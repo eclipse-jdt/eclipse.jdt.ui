@@ -1255,10 +1255,6 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 						CompilationUnitChange current= (CompilationUnitChange) manager.get(unit);
 						if (change != null && current.getEdit() == null)
 							manager.remove(unit);
-						CompilationUnitRewrite rewrite= fCompilationUnitRewrites.get(unit);
-						if (rewrite != null) {
-							rewrite.clearGroupDescriptions();
-						}
 					}
 				}
 			}
