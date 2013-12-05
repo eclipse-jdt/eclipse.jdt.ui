@@ -755,8 +755,6 @@ public class Bindings {
 			return containsTypeVariables(type.getWildcard());
 		if (type.isParameterizedType())
 			return containsTypeVariables(type.getTypeArguments());
-		if (type.isTypeVariable())
-			return containsTypeVariables(type.getTypeBounds());
 		if (type.isWildcardType() && type.getBound() != null)
 			return containsTypeVariables(type.getBound());
 		return false;
