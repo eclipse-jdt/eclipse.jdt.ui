@@ -209,7 +209,7 @@ public final class ASTProvider {
 	private static final String DEBUG_PREFIX= "ASTProvider > "; //$NON-NLS-1$
 
 
-	private ITypeRoot fReconcilingJavaElement;
+	private volatile ITypeRoot fReconcilingJavaElement;
 	private ITypeRoot fActiveJavaElement;
 	private CompilationUnit fAST;
 	private ActivationListener fActivationListener;
@@ -454,7 +454,7 @@ public final class ASTProvider {
 					if (isReconciling(input)) {
 						if (DEBUG)
 							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "waiting for AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
-						fWaitLock.wait();
+						fWaitLock.wait(30000); // XXX: The 30 seconds timeout is an attempt to at least avoid a deadlock. See https://bugs.eclipse.org/366048#c21
 					}
 				}
 
