@@ -38,6 +38,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -88,7 +89,18 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 	}
 
 	private void codeComplete(ICompilationUnit cu, int offset, CompletionProposalCollector collector) throws JavaModelException {
-		cu.codeComplete(offset, collector, new NullProgressMonitor());
+		try {
+			cu.codeComplete(offset, collector, new NullProgressMonitor());
+		} catch (JavaModelException e) {
+			// logging for https://bugs.eclipse.org/bugs/show_bug.cgi?id=421699
+			System.out.println(getClass().getName() + "#" + getName() + " failed: " + e.getMessage()); 
+			System.out.println("offset: " + offset);
+			System.out.println("cu: " + cu);
+			IBuffer buffer= cu.getBuffer();
+			System.out.println("buffer: " + buffer);
+			System.out.println("source: |" + buffer.getContents() + "|");
+			throw e;
+		}
 	}
 
 	protected void setUp() throws Exception {
