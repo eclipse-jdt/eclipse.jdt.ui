@@ -222,7 +222,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				// use short form with inferred parameter types and without parentheses if possible
 				LambdaExpression lambdaExpression= ast.newLambdaExpression();
 				List<VariableDeclaration> lambdaParameters= lambdaExpression.parameters();
-				lambdaExpression.setParentheses(lambdaParameters.size() == 1);
+				lambdaExpression.setParentheses(methodParameters.size() != 1);
 				for (SingleVariableDeclaration methodParameter : methodParameters) {
 					VariableDeclarationFragment lambdaParameter= ast.newVariableDeclarationFragment();
 					lambdaParameter.setName((SimpleName) rewrite.createCopyTarget(methodParameter.getName()));
