@@ -552,13 +552,19 @@ public class ASTView extends ViewPart implements IShowInSource {
 			throw new CoreException(getErrorStatus("Input has no buffer", null)); //$NON-NLS-1$
 		}
 		
+		CompilationUnit root;
 		try {
-			CompilationUnit root= createAST(input, offset);
+			root= createAST(input, offset);
 			resetView(root);
 			if (root == null) {
 				setContentDescription("AST could not be created."); //$NON-NLS-1$
 				return null;
 			}
+		} catch (RuntimeException e) {
+			throw new CoreException(getErrorStatus("Could not create AST:\n" + e.getMessage(), e)); //$NON-NLS-1$
+		}
+		
+		try {
 			ASTNode node= NodeFinder.perform(root, offset, length);
 			if (node != null) {
 				fViewer.getTree().setRedraw(false);
@@ -569,11 +575,11 @@ public class ASTView extends ViewPart implements IShowInSource {
 					fViewer.getTree().setRedraw(true);
 				}
 			}
-			return root;
-			
 		} catch (RuntimeException e) {
-			throw new CoreException(getErrorStatus("Could not create AST:\n" + e.getMessage(), e)); //$NON-NLS-1$
+			showAndLogError("Could not select node for editor selection", e); //$NON-NLS-1$
 		}
+		
+		return root;
 	}
 	
 	private void clearView() {
