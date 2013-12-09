@@ -63,20 +63,26 @@ public class BuildPathSupport {
 		}
 		
 		public IPath getBundleLocation() {
-			return getBundleLocation(this.bundleId, this.versionRange);
+			return getBundleLocation(bundleId, versionRange);
 		}
 		
 		public IPath getSourceBundleLocation() {
-			return getBundleLocation(this.sourceBundleId, this.versionRange);
+			return getSourceLocation(getBundleLocation());
 		}
 
-		private IPath getBundleLocation(String bundleId, VersionRange versionRange) {
-			BundleInfo bundleInfo = P2Utils.findBundle(bundleId, versionRange, false);
+		private IPath getBundleLocation(String aBundleId, VersionRange aVersionRange) {
+			return getBundleLocation(aBundleId, aVersionRange, false);
+		}
+		
+		private IPath getBundleLocation(String aBundleId, VersionRange aVersionRange, boolean isSourceBundle) {
+			BundleInfo bundleInfo = P2Utils.findBundle(aBundleId, aVersionRange, isSourceBundle);
 			if (bundleInfo != null) {
-				this.resolvedVersion = bundleInfo.getVersion();
+				resolvedVersion = bundleInfo.getVersion();
 				return P2Utils.getBundleLocationPath(bundleInfo);
 			} else {
-				Bundle[] bundles= Platform.getBundles(bundleId, versionRange.toString());
+				// p2's simple configurator is not available. Let's try with installed bundles from the running platform.
+				// Note: Source bundles are typically not available at run time!
+				Bundle[] bundles= Platform.getBundles(aBundleId, aVersionRange.toString());
 				Bundle bestMatch = null;
 				if (bundles != null) {
 					for (int i= 0; i < bundles.length; i++) {
@@ -88,7 +94,7 @@ public class BuildPathSupport {
 				}
 				if (bestMatch != null) {
 					try {
-						this.resolvedVersion = bestMatch.getVersion().toString();
+						resolvedVersion = bestMatch.getVersion().toString();
 						URL rootUrl= bestMatch.getEntry("/"); //$NON-NLS-1$
 						URL fileRootUrl= FileLocator.toFileURL(rootUrl);
 						return new Path(fileRootUrl.getPath());
@@ -101,7 +107,7 @@ public class BuildPathSupport {
 		}
 		
 		public IClasspathEntry getLibraryEntry() {
-			IPath bundleLocation = getBundleLocation(this.bundleId, this.versionRange);
+			IPath bundleLocation = getBundleLocation(bundleId, versionRange);
 			if (bundleLocation != null) {
 				IPath bundleRootLocation= null;
 				if (bundleRoot != null) {
@@ -111,7 +117,7 @@ public class BuildPathSupport {
 					bundleRootLocation= getLocationIfExists(bundleLocation, binaryImportedRoot);
 				}
 				if (bundleRootLocation == null) {
-					bundleRootLocation= getBundleLocation(this.bundleId, this.versionRange);
+					bundleRootLocation= getBundleLocation(bundleId, versionRange);
 				}
 
 				IPath srcLocation= getSourceLocation(bundleLocation);
@@ -139,15 +145,16 @@ public class BuildPathSupport {
 				// Try source in workspace (from repository)
 				srcLocation= getLocationIfExists(bundleLocation, repositorySource);
 			}
-
+			
 			if (srcLocation == null) {
 				if (bundleLocation != null) {
 					// Try exact version
-					srcLocation= getBundleLocation(this.sourceBundleId, new VersionRange(new Version(this.resolvedVersion), true, new Version(this.resolvedVersion), true));
+					Version version= new Version(resolvedVersion);
+					srcLocation= getBundleLocation(sourceBundleId, new VersionRange(version, true, version, true), true);
 				}
 				if (srcLocation == null) {
 					// Try version range
-					srcLocation= getBundleLocation(this.sourceBundleId, this.versionRange);
+					srcLocation= getBundleLocation(sourceBundleId, versionRange, true);
 				}
 			}
 
