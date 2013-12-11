@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
@@ -99,6 +104,22 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			IBuffer buffer= cu.getBuffer();
 			System.out.println("buffer: " + buffer);
 			System.out.println("source: |" + buffer.getContents() + "|");
+			
+			System.out.print("file contents: |");
+			File file= cu.getResource().getLocation().toFile();
+			try {
+				BufferedReader reader= new BufferedReader(new FileReader(file));
+				String line;
+				while ((line= reader.readLine()) != null) {
+					System.out.println(line);
+				}
+				System.out.println("|");
+				reader.close();
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			throw e;
 		}
 	}
