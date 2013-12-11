@@ -96,6 +96,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		switch (loopTypeToGenerate) {
 			case GenerateForLoopAssistProposal.GENERATE_FOREACH:
 				setDisplayName(CorrectionMessages.QuickAssistProcessor_generate_enhanced_for_loop);
+				setRelevance(IProposalRelevance.GENERATE_ENHANCED_FOR_LOOP);
 				break;
 			case GenerateForLoopAssistProposal.GENERATE_ITERATOR_FOR:
 				setDisplayName(CorrectionMessages.QuickAssistProcessor_generate_iterator_for_loop);
@@ -157,7 +158,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		ITypeBinding loopOverType= extractElementType(ast);
 
 		// generate name proposals and add them to the variable declaration
-		SimpleName forDeclarationName= resolveLinkedVariableNameWithProposals(rewrite, loopOverType.getName(), true);
+		SimpleName forDeclarationName= resolveLinkedVariableNameWithProposals(rewrite, loopOverType.getName(), null, true);
 
 		SingleVariableDeclaration forLoopInitializer= ast.newSingleVariableDeclaration();
 		forLoopInitializer.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentNode, getImportRewrite())));
@@ -189,7 +190,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 
 		ITypeBinding loopOverType= extractElementType(ast);
 
-		SimpleName loopVariableName= resolveLinkedVariableNameWithProposals(rewrite, "iterator", true); //$NON-NLS-1$
+		SimpleName loopVariableName= resolveLinkedVariableNameWithProposals(rewrite, "iterator", null, true); //$NON-NLS-1$
 		loopStatement.initializers().add(getIteratorBasedForInitializer(rewrite, loopVariableName));
 
 		MethodInvocation loopExpression= ast.newMethodInvocation();
@@ -254,7 +255,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		Assignment assignResolvedVariable= ast.newAssignment();
 
 		// left hand side
-		SimpleName resolvedVariableName= resolveLinkedVariableNameWithProposals(rewrite, loopOverType.getName(), false);
+		SimpleName resolvedVariableName= resolveLinkedVariableNameWithProposals(rewrite, loopOverType.getName(), loopVariableName.getIdentifier(), false);
 		VariableDeclarationFragment resolvedVariableDeclarationFragment= ast.newVariableDeclarationFragment();
 		resolvedVariableDeclarationFragment.setName(resolvedVariableName);
 		VariableDeclarationExpression resolvedVariableDeclaration= ast.newVariableDeclarationExpression(resolvedVariableDeclarationFragment);
@@ -284,7 +285,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
 		ForStatement loopStatement= ast.newForStatement();
-		SimpleName loopVariableName= resolveLinkedVariableNameWithProposals(rewrite, "i", true); //$NON-NLS-1$
+		SimpleName loopVariableName= resolveLinkedVariableNameWithProposals(rewrite, "int", null, true); //$NON-NLS-1$
 		loopStatement.initializers().add(getForInitializer(ast, loopVariableName));
 
 		FieldAccess getArrayLengthExpression= ast.newFieldAccess();
@@ -320,7 +321,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		Assignment assignResolvedVariable= ast.newAssignment();
 
 		// left hand side
-		SimpleName resolvedVariableName= resolveLinkedVariableNameWithProposals(rewrite, loopOverType.getName(), false);
+		SimpleName resolvedVariableName= resolveLinkedVariableNameWithProposals(rewrite, loopOverType.getName(), loopVariableName.getIdentifier(), false);
 		VariableDeclarationFragment resolvedVariableDeclarationFragment= ast.newVariableDeclarationFragment();
 		resolvedVariableDeclarationFragment.setName(resolvedVariableName);
 		VariableDeclarationExpression resolvedVariableDeclaration= ast.newVariableDeclarationExpression(resolvedVariableDeclarationFragment);
@@ -419,7 +420,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
 		ForStatement loopStatement= ast.newForStatement();
-		SimpleName loopVariableName= resolveLinkedVariableNameWithProposals(rewrite, "i", true); //$NON-NLS-1$
+		SimpleName loopVariableName= resolveLinkedVariableNameWithProposals(rewrite, "int", null, true); //$NON-NLS-1$
 		loopStatement.initializers().add(getForInitializer(ast, loopVariableName));
 
 		MethodInvocation listSizeExpression= ast.newMethodInvocation();
@@ -456,7 +457,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		Assignment assignResolvedVariable= ast.newAssignment();
 
 		// left hand side
-		SimpleName resolvedVariableName= resolveLinkedVariableNameWithProposals(rewrite, loopOverType.getName(), false);
+		SimpleName resolvedVariableName= resolveLinkedVariableNameWithProposals(rewrite, loopOverType.getName(), loopVariableName.getIdentifier(), false);
 		VariableDeclarationFragment resolvedVariableDeclarationFragment= ast.newVariableDeclarationFragment();
 		resolvedVariableDeclarationFragment.setName(resolvedVariableName);
 		VariableDeclarationExpression resolvedVariableDeclaration= ast.newVariableDeclarationExpression(resolvedVariableDeclarationFragment);
@@ -483,14 +484,15 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	 * 
 	 * @param rewrite the current instance of an {@link ASTRewrite}
 	 * @param basename the base string to use for proposal calculation
+	 * @param excludedName a name that cannot be used for the variable; <code>null</code> if none
 	 * @param firstLinkedProposal true if the generated name is the first {@link LinkedPosition} to
 	 *            edit in the current {@link CompilationUnit}, false otherwise
 	 * @return the linked {@link SimpleName} instance based on the name proposals
 	 */
-	private SimpleName resolveLinkedVariableNameWithProposals(ASTRewrite rewrite, String basename, boolean firstLinkedProposal) {
+	private SimpleName resolveLinkedVariableNameWithProposals(ASTRewrite rewrite, String basename, String excludedName, boolean firstLinkedProposal) {
 		AST ast= rewrite.getAST();
-		String[] nameProposals= getVariableNameProposals(basename);
-		SimpleName forDeclarationName= (nameProposals.length > 0 ? ast.newSimpleName(nameProposals[0]) : ast.newSimpleName(basename));
+		String[] nameProposals= getVariableNameProposals(basename, excludedName);
+		SimpleName forDeclarationName= ast.newSimpleName(nameProposals.length > 0 ? nameProposals[0] : basename);
 		for (int i= 0; i < nameProposals.length; i++) {
 			addLinkedPositionProposal(forDeclarationName.getIdentifier(), nameProposals[i], null);
 		}
@@ -514,12 +516,13 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	}
 
 	/**
-	 * Retrieves variable name proposals for the loop variable.
+	 * Retrieves name proposals for a fresh local variable.
 	 * 
 	 * @param basename the basename of the proposals
+	 * @param excludedName a name that cannot be used for the variable; <code>null</code> if none
 	 * @return an array of proposal strings
 	 */
-	private String[] getVariableNameProposals(String basename) {
+	private String[] getVariableNameProposals(String basename, String excludedName) {
 		ASTNode surroundingBlock= fCurrentNode;
 		while ((surroundingBlock= surroundingBlock.getParent()) != null) {
 			if (surroundingBlock instanceof Block) {
@@ -527,6 +530,9 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 			}
 		}
 		Collection<String> localUsedNames= new ScopeAnalyzer((CompilationUnit) fCurrentExpression.getRoot()).getUsedVariableNames(surroundingBlock.getStartPosition(), surroundingBlock.getLength());
+		if (excludedName != null) {
+			localUsedNames.add(excludedName);
+		}
 		String[] names= StubUtility.getLocalNameSuggestions(getCompilationUnit().getJavaProject(), basename, 0, localUsedNames.toArray(new String[localUsedNames.size()]));
 		return names;
 	}

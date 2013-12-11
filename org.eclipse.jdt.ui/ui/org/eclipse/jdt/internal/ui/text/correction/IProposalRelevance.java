@@ -201,6 +201,7 @@ public interface IProposalRelevance {
 	public static final int CHANGE_TO_ATTRIBUTE= 3;
 
 	public static final int CONVERT_TO_INDEXED_FOR_LOOP= 2;
+	public static final int GENERATE_ENHANCED_FOR_LOOP= 2;
 	public static final int USE_SEPARATE_CATCH_BLOCKS= 2;
 	public static final int INSERT_NULL_CHECK= 2;
 	public static final int COMBINE_CATCH_BLOCKS= 2;
