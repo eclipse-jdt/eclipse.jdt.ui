@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,28 +40,13 @@ public class ASTBatchParser {
 
 	private static final int MAX_AT_ONCE;
 	static {
-		long maxMemory= Runtime.getRuntime().maxMemory();
-		int ratio= (int) Math.round((double) maxMemory / (64 * 0x100000));
-		switch (ratio) {
-			case 0:
-				MAX_AT_ONCE= 25;
-				break;
-			case 1:
-				MAX_AT_ONCE= 100;
-				break;
-			case 2:
-				MAX_AT_ONCE= 200;
-				break;
-			case 3:
-				MAX_AT_ONCE= 300;
-				break;
-			case 4:
-				MAX_AT_ONCE= 400;
-				break;
-			default:
-				MAX_AT_ONCE= 500;
-				break;
-		}
+		long maxMemory= Runtime.getRuntime().maxMemory() / (1 << 20); // in MiB
+		
+		if      (maxMemory >= 2000) MAX_AT_ONCE= 400;
+		else if (maxMemory >= 1500) MAX_AT_ONCE= 300;
+		else if (maxMemory >= 1000) MAX_AT_ONCE= 200;
+		else if (maxMemory >=  500) MAX_AT_ONCE= 100;
+		else                        MAX_AT_ONCE=  25;
 	}
 
 	/**
