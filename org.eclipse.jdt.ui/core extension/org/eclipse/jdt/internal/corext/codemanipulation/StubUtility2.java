@@ -480,7 +480,7 @@ public final class StubUtility2 {
 		boolean is50OrHigher= JavaModelUtil.is50OrHigher(project);
 		List<SingleVariableDeclaration> parameters= decl.parameters();
 		ITypeBinding[] params= binding.getParameterTypes();
-		if (paramNames == null) {
+		if (paramNames == null || paramNames.length < params.length) {
 			paramNames= StubUtility.suggestArgumentNames(project, binding);
 		}
 		for (int i= 0; i < params.length; i++) {
