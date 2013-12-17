@@ -21,6 +21,8 @@ import java.util.List;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.jdt.astview.ASTViewPlugin;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -146,8 +148,15 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 				IAnnotationBinding binding= ((Annotation) expression).resolveAnnotationBinding();
 				res.add(createBinding(expression, binding));
 			} else if (expression instanceof LambdaExpression) {
-				IMethodBinding binding= ((LambdaExpression) expression).resolveMethodBinding();
-				res.add(createBinding(expression, binding));
+				ASTAttribute bindingAttribute;
+				try {
+					IMethodBinding binding= ((LambdaExpression) expression).resolveMethodBinding();
+					bindingAttribute= createBinding(expression, binding);
+				} catch (RuntimeException e) {
+					bindingAttribute= new Error(res, ">binding: Error: " + e.getMessage(), e);
+					ASTViewPlugin.log("Exception thrown in LambdaExpression#resolveMethodBinding() for \"" + expression + "\"", e);
+				}
+				res.add(bindingAttribute);
 			} else if (expression instanceof MethodReference) {
 				IMethodBinding binding= ((MethodReference) expression).resolveMethodBinding();
 				res.add(createBinding(expression, binding));

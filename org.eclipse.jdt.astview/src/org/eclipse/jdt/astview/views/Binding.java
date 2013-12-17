@@ -80,7 +80,14 @@ public class Binding extends ASTAttribute {
 	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getChildren()
 	 */
 	public Object[] getChildren() {
-		
+		try {
+			if (fBinding != null) {
+				fBinding.getKey();
+			}
+		} catch (RuntimeException e) {
+			ASTViewPlugin.log("Exception thrown in IBinding#getKey() for \"" + fBinding + "\"", e);
+			return new Object[] { new Error(this, "BrokenBinding: " + fBinding, null) };
+		}
 		if (fBinding != null) {
 			ArrayList res= new ArrayList();
 			res.add(new BindingProperty(this, "NAME", fBinding.getName(), true)); //$NON-NLS-1$
