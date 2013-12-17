@@ -110,21 +110,7 @@ public final class StubUtility2 {
 		decl.setName(ast.newSimpleName(type));
 		decl.setConstructor(true);
 
-		ITypeBinding[] typeParams= binding.getTypeParameters();
-		List<TypeParameter> typeParameters= decl.typeParameters();
-		for (int i= 0; i < typeParams.length; i++) {
-			ITypeBinding curr= typeParams[i];
-			TypeParameter newTypeParam= ast.newTypeParameter();
-			newTypeParam.setName(ast.newSimpleName(curr.getName()));
-			ITypeBinding[] typeBounds= curr.getTypeBounds();
-			if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
-				List<Type> newTypeBounds= newTypeParam.typeBounds();
-				for (int k= 0; k < typeBounds.length; k++) {
-					newTypeBounds.add(imports.addImport(typeBounds[k], ast, context));
-				}
-			}
-			typeParameters.add(newTypeParam);
-		}
+		createTypeParameters(imports, context, ast, binding, decl);
 
 		List<SingleVariableDeclaration> parameters= createParameters(unit.getJavaProject(), imports, context, ast, binding, null, decl);
 
@@ -176,21 +162,7 @@ public final class StubUtility2 {
 
 		List<SingleVariableDeclaration> parameters= decl.parameters();
 		if (superConstructor != null) {
-			ITypeBinding[] typeParams= superConstructor.getTypeParameters();
-			List<TypeParameter> typeParameters= decl.typeParameters();
-			for (int i= 0; i < typeParams.length; i++) {
-				ITypeBinding curr= typeParams[i];
-				TypeParameter newTypeParam= ast.newTypeParameter();
-				newTypeParam.setName(ast.newSimpleName(curr.getName()));
-				ITypeBinding[] typeBounds= curr.getTypeBounds();
-				if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
-					List<Type> newTypeBounds= newTypeParam.typeBounds();
-					for (int k= 0; k < typeBounds.length; k++) {
-						newTypeBounds.add(imports.addImport(typeBounds[k], ast, context));
-					}
-				}
-				typeParameters.add(newTypeParam);
-			}
+			createTypeParameters(imports, context, ast, superConstructor, decl);
 
 			createParameters(unit.getJavaProject(), imports, context, ast, superConstructor, null, decl);
 
@@ -274,44 +246,11 @@ public final class StubUtility2 {
 		decl.setName(ast.newSimpleName(delegate.getName()));
 		decl.setConstructor(false);
 
-		ITypeBinding[] typeParams= delegate.getTypeParameters();
-		List<TypeParameter> typeParameters= decl.typeParameters();
-		for (int i= 0; i < typeParams.length; i++) {
-			ITypeBinding curr= typeParams[i];
-			TypeParameter newTypeParam= ast.newTypeParameter();
-			newTypeParam.setName(ast.newSimpleName(curr.getName()));
-			ITypeBinding[] typeBounds= curr.getTypeBounds();
-			if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
-				List<Type> newTypeBounds= newTypeParam.typeBounds();
-				for (int k= 0; k < typeBounds.length; k++) {
-					newTypeBounds.add(imports.addImport(typeBounds[k], ast, context));
-				}
-			}
-			typeParameters.add(newTypeParam);
-		}
+		createTypeParameters(imports, context, ast, delegate, decl);
 
 		decl.setReturnType2(imports.addImport(delegate.getReturnType(), ast, context));
 
-		List<SingleVariableDeclaration> parameters= decl.parameters();
-		ITypeBinding[] params= delegate.getParameterTypes();
-		String[] paramNames= StubUtility.suggestArgumentNames(unit.getJavaProject(), delegate);
-		for (int i= 0; i < params.length; i++) {
-			SingleVariableDeclaration varDecl= ast.newSingleVariableDeclaration();
-			if (params[i].isWildcardType() && !params[i].isUpperbound())
-				varDecl.setType(imports.addImport(params[i].getBound(), ast, context));
-			else {
-				if (delegate.isVarargs() && params[i].isArray() && i == params.length - 1) {
-					StringBuffer buffer= new StringBuffer(imports.addImport(params[i].getElementType(), context));
-					for (int dim= 1; dim < params[i].getDimensions(); dim++)
-						buffer.append("[]"); //$NON-NLS-1$
-					varDecl.setType(ASTNodeFactory.newType(ast, buffer.toString()));
-					varDecl.setVarargs(true);
-				} else
-					varDecl.setType(imports.addImport(params[i], ast, context));
-			}
-			varDecl.setName(ast.newSimpleName(paramNames[i]));
-			parameters.add(varDecl);
-		}
+		List<SingleVariableDeclaration> params= createParameters(unit.getJavaProject(), imports, context, ast, delegate, null, decl);
 
 		createThrownExceptions(decl, delegate, imports, context, ast);
 
@@ -324,8 +263,8 @@ public final class StubUtility2 {
 		MethodInvocation invocation= ast.newMethodInvocation();
 		invocation.setName(ast.newSimpleName(delegate.getName()));
 		List<Expression> arguments= invocation.arguments();
-		for (int i= 0; i < params.length; i++)
-			arguments.add(ast.newSimpleName(paramNames[i]));
+		for (int i= 0; i < params.size(); i++)
+			arguments.add(ast.newSimpleName(params.get(i).getName().getIdentifier()));
 		if (settings.useKeywordThis) {
 			FieldAccess access= ast.newFieldAccess();
 			access.setExpression(ast.newThisExpression());
@@ -394,21 +333,7 @@ public final class StubUtility2 {
 		ITypeBinding bindingReturnType= binding.getReturnType();
 		
 		if (JavaModelUtil.is50OrHigher(unit.getJavaProject())) {
-			ITypeBinding[] typeParams= binding.getTypeParameters();
-			List<TypeParameter> typeParameters= decl.typeParameters();
-			for (int i= 0; i < typeParams.length; i++) {
-				ITypeBinding curr= typeParams[i];
-				TypeParameter newTypeParam= ast.newTypeParameter();
-				newTypeParam.setName(ast.newSimpleName(curr.getName()));
-				ITypeBinding[] typeBounds= curr.getTypeBounds();
-				if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
-					List<Type> newTypeBounds= newTypeParam.typeBounds();
-					for (int k= 0; k < typeBounds.length; k++) {
-						newTypeBounds.add(imports.addImport(typeBounds[k], ast, context));
-					}
-				}
-				typeParameters.add(newTypeParam);
-			}
+			createTypeParameters(imports, context, ast, binding, decl);
 			
 		} else {
 			bindingReturnType= bindingReturnType.getErasure();
@@ -476,6 +401,24 @@ public final class StubUtility2 {
 		return decl;
 	}
 
+	private static void createTypeParameters(ImportRewrite imports, ImportRewriteContext context, AST ast, IMethodBinding binding, MethodDeclaration decl) {
+		ITypeBinding[] typeParams= binding.getTypeParameters();
+		List<TypeParameter> typeParameters= decl.typeParameters();
+		for (int i= 0; i < typeParams.length; i++) {
+			ITypeBinding curr= typeParams[i];
+			TypeParameter newTypeParam= ast.newTypeParameter();
+			newTypeParam.setName(ast.newSimpleName(curr.getName()));
+			ITypeBinding[] typeBounds= curr.getTypeBounds();
+			if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
+				List<Type> newTypeBounds= newTypeParam.typeBounds();
+				for (int k= 0; k < typeBounds.length; k++) {
+					newTypeBounds.add(imports.addImport(typeBounds[k], ast, context));
+				}
+			}
+			typeParameters.add(newTypeParam);
+		}
+	}
+
 	private static List<SingleVariableDeclaration> createParameters(IJavaProject project, ImportRewrite imports, ImportRewriteContext context, AST ast, IMethodBinding binding, String[] paramNames, MethodDeclaration decl) {
 		boolean is50OrHigher= JavaModelUtil.is50OrHigher(project);
 		List<SingleVariableDeclaration> parameters= decl.parameters();
@@ -496,6 +439,10 @@ public final class StubUtility2 {
 				var.setVarargs(true);
 			} else {
 				ITypeBinding type= params[i];
+				if (type.isWildcardType()) {
+					ITypeBinding bound= type.getBound();
+					type= (bound != null) ? bound : type.getErasure();
+				}
 				if (!is50OrHigher)
 					type= type.getErasure();
 				var.setType(imports.addImport(type, ast, context));

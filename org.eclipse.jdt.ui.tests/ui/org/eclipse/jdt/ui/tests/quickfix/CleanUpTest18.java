@@ -125,6 +125,70 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 	
+	public void testConvertToAnonymous_andBack_WithWildcards() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Integer[] ints){\n");
+		buf.append("        Arrays.sort(ints, (i1, i2) -> i1 - i2);\n");
+		buf.append("        Comparator<?> cw = (w1, w2) -> 0;\n");
+		buf.append("        Comparator cr = (r1, r2) -> 0;\n");
+		buf.append("        Comparator<? extends Number> ce = (n1, n2) -> -0;\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		String original= buf.toString();
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
+	
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
+	
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Integer[] ints){\n");
+		buf.append("        Arrays.sort(ints, new Comparator<Integer>() {\n");
+		buf.append("            /* comment */\n");
+		buf.append("            @Override\n");
+		buf.append("            public int compare(Integer i1, Integer i2) {\n");
+		buf.append("                return i1 - i2;\n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("        Comparator<?> cw = new Comparator<Object>() {\n");
+		buf.append("            /* comment */\n");
+		buf.append("            @Override\n");
+		buf.append("            public int compare(Object w1, Object w2) {\n");
+		buf.append("                return 0;\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("        Comparator cr = new Comparator() {\n");
+		buf.append("            /* comment */\n");
+		buf.append("            @Override\n");
+		buf.append("            public int compare(Object r1, Object r2) {\n");
+		buf.append("                return 0;\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("        Comparator<? extends Number> ce = new Comparator<Number>() {\n");
+		buf.append("            /* comment */\n");
+		buf.append("            @Override\n");
+		buf.append("            public int compare(Number n1, Number n2) {\n");
+		buf.append("                return -0;\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+	
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		
+		disable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
+		enable(CleanUpConstants.USE_LAMBDA);
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+	}
+
 	public void testConvertToLambdaNestedWithImports() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();

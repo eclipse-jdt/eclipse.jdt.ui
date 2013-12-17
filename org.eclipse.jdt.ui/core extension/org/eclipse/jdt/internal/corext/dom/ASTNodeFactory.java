@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
@@ -413,6 +414,39 @@ public class ASTNodeFactory {
 			
 		} else {
 			return null;
+		}
+	}
+
+	public static Type newCreationType(AST ast, ITypeBinding typeBinding, ImportRewrite importRewrite, ImportRewriteContext importContext) {
+		if (typeBinding.isParameterizedType()) {
+			Type baseType= newCreationType(ast, typeBinding.getTypeDeclaration(), importRewrite, importContext);
+			ParameterizedType parameterizedType= ast.newParameterizedType(baseType);
+			for (ITypeBinding typeArgument : typeBinding.getTypeArguments()) {
+				parameterizedType.typeArguments().add(newCreationType(ast, typeArgument, importRewrite, importContext));
+			}
+			return parameterizedType;
+			
+		} else if (typeBinding.isParameterizedType()) {
+			Type elementType= newCreationType(ast, typeBinding.getElementType(), importRewrite, importContext);
+			ArrayType arrayType= ast.newArrayType(elementType, 0);
+			while (typeBinding.isArray()) {
+				Dimension dimension= ast.newDimension();
+				IAnnotationBinding[] typeAnnotations= typeBinding.getTypeAnnotations();
+				for (IAnnotationBinding typeAnnotation : typeAnnotations) {
+					dimension.annotations().add(newAnnotation(ast, typeAnnotation, importRewrite, importContext));
+				}
+				arrayType.dimensions().add(dimension);
+				typeBinding= typeBinding.getComponentType();
+			}
+			return arrayType;
+				
+		} else if (typeBinding.isWildcardType()) {
+			ITypeBinding bound= typeBinding.getBound();
+			typeBinding= (bound != null) ? bound : typeBinding.getErasure();
+			return newCreationType(ast, typeBinding, importRewrite, importContext);
+			
+		} else {
+			return importRewrite.addImport(typeBinding, ast, importContext);
 		}
 	}
 }

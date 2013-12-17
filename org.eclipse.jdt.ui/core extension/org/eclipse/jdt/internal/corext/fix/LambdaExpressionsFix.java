@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -63,6 +64,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -288,7 +290,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 				final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cuRewrite.getCu().getJavaProject());
 				ImportRewrite importRewrite= cuRewrite.getImportRewrite();
-				ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(cuRewrite.getRoot(), importRewrite);
+				ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(lambdaExpression, importRewrite);
 				
 				MethodDeclaration methodDeclaration= StubUtility2.createImplementationStub(cuRewrite.getCu(), rewrite, importRewrite, importContext,
 						methodBinding, parameterNames, lambdaTypeBinding.getName(), settings, false);
@@ -317,8 +319,10 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				List<BodyDeclaration> bodyDeclarations= anonymousClassDeclaration.bodyDeclarations();
 				bodyDeclarations.add(methodDeclaration);
 
+				Type creationType= ASTNodeFactory.newCreationType(ast, lambdaTypeBinding, importRewrite, importContext);
+				
 				ClassInstanceCreation classInstanceCreation= ast.newClassInstanceCreation();
-				classInstanceCreation.setType(importRewrite.addImport(lambdaTypeBinding, ast, importContext));
+				classInstanceCreation.setType(creationType);
 				classInstanceCreation.setAnonymousClassDeclaration(anonymousClassDeclaration);
 
 				rewrite.replace(lambdaExpression, classInstanceCreation, group);

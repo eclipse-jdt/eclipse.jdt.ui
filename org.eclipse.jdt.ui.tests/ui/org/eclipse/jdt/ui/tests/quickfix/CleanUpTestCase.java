@@ -160,6 +160,11 @@ public class CleanUpTestCase extends QuickFixTest {
 		commitProfile();
 	}
 
+	protected void disable(String key) throws CoreException {
+		fProfile.getSettings().put(key, CleanUpOptions.FALSE);
+		commitProfile();
+	}
+
 	protected void enable(String key) throws CoreException {
 		fProfile.getSettings().put(key, CleanUpOptions.TRUE);
 		commitProfile();
