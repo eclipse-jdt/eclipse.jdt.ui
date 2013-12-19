@@ -687,12 +687,13 @@ public class UnresolvedElementsSubProcessor {
 			return;
 		if (javaProject.findType(defaultOptions.get(annotationNameOptions[0])) != null)
 			return;
-		Bundle annotationsBundle= Platform.getBundle("org.eclipse.jdt.annotation"); //$NON-NLS-1$
-		if (annotationsBundle == null)
+		String version= JavaModelUtil.is18OrHigher(javaProject) ? "2" : "[1.1.0,2.0.0)"; //$NON-NLS-1$ //$NON-NLS-2$
+		Bundle[] annotationsBundles= Platform.getBundles("org.eclipse.jdt.annotation", version); //$NON-NLS-1$
+		if (annotationsBundles == null)
 			return;
 		
 		if (! addAddToBuildPropertiesProposal(cu, node, nullityAnnotation, proposals))
-			addCopyAnnotationsJarProposal(cu, node, nullityAnnotation, annotationsBundle, proposals);
+			addCopyAnnotationsJarProposal(cu, node, nullityAnnotation, annotationsBundles[0], proposals);
 	}
 
 	private static boolean addAddToBuildPropertiesProposal(final ICompilationUnit cu, final Name name, final String fullyQualifiedName, Collection<ICommandAccess> proposals) throws CoreException {
