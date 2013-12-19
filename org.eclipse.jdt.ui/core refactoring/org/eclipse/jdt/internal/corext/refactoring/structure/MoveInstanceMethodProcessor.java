@@ -10,6 +10,7 @@
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] super method invocation does not compile after refactoring - https://bugs.eclipse.org/356687
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Move method with static imported method calls introduces compiler error - https://bugs.eclipse.org/217753
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Wrong detection of duplicate methods (can result in compile errors) - https://bugs.eclipse.org/404477
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Annotation error in applying move-refactoring to inherited methods - https://bugs.eclipse.org/404471
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -72,6 +73,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -82,6 +84,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -2304,6 +2307,15 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					ModifierRewrite.create(rewrite, declaration).setVisibility(keyword == null ? Modifier.NONE : keyword.toFlagValue(), null);
 					adjustment.setNeedsRewriting(false);
 					adjustments.put(fMethod, adjustment);
+				}
+			}
+			for (IExtendedModifier modifier : (List<IExtendedModifier>) declaration.modifiers()) {
+				if (modifier.isAnnotation()) {
+					Annotation annotation= (Annotation) modifier;
+					ITypeBinding typeBinding= annotation.resolveTypeBinding();
+					if (typeBinding != null && typeBinding.getQualifiedName().equals("java.lang.Override")) { //$NON-NLS-1$
+						rewrite.remove(annotation, null);
+					}
 				}
 			}
 			target= createMethodArguments(rewrites, rewrite, declaration, adjustments, status);

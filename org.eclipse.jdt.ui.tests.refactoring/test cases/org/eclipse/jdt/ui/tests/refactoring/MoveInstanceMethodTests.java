@@ -10,6 +10,7 @@
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] super method invocation does not compile after refactoring - https://bugs.eclipse.org/356687
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Move method with static imported method calls introduces compiler error - https://bugs.eclipse.org/217753
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Wrong detection of duplicate methods (can result in compile errors) - https://bugs.eclipse.org/404477
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Annotation error in applying move-refactoring to inherited methods - https://bugs.eclipse.org/404471
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -556,6 +557,11 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	// bug 404477
 	public void test64() throws Exception {
 		helper1(new String[] { "A" }, "A", 3, 17, 3, 18, PARAMETER, "b", true, true);
+	}
+
+	// bug 404471
+	public void test65() throws Exception {
+		helper1(new String[] { "A" }, "A", 3, 17, 3, 18, PARAMETER, "c", false, false);
 	}
 
 	// Move mA1 to field fB, do not inline delegator
