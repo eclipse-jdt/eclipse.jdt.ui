@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] super method invocation does not compile after refactoring - https://bugs.eclipse.org/356687
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Move method with static imported method calls introduces compiler error - https://bugs.eclipse.org/217753
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Wrong detection of duplicate methods (can result in compile errors) - https://bugs.eclipse.org/404477
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -1228,7 +1229,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			for (int index= 0; index < methods.length; index++) {
 				method= methods[index];
 				int newParamCount= fMethod.getParameterTypes().length;
-				if (needsTargetNode())
+				if (!needsTargetNode())
 					newParamCount--;
 				if (method.getElementName().equals(fMethodName) && method.getParameterTypes().length == newParamCount)
 					status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_already_exists, new String[] { BasicElementLabels.getJavaElementName(fMethodName), BasicElementLabels.getJavaElementName(fTargetType.getElementName()) }), JavaStatusContext.create(method)));

@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] super method invocation does not compile after refactoring - https://bugs.eclipse.org/356687
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Move method with static imported method calls introduces compiler error - https://bugs.eclipse.org/217753
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Wrong detection of duplicate methods (can result in compile errors) - https://bugs.eclipse.org/404477
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -552,6 +553,11 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		helper1(new String[] { "A" }, "A", 2, 10, 2, 11, PARAMETER, "b", true, true);
 	}
 
+	// bug 404477
+	public void test64() throws Exception {
+		helper1(new String[] { "A" }, "A", 3, 17, 3, 18, PARAMETER, "b", true, true);
+	}
+
 	// Move mA1 to field fB, do not inline delegator
 	public void test3() throws Exception {
 		helper1(new String[] { "p1.A", "p2.B", "p3.C"}, "p1.A", 9, 17, 9, 20, FIELD, "fB", false, false);
@@ -618,6 +624,11 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void testFail13() throws Exception {
 		printTestDisabledMessage("disabled - jcore does not have elements for annotation members");
 //		failHelper2(new String[] { "p1.A", "p2.B"}, "p1.A", 5, 12, 5, 13, PARAMETER, "b", "a", true, true);
+	}
+
+	// bug 404477 - target method already exists
+	public void testFail14() throws Exception {
+		failHelper1(new String[] { "A" }, "A", 2, 17, 2, 18, PARAMETER, "b", true, true);
 	}
 
 	// Cannot move static method
