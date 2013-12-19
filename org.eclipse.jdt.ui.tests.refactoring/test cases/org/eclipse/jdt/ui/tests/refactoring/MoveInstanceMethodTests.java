@@ -637,6 +637,11 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		failHelper1(new String[] { "A" }, "A", 2, 17, 2, 18, PARAMETER, "b", true, true);
 	}
 
+	// bug 404477 / bug 286221 - target method already exists
+	public void testFail15() throws Exception {
+		failHelper1(new String[] { "A" }, "A", 3, 17, 3, 18, FIELD, "fB", true, true);
+	}
+	
 	// Cannot move static method
 	public void testFail2() throws Exception {
 		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 6, 23, 6, 24, PARAMETER, "b", true, true);

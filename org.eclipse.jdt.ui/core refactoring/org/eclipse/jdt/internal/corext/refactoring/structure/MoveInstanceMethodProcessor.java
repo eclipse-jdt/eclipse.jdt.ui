@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] super method invocation does not compile after refactoring - https://bugs.eclipse.org/356687
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Move method with static imported method calls introduces compiler error - https://bugs.eclipse.org/217753
- *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Wrong detection of duplicate methods (can result in compile errors) - https://bugs.eclipse.org/404477
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Annotation error in applying move-refactoring to inherited methods - https://bugs.eclipse.org/404471
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
@@ -1225,15 +1224,17 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(status);
 		final IMethod[] methods= fTargetType.getMethods();
+		int newParamCount= fMethod.getParameterTypes().length;
+		if (!fTarget.isField())
+			newParamCount--; // moving to a parameter
+		if (needsTargetNode())
+			newParamCount++; // will add a parameter for the old 'this'
 		try {
 			monitor.beginTask("", methods.length); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
 			IMethod method= null;
 			for (int index= 0; index < methods.length; index++) {
 				method= methods[index];
-				int newParamCount= fMethod.getParameterTypes().length;
-				if (!needsTargetNode())
-					newParamCount--;
 				if (method.getElementName().equals(fMethodName) && method.getParameterTypes().length == newParamCount)
 					status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_already_exists, new String[] { BasicElementLabels.getJavaElementName(fMethodName), BasicElementLabels.getJavaElementName(fTargetType.getElementName()) }), JavaStatusContext.create(method)));
 				monitor.worked(1);
@@ -1707,8 +1708,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(arguments);
 		Assert.isNotNull(factory);
-		final AstNodeFinder finder= new ThisReferenceFinder();
-		declaration.accept(finder);
 		IVariableBinding binding= null;
 		VariableDeclaration variable= null;
 		boolean added= false;
@@ -1719,14 +1718,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			if (binding != null) {
 				if (!Bindings.equals(binding, fTarget))
 					arguments.add(factory.getArgumentNode(binding, index == size - 1));
-				else if (!finder.getStatus().isOK()) {
+				else if (needsTargetNode()) {
 					arguments.add(factory.getTargetNode());
 					added= true;
 				}
 			} else
 				arguments.add(factory.getArgumentNode(binding, index == size - 1));
 		}
-		if (!finder.getStatus().isOK() && !added) {
+		if (needsTargetNode() && !added) {
 			arguments.add(0, factory.getTargetNode());
 			added= true;
 		}
