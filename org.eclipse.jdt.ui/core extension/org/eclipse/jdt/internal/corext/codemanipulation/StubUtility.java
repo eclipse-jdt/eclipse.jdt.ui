@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -820,10 +820,8 @@ public class StubUtility {
 	}
 
 	/**
-	 * Examines a string and returns the first line delimiter found.
-	 * 
-	 * @param elem the element
-	 * @return the line delimiter used for the element
+	 * @param elem a Java element (doesn't have to exist)
+	 * @return the existing or default line delimiter for the element
 	 */
 	public static String getLineDelimiterUsed(IJavaElement elem) {
 		IOpenable openable= elem.getOpenable();
