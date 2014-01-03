@@ -180,6 +180,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	public static final String CONVERT_ANONYMOUS_TO_LOCAL_ID= "org.eclipse.jdt.ui.correction.convertAnonymousToLocal.assist"; //$NON-NLS-1$
 	public static final String CONVERT_TO_STRING_BUFFER_ID= "org.eclipse.jdt.ui.correction.convertToStringBuffer.assist"; //$NON-NLS-1$
 	public static final String CONVERT_TO_MESSAGE_FORMAT_ID= "org.eclipse.jdt.ui.correction.convertToMessageFormat.assist"; //$NON-NLS-1$;
+	public static final String EXTRACT_METHOD_INPLACE_ID= "org.eclipse.jdt.ui.correction.extractMethodInplace.assist"; //$NON-NLS-1$;
 
 	public QuickAssistProcessor() {
 		super();
@@ -331,6 +332,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 			int relevance= problemsAtLocation ? IProposalRelevance.EXTRACT_METHOD_ERROR : IProposalRelevance.EXTRACT_METHOD;
 			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractMethodRefactoring, relevance, image);
+			proposal.setCommandId(EXTRACT_METHOD_INPLACE_ID);
 			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
 		}

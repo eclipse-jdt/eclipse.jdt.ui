@@ -3694,6 +3694,12 @@
             id="org.eclipse.jdt.ui.correction.extractConstant.assist">
       </command>
       <command
+            name="%ActionDefinition.corrections.extractMethodInplace.name"
+            description="%ActionDefinition.corrections.extractMethodInplace.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.extractMethodInplace.assist">
+      </command>
+      <command
             name="%ActionDefinition.corrections.convertLocalToField.name"
             description="%ActionDefinition.corrections.convertLocalToField.description"
             categoryId="org.eclipse.jdt.ui.category.source"
@@ -4409,6 +4415,11 @@
             sequence="M1+2 R"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.correction.renameInFile.assist"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+       <key
+            sequence="M1+2 E"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.correction.extractMethodInplace.assist"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
        <key
             sequence="M1+2 L"
