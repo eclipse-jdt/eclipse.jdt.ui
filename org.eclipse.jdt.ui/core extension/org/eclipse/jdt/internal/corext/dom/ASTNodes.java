@@ -75,8 +75,8 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NodeFinder;
-import org.eclipse.jdt.core.dom.PackageQualifiedType;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
@@ -408,7 +408,7 @@ public class ASTNodes {
 				return false;
 			}
 			@Override
-			public boolean visit(PackageQualifiedType node) {
+			public boolean visit(NameQualifiedType node) {
 				buffer.append(node.getName().getIdentifier());
 				return false;
 			}
@@ -452,7 +452,7 @@ public class ASTNodes {
 				return false;
 			}
 			@Override
-			public boolean visit(PackageQualifiedType node) {
+			public boolean visit(NameQualifiedType node) {
 				buffer.append(node.getQualifier().getFullyQualifiedName());
 				buffer.append('.');
 				buffer.append(node.getName().getIdentifier());
@@ -659,7 +659,7 @@ public class ASTNodes {
 		// normalize type
 		if (QualifiedType.NAME_PROPERTY.equals(current.getLocationInParent())
 				|| SimpleType.NAME_PROPERTY.equals(current.getLocationInParent())
-				|| PackageQualifiedType.NAME_PROPERTY.equals(current.getLocationInParent())) {
+				|| NameQualifiedType.NAME_PROPERTY.equals(current.getLocationInParent())) {
 			current= current.getParent();
 		}
 		// normalize parameterized types

@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -63,11 +67,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
-import org.eclipse.jdt.core.dom.PackageQualifiedType;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
@@ -359,6 +363,11 @@ public class GenericVisitor extends ASTVisitor {
 		endVisitNode(node);
 	}
 	@Override
+	public void endVisit(NameQualifiedType node) {
+		endVisitNode(node);
+	}
+
+	@Override
 	public void endVisit(NormalAnnotation node) {
 		endVisitNode(node);
 	}
@@ -372,10 +381,6 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public void endVisit(PackageDeclaration node) {
-		endVisitNode(node);
-	}
-	@Override
-	public void endVisit(PackageQualifiedType node) {
 		endVisitNode(node);
 	}
 	@Override
@@ -731,6 +736,11 @@ public class GenericVisitor extends ASTVisitor {
 		return visitNode(node);
 	}
 	@Override
+	public boolean visit(NameQualifiedType node) {
+		return visitNode(node);
+	}
+
+	@Override
 	public boolean visit(NormalAnnotation node) {
 		return visitNode(node);
 	}
@@ -744,10 +754,6 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	@Override
 	public boolean visit(PackageDeclaration node) {
-		return visitNode(node);
-	}
-	@Override
-	public boolean visit(PackageQualifiedType node) {
 		return visitNode(node);
 	}
 	@Override

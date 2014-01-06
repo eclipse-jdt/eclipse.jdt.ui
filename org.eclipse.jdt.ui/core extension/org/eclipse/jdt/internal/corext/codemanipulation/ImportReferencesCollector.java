@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,9 +38,9 @@ import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.MethodRefParameter;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
-import org.eclipse.jdt.core.dom.PackageQualifiedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -205,11 +205,11 @@ public class ImportReferencesCollector extends GenericVisitor {
 	}
 	
 	/*
-	 * @see ASTVisitor#visit(PackageQualifiedType)
+	 * @see ASTVisitor#visit(NameQualifiedType)
 	 */
 	@Override
-	public boolean visit(PackageQualifiedType node) {
-		typeRefFound(node.getName());
+	public boolean visit(NameQualifiedType node) {
+		possibleTypeRefFound(node.getQualifier());
 		doVisitChildren(node.annotations());
 		return false;
 	}

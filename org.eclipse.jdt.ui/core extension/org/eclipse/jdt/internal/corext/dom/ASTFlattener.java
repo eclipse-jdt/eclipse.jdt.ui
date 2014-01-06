@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1080,6 +1080,18 @@ public class ASTFlattener extends GenericVisitor {
 	}
 
 	/*
+	 * @see ASTVisitor#visit(NameQualifiedType)
+	 */
+	@Override
+	public boolean visit(NameQualifiedType node) {
+		node.getQualifier().accept(this);
+		this.fBuffer.append('.');
+		printTypeAnnotations(node);
+		node.getName().accept(this);
+		return false;
+	}
+
+	/*
 	 * @see ASTVisitor#visit(NormalAnnotation)
 	 * @since 3.0
 	 */
@@ -1135,18 +1147,6 @@ public class ASTFlattener extends GenericVisitor {
 		this.fBuffer.append("package ");//$NON-NLS-1$
 		node.getName().accept(this);
 		this.fBuffer.append(";");//$NON-NLS-1$
-		return false;
-	}
-
-	/*
-	 * @see ASTVisitor#visit(PackageQualifiedType)
-	 */
-	@Override
-	public boolean visit(PackageQualifiedType node) {
-		node.getQualifier().accept(this);
-		this.fBuffer.append('.');
-		printTypeAnnotations(node);
-		node.getName().accept(this);
 		return false;
 	}
 
