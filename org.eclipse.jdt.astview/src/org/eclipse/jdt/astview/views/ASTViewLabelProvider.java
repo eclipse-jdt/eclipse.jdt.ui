@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,9 @@
  *******************************************************************************/
 
 package org.eclipse.jdt.astview.views;
+
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -183,7 +186,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	private boolean isInsideNode(ASTNode node) {
 		int start= node.getStartPosition();
 		int end= start + node.getLength();
-		if (start <= fSelectionStart && (fSelectionStart + fSelectionLength) < end) {
+		if (start <= fSelectionStart && (fSelectionStart + fSelectionLength) <= end) {
 			return true;
 		}
 		return false;
@@ -197,6 +200,13 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			Object object= property.getNode();
 			if (object instanceof ASTNode) {
 				return isInsideNode((ASTNode) object);
+			} else if (object instanceof List) {
+				for (Iterator iter= ((List) object).iterator(); iter.hasNext(); ) {
+					Object child= iter.next();
+					if (isInside(child)) {
+						return true;
+					}
+				}
 			}
 		}
 		return false;
