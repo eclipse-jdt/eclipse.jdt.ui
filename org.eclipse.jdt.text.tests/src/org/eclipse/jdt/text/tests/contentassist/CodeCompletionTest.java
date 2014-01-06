@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -94,34 +94,33 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 	}
 
 	private void codeComplete(ICompilationUnit cu, int offset, CompletionProposalCollector collector) throws JavaModelException {
+		// logging for https://bugs.eclipse.org/bugs/show_bug.cgi?id=423416
+		System.out.println();
+		System.out.println("---- " + getClass().getName() + "#" + getName() + " ----");
+		System.out.println("offset: " + offset);
+		System.out.println("cu: " + cu);
+		IBuffer buffer= cu.getBuffer();
+		System.out.println("buffer: " + buffer);
+		System.out.println("source: |" + buffer.getContents() + "|");
+
+		System.out.print("file contents: |");
+		File file= cu.getResource().getLocation().toFile();
 		try {
-			cu.codeComplete(offset, collector, new NullProgressMonitor());
-		} catch (JavaModelException e) {
-			// logging for https://bugs.eclipse.org/bugs/show_bug.cgi?id=421699
-			System.out.println(getClass().getName() + "#" + getName() + " failed: " + e.getMessage()); 
-			System.out.println("offset: " + offset);
-			System.out.println("cu: " + cu);
-			IBuffer buffer= cu.getBuffer();
-			System.out.println("buffer: " + buffer);
-			System.out.println("source: |" + buffer.getContents() + "|");
-			
-			System.out.print("file contents: |");
-			File file= cu.getResource().getLocation().toFile();
-			try {
-				BufferedReader reader= new BufferedReader(new FileReader(file));
-				String line;
-				while ((line= reader.readLine()) != null) {
-					System.out.println(line);
-				}
-				System.out.println("|");
-				reader.close();
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				e1.printStackTrace();
+			BufferedReader reader= new BufferedReader(new FileReader(file));
+			String line;
+			while ((line= reader.readLine()) != null) {
+				System.out.println(line);
 			}
-			throw e;
+			System.out.println("|");
+			reader.close();
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
+		System.out.println();
+
+		cu.codeComplete(offset, collector, new NullProgressMonitor());
 	}
 
 	protected void setUp() throws Exception {
