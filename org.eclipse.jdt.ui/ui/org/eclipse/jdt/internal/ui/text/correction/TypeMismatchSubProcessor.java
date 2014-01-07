@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [quick fix] proposes wrong cast from Object to primitive int - https://bugs.eclipse.org/bugs/show_bug.cgi?id=100593
@@ -39,6 +43,7 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
@@ -455,11 +460,17 @@ public class TypeMismatchSubProcessor {
 		SingleVariableDeclaration parameter= forStatement.getParameter();
 
 		ICompilationUnit cu= context.getCompilationUnit();
-		if (parameter.getName().getLength() == 0
-				&& parameter.getType() instanceof SimpleType) {
-			SimpleType type= (SimpleType) parameter.getType();
-			if (type.getName() instanceof SimpleName) {
-				SimpleName simpleName= (SimpleName) type.getName();
+		if (parameter.getName().getLength() == 0) {
+			SimpleName simpleName= null;
+			if (parameter.getType() instanceof SimpleType) {
+				SimpleType type= (SimpleType) parameter.getType();
+				if (type.getName() instanceof SimpleName) {
+					simpleName= (SimpleName) type.getName();
+				}
+			} else if (parameter.getType() instanceof NameQualifiedType) {
+				simpleName= ((NameQualifiedType) parameter.getType()).getName();
+			}
+			if (simpleName != null) {
 				String name= simpleName.getIdentifier();
 				int relevance= StubUtility.hasLocalVariableName(cu.getJavaProject(), name) ? 10 : 7;
 				String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_create_loop_variable_description, BasicElementLabels.getJavaElementName(name));

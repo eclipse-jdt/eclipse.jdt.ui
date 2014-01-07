@@ -82,6 +82,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
@@ -698,8 +699,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		
 		if (node instanceof Name) {
 			Name name= ASTNodes.getTopMostName((Name) node);
-			if (name.getLocationInParent() == SimpleType.NAME_PROPERTY) {
-				SimpleType type= (SimpleType) name.getParent();
+			if (name.getLocationInParent() == SimpleType.NAME_PROPERTY ||
+					name.getLocationInParent() == NameQualifiedType.NAME_PROPERTY) {
+				ASTNode type= name.getParent();
 				if (type.getLocationInParent() == ParameterizedType.TYPE_PROPERTY) {
 					createdType= (ParameterizedType) type.getParent();
 					if (createdType.getLocationInParent() != ClassInstanceCreation.TYPE_PROPERTY) {
@@ -1468,7 +1470,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		Type type= catchClause.getException().getType();
-		if (!type.isSimpleType() && !type.isUnionType()) {
+		if (!type.isSimpleType() && !type.isUnionType() && !type.isNameQualifiedType()) {
 			return false;
 		}
 
@@ -1484,12 +1486,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= bodyDeclaration.getAST();
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 
-		SimpleType selectedMultiCatchType= null;
+		Type selectedMultiCatchType= null;
 		if (type.isUnionType() && node instanceof Name) {
 			Name topMostName= ASTNodes.getTopMostName((Name) node);
 			ASTNode parent= topMostName.getParent();
 			if (parent instanceof SimpleType) {
 				selectedMultiCatchType= (SimpleType) parent;
+			} else if (parent instanceof NameQualifiedType) {
+				selectedMultiCatchType= (NameQualifiedType) parent;
 			}
 		}
 
@@ -1509,12 +1513,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					UnionType unionType= (UnionType) type;
 					List<Type> types= unionType.types();
 					for (Type elementType : types) {
-						if (!(elementType instanceof SimpleType))
+						if (!(elementType instanceof SimpleType || elementType instanceof NameQualifiedType))
 							return false;
-						addExceptionToThrows(ast, methodDeclaration, rewrite, (SimpleType) elementType);
+						addExceptionToThrows(ast, methodDeclaration, rewrite, elementType);
 					}
 				} else {
-					addExceptionToThrows(ast, methodDeclaration, rewrite, (SimpleType) type);
+					addExceptionToThrows(ast, methodDeclaration, rewrite, type);
 				}
 				String label= CorrectionMessages.QuickAssistProcessor_catchclausetothrows_description;
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REPLACE_CATCH_CLAUSE_WITH_THROWS, image);
@@ -1550,7 +1554,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 	}
 
-	private static void addExceptionToThrows(AST ast, MethodDeclaration methodDeclaration, ASTRewrite rewrite, SimpleType type2) {
+	private static void addExceptionToThrows(AST ast, MethodDeclaration methodDeclaration, ASTRewrite rewrite, Type type2) {
 		ITypeBinding binding= type2.resolveBinding();
 		if (binding == null || isNotYetThrown(binding, methodDeclaration.thrownExceptionTypes())) {
 			Type newType= (Type) ASTNode.copySubtree(ast, type2);
@@ -1617,12 +1621,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		SimpleType selectedMultiCatchType= null;
+		Type selectedMultiCatchType= null;
 		if (type.isUnionType() && node instanceof Name) {
 			Name topMostName= ASTNodes.getTopMostName((Name) node);
 			ASTNode parent= topMostName.getParent();
-			if (parent instanceof SimpleType) {
-				selectedMultiCatchType= (SimpleType) parent;
+			if (parent instanceof SimpleType || parent instanceof NameQualifiedType) {
+				selectedMultiCatchType= (Type) parent;
 			}
 		}
 
@@ -1690,12 +1694,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		Type type1= catchClause.getException().getType();
-		SimpleType selectedMultiCatchType= null;
+		Type selectedMultiCatchType= null;
 		if (type1.isUnionType() && covering instanceof Name) {
 			Name topMostName= ASTNodes.getTopMostName((Name) covering);
 			ASTNode parent= topMostName.getParent();
-			if (parent instanceof SimpleType) {
-				selectedMultiCatchType= (SimpleType) parent;
+			if (parent instanceof SimpleType || parent instanceof NameQualifiedType) {
+				selectedMultiCatchType= (Type) parent;
 			}
 		}
 		if (selectedMultiCatchType != null)
@@ -1781,12 +1785,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		Type type1= catchClause.getException().getType();
-		SimpleType selectedMultiCatchType= null;
+		Type selectedMultiCatchType= null;
 		if (type1.isUnionType() && covering instanceof Name) {
 			Name topMostName= ASTNodes.getTopMostName((Name) covering);
 			ASTNode parent= topMostName.getParent();
-			if (parent instanceof SimpleType) {
-				selectedMultiCatchType= (SimpleType) parent;
+			if (parent instanceof SimpleType || parent instanceof NameQualifiedType) {
+				selectedMultiCatchType= (Type) parent;
 			}
 		}
 		if (selectedMultiCatchType != null)

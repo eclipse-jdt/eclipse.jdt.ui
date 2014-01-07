@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Genady Beryozkin <eclipse@genady.org> - [hovering] tooltip for constant string does not show constant value - https://bugs.eclipse.org/bugs/show_bug.cgi?id=85382
@@ -83,6 +87,7 @@ import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -1042,7 +1047,9 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			// workaround for https://bugs.eclipse.org/62605 (constructor name resolves to type, not method)
 			SimpleName simpleName= (SimpleName) node;
 			StructuralPropertyDescriptor loc= simpleName.getLocationInParent();
-			while (loc == QualifiedType.NAME_PROPERTY || loc == QualifiedName.NAME_PROPERTY|| loc == SimpleType.NAME_PROPERTY || loc == ParameterizedType.TYPE_PROPERTY) {
+			while (loc == QualifiedType.NAME_PROPERTY || loc == QualifiedName.NAME_PROPERTY
+					|| loc == SimpleType.NAME_PROPERTY || loc == NameQualifiedType.NAME_PROPERTY
+					|| loc == ParameterizedType.TYPE_PROPERTY) {
 				node= node.getParent();
 				loc= node.getLocationInParent();
 			}

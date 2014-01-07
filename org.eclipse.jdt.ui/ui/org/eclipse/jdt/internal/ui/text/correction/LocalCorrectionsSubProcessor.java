@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,6 +80,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
@@ -1436,10 +1437,14 @@ public class LocalCorrectionsSubProcessor {
 		Name node= null;
 		if (selectedNode instanceof SimpleType) {
 			node= ((SimpleType) selectedNode).getName();
+		} else if (selectedNode instanceof NameQualifiedType) {
+			node= ((NameQualifiedType) selectedNode).getName();
 		} else if (selectedNode instanceof ArrayType) {
 			Type elementType= ((ArrayType) selectedNode).getElementType();
 			if (elementType.isSimpleType()) {
 				node= ((SimpleType) elementType).getName();
+			} else if (elementType.isNameQualifiedType()) {
+				node= ((NameQualifiedType) elementType).getName();
 			} else {
 				return;
 			}
@@ -1463,7 +1468,7 @@ public class LocalCorrectionsSubProcessor {
 			simpleBinding= simpleBinding.getTypeDeclaration();
 		
 			if (!simpleBinding.isRecovered()) {
-				if (binding.isParameterizedType() && node.getParent() instanceof SimpleType && !(node.getParent().getParent() instanceof Type)) {
+				if (binding.isParameterizedType() && (node.getParent() instanceof SimpleType || node.getParent() instanceof NameQualifiedType) && !(node.getParent().getParent() instanceof Type)) {
 					proposals.add(UnresolvedElementsSubProcessor.createTypeRefChangeFullProposal(cu, binding, node, IProposalRelevance.TYPE_ARGUMENTS_FROM_CONTEXT));
 				}
 			}
