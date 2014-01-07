@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -518,7 +518,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				}
 				updateControls();
 				updateInlineJSREnableState();
-				updatePreserveMethodParamNamesEnableState();
+				updateStoreMethodParamNamesEnableState();
 				updateAssertEnumAsIdentifierEnableState();
 				fComplianceStatus= validateCompliance();
 			} else if (PREF_PB_ENUM_AS_IDENTIFIER.equals(changedKey) ||
@@ -533,7 +533,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			updateComplianceEnableState();
 			updateAssertEnumAsIdentifierEnableState();
 			updateInlineJSREnableState();
-			updatePreserveMethodParamNamesEnableState();
+			updateStoreMethodParamNamesEnableState();
 			fComplianceStatus= validateCompliance();
 			validateComplianceStatus();
 		}
@@ -583,7 +583,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				updateComplianceEnableState();
 				validateComplianceStatus();
 				updateInlineJSREnableState();
-				updatePreserveMethodParamNamesEnableState();
+				updateStoreMethodParamNamesEnableState();
 			}
 		}
 	}
@@ -786,7 +786,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		}
 	}
 
-	private void updatePreserveMethodParamNamesEnableState() {
+	private void updateStoreMethodParamNamesEnableState() {
 		String target= getValue(PREF_CODEGEN_TARGET_PLATFORM);
 		boolean enabled= JavaModelUtil.is18OrHigher(target);
 		Button checkBox= getCheckBox(PREF_CODEGEN_METHOD_PARAMETERS_ATTR);
@@ -900,7 +900,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			} else {
 				updateInlineJSREnableState();
 				updateAssertEnumAsIdentifierEnableState();
-				updatePreserveMethodParamNamesEnableState();
+				updateStoreMethodParamNamesEnableState();
 				return;
 			}
 		}
@@ -911,7 +911,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		updateControls();
 		updateInlineJSREnableState();
 		updateAssertEnumAsIdentifierEnableState();
-		updatePreserveMethodParamNamesEnableState();
+		updateStoreMethodParamNamesEnableState();
 	}
 
 	/**
