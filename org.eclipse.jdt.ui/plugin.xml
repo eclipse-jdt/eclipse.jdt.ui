@@ -4418,7 +4418,7 @@
             commandId="org.eclipse.jdt.ui.correction.renameInFile.assist"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
        <key
-            sequence="M1+2 E"
+            sequence="M1+2 M"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.correction.extractMethodInplace.assist"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
