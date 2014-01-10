@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -982,7 +982,7 @@ public class AddImportTest extends CoreTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
-	public void testAddImports_bug107206() throws Exception {
+	public void testAddImportAction_bug107206() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
@@ -1072,6 +1072,251 @@ public class AddImportTest extends CoreTests {
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    String str= java.io.File.separator;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	public void testAddImportActionNestedType1() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    java.lang.Thread.State s;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+				
+		int selOffset= buf.indexOf("Thread");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    Thread.State s;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testAddImportActionNestedType2() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    java.lang.Thread.State s;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		int selOffset= buf.indexOf("State");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.Thread.State;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    State s;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testAddImportActionParameterizedType1() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    java.util.Map<String, Integer> m;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+				
+		int selOffset= buf.indexOf("Map");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    Map<String, Integer> m;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	public void testAddImportActionParameterizedType2() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    java.util.Map.Entry e;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+				
+		int selOffset= buf.indexOf("Entry");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Map.Entry;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    Entry e;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testAddImportActionParameterizedType3() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    java.util.Map.Entry<String, Object> e;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+				
+		int selOffset= buf.indexOf("Map");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    Map.Entry<String, Object> e;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testAddImportActionParameterizedType4() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    java.util.Map.Entry<String, Object> e;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		int selOffset= buf.indexOf("Entry");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Map.Entry;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    Entry<String, Object> e;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testAddImportActionParameterizedType5() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack2;\n");
+		buf.append("\n");
+		buf.append("public class Outer {\n");
+		buf.append("    public class Middle<M> {\n");
+		buf.append("        public class Inner<I> {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("Outer.java", buf.toString(), false, null);
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    pack2.Outer.Middle<String>.Inner<Integer> i;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		int selOffset= buf.indexOf("Middle");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import pack2.Outer.Middle;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    Middle<String>.Inner<Integer> i;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	// Don't touch nested type if outer is parameterized.
+	public void testAddImportActionParameterizedType6() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack2", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack2;\n");
+		buf.append("\n");
+		buf.append("public class Outer {\n");
+		buf.append("    public class Middle<M> {\n");
+		buf.append("        public class Inner<I> {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("Outer.java", buf.toString(), false, null);
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    pack2.Outer.Middle<String>.Inner<Integer> i;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		int selOffset= buf.indexOf("Inner");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    pack2.Outer.Middle<String>.Inner<Integer> i;\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}

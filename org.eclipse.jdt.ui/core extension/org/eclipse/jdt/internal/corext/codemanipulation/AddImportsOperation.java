@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,9 +48,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -224,11 +222,6 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 				containerName= qualifier.getFullyQualifiedName();
 				name= JavaModelUtil.concatenateName(containerName, simpleName);
 				qualifierStart= qualifier.getStartPosition();
-			} else if (nameNode.getParent().getLocationInParent() == QualifiedType.NAME_PROPERTY) {
-				Type qualifier= ((QualifiedType) nameNode.getParent().getParent()).getQualifier();
-				containerName= ASTNodes.asString(qualifier);
-				name= JavaModelUtil.concatenateName(containerName, simpleName);
-				qualifierStart= qualifier.getStartPosition();
 			} else if (nameNode.getLocationInParent() == MethodInvocation.NAME_PROPERTY) {
 				ASTNode qualifier= ((MethodInvocation) nameNode.getParent()).getExpression();
 				if (qualifier instanceof Name) {
@@ -247,13 +240,13 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			IBinding binding= nameNode.resolveBinding();
 			if (binding != null && !binding.isRecovered()) {
 				if (binding instanceof ITypeBinding) {
-					ITypeBinding typeBinding= (ITypeBinding) binding;
+					ITypeBinding typeBinding= ((ITypeBinding) binding).getTypeDeclaration();
 					String qualifiedBindingName= typeBinding.getQualifiedName();
 					if (containerName.length() > 0 && !qualifiedBindingName.equals(name)) {
 						return null;
 					}
 
-					ImportRewriteContext context= new ContextSensitiveImportRewriteContext(root, simpleNameStart, importRewrite);
+					ImportRewriteContext context= new ContextSensitiveImportRewriteContext(root, qualifierStart, importRewrite);
 					String res= importRewrite.addImport(typeBinding, context);
 					if (containerName.length() > 0 && !res.equals(simpleName)) {
 						// adding import failed
