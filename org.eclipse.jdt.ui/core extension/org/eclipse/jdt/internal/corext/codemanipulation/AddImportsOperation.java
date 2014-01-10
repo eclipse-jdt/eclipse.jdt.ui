@@ -5,12 +5,17 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -46,6 +51,7 @@ import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -222,6 +228,16 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 				containerName= qualifier.getFullyQualifiedName();
 				name= JavaModelUtil.concatenateName(containerName, simpleName);
 				qualifierStart= qualifier.getStartPosition();
+			} else if (nameNode.getLocationInParent() == NameQualifiedType.NAME_PROPERTY) {
+				NameQualifiedType nameQualifiedType= (NameQualifiedType) nameNode.getParent();
+				Name qualifier= nameQualifiedType.getQualifier();
+				containerName= qualifier.getFullyQualifiedName();
+				name= JavaModelUtil.concatenateName(containerName, simpleName);
+				qualifierStart= qualifier.getStartPosition();
+				List<Annotation> annotations= nameQualifiedType.annotations();
+				if (!annotations.isEmpty()) { // don't remove annotations
+					simpleNameStart= annotations.get(0).getStartPosition();
+				}
 			} else if (nameNode.getLocationInParent() == MethodInvocation.NAME_PROPERTY) {
 				ASTNode qualifier= ((MethodInvocation) nameNode.getParent()).getExpression();
 				if (qualifier instanceof Name) {

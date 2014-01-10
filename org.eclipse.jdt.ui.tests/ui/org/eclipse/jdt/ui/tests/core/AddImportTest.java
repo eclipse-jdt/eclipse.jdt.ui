@@ -1321,6 +1321,76 @@ public class AddImportTest extends CoreTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
+	public void testAddImportActionAnnotatedType1() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    java.text.@A Format.@A Field f;\n");
+		buf.append("}\n");
+		buf.append("@Target(ElementType.TYPE_USE) @interface A {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		int selOffset= buf.indexOf("Format");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("import java.text.Format;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    @A Format.@A Field f;\n");
+		buf.append("}\n");
+		buf.append("@Target(ElementType.TYPE_USE) @interface A {}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	// Don't touch nested type if outer is annotated.
+	public void testAddImportActionAnnotatedType2() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    java.text.@A Format.@A Field f;\n");
+		buf.append("}\n");
+		buf.append("@Target(ElementType.TYPE_USE) @interface A {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		int selOffset= buf.indexOf("Field");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 0, null, true);
+		op.run(null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    java.text.@A Format.@A Field f;\n");
+		buf.append("}\n");
+		buf.append("@Target(ElementType.TYPE_USE) @interface A {}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
 	public void testAddImportContextSensitive01() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
