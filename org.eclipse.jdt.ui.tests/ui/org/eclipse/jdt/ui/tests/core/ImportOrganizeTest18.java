@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -293,6 +293,45 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 		buf.append("\n");
 		buf.append("public class C{\n");
 		buf.append("    int[] arr = new int @TypeUse [5];\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	public void testStaticMethodReferenceImports_bug424172() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack0= sourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import java.util.function.IntPredicate;\n");
+		buf.append("\n");
+		buf.append("class UnusedStaticImport {\n");
+		buf.append("    boolean value = match(Character::isUpperCase, 'A');\n");
+		buf.append("\n");
+		buf.append("    public static boolean match(IntPredicate matcher, int codePoint) {\n");
+		buf.append("        return matcher.test(codePoint);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack0.createCompilationUnit("UnusedStaticImport.java", buf.toString(), false, null);
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("StaticMethodReferenceImports_bug424172", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import java.util.function.IntPredicate;\n");
+		buf.append("\n");
+		buf.append("class UnusedStaticImport {\n");
+		buf.append("    boolean value = match(Character::isUpperCase, 'A');\n");
+		buf.append("\n");
+		buf.append("    public static boolean match(IntPredicate matcher, int codePoint) {\n");
+		buf.append("        return matcher.test(codePoint);\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
