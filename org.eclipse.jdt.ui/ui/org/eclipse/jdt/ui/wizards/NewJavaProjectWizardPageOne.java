@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -51,6 +53,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.util.Policy;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
@@ -97,8 +100,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
-import org.eclipse.jface.util.BidiUtils;
-import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 /**
  * The first page of the New Java Project wizard. This page is typically used in combination with
@@ -592,12 +593,9 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				}
 			}
 
-			String defaultCC;
-			if (defaultVM instanceof IVMInstall2) {
-				defaultCC= JavaModelUtil.getCompilerCompliance((IVMInstall2)defaultVM, JavaCore.VERSION_1_4);
-			} else {
-				defaultCC= JavaCore.VERSION_1_4;
-			}
+			String defaultCC=JavaModelUtil.VERSION_LATEST;
+			if (defaultVM instanceof IVMInstall2)
+				defaultCC= JavaModelUtil.getCompilerCompliance((IVMInstall2)defaultVM, defaultCC);
 
 			for (int i= 0; i < environments.length; i++) {
 				String eeCompliance= JavaModelUtil.getExecutionEnvironmentCompliance(environments[i]);
@@ -605,7 +603,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					return environments[i].getId();
 			}
 
-			return "JavaSE-1.6"; //$NON-NLS-1$
+			return "JavaSE-1.7"; //$NON-NLS-1$
 		}
 
 		private String getDefaultJVMLabel() {
