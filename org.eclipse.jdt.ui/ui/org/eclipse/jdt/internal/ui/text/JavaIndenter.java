@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -993,6 +993,12 @@ public final class JavaIndenter {
 			return matchCaseAlignment();
 		}
 
+		int storedPos= fPosition;
+		if (peekChar(offset) == Symbols.TokenLBRACE && looksLikeMethodDeclLBrace(offset)) {
+			return skipToStatementStart(danglingElse, false);
+		}
+		fPosition= storedPos;
+
 		nextToken();
 		switch (fToken) {
 			case Symbols.TokenGREATERTHAN:
@@ -1077,9 +1083,6 @@ public final class JavaIndenter {
 						return fPosition;
 					}
 					fPosition= scope;
-					if (looksLikeMethodDecl()) {
-						return skipToStatementStart(danglingElse, false);
-					}
 					if (fToken == Symbols.TokenCATCH) {
 						return skipToStatementStart(danglingElse, false);
 					}
@@ -1127,6 +1130,53 @@ public final class JavaIndenter {
 				// if we are inside a continued expression, then either align with a previous line that has indentation
 				// or indent from the expression start line (either a scope introducer or the start of the expr).
 				return skipToPreviousListItemOrListStart();
+		}
+	}
+
+	/**
+	 * Checks whether the Symbols.TokenLBRACE after <code>offset</code> probably represents the
+	 * beginning of a method body declaration.
+	 * 
+	 * @param offset the document offset for which {@link #peekChar(int) peekChar(offset)} returns
+	 *            Symbols.TokenLBRACE
+	 * @return <code>true</code> if the left brace after <code>offset</code> looks like the
+	 *         beginning of a method body declaration, <code>false</code> otherwise
+	 * 
+	 * @since 3.9
+	 */
+	private boolean looksLikeMethodDeclLBrace(int offset) {
+		nextToken();
+		while (true) {
+			switch (fToken) {
+				case Symbols.TokenTHROWS:
+				case Symbols.TokenIDENT: // identifier for exception/annotation/annotation value
+				case Symbols.TokenCOMMA:
+				case Symbols.TokenAT:
+				case Symbols.TokenLBRACKET: // for array valued return type
+				case Symbols.TokenRBRACKET:
+					break; // possible tokens between '{' and ')' in method declaration
+				case Symbols.TokenOTHER: // dot of qualification
+					try {
+						if (fDocument.getChar(fPosition) != '.') {
+							return false;
+						}
+					} catch (BadLocationException e) {
+						return false;
+					}
+					break;
+				case Symbols.TokenRPAREN: // parenthesis for annotation value / method declaration
+					skipScope();
+					int storedPos= fPosition;
+					if (looksLikeMethodDecl())
+						return true;
+					fPosition= storedPos;
+					break;
+				case Symbols.TokenEOF:
+					return false;
+				default:
+					return false;
+			}
+			nextToken();
 		}
 	}
 
