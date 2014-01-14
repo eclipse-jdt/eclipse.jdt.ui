@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -916,7 +916,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			{ createHighlightedRange(14, 19,  5, SemanticHighlightings.ANNOTATION_ELEMENT_REFERENCE) },
 			{ createHighlightedRange(15, 12,  3, SemanticHighlightings.METHOD_DECLARATION), createHighlightedRange(15, 12,  3, SemanticHighlightings.METHOD) },
 			{ createHighlightedRange(15, 16,  7, SemanticHighlightings.CLASS) },
-			{ createHighlightedRange(15, 24,  9, SemanticHighlightings.PARAMETER_VARIABLE) },
+			{ createHighlightedRange(15, 24,  9, SemanticHighlightings.PARAMETER_VARIABLE), createHighlightedRange(15, 24,  9, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
 			{ createHighlightedRange(16,  2, 14, SemanticHighlightings.ABSTRACT_METHOD_INVOCATION), createHighlightedRange(16,  2, 14, SemanticHighlightings.METHOD) },
 			{ createHighlightedRange(16, 17, 14, SemanticHighlightings.INHERITED_FIELD), createHighlightedRange(16, 17, 14, SemanticHighlightings.FIELD) },
 			{ createHighlightedRange(17,  6,  5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
@@ -925,7 +925,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			{ createHighlightedRange(18,  2, 12, SemanticHighlightings.STATIC_METHOD_INVOCATION), createHighlightedRange(18,  2, 12, SemanticHighlightings.METHOD) },
 			{ createHighlightedRange(19,  9,  3, SemanticHighlightings.METHOD) },
 			{ createHighlightedRange(19, 13,  5, SemanticHighlightings.LOCAL_VARIABLE) },
-			{ createHighlightedRange(19, 22,  9, SemanticHighlightings.AUTOBOXING), createHighlightedRange(19, 22, 9, SemanticHighlightings.PARAMETER_VARIABLE) },
+			{ createHighlightedRange(19, 22,  9, SemanticHighlightings.AUTOBOXING), createHighlightedRange(19, 22, 9, SemanticHighlightings.PARAMETER_VARIABLE), createHighlightedRange(19, 22,  9, SemanticHighlightings.LOCAL_VARIABLE) },
 		};
 	}
 
