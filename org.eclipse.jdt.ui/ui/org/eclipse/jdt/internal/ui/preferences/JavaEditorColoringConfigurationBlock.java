@@ -588,7 +588,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		editorComposite.setLayout(layout);
-		GridData gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		GridData gd= new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.heightHint= convertHeightInCharsToPixels(7);
 		editorComposite.setLayoutData(gd);
 
 		fTreeViewer= new TreeViewer(editorComposite, SWT.SINGLE | SWT.BORDER);
@@ -610,8 +611,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 				return 0;
 			}
 		});
-		gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, true);
-		gd.heightHint= convertHeightInCharsToPixels(9);
+		gd= new GridData(SWT.BEGINNING, SWT.FILL, false, true);
+		gd.heightHint= convertHeightInCharsToPixels(7);
 		int maxWidth= 0;
 		for (Iterator<HighlightingColorListItem> it= fListModel.iterator(); it.hasNext();) {
 			HighlightingColorListItem item= it.next();
@@ -631,7 +632,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		layout.marginWidth= 0;
 		layout.numColumns= 2;
 		stylesComposite.setLayout(layout);
-		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		stylesComposite.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, true, false));
 
 		fEnableCheckbox= new Button(stylesComposite, SWT.CHECK);
 		fEnableCheckbox.setText(PreferencesMessages.JavaEditorPreferencePage_enable);
@@ -684,9 +685,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Control previewer= createPreviewer(colorComposite);
-		gd= new GridData(GridData.FILL_BOTH);
+		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= convertWidthInCharsToPixels(20);
-		gd.heightHint= convertHeightInCharsToPixels(5);
 		previewer.setLayoutData(gd);
 
 		fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -766,7 +766,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			}
 		});
 
-		colorComposite.layout(false);
+		colorComposite.layout();
 
 		return colorComposite;
 	}
@@ -804,7 +804,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 		IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
 		IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(createTemporaryCorePreferenceStore()), generalTextStore });
-		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
+		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.H_SCROLL | SWT.BORDER, store);
 		SimpleJavaSourceViewerConfiguration configuration= new SimpleJavaSourceViewerConfiguration(fColorManager, store, null, IJavaPartitions.JAVA_PARTITIONING, false);
 		fPreviewViewer.configure(configuration);
 		// fake 1.5 source to get 1.5 features right.
@@ -852,6 +852,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 				buffer.append(line);
 				buffer.append(separator);
 			}
+			buffer.setLength(buffer.length() - separator.length());
 		} catch (IOException io) {
 			JavaPlugin.log(io);
 		} finally {
