@@ -6299,19 +6299,19 @@
          id="org.eclipse.jdt.ui.localVariableDeclarationHighlighting"
          isEditable="false"
          label="%Dummy.label"
-         value="64,128,192">
+         value="106,62,62">
       </colorDefinition>
       <colorDefinition
          id="org.eclipse.jdt.ui.localVariableHighlighting"
          isEditable="false"
          label="%Dummy.label"
-         value="64,128,192">
+         value="106,62,62">
       </colorDefinition>
       <colorDefinition
          id="org.eclipse.jdt.ui.parameterVariableHighlighting"
          isEditable="false"
          label="%Dummy.label"
-         value="64,128,192">
+         value="106,62,62">
       </colorDefinition>
       <colorDefinition
          id="org.eclipse.jdt.ui.deprecatedMemberHighlighting"

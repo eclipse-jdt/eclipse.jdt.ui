@@ -228,7 +228,7 @@ public class SemanticHighlightings {
 		 */
 		@Override
 		public boolean isBoldByDefault() {
-			return false;
+			return true;
 		}
 
 		/*
@@ -244,7 +244,7 @@ public class SemanticHighlightings {
 		 */
 		@Override
 		public boolean isEnabledByDefault() {
-			return false;
+			return true;
 		}
 
 		/*
@@ -976,7 +976,7 @@ public class SemanticHighlightings {
 		 */
 		@Override
 		public RGB getDefaultDefaultTextColor() {
-			return new RGB(64, 128, 192);
+			return new RGB(106, 62, 62);
 		}
 
 		/*
@@ -984,7 +984,7 @@ public class SemanticHighlightings {
 		 */
 		@Override
 		public boolean isBoldByDefault() {
-			return false;
+			return true;
 		}
 
 		/*
@@ -1047,7 +1047,7 @@ public class SemanticHighlightings {
 		 */
 		@Override
 		public RGB getDefaultDefaultTextColor() {
-			return new RGB(64, 128, 192);
+			return new RGB(106, 62, 62);
 		}
 
 		/*
@@ -1114,7 +1114,7 @@ public class SemanticHighlightings {
 		 */
 		@Override
 		public RGB getDefaultDefaultTextColor() {
-			return new RGB(64, 128, 192);
+			return new RGB(106, 62, 62);
 		}
 
 		/*
