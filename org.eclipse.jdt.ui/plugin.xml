@@ -6245,7 +6245,7 @@
          id="org.eclipse.jdt.ui.staticFinalFieldHighlighting"
          isEditable="false"
          label="%Dummy.label"
-         value="0,0,0">
+         value="0,0,192">
       </colorDefinition>
       <colorDefinition
          id="org.eclipse.jdt.ui.fieldHighlighting"
@@ -6299,19 +6299,19 @@
          id="org.eclipse.jdt.ui.localVariableDeclarationHighlighting"
          isEditable="false"
          label="%Dummy.label"
-         value="0,0,0">
+         value="64,128,192">
       </colorDefinition>
       <colorDefinition
          id="org.eclipse.jdt.ui.localVariableHighlighting"
          isEditable="false"
          label="%Dummy.label"
-         value="0,0,0">
+         value="64,128,192">
       </colorDefinition>
       <colorDefinition
          id="org.eclipse.jdt.ui.parameterVariableHighlighting"
          isEditable="false"
          label="%Dummy.label"
-         value="0,0,0">
+         value="64,128,192">
       </colorDefinition>
       <colorDefinition
          id="org.eclipse.jdt.ui.deprecatedMemberHighlighting"
