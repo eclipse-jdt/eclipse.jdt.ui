@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -939,23 +939,6 @@ public class ASTNodes {
 		}
 	}
 
-	public static SimpleType getLeftMostSimpleType(QualifiedType type) {
-		final SimpleType[] result= new SimpleType[1];
-		ASTVisitor visitor= new ASTVisitor() {
-			@Override
-			public boolean visit(QualifiedType qualifiedType) {
-				Type left= qualifiedType.getQualifier();
-				if (left instanceof SimpleType)
-					result[0]= (SimpleType)left;
-				else
-					left.accept(this);
-				return false;
-			}
-		};
-		type.accept(visitor);
-		return result[0];
-	}
-
 	/**
 	 * Returns the topmost ancestor of <code>name</code> that is still a {@link Name}.
 	 * <p>
@@ -963,6 +946,7 @@ public class ASTNodes {
 	 * 
 	 * @param name a name node
 	 * @return the topmost name
+	 * @see #getNormalizedNode(ASTNode)
 	 */
 	public static Name getTopMostName(Name name) {
 		Name result= name;
@@ -979,6 +963,7 @@ public class ASTNodes {
 	 * 
 	 * @param node the starting node, can be <code>null</code>
 	 * @return the topmost type or <code>null</code> if the node is not a descendant of a type node
+	 * @see #getNormalizedNode(ASTNode)
 	 */
 	public static Type getTopMostType(ASTNode node) {
 		ASTNode result= null;

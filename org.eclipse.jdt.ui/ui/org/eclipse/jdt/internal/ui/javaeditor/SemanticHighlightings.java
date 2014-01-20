@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,18 +35,18 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -480,12 +480,15 @@ public class SemanticHighlightings {
 					return isAutoUnBoxingExpression((Expression) parent);
 			}
 			// B) constructor invocations
-			if (desc == SimpleType.NAME_PROPERTY || desc == QualifiedType.NAME_PROPERTY) {
+			if (desc == QualifiedName.NAME_PROPERTY) {
+				node= (Expression) node.getParent();
+				desc= node.getLocationInParent();
+			}
+			if (desc == SimpleType.NAME_PROPERTY || desc == NameQualifiedType.NAME_PROPERTY) {
 				ASTNode parent= node.getParent();
 				if (parent != null && parent.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY) {
 					parent= parent.getParent();
-					if (parent instanceof Expression)
-						return isAutoUnBoxingExpression((Expression) parent);
+					return isAutoUnBoxingExpression((ClassInstanceCreation) parent);
 				}
 			}
 			return false;
@@ -908,53 +911,8 @@ public class SemanticHighlightings {
 		 */
 		@Override
 		public boolean consumes(SemanticToken token) {
-			IBinding binding= getMethodBinding(token);
+			IBinding binding= getBinding(token);
 			return binding != null && binding.getKind() == IBinding.METHOD;
-		}
-
-		/**
-		 * Extracts the method binding from the token's simple name. The method
-		 * binding is either the token's binding (if the parent of token is a
-		 * method call or declaration) or the constructor binding of a class
-		 * instance creation if the node is the type name of a class instance
-		 * creation.
-		 *
-		 * @param token the token to extract the method binding from
-		 * @return the corresponding method binding, or <code>null</code>
-		 */
-		private IBinding getMethodBinding(SemanticToken token) {
-			IBinding binding= null;
-			// work around: https://bugs.eclipse.org/bugs/show_bug.cgi?id=62605
-			ASTNode node= token.getNode();
-			ASTNode parent= node.getParent();
-			while (isTypePath(node, parent)) {
-				node= parent;
-				parent= parent.getParent();
-			}
-
-			if (parent != null && node.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY)
-				binding= ((ClassInstanceCreation) parent).resolveConstructorBinding();
-			else
-				binding= token.getBinding();
-			return binding;
-		}
-
-		/**
-		 * Returns <code>true</code> if the given child/parent nodes are valid
-		 * sub nodes of a <code>Type</code> ASTNode.
-		 * @param child the child node
-		 * @param parent the parent node
-		 * @return <code>true</code> if the nodes may be the sub nodes of a type node, false otherwise
-		 */
-		private boolean isTypePath(ASTNode child, ASTNode parent) {
-			if (parent instanceof Type) {
-				StructuralPropertyDescriptor location= child.getLocationInParent();
-				return location == ParameterizedType.TYPE_PROPERTY || location == SimpleType.NAME_PROPERTY;
-			} else if (parent instanceof QualifiedName) {
-				StructuralPropertyDescriptor location= child.getLocationInParent();
-				return location == QualifiedName.NAME_PROPERTY;
-			}
-			return false;
 		}
 	}
 
@@ -1230,7 +1188,7 @@ public class SemanticHighlightings {
 		 */
 		@Override
 		public boolean consumes(SemanticToken token) {
-			IBinding binding= getMethodBinding(token);
+			IBinding binding= getBinding(token);
 			if (binding != null) {
 				if (binding.isDeprecated())
 					return true;
@@ -1248,51 +1206,6 @@ public class SemanticHighlightings {
 						return declaringClass.isDeprecated();
 					}
 				}
-			}
-			return false;
-		}
-
-		/**
-		 * Extracts the method binding from the token's simple name. The method
-		 * binding is either the token's binding (if the parent of token is a
-		 * method call or declaration) or the constructor binding of a class
-		 * instance creation if the node is the type name of a class instance
-		 * creation.
-		 *
-		 * @param token the token to extract the method binding from
-		 * @return the corresponding method binding, or <code>null</code>
-		 */
-		private IBinding getMethodBinding(SemanticToken token) {
-			IBinding binding= null;
-			// work around: https://bugs.eclipse.org/bugs/show_bug.cgi?id=62605
-			ASTNode node= token.getNode();
-			ASTNode parent= node.getParent();
-			while (isTypePath(node, parent)) {
-				node= parent;
-				parent= parent.getParent();
-			}
-
-			if (parent != null && node.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY)
-				binding= ((ClassInstanceCreation) parent).resolveConstructorBinding();
-			else
-				binding= token.getBinding();
-			return binding;
-		}
-
-		/**
-		 * Returns <code>true</code> if the given child/parent nodes are valid
-		 * sub nodes of a <code>Type</code> ASTNode.
-		 * @param child the child node
-		 * @param parent the parent node
-		 * @return <code>true</code> if the nodes may be the sub nodes of a type node, false otherwise
-		 */
-		private boolean isTypePath(ASTNode child, ASTNode parent) {
-			if (parent instanceof Type) {
-				StructuralPropertyDescriptor location= child.getLocationInParent();
-				return location == ParameterizedType.TYPE_PROPERTY || location == SimpleType.NAME_PROPERTY;
-			} else if (parent instanceof QualifiedName) {
-				StructuralPropertyDescriptor location= child.getLocationInParent();
-				return location == QualifiedName.NAME_PROPERTY;
 			}
 			return false;
 		}
@@ -2191,9 +2104,9 @@ public class SemanticHighlightings {
 		String italickey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + METHOD + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX;
 		String enabledkey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + METHOD + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX;
 
-		String oldColorkey= PreferenceConstants.EDITOR_JAVA_METHOD_NAME_COLOR;
-		String oldBoldkey= PreferenceConstants.EDITOR_JAVA_METHOD_NAME_BOLD;
-		String oldItalickey= PreferenceConstants.EDITOR_JAVA_METHOD_NAME_ITALIC;
+		@SuppressWarnings("deprecation") String oldColorkey= PreferenceConstants.EDITOR_JAVA_METHOD_NAME_COLOR;
+		@SuppressWarnings("deprecation") String oldBoldkey= PreferenceConstants.EDITOR_JAVA_METHOD_NAME_BOLD;
+		@SuppressWarnings("deprecation") String oldItalickey= PreferenceConstants.EDITOR_JAVA_METHOD_NAME_ITALIC;
 
 		if (conditionalReset(store, oldColorkey, colorkey)
 				|| conditionalReset(store, oldBoldkey, boldkey)
@@ -2225,11 +2138,11 @@ public class SemanticHighlightings {
 		String underlineKey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + ANNOTATION + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_UNDERLINE_SUFFIX;
 		String enabledkey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + ANNOTATION + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX;
 
-		String oldColorkey= PreferenceConstants.EDITOR_JAVA_ANNOTATION_COLOR;
-		String oldBoldkey= PreferenceConstants.EDITOR_JAVA_ANNOTATION_BOLD;
-		String oldItalickey= PreferenceConstants.EDITOR_JAVA_ANNOTATION_ITALIC;
-		String oldStrikethroughKey= PreferenceConstants.EDITOR_JAVA_ANNOTATION_STRIKETHROUGH;
-		String oldUnderlineKey= PreferenceConstants.EDITOR_JAVA_ANNOTATION_UNDERLINE;
+		@SuppressWarnings("deprecation") String oldColorkey= PreferenceConstants.EDITOR_JAVA_ANNOTATION_COLOR;
+		@SuppressWarnings("deprecation") String oldBoldkey= PreferenceConstants.EDITOR_JAVA_ANNOTATION_BOLD;
+		@SuppressWarnings("deprecation") String oldItalickey= PreferenceConstants.EDITOR_JAVA_ANNOTATION_ITALIC;
+		@SuppressWarnings("deprecation") String oldStrikethroughKey= PreferenceConstants.EDITOR_JAVA_ANNOTATION_STRIKETHROUGH;
+		@SuppressWarnings("deprecation") String oldUnderlineKey= PreferenceConstants.EDITOR_JAVA_ANNOTATION_UNDERLINE;
 
 		if (conditionalReset(store, oldColorkey, colorkey)
 				|| conditionalReset(store, oldBoldkey, boldkey)
@@ -2284,6 +2197,23 @@ public class SemanticHighlightings {
 
 		if (oldValue != null && !oldValue.equals(newValue))
 			store.firePropertyChangeEvent(key, oldValue, newValue);
+	}
+
+	/**
+	 * Extracts the binding from the token's simple name.
+	 * Works around bug 62605 to return the correct constructor binding in a ClassInstanceCreation.
+	 *
+	 * @param token the token to extract the binding from
+	 * @return the token's binding, or <code>null</code>
+	 */
+	private static IBinding getBinding(SemanticToken token) {
+		ASTNode node= token.getNode();
+		ASTNode normalized= ASTNodes.getNormalizedNode(node);
+		if (normalized.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY) {
+			// work around: https://bugs.eclipse.org/bugs/show_bug.cgi?id=62605
+			return ((ClassInstanceCreation) normalized.getParent()).resolveConstructorBinding();
+		}
+		return token.getBinding();
 	}
 
 	/**

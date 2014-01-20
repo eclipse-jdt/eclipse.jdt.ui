@@ -391,6 +391,8 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 			name= ((SimpleType) selection).getName();
 		} else if (selection instanceof NameQualifiedType) {
 			name= ((NameQualifiedType) selection).getName();
+		} else if (selection instanceof QualifiedType) {
+			name= ((QualifiedType) selection).getName();
 		} else if (selection instanceof ParameterizedType) {
 			final ParameterizedType type= (ParameterizedType) selection;
 			final Type raw= type.getType();

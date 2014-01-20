@@ -470,6 +470,16 @@ public class ASTResolving {
 				}
 				return parentBinding;
 			}
+			case ASTNode.NAME_QUALIFIED_TYPE: {
+				ITypeBinding parentBinding= getPossibleTypeBinding(parent);
+				if (parentBinding == null || !parentBinding.isMember()) {
+					return null;
+				}
+				if (node.getLocationInParent() == NameQualifiedType.QUALIFIER_PROPERTY) {
+					return parentBinding.getDeclaringClass();
+				}
+				return parentBinding;
+			}
 			case ASTNode.VARIABLE_DECLARATION_STATEMENT:
 				return guessVariableType(((VariableDeclarationStatement) parent).fragments());
 			case ASTNode.FIELD_DECLARATION:
@@ -825,6 +835,11 @@ public class ASTResolving {
 		while (parent instanceof Type) {
 			if (parent instanceof QualifiedType) {
 				if (node.getLocationInParent() == QualifiedType.QUALIFIER_PROPERTY) {
+					return mask & (SimilarElementsRequestor.REF_TYPES);
+				}
+				mask&= SimilarElementsRequestor.REF_TYPES;
+			} else if (parent instanceof NameQualifiedType) {
+				if (node.getLocationInParent() == NameQualifiedType.QUALIFIER_PROPERTY) {
 					return mask & (SimilarElementsRequestor.REF_TYPES);
 				}
 				mask&= SimilarElementsRequestor.REF_TYPES;

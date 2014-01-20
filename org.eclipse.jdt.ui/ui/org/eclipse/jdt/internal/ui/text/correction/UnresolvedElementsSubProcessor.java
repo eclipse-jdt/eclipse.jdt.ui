@@ -850,7 +850,9 @@ public class UnresolvedElementsSubProcessor {
 				if (proposal instanceof AddImportCorrectionProposal)
 					proposal.setRelevance(relevance + elements.length + 2);
 
-				if (binding.isParameterizedType() && (node.getParent() instanceof SimpleType || node.getParent() instanceof NameQualifiedType) && !(node.getParent().getParent() instanceof Type)) {
+				if (binding.isParameterizedType()
+						&& (node.getParent() instanceof SimpleType || node.getParent() instanceof NameQualifiedType)
+						&& !(node.getParent().getParent() instanceof Type)) {
 					proposals.add(createTypeRefChangeFullProposal(cu, binding, node, relevance + 5));
 				}
 			}
