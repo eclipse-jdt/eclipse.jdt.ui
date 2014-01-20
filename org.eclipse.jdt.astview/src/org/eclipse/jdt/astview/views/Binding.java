@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -185,7 +185,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "MODIFIERS", Flags.toString(fBinding.getModifiers()), isRefType)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "BINARY NAME", typeBinding.getBinaryName(), true)); //$NON-NLS-1$
 					
-					res.add(new Binding(this, "TYPE DECLARATION", typeBinding.getTypeDeclaration(), isNonPrimitive)); //$NON-NLS-1$
+					res.add(new Binding(this, "TYPE DECLARATION", typeBinding.getTypeDeclaration(), true)); //$NON-NLS-1$
 					res.add(new Binding(this, "ERASURE", typeBinding.getErasure(), isNonPrimitive)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE PARAMETERS", typeBinding.getTypeParameters(), isType(typeKind, GENERIC))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE ARGUMENTS", typeBinding.getTypeArguments(), isType(typeKind, PARAMETRIZED))); //$NON-NLS-1$
@@ -326,7 +326,7 @@ public class Binding extends ASTAttribute {
 					break;
 				case IBinding.TYPE:
 					ITypeBinding typeBinding= (ITypeBinding) fBinding;
-					buf.append(typeBinding.getQualifiedName());
+					appendAnnotatedQualifiedName(buf, typeBinding);
 					break;
 				case IBinding.METHOD:
 					IMethodBinding methodBinding= (IMethodBinding) fBinding;
@@ -355,6 +355,16 @@ public class Binding extends ASTAttribute {
 		}
 		return buf.toString();
 
+	}
+
+	public static void appendAnnotatedQualifiedName(StringBuffer buf, ITypeBinding typeBinding) {
+		String debugString= typeBinding.toString(); // XXX: hack, but that's OK for a debugging tool...
+		if (debugString.indexOf('\n') == -1 || typeBinding.getTypeAnnotations().length != 0) {			
+			// one-liner || outermost type has type annotations
+			buf.append(debugString);
+		} else {
+			buf.append(typeBinding.getQualifiedName());
+		}
 	}
 
 	/* (non-Javadoc)
