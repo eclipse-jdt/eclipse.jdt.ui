@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,8 +81,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
 		}
 	}
 
-    private static Hashtable fExpectedChangesAllTests;
-    static {
+    private Hashtable fExpectedChangesAllTests;
+    {
         fExpectedChangesAllTests= new Hashtable();
         StringBuffer buf= null;
         buf= new StringBuffer();
@@ -729,7 +729,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * TestSuite that runs all the sample tests\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class AllTests {\n");
         buf.append("\n");
@@ -1010,7 +1010,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append(" * A Decorator for Tests. Use TestDecorator as the base class for defining new\n");
         buf.append(" * test decorators. Test decorator subclasses can be introduced to add behaviour\n");
         buf.append(" * before or after a test is run.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class TestDecorator extends Assert implements Test {\n");
         buf.append("    protected Test fTest;\n");
@@ -1065,7 +1065,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append(" * distinguishes between <i>failures</i> and <i>errors</i>. A failure is\n");
         buf.append(" * anticipated and checked for with assertions. Errors are unanticipated\n");
         buf.append(" * problems like an <code>ArrayIndexOutOfBoundsException</code>.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" * @see Test\n");
         buf.append(" */\n");
         buf.append("public class TestResult extends Object {\n");
@@ -1319,7 +1319,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * A fixture for testing the \"auto\" test suite feature.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class SuiteTest extends TestCase {\n");
         buf.append("    public static Test suite() {\n");
@@ -1430,7 +1430,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * A <em>Test</em> can be run and collect its results.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" * @see TestResult\n");
         buf.append(" */\n");
         buf.append("public interface Test {\n");
@@ -1463,7 +1463,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * A test case testing the testing framework.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class Success extends TestCase {\n");
         buf.append("\n");
@@ -1836,7 +1836,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * Some simple tests.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class SimpleTest extends TestCase {\n");
         buf.append("    public static void main(final String[] args) {\n");
@@ -1991,7 +1991,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append(" * \n");
         buf.append(" * This constructor creates a suite with all the methods starting with \"test\"\n");
         buf.append(" * that take no arguments.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" * @see Test\n");
         buf.append(" */\n");
         buf.append("public class TestSuite implements Test {\n");
@@ -2272,7 +2272,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append(" * }\n");
         buf.append(" * fail(&quot;Expected SpecialException&quot;);\n");
         buf.append(" * </pre>\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" * To use ExceptionTestCase, create a TestCase like:\n");
         buf.append(" * \n");
         buf.append(" * <pre>\n");
@@ -2651,7 +2651,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append(" * An implementation of a TestCollector that consults the class path. It\n");
         buf.append(" * considers all classes on the class path excluding classes in JARs. It leaves\n");
         buf.append(" * it up to subclasses to decide whether a class is a runnable Test.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" * @see TestCollector\n");
         buf.append(" */\n");
         buf.append("public abstract class ClassPathTestCollector implements TestCollector {\n");
@@ -2829,7 +2829,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * A <em>Protectable</em> can be run and can throw a Throwable.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" * @see TestResult\n");
         buf.append(" */\n");
         buf.append("public interface Protectable {\n");
@@ -2845,7 +2845,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * The common interface for simple Monies and MoneyBags\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public interface IMoney {\n");
         buf.append("    /**\n");
@@ -3294,7 +3294,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * A test case testing the extensions to the testing framework.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class ExtensionTest extends TestCase {\n");
         buf.append("    static class TornDown extends TestSetup {\n");
@@ -3390,7 +3390,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * TestSuite that runs all the JUnit tests\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class AllTests {\n");
         buf.append("\n");
@@ -3675,7 +3675,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * A sample test case, testing <code>java.util.Vector</code>.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class VectorTest extends TestCase {\n");
         buf.append("    public static void main(final String[] args) {\n");
@@ -3833,7 +3833,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * A test case testing the testing framework.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class TestCaseTest extends TestCase {\n");
         buf.append("\n");
@@ -4220,7 +4220,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * A test case testing the testing framework.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class Failure extends TestCase {\n");
         buf.append("    @Override\n");
@@ -4249,7 +4249,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * A Decorator that runs a test repeatedly.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class RepeatedTest extends TestDecorator {\n");
         buf.append("    private final int fTimesRepeat;\n");
@@ -4342,7 +4342,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * TestSuite that runs all the sample tests\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class AllTests {\n");
         buf.append("\n");
@@ -4440,7 +4440,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * TestSuite that runs all the sample tests\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class AllTests {\n");
         buf.append("\n");
@@ -4501,7 +4501,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append(" * CHF and 14 USD. Adding another 10 Swiss francs gives a bag with 22 CHF and 14\n");
         buf.append(" * USD. Due to the deferred exchange rate conversion we can later value a\n");
         buf.append(" * MoneyBag with different exchange rates.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" * A MoneyBag is represented as a list of Monies and provides different\n");
         buf.append(" * constructors to create a MoneyBag.\n");
         buf.append(" */\n");
@@ -4685,7 +4685,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append(" *     }\n");
         buf.append(" * }\n");
         buf.append(" * </pre>\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" * For each test implement a method which interacts with the fixture. Verify the\n");
         buf.append(" * expected results with assertions specified by calling <code>assertTrue</code>\n");
         buf.append(" * with a boolean.\n");
@@ -4765,7 +4765,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    }\n");
         buf.append("    /**\n");
         buf.append("     * Creates a default TestResult object\n");
-        buf.append("     * \n");
+        buf.append("     *\n");
         buf.append("     * @see TestResult\n");
         buf.append("     */\n");
         buf.append("    protected TestResult createResult() {\n");
@@ -4782,7 +4782,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    /**\n");
         buf.append("     * A convenience method to run this test, collecting the results with a\n");
         buf.append("     * default TestResult object.\n");
-        buf.append("     * \n");
+        buf.append("     *\n");
         buf.append("     * @see TestResult\n");
         buf.append("     */\n");
         buf.append("    public TestResult run() {\n");
@@ -5038,7 +5038,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * TestSuite that runs all the extension tests\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class AllTests {\n");
         buf.append("\n");
@@ -5082,7 +5082,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * A TestCase for testing the TestCaseClassLoader\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class TestCaseClassLoaderTest extends TestCase {\n");
         buf.append("\n");
@@ -5127,7 +5127,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("\n");
         buf.append("/**\n");
         buf.append(" * A simple Money.\n");
-        buf.append(" * \n");
+        buf.append(" *\n");
         buf.append(" */\n");
         buf.append("public class Money implements IMoney {\n");
         buf.append("\n");
@@ -5401,8 +5401,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
 //
 //		StringBuffer buf= new StringBuffer();
 //
-//		buf.append("    private static Hashtable fExpectedChangesAllTests;").append("\n");
-//		buf.append("    static {").append("\n");
+//		buf.append("    private Hashtable fExpectedChangesAllTests;").append("\n");
+//		buf.append("    {").append("\n");
 //		buf.append("        fExpectedChangesAllTests= new Hashtable();").append("\n");
 //		buf.append("        StringBuffer buf= null;").append("\n");
 //
