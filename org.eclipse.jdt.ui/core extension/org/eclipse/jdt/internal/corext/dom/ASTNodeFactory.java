@@ -21,17 +21,13 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
-import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -40,12 +36,9 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -308,66 +301,6 @@ public class ASTNodeFactory {
 		result.setRightOperand(operands.get(1));
 		result.extendedOperands().addAll(operands.subList(2, operands.size()));
 		return result;
-	}
-
-	public static Expression newAnnotationValue(AST ast, Object value, ImportRewrite importRewrite, ImportRewriteContext context) {
-		if (value instanceof Boolean) {
-			return ast.newBooleanLiteral(((Boolean) value).booleanValue());
-			
-		} else if (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long
-				|| value instanceof Float || value instanceof Double) {
-			return ast.newNumberLiteral(value.toString());
-			
-		} else if (value instanceof Character) {
-			CharacterLiteral result= ast.newCharacterLiteral();
-			result.setCharValue(((Character) value).charValue());
-			return result;
-			
-		} else if (value instanceof ITypeBinding) {
-			TypeLiteral result= ast.newTypeLiteral();
-			result.setType(importRewrite.addImport((ITypeBinding) value, ast, context));
-			return result;
-			
-		} else if (value instanceof String) {
-			StringLiteral result= ast.newStringLiteral();
-			result.setLiteralValue((String) value);
-			return result;
-			
-		} else if (value instanceof IVariableBinding) {
-			IVariableBinding variable= (IVariableBinding) value;
-			
-			FieldAccess result= ast.newFieldAccess();
-			result.setName(ast.newSimpleName(variable.getName()));
-			Type type= importRewrite.addImport(variable.getType(), ast, context);
-			Name name;
-			if (type instanceof SimpleType) {
-				SimpleType simpleType= (SimpleType) type;
-				name= simpleType.getName();
-				// pay ransom to allow reuse of 'name':
-				simpleType.setName(ast.newSimpleName("a")); //$NON-NLS-1$
-			} else {
-				name= ast.newName(ASTNodes.asString(type));
-			}
-			result.setExpression(name);
-			return result;
-			
-		} else if (value instanceof IAnnotationBinding) {
-			return importRewrite.addAnnotation((IAnnotationBinding) value, ast, context);
-			
-		} else if (value instanceof Object[]) {
-			Object[] values= (Object[]) value;
-			if (values.length == 1)
-				return newAnnotationValue(ast, values[0], importRewrite, context);
-			
-			ArrayInitializer initializer= ast.newArrayInitializer();
-			List<Expression> expressions= initializer.expressions();
-			for (Object val : values)
-				expressions.add(newAnnotationValue(ast, val, importRewrite, context));
-			return initializer;
-			
-		} else {
-			return null;
-		}
 	}
 
 	public static Type newCreationType(AST ast, ITypeBinding typeBinding, ImportRewrite importRewrite, ImportRewriteContext importContext) {
