@@ -619,6 +619,15 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.SwitchOnStringsNotBelow17:
 				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_1_7);
 				break;
+			case IProblem.ExplicitThisParameterNotBelow18:
+			case IProblem.DefaultMethodNotBelow18:
+			case IProblem.StaticInterfaceMethodNotBelow18:
+			case IProblem.LambdaExpressionNotBelow18:
+			case IProblem.MethodReferenceNotBelow18:
+			case IProblem.ConstructorReferenceNotBelow18:
+			case IProblem.IntersectionCastNotBelow18:
+				ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_1_8);
+				break;
 			case IProblem.NonGenericType:
 				TypeArgumentMismatchSubProcessor.removeMismatchedArguments(context, problem, proposals);
 				break;
