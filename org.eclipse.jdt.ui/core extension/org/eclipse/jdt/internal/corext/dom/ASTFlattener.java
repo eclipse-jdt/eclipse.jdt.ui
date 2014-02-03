@@ -1684,7 +1684,7 @@ public class ASTFlattener extends GenericVisitor {
 	 */
 	@Override
 	public boolean visit(TypeParameter node) {
-		printAnnotationsList(node.annotations());
+		printModifiers(node.modifiers());
 		node.getName().accept(this);
 		if (!node.typeBounds().isEmpty()) {
 			this.fBuffer.append(" extends ");//$NON-NLS-1$
