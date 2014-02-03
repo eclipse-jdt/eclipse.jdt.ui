@@ -266,6 +266,13 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NullableFieldReference:
 			case IProblem.ConflictingNullAnnotations:
 			case IProblem.ConflictingInheritedNullAnnotations:
+			case IProblem.ExplicitThisParameterNotBelow18:
+			case IProblem.DefaultMethodNotBelow18:
+			case IProblem.StaticInterfaceMethodNotBelow18:
+			case IProblem.LambdaExpressionNotBelow18:
+			case IProblem.MethodReferenceNotBelow18:
+			case IProblem.ConstructorReferenceNotBelow18:
+			case IProblem.IntersectionCastNotBelow18:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId);
