@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.jdt.astview.feature"
       label="AST View"
-      version="1.1.8.qualifier"
+      version="1.1.100.qualifier"
       provider-name="Eclipse.org">
    <install-handler/>
 
