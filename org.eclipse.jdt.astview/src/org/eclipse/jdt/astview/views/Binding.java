@@ -20,7 +20,6 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.astview.ASTViewPlugin;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
@@ -31,6 +30,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
@@ -100,7 +100,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "IS ENUM CONSTANT", variableBinding.isEnumConstant(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS PARAMETER", variableBinding.isParameter(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "VARIABLE ID", variableBinding.getVariableId(), true)); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "MODIFIERS", Flags.toString(fBinding.getModifiers()), true)); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "MODIFIERS", getModifiersString(fBinding.getModifiers(), false), true)); //$NON-NLS-1$
 					res.add(new Binding(this, "TYPE", variableBinding.getType(), true)); //$NON-NLS-1$
 					res.add(new Binding(this, "DECLARING CLASS", variableBinding.getDeclaringClass(), true)); //$NON-NLS-1$
 					res.add(new Binding(this, "DECLARING METHOD", variableBinding.getDeclaringMethod(), true)); //$NON-NLS-1$
@@ -182,7 +182,7 @@ public class Binding extends ASTAttribute {
 					res.add(new Binding(this, "PACKAGE", typeBinding.getPackage(), isRefType)); //$NON-NLS-1$
 					res.add(new Binding(this, "DECLARING CLASS", typeBinding.getDeclaringClass(), isType(typeKind, REF_TYPE | VARIABLE_TYPE | CAPTURE_TYPE))); //$NON-NLS-1$
 					res.add(new Binding(this, "DECLARING METHOD", typeBinding.getDeclaringMethod(), isType(typeKind, REF_TYPE | VARIABLE_TYPE | CAPTURE_TYPE))); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "MODIFIERS", Flags.toString(fBinding.getModifiers()), isRefType)); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "MODIFIERS", getModifiersString(fBinding.getModifiers(), false), isRefType)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "BINARY NAME", typeBinding.getBinaryName(), true)); //$NON-NLS-1$
 					
 					res.add(new Binding(this, "TYPE DECLARATION", typeBinding.getTypeDeclaration(), true)); //$NON-NLS-1$
@@ -211,7 +211,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "IS DEFAULT CONSTRUCTOR", methodBinding.isDefaultConstructor(), true)); //$NON-NLS-1$
 					res.add(new Binding(this, "DECLARING CLASS", methodBinding.getDeclaringClass(), true)); //$NON-NLS-1$
 					res.add(new Binding(this, "RETURN TYPE", methodBinding.getReturnType(), true)); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "MODIFIERS", Flags.toString(fBinding.getModifiers()), true)); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "MODIFIERS", getModifiersString(fBinding.getModifiers(), true), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "PARAMETER TYPES", methodBinding.getParameterTypes(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS VARARGS", methodBinding.isVarargs(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "EXCEPTION TYPES", methodBinding.getExceptionTypes(), true)); //$NON-NLS-1$
@@ -493,5 +493,44 @@ public class Binding extends ASTAttribute {
 		CharacterLiteral charLiteral= AST.newAST(ASTView.JLS_LATEST).newCharacterLiteral();
 		charLiteral.setCharValue(charValue);
 		return charLiteral.getEscapedValue();
+	}
+	
+	private static StringBuffer getModifiersString(int flags, boolean isMethod) {
+		StringBuffer sb = new StringBuffer().append("0x").append(Integer.toHexString(flags)).append(" (");
+		int prologLen= sb.length();
+		int rest= flags;
+		
+		rest&= ~ appendFlag(sb, flags, Modifier.PUBLIC, "public ");
+		rest&= ~ appendFlag(sb, flags, Modifier.PRIVATE, "private ");
+		rest&= ~ appendFlag(sb, flags, Modifier.PROTECTED, "protected ");
+		rest&= ~ appendFlag(sb, flags, Modifier.STATIC, "static ");
+		rest&= ~ appendFlag(sb, flags, Modifier.FINAL, "final ");
+		if (isMethod) {
+			rest&= ~ appendFlag(sb, flags, Modifier.SYNCHRONIZED, "synchronized ");
+			rest&= ~ appendFlag(sb, flags, Modifier.DEFAULT, "default ");
+		} else {
+			rest&= ~ appendFlag(sb, flags, Modifier.VOLATILE, "volatile ");
+			rest&= ~ appendFlag(sb, flags, Modifier.TRANSIENT, "transient ");
+		}
+		rest&= ~ appendFlag(sb, flags, Modifier.NATIVE, "native ");
+		rest&= ~ appendFlag(sb, flags, Modifier.ABSTRACT, "abstract ");
+		rest&= ~ appendFlag(sb, flags, Modifier.STRICTFP, "strictfp ");
+		
+		if (rest != 0)
+			sb.append("unknown:0x").append(Integer.toHexString(rest)).append(" ");
+		int len = sb.length();
+		if (len != prologLen)
+			sb.setLength(len - 1);
+		sb.append(")");
+		return sb;
+	}
+	
+	private static int appendFlag(StringBuffer sb, int flags, int flag, String name) {
+		if ((flags & flag) != 0) {
+			sb.append(name);
+			return flag;
+		} else {
+			return 0;
+		}
 	}
 }
