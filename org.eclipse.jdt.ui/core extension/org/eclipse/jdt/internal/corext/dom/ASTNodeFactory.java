@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 
 /**
  * JDT-UI-internal helper methods to create new {@link ASTNode}s.
- * Complements <code>AST#new*(..)</code>.
+ * Complements <code>AST#new*(..)</code> and <code>ImportRewrite#add*(..)</code>.
  * 
  * @see JDTUIHelperClasses
  */
