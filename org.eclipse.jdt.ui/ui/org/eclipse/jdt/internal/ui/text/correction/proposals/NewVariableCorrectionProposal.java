@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -225,7 +225,6 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
 		ImportRewrite imports= createImportRewrite((CompilationUnit) decl.getRoot());
-		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(decl, imports);
 
 		SimpleName[] names= getAllReferences(body);
 		ASTNode dominant= getDominantNode(names);
@@ -236,6 +235,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		}
 
 		SimpleName node= names[0];
+		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, imports);
 
 		if (isAssigned(dominantStatement, node)) {
 			// x = 1; -> int x = 1;
