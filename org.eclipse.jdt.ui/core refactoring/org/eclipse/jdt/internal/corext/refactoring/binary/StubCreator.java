@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 IBM Corporation and others.
+ * Copyright (c) 2006, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -134,8 +134,12 @@ public class StubCreator {
 	}
 
 	private void appendAnnotation(IAnnotation annotation) throws JavaModelException {
+		String name= annotation.getElementName();
+		if (!fStubInvisible && name.startsWith("sun.")) //$NON-NLS-1$
+			return; // skip Sun-internal annotations 
+		
 		fBuffer.append('@');
-		fBuffer.append(annotation.getElementName());
+		fBuffer.append(name);
 		fBuffer.append('(');
 		
 		IMemberValuePair[] memberValuePairs= annotation.getMemberValuePairs();
