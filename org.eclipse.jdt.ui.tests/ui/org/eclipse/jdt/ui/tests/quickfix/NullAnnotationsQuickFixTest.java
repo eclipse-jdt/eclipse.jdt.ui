@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 GK Software AG and others.
+ * Copyright (c) 2012, 2014 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     Stephan Herrmann - initial API and implementation
@@ -17,6 +21,8 @@ import java.util.Hashtable;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.osgi.framework.Bundle;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -92,7 +98,9 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		fJProject1= ProjectTestSetup.getProject();
 
 		if (this.ANNOTATION_JAR_PATH == null) {
-			File bundleFile= FileLocator.getBundleFile(Platform.getBundle("org.eclipse.jdt.annotation"));
+			String version= "[1.1.0,2.0.0)"; // tests run at 1.5, need the "old" null annotations
+			Bundle[] bundles= Platform.getBundles("org.eclipse.jdt.annotation", version);
+			File bundleFile= FileLocator.getBundleFile(bundles[0]);
 			if (bundleFile.isDirectory())
 				this.ANNOTATION_JAR_PATH= bundleFile.getPath() + "/bin";
 			else
@@ -1458,8 +1466,8 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3); // includes "add @SW"
-		
+		assertNumberOfProposals(proposals, 2);
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
 		assertEqualString(proposal.getDisplayString(), "Change return type of 'foo(..)' to '@Nullable'");
@@ -1499,69 +1507,75 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	// remove @Nullable without adding redundant @NonNull (due to @NonNullByDefault)
 	// variant: package-level default
 	public void testChangeReturn5() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String suppressOptionalErrors= this.fJProject1.getOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, true);
+		try {
+			this.fJProject1.setOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, JavaCore.ENABLED);
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
-		StringBuffer buf= new StringBuffer();
-		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
-		buf.append("package test1;\n");
-		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+			buf.append("package test1;\n");
+			pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    @Nullable Object bar() {\n");
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import org.eclipse.jdt.annotation.*;\n");
+			buf.append("public class E {\n");
+			buf.append("    @Nullable Object bar() {\n");
+			buf.append("        return new Object();\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public Object foo(E e) {\n"); // non-null by default
-		buf.append("        return e.bar();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class E2 {\n");
+			buf.append("    public Object foo(E e) {\n"); // non-null by default
+			buf.append("        return e.bar();\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 
-		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3); // includes "add @SW"
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList proposals= collectCorrections(cu, astRoot);
+			assertNumberOfProposals(proposals, 3); // includes "add @SW"
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+			CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
-		assertEqualString(proposal.getDisplayString(), "Change return type of 'foo(..)' to '@Nullable'");
+			assertEqualString(proposal.getDisplayString(), "Change return type of 'foo(..)' to '@Nullable'");
 
-		String preview= getPreviewContent(proposal);
+			String preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
-		buf.append("\n");
-		buf.append("public class E2 {\n");
-		buf.append("    public @Nullable Object foo(E e) {\n");
-		buf.append("        return e.bar();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
+			buf.append("\n");
+			buf.append("public class E2 {\n");
+			buf.append("    public @Nullable Object foo(E e) {\n");
+			buf.append("        return e.bar();\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertEqualString(preview, buf.toString());
 
-		proposal= (CUCorrectionProposal)proposals.get(1);
+			proposal= (CUCorrectionProposal)proposals.get(1);
 
-		assertEqualString(proposal.getDisplayString(), "Change return type of 'bar(..)' to '@NonNull'");
+			assertEqualString(proposal.getDisplayString(), "Change return type of 'bar(..)' to '@NonNull'");
 
-		preview= getPreviewContent(proposal);
+			preview= getPreviewContent(proposal);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import org.eclipse.jdt.annotation.*;\n");
-		buf.append("public class E {\n");
-		buf.append("    Object bar() {\n"); // here's the rub: don't add redundant @NonNull, just remove @Nullable
-		buf.append("        return new Object();\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		assertEqualString(preview, buf.toString());
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import org.eclipse.jdt.annotation.*;\n");
+			buf.append("public class E {\n");
+			buf.append("    Object bar() {\n"); // here's the rub: don't add redundant @NonNull, just remove @Nullable
+			buf.append("        return new Object();\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertEqualString(preview, buf.toString());
+		} finally {
+			this.fJProject1.setOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, suppressOptionalErrors);
+		}
 	}
 
 	// https://bugs.eclipse.org/378724 - Null annotations are extremely hard to use in an existing project
@@ -1598,7 +1612,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3); // includes "add @SW"
+		assertNumberOfProposals(proposals, 2);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
