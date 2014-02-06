@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ public class NewLinesTabPage extends FormatterTabPage {
 	"  Listener fListener= new Listener() {" + //$NON-NLS-1$
 	"  };\n" + //$NON-NLS-1$
 	"  @Deprecated @Override " + //$NON-NLS-1$
-	"  public void\nbar\n(@SuppressWarnings(\"unused\")\n int i)\n {\n@SuppressWarnings(\"unused\") int k;\n}\n" + //$NON-NLS-1$
+	"  public void\nbar\n(@SuppressWarnings(\"unused\")\n int i)\n {\n@SuppressWarnings(\"unused\") final @Positive int k;\n}\n" + //$NON-NLS-1$
 	"  void foo() {" + //$NON-NLS-1$
 	"    ;;" + //$NON-NLS-1$
 	"    label:" + //$NON-NLS-1$
@@ -83,8 +83,9 @@ public class NewLinesTabPage extends FormatterTabPage {
 		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_types, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_TYPE, DO_NOT_INSERT_INSERT);
 		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_fields, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_FIELD, DO_NOT_INSERT_INSERT);
 		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_methods, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD, DO_NOT_INSERT_INSERT);
-		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_paramters, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PARAMETER, DO_NOT_INSERT_INSERT);
 		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_local_variables, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE, DO_NOT_INSERT_INSERT);
+		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_paramters, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PARAMETER, DO_NOT_INSERT_INSERT);
+		createPref(annotationsGroup, numColumns, FormatterMessages.NewLinesTabPage_annotations_group_type_annotations, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_TYPE_ANNOTATION, DO_NOT_INSERT_INSERT);
 	}
 
 	@Override

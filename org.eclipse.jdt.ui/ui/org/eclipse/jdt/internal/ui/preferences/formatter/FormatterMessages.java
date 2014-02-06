@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -461,6 +461,7 @@ final class FormatterMessages extends NLS {
 	public static String NewLinesTabPage_annotations_group_paramters;
 	public static String NewLinesTabPage_annotations_group_packages;
 	public static String NewLinesTabPage_annotations_group_types;
+	public static String NewLinesTabPage_annotations_group_type_annotations;
 	public static String NewLinesTabPage_annotations_group_fields;
 	public static String NewLinesTabPage_annotations_group_methods;
 	public static String NewLinesTabPage_annotations_group_title;
