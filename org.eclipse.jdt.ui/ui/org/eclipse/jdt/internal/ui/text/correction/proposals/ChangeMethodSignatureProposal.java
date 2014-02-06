@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -381,7 +381,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			} else if (curr instanceof InsertDescription) {
 				InsertDescription desc= (InsertDescription) curr;
 				String type= imports.addImport(desc.type, context);
-				ASTNode newNode= ASTNodeFactory.newType(ast, type);
+				ASTNode newNode= imports.addImport(desc.type, ast, context);
 
 				listRewrite.insertAt(newNode, i, null);
 
@@ -416,7 +416,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				Type oldNode= exceptions.get(k);
 
 				String type= imports.addImport(desc.type, context);
-				ASTNode newNode= ASTNodeFactory.newType(ast, type);
+				ASTNode newNode= imports.addImport(desc.type, ast, context);
 
 				listRewrite.replace(oldNode, newNode, null);
 				String key= getExceptionTypeGroupId(i);

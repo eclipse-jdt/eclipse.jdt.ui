@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,6 +83,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(ReturnTypeQuickFixTest.suite());
 		suite.addTest(LocalCorrectionsQuickFixTest.suite());
 		suite.addTest(LocalCorrectionsQuickFixTest17.suite());
+		suite.addTest(LocalCorrectionsQuickFixTest18.suite());
 		suite.addTest(TypeMismatchQuickFixTests.suite());
 		suite.addTest(ReorgQuickFixTest.suite());
 		suite.addTest(ModifierCorrectionsQuickFixTest.suite());
