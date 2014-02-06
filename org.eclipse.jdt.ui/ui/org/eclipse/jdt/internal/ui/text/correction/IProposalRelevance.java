@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 IBM Corporation and others.
+ * Copyright (c) 2012, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -273,6 +273,8 @@ public interface IProposalRelevance {
 	public static final int NEW_TYPE= 0;
 	public static final int SIMILAR_VARIABLE_PROPOSAL= 0;
 	public static final int EXTRACT_LOCAL_ALL_ZERO_SELECTION= 0;
+	public static final int CHANGE_LAMBDA_BODY_TO_BLOCK= 0;
+	public static final int CHANGE_LAMBDA_BODY_TO_EXPRESSION= 0;
 
 	public static final int EXTRACT_LOCAL_ZERO_SELECTION= -1;
 

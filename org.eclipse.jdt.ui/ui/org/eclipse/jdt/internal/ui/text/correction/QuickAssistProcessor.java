@@ -86,13 +86,17 @@ import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
@@ -222,6 +226,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getConvertAnonymousToNestedProposal(context, coveringNode, null)
 				|| getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, null)
 				|| getConvertLambdaToAnonymousClassCreationsProposals(context, coveringNode, null)
+				|| getChangeLambdaBodyToBlockProposal(context, coveringNode, null)
+				|| getChangeLambdaBodyToExpressionProposal(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
 				|| getMakeVariableDeclarationFinalProposals(context, null)
 				|| getMissingCaseStatementProposals(context, coveringNode, null)
@@ -267,6 +273,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertAnonymousToNestedProposal(context, coveringNode, resultingCollections);
 				getConvertAnonymousClassCreationsToLambdaProposals(context, coveringNode, resultingCollections);
 				getConvertLambdaToAnonymousClassCreationsProposals(context, coveringNode, resultingCollections);
+				getChangeLambdaBodyToBlockProposal(context, coveringNode, resultingCollections);
+				getChangeLambdaBodyToExpressionProposal(context, coveringNode, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getConvertEnhancedForLoopProposal(context, coveringNode, resultingCollections);
@@ -572,6 +580,116 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new LambdaExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_ANONYMOUS_CLASS_CREATION, image, context);
 		resultingCollections.add(proposal);
 		return true;
+	}
+
+	private static boolean getChangeLambdaBodyToBlockProposal(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+		LambdaExpression lambda;
+		if (covering instanceof LambdaExpression) {
+			lambda= (LambdaExpression) covering;
+		} else if (covering.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
+			lambda= (LambdaExpression) covering.getParent();
+		} else {
+			return false;
+		}
+
+		if (!(lambda.getBody() instanceof Expression))
+			return false;
+		if (lambda.resolveMethodBinding() == null)
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		AST ast= lambda.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+
+		Statement statementInBlockBody;
+		Expression bodyExpr= (Expression) rewrite.createMoveTarget(lambda.getBody());
+		if (ast.resolveWellKnownType("void").isEqualTo(lambda.resolveMethodBinding().getReturnType())) { //$NON-NLS-1$
+			ExpressionStatement expressionStatement= ast.newExpressionStatement(bodyExpr);
+			statementInBlockBody= expressionStatement;
+		} else {
+			ReturnStatement returnStatement= ast.newReturnStatement();
+			returnStatement.setExpression(bodyExpr);
+			statementInBlockBody= returnStatement;
+		}
+		Block blockBody= ast.newBlock();
+		blockBody.statements().add(statementInBlockBody);
+
+		rewrite.set(lambda, LambdaExpression.BODY_PROPERTY, blockBody, null);
+
+		// add proposal
+		String label= CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_block;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CHANGE_LAMBDA_BODY_TO_BLOCK, image);
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private static boolean getChangeLambdaBodyToExpressionProposal(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+		LambdaExpression lambda;
+		if (covering instanceof LambdaExpression) {
+			lambda= (LambdaExpression) covering;
+		} else if (covering.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
+			lambda= (LambdaExpression) covering.getParent();
+		} else {
+			return false;
+		}
+
+		if (!(lambda.getBody() instanceof Block))
+			return false;
+
+		Block lambdaBody= (Block) lambda.getBody();
+		if (lambdaBody.statements().size() != 1)
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		AST ast= lambda.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+
+		Expression exprBody;
+		Statement singleStatement= (Statement) lambdaBody.statements().get(0);
+		if (singleStatement instanceof ReturnStatement) {
+			Expression returnExpr= ((ReturnStatement) singleStatement).getExpression();
+			if (returnExpr == null)
+				return false;
+			exprBody= (Expression) rewrite.createMoveTarget(returnExpr);
+		} else if (singleStatement instanceof ExpressionStatement) {
+			Expression expression= ((ExpressionStatement) singleStatement).getExpression();
+			if (isValidExpressionBody(expression)) {
+				exprBody= (Expression) rewrite.createMoveTarget(expression);
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+
+		rewrite.set(lambda, LambdaExpression.BODY_PROPERTY, exprBody, null);
+
+		// add proposal
+		String label= CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CHANGE_LAMBDA_BODY_TO_EXPRESSION, image);
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private static boolean isValidExpressionBody(Expression expression) {
+		boolean isValidExpressionBody= expression instanceof Assignment
+				|| expression instanceof ClassInstanceCreation
+				|| expression instanceof MethodInvocation
+				|| expression instanceof PostfixExpression
+				|| expression instanceof SuperMethodInvocation;
+		if (expression instanceof PrefixExpression) {
+			Operator operator= ((PrefixExpression) expression).getOperator();
+			if (operator == Operator.INCREMENT || operator == Operator.DECREMENT) {
+				isValidExpressionBody= true;
+			}
+		}
+		return isValidExpressionBody;
 	}
 
 	public static boolean getInferDiamondArgumentsProposal(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
