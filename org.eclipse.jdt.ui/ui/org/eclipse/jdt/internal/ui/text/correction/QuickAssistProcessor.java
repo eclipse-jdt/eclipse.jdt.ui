@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -643,31 +643,32 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (lambdaBody.statements().size() != 1)
 			return false;
 
-		if (resultingCollections == null)
-			return true;
-
-		AST ast= lambda.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-
 		Expression exprBody;
 		Statement singleStatement= (Statement) lambdaBody.statements().get(0);
 		if (singleStatement instanceof ReturnStatement) {
 			Expression returnExpr= ((ReturnStatement) singleStatement).getExpression();
 			if (returnExpr == null)
 				return false;
-			exprBody= (Expression) rewrite.createMoveTarget(returnExpr);
+			exprBody= returnExpr;
 		} else if (singleStatement instanceof ExpressionStatement) {
 			Expression expression= ((ExpressionStatement) singleStatement).getExpression();
 			if (isValidExpressionBody(expression)) {
-				exprBody= (Expression) rewrite.createMoveTarget(expression);
+				exprBody= expression;
 			} else {
 				return false;
 			}
 		} else {
 			return false;
 		}
-
-		rewrite.set(lambda, LambdaExpression.BODY_PROPERTY, exprBody, null);
+		
+		if (resultingCollections == null)
+			return true;
+		
+		AST ast= lambda.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		
+		Expression movedBody= (Expression) rewrite.createMoveTarget(exprBody);
+		rewrite.set(lambda, LambdaExpression.BODY_PROPERTY, movedBody, null);
 
 		// add proposal
 		String label= CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression;
