@@ -173,7 +173,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 			ITypeBinding declaringClass= methodBinding.getDeclaringClass();
 			if (declaringClass != null && !declaringClass.isLocal()) {
 				if (new ScopeAnalyzer(fASTRoot).isDeclaredInScope(methodBinding, simpleName, ScopeAnalyzer.METHODS | ScopeAnalyzer.CHECK_VISIBILITY))
-						return;
+					return;
 				fStaticImports.add(simpleName);
 			}
 		}
@@ -305,6 +305,14 @@ public class ImportReferencesCollector extends GenericVisitor {
 		evalQualifyingExpression(node.getExpression(), node.getName());
 		doVisitChildren(node.typeArguments());
 		doVisitChildren(node.arguments());
+		return false;
+	}
+
+
+	@Override
+	public boolean visit(ExpressionMethodReference node) {
+		evalQualifyingExpression(node.getExpression(), node.getName());
+		doVisitChildren(node.typeArguments());
 		return false;
 	}
 

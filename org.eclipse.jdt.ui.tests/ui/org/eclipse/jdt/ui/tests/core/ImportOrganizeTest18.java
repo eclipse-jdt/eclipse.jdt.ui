@@ -336,4 +336,52 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
+	public void testMethodReferenceImports_bug424227() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack0= sourceFolder.createPackageFragment("p0", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p0;\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("public interface FI {\n");
+		buf.append("    FI foo();\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("FI.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package p0;\n");
+		buf.append("public class X {\n");
+		buf.append("    public static FI staticMethodX() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("X.java", buf.toString(), false, null);
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("p1", false, null);
+		buf= new StringBuffer();
+		buf.append("package p1;\n");
+		buf.append("\n");
+		buf.append("public class C1 {\n");
+		buf.append("    FI fi = X::staticMethodX;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf.toString(), false, null);
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("MethodReferenceImports_bug424227", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package p1;\n");
+		buf.append("\n");
+		buf.append("import p0.FI;\n");
+		buf.append("import p0.X;\n");
+		buf.append("\n");
+		buf.append("public class C1 {\n");
+		buf.append("    FI fi = X::staticMethodX;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
 }
