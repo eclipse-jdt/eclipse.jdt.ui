@@ -150,6 +150,6 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		buf.append("@interface Marker { }\n");
 		String expected2= buf.toString();
 
-		assertExpectedExistInProposals(proposals, new String[] { /*expected1,*/expected2 });
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 }
