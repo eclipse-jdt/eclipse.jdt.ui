@@ -137,4 +137,8 @@ public class RenameTests18 extends RefactoringTest {
 	public void testLambda2() throws Exception {
 		helper2("renamedIi", true);
 	}
+	
+	public void testLambda3() throws Exception {
+		helper2("x_renamed", true);
+	}
 }
