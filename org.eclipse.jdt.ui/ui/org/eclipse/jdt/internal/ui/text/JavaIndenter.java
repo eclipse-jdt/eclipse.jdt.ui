@@ -1576,6 +1576,8 @@ public final class JavaIndenter {
 				int storedToken= fToken;
 				nextToken();
 				switch (fToken) {
+					case Symbols.TokenLESSTHAN:
+						return true;
 					case Symbols.TokenIDENT:
 						boolean isGenericStarter;
 						try {

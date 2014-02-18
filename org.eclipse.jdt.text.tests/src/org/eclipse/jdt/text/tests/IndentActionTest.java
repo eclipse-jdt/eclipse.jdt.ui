@@ -170,4 +170,9 @@ public class IndentActionTest extends TestCase {
 		selectAll();
 		assertIndentResult();
 	}
+
+	public void testBug428384() throws Exception {
+		selectAll();
+		assertIndentResult();
+	}
 }
