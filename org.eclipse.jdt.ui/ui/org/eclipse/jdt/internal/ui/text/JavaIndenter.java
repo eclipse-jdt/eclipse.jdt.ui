@@ -1593,7 +1593,7 @@ public final class JavaIndenter {
 						if (skipScope(Symbols.TokenLESSTHAN, Symbols.TokenGREATERTHAN))
 							return true;
 				}
-				// <> are harder to detect - restore the position if we fail
+				// <...> are harder to detect - restore the position if we fail
 				fPosition= storedPosition;
 				fToken= storedToken;
 				return false;
