@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -402,9 +402,18 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		BodyDeclaration bodyDeclaration= bodyDeclarations.get(0);
 		if (!(bodyDeclaration instanceof MethodDeclaration))
 			return false;
-		
+
+		MethodDeclaration methodDecl= (MethodDeclaration) bodyDeclaration;
+		IMethodBinding methodBinding= methodDecl.resolveBinding();
+
+		if (methodBinding == null)
+			return false;
+		// generic lambda expressions are not allowed
+		if (methodBinding.isGenericMethod())
+			return false;
+
 		// lambda cannot refer to 'this'/'super' literals
-		if (SuperThisReferenceFinder.hasReference((MethodDeclaration) bodyDeclaration))
+		if (SuperThisReferenceFinder.hasReference(methodDecl))
 			return false;
 		
 		if (!isInTargetTypeContext(node))

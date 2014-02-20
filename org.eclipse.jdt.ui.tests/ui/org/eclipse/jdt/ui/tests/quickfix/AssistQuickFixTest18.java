@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -463,6 +463,33 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		String expected1= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertToLambda13() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface J {\n");
+		buf.append("    <M> J run(M x);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class Test {\n");
+		buf.append("    J j = new J() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public <M> J run(M x) {\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("    };    \n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("J()"); // generic lambda not allowed
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
 	}
 
 	public void testConvertToAnonymousClassCreation1() throws Exception {
