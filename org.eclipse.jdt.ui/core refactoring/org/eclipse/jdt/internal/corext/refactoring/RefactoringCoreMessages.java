@@ -1421,6 +1421,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String PromoteTempToFieldRefactoring_initialize_method;
 
+	public static String PromoteTempToFieldRefactoring_interface_methods;
+
 	public static String PromoteTempToFieldRefactoring_method_parameters;
 
 	public static String PromoteTempToFieldRefactoring_name;

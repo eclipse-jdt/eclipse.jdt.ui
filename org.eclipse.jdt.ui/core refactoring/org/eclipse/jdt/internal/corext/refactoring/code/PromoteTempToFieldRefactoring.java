@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -103,6 +103,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
@@ -334,6 +335,10 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		if (isTempAnExceptionInCatchBlock())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.PromoteTempToFieldRefactoring_exceptions);
 
+		ASTNode declaringType= ASTResolving.findParentType(fTempDeclarationNode);
+		if (declaringType instanceof TypeDeclaration && ((TypeDeclaration) declaringType).isInterface())
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.PromoteTempToFieldRefactoring_interface_methods);
+		
 		result.merge(checkTempTypeForLocalTypeUsage());
 		if (result.hasFatalError())
 		    return result;
