@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ public class ExtractConstantTests extends RefactoringTest {
 	private static final String REFACTORING_PATH = "ExtractConstant/";
 
 	private static final boolean BUG_86113_ImportRewrite= true;
+	private static final boolean BUG_405780= true; //XXX: [1.8][compiler] Bad syntax error 'insert ":: IdentifierOrNew"' for missing semicolon
 
 	private Object fCompactPref;
 	private boolean fAddComments;
@@ -306,6 +307,8 @@ public class ExtractConstantTests extends RefactoringTest {
 	}
 
 	public void test34() throws Exception { // syntax error
+		if (BUG_405780)
+			return;
 		helper1(7, 20, 7, 35, true, false, "STRING", "STRING");
 	}
 
