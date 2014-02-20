@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,10 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.prefs.BackingStoreException;
 
 import org.eclipse.swt.widgets.Display;
@@ -25,6 +28,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
@@ -267,6 +271,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	private IPropertyChangeListener fThemeListener;
 
+	private BundleContext fBundleContext;
+
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
 	}
@@ -358,6 +364,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		fBundleContext= context;
 
 		WorkingCopyOwner.setPrimaryBufferProvider(new WorkingCopyOwner() {
 			@Override
@@ -1092,4 +1099,28 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 		return JavaUIMessages.JavaPlugin_additionalInfo_affordance;
 	}
+	
+	/**
+	 * Returns the bundles for a given bundle name and version range,
+	 * regardless whether the bundle is resolved or not.
+	 *
+	 * @param bundleName the bundle name
+	 * @param version the version of the bundle, or <code>null</code> for all bundles
+	 * @return the bundles of the given name belonging to the given version range
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public Bundle[] getBundles(String bundleName, String version) {
+		Bundle[] bundles= Platform.getBundles(bundleName, version);
+		if (bundles != null)
+			return bundles;
+
+		// Accessing unresolved bundle
+		ServiceReference<PackageAdmin> serviceRef= fBundleContext.getServiceReference(PackageAdmin.class);
+		PackageAdmin admin= fBundleContext.getService(serviceRef);
+		bundles= admin.getBundles(bundleName, version);
+		if (bundles != null && bundles.length > 0)
+			return bundles;
+		return null;
+	}
+
 }

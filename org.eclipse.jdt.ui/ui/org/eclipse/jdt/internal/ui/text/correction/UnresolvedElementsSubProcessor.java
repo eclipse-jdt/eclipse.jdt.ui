@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
@@ -697,7 +696,7 @@ public class UnresolvedElementsSubProcessor {
 		if (javaProject.findType(defaultOptions.get(annotationNameOptions[0])) != null)
 			return;
 		String version= JavaModelUtil.is18OrHigher(javaProject) ? "2" : "[1.1.0,2.0.0)"; //$NON-NLS-1$ //$NON-NLS-2$
-		Bundle[] annotationsBundles= Platform.getBundles("org.eclipse.jdt.annotation", version); //$NON-NLS-1$
+		Bundle[] annotationsBundles= JavaPlugin.getDefault().getBundles("org.eclipse.jdt.annotation", version); //$NON-NLS-1$
 		if (annotationsBundles == null)
 			return;
 		
