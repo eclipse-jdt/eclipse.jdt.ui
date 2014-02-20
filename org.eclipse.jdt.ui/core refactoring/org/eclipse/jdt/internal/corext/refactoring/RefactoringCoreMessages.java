@@ -1331,6 +1331,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveMembersRefactoring_inside;
 
+	public static String MoveMembersRefactoring_member_will_be_public;
+
 	public static String MoveMembersRefactoring_move_members;
 
 	public static String MoveMembersRefactoring_Move_Members;

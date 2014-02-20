@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,17 +32,17 @@ public class MoveMembersTests18 extends MoveMembersTests {
 		return new Java18Setup(someTest);
 	}
 
-	public void test63() throws Exception {
+	public void test18_1() throws Exception {
 		// move private static method from class to interface, update visibility
 		methodHelper_passing(new String[] { "m" }, new String[][] { new String[0] });
 	}
 
-	public void test64() throws Exception {
+	public void test18_2() throws Exception {
 		// move static method from interface to another interface
 		methodHelper_passing(new String[] { "m" }, new String[][] { new String[0] });
 	}
 
-	public void test65() throws Exception {
+	public void test18_3() throws Exception {
 		// move static method from interface to class, add 'public'
 		methodHelper_passing(new String[] { "m" }, new String[][] { new String[0] });
 	}
