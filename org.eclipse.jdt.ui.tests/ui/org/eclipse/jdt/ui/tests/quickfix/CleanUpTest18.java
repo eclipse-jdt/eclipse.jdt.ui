@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -186,6 +186,50 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		disable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 		enable(CleanUpConstants.USE_LAMBDA);
 		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+	}
+
+	public void testConvertToAnonymous_andBack_WithWildcards1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("interface I<M> {\n");
+		buf.append("    M run(M x);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class Test {\n");
+		buf.append("    I<?> li = s -> null;\n");
+		buf.append("}\n");
+		String original= buf.toString();
+		ICompilationUnit cu1= pack1.createCompilationUnit("Test.java", original, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("interface I<M> {\n");
+		buf.append("    M run(M x);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class Test {\n");
+		buf.append("    I<?> li = new I<Object>() {\n");
+		buf.append("        /* comment */\n");
+		buf.append("        @Override\n");
+		buf.append("        public Object run(Object s) {\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+
+		disable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
+		enable(CleanUpConstants.USE_LAMBDA);
+
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 

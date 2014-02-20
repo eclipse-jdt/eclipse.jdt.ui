@@ -331,6 +331,10 @@ public final class StubUtility2 {
 		decl.setConstructor(false);
 		
 		ITypeBinding bindingReturnType= binding.getReturnType();
+		if (bindingReturnType.isWildcardType()) {
+			ITypeBinding bound= bindingReturnType.getBound();
+			bindingReturnType= (bound != null) ? bound : bindingReturnType.getErasure();
+		}
 		
 		if (JavaModelUtil.is50OrHigher(unit.getJavaProject())) {
 			createTypeParameters(imports, context, ast, binding, decl);
