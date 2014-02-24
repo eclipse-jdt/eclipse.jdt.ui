@@ -233,6 +233,51 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
+	public void testConvertToAnonymous_andBack_WithJoinedSAM() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428526#c1 and #c6
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("interface Foo<T, N extends Number> {\n");
+		buf.append("    void m(T t);\n");
+		buf.append("    void m(N n);\n");
+		buf.append("}\n");
+		buf.append("interface Baz extends Foo<Integer, Integer> {}\n");
+		buf.append("class Test {\n");
+		buf.append("    Baz baz = x -> { return; };\n");
+		buf.append("}\n");
+		String original= buf.toString();
+		ICompilationUnit cu1= pack1.createCompilationUnit("Test.java", original, false, null);
+	
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
+	
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("interface Foo<T, N extends Number> {\n");
+		buf.append("    void m(T t);\n");
+		buf.append("    void m(N n);\n");
+		buf.append("}\n");
+		buf.append("interface Baz extends Foo<Integer, Integer> {}\n");
+		buf.append("class Test {\n");
+		buf.append("    Baz baz = new Baz() {\n");
+		buf.append("        /* comment */\n");
+		buf.append("        @Override\n");
+		buf.append("        public void m(Integer x) { return; }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+	
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	
+		disable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
+		enable(CleanUpConstants.USE_LAMBDA);
+	
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+	}
+
 	public void testConvertToLambdaNestedWithImports() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();

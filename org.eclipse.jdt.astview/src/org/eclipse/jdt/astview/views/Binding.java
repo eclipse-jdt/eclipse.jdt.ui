@@ -137,7 +137,6 @@ public class Binding extends ASTAttribute {
 					if (typeBinding.isAnnotation()) kinds.append(" isAnnotation"); //$NON-NLS-1$
 					if (typeBinding.isClass()) kinds.append(" isClass"); //$NON-NLS-1$
 					if (typeBinding.isInterface()) kinds.append(" isInterface"); //$NON-NLS-1$
-					if (typeBinding.isFunctionalInterface()) kinds.append(" isFunctionalInterface"); //$NON-NLS-1$
 					if (typeBinding.isEnum()) kinds.append(" isEnum"); //$NON-NLS-1$
 					res.add(new BindingProperty(this, kinds, true)); //$NON-NLS-1$
 					
@@ -185,7 +184,8 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "MODIFIERS", getModifiersString(fBinding.getModifiers(), false), isRefType)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "BINARY NAME", typeBinding.getBinaryName(), true)); //$NON-NLS-1$
 					
-					res.add(new Binding(this, "TYPE DECLARATION", typeBinding.getTypeDeclaration(), true)); //$NON-NLS-1$
+					String isTypeDeclaration= typeBinding == typeBinding.getTypeDeclaration() ? " ( == this)" : " ( != this)";
+					res.add(new Binding(this, "TYPE DECLARATION" + isTypeDeclaration, typeBinding.getTypeDeclaration(), true)); //$NON-NLS-1$
 					res.add(new Binding(this, "ERASURE", typeBinding.getErasure(), isNonPrimitive)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE PARAMETERS", typeBinding.getTypeParameters(), isType(typeKind, GENERIC))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE ARGUMENTS", typeBinding.getTypeArguments(), isType(typeKind, PARAMETRIZED))); //$NON-NLS-1$
@@ -200,6 +200,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "DECLARED TYPES", typeBinding.getDeclaredTypes(), isRefType)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "DECLARED FIELDS", typeBinding.getDeclaredFields(), isRefType)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "DECLARED METHODS", typeBinding.getDeclaredMethods(), isRefType)); //$NON-NLS-1$
+					res.add(new Binding(this, "FUNCTIONAL INTERFACE METHOD", typeBinding.getFunctionalInterfaceMethod(), typeBinding.isInterface())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic(), isNonPrimitive)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated(), isRefType)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE ANNOTATIONS", typeBinding.getTypeAnnotations(), true)); //$NON-NLS-1$
@@ -222,7 +223,8 @@ public class Binding extends ASTAttribute {
 					if (methodBinding.isParameterizedMethod()) genericsM.append(" isParameterizedMethod"); //$NON-NLS-1$
 					res.add(new BindingProperty(this, genericsM, true));
 					
-					res.add(new Binding(this, "METHOD DECLARATION", methodBinding.getMethodDeclaration(), true)); //$NON-NLS-1$
+					String isMethodDeclaration= methodBinding == methodBinding.getMethodDeclaration() ? " ( == this)" : " ( != this)";
+					res.add(new Binding(this, "METHOD DECLARATION" + isMethodDeclaration, methodBinding.getMethodDeclaration(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE PARAMETERS", methodBinding.getTypeParameters(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE ARGUMENTS", methodBinding.getTypeArguments(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic(), true)); //$NON-NLS-1$

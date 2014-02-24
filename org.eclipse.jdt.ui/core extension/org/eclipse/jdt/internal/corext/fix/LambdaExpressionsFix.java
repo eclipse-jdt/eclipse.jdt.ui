@@ -233,19 +233,18 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				
 				Block body= methodDeclaration.getBody();
 				List<Statement> statements= body.statements();
-				ASTNode lambdaBody;
+				ASTNode lambdaBody= body;
 				if (statements.size() == 1) {
 					// use short form with just an expression body if possible
 					Statement statement= statements.get(0);
 					if (statement instanceof ExpressionStatement) {
 						lambdaBody= ((ExpressionStatement) statement).getExpression();
 					} else if (statement instanceof ReturnStatement) {
-						lambdaBody= ((ReturnStatement) statement).getExpression();
-					} else {
-						lambdaBody= body;
+						Expression returnExpression= ((ReturnStatement) statement).getExpression();
+						if (returnExpression != null) {
+							lambdaBody= returnExpression;
+						}
 					}
-				} else {
-					lambdaBody= body;
 				}
 				//TODO: Bug 421479: [1.8][clean up][quick assist] convert anonymous to lambda must consider lost scope of interface
 //				lambdaBody.accept(new InterfaceAccessQualifier(rewrite, classInstanceCreation.getType().resolveBinding())); //TODO: maybe need a separate ASTRewrite and string placeholder
@@ -281,7 +280,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				TextEditGroup group= createTextEditGroup(FixMessages.LambdaExpressionsFix_convert_to_anonymous_class_creation, cuRewrite);
 
 				ITypeBinding lambdaTypeBinding= lambdaExpression.resolveTypeBinding();
-				IMethodBinding methodBinding= lambdaTypeBinding.getDeclaredMethods()[0];
+				IMethodBinding methodBinding= lambdaTypeBinding.getFunctionalInterfaceMethod();
 				List<VariableDeclaration> parameters= lambdaExpression.parameters();
 				String[] parameterNames= new String[parameters.size()];
 				for (int i= 0; i < parameterNames.length; i++) {
@@ -388,7 +387,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		ITypeBinding[] interfaces= typeBinding.getInterfaces();
 		if (interfaces.length != 1)
 			return false;
-		if (!interfaces[0].isFunctionalInterface())
+		if (interfaces[0].getFunctionalInterfaceMethod() == null)
 			return false;
 	
 		AnonymousClassDeclaration anonymTypeDecl= node.getAnonymousClassDeclaration();
@@ -434,7 +433,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			if (methodBinding == null)
 				return false;
 			//TODO: could also cast to the CIC type instead of aborting...
-			return methodBinding.getReturnType().isFunctionalInterface();
+			return methodBinding.getReturnType().getFunctionalInterfaceMethod() != null;
 		}
 		
 		//TODO: should also check whether variable is of a functional type 
