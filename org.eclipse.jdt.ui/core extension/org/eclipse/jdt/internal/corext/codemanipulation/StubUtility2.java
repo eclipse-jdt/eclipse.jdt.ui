@@ -507,19 +507,41 @@ public final class StubUtility2 {
 		return null;
 	}
 
-	private static void findUnimplementedInterfaceMethods(ITypeBinding typeBinding, HashSet<ITypeBinding> visited, ArrayList<IMethodBinding> allMethods, IPackageBinding currPack, ArrayList<IMethodBinding> toImplement) {
+	private static void findUnimplementedInterfaceMethods(ITypeBinding typeBinding, HashSet<ITypeBinding> visited,
+			ArrayList<IMethodBinding> allMethods, IPackageBinding currPack, ArrayList<IMethodBinding> toImplement) {
+		
 		if (visited.add(typeBinding)) {
 			IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
-			for (int i= 0; i < typeMethods.length; i++) {
+			
+			nextMethod: for (int i= 0; i < typeMethods.length; i++) {
 				IMethodBinding curr= typeMethods[i];
-				IMethodBinding impl= findMethodBinding(curr, allMethods);
-				if (impl == null || !Bindings.isVisibleInHierarchy(impl, currPack)) {
-					if (impl != null)
-						allMethods.remove(impl);
-					if (Modifier.isAbstract(curr.getModifiers())) {
-						toImplement.add(curr);
-						allMethods.add(curr);
+				for (Iterator<IMethodBinding> allIter= allMethods.iterator(); allIter.hasNext();) {
+					IMethodBinding oneMethod= allIter.next();
+					if (Bindings.isSubsignature(oneMethod, curr)) {
+						// We've already seen a method that is a subsignature of curr.
+						if (!Bindings.isSubsignature(curr, oneMethod)) {
+							// oneMethod is a true subsignature of curr; let's go with oneMethod
+							continue nextMethod;
+						}
+						// Subsignatures are equivalent.
+						// Check visibility and return types ('getErasure()' tries to achieve effect of "rename type variables")
+						if (Bindings.isVisibleInHierarchy(oneMethod, currPack)
+								&& oneMethod.getReturnType().getErasure().isSubTypeCompatible(curr.getReturnType().getErasure())) {
+							// oneMethod is visible and curr doesn't have a stricter return type; let's go with oneMethod
+							continue nextMethod;
+						}
+						// curr is stricter than oneMethod, so let's remove oneMethod
+						allIter.remove();
+						toImplement.remove(oneMethod);
+					} else if (Bindings.isSubsignature(curr, oneMethod)) {
+						// curr is a true subsignature of oneMethod. Let's remove oneMethod.
+						allIter.remove();
+						toImplement.remove(oneMethod);
 					}
+				}
+				if (Modifier.isAbstract(curr.getModifiers())) {
+					toImplement.add(curr);
+					allMethods.add(curr);
 				}
 			}
 			ITypeBinding[] superInterfaces= typeBinding.getInterfaces();
