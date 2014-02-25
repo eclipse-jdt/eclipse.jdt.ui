@@ -111,7 +111,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		@Override
 		public boolean visit(LambdaExpression node) {
 			ITypeBinding typeBinding= node.resolveTypeBinding();
-			if (typeBinding != null) {
+			if (typeBinding != null && typeBinding.getFunctionalInterfaceMethod() != null) {
 				fNodes.add(node);
 			}
 			return true;
@@ -344,7 +344,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 	public static IProposableFix createConvertToAnonymousClassCreationsFix(LambdaExpression lambda) {
 		// offer the quick assist at pre 1.8 levels as well to get rid of the compilation error (TODO: offer this as a quick fix in that case)
 
-		if (lambda.resolveTypeBinding() == null)
+		if (lambda.resolveTypeBinding() == null || lambda.resolveTypeBinding().getFunctionalInterfaceMethod() == null)
 			return null;
 
 		CreateAnonymousClassCreationOperation op= new CreateAnonymousClassCreationOperation(Collections.singletonList(lambda));

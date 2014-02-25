@@ -684,6 +684,147 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	public void testConvertToAnonymousClassCreation5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface FX {\n");
+		buf.append("    default int defaultMethod(String x) {\n");
+		buf.append("        return -1;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    int foo(int x);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class TestX {\n");
+		buf.append("    FX fxx = x -> {\n");
+		buf.append("        return (new FX() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public int foo(int x) {\n");
+		buf.append("                return 0;\n");
+		buf.append("            }\n");
+		buf.append("        }).defaultMethod(\"a\");\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("TestX.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("->");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface FX {\n");
+		buf.append("    default int defaultMethod(String x) {\n");
+		buf.append("        return -1;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    int foo(int x);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class TestX {\n");
+		buf.append("    FX fxx = new FX() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public int foo(int x) {\n");
+		buf.append("            return (new FX() {\n");
+		buf.append("                @Override\n");
+		buf.append("                public int foo(int x) {\n");
+		buf.append("                    return 0;\n");
+		buf.append("                }\n");
+		buf.append("            }).defaultMethod(\"a\");\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertToAnonymousClassCreation6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.UnaryOperator;\n");
+		buf.append("\n");
+		buf.append("public class Snippet {\n");
+		buf.append("    UnaryOperator<String> fi3 = x -> {\n");
+		buf.append("        return x.toString();\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("->");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.UnaryOperator;\n");
+		buf.append("\n");
+		buf.append("public class Snippet {\n");
+		buf.append("    UnaryOperator<String> fi3 = new UnaryOperator<String>() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public String apply(String x) {\n");
+		buf.append("            return x.toString();\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	// Bug 427694: [1.8][compiler] Functional interface not identified correctly
+	public void _testConvertToAnonymousClassCreation7() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface I { Object m(Class c); }\n");
+		buf.append("interface J<S> { S m(Class<?> c); }\n");
+		buf.append("interface K<T> { T m(Class<?> c); }\n");
+		buf.append("interface Functional<S,T> extends I, J<S>, K<T> {}\n");
+		buf.append("\n");
+		buf.append("class C {\n");
+		buf.append("    Functional<?, ?> fun= (c) -> { return null;};\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("->");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface I { Object m(Class c); }\n");
+		buf.append("interface J<S> { S m(Class<?> c); }\n");
+		buf.append("interface K<T> { T m(Class<?> c); }\n");
+		buf.append("interface Functional<S,T> extends I, J<S>, K<T> {}\n");
+		buf.append("\n");
+		buf.append("class C {\n");
+		buf.append("    Functional<?, ?> fun= new Functional<Object, Object>() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public Object m(Class c) {\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
 	public void testConvertToAnonymousClassCreationWithParameterName() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
