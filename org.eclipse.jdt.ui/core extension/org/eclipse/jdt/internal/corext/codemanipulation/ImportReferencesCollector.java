@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -47,8 +48,8 @@ import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -165,10 +166,6 @@ public class ImportReferencesCollector extends GenericVisitor {
 				}
 			}
 		} else if (binding instanceof IMethodBinding) {
-			StructuralPropertyDescriptor locationInParent= simpleName.getLocationInParent();
-			if (locationInParent == ExpressionMethodReference.NAME_PROPERTY || locationInParent == TypeMethodReference.NAME_PROPERTY) {
-				return;
-			}
 			IMethodBinding methodBinding= ((IMethodBinding) binding).getMethodDeclaration();
 			ITypeBinding declaringClass= methodBinding.getDeclaringClass();
 			if (declaringClass != null && !declaringClass.isLocal()) {
@@ -308,7 +305,13 @@ public class ImportReferencesCollector extends GenericVisitor {
 		return false;
 	}
 
-
+	@Override
+	public boolean visit(CreationReference node) {
+		doVisitNode(node.getType());
+		doVisitChildren(node.typeArguments());
+		return false;
+	}
+	
 	@Override
 	public boolean visit(ExpressionMethodReference node) {
 		evalQualifyingExpression(node.getExpression(), node.getName());
@@ -316,6 +319,20 @@ public class ImportReferencesCollector extends GenericVisitor {
 		return false;
 	}
 
+	@Override
+	public boolean visit(SuperMethodReference node) {
+		doVisitNode(node.getQualifier());
+		doVisitChildren(node.typeArguments());
+		return false;
+	}
+	
+	@Override
+	public boolean visit(TypeMethodReference node) {
+		doVisitNode(node.getType());
+		doVisitChildren(node.typeArguments());
+		return false;
+	}
+	
 	/*
 	 * @see ASTVisitor#visit(SuperConstructorInvocation)
 	 */
