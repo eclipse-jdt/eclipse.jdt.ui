@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -76,12 +80,36 @@ public class JavaWordFinder {
 		}
 
 		if (start >= -1 && end > -1) {
-			if (start == offset && end == offset)
+			if (start == offset && end == offset) {
+				try {
+					char c= document.getChar(offset);
+					switch (c) {
+						case '-':
+							if (document.getChar(offset + 1) == '>') {
+								return new Region(offset, 2);
+							}
+							break;
+						case '>':
+							if (document.getChar(offset - 1) == '-') {
+								return new Region(offset - 1, 2);
+							}
+							break;
+						case ':':
+							if (document.getChar(offset + 1) == ':') {
+								return new Region(offset, 2);
+							} else if (document.getChar(offset - 1) == ':') {
+								return new Region(offset - 1, 2);
+							}
+							break;
+					}
+				} catch (BadLocationException e) {
+				}
 				return new Region(offset, 0);
-			else if (start == offset)
-				return new Region(start, end - start);
-			else
+			} else if (start == offset) {
+				return new Region(start, end - start); //XXX: probably unused...
+			} else {
 				return new Region(start + 1, end - start - 1);
+			}
 		}
 
 		return null;
