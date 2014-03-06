@@ -69,6 +69,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -293,6 +294,8 @@ public class ASTNodes {
 				return ((VariableDeclarationStatement)parent).getType();
 			else if (parent instanceof FieldDeclaration)
 				return ((FieldDeclaration)parent).getType();
+			else if (parent instanceof LambdaExpression)
+				return null;
 		}
 		Assert.isTrue(false, "Unknown VariableDeclaration"); //$NON-NLS-1$
 		return null;
@@ -300,9 +303,20 @@ public class ASTNodes {
 
 	public static int getDimensions(VariableDeclaration declaration) {
 		int dim= declaration.getExtraDimensions();
-		Type type= getType(declaration);
-		if (type instanceof ArrayType) {
-			dim += ((ArrayType) type).getDimensions();
+		if (declaration instanceof VariableDeclarationFragment && declaration.getParent() instanceof LambdaExpression) {
+			LambdaExpression lambda= (LambdaExpression) declaration.getParent();
+			IMethodBinding methodBinding= lambda.resolveMethodBinding();
+			if (methodBinding != null) {
+				ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+				int index= lambda.parameters().indexOf(declaration);
+				ITypeBinding typeBinding= parameterTypes[index];
+				return typeBinding.getDimensions();
+			}
+		} else {
+			Type type= getType(declaration);
+			if (type instanceof ArrayType) {
+				dim+= ((ArrayType) type).getDimensions();
+			}
 		}
 		return dim;
 	}
