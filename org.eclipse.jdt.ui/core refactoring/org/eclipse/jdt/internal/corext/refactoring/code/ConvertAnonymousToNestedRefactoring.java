@@ -11,11 +11,15 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     N.Metchev@teamphone.com - contributed fixes for
+ *     NikolayMetchev@gmail.com - contributed fixes for
  *     - convert anonymous to nested should sometimes declare class as static [refactoring]
  *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=43360)
  *     - Convert anonymous to nested: should show error if field form outer anonymous type is references [refactoring]
  *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=48282)
+ *     - [refactoring][convert anonymous] gets confused with generic methods
+ *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=124978)
+ *     - [convert anonymous] Convert Anonymous to nested generates wrong code
+ *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=159917)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -140,7 +144,17 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			}
 			return true;
 		}
-
+		
+		@Override
+		public final boolean visit(TypeParameter parameter) {
+			ITypeBinding binding= parameter.resolveBinding();
+			if (binding != null) {
+				// don't collect type parameters declared inside the anonymous
+				fBindings.put(binding.getKey(), binding);
+			}
+			return false;
+		}
+		
 		public final ITypeBinding[] getResult() {
 			final ITypeBinding[] result= new ITypeBinding[fFound.size()];
 			fFound.toArray(result);
@@ -1087,7 +1101,10 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         boolean ans = false;
         while(current != null) {
             switch(current.getNodeType()) {
-                case ASTNode.ANONYMOUS_CLASS_DECLARATION:
+				case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
+				case ASTNode.CONSTRUCTOR_INVOCATION:
+					return true;
+				case ASTNode.ANONYMOUS_CLASS_DECLARATION:
                 {
                     AnonymousClassDeclaration enclosingAnonymousClassDeclaration= (AnonymousClassDeclaration)current;
                     ITypeBinding binding= enclosingAnonymousClassDeclaration.resolveBinding();

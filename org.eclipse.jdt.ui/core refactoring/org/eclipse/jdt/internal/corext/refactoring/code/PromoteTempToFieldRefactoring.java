@@ -500,7 +500,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	}
 
     private RefactoringStatus checkClashesWithExistingFields(){
-        FieldDeclaration[] existingFields= getFieldDeclarations(getBodyDeclarationListOfDeclaringType());
+        FieldDeclaration[] existingFields= getFieldDeclarations();
         for (int i= 0; i < existingFields.length; i++) {
             FieldDeclaration declaration= existingFields[i];
 			VariableDeclarationFragment[] fragments= (VariableDeclarationFragment[]) declaration.fragments().toArray(new VariableDeclarationFragment[declaration.fragments().size()]);
@@ -516,18 +516,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         return null;
     }
 
-    private ChildListPropertyDescriptor getBodyDeclarationListOfDeclaringType(){
-    	ASTNode methodParent= getMethodDeclaration().getParent();
-    	if (methodParent instanceof AbstractTypeDeclaration)
-    		return ((AbstractTypeDeclaration) methodParent).getBodyDeclarationsProperty();
-    	if (methodParent instanceof AnonymousClassDeclaration)
-    		return AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY;
-    	Assert.isTrue(false);
-    	return null;
-    }
-
-    private FieldDeclaration[] getFieldDeclarations(ChildListPropertyDescriptor descriptor) {
-    	final List<BodyDeclaration> bodyDeclarations= (List<BodyDeclaration>) getMethodDeclaration().getParent().getStructuralProperty(descriptor);
+    private FieldDeclaration[] getFieldDeclarations() {
+    	List<BodyDeclaration> bodyDeclarations= ASTNodes.getBodyDeclarations(getMethodDeclaration().getParent());
     	List<FieldDeclaration> fields= new ArrayList<FieldDeclaration>(1);
     	for (Iterator<BodyDeclaration> iter= bodyDeclarations.iterator(); iter.hasNext();) {
 	        Object each= iter.next();
@@ -834,14 +824,14 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
 
     private void addFieldDeclaration(ASTRewrite rewrite) {
-    	final ChildListPropertyDescriptor descriptor= getBodyDeclarationListOfDeclaringType();
-    	FieldDeclaration[] fields= getFieldDeclarations(getBodyDeclarationListOfDeclaringType());
-    	final ASTNode parent= getMethodDeclaration().getParent();
+    	FieldDeclaration[] fields= getFieldDeclarations();
+    	ASTNode parent= getMethodDeclaration().getParent();
+    	ChildListPropertyDescriptor descriptor= ASTNodes.getBodyDeclarationsProperty(parent);
     	int insertIndex;
     	if (fields.length == 0)
     		insertIndex= 0;
     	else
-    		insertIndex= ((List<? extends ASTNode>) parent.getStructuralProperty(descriptor)).indexOf(fields[fields.length - 1]) + 1;
+    		insertIndex= ASTNodes.getBodyDeclarations(parent).indexOf(fields[fields.length - 1]) + 1;
 
     	final FieldDeclaration declaration= createNewFieldDeclaration(rewrite);
 		rewrite.getListRewrite(parent, descriptor).insertAt(declaration, insertIndex, null);

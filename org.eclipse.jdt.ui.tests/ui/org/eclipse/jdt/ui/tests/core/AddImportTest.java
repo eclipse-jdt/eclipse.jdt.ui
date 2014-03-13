@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - Import static (Ctrl+Shift+M) creates imports for private methods - https://bugs.eclipse.org/409594
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
@@ -981,7 +982,227 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+	
+	public void testAddImportActionBug_409594_test1() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
+		String input =
+				"package p;\n" + 
+				"\n" + 
+				"class A {\n" + 
+				"	static void foo() {\n" + 
+				"		A.bar();\n" + 
+				"	}\n" + 
+				"\n" + 
+				"	private static void bar() {\n" + 
+				"	}\n" + 
+				"}";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", input, false, null);
+		
+		int selOffset= input.indexOf("bar");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 3, null, true);
+		op.run(null);
+		
+		String expected = 
+				"package p;\n" + 
+				"\n" + 
+				"class A {\n" + 
+				"	static void foo() {\n" + 
+				"		bar();\n" + 
+				"	}\n" + 
+				"\n" + 
+				"	private static void bar() {\n" + 
+				"	}\n" + 
+				"}";
+		assertEqualString(cu.getSource(), expected);
+	}
+	
+	public void testAddImportActionBug_409594_test2() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
+		String input =
+				"package p;\n" + 
+				"\n" + 
+				"class A {\n" + 
+				"	static void foo() {\n" + 
+				"		A.bar();\n" + 
+				"	}\n" + 
+				"\n" + 
+				"	public static void bar() {\n" + 
+				"	}\n" + 
+				"}";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", input, false, null);
+		
+		int selOffset= input.indexOf("bar");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 3, null, true);
+		op.run(null);
+		
+		String expected = 
+				"package p;\n" + 
+				"\n" + 
+				"class A {\n" + 
+				"	static void foo() {\n" + 
+				"		bar();\n" + 
+				"	}\n" + 
+				"\n" + 
+				"	public static void bar() {\n" + 
+				"	}\n" + 
+				"}";
+		assertEqualString(cu.getSource(), expected);
+	}
+	
+	public void testAddImportActionBug_409594_test3() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
+		String input =
+				"package p;\n" + 
+				"class SnippetX {\n" + 
+				"    private static class Test {\n" + 
+				"        class X {\n" + 
+				"            void foo() {\n" + 
+				"                Test.bar();\n" + 
+				"            }\n" + 
+				"        }\n" + 
+				"        public static void bar() {}\n" + 
+				"    }\n" + 
+				"}";
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", input, false, null);
+		
+		int selOffset= input.indexOf("bar");
+		
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 3, null, true);
+		op.run(null);
+		
+		String expected = 
+				"package p;\n" + 
+				"class SnippetX {\n" + 
+				"    private static class Test {\n" + 
+				"        class X {\n" + 
+				"            void foo() {\n" + 
+				"                bar();\n" + 
+				"            }\n" + 
+				"        }\n" + 
+				"        public static void bar() {}\n" + 
+				"    }\n" + 
+				"}";
+		assertEqualString(cu.getSource(), expected);
+	}
 
+	public void testAddImportActionBug_409594_test4() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("class SnippetY {\n");
+		buf.append("    static class Test {\n");
+		buf.append("        static void bar() {}\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Test.bar();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		int selOffset= buf.indexOf("bar();");
+
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 3, null, true);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import static p.SnippetY.Test.bar;\n");
+		buf.append("\n");
+		buf.append("class SnippetY {\n");
+		buf.append("    static class Test {\n");
+		buf.append("        static void bar() {}\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void foo() {\n");
+		buf.append("        bar();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testAddImportActionBug_409594_test5() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package organize.imports.pvtStaticMembers.bug409594;\n");
+		buf.append("\n");
+		buf.append("class SnippetY {    \n");
+		buf.append("    private static class Test {\n");
+		buf.append("        static void bar() {}        \n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("    void foo() {\n");
+		buf.append("         Test.bar();\n");
+		buf.append("     }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		int selOffset= buf.indexOf("bar();");
+
+		AddImportsOperation op= new AddImportsOperation(cu, selOffset, 3, null, true);
+		op.run(null);
+
+		assertEqualString(cu.getSource(), cu.getSource());
+	}
+	
+	public void testAddImportActionBug_409594_test6() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
+		String inputA=
+				"package q;\n" +
+						"\n" +
+						"public class A {\n" +
+						"	protected static void bar() {\n" +
+						"	}\n" +
+						"}";
+		String inputB=
+				"package p;\n" +
+						"\n" +
+						"import q.A;\n" +
+						"\n" +
+						"class B extends A {\n" +
+						"	void foo() {\n" +
+						"		A.bar();\n" +
+						"	}\n" +
+						"}\n" +
+						"";
+		pack1.createCompilationUnit("A.java", inputA, false, null);
+		ICompilationUnit cuB= pack1.createCompilationUnit("B.java", inputB, false, null);
+
+		int selOffset= inputB.indexOf("bar");
+
+		AddImportsOperation op= new AddImportsOperation(cuB, selOffset, 3, null, true);
+		op.run(null);
+
+		String expected=
+				"package p;\n" +
+						"\n" +
+						"import q.A;\n" +
+						"\n" +
+						"class B extends A {\n" +
+						"	void foo() {\n" +
+						"		bar();\n" +
+						"	}\n" +
+						"}\n" +
+						"";
+		assertEqualString(cuB.getSource(), expected);
+	}
+	
 	public void testAddImportAction_bug107206() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 

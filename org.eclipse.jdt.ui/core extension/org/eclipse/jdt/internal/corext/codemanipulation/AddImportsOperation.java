@@ -11,6 +11,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - Import static (Ctrl+Shift+M) creates imports for private methods - https://bugs.eclipse.org/409594
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
@@ -41,7 +42,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -281,17 +284,29 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 						return null; // variableBinding.getDeclaringClass() is null for array.length
 					}
 					if (Modifier.isStatic(binding.getModifiers())) {
-						if (Modifier.isPrivate(declaringClass.getModifiers())) {
-							fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_not_visible_class, BasicElementLabels.getJavaElementName(declaringClass.getName())), null);
-							return null;
-						}
-
 						if (containerName.length() > 0) {
 							if (containerName.equals(declaringClass.getName()) || containerName.equals(declaringClass.getQualifiedName()) ) {
-								String res= importRewrite.addStaticImport(declaringClass.getQualifiedName(), binding.getName(), isField);
-								if (!res.equals(simpleName)) {
-									// adding import failed
-									return null;
+								ASTNode node= nameNode.getParent();
+								boolean isDirectlyAccessible= false;
+								while (node != null) {
+									if (isTypeDeclarationSubTypeCompatible(node, declaringClass)) {
+										isDirectlyAccessible= true;
+										break;
+									}
+									node= node.getParent();
+								}
+								if (!isDirectlyAccessible) {
+									if (Modifier.isPrivate(declaringClass.getModifiers())) {
+										fStatus= JavaUIStatus.createError(IStatus.ERROR,
+												Messages.format(CodeGenerationMessages.AddImportsOperation_error_not_visible_class, BasicElementLabels.getJavaElementName(declaringClass.getName())),
+												null);
+										return null;
+									}
+									String res= importRewrite.addStaticImport(declaringClass.getQualifiedName(), binding.getName(), isField);
+									if (!res.equals(simpleName)) {
+										// adding import failed
+										return null;
+									}
 								}
 								return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
 							}
@@ -363,6 +378,18 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
 	}
 
+
+	private boolean isTypeDeclarationSubTypeCompatible(ASTNode typeDeclaration, ITypeBinding supertype) {
+		if (typeDeclaration instanceof AbstractTypeDeclaration) {
+			ITypeBinding binding= ((AbstractTypeDeclaration) typeDeclaration).resolveBinding();
+			return binding != null && binding.isSubTypeCompatible(supertype);
+		} else if (typeDeclaration instanceof AnonymousClassDeclaration) {
+			ITypeBinding binding= ((AnonymousClassDeclaration) typeDeclaration).resolveBinding();
+			return binding != null && binding.isSubTypeCompatible(supertype);
+		} else {
+			return false;
+		}
+	}
 
 	private int getNameStart(IBuffer buffer, int pos) {
 		while (pos > 0) {

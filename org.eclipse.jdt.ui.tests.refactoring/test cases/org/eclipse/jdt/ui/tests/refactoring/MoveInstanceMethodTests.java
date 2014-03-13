@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,10 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] super method invocation does not compile after refactoring - https://bugs.eclipse.org/356687
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Move method with static imported method calls introduces compiler error - https://bugs.eclipse.org/217753
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Wrong detection of duplicate methods (can result in compile errors) - https://bugs.eclipse.org/404477
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Annotation error in applying move-refactoring to inherited methods - https://bugs.eclipse.org/404471
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -469,7 +473,97 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void test47() throws Exception {
 		helper1(new String[] { "p.A" }, "p.A", 8, 17, 8, 17, PARAMETER, "target", true, true);
 	}
+
+	// bug 411529
+	public void test48() throws Exception {
+		helper1(new String[] { "p.A", "p.B", "q.C" }, "p.B", 3, 17, 3, 17, PARAMETER, "c", true, true);
+	}
 	
+	//bug 356687
+	public void test49() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 5, 10, 5, 11, FIELD, "b", true, true);
+	}
+	
+	//bug 356687
+	public void test50() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 4, 10, 4, 11, PARAMETER, "b", true, true);
+	}
+
+	//bug 356687
+	public void test51() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 4, 10, 4, 11, PARAMETER, "b", true, true);
+	}
+
+	//bug 356687
+	public void test52() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 5, 10, 5, 11, FIELD, "b", true, true);
+	}
+	
+	//bug 356687
+	public void test53() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 4, 10, 4, 11, PARAMETER, "b", true, true);
+	}
+	
+	//bug 356687
+	public void test54() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 4, 15, 4, 16, PARAMETER, "b", false, false);
+	}
+	
+	//bug 356687
+	public void test55() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 4, 17, 4, 18, FIELD, "b", true, true);
+	}
+	
+	//bug 356687
+	public void test56() throws Exception {
+		helper1(new String[] {"p.A"}, "p.A", 3, 17, 3, 18, PARAMETER, "b", true, true);
+	}
+	
+	//bug 356687
+	public void test57() throws Exception {
+		helper1(new String[] { "p.A" }, "p.A", 5, 17, 5, 18, PARAMETER, "b", true, true);
+	}
+
+	//bug 217753
+	public void test58() throws Exception {
+		helper1(new String[] { "p.A", "p.B" }, "p.A", 8, 25, 8, 28, PARAMETER, "b", true, true);
+	}
+
+	// bug 217753
+	public void test59() throws Exception {
+		helper1(new String[] { "p.A", "p.B" }, "p.A", 5, 14, 5, 15, PARAMETER, "b", true, true);
+	}
+
+	// bug 217753
+	public void test60() throws Exception {
+		helper1(new String[] { "p.A" }, "p.A", 5, 14, 5, 15, PARAMETER, "b", true, true);
+	}
+
+	// bug 217753
+	public void test61() throws Exception {
+		helper1(new String[] { "p.A" }, "p.A", 5, 14, 5, 15, PARAMETER, "b", true, true);
+	}
+
+	// bug 217753
+	public void test62() throws Exception {
+		helper1(new String[] { "p.A", "q.B" }, "p.A", 8, 14, 8, 15, PARAMETER, "c", true, true);
+	}
+
+	// bug 217753
+	public void test63() throws Exception {
+		helper1(new String[] { "A" }, "A", 2, 10, 2, 11, PARAMETER, "b", true, true);
+	}
+
+	// bug 404477
+	public void test64() throws Exception {
+		helper1(new String[] { "A" }, "A", 3, 17, 3, 18, PARAMETER, "b", true, true);
+	}
+
+	// bug 404471
+	public void test65() throws Exception {
+		helper1(new String[] { "A" }, "A", 3, 17, 3, 18, PARAMETER, "c", false, false);
+	}
+
 	// Move mA1 to field fB, do not inline delegator
 	public void test3() throws Exception {
 		helper1(new String[] { "p1.A", "p2.B", "p3.C"}, "p1.A", 9, 17, 9, 20, FIELD, "fB", false, false);
@@ -538,6 +632,16 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 //		failHelper2(new String[] { "p1.A", "p2.B"}, "p1.A", 5, 12, 5, 13, PARAMETER, "b", "a", true, true);
 	}
 
+	// bug 404477 - target method already exists
+	public void testFail14() throws Exception {
+		failHelper1(new String[] { "A" }, "A", 2, 17, 2, 18, PARAMETER, "b", true, true);
+	}
+
+	// bug 404477 / bug 286221 - target method already exists
+	public void testFail15() throws Exception {
+		failHelper1(new String[] { "A" }, "A", 3, 17, 3, 18, FIELD, "fB", true, true);
+	}
+	
 	// Cannot move static method
 	public void testFail2() throws Exception {
 		failHelper1(new String[] { "p1.A", "p2.B"}, "p1.A", 6, 23, 6, 24, PARAMETER, "b", true, true);

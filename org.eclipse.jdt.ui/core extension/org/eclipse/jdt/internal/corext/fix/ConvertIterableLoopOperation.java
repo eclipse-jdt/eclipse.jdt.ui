@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -357,7 +357,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			if (resultStatus.getSeverity() == IStatus.ERROR)
 				return resultStatus;
 
-			List<Expression> updateExpressions= (List<Expression>) getForStatement().getStructuralProperty(ForStatement.UPDATERS_PROPERTY);
+			List<Expression> updateExpressions= getForStatement().updaters();
 			if (updateExpressions.size() == 1) {
 				resultStatus= new StatusInfo(IStatus.WARNING, Messages.format(FixMessages.ConvertIterableLoopOperation_RemoveUpdateExpression_Warning, BasicElementLabels.getJavaCodeString(updateExpressions.get(0).toString())));
 			} else if (updateExpressions.size() > 1) {
@@ -451,14 +451,14 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 								String name= invocation.getName().getIdentifier();
 								if (name.equals("next") || name.equals("nextElement")) { //$NON-NLS-1$ //$NON-NLS-2$
 									nextInvocationCount[0]++;
-									
+
 									Expression left= null;
 									if (invocation.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
 										left= ((Assignment) invocation.getParent()).getLeftHandSide();
 									} else if (invocation.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
 										left= ((VariableDeclarationFragment) invocation.getParent()).getName();
-									} 
-									
+									}
+
 									return visitElementVariable(left);
 								}
 							}
@@ -466,7 +466,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 						}
 						return true;
 					}
-					
+
 					private boolean visitElementVariable(final Expression node) {
 						if (node != null) {
 							final ITypeBinding binding= node.resolveTypeBinding();
@@ -594,9 +594,9 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
 		MethodInvocation methodInvocation= (MethodInvocation)initializer;
 		String methodName= methodInvocation.getName().getIdentifier();
-		if (!"iterator".equals(methodName)) //$NON-NLS-1$
+		if (!"iterator".equals(methodName) || methodInvocation.arguments().size() != 0) //$NON-NLS-1$
 			return SEMANTIC_CHANGE_WARNING_STATUS;
-		
+
 		return StatusInfo.OK_STATUS;
 	}
 

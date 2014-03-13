@@ -102,7 +102,7 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 			MethodDeclaration newStub= getStub(rewrite, newTypeDecl);
 
 			ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
-			List<BodyDeclaration> members= (List<BodyDeclaration>) newTypeDecl.getStructuralProperty(property);
+			List<BodyDeclaration> members= ASTNodes.getBodyDeclarations(newTypeDecl);
 
 			int insertIndex;
 			if (isConstructor()) {

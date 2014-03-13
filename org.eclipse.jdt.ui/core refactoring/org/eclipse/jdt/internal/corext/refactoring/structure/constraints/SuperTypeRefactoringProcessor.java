@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -623,7 +623,9 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			engine.setScope(RefactoringScopeFactory.create(type));
 			engine.setPattern(SearchPattern.createPattern(type, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 			engine.searchPattern(new SubProgressMonitor(monitor, 100));
-			return (Map<IJavaProject, Set<SearchResultGroup>>) engine.getAffectedProjects();
+			@SuppressWarnings("unchecked")
+			Map<IJavaProject, Set<SearchResultGroup>> result= (Map<IJavaProject, Set<SearchResultGroup>>) engine.getAffectedProjects();
+			return result;
 		} finally {
 			monitor.done();
 		}

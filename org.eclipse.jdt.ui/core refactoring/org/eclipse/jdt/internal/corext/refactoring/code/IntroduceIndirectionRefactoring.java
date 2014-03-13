@@ -11,6 +11,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [introduce indirection] ClassCastException when introducing indirection on method in generic class - https://bugs.eclipse.org/395231
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -120,6 +121,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 /**
@@ -1130,6 +1132,13 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 	private CompilationUnitRewrite getCachedCURewrite(ICompilationUnit unit) {
 		CompilationUnitRewrite rewrite= fRewrites.get(unit);
+		if (rewrite == null && fSelectionMethodInvocation != null) {
+			CompilationUnit cuNode= ASTResolving.findParentCompilationUnit(fSelectionMethodInvocation);
+			if (cuNode != null && cuNode.getJavaElement().equals(unit)) {
+				rewrite= new CompilationUnitRewrite(unit, cuNode);
+				fRewrites.put(unit, rewrite);
+			}
+		}
 		if (rewrite == null) {
 			rewrite= new CompilationUnitRewrite(unit);
 			fRewrites.put(unit, rewrite);
@@ -1210,9 +1219,42 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		} else {
 			typeBinding= expression.resolveTypeBinding();
 		}
-
+		if (typeBinding != null && typeBinding.isTypeVariable()) {
+			ITypeBinding[] typeBounds= typeBinding.getTypeBounds();
+			if (typeBounds.length > 0) {
+				for (ITypeBinding typeBound : typeBounds) {
+					ITypeBinding expressionType= getExpressionType(invocation, typeBound);
+					if (expressionType != null) {
+						return expressionType;
+					}
+				}
+				typeBinding= typeBounds[0].getTypeDeclaration();
+			} else {
+				typeBinding= invocation.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+			}
+		}
 		Assert.isNotNull(typeBinding, "Type binding of target expression may not be null"); //$NON-NLS-1$
 		return typeBinding;
+	}
+
+	private ITypeBinding getExpressionType(final MethodInvocation invocation, ITypeBinding typeBinding) {
+		if (typeBinding == null)
+			return null;
+		for (IMethodBinding iMethodBinding : typeBinding.getDeclaredMethods()) {
+			if (invocation.resolveMethodBinding() == iMethodBinding)
+				return typeBinding.getTypeDeclaration();
+		}
+		ITypeBinding expressionType= getExpressionType(invocation, typeBinding.getSuperclass());
+		if (expressionType != null) {
+			return expressionType;
+		}
+		for (ITypeBinding interfaceBinding : typeBinding.getInterfaces()) {
+			expressionType= getExpressionType(invocation, interfaceBinding);
+			if (expressionType != null) {
+				return expressionType;
+			}
+		}
+		return null;
 	}
 
 	private IFile[] getAllFilesToModify() {

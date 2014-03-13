@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [inline] problem with fields from generic types - https://bugs.eclipse.org/218431
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -311,6 +312,14 @@ public class InlineConstantTests extends RefactoringTest {
 
 	public void test37() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
 		helper1("p.A", 4, 23, 4, 28, true, true);
+	}
+
+	public void test38() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=218431
+		helper1("p.A", 6, 22, 6, 23, true, true);
+	}
+
+	public void test39() throws Exception { // test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=218431
+		helper1("p.A", 7, 26, 7, 27, true, true);
 	}
 
 	// -- testing failing preconditions

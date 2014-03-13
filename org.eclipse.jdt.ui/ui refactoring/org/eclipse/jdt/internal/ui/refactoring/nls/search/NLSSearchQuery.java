@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -78,7 +78,7 @@ public class NLSSearchQuery implements ISearchQuery {
 				IFile propertieFile= fPropertiesFile[i];
 				if (! wrapperClass.exists())
 					return JavaUIStatus.createError(0, Messages.format(NLSSearchMessages.NLSSearchQuery_wrapperNotExists, JavaElementLabels.getElementLabel(wrapperClass, JavaElementLabels.ALL_DEFAULT)), null);
-				if (! wrapperClass.exists())
+				if (! propertieFile.exists())
 					return JavaUIStatus.createError(0, Messages.format(NLSSearchMessages.NLSSearchQuery_propertiesNotExists, BasicElementLabels.getResourceName(propertieFile)), null);
 
 				SearchPattern pattern= SearchPattern.createPattern(wrapperClass, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);

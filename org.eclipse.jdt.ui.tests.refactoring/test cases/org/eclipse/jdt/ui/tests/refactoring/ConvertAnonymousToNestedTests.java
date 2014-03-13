@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,9 +7,13 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     N.Metchev@teamphone.com - contributed fixes for
+ *     NikolayMetchev@gmail.com - contributed fixes for
  *     - convert anonymous to nested should sometimes declare class as static [refactoring]
  *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=43360)
+ *     - [refactoring][convert anonymous] gets confused with generic methods
+ *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=124978)
+ *     - [convert anonymous] Convert Anonymous to nested generates wrong code
+ *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=159917)
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -372,11 +376,27 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		helper1(7, 20, 7, 20, true, true, "Inner", Modifier.PRIVATE);
 	}
 
+	public void testGenerics7() throws Exception{ // test for bug 124978
+		helper1(6, 18, 6, 18, true, true, "Inner", Modifier.PRIVATE);
+	}
+	
     public void test31() throws Exception{ // for bug 181054
     	helper1(10, 24, 10, 30, true, false, "Inner1Extension", Modifier.PRIVATE);
     }
 
     public void test32() throws Exception{ // for bug 158028
     	helper1(10, 30, 10, 36, true, false, "Inner1Extension", Modifier.PRIVATE);
+    }
+    
+	public void test33() throws Exception { // for bug 124978
+		helper1(9, 21, 12, 7, true, true, "AImpl", Modifier.PRIVATE);
+	}
+    
+	public void test34() throws Exception { // for bug 159917
+		helper1(16, 27, 22, 9, false, false, "Nested", Modifier.PRIVATE);
+    }
+
+	public void test35() throws Exception { // for bug 159917
+		helper1(16, 26, 22, 9, false, false, "Nested", Modifier.PRIVATE);
     }
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <!-- ====================================================================== -->
-<!-- Copyright (c) 2000, 2012 IBM Corporation and others.                   -->
+<!-- Copyright (c) 2000, 2014 IBM Corporation and others.                   -->
 <!-- All rights reserved. This program and the accompanying materials       -->
 <!-- are made available under the terms of the Eclipse Public License v1.0  -->
 <!-- which accompanies this distribution, and is available at               -->
@@ -15,6 +15,7 @@
 <!--     IBM Corporation - initial API and implementation                   -->
 <!--     Francis Upton IV, Oakland Software <francisu@ieee.org> - Add support for Go Into with the ProjectExplorer - https://bugs.eclipse.org/bugs/show_bug.cgi?id=262091 -->
 <!--     Troy Bishop <tjbishop@ca.ibm.com> - Add support for importing/exporting Java Code Style preferences - https://bugs.eclipse.org/bugs/show_bug.cgi?id=304395 -->
+<!--     Eugene Lucash <e.lucash@gmail.com> - [quick assist] Add key binding for Extract method Quick Assist - https://bugs.eclipse.org/424166 -->
 <!-- ====================================================================== -->
 <plugin>
 
@@ -3698,6 +3699,12 @@
             id="org.eclipse.jdt.ui.correction.extractConstant.assist">
       </command>
       <command
+            name="%ActionDefinition.corrections.extractMethodInplace.name"
+            description="%ActionDefinition.corrections.extractMethodInplace.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.extractMethodInplace.assist">
+      </command>
+      <command
             name="%ActionDefinition.corrections.convertLocalToField.name"
             description="%ActionDefinition.corrections.convertLocalToField.description"
             categoryId="org.eclipse.jdt.ui.category.source"
@@ -4204,7 +4211,7 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             platform="carbon"
-            sequence="CTRL+SHIFT+ARROW_UP"
+            sequence="CTRL+ALT+SHIFT+ARROW_UP"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.select.enclosing"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
@@ -4222,7 +4229,7 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             platform="carbon"
-            sequence="CTRL+SHIFT+ARROW_RIGHT"
+            sequence="CTRL+ALT+SHIFT+ARROW_RIGHT"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.select.next"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
@@ -4239,7 +4246,7 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             platform="carbon"
-            sequence="CTRL+SHIFT+ARROW_LEFT"
+            sequence="CTRL+ALT+SHIFT+ARROW_LEFT"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.select.previous"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
@@ -4256,7 +4263,7 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             platform="carbon"
-            sequence="CTRL+SHIFT+ARROW_DOWN"
+            sequence="CTRL+ALT+SHIFT+ARROW_DOWN"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.select.last"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
@@ -4413,6 +4420,11 @@
             sequence="M1+2 R"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.correction.renameInFile.assist"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+       <key
+            sequence="M1+2 M"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId="org.eclipse.jdt.ui.correction.extractMethodInplace.assist"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
        <key
             sequence="M1+2 L"
@@ -5836,11 +5848,12 @@
 					overrides="org.eclipse.ui.navigator.resources.GoIntoActions"> 
 				<enablement>
 					<or>
-						<and>
-							<adapt type="org.eclipse.core.resources.IProject" />
-							<test property="org.eclipse.core.resources.open" 
-								value="true"/>
-						</and>
+						<adapt
+							type="org.eclipse.core.resources.IProject">
+							<test
+								property="org.eclipse.core.resources.open">
+							</test>
+						</adapt>
 						<adapt type="org.eclipse.core.resources.IFolder" /> 	
 						<adapt type="org.eclipse.ui.IWorkingSet" /> 	
 						<instanceof value="org.eclipse.jdt.core.IJavaProject" />
@@ -6236,7 +6249,7 @@
          id="org.eclipse.jdt.ui.staticFinalFieldHighlighting"
          isEditable="false"
          label="%Dummy.label"
-         value="0,0,0">
+         value="0,0,192">
       </colorDefinition>
       <colorDefinition
          id="org.eclipse.jdt.ui.fieldHighlighting"
@@ -6290,19 +6303,19 @@
          id="org.eclipse.jdt.ui.localVariableDeclarationHighlighting"
          isEditable="false"
          label="%Dummy.label"
-         value="0,0,0">
+         value="106,62,62">
       </colorDefinition>
       <colorDefinition
          id="org.eclipse.jdt.ui.localVariableHighlighting"
          isEditable="false"
          label="%Dummy.label"
-         value="0,0,0">
+         value="106,62,62">
       </colorDefinition>
       <colorDefinition
          id="org.eclipse.jdt.ui.parameterVariableHighlighting"
          isEditable="false"
          label="%Dummy.label"
-         value="0,0,0">
+         value="106,62,62">
       </colorDefinition>
       <colorDefinition
          id="org.eclipse.jdt.ui.deprecatedMemberHighlighting"

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,7 +77,8 @@ public class SuppressWarningsSubProcessor {
 			String optionId= JavaCore.getOptionForConfigurableSeverity(problemId);
 			if (optionId != null) {
 				String optionValue= javaProject.getOption(optionId, true);
-				return JavaCore.WARNING.equals(optionValue);
+				return JavaCore.WARNING.equals(optionValue) ||
+						(JavaCore.ERROR.equals(optionValue) && JavaCore.ENABLED.equals(javaProject.getOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, true)));
 			}
 		}
 		return false;
@@ -166,7 +167,7 @@ public class SuppressWarningsSubProcessor {
 			StringLiteral newStringLiteral= ast.newStringLiteral();
 			newStringLiteral.setLiteralValue(fWarningToken);
 
-			Annotation existing= findExistingAnnotation((List<? extends ASTNode>) fNode.getStructuralProperty(fProperty));
+			Annotation existing= findExistingAnnotation(ASTNodes.getChildListProperty(fNode, fProperty));
 			if (existing == null) {
 				ListRewrite listRewrite= rewrite.getListRewrite(fNode, fProperty);
 

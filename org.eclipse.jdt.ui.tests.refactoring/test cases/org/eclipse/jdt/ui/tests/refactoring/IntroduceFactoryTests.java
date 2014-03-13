@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Samrat Dhillon <samrat.dhillon@gmail.com> - [introduce factory] Introduce Factory on an abstract class adds a statement to create an instance of that class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=395016
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -214,6 +215,26 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 		assertEqualLines(getName() + ": ", getFileContents(outputFileName), newSource);
 	}
+	
+	private void doSingleUnitTestWithWarning(boolean protectConstructor, ICompilationUnit cu, String outputFileName) throws Exception, JavaModelException, IOException {
+		ISourceRange selection= findSelectionInSource(cu.getSource());
+		IntroduceFactoryRefactoring ref= new IntroduceFactoryRefactoring(cu, selection.getOffset(), selection.getLength());
+
+		ref.setProtectConstructor(protectConstructor);
+
+		RefactoringStatus activationResult= ref.checkInitialConditions(new NullProgressMonitor());
+
+		assertTrue("activation was supposed to be successful", activationResult.isOK());
+
+		RefactoringStatus checkInputResult= ref.checkFinalConditions(new NullProgressMonitor());
+
+		assertEquals(RefactoringStatus.WARNING, checkInputResult.getSeverity());
+		performChange(ref, false);
+
+		String newSource= cu.getSource();
+
+		assertEqualLines(getName() + ": ", getFileContents(outputFileName), newSource);
+	}
 
 	/**
 	 * Tests the IntroduceFactoryRefactoring refactoring on a single input source file
@@ -248,6 +269,14 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		ICompilationUnit	cu= createCUForBugTestCase(null, getPackageP(), baseFileName, true);
 
 		doSingleUnitTest(protectConstructor, cu, getBugTestFileName(null, getPackageP(), baseFileName, false));
+	}
+	
+	protected void singleUnitBugHelperWithWarning(String baseFileName, boolean protectConstructor)
+			throws Exception
+	{
+		ICompilationUnit cu= createCUForBugTestCase(null, getPackageP(), baseFileName, true);
+
+		doSingleUnitTestWithWarning(protectConstructor, cu, getBugTestFileName(null, getPackageP(), baseFileName, false));
 	}
 
 	/**
@@ -736,6 +765,14 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	
 	public void test298281() throws Exception {
 		singleUnitBugHelper("Thing", true);
+	}
+	
+	public void test395016_1() throws Exception {
+		singleUnitBugHelperWithWarning("AbstractClass", true);
+	}
+	
+	public void test395016_2() throws Exception {
+		singleUnitBugHelperWithWarning("AbstractMethod", true);
 	}
 	
 	public void testFactoryClash() throws Exception {

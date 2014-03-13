@@ -14,6 +14,8 @@
  *     Sebastian Davids <sdavids@gmx.de> - Bug 37432 getInvertEqualsProposal
  *     Benjamin Muskalla <b.muskalla@gmx.net> - Bug 36350 convertToStringBufferPropsal
  *     Chris West (Faux) <eclipse@goeswhere.com> - [quick assist] "Use 'StringBuilder' for string concatenation" could fix existing misuses - https://bugs.eclipse.org/bugs/show_bug.cgi?id=282755
+ *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
+ *     Eugene Lucash <e.lucash@gmail.com> - [quick assist] Add key binding for Extract method Quick Assist - https://bugs.eclipse.org/424166
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -68,6 +70,7 @@ import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -165,6 +168,7 @@ import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.GenerateForLoopAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodProposal;
@@ -191,6 +195,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	public static final String CONVERT_ANONYMOUS_TO_LOCAL_ID= "org.eclipse.jdt.ui.correction.convertAnonymousToLocal.assist"; //$NON-NLS-1$
 	public static final String CONVERT_TO_STRING_BUFFER_ID= "org.eclipse.jdt.ui.correction.convertToStringBuffer.assist"; //$NON-NLS-1$
 	public static final String CONVERT_TO_MESSAGE_FORMAT_ID= "org.eclipse.jdt.ui.correction.convertToMessageFormat.assist"; //$NON-NLS-1$;
+	public static final String EXTRACT_METHOD_INPLACE_ID= "org.eclipse.jdt.ui.correction.extractMethodInplace.assist"; //$NON-NLS-1$;
 
 	public QuickAssistProcessor() {
 		super();
@@ -220,6 +225,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getConvertForLoopProposal(context, coveringNode, null)
 				|| getConvertIterableLoopProposal(context, coveringNode, null)
 				|| getConvertEnhancedForLoopProposal(context, coveringNode, null)
+				|| getGenerateForLoopProposals(context, coveringNode, null, null)
 				|| getExtractVariableProposal(context, false, null)
 				|| getExtractMethodProposal(context, coveringNode, false, null)
 				|| getInlineLocalProposal(context, coveringNode, null)
@@ -251,6 +257,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			getAssignToVariableProposals(context, coveringNode, locations, resultingCollections);
 			getAssignParamToFieldProposals(context, coveringNode, resultingCollections);
 			getInferDiamondArgumentsProposal(context, coveringNode, locations, resultingCollections);
+			getGenerateForLoopProposals(context, coveringNode, locations, resultingCollections);
 
 			if (noErrorsAtLocation) {
 				boolean problemsAtLocation= locations.length != 0;
@@ -348,6 +355,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 			int relevance= problemsAtLocation ? IProposalRelevance.EXTRACT_METHOD_ERROR : IProposalRelevance.EXTRACT_METHOD;
 			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, extractMethodRefactoring, relevance, image);
+			proposal.setCommandId(EXTRACT_METHOD_INPLACE_ID);
 			proposal.setLinkedProposalModel(linkedProposalModel);
 			proposals.add(proposal);
 		}
@@ -893,7 +901,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		List<? extends ASTNode> list= (List<? extends ASTNode>) statementParent.getStructuralProperty(property);
+		List<? extends ASTNode> list= ASTNodes.getChildListProperty(statementParent, (ChildListPropertyDescriptor) property);
 
 		if (resultingCollections == null) {
 			return true;
@@ -2468,7 +2476,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ITypeBinding initializerListType= Bindings.findTypeInHierarchy(initializerTypeBinding, "java.util.List"); //$NON-NLS-1$
 		ITypeBinding initializerIterableType= Bindings.findTypeInHierarchy(initializerTypeBinding, "java.lang.Iterable"); //$NON-NLS-1$
 		
-		if (initializerIterableType != null && initializerIterableType.getTypeArguments().length == 1) {
+		if (initializerIterableType != null) {
 			String label= CorrectionMessages.QuickAssistProcessor_convert_to_iterator_for_loop;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			
@@ -2484,9 +2492,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			iterInitializer.setName(ast.newSimpleName("iterator")); //$NON-NLS-1$
 			ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
 			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, imports);
-			Type iterTypeArgument= imports.addImport(Bindings.normalizeTypeBinding(initializerIterableType.getTypeArguments()[0]), ast, importRewriteContext);
-			ParameterizedType iterType= ast.newParameterizedType(ast.newSimpleType(ast.newName(imports.addImport("java.util.Iterator", importRewriteContext)))); //$NON-NLS-1$
-			iterType.typeArguments().add(iterTypeArgument);
+			Type iterType= ast.newSimpleType(ast.newName(imports.addImport("java.util.Iterator", importRewriteContext))); //$NON-NLS-1$
+			if (initializerIterableType.getTypeArguments().length == 1) {
+				Type iterTypeArgument= imports.addImport(Bindings.normalizeTypeBinding(initializerIterableType.getTypeArguments()[0]), ast, importRewriteContext);
+				ParameterizedType parameterizedIterType= ast.newParameterizedType(iterType);
+				parameterizedIterType.typeArguments().add(iterTypeArgument);
+				iterType= parameterizedIterType;
+			}
 			String[] iterNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, project, iterType, iterInitializer, usedVarNames);
 			String iterName= iterNames[0];
 			SimpleName initializerIterName= ast.newSimpleName(iterName);
@@ -2753,6 +2765,54 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		proposal.setCommandId(CONVERT_FOR_LOOP_ID);
 
 		resultingCollections.add(proposal);
+		return true;
+	}
+
+	public static boolean getGenerateForLoopProposals(IInvocationContext context, ASTNode coveringNode, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
+		Statement statement= ASTResolving.findParentStatement(coveringNode);
+		if (!(statement instanceof ExpressionStatement)) {
+			return false;
+		}
+
+		if (containsMatchingProblem(locations, IProblem.ParsingErrorInsertToComplete))
+			return false;
+
+		Expression expression= ((ExpressionStatement) statement).getExpression();
+		ICompilationUnit cu= context.getCompilationUnit();
+		ITypeBinding expressionType= null;
+
+		if (expression instanceof MethodInvocation
+				|| expression instanceof SimpleName
+				|| expression instanceof FieldAccess) {
+			expressionType= expression.resolveTypeBinding();
+		} else if (expression instanceof Assignment
+				&& ((Assignment) expression).getRightHandSide().resolveTypeBinding() == null
+				&& ((Assignment) expression).getLeftHandSide().resolveTypeBinding() != null) {
+			expressionType= ((Assignment) expression).getLeftHandSide().resolveTypeBinding();
+		}
+
+		if (expressionType == null)
+			return false;
+
+		if (Bindings.findTypeInHierarchy(expressionType, "java.lang.Iterable") != null) { //$NON-NLS-1$
+			if (resultingCollections == null)
+				return true;
+			resultingCollections.add(new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATOR_FOR));
+			if (Bindings.findTypeInHierarchy(expressionType, "java.util.List") != null) { //$NON-NLS-1$
+				resultingCollections.add(new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATE_LIST));
+			}
+		} else if (expressionType.isArray()) {
+			if (resultingCollections == null)
+				return true;
+			resultingCollections.add(new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATE_ARRAY));
+		} else {
+			return false;
+		}
+
+		if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
+			resultingCollections.add(new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_FOREACH));
+		}
+
 		return true;
 	}
 

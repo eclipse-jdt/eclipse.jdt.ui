@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
@@ -38,6 +43,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -88,6 +94,32 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 	}
 
 	private void codeComplete(ICompilationUnit cu, int offset, CompletionProposalCollector collector) throws JavaModelException {
+		// logging for https://bugs.eclipse.org/bugs/show_bug.cgi?id=423416
+		System.out.println();
+		System.out.println("---- " + getClass().getName() + "#" + getName() + " ----");
+		System.out.println("offset: " + offset);
+		System.out.println("cu: " + cu);
+		IBuffer buffer= cu.getBuffer();
+		System.out.println("buffer: " + buffer);
+		System.out.println("source: |" + buffer.getContents() + "|");
+
+		System.out.print("file contents: |");
+		File file= cu.getResource().getLocation().toFile();
+		try {
+			BufferedReader reader= new BufferedReader(new FileReader(file));
+			String line;
+			while ((line= reader.readLine()) != null) {
+				System.out.println(line);
+			}
+			System.out.println("|");
+			reader.close();
+		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		System.out.println();
+
 		cu.codeComplete(offset, collector, new NullProgressMonitor());
 	}
 

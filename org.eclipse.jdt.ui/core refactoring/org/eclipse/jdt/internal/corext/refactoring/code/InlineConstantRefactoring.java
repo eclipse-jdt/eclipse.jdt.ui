@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [inline] problem with fields from generic types - https://bugs.eclipse.org/218431
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -395,7 +396,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				if (declaringClass == null)
 					return;
 
-				Type newQualification= fNewLocationCuRewrite.getImportRewrite().addImport(declaringClass, fInitializerRewrite.getAST(), fNewLocationContext);
+				Type newQualification= fNewLocationCuRewrite.getImportRewrite().addImport(declaringClass.getErasure(), fInitializerRewrite.getAST(), fNewLocationContext);
 				fNewLocationCuRewrite.getImportRemover().registerAddedImports(newQualification);
 
 				SimpleName newToQualify= (SimpleName) fInitializerRewrite.createMoveTarget(toQualify);
@@ -809,6 +810,8 @@ public class InlineConstantRefactoring extends Refactoring {
 		pm.beginTask("", 3); //$NON-NLS-1$
 
 		try {
+			fSelectionCuRewrite.clearASTAndImportRewrites();
+			fDeclarationCuRewrite.clearASTAndImportRewrites();
 			List<CompilationUnitChange>changes= new ArrayList<CompilationUnitChange>();
 			HashSet<SimpleName> staticImportsInInitializer= new HashSet<SimpleName>();
 			ImportReferencesCollector.collect(getInitializer(), fField.getJavaProject(), null, new ArrayList<SimpleName>(), staticImportsInInitializer);
@@ -873,10 +876,6 @@ public class InlineConstantRefactoring extends Refactoring {
 			return result;
 
 		} finally {
-			fSelectionCuRewrite= null;
-			fSelectedConstantName= null;
-			fDeclarationCuRewrite= null;
-			fDeclaration= null;
 			pm.done();
 		}
 	}

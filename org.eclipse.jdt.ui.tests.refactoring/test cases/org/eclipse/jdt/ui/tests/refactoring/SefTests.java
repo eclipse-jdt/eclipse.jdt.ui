@@ -10,6 +10,7 @@
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
  *       bug Encapuslate field can fail when two variables in one variable declaration (see
  *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=51540).
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [encapsulate field] Encapsulating parenthesized field assignment yields compilation error - https://bugs.eclipse.org/177095
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -185,6 +186,10 @@ public class SefTests extends AbstractSelectionTestCase {
 		objectTest("field");
 	}
 
+	public void testSimpleParenthesizedWrite() throws Exception {
+		objectTest("field");
+	}
+
 	public void testSimpleReadWrite() throws Exception {
 		objectTest("field");
 	}
@@ -223,6 +228,10 @@ public class SefTests extends AbstractSelectionTestCase {
 	}
 
 	public void testSetterAsReceiver() throws Exception {
+		objectTest("field");
+	}
+
+	public void testCompoundParenthesizedWrite() throws Exception {
 		objectTest("field");
 	}
 

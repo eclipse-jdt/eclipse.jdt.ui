@@ -2791,9 +2791,9 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	protected <T extends ASTNode> T moveNode(T oldNode, ASTRewrite rewrite) {
 		T movedNode;
 		if (ASTNodes.isExistingNode(oldNode))
-			movedNode= (T) rewrite.createMoveTarget(oldNode); //node must be one of ast
+			movedNode= ASTNodes.createMoveTarget(rewrite, oldNode); //node must be one of ast
 		else
-			movedNode= (T) ASTNode.copySubtree(rewrite.getAST(), oldNode);
+			movedNode= ASTNodes.copySubtree(rewrite.getAST(), oldNode);
 		return movedNode;
 	}
 

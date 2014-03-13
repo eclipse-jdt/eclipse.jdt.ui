@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.IWordDetector;
+import org.eclipse.jface.text.rules.MultiLineRule;
 import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WhitespaceRule;
@@ -157,7 +158,7 @@ public final class JavaDocScanner extends JavaCommentScanner {
 
 		List<IRule> list= new ArrayList<IRule>();
 
-		// Add rule for tags.
+		// Add rule for tags
 		Token token= getToken(IJavaColorConstants.JAVADOC_TAG);
 		list.add(new TagRule(token));
 
@@ -169,14 +170,18 @@ public final class JavaDocScanner extends JavaCommentScanner {
 		list.add(wordRule);
 
 
-		// Add rule for links.
+		// Add rules for links
 		token= getToken(IJavaColorConstants.JAVADOC_LINK);
-		list.add(new SingleLineRule("{@link", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
-		list.add(new SingleLineRule("{@value", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
-		list.add(new SingleLineRule("{@inheritDoc", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
+		list.add(new MultiLineRule("{@link", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
+		list.add(new MultiLineRule("{@value", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
+		list.add(new MultiLineRule("{@inheritDoc", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
 
+		// Add rules for @code and @literals
+		token= getToken(IJavaColorConstants.JAVADOC_DEFAULT);
+		list.add(new MultiLineRule("{@code", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
+		list.add(new MultiLineRule("{@literal", "}", token)); //$NON-NLS-2$ //$NON-NLS-1$
 
-		// Add generic whitespace rule.
+		// Add generic whitespace rule
 		token= getToken(IJavaColorConstants.JAVADOC_DEFAULT);
 		list.add(new WhitespaceRule(new JavaWhitespaceDetector(), token));
 

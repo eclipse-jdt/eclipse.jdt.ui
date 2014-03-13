@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Samrat Dhillon samrat.dhillon@gmail.com https://bugs.eclipse.org/bugs/show_bug.cgi?id=395558 and https://bugs.eclipse.org/bugs/show_bug.cgi?id=395561
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -405,6 +406,20 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		parameters[1]=parameters[2];
 		parameters[2]=temp;
 		fDescriptor.setParameters(parameters);
+		runRefactoring(false, true);
+	}
+	
+	public void testMethodTypeParamArgs() throws Exception {
+		fDescriptor.setMethod(setupMethod());
+		fDescriptor.setTopLevel(false);
+		fDescriptor.setClassName("FooParameter");
+		runRefactoring(false, true);
+	}
+	
+	public void testMethodTypeParamArgsTopLevel() throws Exception {
+		fDescriptor.setMethod(setupMethod());
+		fDescriptor.setTopLevel(true);
+		fDescriptor.setClassName("FooParameter");
 		runRefactoring(false, true);
 	}
 }

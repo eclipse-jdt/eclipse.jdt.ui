@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * DO NOT REMOVE, used in a product.
  * @deprecated As of 3.5, replaced by {@link org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper}
  */
+@SuppressWarnings("all")
 public class RefactoringSaveHelper {
 
 	private boolean fFilesSaved;

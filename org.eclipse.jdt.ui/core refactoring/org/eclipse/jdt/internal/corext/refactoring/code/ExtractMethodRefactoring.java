@@ -15,6 +15,7 @@
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] should declare method static if extracted from anonymous in static method - https://bugs.eclipse.org/bugs/show_bug.cgi?id=152004
  *     Samrat Dhillon <samrat.dhillon@gmail.com> -  [extract method] Extracted method should be declared static if extracted expression is also used in another static method https://bugs.eclipse.org/bugs/show_bug.cgi?id=393098
+ *     Samrat Dhillon <samrat.dhillon@gmail.com> -  [extract method] Extracting expression of parameterized type that is passed as argument to this constructor yields compilation error https://bugs.eclipse.org/bugs/show_bug.cgi?id=394030
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -1015,7 +1016,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			modifiers|= Modifier.DEFAULT;
 		}
 
-		ITypeBinding[] typeVariables= computeLocalTypeVariables();
+		ITypeBinding[] typeVariables= computeLocalTypeVariables(modifiers);
 		List<TypeParameter> typeParameters= result.typeParameters();
 		for (int i= 0; i < typeVariables.length; i++) {
 			TypeParameter parameter= fAST.newTypeParameter();
@@ -1054,20 +1055,20 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return result;
 	}
 
-	private ITypeBinding[] computeLocalTypeVariables() {
+	private ITypeBinding[] computeLocalTypeVariables(int modifier) {
 		List<ITypeBinding> result= new ArrayList<ITypeBinding>(Arrays.asList(fAnalyzer.getTypeVariables()));
 		for (int i= 0; i < fParameterInfos.size(); i++) {
 			ParameterInfo info= fParameterInfos.get(i);
-			processVariable(result, info.getOldBinding());
+			processVariable(result, info.getOldBinding(), modifier);
 		}
 		IVariableBinding[] methodLocals= fAnalyzer.getMethodLocals();
 		for (int i= 0; i < methodLocals.length; i++) {
-			processVariable(result, methodLocals[i]);
+			processVariable(result, methodLocals[i], modifier);
 		}
 		return result.toArray(new ITypeBinding[result.size()]);
 	}
 
-	private void processVariable(List<ITypeBinding> result, IVariableBinding variable) {
+	private void processVariable(List<ITypeBinding> result, IVariableBinding variable, int modifier) {
 		if (variable == null)
 			return;
 		ITypeBinding binding= variable.getType();
@@ -1077,8 +1078,22 @@ public class ExtractMethodRefactoring extends Refactoring {
 				ITypeBinding arg= typeArgs[args];
 				if (arg.isTypeVariable() && !result.contains(arg)) {
 					ASTNode decl= fRoot.findDeclaringNode(arg);
-					if (decl != null && decl.getParent() instanceof MethodDeclaration) {
-						result.add(arg);
+					if (decl != null) {
+						ASTNode parent= decl.getParent();
+						if (parent instanceof MethodDeclaration || (parent instanceof TypeDeclaration && Modifier.isStatic(modifier))) {
+							result.add(arg);
+						}
+					}
+				} else {
+					ITypeBinding bound= arg.getBound();
+					if (arg.isWildcardType() && bound != null && !result.contains(bound)) {
+						ASTNode decl= fRoot.findDeclaringNode(bound);
+						if (decl != null) {
+							ASTNode parent= decl.getParent();
+							if (parent instanceof MethodDeclaration || (parent instanceof TypeDeclaration && Modifier.isStatic(modifier))) {
+								result.add(bound);
+							}
+						}
 					}
 				}
 			}

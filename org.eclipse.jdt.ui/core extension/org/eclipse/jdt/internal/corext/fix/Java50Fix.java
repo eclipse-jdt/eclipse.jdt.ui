@@ -132,7 +132,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
 			for (int i= 0; i < nodes.length; i++) {
 				ParameterizedType type= nodes[i];
-				List<Type> args= (List<Type>) type.getStructuralProperty(ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
+				List<Type> args= type.typeArguments();
 				int j= 0;
 				for (Iterator<Type> iter= args.iterator(); iter.hasNext();) {
 					LinkedProposalPositionGroup group= new LinkedProposalPositionGroup("G" + i + "_" + j); //$NON-NLS-1$ //$NON-NLS-2$

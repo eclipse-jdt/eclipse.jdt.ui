@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -283,7 +283,16 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		programArguments.addAll(Arrays.asList(execArgs.getProgramArgumentsArray()));
 
 		String testFailureNames= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES, ""); //$NON-NLS-1$
-
+		
+		/*
+		 * The "-version" "3" arguments don't make sense and should eventually be removed.
+		 * But we keep them for now, since users may want to run with older releases of
+		 * org.eclipse.jdt.junit[4].runtime, where this is still
+		 * read by org.eclipse.jdt.internal.junit.runner.RemoteTestRunner#defaultInit(String[])
+		 * and used in org.eclipse.jdt.internal.junit.runner.DefaultClassifier#isComparisonFailure(Throwable).
+		 * The JUnit4 equivalent of the latter method is already version-agnostic:
+		 * org.eclipse.jdt.internal.junit4.runner.JUnit4TestListener#testFailure(Failure, boolean)
+		 */
 		programArguments.add("-version"); //$NON-NLS-1$
 		programArguments.add("3"); //$NON-NLS-1$
 

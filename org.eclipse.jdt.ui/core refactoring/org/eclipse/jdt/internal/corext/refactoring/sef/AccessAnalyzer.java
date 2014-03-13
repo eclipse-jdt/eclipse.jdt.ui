@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     jens.lukowski@gmx.de - contributed code to convert prefix and postfix
  *       expressions into a combination of setter and getter calls.
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [encapsulate field] Encapsulating parenthesized field assignment yields compilation error - https://bugs.eclipse.org/177095
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.sef;
 
@@ -280,6 +281,8 @@ class AccessAnalyzer extends ASTVisitor {
 			return ((QualifiedName)expression).resolveBinding();
 		else if (expression instanceof FieldAccess)
 			return ((FieldAccess)expression).getName().resolveBinding();
+		else if (expression instanceof ParenthesizedExpression)
+			return resolveBinding(((ParenthesizedExpression) expression).getExpression());
 		return null;
 	}
 
@@ -292,6 +295,8 @@ class AccessAnalyzer extends ASTVisitor {
 				return ((QualifiedName)expression).getQualifier();
 			case ASTNode.FIELD_ACCESS:
 				return ((FieldAccess)expression).getExpression();
+			case ASTNode.PARENTHESIZED_EXPRESSION:
+				return getReceiver(((ParenthesizedExpression)expression).getExpression());
 		}
 		return null;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.search;
 
 import org.eclipse.core.runtime.CoreException;
@@ -25,6 +24,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
+
 public class JavaElementLine {
 
 
@@ -37,7 +37,7 @@ public class JavaElementLine {
 
 	/**
 	 * @param element either an ICompilationUnit or an IClassFile
-	 * @param lineNumber the line number
+	 * @param lineNumber the line number, starting at 0
 	 * @param lineStartOffset the start offset of the line
 	 * @throws CoreException thrown when accessing of the buffer failed
 	 */
@@ -87,7 +87,12 @@ public class JavaElementLine {
 		return fElement;
 	}
 
-	public int getLine() {
+	/**
+	 * Returns the line number.
+	 * 
+	 * @return the line number, starting at 0
+	 */
+	public int getLineNumber() {
 		return fLineNumber;
 	}
 

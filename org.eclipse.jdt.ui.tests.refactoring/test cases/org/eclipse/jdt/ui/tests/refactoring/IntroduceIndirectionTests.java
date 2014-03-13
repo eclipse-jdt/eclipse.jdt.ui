@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [introduce indirection] ClassCastException when introducing indirection on method in generic class - https://bugs.eclipse.org/395231
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -305,5 +306,30 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 	public void test31() throws Exception {
 		// test for bug 127665
 		helperPass(new String[] { "p.Test" }, "foo", "p.Test0", 13, 20, 13, 23);
-	}	
+	}
+
+	public void test32() throws Exception {
+		// test for bug 395231
+		helperPass(new String[] { "p.Test" }, "foo", "p.Test0", 4, 10, 4, 13);
+	}
+
+	public void test33() throws Exception {
+		// test for bug 395231
+		helper(new String[] { "p.Test" }, "foo", "p.Test0", 8, 9, 8, 20, false, false, false, false);
+	}
+
+	public void test34() throws Exception {
+		// test for bug 395231
+		helperPass(new String[] { "p.Test" }, "foo", "p.Test0", 6, 9, 6, 13);
+	}
+
+	public void test35() throws Exception {
+		// test for bug 395231
+		helperPass(new String[] { "p.Test" }, "foo", "p.Test0", 6, 9, 6, 13);
+	}
+
+	public void test36() throws Exception {
+		// test for bug 395231
+		helperPass(new String[] { "p.Test" }, "foo", "p.Test0", 6, 9, 6, 13);
+	}
 }

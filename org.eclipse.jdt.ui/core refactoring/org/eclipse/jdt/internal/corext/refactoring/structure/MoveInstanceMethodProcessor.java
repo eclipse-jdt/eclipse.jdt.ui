@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,9 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] super method invocation does not compile after refactoring - https://bugs.eclipse.org/356687
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Move method with static imported method calls introduces compiler error - https://bugs.eclipse.org/217753
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [move method] Annotation error in applying move-refactoring to inherited methods - https://bugs.eclipse.org/404471
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -69,6 +72,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -79,6 +83,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -263,8 +268,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 		private Map<IMember, IncomingMemberVisibilityAdjustment> fAdjustments;
 
-		private boolean fNeededInsertion;
-
 		private Map<ICompilationUnit, CompilationUnitRewrite> fRewrites;
 
 		public DelegateInstanceMethodCreator(Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, Map<ICompilationUnit, CompilationUnitRewrite> rewrites) {
@@ -279,7 +282,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			final MethodInvocation invocation= getAst().newMethodInvocation();
 			invocation.setName(getAst().newSimpleName(getNewElementName()));
 			invocation.setExpression(createSimpleTargetAccessExpression(methodDeclaration));
-			fNeededInsertion= createArgumentList(methodDeclaration, invocation.arguments(), new VisibilityAdjustingArgumentFactory(getAst(), fRewrites, fAdjustments));
+			createArgumentList(methodDeclaration, invocation.arguments(), new VisibilityAdjustingArgumentFactory(getAst(), fRewrites, fAdjustments));
 			final Block block= getAst().newBlock();
 			block.statements().add(createMethodInvocation(methodDeclaration, invocation));
 			if (!fSourceRewrite.getCu().equals(fTargetType.getCompilationUnit()))
@@ -290,10 +293,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		@Override
 		protected ASTNode createDocReference(final BodyDeclaration declaration) throws JavaModelException {
 			return MoveInstanceMethodProcessor.this.createMethodReference((MethodDeclaration) declaration, getAst());
-		}
-
-		protected boolean getNeededInsertion() {
-			return fNeededInsertion;
 		}
 	}
 
@@ -584,8 +583,15 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					final AST ast= node.getAST();
 					if (!JdtFlags.isStatic(method))
 						rewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, ast.newSimpleName(fTargetName), null);
-					else
-						rewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, ast.newSimpleType(ast.newSimpleName(fMethod.getDeclaringType().getElementName())), null);
+					else if (!fStaticImports.contains(method)) {
+						ITypeBinding declaring= method.getDeclaringClass();
+						if (declaring != null) {
+							IType type= (IType) declaring.getJavaElement();
+							if (type != null) {
+								rewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, ast.newName(type.getTypeQualifiedName('.')), null);
+							}
+						}
+					}
 					return true;
 				} else {
 					if (expression instanceof FieldAccess) {
@@ -1212,15 +1218,17 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(status);
 		final IMethod[] methods= fTargetType.getMethods();
+		int newParamCount= fMethod.getParameterTypes().length;
+		if (!fTarget.isField())
+			newParamCount--; // moving to a parameter
+		if (needsTargetNode())
+			newParamCount++; // will add a parameter for the old 'this'
 		try {
 			monitor.beginTask("", methods.length); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking);
 			IMethod method= null;
 			for (int index= 0; index < methods.length; index++) {
 				method= methods[index];
-				int newParamCount= fMethod.getParameterTypes().length;
-				if (needsTargetNode())
-					newParamCount--;
 				if (method.getElementName().equals(fMethodName) && method.getParameterTypes().length == newParamCount)
 					status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_method_already_exists, new String[] { BasicElementLabels.getJavaElementName(fMethodName), BasicElementLabels.getJavaElementName(fTargetType.getElementName()) }), JavaStatusContext.create(method)));
 				monitor.worked(1);
@@ -1685,39 +1693,32 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            the argument list to create
 	 * @param factory
 	 *            the argument factory to use
-	 * @return <code>true</code> if a target node had to be inserted as first
-	 *         argument, <code>false</code> otherwise
 	 * @throws JavaModelException
 	 *             if an error occurs
 	 */
-	protected boolean createArgumentList(final MethodDeclaration declaration, final List<ASTNode> arguments, final IArgumentFactory factory) throws JavaModelException {
+	protected void createArgumentList(MethodDeclaration declaration, List<ASTNode> arguments, IArgumentFactory factory) throws JavaModelException {
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(arguments);
 		Assert.isNotNull(factory);
-		final AstNodeFinder finder= new ThisReferenceFinder();
-		declaration.accept(finder);
-		IVariableBinding binding= null;
-		VariableDeclaration variable= null;
-		boolean added= false;
-		final int size= declaration.parameters().size();
-		for (int index= 0; index < size; index++) {
-			variable= (VariableDeclaration) declaration.parameters().get(index);
-			binding= variable.resolveBinding();
-			if (binding != null) {
-				if (!Bindings.equals(binding, fTarget))
-					arguments.add(factory.getArgumentNode(binding, index == size - 1));
-				else if (!finder.getStatus().isOK()) {
+		List<SingleVariableDeclaration> parameters= declaration.parameters();
+		int size= parameters.size();
+		for (int i= 0; i < size; i++) {
+			IVariableBinding binding= parameters.get(i).resolveBinding();
+			if (binding != null && Bindings.equals(binding, fTarget)) {
+				if (needsTargetNode()) {
+					// replace move target parameter with new target
 					arguments.add(factory.getTargetNode());
-					added= true;
+				} else {
+					// drop unused move target parameter 
 				}
-			} else
-				arguments.add(factory.getArgumentNode(binding, index == size - 1));
+			} else {
+				arguments.add(factory.getArgumentNode(binding, i == size - 1));
+			}
 		}
-		if (!finder.getStatus().isOK() && !added) {
+		if (needsTargetNode() && fTarget.isField()) {
+			// prepend new target when moving to a field
 			arguments.add(0, factory.getTargetNode());
-			added= true;
 		}
-		return added;
 	}
 
 	/*
@@ -1808,15 +1809,15 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			adjustor.setRewrite(sourceRewrite, fSourceRewrite.getRoot());
 			adjustor.adjustVisibility(new SubProgressMonitor(monitor, 1));
 			final IDocument document= new Document(fMethod.getCompilationUnit().getBuffer().getContents());
-			final boolean target= createMethodCopy(document, declaration, sourceRewrite, rewrites, adjustor.getAdjustments(), status, new SubProgressMonitor(monitor, 1));
-			createMethodJavadocReferences(rewrites, declaration, references, target, status, new SubProgressMonitor(monitor, 1));
+			createMethodCopy(document, declaration, sourceRewrite, rewrites, adjustor.getAdjustments(), status, new SubProgressMonitor(monitor, 1));
+			createMethodJavadocReferences(rewrites, declaration, references, status, new SubProgressMonitor(monitor, 1));
 			if (!fSourceRewrite.getCu().equals(targetRewrite.getCu()))
 				createMethodImports(targetRewrite, declaration, new SubProgressMonitor(monitor, 1), status);
 			boolean removable= false;
 			if (fInline) {
 				String binaryRefsDescription= Messages.format(RefactoringCoreMessages.ReferencesInBinaryContext_ref_in_binaries_description , BasicElementLabels.getJavaElementName(getMethod().getElementName()));
 				ReferencesInBinaryContext binaryRefs= new ReferencesInBinaryContext(binaryRefsDescription);
-				removable= createMethodDelegator(rewrites, declaration, references, adjustor.getAdjustments(), target, binaryRefs, status, new SubProgressMonitor(monitor, 1));
+				removable= createMethodDelegator(rewrites, declaration, references, adjustor.getAdjustments(), binaryRefs, status, new SubProgressMonitor(monitor, 1));
 				binaryRefs.addErrorIfNecessary(status);
 				if (fRemove && removable) {
 					fSourceRewrite.getASTRewrite().remove(declaration, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.MoveInstanceMethodProcessor_remove_original_method));
@@ -1864,9 +1865,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            the search match representing the method invocation
 	 * @param adjustments
 	 *            the map of elements to visibility adjustments
-	 * @param target
-	 *            <code>true</code> if a target node had to be inserted as
-	 *            first argument, <code>false</code> otherwise
 	 * @param status
 	 *            the refactoring status
 	 * @return <code>true</code> if the inline change could be performed,
@@ -1875,7 +1873,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *             if a problem occurred while creating the inlined target
 	 *             expression for field targets
 	 */
-	protected boolean createInlinedMethodInvocation(final CompilationUnitRewrite rewriter, final MethodDeclaration declaration, final SearchMatch match, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final boolean target, final RefactoringStatus status) throws JavaModelException {
+	protected boolean createInlinedMethodInvocation(CompilationUnitRewrite rewriter, MethodDeclaration declaration, SearchMatch match,
+			Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, RefactoringStatus status) throws JavaModelException {
 		Assert.isNotNull(rewriter);
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(match);
@@ -1885,7 +1884,47 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		final ASTRewrite rewrite= rewriter.getASTRewrite();
 		final ASTNode node= ASTNodeSearchUtil.findNode(match, rewriter.getRoot());
 		final TextEditGroup group= rewriter.createGroupDescription(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_method_invocation);
-		if (node instanceof MethodInvocation) {
+		if (node instanceof SuperMethodInvocation) {
+			SuperMethodInvocation invocation= (SuperMethodInvocation) node;
+			MethodInvocation newMethodInvocation= rewrite.getAST().newMethodInvocation();
+			newMethodInvocation.setName(rewrite.getAST().newSimpleName(fMethodName));
+			if (fTarget.isField()) {
+				newMethodInvocation.setStructuralProperty(MethodInvocation.EXPRESSION_PROPERTY, rewrite.getAST().newSimpleName(fTarget.getName()));
+				if (needsTargetNode()) {
+					newMethodInvocation.arguments().add(rewrite.getAST().newThisExpression());
+				}
+				for (ASTNode astNode : (List<ASTNode>) invocation.arguments()) {
+					newMethodInvocation.arguments().add(rewrite.createCopyTarget(astNode));
+				}
+			} else {
+				final IVariableBinding[] bindings= getArgumentBindings(declaration);
+				List<ASTNode> arguments= invocation.arguments();
+				for (int i= 0; i < arguments.size(); i++) {
+					ASTNode arg= arguments.get(i);
+					if (bindings.length > i && Bindings.equals(bindings[i], fTarget)) {
+						if (arg.getNodeType() == ASTNode.NULL_LITERAL) {
+							status.merge(RefactoringStatus.createErrorStatus(
+									Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_null_argument,
+											BindingLabelProvider.getBindingLabel(declaration.resolveBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED)),
+											JavaStatusContext.create(rewriter.getCu(), invocation)));
+							result= false;
+						} else {
+							if (arg.getNodeType() != ASTNode.THIS_EXPRESSION) {
+								newMethodInvocation.setStructuralProperty(MethodInvocation.EXPRESSION_PROPERTY, rewrite.createCopyTarget(arg));
+							}
+							if (needsTargetNode()) {
+								newMethodInvocation.arguments().add(rewrite.getAST().newThisExpression());
+							}
+						}
+					} else {
+						newMethodInvocation.arguments().add(rewrite.createCopyTarget(arg));
+					}
+				}
+			}
+			if (result) {
+				rewrite.replace(node, newMethodInvocation, group);
+			}
+		} else if (node instanceof MethodInvocation) {
 			final MethodInvocation invocation= (MethodInvocation) node;
 			final ListRewrite list= rewrite.getListRewrite(invocation, MethodInvocation.ARGUMENTS_PROPERTY);
 			if (fTarget.isField()) {
@@ -1895,7 +1934,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, access, group);
 				} else
 					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, rewrite.getAST().newSimpleName(fTarget.getName()), group);
-				if (target) {
+				if (needsTargetNode()) {
 					if (access == null || !(access instanceof FieldAccess))
 						list.insertFirst(rewrite.getAST().newThisExpression(), null);
 					else
@@ -1918,7 +1957,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 								rewrite.remove(invocation.getExpression(), null);
 							else
 								rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, rewrite.createCopyTarget(argument), group);
-							if (target) {
+							if (needsTargetNode()) {
 								if (invocation.getExpression() != null)
 									list.replace(argument, rewrite.createCopyTarget(invocation.getExpression()), group);
 								else {
@@ -1999,12 +2038,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            the map of elements to visibility adjustments
 	 * @param status
 	 *            the refactoring status
-	 * @return <code>true</code> if a target node had to be inserted as method
-	 *         argument, <code>false</code> otherwise
 	 * @throws JavaModelException
 	 *             if an error occurs while accessing the types of the arguments
 	 */
-	protected boolean createMethodArguments(final Map<ICompilationUnit, CompilationUnitRewrite> rewrites, final ASTRewrite rewrite, final MethodDeclaration declaration, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final RefactoringStatus status) throws JavaModelException {
+	protected void createMethodArguments(Map<ICompilationUnit, CompilationUnitRewrite> rewrites, ASTRewrite rewrite, final MethodDeclaration declaration, Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, RefactoringStatus status) throws JavaModelException {
 		Assert.isNotNull(rewrites);
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(rewrite);
@@ -2015,7 +2052,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		final AstNodeFinder finder= new AnonymousClassReferenceFinder(declaration);
 		declaration.accept(finder);
 		final List<ASTNode> arguments= new ArrayList<ASTNode>(declaration.parameters().size() + 1);
-		final boolean result= createArgumentList(declaration, arguments, new VisibilityAdjustingArgumentFactory(ast, rewrites, adjustments) {
+		createArgumentList(declaration, arguments, new VisibilityAdjustingArgumentFactory(ast, rewrites, adjustments) {
 
 			@Override
 			public final ASTNode getArgumentNode(final IVariableBinding binding, final boolean last) throws JavaModelException {
@@ -2074,7 +2111,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			node= iterator.next();
 			list.insertLast(node, null);
 		}
-		return result;
 	}
 
 	/**
@@ -2226,10 +2262,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            the progress monitor to display progress
 	 * @throws CoreException
 	 *             if an error occurs
-	 * @return <code>true</code> if a target node had to be inserted as first
-	 *         argument, <code>false</code> otherwise
 	 */
-	protected boolean createMethodCopy(final IDocument document, final MethodDeclaration declaration, final ASTRewrite rewrite, final Map<ICompilationUnit, CompilationUnitRewrite> rewrites, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	protected void createMethodCopy(IDocument document, MethodDeclaration declaration, ASTRewrite rewrite, Map<ICompilationUnit, CompilationUnitRewrite> rewrites, Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, RefactoringStatus status, IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(document);
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(rewrite);
@@ -2237,7 +2271,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		Assert.isNotNull(adjustments);
 		Assert.isNotNull(status);
 		Assert.isNotNull(monitor);
-		boolean target= false;
 		final CompilationUnitRewrite rewriter= getCompilationUnitRewrite(rewrites, getTargetType().getCompilationUnit());
 		try {
 			rewrite.set(declaration, MethodDeclaration.NAME_PROPERTY, rewrite.getAST().newSimpleName(fMethodName), null);
@@ -2255,7 +2288,16 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					adjustments.put(fMethod, adjustment);
 				}
 			}
-			target= createMethodArguments(rewrites, rewrite, declaration, adjustments, status);
+			for (IExtendedModifier modifier : (List<IExtendedModifier>) declaration.modifiers()) {
+				if (modifier.isAnnotation()) {
+					Annotation annotation= (Annotation) modifier;
+					ITypeBinding typeBinding= annotation.resolveTypeBinding();
+					if (typeBinding != null && typeBinding.getQualifiedName().equals("java.lang.Override")) { //$NON-NLS-1$
+						rewrite.remove(annotation, null);
+					}
+				}
+			}
+			createMethodArguments(rewrites, rewrite, declaration, adjustments, status);
 			createMethodTypeParameters(rewrite, declaration, status);
 			createMethodComment(rewrite, declaration);
 			createMethodBody(rewriter, rewrite, declaration);
@@ -2263,7 +2305,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			if (fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit()))
 				rewriter.clearImportRewrites();
 		}
-		return target;
 	}
 
 	/**
@@ -2282,10 +2323,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            the progress monitor to display progress
 	 * @throws CoreException
 	 *             if the change could not be generated
-	 * @return <code>true</code> if a target node had to be inserted as first
-	 *         argument, <code>false</code> otherwise
 	 */
-	protected boolean createMethodDelegation(final MethodDeclaration declaration, final Map<ICompilationUnit, CompilationUnitRewrite> rewrites, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
+	protected void createMethodDelegation(final MethodDeclaration declaration, final Map<ICompilationUnit, CompilationUnitRewrite> rewrites, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(monitor);
 
@@ -2297,8 +2336,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		creator.setNewElementName(fMethodName);
 		creator.prepareDelegate();
 		creator.createEdit();
-
-		return creator.getNeededInsertion();
 	}
 
 	/**
@@ -2314,9 +2351,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            moved method, including references in comments
 	 * @param adjustments
 	 *            the map of elements to visibility adjustments
-	 * @param target
-	 *            <code>true</code> if a target node must be inserted as first
-	 *            argument, <code>false</code> otherwise
 	 * @param binaryRefs
 	 *            the binary references context
 	 * @param status
@@ -2327,7 +2361,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *         method declaration could be inlined, <code>false</code>
 	 *         otherwise
 	 */
-	protected boolean createMethodDelegator(final Map<ICompilationUnit, CompilationUnitRewrite> rewrites, final MethodDeclaration declaration, final SearchResultGroup[] groups, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final boolean target, ReferencesInBinaryContext binaryRefs, final RefactoringStatus status, final IProgressMonitor monitor) {
+	protected boolean createMethodDelegator(Map<ICompilationUnit, CompilationUnitRewrite> rewrites, MethodDeclaration declaration, SearchResultGroup[] groups, Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, ReferencesInBinaryContext binaryRefs, RefactoringStatus status, IProgressMonitor monitor) {
 		Assert.isNotNull(rewrites);
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(groups);
@@ -2380,7 +2414,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 								if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
 									status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_inaccurate, BasicElementLabels.getFileName(unit)), JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength()))));
 									result= false;
-								} else if (!createInlinedMethodInvocation(rewrite, declaration, match, adjustments, target, status))
+								} else if (!createInlinedMethodInvocation(rewrite, declaration, match, adjustments, status))
 									result= false;
 							}
 						} else {
@@ -2438,13 +2472,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *            the source method declaration
 	 * @param match
 	 *            the search match representing the method reference
-	 * @param targetNode
-	 *            <code>true</code> if a target node had to be inserted as
-	 *            first argument, <code>false</code> otherwise
 	 * @param status
 	 *            the refactoring status
 	 */
-	protected void createMethodJavadocReference(final CompilationUnitRewrite rewrite, final MethodDeclaration declaration, final SearchMatch match, final boolean targetNode, final RefactoringStatus status) {
+	protected void createMethodJavadocReference(CompilationUnitRewrite rewrite, MethodDeclaration declaration, SearchMatch match, RefactoringStatus status) {
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(match);
@@ -2469,15 +2500,12 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @param groups
 	 *            the search result groups representing all references to the
 	 *            moved method, including references in comments
-	 * @param target
-	 *            <code>true</code> if a target node must be inserted as first
-	 *            argument, <code>false</code> otherwise
 	 * @param status
 	 *            the refactoring status
 	 * @param monitor
 	 *            the progress monitor to use
 	 */
-	protected void createMethodJavadocReferences(final Map<ICompilationUnit, CompilationUnitRewrite> rewrites, final MethodDeclaration declaration, final SearchResultGroup[] groups, final boolean target, final RefactoringStatus status, final IProgressMonitor monitor) {
+	protected void createMethodJavadocReferences(Map<ICompilationUnit, CompilationUnitRewrite> rewrites, MethodDeclaration declaration, SearchResultGroup[] groups, RefactoringStatus status, IProgressMonitor monitor) {
 		Assert.isNotNull(rewrites);
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(status);
@@ -2504,7 +2532,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 						if (match.getAccuracy() == SearchMatch.A_INACCURATE) {
 							status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_inaccurate, BasicElementLabels.getFileName(unit)), JavaStatusContext.create(unit, new SourceRange(match.getOffset(), match.getLength()))));
 						} else
-							createMethodJavadocReference(rewrite, declaration, match, target, status);
+							createMethodJavadocReference(rewrite, declaration, match, status);
 					}
 				}
 				monitor.worked(1);

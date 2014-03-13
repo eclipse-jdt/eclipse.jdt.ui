@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Lars Vogel <Lars.Vogel@gmail.com> - Bug 427883
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
@@ -33,6 +34,7 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -43,12 +45,10 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.Window;
 
@@ -74,24 +74,6 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
 public class ExtractClassWizard extends RefactoringWizard {
-
-	public class FieldContentProvider implements IStructuredContentProvider {
-
-		public void dispose() {
-		}
-
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		}
-
-		public Object[] getElements(Object inputElement) {
-			if (inputElement instanceof ExtractClassDescriptor) {
-				ExtractClassDescriptor descriptor= (ExtractClassDescriptor) inputElement;
-				return descriptor.getFields();
-			}
-			return null;
-		}
-
-	}
 
 	private ExtractClassDescriptor fDescriptor;
 
@@ -275,7 +257,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 			layoutComposite.addColumnData(new ColumnWeightData(40, convertWidthInCharsToPixels(20), true));
 			layoutComposite.addColumnData(new ColumnWeightData(60, convertWidthInCharsToPixels(20), true));
 			final CheckboxTableViewer tv= CheckboxTableViewer.newCheckList(layoutComposite, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
-			tv.setContentProvider(new FieldContentProvider());
+			tv.setContentProvider(ArrayContentProvider.getInstance());
 			createColumns(tv);
 
 			Table table= tv.getTable();
@@ -283,13 +265,13 @@ public class ExtractClassWizard extends RefactoringWizard {
 			table.setHeaderVisible(true);
 			gridData= new GridData(GridData.FILL_BOTH);
 			table.setLayoutData(gridData);
-			tv.setInput(fDescriptor);
-			final Field[] fields= fDescriptor.getFields();
+			Field[] fields= fDescriptor.getFields();
+			tv.setInput(fields);
 			for (int i= 0; i < fields.length; i++) {
 				Field field= fields[i];
 				tv.setChecked(field, field.isCreateField());
 			}
-			tv.refresh(true);
+
 			gridData= new GridData(GridData.FILL_BOTH);
 			gridData.heightHint= SWTUtil.getTableHeightHint(table, Math.max(fields.length,5));
 			gridData.widthHint= convertWidthInCharsToPixels(50);

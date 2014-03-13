@@ -247,7 +247,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 		}
 	}
 
-	protected static void copyJavadocNode(final ASTRewrite rewrite, final BodyDeclaration oldDeclaration, final BodyDeclaration newDeclaration) throws JavaModelException {
+	protected static void copyJavadocNode(final ASTRewrite rewrite, final BodyDeclaration oldDeclaration, final BodyDeclaration newDeclaration) {
 		final Javadoc predecessor= oldDeclaration.getJavadoc();
 		if (predecessor != null) {
 			String newString= ASTNodes.getNodeSource(predecessor, false, true);

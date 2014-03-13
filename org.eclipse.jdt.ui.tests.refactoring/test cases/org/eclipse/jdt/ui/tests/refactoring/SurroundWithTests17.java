@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Samrat Dhillon <samrat.dhillon@gmail.com> - Bug 388724 -  [surround with try/catch][quick fix] Multi-Catch QuickFix creates compiler error
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -57,6 +58,10 @@ public class SurroundWithTests17 extends SurroundWithTests {
 	}
 
 	public void testSimple2() throws Exception {
+		tryCatchTest();
+	}
+	
+	public void testMultiTryCatch() throws Exception {
 		tryCatchTest();
 	}
 

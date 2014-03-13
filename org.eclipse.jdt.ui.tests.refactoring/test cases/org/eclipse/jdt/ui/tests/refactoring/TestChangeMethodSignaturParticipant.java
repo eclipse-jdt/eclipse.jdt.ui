@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2009 IBM Corporation and others.
+ * Copyright (c) 2007, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Assert;
+
+import org.junit.Assert;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -25,9 +26,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureArguments;
-import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureParticipant;
 import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureArguments.Parameter;
 import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureArguments.ThrownException;
+import org.eclipse.jdt.core.refactoring.participants.ChangeMethodSignatureParticipant;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;

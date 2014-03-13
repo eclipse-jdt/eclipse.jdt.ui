@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [extract class] Extract class refactoring on a field in an inner non-static class yields compilation error - https://bugs.eclipse.org/394547
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -482,18 +483,29 @@ public class ExtractClassRefactoring extends Refactoring {
 			ListRewrite listRewrite= rewrite.getListRewrite(typeDecl, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 			TypeDeclaration paramClass= pof.createClassDeclaration(typeDecl.getName().getFullyQualifiedName(), fBaseCURewrite, fieldUpdate);
 			paramClass.modifiers().add(rewrite.getAST().newModifier(ModifierKeyword.PUBLIC_KEYWORD));
-			paramClass.modifiers().add(rewrite.getAST().newModifier(ModifierKeyword.STATIC_KEYWORD));
+			if (shouldParamClassBeStatic(typeDecl)) {
+				paramClass.modifiers().add(rewrite.getAST().newModifier(ModifierKeyword.STATIC_KEYWORD));
+			}
 			listRewrite.insertFirst(paramClass, fBaseCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractClassRefactoring_group_insert_parameter));
 			return new ArrayList<ResourceChange>(); //Change will be generated later for fBaseCURewrite
 		}
 
 	}
 
+	private boolean shouldParamClassBeStatic(TypeDeclaration enclosingTypeDecl) {
+		if (enclosingTypeDecl.isPackageMemberTypeDeclaration()) {
+			return true;
+		}
+		ITypeBinding binding= enclosingTypeDecl.resolveBinding();
+		int modifiers= binding != null ? binding.getModifiers() : enclosingTypeDecl.getModifiers();
+		return Modifier.isStatic(modifiers);
+	}
+
 	private ParameterObjectFactory initializeFactory() {
 		ParameterObjectFactory pof= new ParameterObjectFactory();
 		pof.setClassName(fDescriptor.getClassName());
 		pof.setPackage(fDescriptor.getPackage());
-		pof.setEnclosingType(fDescriptor.getType().getFullyQualifiedName());
+		pof.setEnclosingType(fDescriptor.getType().getFullyQualifiedName('.'));
 		pof.setCreateGetter(fDescriptor.isCreateGetterSetter());
 		pof.setCreateSetter(fDescriptor.isCreateGetterSetter());
 		List<ParameterInfo> variables= new ArrayList<ParameterInfo>();
@@ -742,9 +754,9 @@ public class ExtractClassRefactoring extends Refactoring {
 						status.addFatalError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_fatal_error_cannot_resolve_binding, BasicElementLabels.getJavaElementName(pi.name)), JavaStatusContext.create(typeRoot, vdf));
 					} else {
 						ITypeBinding typeBinding= binding.getType();
-						if (Modifier.isPrivate(typeBinding.getDeclaredModifiers())){
+						if (Modifier.isPrivate(typeBinding.getModifiers())){
 							status.addError(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_error_referencing_private_class, BasicElementLabels.getJavaElementName(typeBinding.getName())), JavaStatusContext.create(typeRoot, vdf));
-						} else if (Modifier.isProtected(typeBinding.getDeclaredModifiers())){
+						} else if (Modifier.isProtected(typeBinding.getModifiers())){
 							ITypeBinding declaringClass= typeBinding.getDeclaringClass();
 							if (declaringClass != null) {
 								IPackageBinding package1= declaringClass.getPackage();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -534,14 +534,14 @@ public class InferTypeArgumentsTCModel {
 
 	public CollectionElementVariable2 getElementVariable(ConstraintVariable2 constraintVariable, ITypeBinding typeVariable) {
 		Assert.isTrue(typeVariable.isTypeVariable()); // includes null check
-		HashMap<String, CollectionElementVariable2> typeVarToElementVars= (HashMap<String, CollectionElementVariable2>) constraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
+		HashMap<String, CollectionElementVariable2> typeVarToElementVars= getIndexedCollectionElements(constraintVariable);
 		if (typeVarToElementVars == null)
 			return null;
 		return typeVarToElementVars.get(typeVariable.getKey());
 	}
 
 	public Map<String, CollectionElementVariable2> getElementVariables(ConstraintVariable2 constraintVariable) {
-		Map<String, CollectionElementVariable2> elementVariables= (Map<String, CollectionElementVariable2>) constraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
+		Map<String, CollectionElementVariable2> elementVariables= getIndexedCollectionElements(constraintVariable);
 		if (elementVariables == null)
 			return EMPTY_COLLECTION_ELEMENT_VARIABLES_MAP;
 		else
@@ -790,8 +790,13 @@ public class InferTypeArgumentsTCModel {
 		return cv;
 	}
 
-	private void setElementVariable(ConstraintVariable2 typeConstraintVariable, CollectionElementVariable2 elementVariable, TypeVariable typeVariable) {
-		HashMap<String, CollectionElementVariable2> keyToElementVar= (HashMap<String, CollectionElementVariable2>) typeConstraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
+	@SuppressWarnings("unchecked")
+	private static HashMap<String, CollectionElementVariable2> getIndexedCollectionElements(ConstraintVariable2 constraintVariable) {
+		return (HashMap<String, CollectionElementVariable2>) constraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
+	}
+
+	private static void setElementVariable(ConstraintVariable2 typeConstraintVariable, CollectionElementVariable2 elementVariable, TypeVariable typeVariable) {
+		HashMap<String, CollectionElementVariable2> keyToElementVar= getIndexedCollectionElements(typeConstraintVariable);
 		String key= typeVariable.getBindingKey();
 		if (keyToElementVar == null) {
 			keyToElementVar= new HashMap<String, CollectionElementVariable2>();
@@ -807,7 +812,7 @@ public class InferTypeArgumentsTCModel {
 
 	public CollectionElementVariable2 getElementVariable(ConstraintVariable2 constraintVariable, TypeVariable typeVariable) {
 		Assert.isTrue(typeVariable.isTypeVariable()); // includes null check
-		HashMap<String, CollectionElementVariable2> typeVarToElementVars= (HashMap<String, CollectionElementVariable2>) constraintVariable.getData(INDEXED_COLLECTION_ELEMENTS);
+		HashMap<String, CollectionElementVariable2> typeVarToElementVars= getIndexedCollectionElements(constraintVariable);
 		if (typeVarToElementVars == null)
 			return null;
 		return typeVarToElementVars.get(typeVariable.getBindingKey());

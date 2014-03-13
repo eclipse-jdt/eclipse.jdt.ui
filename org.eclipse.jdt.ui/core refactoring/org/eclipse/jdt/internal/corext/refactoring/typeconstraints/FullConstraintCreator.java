@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Samrat Dhillon samrat.dhillon@gmail.com [generalize type] Generalize Declared Type does not consider use of variable in throw statement, which yields compilation error https://bugs.eclipse.org/bugs/show_bug.cgi?id=395989
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints;
 
@@ -49,6 +50,7 @@ import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -485,6 +487,18 @@ public class FullConstraintCreator extends ConstraintCreator{
 	@Override
 	public ITypeConstraint[] create(VariableDeclarationStatement vds){
 		return getConstraintsFromFragmentList(vds.fragments(), vds.getType());
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ThrowStatement)
+	 */
+	@Override
+	public ITypeConstraint[] create(ThrowStatement node) {
+		ConstraintVariable nameVariable= fConstraintVariableFactory.makeExpressionOrTypeVariable(node.getExpression(), getContext());
+		ITypeBinding throwable= node.getAST().resolveWellKnownType("java.lang.Throwable"); //$NON-NLS-1$
+		return fTypeConstraintFactory.createSubtypeConstraint(
+				nameVariable,
+				fConstraintVariableFactory.makeRawBindingVariable(throwable));
 	}
 
 

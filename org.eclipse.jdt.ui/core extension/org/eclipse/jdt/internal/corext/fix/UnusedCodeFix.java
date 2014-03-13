@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.edits.TextEditGroup;
@@ -27,8 +26,8 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -51,8 +50,8 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
@@ -65,6 +64,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
+import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -107,8 +107,9 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			Object operator= node.getOperator();
 			if (operator == PrefixExpression.Operator.INCREMENT || operator == PrefixExpression.Operator.DECREMENT) {
 				fSideEffectNodes.add(node);
+				return false;
 			}
-			return false;
+			return true;
 		}
 
 		@Override
@@ -311,10 +312,11 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 					fragments= ((VariableDeclarationStatement) varDecl).fragments();
 				}
 				Expression initializer = frag.getInitializer();
-				if (initializer instanceof CastExpression) {
-					initializer= ((CastExpression) initializer).getExpression();
+				ArrayList<Expression> sideEffects= new ArrayList<Expression>();
+				if (initializer != null) {
+					initializer.accept(new SideEffectFinder(sideEffects));
 				}
-				boolean sideEffectInitializer = initializer instanceof MethodInvocation || initializer instanceof ClassInstanceCreation;
+				boolean sideEffectInitializer= sideEffects.size() > 0;
 				if (fragments.size() == fUnusedNames.length) {
 					if (fForceRemove) {
 						rewrite.remove(varDecl, group);
@@ -324,10 +326,15 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 						rewrite.remove(varDecl, group);
 						return;
 					}
-					if (sideEffectInitializer){
-						Expression movedInit = (Expression) rewrite.createMoveTarget(initializer);
-						ExpressionStatement wrapped = rewrite.getAST().newExpressionStatement(movedInit);
-						rewrite.replace(varDecl, wrapped, group);
+					if (sideEffectInitializer) {
+						Statement[] wrapped= new Statement[sideEffects.size()];
+						for (int i= 0; i < wrapped.length; i++) {
+							Expression sideEffect= sideEffects.get(i);
+							Expression movedInit= (Expression) rewrite.createMoveTarget(sideEffect);
+							wrapped[i]= rewrite.getAST().newExpressionStatement(movedInit);
+						}
+						StatementRewrite statementRewrite= new StatementRewrite(rewrite, new ASTNode[] { varDecl });
+						statementRewrite.replace(wrapped, group);
 					} else {
 						rewrite.remove(varDecl, group);
 					}
@@ -343,16 +350,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 						return;
 					}
 					if (declaration instanceof VariableDeclarationStatement) {
-						ASTNode lst = declaration.getParent();
-						ListRewrite listRewrite= null;
-						if (lst instanceof Block) {
-							listRewrite= rewrite.getListRewrite(lst, Block.STATEMENTS_PROPERTY);
-						} else if (lst instanceof SwitchStatement) {
-							listRewrite= rewrite.getListRewrite(lst, SwitchStatement.STATEMENTS_PROPERTY);
-						} else {
-							Assert.isTrue(false);
-						}
-						splitUpDeclarations(rewrite, group, frag, listRewrite, (VariableDeclarationStatement) declaration);
+						splitUpDeclarations(rewrite, group, frag, (VariableDeclarationStatement) declaration, sideEffects);
 						rewrite.remove(frag, group);
 						return;
 					}
@@ -374,14 +372,18 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			}
 		}
 
-		private void splitUpDeclarations(ASTRewrite rewrite, TextEditGroup group, VariableDeclarationFragment frag, ListRewrite statementRewrite, VariableDeclarationStatement originalStatement) {
-			Expression initializer = frag.getInitializer();
-			//keep constructors and method invocations
-			if (initializer instanceof MethodInvocation || initializer instanceof ClassInstanceCreation){
-				Expression movedInitializer= (Expression) rewrite.createMoveTarget(initializer);
-
-				ExpressionStatement newInitializer= rewrite.getAST().newExpressionStatement( movedInitializer);
-				statementRewrite.insertAfter(newInitializer, originalStatement, group);
+		private void splitUpDeclarations(ASTRewrite rewrite, TextEditGroup group, VariableDeclarationFragment frag, VariableDeclarationStatement originalStatement, List<Expression> sideEffects) {
+			if (sideEffects.size() > 0) {
+				ListRewrite statementRewrite= rewrite.getListRewrite(originalStatement.getParent(), (ChildListPropertyDescriptor) originalStatement.getLocationInParent());
+				
+				Statement previousStatement= originalStatement;
+				for (int i= 0; i < sideEffects.size(); i++) {
+					Expression sideEffect= sideEffects.get(i);
+					Expression movedInit= (Expression) rewrite.createMoveTarget(sideEffect);
+					ExpressionStatement wrapped= rewrite.getAST().newExpressionStatement(movedInit);
+					statementRewrite.insertAfter(wrapped, previousStatement, group);
+					previousStatement= wrapped;
+				}
 
 				VariableDeclarationStatement newDeclaration= null;
 				List<VariableDeclarationFragment> fragments= originalStatement.fragments();
@@ -394,14 +396,15 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 						newDeclaration= rewrite.getAST().newVariableDeclarationStatement(movedFragment);
 						Type copiedType= (Type) rewrite.createCopyTarget(originalStatement.getType());
 						newDeclaration.setType(copiedType);
-					} else
+					} else {
 						newDeclaration.fragments().add(movedFragment);
+					}
 				}
 				if (newDeclaration != null){
-					statementRewrite.insertAfter(newDeclaration, newInitializer, group);
-				}
-				if (originalStatement.fragments().size() == newDeclaration.fragments().size() + 1){
-					rewrite.remove(originalStatement, group);
+					statementRewrite.insertAfter(newDeclaration, previousStatement, group);
+					if (originalStatement.fragments().size() == newDeclaration.fragments().size() + 1){
+						rewrite.remove(originalStatement, group);
+					}
 				}
 			}
 		}

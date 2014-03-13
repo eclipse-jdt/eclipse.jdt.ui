@@ -44,7 +44,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -78,6 +80,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -109,6 +112,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstrain
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
@@ -537,7 +541,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * @throws CoreException
 	 */
 	private void addAllChangesFor(ICompilationUnit icu, Set<ConstraintVariable> vars, CompilationUnitChange unitChange) throws CoreException {
-		CompilationUnit	unit= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(icu, false);
+		CompilationUnit	unit= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(icu, true);
 		ASTRewrite unitRewriter= ASTRewrite.create(unit.getAST());
 		MultiTextEdit root= new MultiTextEdit();
 		unitChange.setEdit(root); // Adam sez don't need this, but then unitChange.addGroupDescription() fails an assertion!
@@ -1211,6 +1215,13 @@ public class ChangeTypeRefactoring extends Refactoring {
 						    Collection<ITypeConstraint> constraints,
 							IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, constraints.size());
+
+		for(ICompilationUnit cu: fAffectedUnits){
+			if (!JavaModelUtil.isVisibleInHierarchy((IMember) (type.getJavaElement()), (IPackageFragment) cu.getParent())) {
+				return false;
+			}
+		}
+
 		for (Iterator<ITypeConstraint> it= constraints.iterator(); it.hasNext(); ) {
 			ITypeConstraint tc= it.next();
 			if (tc instanceof SimpleTypeConstraint) {
@@ -1320,7 +1331,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	private String updateImports(CompilationUnit astRoot, MultiTextEdit rootEdit) throws CoreException{
 		ImportRewrite rewrite= StubUtility.createImportRewrite(astRoot, true);
-		String typeName= rewrite.addImport(fSelectedType.getQualifiedName());
+		ContextSensitiveImportRewriteContext context= new ContextSensitiveImportRewriteContext(astRoot, fSelectionStart, rewrite);
+		String typeName= rewrite.addImport(fSelectedType.getQualifiedName(), context);
 		rootEdit.addChild(rewrite.rewriteImports(null));
 		return typeName;
 	}

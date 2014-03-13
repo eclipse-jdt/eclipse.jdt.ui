@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=44417)
  *       o Allow 'this' constructor to be inlined
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38093)
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - Anonymous class using final parameter breaks method inlining - https://bugs.eclipse.org/269401
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -503,7 +504,22 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void test91470() throws Exception {
 		performArgumentTest();
 	}
+	
+	//see bug 269401
+	public void testFinalParameter1() throws Exception {
+		performArgumentTest();
+	}
 
+	//see bug 269401
+	public void testFinalParameter2() throws Exception {
+		performArgumentTest();
+	}
+
+	//see bug 269401
+	public void testFinalParameter3() throws Exception {
+		performArgumentTest();
+	}
+	
 	/* *********************** Name Conflict Tests ******************************* */
 
 	private void performNameConflictTest() throws Exception {

@@ -13,10 +13,12 @@
  *     IBM Corporation - initial API and implementation
  *     Renaud Waldura &lt;renaud+eclipse@waldura.com&gt; - Access to static proposal
  *     Benjamin Muskalla <bmuskalla@innoopract.com> - [quick fix] Shouldn't offer "Add throws declaration" quickfix for overriding signature if result would conflict with overridden signature
+ *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -59,6 +61,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
@@ -291,7 +294,8 @@ public class LocalCorrectionsSubProcessor {
 				List<CatchClause> catchClauses= surroundingTry.catchClauses();
 
 				if (catchClauses != null && catchClauses.size() == 1) {
-					String label= uncaughtExceptions.length > 1
+					List<ITypeBinding> filteredExceptions= filterSubtypeExceptions(uncaughtExceptions);
+					String label= filteredExceptions.size() > 1
 							? CorrectionMessages.LocalCorrectionsSubProcessor_addexceptionstoexistingcatch_description
 							: CorrectionMessages.LocalCorrectionsSubProcessor_addexceptiontoexistingcatch_description;
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
@@ -305,8 +309,8 @@ public class LocalCorrectionsSubProcessor {
 					if (type instanceof UnionType) {
 						UnionType unionType= (UnionType) type;
 						ListRewrite listRewrite= rewrite.getListRewrite(unionType, UnionType.TYPES_PROPERTY);
-						for (int i= 0; i < uncaughtExceptions.length; i++) {
-							ITypeBinding excBinding= uncaughtExceptions[i];
+						for (int i= 0; i < filteredExceptions.size(); i++) {
+							ITypeBinding excBinding= filteredExceptions.get(i);
 							Type type2= imports.addImport(excBinding, ast, importRewriteContext);
 							listRewrite.insertLast(type2, null);
 
@@ -319,8 +323,8 @@ public class LocalCorrectionsSubProcessor {
 						List<Type> types= newUnionType.types();
 
 						types.add((Type) rewrite.createCopyTarget(type));
-						for (int i= 0; i < uncaughtExceptions.length; i++) {
-							ITypeBinding excBinding= uncaughtExceptions[i];
+						for (int i= 0; i < filteredExceptions.size(); i++) {
+							ITypeBinding excBinding= filteredExceptions.get(i);
 							Type type2= imports.addImport(excBinding, ast, importRewriteContext);
 							types.add(type2);
 
@@ -435,6 +439,23 @@ public class LocalCorrectionsSubProcessor {
 				proposals.add(proposal);
 			}
 		}
+	}
+
+	private static List<ITypeBinding> filterSubtypeExceptions(ITypeBinding[] exceptions) {
+		List<ITypeBinding> filteredExceptions= new ArrayList<ITypeBinding>();
+		filteredExceptions.addAll(Arrays.asList(exceptions));
+
+		for (Iterator<ITypeBinding> subtypeIterator= filteredExceptions.iterator(); subtypeIterator.hasNext();) {
+			ITypeBinding iTypeBinding= subtypeIterator.next();
+			for (Iterator<ITypeBinding> supertypeIterator= filteredExceptions.iterator(); supertypeIterator.hasNext();) {
+				ITypeBinding superTypeBinding= supertypeIterator.next();
+				if (!iTypeBinding.equals(superTypeBinding) && iTypeBinding.isSubTypeCompatible(superTypeBinding)) {
+					subtypeIterator.remove();
+					break;
+				}
+			}
+		}
+		return filteredExceptions;
 	}
 
 	private static void addExceptionTypeLinkProposals(LinkedCorrectionProposal proposal, ITypeBinding exc, String key) {
@@ -1096,7 +1117,7 @@ public class LocalCorrectionsSubProcessor {
 			
 		} else if (selectedNode instanceof Statement && selectedNode.getLocationInParent().isChildListProperty()) {
 			// remove all statements following the unreachable:
-			List<Statement> statements= (List<Statement>) selectedNode.getParent().getStructuralProperty(selectedNode.getLocationInParent());
+			List<Statement> statements= ASTNodes.<Statement>getChildListProperty(selectedNode.getParent(), (ChildListPropertyDescriptor) selectedNode.getLocationInParent());
 			int idx= statements.indexOf(selectedNode);
 			
 			ASTRewrite rewrite= ASTRewrite.create(selectedNode.getAST());
@@ -1847,6 +1868,13 @@ public class LocalCorrectionsSubProcessor {
 		
 		
 		proposals.add(proposal2);
+	}
+	
+	public static void getGenerateForLoopProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
+		if (coveringNode != null) {
+			QuickAssistProcessor.getGenerateForLoopProposals(context, coveringNode, null, proposals);
+		}
 	}
 
 }

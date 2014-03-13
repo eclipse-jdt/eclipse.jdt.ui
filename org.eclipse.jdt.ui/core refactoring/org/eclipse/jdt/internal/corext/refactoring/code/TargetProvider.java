@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,10 +63,9 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.ui.SharedASTProvider;
 
 /**
  * A TargetProvider provides all targets that have to be adapted, i.e. all method invocations that should be inlined.
@@ -469,7 +468,7 @@ abstract class TargetProvider {
 
 		@Override
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
-			ASTNode root= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, true);
+			ASTNode root= SharedASTProvider.getAST(unit, SharedASTProvider.WAIT_YES, pm);
 			InvocationFinder finder= new InvocationFinder(fMethodBinding);
 			root.accept(finder);
 			fCurrentBodies= finder.result;

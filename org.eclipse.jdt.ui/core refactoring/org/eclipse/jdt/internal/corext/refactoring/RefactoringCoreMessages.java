@@ -12,6 +12,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
+ *     Samrat Dhillon <samrat.dhillon@gmail.com> - [introduce factory] Introduce Factory on an abstract class adds a statement to create an instance of that class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=395016
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
@@ -936,6 +937,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String IntroduceFactory_unexpectedInitializerNodeType;
 
 	public static String IntroduceFactory_unsupportedNestedTypes;
+
+	public static String IntroduceFactory_abstractClass;
 
 	public static String IntroduceFactoryRefactoring_declare_private;
 

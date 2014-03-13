@@ -158,11 +158,12 @@ public class CompilationUnitRewrite {
 
 	public void clearImportRewrites() {
 		fImportRewrite= null;
+		fImportRemover= null;
 	}
 
 	public void clearASTAndImportRewrites() {
 		clearASTRewrite();
-		fImportRewrite= null;
+		clearImportRewrites();
 	}
 
 	public CategorizedTextEditGroup createCategorizedGroupDescription(String name, GroupCategorySet set) {
@@ -268,6 +269,8 @@ public class CompilationUnitRewrite {
 			}
 
 			if (needsAstRewrite) {
+				// clean up garbage from earlier calls to ASTRewrite#rewriteAST(..), see https://bugs.eclipse.org/bugs/show_bug.cgi?id=408334#c2
+				clearGroupDescriptionEdits();
 				TextEdit rewriteEdit;
 				if (fRememberContent != null) {
 					rewriteEdit= fRewrite.rewriteAST(fRememberContent, fCu.getJavaProject().getOptions(true));
@@ -366,7 +369,7 @@ public class CompilationUnitRewrite {
 		return fImportRemover;
 	}
 
-	public void clearGroupDescriptions() {
+	private void clearGroupDescriptionEdits() {
 		for (Iterator<TextEditGroup> iter= fTextEditGroups.iterator(); iter.hasNext();) {
 			TextEditGroup group= iter.next();
 			group.clearTextEdits();

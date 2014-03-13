@@ -17,6 +17,7 @@
  *								[quick fix] The fix change parameter type to @Nonnull generated a null change - https://bugs.eclipse.org/400668 
  *								[quick fix] don't propose null annotations when those are disabled - https://bugs.eclipse.org/405086
  *								[quickfix] Update null annotation quick fixes for bug 388281 - https://bugs.eclipse.org/395555
+ *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -266,6 +267,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NullableFieldReference:
 			case IProblem.ConflictingNullAnnotations:
 			case IProblem.ConflictingInheritedNullAnnotations:
+			case IProblem.ParsingErrorInsertToComplete:
 			case IProblem.ExplicitThisParameterNotBelow18:
 			case IProblem.DefaultMethodNotBelow18:
 			case IProblem.StaticInterfaceMethodNotBelow18:
@@ -758,6 +760,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ConflictingInheritedNullAnnotations:
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, ChangeKind.LOCAL, proposals);
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, ChangeKind.INVERSE, proposals);
+				break;
+			case IProblem.ParsingErrorInsertToComplete:
+				LocalCorrectionsSubProcessor.getGenerateForLoopProposals(context, problem, proposals);
 				break;
 			default:
 		}

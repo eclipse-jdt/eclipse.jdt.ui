@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,11 +65,6 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 * The current test result
 	 */
 	private TestExecution fExecution;
-
-	/**
-	 * The version expected by the client
-	 */
-	private String fVersion= ""; //$NON-NLS-1$
 
 	/**
 	 * The client socket.
@@ -280,10 +275,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 			}
 			else if(args[i].toLowerCase().equals("-debugging") || args[i].toLowerCase().equals("-debug")){ //$NON-NLS-1$ //$NON-NLS-2$
 			    fDebugMode= true;
-			}
-			else if(args[i].toLowerCase().equals("-version")){ //$NON-NLS-1$
-			    fVersion= args[i+1];
-			    i++;
+
 			} else if (args[i].toLowerCase().equals("-junitconsole")) { //$NON-NLS-1$
 			    fConsoleMode  = true;
 			} else if (args[i].toLowerCase().equals("-testloaderclass")) { //$NON-NLS-1$
@@ -511,7 +503,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	protected IClassifiesThrowables getClassifier() {
-		return new DefaultClassifier(fVersion);
+		return new DefaultClassifier();
 	}
 
 	public void visitTreeEntry(ITestIdentifier id, boolean b, int i) {

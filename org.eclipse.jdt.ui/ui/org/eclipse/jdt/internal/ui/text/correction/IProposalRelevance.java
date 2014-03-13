@@ -12,6 +12,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Billy Huang <billyhuang31@gmail.com> - [quick assist] concatenate/merge string literals - https://bugs.eclipse.org/77632
+ *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -209,6 +210,7 @@ public interface IProposalRelevance {
 	public static final int CHANGE_TO_ATTRIBUTE= 3;
 
 	public static final int CONVERT_TO_INDEXED_FOR_LOOP= 2;
+	public static final int GENERATE_ENHANCED_FOR_LOOP= 2;
 	public static final int USE_SEPARATE_CATCH_BLOCKS= 2;
 	public static final int INSERT_NULL_CHECK= 2;
 	public static final int COMBINE_CATCH_BLOCKS= 2;
@@ -220,6 +222,7 @@ public interface IProposalRelevance {
 	public static final int JOIN_VARIABLE_DECLARATION= 1;
 	public static final int INVERT_EQUALS= 1;
 	public static final int CONVERT_TO_ITERATOR_FOR_LOOP= 1;
+	public static final int GENERATE_FOR_LOOP= 1;
 	public static final int ADD_TYPE_TO_ARRAY_INITIALIZER= 1;
 	public static final int REMOVE_EXTRA_PARENTHESES= 1;
 	public static final int CONVERT_ITERABLE_LOOP_TO_ENHANCED= 1;

@@ -13,13 +13,17 @@ package org.eclipse.jdt.internal.junit.buildpath;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.net.URL;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 
 import org.eclipse.equinox.frameworkadmin.BundleInfo;
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.osgi.service.resolver.VersionRange;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -45,6 +49,8 @@ public class BuildPathSupport {
 		private final String sourceBundleId;
 		private final String repositorySource;
 		private final String javadocPreferenceKey;
+		
+		private String resolvedVersion = null;
 
 		public JUnitPluginDescription(String bundleId, VersionRange versionRange, String bundleRoot, String binaryImportedRoot, String sourceBundleId, String repositorySource, String javadocPreferenceKey) {
 			this.bundleId= bundleId;
@@ -57,21 +63,65 @@ public class BuildPathSupport {
 		}
 		
 		public IPath getBundleLocation() {
-			return P2Utils.getBundleLocationPath(P2Utils.findBundle(bundleId, versionRange, false));
+			return getBundleLocation(bundleId, versionRange);
 		}
 		
 		public IPath getSourceBundleLocation() {
-			return getSourceLocation(P2Utils.findBundle(bundleId, versionRange, false));
+			return getSourceLocation(getBundleLocation());
+		}
+
+		private IPath getBundleLocation(String aBundleId, VersionRange aVersionRange) {
+			return getBundleLocation(aBundleId, aVersionRange, false);
+		}
+		
+		private IPath getBundleLocation(String aBundleId, VersionRange aVersionRange, boolean isSourceBundle) {
+			BundleInfo bundleInfo = P2Utils.findBundle(aBundleId, aVersionRange, isSourceBundle);
+			if (bundleInfo != null) {
+				resolvedVersion = bundleInfo.getVersion();
+				return P2Utils.getBundleLocationPath(bundleInfo);
+			} else {
+				// p2's simple configurator is not available. Let's try with installed bundles from the running platform.
+				// Note: Source bundles are typically not available at run time!
+				Bundle[] bundles= Platform.getBundles(aBundleId, aVersionRange.toString());
+				Bundle bestMatch = null;
+				if (bundles != null) {
+					for (int i= 0; i < bundles.length; i++) {
+						Bundle bundle= bundles[i];
+						if (bestMatch == null || bundle.getState() > bestMatch.getState()) {
+							bestMatch= bundle;
+						}
+					}
+				}
+				if (bestMatch != null) {
+					try {
+						resolvedVersion = bestMatch.getVersion().toString();
+						URL rootUrl= bestMatch.getEntry("/"); //$NON-NLS-1$
+						URL fileRootUrl= FileLocator.toFileURL(rootUrl);
+						return new Path(fileRootUrl.getPath());
+					} catch (IOException ex) {
+						JUnitCorePlugin.log(ex);
+					}
+				}
+			}
+			return null;
 		}
 		
 		public IClasspathEntry getLibraryEntry() {
-			BundleInfo bundleInfo= P2Utils.findBundle(bundleId, versionRange, false);
-			IPath bundleLocation= P2Utils.getBundleLocationPath(bundleInfo);
+			IPath bundleLocation = getBundleLocation(bundleId, versionRange);
 			if (bundleLocation != null) {
-				
-				IPath bundleRootLocation= getLibraryLocation(bundleInfo, bundleLocation);
-				IPath srcLocation= getSourceLocation(bundleInfo);
-				
+				IPath bundleRootLocation= null;
+				if (bundleRoot != null) {
+					bundleRootLocation= getLocationIfExists(bundleLocation, bundleRoot);
+				}
+				if (bundleRootLocation == null && binaryImportedRoot != null) {
+					bundleRootLocation= getLocationIfExists(bundleLocation, binaryImportedRoot);
+				}
+				if (bundleRootLocation == null) {
+					bundleRootLocation= getBundleLocation(bundleId, versionRange);
+				}
+
+				IPath srcLocation= getSourceLocation(bundleLocation);
+
 				String javadocLocation= Platform.getPreferencesService().getString(JUnitCorePlugin.CORE_PLUGIN_ID, javadocPreferenceKey, "", null); //$NON-NLS-1$
 				IClasspathAttribute[] attributes;
 				if (javadocLocation.length() == 0) {
@@ -89,44 +139,30 @@ public class BuildPathSupport {
 			return new IAccessRule[0];
 		}
 
-		private IPath getLibraryLocation(BundleInfo bundleInfo, IPath bundleLocation) {
-			IPath bundleRootLocation= null;
-			if (bundleRoot != null)
-				bundleRootLocation= getLocationIfExists(bundleInfo, bundleRoot);
-			
-			if (bundleRootLocation == null && binaryImportedRoot != null)
-				bundleRootLocation= getLocationIfExists(bundleInfo, binaryImportedRoot);
-			
-			if (bundleRootLocation == null)
-				bundleRootLocation= bundleLocation;
-			return bundleRootLocation;
-		}
-
-		private IPath getSourceLocation(BundleInfo bundleInfo) {
+		private IPath getSourceLocation(IPath bundleLocation) {
 			IPath srcLocation= null;
 			if (repositorySource != null) {
 				// Try source in workspace (from repository)
-				srcLocation= getLocationIfExists(bundleInfo, repositorySource);
+				srcLocation= getLocationIfExists(bundleLocation, repositorySource);
 			}
 			
 			if (srcLocation == null) {
-				BundleInfo sourceBundleInfo= null;
-				if (bundleInfo != null) {
+				if (bundleLocation != null) {
 					// Try exact version
-					sourceBundleInfo= P2Utils.findBundle(sourceBundleId, new Version(bundleInfo.getVersion()), true);
+					Version version= new Version(resolvedVersion);
+					srcLocation= getBundleLocation(sourceBundleId, new VersionRange(version, true, version, true), true);
 				}
-				if (sourceBundleInfo == null) {
+				if (srcLocation == null) {
 					// Try version range
-					sourceBundleInfo= P2Utils.findBundle(sourceBundleId, versionRange, true);
+					srcLocation= getBundleLocation(sourceBundleId, versionRange, true);
 				}
-				srcLocation= P2Utils.getBundleLocationPath(sourceBundleInfo);
 			}
+
 			return srcLocation;
 		}
 
-		private IPath getLocationIfExists(BundleInfo bundleInfo, final String entryInBundle) {
+		private IPath getLocationIfExists(IPath bundleLocationPath, final String entryInBundle) {
 			IPath srcLocation= null;
-			IPath bundleLocationPath= P2Utils.getBundleLocationPath(bundleInfo);
 			if (bundleLocationPath != null) {
 				File bundleFile= bundleLocationPath.toFile();
 				if (bundleFile.isDirectory()) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,9 +26,11 @@ import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 
@@ -166,7 +168,7 @@ public abstract class StructureSelectionAction extends Action {
 		ASTNode parent= node.getParent();
 		StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
 		if (locationInParent.isChildListProperty()) {
-			List<? extends ASTNode> siblings= (List<? extends ASTNode>) parent.getStructuralProperty(locationInParent);
+			List<? extends ASTNode> siblings= ASTNodes.getChildListProperty(parent, (ChildListPropertyDescriptor) locationInParent);
 			return siblings.toArray(new ASTNode[siblings.size()]);
 		}
 		return null;

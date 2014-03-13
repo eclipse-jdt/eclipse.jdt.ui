@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -588,7 +588,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		editorComposite.setLayout(layout);
-		GridData gd= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		GridData gd= new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.heightHint= convertHeightInCharsToPixels(7);
 		editorComposite.setLayoutData(gd);
 
 		fTreeViewer= new TreeViewer(editorComposite, SWT.SINGLE | SWT.BORDER);
@@ -610,8 +611,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 				return 0;
 			}
 		});
-		gd= new GridData(SWT.BEGINNING, SWT.BEGINNING, false, true);
-		gd.heightHint= convertHeightInCharsToPixels(9);
+		gd= new GridData(SWT.BEGINNING, SWT.FILL, false, true);
+		gd.heightHint= convertHeightInCharsToPixels(7);
 		int maxWidth= 0;
 		for (Iterator<HighlightingColorListItem> it= fListModel.iterator(); it.hasNext();) {
 			HighlightingColorListItem item= it.next();
@@ -631,7 +632,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		layout.marginWidth= 0;
 		layout.numColumns= 2;
 		stylesComposite.setLayout(layout);
-		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		stylesComposite.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, true, false));
 
 		fEnableCheckbox= new Button(stylesComposite, SWT.CHECK);
 		fEnableCheckbox.setText(PreferencesMessages.JavaEditorPreferencePage_enable);
@@ -684,9 +685,8 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		Control previewer= createPreviewer(colorComposite);
-		gd= new GridData(GridData.FILL_BOTH);
+		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= convertWidthInCharsToPixels(20);
-		gd.heightHint= convertHeightInCharsToPixels(5);
 		previewer.setLayoutData(gd);
 
 		fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -766,7 +766,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			}
 		});
 
-		colorComposite.layout(false);
+		colorComposite.layout();
 
 		return colorComposite;
 	}
@@ -804,7 +804,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 		IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
 		IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(createTemporaryCorePreferenceStore()), generalTextStore });
-		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
+		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.H_SCROLL | SWT.BORDER, store);
 		SimpleJavaSourceViewerConfiguration configuration= new SimpleJavaSourceViewerConfiguration(fColorManager, store, null, IJavaPartitions.JAVA_PARTITIONING, false);
 		fPreviewViewer.configure(configuration);
 		// fake 1.5 source to get 1.5 features right.
@@ -852,6 +852,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 				buffer.append(line);
 				buffer.append(separator);
 			}
+			buffer.setLength(buffer.length() - separator.length());
 		} catch (IOException io) {
 			JavaPlugin.log(io);
 		} finally {
@@ -897,36 +898,36 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 */
 	private SemanticHighlightingManager.HighlightedRange[][] createPreviewerRanges() {
 		return new SemanticHighlightingManager.HighlightedRange[][] {
-			{ createHighlightedRange( 6, 13,  9, SemanticHighlightings.DEPRECATED_MEMBER), createHighlightedRange( 6, 13,  9, SemanticHighlightings.CLASS),  },
-			{ createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_VARIABLE), createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_ARGUMENT), },
-			{ createHighlightedRange( 6, 34,  8, SemanticHighlightings.CLASS) },
-			{ createHighlightedRange( 6, 54, 13, SemanticHighlightings.INTERFACE) },
-			{ createHighlightedRange( 6, 68,  6, SemanticHighlightings.TYPE_ARGUMENT), createHighlightedRange( 6, 68,  6, SemanticHighlightings.CLASS) },
-			{ createHighlightedRange( 7,  6,  5, SemanticHighlightings.ENUM), },
-			{ createHighlightedRange( 7, 14,  3, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange( 7, 14,  3, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 14, 3, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange( 7, 19,  5, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange( 7, 19,  5, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 19, 5, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange( 7, 26,  4, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange( 7, 26,  4, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 26, 4, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange( 9,  8,  6, SemanticHighlightings.CLASS), },
-			{ createHighlightedRange( 9, 15, 11, SemanticHighlightings.STATIC_FIELD), createHighlightedRange( 9, 15, 11, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange(11,  9,  1, SemanticHighlightings.TYPE_VARIABLE) },
-			{ createHighlightedRange(11, 11,  5, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange(12,  9, 17, SemanticHighlightings.ABSTRACT_CLASS), createHighlightedRange(12,  9, 17, SemanticHighlightings.CLASS) },
-			{ createHighlightedRange(12, 27,  6, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange(14,  2, 16, SemanticHighlightings.ANNOTATION) },
-			{ createHighlightedRange(14, 19,  5, SemanticHighlightings.ANNOTATION_ELEMENT_REFERENCE) },
-			{ createHighlightedRange(15, 12,  3, SemanticHighlightings.METHOD_DECLARATION), createHighlightedRange(15, 12,  3, SemanticHighlightings.METHOD) },
-			{ createHighlightedRange(15, 16,  7, SemanticHighlightings.CLASS) },
-			{ createHighlightedRange(15, 24,  9, SemanticHighlightings.PARAMETER_VARIABLE) },
-			{ createHighlightedRange(16,  2, 14, SemanticHighlightings.ABSTRACT_METHOD_INVOCATION), createHighlightedRange(16,  2, 14, SemanticHighlightings.METHOD) },
-			{ createHighlightedRange(16, 17, 14, SemanticHighlightings.INHERITED_FIELD), createHighlightedRange(16, 17, 14, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange(17,  6,  5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION) },
-			{ createHighlightedRange(17, 13,  2, SemanticHighlightings.NUMBER) },
-			{ createHighlightedRange(17, 16,  8, SemanticHighlightings.INHERITED_METHOD_INVOCATION), createHighlightedRange(17, 16,  8, SemanticHighlightings.METHOD) },
-			{ createHighlightedRange(18,  2, 12, SemanticHighlightings.STATIC_METHOD_INVOCATION), createHighlightedRange(18,  2, 12, SemanticHighlightings.METHOD) },
-			{ createHighlightedRange(19,  9,  3, SemanticHighlightings.METHOD) },
-			{ createHighlightedRange(19, 13,  5, SemanticHighlightings.LOCAL_VARIABLE) },
-			{ createHighlightedRange(19, 22,  9, SemanticHighlightings.AUTOBOXING), createHighlightedRange(19, 22, 9, SemanticHighlightings.PARAMETER_VARIABLE) },
-		};
+				{ createHighlightedRange( 6, 13,  9, SemanticHighlightings.DEPRECATED_MEMBER), createHighlightedRange( 6, 13,  9, SemanticHighlightings.CLASS),  },
+				{ createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_VARIABLE), createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_ARGUMENT), },
+				{ createHighlightedRange( 6, 34,  8, SemanticHighlightings.CLASS) },
+				{ createHighlightedRange( 6, 54, 13, SemanticHighlightings.INTERFACE) },
+				{ createHighlightedRange( 6, 68,  6, SemanticHighlightings.TYPE_ARGUMENT), createHighlightedRange( 6, 68,  6, SemanticHighlightings.CLASS) },
+				{ createHighlightedRange( 7,  6,  5, SemanticHighlightings.ENUM), },
+				{ createHighlightedRange( 7, 14,  3, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange( 7, 14,  3, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 14, 3, SemanticHighlightings.FIELD) },
+				{ createHighlightedRange( 7, 19,  5, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange( 7, 19,  5, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 19, 5, SemanticHighlightings.FIELD) },
+				{ createHighlightedRange( 7, 26,  4, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange( 7, 26,  4, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 26, 4, SemanticHighlightings.FIELD) },
+				{ createHighlightedRange( 9,  8,  6, SemanticHighlightings.CLASS), },
+				{ createHighlightedRange( 9, 15, 11, SemanticHighlightings.STATIC_FIELD), createHighlightedRange( 9, 15, 11, SemanticHighlightings.FIELD) },
+				{ createHighlightedRange(11,  9,  1, SemanticHighlightings.TYPE_VARIABLE) },
+				{ createHighlightedRange(11, 11,  5, SemanticHighlightings.FIELD) },
+				{ createHighlightedRange(12,  9, 17, SemanticHighlightings.ABSTRACT_CLASS), createHighlightedRange(12,  9, 17, SemanticHighlightings.CLASS) },
+				{ createHighlightedRange(12, 27,  6, SemanticHighlightings.FIELD) },
+				{ createHighlightedRange(14,  2, 16, SemanticHighlightings.ANNOTATION) },
+				{ createHighlightedRange(14, 19,  5, SemanticHighlightings.ANNOTATION_ELEMENT_REFERENCE) },
+				{ createHighlightedRange(15, 12,  3, SemanticHighlightings.METHOD_DECLARATION), createHighlightedRange(15, 12,  3, SemanticHighlightings.METHOD) },
+				{ createHighlightedRange(15, 16,  7, SemanticHighlightings.CLASS) },
+				{ createHighlightedRange(15, 24,  9, SemanticHighlightings.PARAMETER_VARIABLE), createHighlightedRange(15, 24, 9, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION), createHighlightedRange(15, 24, 9, SemanticHighlightings.LOCAL_VARIABLE) },
+				{ createHighlightedRange(16,  2, 14, SemanticHighlightings.ABSTRACT_METHOD_INVOCATION), createHighlightedRange(16,  2, 14, SemanticHighlightings.METHOD) },
+				{ createHighlightedRange(16, 17, 14, SemanticHighlightings.INHERITED_FIELD), createHighlightedRange(16, 17, 14, SemanticHighlightings.FIELD) },
+				{ createHighlightedRange(17,  6,  5, SemanticHighlightings.LOCAL_VARIABLE_DECLARATION), createHighlightedRange(17, 6, 5, SemanticHighlightings.LOCAL_VARIABLE) },
+				{ createHighlightedRange(17, 13,  2, SemanticHighlightings.NUMBER) },
+				{ createHighlightedRange(17, 16,  8, SemanticHighlightings.INHERITED_METHOD_INVOCATION), createHighlightedRange(17, 16,  8, SemanticHighlightings.METHOD) },
+				{ createHighlightedRange(18,  2, 12, SemanticHighlightings.STATIC_METHOD_INVOCATION), createHighlightedRange(18,  2, 12, SemanticHighlightings.METHOD) },
+				{ createHighlightedRange(19,  9,  3, SemanticHighlightings.METHOD) },
+				{ createHighlightedRange(19, 13,  5, SemanticHighlightings.LOCAL_VARIABLE) },
+				{ createHighlightedRange(19, 22,  9, SemanticHighlightings.AUTOBOXING), createHighlightedRange(19, 22, 9, SemanticHighlightings.PARAMETER_VARIABLE), createHighlightedRange(19, 22,  9, SemanticHighlightings.LOCAL_VARIABLE) },
+			};
 	}
 
 

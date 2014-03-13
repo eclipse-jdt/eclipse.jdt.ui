@@ -5,11 +5,7 @@
 	<classpathentry kind="src" path="core refactoring"/>
 	<classpathentry kind="src" path="core extension"/>
 	<classpathentry kind="src" output="bin-jar-in-jar-loader" path="jar in jar loader"/>
-	<classpathentry kind="src" path="internal compatibility">
-		<attributes>
-			<attribute name="ignore_optional_problems" value="true"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="src" path="internal compatibility"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>

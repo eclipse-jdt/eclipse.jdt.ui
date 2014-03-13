@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,31 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		}
 		
 		/*
+		 * @see java.lang.Object#equals(java.lang.Object)
+		 * @since 3.9
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TypeIndicatorOverlay other= (TypeIndicatorOverlay) obj;
+			if (fDeprecated != other.fDeprecated)
+				return false;
+			if (fPackageDefault != other.fPackageDefault)
+				return false;
+			if (fType == null) {
+				if (other.fType != null)
+					return false;
+			} else if (!fType.equals(other.fType))
+				return false;
+			return true;
+		}
+
+		/*
 		 * @see org.eclipse.jface.resource.CompositeImageDescriptor#drawCompositeImage(int, int)
 		 */
 		@Override
@@ -80,6 +105,20 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 				fgSize= new Point(imageData.width, imageData.height);
 			}
 			return fgSize;
+		}
+
+		/*
+		 * @see java.lang.Object#hashCode()
+		 * @since 3.9
+		 */
+		@Override
+		public int hashCode() {
+			final int prime= 31;
+			int result= 1;
+			result= prime * result + (fDeprecated ? 1231 : 1237);
+			result= prime * result + (fPackageDefault ? 1231 : 1237);
+			result= prime * result + ((fType == null) ? 0 : fType.hashCode());
+			return result;
 		}
 	}
 

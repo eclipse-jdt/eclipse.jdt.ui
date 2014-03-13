@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -292,7 +292,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			// get the declaration and the rewrite
 			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.findDeclaration(fType, fRewrite.getRoot());
 			ListRewrite rewriter= fRewrite.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
-			final List<BodyDeclaration> list= (List<BodyDeclaration>) declaration.getStructuralProperty(declaration.getBodyDeclarationsProperty());
+			List<BodyDeclaration> list= declaration.bodyDeclarations();
 			if (fType != null && rewriter != null) {
 
 				ICompilationUnit cu= (ICompilationUnit) fUnit.getJavaElement();

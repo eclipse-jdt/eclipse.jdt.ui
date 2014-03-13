@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Samrat Dhillon samrat.dhillon@gmail.com - [move member type] Moving a member interface to its own file adds the host's type parameters to it - https://bugs.eclipse.org/bugs/show_bug.cgi?id=385237
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -383,6 +384,11 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	
 	public void test44() throws Exception {
 		validatePassingTest("A", "B", "p", new String[] { "A"}, new String[] { "p"}, "a", true, true, true, true);
+	}
+	
+	// static context: https://bugs.eclipse.org/bugs/show_bug.cgi?id=385237
+	public void test_static_context_0() throws Exception{
+		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, null, false, false);
 	}
 	
 	// --- Non static

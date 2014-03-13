@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.junit.runner.junit3.JUnit3TestReference;
 public class JUnit4TestLoader implements ITestLoader {
 
 	public ITestReference[] loadTests(
-			@SuppressWarnings("rawtypes") Class[] testClasses, // https://bugs.eclipse.org/bugs/show_bug.cgi?id=164472
+			Class[] testClasses,
 			String testName,
 			String[] failureNames,
 			RemoteTestRunner listener) {

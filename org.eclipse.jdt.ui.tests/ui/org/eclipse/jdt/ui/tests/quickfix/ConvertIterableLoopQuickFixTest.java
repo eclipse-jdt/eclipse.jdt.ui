@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -913,6 +913,72 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		String expected= buf.toString();
 		assertEqualString(preview, expected);
+	}
+
+	public void testWrongIteratorMethod_bug411588() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("\n");
+		buf.append("public class TestSaveActionConvertToEnhancedForLoop {\n");
+		buf.append("    static class Something implements Iterable<Object>{\n");
+		buf.append("        @Override\n");
+		buf.append("        public Iterator<Object> iterator() {\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        public Iterator<Object> iterator(int filter) {\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("    public static void main(String[] args) {          \n");
+		buf.append("        Something s = new Something();\n");
+		buf.append("        for (Iterator<Object> it = s.iterator(42) ; it.hasNext(); ) {\n");
+		buf.append("             Object obj = it.next();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit unit= pack.createCompilationUnit("TestSaveActionConvertToEnhancedForLoop.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, unit);
+
+		assertTrue(fConvertLoopProposal.getFixStatus() != null && fConvertLoopProposal.getFixStatus().getCode() == IStatus.WARNING);
+
+		assertCorrectLabels(proposals);
+
+		assertNotNull(fConvertLoopProposal.getStatusMessage());
+
+		String preview= getPreviewContent(fConvertLoopProposal);
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("\n");
+		buf.append("public class TestSaveActionConvertToEnhancedForLoop {\n");
+		buf.append("    static class Something implements Iterable<Object>{\n");
+		buf.append("        @Override\n");
+		buf.append("        public Iterator<Object> iterator() {\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        public Iterator<Object> iterator(int filter) {\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("    public static void main(String[] args) {          \n");
+		buf.append("        Something s = new Something();\n");
+		buf.append("        for (Object obj : s) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected= buf.toString();
+		assertEqualString(preview, expected);
+
 	}
 
 	public void testCorrectIteratorMethod() throws Exception {

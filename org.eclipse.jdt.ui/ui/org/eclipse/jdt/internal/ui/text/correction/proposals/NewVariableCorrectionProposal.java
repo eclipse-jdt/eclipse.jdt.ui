@@ -432,7 +432,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			}
 
 			ChildListPropertyDescriptor property= ASTNodes.getBodyDeclarationsProperty(newTypeDecl);
-			List<BodyDeclaration> decls= (List<BodyDeclaration>) newTypeDecl.getStructuralProperty(property);
+			List<BodyDeclaration> decls= ASTNodes.<BodyDeclaration>getChildListProperty(newTypeDecl, property);
 
 			int maxOffset= isInDifferentCU ? -1 : node.getStartPosition();
 

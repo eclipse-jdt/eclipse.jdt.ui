@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -491,7 +491,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			}
 
 			Link proposalLink= new Link(parent, SWT.NONE);
-			GridData layoutData= new GridData(SWT.BEGINNING, SWT.CENTER, false, false);
+			GridData layoutData= new GridData(SWT.FILL, SWT.CENTER, true, false);
 			String linkText;
 			if (isMultiFix) {
 				linkText= Messages.format(JavaHoverMessages.AbstractAnnotationHover_multifix_variable_description, new Integer(count));

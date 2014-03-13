@@ -18,6 +18,7 @@
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] should declare method static if extracted from anonymous in static method - https://bugs.eclipse.org/bugs/show_bug.cgi?id=152004
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] extracting return value results in compile error - https://bugs.eclipse.org/bugs/show_bug.cgi?id=264606
  *     Samrat Dhillon <samrat.dhillon@gmail.com> -  [extract method] Extracted method should be declared static if extracted expression is also used in another static method https://bugs.eclipse.org/bugs/show_bug.cgi?id=393098
+ *     Samrat Dhillon <samrat.dhillon@gmail.com> -  [extract method] Extracting expression of parameterized type that is passed as argument to this constructor yields compilation error https://bugs.eclipse.org/bugs/show_bug.cgi?id=394030
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -2100,6 +2101,14 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 
 	public void test1120() throws Exception {
 		genericTest(); //https://bugs.eclipse.org/bugs/show_bug.cgi?id=369295
+	}
+	
+	public void test1121() throws Exception {
+		genericTest();
+	}
+	
+	public void test1122() throws Exception {
+		genericTest();
 	}
 
 	//---- Test enums ---------------------------------

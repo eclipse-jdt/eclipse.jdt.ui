@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Samrat Dhillon samrat.dhillon@gmail.com https://bugs.eclipse.org/bugs/show_bug.cgi?id=395558 , https://bugs.eclipse.org/bugs/show_bug.cgi?id=395561 and https://bugs.eclipse.org/bugs/show_bug.cgi?id=394548
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -61,6 +62,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -192,6 +194,12 @@ public class ParameterObjectFactory {
 				FieldDeclaration declaration= createField(pi, cuRewrite);
 				listener.fieldCreated(cuRewrite, declaration, pi);
 				body.add(declaration);
+				ITypeBinding oldTypeBinding= pi.getOldTypeBinding();
+				if(oldTypeBinding != null && oldTypeBinding.isTypeVariable()){
+					TypeParameter param= ast.newTypeParameter();
+					param.setName(ast.newSimpleName(pi.getNewTypeName()));
+					typeDeclaration.typeParameters().add(param);
+				}
 			}
 		}
 		MethodDeclaration constructor= createConstructor(declaringType, cuRewrite, listener);
@@ -291,7 +299,7 @@ public class ParameterObjectFactory {
 
 
 	public static Type importBinding(ITypeBinding typeBinding, CompilationUnitRewrite cuRewrite) {
-		int declaredModifiers= typeBinding.getDeclaredModifiers();
+		int declaredModifiers= typeBinding.getModifiers();
 		AST ast= cuRewrite.getAST();
 		if (Modifier.isPrivate(declaredModifiers) || Modifier.isProtected(declaredModifiers)) {
 			return ast.newSimpleType(ast.newSimpleName(typeBinding.getName()));
