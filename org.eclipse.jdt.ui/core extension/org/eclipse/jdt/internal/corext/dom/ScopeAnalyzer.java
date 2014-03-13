@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -32,6 +33,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -695,6 +697,16 @@ public class ScopeAnalyzer {
 		}
 
 		@Override
+		public boolean visit(FieldDeclaration node) {
+			return !fBreak && isInside(node);
+		}
+		
+		@Override
+		public boolean visit(LambdaExpression node) {
+			return !fBreak && isInside(node);
+		}
+
+		@Override
 		public boolean visit(Statement node) {
 			return !fBreak && isInside(node);
 		}
@@ -820,7 +832,7 @@ public class ScopeAnalyzer {
 	private boolean addLocalDeclarations(ASTNode node, int offset, int flags, IBindingRequestor requestor) {
 		if (hasFlag(VARIABLES, flags) || hasFlag(TYPES, flags)) {
 			BodyDeclaration declaration= ASTResolving.findParentBodyDeclaration(node);
-			if (declaration instanceof MethodDeclaration || declaration instanceof Initializer) {
+			if (declaration instanceof MethodDeclaration || declaration instanceof Initializer || declaration instanceof FieldDeclaration) {
 				ScopeAnalyzerVisitor visitor= new ScopeAnalyzerVisitor(offset, flags, requestor);
 				declaration.accept(visitor);
 				return visitor.fBreak;

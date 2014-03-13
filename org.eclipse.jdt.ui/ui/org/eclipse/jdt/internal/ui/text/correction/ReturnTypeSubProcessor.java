@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -30,6 +34,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -54,6 +59,7 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingReturnTypeCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingReturnTypeInLambdaCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
@@ -288,33 +294,40 @@ public class ReturnTypeSubProcessor {
 		if (selectedNode == null) {
 			return;
 		}
-		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
-		if (decl instanceof MethodDeclaration) {
-			MethodDeclaration methodDecl= (MethodDeclaration) decl;
-			Block block= methodDecl.getBody();
-			if (block == null) {
-				return;
-			}
-			ReturnStatement existingStatement= (selectedNode instanceof ReturnStatement) ? (ReturnStatement) selectedNode : null;
-			proposals.add( new MissingReturnTypeCorrectionProposal(cu, methodDecl, existingStatement, IProposalRelevance.MISSING_RETURN_TYPE));
-
-			Type returnType= methodDecl.getReturnType2();
-			if (returnType != null && !"void".equals(ASTNodes.asString(returnType))) { //$NON-NLS-1$
-				AST ast= methodDecl.getAST();
-				ASTRewrite rewrite= ASTRewrite.create(ast);
-				rewrite.replace(returnType, ast.newPrimitiveType(PrimitiveType.VOID), null);
-				Javadoc javadoc= methodDecl.getJavadoc();
-				if (javadoc != null) {
-					TagElement tagElement= JavadocTagsSubProcessor.findTag(javadoc, TagElement.TAG_RETURN, null);
-					if (tagElement != null) {
-						rewrite.remove(tagElement, null);
-					}
+		ReturnStatement existingStatement= (selectedNode instanceof ReturnStatement) ? (ReturnStatement) selectedNode : null;
+		// Lambda Expression can be in a MethodDeclaration or a Field Declaration
+		if (selectedNode instanceof LambdaExpression) {
+			MissingReturnTypeInLambdaCorrectionProposal proposal= new MissingReturnTypeInLambdaCorrectionProposal(cu, (LambdaExpression) selectedNode, existingStatement,
+					IProposalRelevance.MISSING_RETURN_TYPE);
+			proposals.add(proposal);
+		} else {
+			BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
+			if (decl instanceof MethodDeclaration) {
+				MethodDeclaration methodDecl= (MethodDeclaration) decl;
+				Block block= methodDecl.getBody();
+				if (block == null) {
+					return;
 				}
+				proposals.add(new MissingReturnTypeCorrectionProposal(cu, methodDecl, existingStatement, IProposalRelevance.MISSING_RETURN_TYPE));
 
-				String label= CorrectionMessages.ReturnTypeSubProcessor_changetovoid_description;
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, IProposalRelevance.CHANGE_RETURN_TYPE_TO_VOID, image);
-				proposals.add(proposal);
+				Type returnType= methodDecl.getReturnType2();
+				if (returnType != null && !"void".equals(ASTNodes.asString(returnType))) { //$NON-NLS-1$
+					AST ast= methodDecl.getAST();
+					ASTRewrite rewrite= ASTRewrite.create(ast);
+					rewrite.replace(returnType, ast.newPrimitiveType(PrimitiveType.VOID), null);
+					Javadoc javadoc= methodDecl.getJavadoc();
+					if (javadoc != null) {
+						TagElement tagElement= JavadocTagsSubProcessor.findTag(javadoc, TagElement.TAG_RETURN, null);
+						if (tagElement != null) {
+							rewrite.remove(tagElement, null);
+						}
+					}
+
+					String label= CorrectionMessages.ReturnTypeSubProcessor_changetovoid_description;
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, IProposalRelevance.CHANGE_RETURN_TYPE_TO_VOID, image);
+					proposals.add(proposal);
+				}
 			}
 		}
 	}

@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -38,10 +42,10 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposal {
 
-	private static final String RETURN_EXPRESSION_KEY= "value"; //$NON-NLS-1$
+	protected static final String RETURN_EXPRESSION_KEY= "value"; //$NON-NLS-1$
 
 	private MethodDeclaration fMethodDecl;
-	private ReturnStatement fExistingReturn;
+	protected ReturnStatement fExistingReturn;
 
 	public MissingReturnTypeCorrectionProposal(ICompilationUnit cu, MethodDeclaration decl, ReturnStatement existingReturn, int relevance) {
 		super("", cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
@@ -63,7 +67,7 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 	 */
 	@Override
 	protected ASTRewrite getRewrite() {
-		AST ast= fMethodDecl.getAST();
+		AST ast= getAST();
 
 		ITypeBinding returnBinding= getReturnTypeBinding();
 
@@ -80,77 +84,62 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 		} else {
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
-			Block block= fMethodDecl.getBody();
-
-			List<Statement> statements= block.statements();
-			int nStatements= statements.size();
-			ASTNode lastStatement= null;
-			if (nStatements > 0) {
-				lastStatement= statements.get(nStatements - 1);
-			}
-
-			if (returnBinding != null && lastStatement instanceof ExpressionStatement && lastStatement.getNodeType() != ASTNode.ASSIGNMENT) {
-				Expression expression= ((ExpressionStatement) lastStatement).getExpression();
-				ITypeBinding binding= expression.resolveTypeBinding();
-				if (binding != null && binding.isAssignmentCompatible(returnBinding)) {
-					Expression placeHolder= (Expression) rewrite.createMoveTarget(expression);
-
-					ReturnStatement returnStatement= ast.newReturnStatement();
-					returnStatement.setExpression(placeHolder);
-
-					rewrite.replace(lastStatement, returnStatement, null);
-					return rewrite;
+			ASTNode body= getBody();
+			// For lambda the body can be a block or an expression.
+			if (body instanceof Block) {
+				Block block= (Block) body;
+				List<Statement> statements= block.statements();
+				int nStatements= statements.size();
+				ASTNode lastStatement= null;
+				if (nStatements > 0) {
+					lastStatement= statements.get(nStatements - 1);
 				}
+
+				if (returnBinding != null && lastStatement instanceof ExpressionStatement && lastStatement.getNodeType() != ASTNode.ASSIGNMENT) {
+					Expression expression= ((ExpressionStatement) lastStatement).getExpression();
+					ITypeBinding binding= expression.resolveTypeBinding();
+					if (binding != null && binding.isAssignmentCompatible(returnBinding)) {
+						Expression placeHolder= (Expression) rewrite.createMoveTarget(expression);
+
+						ReturnStatement returnStatement= ast.newReturnStatement();
+						returnStatement.setExpression(placeHolder);
+
+						rewrite.replace(lastStatement, returnStatement, null);
+						return rewrite;
+					}
+				}
+
+				int offset;
+				if (lastStatement == null) {
+					offset= block.getStartPosition() + 1;
+				} else {
+					offset= lastStatement.getStartPosition() + lastStatement.getLength();
+				}
+
+				ReturnStatement returnStatement= ast.newReturnStatement();
+				Expression expression= evaluateReturnExpressions(ast, returnBinding, offset);
+
+				returnStatement.setExpression(expression);
+
+				rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY).insertLast(returnStatement, null);
+
+				addLinkedPosition(rewrite.track(returnStatement.getExpression()), true, RETURN_EXPRESSION_KEY);
 			}
-
-			int offset;
-			if (lastStatement == null) {
-				offset= block.getStartPosition() + 1;
-			} else {
-				offset= lastStatement.getStartPosition() + lastStatement.getLength();
-			}
-			ReturnStatement returnStatement= ast.newReturnStatement();
-			Expression expression= evaluateReturnExpressions(ast, returnBinding, offset);
-
-			returnStatement.setExpression(expression);
-
-			rewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY).insertLast(returnStatement, null);
-
-			addLinkedPosition(rewrite.track(returnStatement.getExpression()), true, RETURN_EXPRESSION_KEY);
 			return rewrite;
 		}
-	}
-
-	private ITypeBinding getReturnTypeBinding() {
-		IMethodBinding methodBinding= fMethodDecl.resolveBinding();
-		if (methodBinding != null && methodBinding.getReturnType() != null) {
-			return methodBinding.getReturnType();
-		}
-		return null;
 	}
 
 	/*
 	 * Evaluates possible return expressions. The favourite expression is returned.
 	 */
 	private Expression evaluateReturnExpressions(AST ast, ITypeBinding returnBinding, int returnOffset) {
-		CompilationUnit root= (CompilationUnit) fMethodDecl.getRoot();
+		CompilationUnit root= getCU();
 
 		Expression result= null;
 		if (returnBinding != null) {
-			ScopeAnalyzer analyzer= new ScopeAnalyzer(root);
-			IBinding[] bindings= analyzer.getDeclarationsInScope(returnOffset, ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY );
-			for (int i= 0; i < bindings.length; i++) {
-				IVariableBinding curr= (IVariableBinding) bindings[i];
-				ITypeBinding type= curr.getType();
-				if (type != null && type.isAssignmentCompatible(returnBinding) && testModifier(curr)) {
-					if (result == null) {
-						result= ast.newSimpleName(curr.getName());
-					}
-					addLinkedPositionProposal(RETURN_EXPRESSION_KEY, curr.getName(), null);
-				}
-			}
+			result= computeProposals(ast, returnBinding, returnOffset, root, result);
 		}
-		Expression defaultExpression= ASTNodeFactory.newDefaultExpression(ast, fMethodDecl.getReturnType2(), fMethodDecl.getExtraDimensions());
+		Expression defaultExpression= createDefaultExpression(ast);
 		addLinkedPositionProposal(RETURN_EXPRESSION_KEY, ASTNodes.asString(defaultExpression), null);
 		if (result == null) {
 			return defaultExpression;
@@ -158,15 +147,60 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 		return result;
 	}
 
-	private boolean testModifier(IVariableBinding curr) {
+	protected Expression computeProposals(AST ast, ITypeBinding returnBinding, int returnOffset, CompilationUnit root, Expression result) {
+		ScopeAnalyzer analyzer= new ScopeAnalyzer(root);
+		IBinding[] bindings= analyzer.getDeclarationsInScope(returnOffset, ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY);
+		for (int i= 0; i < bindings.length; i++) {
+			IVariableBinding curr= (IVariableBinding) bindings[i];
+			ITypeBinding type= curr.getType();
+			if (type != null && type.isAssignmentCompatible(returnBinding) && testModifier(curr)) {
+				if (result == null) {
+					result= ast.newSimpleName(curr.getName());
+				}
+				addLinkedPositionProposal(RETURN_EXPRESSION_KEY, curr.getName(), null);
+			}
+		}
+		return result;
+	}
+
+	protected boolean testModifier(IVariableBinding curr) {
 		int modifiers= curr.getModifiers();
 		int staticFinal= Modifier.STATIC | Modifier.FINAL;
 		if ((modifiers & staticFinal) == staticFinal) {
 			return false;
 		}
-		if (Modifier.isStatic(modifiers) && !Modifier.isStatic(fMethodDecl.getModifiers())) {
+		if (Modifier.isStatic(modifiers) && !Modifier.isStatic(getModifiers())) {
 			return false;
 		}
 		return true;
+	}
+	
+	protected Expression createDefaultExpression(AST ast) {
+		return ASTNodeFactory.newDefaultExpression(ast, fMethodDecl.getReturnType2(), fMethodDecl.getExtraDimensions());
+	}
+
+	protected CompilationUnit getCU() {
+		return (CompilationUnit) fMethodDecl.getRoot();
+	}
+
+
+	protected ASTNode getBody() {
+		return fMethodDecl.getBody();
+	}
+
+	protected AST getAST() {
+		return fMethodDecl.getAST();
+	}
+
+	protected ITypeBinding getReturnTypeBinding() {
+		IMethodBinding methodBinding= fMethodDecl.resolveBinding();
+		if (methodBinding != null && methodBinding.getReturnType() != null) {
+			return methodBinding.getReturnType();
+		}
+		return null;
+	}
+
+	protected int getModifiers() {
+		return fMethodDecl.getModifiers();
 	}
 }

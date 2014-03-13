@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -194,5 +194,240 @@ public class QuickFixTest18 extends QuickFixTest {
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 
+	}
+
+	public void testLambdaReturnType1() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("interface I {\n");
+		buf.append("     int foo(int x);    \n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("public class A {    \n");
+		buf.append("    int fun2() {\n");
+		buf.append("        I i= (int x) -> {\n");
+		buf.append("            x++;\n");
+		buf.append("            System.out.println(x);\n");
+		buf.append("        };\n");
+		buf.append("        return 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("interface I {\n");
+		buf.append("     int foo(int x);    \n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("public class A {    \n");
+		buf.append("    int fun2() {\n");
+		buf.append("        I i= (int x) -> {\n");
+		buf.append("            x++;\n");
+		buf.append("            System.out.println(x);\n");
+		buf.append("            return x;\n");
+		buf.append("        };\n");
+		buf.append("        return 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+	}
+
+	public void testLambdaReturnType2() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("interface I {\n");
+		buf.append("     int foo(int x);    \n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("public class A {    \n");
+		buf.append("    void fun2() {\n");
+		buf.append("        I i= (int x) -> {\n");
+		buf.append("            x++;\n");
+		buf.append("            System.out.println(x);\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("interface I {\n");
+		buf.append("     int foo(int x);    \n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("public class A {    \n");
+		buf.append("    void fun2() {\n");
+		buf.append("        I i= (int x) -> {\n");
+		buf.append("            x++;\n");
+		buf.append("            System.out.println(x);\n");
+		buf.append("            return x;\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+	}
+
+	public void testLambdaReturnType3() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("interface I {\n");
+		buf.append("     int foo(int x);    \n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("public class A {    \n");
+		buf.append("    void fun2() {\n");
+		// Inferred parameter type
+		buf.append("        I i= (x) -> {\n");
+		buf.append("            x++;\n");
+		buf.append("            System.out.println(x);\n");
+		buf.append("        };\n");
+		buf.append("        i.foo(10);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("interface I {\n");
+		buf.append("     int foo(int x);    \n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("public class A {    \n");
+		buf.append("    void fun2() {\n");
+		buf.append("        I i= (x) -> {\n");
+		buf.append("            x++;\n");
+		buf.append("            System.out.println(x);\n");
+		buf.append("            return x;\n");
+		buf.append("        };\n");
+		buf.append("        i.foo(10);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+	}
+
+	public void testLambdaReturnType4() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("interface I {\n");
+		buf.append("     int foo(int x);    \n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("public class A {    \n");
+		buf.append("    I i2= (int x) -> {\n");
+		buf.append("        x++;\n");
+		buf.append("        System.out.println(x);\n");
+		buf.append("    };\n");
+		buf.append("    \n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("interface I {\n");
+		buf.append("     int foo(int x);    \n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("public class A {    \n");
+		buf.append("    I i2= (int x) -> {\n");
+		buf.append("        x++;\n");
+		buf.append("        System.out.println(x);\n");
+		buf.append("        return x;\n");
+		buf.append("    };\n");
+		buf.append("    \n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+	}
+
+	public void testLambdaReturnType5() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.math.BigInteger;\n");
+		buf.append("\n");
+		buf.append("interface A { Object m(Class c); }\n");
+		buf.append("interface B<S extends Number> { Object m(Class<S> c); }\n");
+		buf.append("interface C<T extends BigInteger> { Object m(Class<T> c); }\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("interface D<S,T> extends A, B<BigInteger>, C<BigInteger> {}\n");
+		buf.append("\n");
+		buf.append("class E {\n");
+		buf.append("    private void foo() {\n");
+		buf.append("         D<BigInteger,BigInteger> d1= (x) -> {\n");
+		buf.append("            };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.math.BigInteger;\n");
+		buf.append("\n");
+		buf.append("interface A { Object m(Class c); }\n");
+		buf.append("interface B<S extends Number> { Object m(Class<S> c); }\n");
+		buf.append("interface C<T extends BigInteger> { Object m(Class<T> c); }\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("interface D<S,T> extends A, B<BigInteger>, C<BigInteger> {}\n");
+		buf.append("\n");
+		buf.append("class E {\n");
+		buf.append("    private void foo() {\n");
+		buf.append("         D<BigInteger,BigInteger> d1= (x) -> {\n");
+		buf.append("            return x;\n");
+		buf.append("            };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
 	}
 }

@@ -275,6 +275,13 @@ public class ASTResolving {
 			if (decl != null && !decl.isConstructor()) {
 				return decl.getReturnType2().resolveBinding();
 			}
+			LambdaExpression lambdaExpr= ASTResolving.findEnclosingLambdaExpression(parent);
+			if (lambdaExpr != null) {
+				IMethodBinding lambdaMethodBinding= lambdaExpr.resolveMethodBinding();
+				if (lambdaMethodBinding != null && lambdaMethodBinding.getReturnType() != null) {
+					return lambdaMethodBinding.getReturnType();
+				}
+			}
 			break;
 		case ASTNode.CAST_EXPRESSION:
 			return ((CastExpression) parent).getType().resolveBinding();
@@ -588,6 +595,7 @@ public class ASTResolving {
 		try {
 			astRoot.accept(new AllBindingsVisitor(visitor));
 		} catch (AllBindingsVisitor.VisitCancelledException e) {
+			// visit cancelled
 		}
 	}
 
@@ -745,6 +753,19 @@ public class ASTResolving {
 		return null;
 	}
 
+	/**
+	 * Returns the closest ancestor of <code>node</code> (including <code>node</code> itself)
+	 * whose type is <code>nodeType</code>, or <code>null</code> if none.
+	 * <p>
+	 * <b>Warning:</b> This method does not stop at any boundaries like parentheses, statements, body declarations, etc.
+	 * The resulting node may be in a totally different scope than the given node.
+	 * Consider using one of the other {@link ASTResolving}<code>.find(..)</code> methods instead.
+	 * </p>
+	 * @param node the node
+	 * @param nodeType the node type constant from {@link ASTNode}
+	 * @return the closest ancestor of <code>node</code> (including <code>node</code> itself) 
+	 *         whose type is <code>nodeType</code>, or <code>null</code> if none
+	 */
 	public static ASTNode findAncestor(ASTNode node, int nodeType) {
 		while ((node != null) && (node.getNodeType() != nodeType)) {
 			node= node.getParent();
