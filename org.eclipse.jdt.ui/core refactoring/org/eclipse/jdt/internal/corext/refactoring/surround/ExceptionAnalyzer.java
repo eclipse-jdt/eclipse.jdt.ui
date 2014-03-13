@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -95,7 +95,7 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 		if (!isSelected(node) || exception == null || Bindings.isRuntimeException(exception)) // Safety net for null bindings when compiling fails.
 			return true;
 
-		addException(exception);
+		addException(exception, node.getAST());
 		return true;
 	}
 
@@ -103,35 +103,35 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 	public boolean visit(MethodInvocation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(node.resolveMethodBinding());
+		return handleExceptions(node.resolveMethodBinding(), node);
 	}
 
 	@Override
 	public boolean visit(SuperMethodInvocation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(node.resolveMethodBinding());
+		return handleExceptions(node.resolveMethodBinding(), node);
 	}
 
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(node.resolveConstructorBinding());
+		return handleExceptions(node.resolveConstructorBinding(), node);
 	}
 
 	@Override
 	public boolean visit(ConstructorInvocation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(node.resolveConstructorBinding());
+		return handleExceptions(node.resolveConstructorBinding(), node);
 	}
 
 	@Override
 	public boolean visit(SuperConstructorInvocation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(node.resolveConstructorBinding());
+		return handleExceptions(node.resolveConstructorBinding(), node);
 	}
 
 	@Override
@@ -141,12 +141,12 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 		return super.visit(node);
 	}
 
-	private boolean handleExceptions(IMethodBinding binding) {
+	private boolean handleExceptions(IMethodBinding binding, ASTNode node) {
 		if (binding == null)
 			return true;
 		ITypeBinding[] exceptions= binding.getExceptionTypes();
 		for (int i= 0; i < exceptions.length; i++) {
-			addException(exceptions[i]);
+			addException(exceptions[i], node.getAST());
 		}
 		return true;
 	}

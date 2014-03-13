@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -103,7 +104,7 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 		List<ITypeBinding> current= fTryStack.pop();
 		fCurrentExceptions= fTryStack.peek();
 		for (Iterator<ITypeBinding> iter= current.iterator(); iter.hasNext();) {
-			addException(iter.next());
+			addException(iter.next(), node.getAST());
 		}
 
 		// visit catch and finally
@@ -125,7 +126,7 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 			if (resourceTypeBinding != null) {
 				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(resourceTypeBinding, "close", new ITypeBinding[0]); //$NON-NLS-1$
 				if (methodBinding != null) {
-					addExceptions(methodBinding.getExceptionTypes());
+					addExceptions(methodBinding.getExceptionTypes(), node.getAST());
 				}
 			}
 		}
@@ -133,15 +134,16 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 	}
 
 
-	protected void addExceptions(ITypeBinding[] exceptions) {
+	protected void addExceptions(ITypeBinding[] exceptions, AST ast) {
 		if(exceptions == null)
 			return;
 		for (int i= 0; i < exceptions.length;i++) {
-			addException(exceptions[i]);
+			addException(exceptions[i], ast);
 		}
 	}
 
-	protected void addException(ITypeBinding exception) {
+	protected void addException(ITypeBinding exception, AST ast) {
+		exception= Bindings.normalizeForDeclarationUse(exception, ast);
 		if (!fCurrentExceptions.contains(exception))
 			fCurrentExceptions.add(exception);
 	}
