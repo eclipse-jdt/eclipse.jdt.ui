@@ -40,10 +40,12 @@ import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.SourceRange;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -966,15 +968,16 @@ public class JavaElementLabelComposer {
 				fBuffer.append('.');
 			}
 		}
+		IJavaElement parent= type.getParent();
 		if (getFlag(flags, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.T_CONTAINER_QUALIFIED)) {
 			IType declaringType= type.getDeclaringType();
 			if (declaringType != null) {
 				appendTypeLabel(declaringType, JavaElementLabels.T_CONTAINER_QUALIFIED | (flags & QUALIFIER_FLAGS));
 				fBuffer.append('.');
 			}
-			int parentType= type.getParent().getElementType();
+			int parentType= parent.getElementType();
 			if (parentType == IJavaElement.METHOD || parentType == IJavaElement.FIELD || parentType == IJavaElement.INITIALIZER) { // anonymous or local
-				appendElementLabel(type.getParent(), 0);
+				appendElementLabel(parent, 0);
 				fBuffer.append('.');
 			}
 		}
@@ -1001,7 +1004,7 @@ public class JavaElementLabelComposer {
 			}
 			if (isAnonymous) {
 				try {
-					if (type.getParent() instanceof IField && type.isEnum()) {
+					if (parent instanceof IField && type.isEnum()) {
 						typeName= '{' + JavaElementLabels.ELLIPSIS_STRING + '}';
 					} else {
 						String supertypeName;
@@ -1054,12 +1057,32 @@ public class JavaElementLabelComposer {
 			int offset= fBuffer.length();
 			fBuffer.append(JavaElementLabels.CONCAT_STRING);
 			IType declaringType= type.getDeclaringType();
+			if (declaringType == null && type.isBinary() && type.getElementName().length() == 0) {
+				// workaround for Bug 87165: [model] IType#getDeclaringType() does not work for anonymous binary type 
+				String tqn= type.getTypeQualifiedName();
+				int lastDollar= tqn.lastIndexOf('$');
+				if (lastDollar != 1) {
+					String declaringTypeCF= tqn.substring(0, lastDollar) + ".class"; //$NON-NLS-1$
+					declaringType= type.getPackageFragment().getClassFile(declaringTypeCF).getType();
+					try {
+						ISourceRange typeSourceRange= type.getSourceRange();
+						if (declaringType.exists() && SourceRange.isAvailable(typeSourceRange)) {
+							IJavaElement realParent= declaringType.getTypeRoot().getElementAt(typeSourceRange.getOffset() - 1);
+							if (realParent != null) {
+								parent= realParent;
+							}
+						}
+					} catch (JavaModelException e) {
+						// ignore
+					}
+				}
+			}
 			if (declaringType != null) {
 				appendTypeLabel(declaringType, JavaElementLabels.T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
-				int parentType= type.getParent().getElementType();
+				int parentType= parent.getElementType();
 				if (parentType == IJavaElement.METHOD || parentType == IJavaElement.FIELD || parentType == IJavaElement.INITIALIZER) { // anonymous or local
 					fBuffer.append('.');
-					appendElementLabel(type.getParent(), 0);
+					appendElementLabel(parent, 0);
 				}
 			} else {
 				appendPackageFragmentLabel(type.getPackageFragment(), flags & QUALIFIER_FLAGS);
