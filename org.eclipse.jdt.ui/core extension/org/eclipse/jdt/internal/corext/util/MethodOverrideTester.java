@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -326,6 +327,12 @@ public class MethodOverrideTester {
 		if (subst != null) {
 			return subst;
 		}
+		IJavaElement parent= type.getParent();
+		if (parent instanceof IMethod) {
+			return getVariableSubstitution((IMethod) parent, variableName);
+		} else if (type.getDeclaringType() != null) {
+			return getVariableSubstitution(type.getDeclaringType(), variableName);
+		}
 		return variableName; // not a type variable
 	}
 
@@ -343,6 +350,12 @@ public class MethodOverrideTester {
 		String subst= getTypeSubstitions(type).getErasure(variableName);
 		if (subst != null) {
 			return subst;
+		}
+		IJavaElement parent= type.getParent();
+		if (parent instanceof IMethod) {
+			return getVariableErasure((IMethod) parent, variableName);
+		} else if (type.getDeclaringType() != null) {
+			return getVariableErasure(type.getDeclaringType(), variableName);
 		}
 		return variableName; // not a type variable
 	}
@@ -426,7 +439,13 @@ public class MethodOverrideTester {
 				computeSubstitutions(superclass, instantiatedType, superTypeArguments);
 			}
 		}
-		String[] superInterfacesTypeSignature= instantiatedType.getSuperInterfaceTypeSignatures();
+		String[] superInterfacesTypeSignature;
+		if (instantiatedType.isAnonymous()) {
+			// special case: superinterface is also returned by IType#getSuperclassTypeSignature()
+			superInterfacesTypeSignature= new String[] { superclassTypeSignature };
+		} else {
+			superInterfacesTypeSignature= instantiatedType.getSuperInterfaceTypeSignatures();
+		}
 		int nInterfaces= superInterfacesTypeSignature.length;
 		if (nInterfaces > 0) {
 			IType[] superInterfaces= fHierarchy.getSuperInterfaces(instantiatedType);

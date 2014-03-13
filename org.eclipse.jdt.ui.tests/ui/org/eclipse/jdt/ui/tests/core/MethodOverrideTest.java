@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,7 +62,7 @@ public class MethodOverrideTest extends CoreTests {
 	 */
 
 	private static final Class THIS= MethodOverrideTest.class;
-	private static final boolean DEBUG_SHOWRESULTS= false;
+	private static final boolean DEBUG_SHOWRESULTS= true;
 
 	public static Test suite() {
 		return setUpTest(new TestSuite(THIS));
@@ -283,8 +283,7 @@ public class MethodOverrideTest extends CoreTests {
 		doOverrideTests(cu, 1, 1, 0); // B and A
 	}
 
-
-	private void doOverrideTests(ICompilationUnit cu, int focusIndex, int overridingIndex, int overriddenIndex) throws JavaModelException {
+	protected void doOverrideTests(ICompilationUnit cu, int focusIndex, int overridingIndex, int overriddenIndex) throws JavaModelException {
 		CompilationUnit root= assertNoCompilationError(cu);
 
 		IType[] types= cu.getTypes();
@@ -295,15 +294,21 @@ public class MethodOverrideTest extends CoreTests {
 			typeBindings[i]= typeBindings[i + 1].getSuperclass();
 		}
 
+		IType focusType= types[focusIndex];
+		
 		IType overridingType= types[overridingIndex];
 		ITypeBinding overridingTypeBinding= typeBindings[overridingIndex];
 		assertSameType(overridingType, overridingTypeBinding);
 
 		IType overriddenType= types[overriddenIndex];
- 		ITypeBinding overriddenTypeBinding= typeBindings[overriddenIndex];
+		ITypeBinding overriddenTypeBinding= typeBindings[overriddenIndex];
 		assertSameType(overriddenType, overriddenTypeBinding);
 
-		IType focusType= types[focusIndex];
+		doOverrideTests(root, focusType, overridingType, overridingTypeBinding, overriddenType, overriddenTypeBinding);
+	}
+
+	protected void doOverrideTests(CompilationUnit root, IType focusType, IType overridingType, ITypeBinding overridingTypeBinding, IType overriddenType, ITypeBinding overriddenTypeBinding)
+			throws JavaModelException {
 		ITypeHierarchy hierarchy= focusType.newTypeHierarchy(null);
 		MethodOverrideTester tester= new MethodOverrideTester(focusType, hierarchy);
 
@@ -426,7 +431,7 @@ public class MethodOverrideTest extends CoreTests {
 		assertEquals(methods.length, bindings.length);
 	}
 
-	private CompilationUnit assertNoCompilationError(ICompilationUnit cu) {
+	protected CompilationUnit assertNoCompilationError(ICompilationUnit cu) {
 		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
