@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1086,10 +1086,16 @@ public class Bindings {
 		binding= normalizeTypeBinding(binding);
 		if (binding == null || !binding.isWildcardType())
 			return binding;
-		if (binding.isUpperbound()) {
-			return binding.getBound();
+		ITypeBinding bound= binding.getBound();
+		if (bound == null || !binding.isUpperbound()) {
+			ITypeBinding[] typeBounds= binding.getTypeBounds();
+			if (typeBounds.length > 0) {
+				return typeBounds[0];
+			} else {
+				return binding.getErasure();
+			}
 		} else {
-			return ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+			return bound;
 		}
 	}
 

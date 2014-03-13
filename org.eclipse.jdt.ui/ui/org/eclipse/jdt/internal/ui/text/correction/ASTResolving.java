@@ -1135,15 +1135,23 @@ public class ASTResolving {
 	 * Use this method before creating a type for a wildcard. Either to assign a wildcard to a new type or for a type to be assigned.
 	 *
 	 * @param wildcardType the wildcard type to normalize
-	 * @param isBindingToAssign If true, then a new receiver type is searched (X x= s), else the type of a sender (R r= x)
-	 * @param ast th current AST
-	 * @return Returns the normalized binding or null when only the 'null' binding
+	 * @param isBindingToAssign if true, then the type X for new variable x is returned (X x= s);
+	 *     if false, the type of an expression x (R r= x)
+	 * @param ast the current AST
+	 * @return the normalized binding or null when only the 'null' binding
+	 * 
+	 * @see Bindings#normalizeForDeclarationUse(ITypeBinding, AST)
 	 */
 	public static ITypeBinding normalizeWildcardType(ITypeBinding wildcardType, boolean isBindingToAssign, AST ast) {
 		ITypeBinding bound= wildcardType.getBound();
 		if (isBindingToAssign) {
 			if (bound == null || !wildcardType.isUpperbound()) {
-				return ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+				ITypeBinding[] typeBounds= wildcardType.getTypeBounds();
+				if (typeBounds.length > 0) {
+					return typeBounds[0];
+				} else {
+					return wildcardType.getErasure();
+				}
 			}
 		} else {
 			if (bound == null || wildcardType.isUpperbound()) {
