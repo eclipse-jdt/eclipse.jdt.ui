@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -338,6 +338,11 @@ public class JavaElementProperties implements IPropertySource {
 		addProperty(new Property(IMethod.class, "isMainMethod") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
 				return ((IMethod) element).isMainMethod();
+			}
+		});
+		addProperty(new Property(IMethod.class, "isLambdaMethod") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IMethod) element).isLambdaMethod();
 			}
 		});
 	}

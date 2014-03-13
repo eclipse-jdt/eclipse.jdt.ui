@@ -166,8 +166,6 @@ public class Binding extends ASTAttribute {
 						}
 					}
 					
-					res.add(new BindingProperty(this, "TYPE BOUNDS", typeBinding.getTypeBounds(), isType(typeKind, VARIABLE_TYPE | CAPTURE_TYPE))); //$NON-NLS-1$
-					
 					StringBuffer origin= new StringBuffer("ORIGIN:"); //$NON-NLS-1$
 					if (typeBinding.isTopLevel()) origin.append(" isTopLevel"); //$NON-NLS-1$
 					if (typeBinding.isNested()) origin.append(" isNested"); //$NON-NLS-1$
@@ -189,6 +187,7 @@ public class Binding extends ASTAttribute {
 					res.add(new Binding(this, "ERASURE", typeBinding.getErasure(), isNonPrimitive)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE PARAMETERS", typeBinding.getTypeParameters(), isType(typeKind, GENERIC))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE ARGUMENTS", typeBinding.getTypeArguments(), isType(typeKind, PARAMETRIZED))); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "TYPE BOUNDS", typeBinding.getTypeBounds(), isType(typeKind, VARIABLE_TYPE | WILDCARD_TYPE | CAPTURE_TYPE))); //$NON-NLS-1$
 					res.add(new Binding(this, "BOUND", typeBinding.getBound(), isType(typeKind, WILDCARD_TYPE))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS UPPERBOUND", typeBinding.isUpperbound(), isType(typeKind, WILDCARD_TYPE))); //$NON-NLS-1$
 					res.add(new Binding(this, "GENERIC TYPE OF WILDCARD TYPE", typeBinding.getGenericTypeOfWildcardType(), isType(typeKind, WILDCARD_TYPE))); //$NON-NLS-1$
