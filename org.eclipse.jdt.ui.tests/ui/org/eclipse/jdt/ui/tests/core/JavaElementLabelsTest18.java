@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,13 +33,13 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 
-public class JavaElementLabelsTest17 extends CoreTests {
+public class JavaElementLabelsTest18 extends CoreTests {
 
-	private static final Class THIS= JavaElementLabelsTest17.class;
+	private static final Class THIS= JavaElementLabelsTest18.class;
 
 	private IJavaProject fJProject1;
 
-	public JavaElementLabelsTest17(String name) {
+	public JavaElementLabelsTest18(String name) {
 		super(name);
 	}
 
@@ -48,18 +48,18 @@ public class JavaElementLabelsTest17 extends CoreTests {
 	}
 
 	public static Test setUpTest(Test test) {
-		return new Java17ProjectTestSetup(test);
+		return new Java18ProjectTestSetup(test);
 	}
 
 	protected void setUp() throws Exception {
-		fJProject1= Java17ProjectTestSetup.getProject();
+		fJProject1= Java18ProjectTestSetup.getProject();
 
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 	}
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, Java17ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
 
 
@@ -208,4 +208,33 @@ public class JavaElementLabelsTest17 extends CoreTests {
 		assertEqualString(lab, "Object invoke(char arg00, ArrayList arg01, Void arg02)");
 	}
 	
+	public void testTypeLabelLambda1() throws Exception {
+
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("import java.util.function.IntConsumer;\n");
+		buf.append("public class C {\n");
+		buf.append("    IntConsumer c = (i) -> { };\n");
+		buf.append("}\n");
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", content, false, null);
+
+		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("i"), 1);
+		IJavaElement i= elems[0];
+		String lab= JavaElementLabels.getTextLabel(i, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED);
+		assertEqualString(lab, "org.test.C.c.() -> {...} IntConsumer.accept(int).i");
+
+		IJavaElement lambdaMethod= i.getParent();
+		lab= JavaElementLabels.getTextLabel(lambdaMethod, JavaElementLabels.T_FULLY_QUALIFIED
+				| JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES);
+		assertEqualString(lab, "accept(int i) - org.test.C.c.() -> {...} IntConsumer");
+		
+		IJavaElement lambdaType= lambdaMethod.getParent();
+		lab= JavaElementLabels.getTextLabel(lambdaType, JavaElementLabels.T_POST_QUALIFIED);
+		assertEqualString(lab, "() -> {...} IntConsumer - org.test.C.c");
+	}
+
 }

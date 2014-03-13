@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,7 +50,7 @@ public class CoreTests extends TestCase {
 		suite.addTest(ImportOrganizeTest.suite());
 		suite.addTest(ImportOrganizeTest18.suite());
 		suite.addTest(JavaElementLabelsTest.suite());
-		suite.addTest(JavaElementLabelsTest17.suite());
+		suite.addTest(JavaElementLabelsTest18.suite());
 		suite.addTest(JavaElementPropertyTesterTest.suite());
 		suite.addTest(JavaModelUtilTest.suite());
 		suite.addTest(MethodOverrideTest.suite());

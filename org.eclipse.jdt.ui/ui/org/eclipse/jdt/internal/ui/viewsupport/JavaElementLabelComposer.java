@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -980,26 +980,47 @@ public class JavaElementLabelComposer {
 		}
 
 		String typeName= getElementName(type);
-		if (typeName.length() == 0) { // anonymous
+		
+		if (isLambdaType(type)) {
+			typeName= "() -> {...}"; //$NON-NLS-1$
 			try {
-				if (type.getParent() instanceof IField && type.isEnum()) {
-					typeName= '{' + JavaElementLabels.ELLIPSIS_STRING + '}';
-				} else {
-					String supertypeName;
-					String[] superInterfaceSignatures= type.getSuperInterfaceTypeSignatures();
-					if (superInterfaceSignatures.length > 0) {
-						supertypeName= getSimpleTypeName(type, superInterfaceSignatures[0]);
-					} else {
-						supertypeName= getSimpleTypeName(type, type.getSuperclassTypeSignature());
-					}
-					typeName= Messages.format(JavaUIMessages.JavaElementLabels_anonym_type , supertypeName);
+				String[] superInterfaceSignatures= type.getSuperInterfaceTypeSignatures();
+				if (superInterfaceSignatures.length > 0) {
+					typeName= typeName + ' ' + getSimpleTypeName(type, superInterfaceSignatures[0]);
 				}
 			} catch (JavaModelException e) {
 				//ignore
-				typeName= JavaUIMessages.JavaElementLabels_anonym;
+			}
+			
+		} else {
+			boolean isAnonymous;
+			try {
+				isAnonymous= type.isAnonymous();
+			} catch (JavaModelException e1) {
+				isAnonymous= typeName.length() == 0;
+			}
+			if (isAnonymous) {
+				try {
+					if (type.getParent() instanceof IField && type.isEnum()) {
+						typeName= '{' + JavaElementLabels.ELLIPSIS_STRING + '}';
+					} else {
+						String supertypeName;
+						String[] superInterfaceSignatures= type.getSuperInterfaceTypeSignatures();
+						if (superInterfaceSignatures.length > 0) {
+							supertypeName= getSimpleTypeName(type, superInterfaceSignatures[0]);
+						} else {
+							supertypeName= getSimpleTypeName(type, type.getSuperclassTypeSignature());
+						}
+						typeName= Messages.format(JavaUIMessages.JavaElementLabels_anonym_type , supertypeName);
+					}
+				} catch (JavaModelException e) {
+					//ignore
+					typeName= JavaUIMessages.JavaElementLabels_anonym;
+				}
 			}
 		}
 		fBuffer.append(typeName);
+		
 		if (getFlag(flags, JavaElementLabels.T_TYPE_PARAMETERS)) {
 			if (getFlag(flags, JavaElementLabels.USE_RESOLVED) && type.isResolved()) {
 				BindingKey key= new BindingKey(type.getKey());
@@ -1046,6 +1067,16 @@ public class JavaElementLabelComposer {
 			if (getFlag(flags, JavaElementLabels.COLORIZE)) {
 				fBuffer.setStyle(offset, fBuffer.length() - offset, QUALIFIER_STYLE);
 			}
+		}
+	}
+
+	private static boolean isLambdaType(IType type) {
+		// TODO: use IType#isLambda() from bug 430195
+		try {
+			IMethod[] methods= type.getMethods();
+			return methods.length == 1 && methods[0].isLambdaMethod();
+		} catch (JavaModelException e) {
+			return false;
 		}
 	}
 
