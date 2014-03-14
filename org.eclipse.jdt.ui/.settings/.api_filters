@@ -136,6 +136,22 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/ui/JavaElementImageDescriptor.java" type="org.eclipse.jdt.ui.JavaElementImageDescriptor">
+        <filter comment="BETA_JAVA8" id="1141899266">
+            <message_arguments>
+                <message_argument value="3.10"/>
+                <message_argument value="3.9"/>
+                <message_argument value="ANNOTATION_DEFAULT"/>
+            </message_arguments>
+        </filter>
+        <filter comment="BETA_JAVA8" id="1141899266">
+            <message_arguments>
+                <message_argument value="3.10"/>
+                <message_argument value="3.9"/>
+                <message_argument value="DEFAULT_METHOD"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/ui/actions/IJavaEditorActionDefinitionIds.java" type="org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds">
         <filter id="571473929">
             <message_arguments>

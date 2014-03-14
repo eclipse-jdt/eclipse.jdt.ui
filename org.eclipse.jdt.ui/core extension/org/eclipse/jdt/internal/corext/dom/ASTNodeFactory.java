@@ -136,7 +136,7 @@ public class ASTNodeFactory {
 	 * 
 	 * @param type the type to be wrapped
 	 * @return the array type
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static ArrayType newArrayType(Type type) {
 		if (type instanceof ArrayType) {
@@ -247,7 +247,7 @@ public class ASTNodeFactory {
 	 * @return a new type node created with the given AST representing the return type of
 	 *         <code>lambdaExpression</code>
 	 * 
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static Type newReturnType(LambdaExpression lambdaExpression, AST ast, ImportRewrite importRewrite, ImportRewriteContext context) {
 		IMethodBinding method= lambdaExpression.resolveMethodBinding();

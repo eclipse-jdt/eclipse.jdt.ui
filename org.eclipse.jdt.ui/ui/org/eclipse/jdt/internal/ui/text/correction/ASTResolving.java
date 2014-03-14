@@ -733,7 +733,7 @@ public class ASTResolving {
 	 * @return the enclosing lambda expression node for the given <code>node</code>, or
 	 *         <code>null</code> if none
 	 * 
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static LambdaExpression findEnclosingLambdaExpression(ASTNode node) {
 		node= node.getParent();

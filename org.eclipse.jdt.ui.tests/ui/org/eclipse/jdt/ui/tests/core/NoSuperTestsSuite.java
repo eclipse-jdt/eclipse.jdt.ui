@@ -17,7 +17,7 @@ import junit.framework.TestSuite;
 /**
  * Test suite that only includes tests from the given test class, but not tests from super classes.
  * 
- * @since 3.9 BETA_JAVA8
+ * @since 3.10
  */
 public class NoSuperTestsSuite extends TestSuite {
 	/**

@@ -106,14 +106,14 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	/**
 	 * Flag to render the 'default' method adornment.
 	 * 
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public final static int DEFAULT_METHOD= 0x10000;
 
 	/**
 	 * Flag to render the 'default' annotation adornment.
 	 * 
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public final static int ANNOTATION_DEFAULT= 0x20000;
 

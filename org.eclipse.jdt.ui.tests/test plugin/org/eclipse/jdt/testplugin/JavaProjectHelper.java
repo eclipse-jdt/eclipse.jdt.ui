@@ -193,7 +193,7 @@ public class JavaProjectHelper {
 	 * Sets the compiler options to 1.8 for the given project.
 	 * 
 	 * @param project the java project
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static void set18CompilerOptions(IJavaProject project) {
 		Map options= project.getOptions(false);
@@ -245,7 +245,7 @@ public class JavaProjectHelper {
 	 * Sets the compiler options to 1.8
 	 * 
 	 * @param options the compiler options to configure
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static void set18CompilerOptions(Map options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options);

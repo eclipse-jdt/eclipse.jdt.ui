@@ -664,7 +664,7 @@ public class CleanUpConstants {
 	 * 
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static final String USE_LAMBDA= "cleanup.use_lambda"; //$NON-NLS-1$
 
@@ -677,7 +677,7 @@ public class CleanUpConstants {
 	 * 
 	 * @see CleanUpOptions#TRUE
 	 * @see CleanUpOptions#FALSE
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static final String USE_ANONYMOUS_CLASS_CREATION= "cleanup.use_anonymous_class_creation"; //$NON-NLS-1$
 

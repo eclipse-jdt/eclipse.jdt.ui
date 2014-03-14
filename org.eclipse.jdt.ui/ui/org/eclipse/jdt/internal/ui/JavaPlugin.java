@@ -1107,7 +1107,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @param bundleName the bundle name
 	 * @param version the version of the bundle, or <code>null</code> for all bundles
 	 * @return the bundles of the given name belonging to the given version range
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public Bundle[] getBundles(String bundleName, String version) {
 		Bundle[] bundles= Platform.getBundles(bundleName, version);

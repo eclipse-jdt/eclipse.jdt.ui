@@ -418,7 +418,7 @@ public class ASTNodes {
 	 * @param type a type that has a simple name
 	 * @return the simple name, followed by array dimensions
 	 * @see #getSimpleNameIdentifier(Name)
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static String getTypeName(Type type) {
 		final StringBuffer buffer= new StringBuffer();
@@ -465,7 +465,7 @@ public class ASTNodes {
 	 * 
 	 * @param type a type that has a name
 	 * @return the name, followed by array dimensions
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static String getQualifiedTypeName(Type type) {
 		final StringBuffer buffer= new StringBuffer();

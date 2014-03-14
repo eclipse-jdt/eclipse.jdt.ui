@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
  * Rewrite helper for {@link Dimension} node lists and {@link ArrayType}s.
  * 
  * @see JDTUIHelperClasses
- * @since 3.9 BETA_JAVA8
+ * @since 3.10
  */
 public class DimensionRewrite {
 
