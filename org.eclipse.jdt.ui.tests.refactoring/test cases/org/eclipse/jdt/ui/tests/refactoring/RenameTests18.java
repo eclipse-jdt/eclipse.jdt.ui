@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,9 @@ import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
@@ -50,11 +52,11 @@ public class RenameTests18 extends RefactoringTest {
 	}
 
 	public static Test suite() {
-		return new RefactoringTestSetup( new TestSuite(clazz));
+		return setUpTest(new TestSuite(clazz));
 	}
 
 	public static Test setUpTest(Test someTest) {
-		return new RefactoringTestSetup(someTest);
+		return new Java18Setup(someTest);
 	}
 
 	protected String getRefactoringPath() {
@@ -82,7 +84,7 @@ public class RenameTests18 extends RefactoringTest {
 		return new SourceRange(offset + AbstractSelectionTestCase.SQUARE_BRACKET_OPEN.length(), end - offset);
 	}
 
-	private void helper2(String newFieldName, boolean updateReferences) throws Exception {
+	private void renameLocalVariable(String newFieldName, boolean updateReferences) throws Exception {
 		ParticipantTesting.reset();
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 
@@ -123,22 +125,63 @@ public class RenameTests18 extends RefactoringTest {
 		assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 
-
-
-	//--------- tests ----------
 	public void testLambda0() throws Exception {
-		helper2("renamedF", true);
+		renameLocalVariable("renamedF", true);
 	}
 
 	public void testLambda1() throws Exception {
-		helper2("renamedP", true);
+		renameLocalVariable("renamedP", true);
 	}
 
 	public void testLambda2() throws Exception {
-		helper2("renamedIi", true);
+		renameLocalVariable("renamedIi", true);
 	}
 	
 	public void testLambda3() throws Exception {
-		helper2("x_renamed", true);
+		renameLocalVariable("x_renamed", true);
+	}
+
+
+	private void renameMethodInInterface(String methodName, String newMethodName, String[] signatures, boolean shouldPass, boolean updateReferences, boolean createDelegate) throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType interfaceI= getType(cu, "I");
+		IMethod method= interfaceI.getMethod(methodName, signatures);
+
+		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
+		descriptor.setJavaElement(method);
+		descriptor.setUpdateReferences(updateReferences);
+		descriptor.setNewName(newMethodName);
+		descriptor.setKeepOriginal(createDelegate);
+		descriptor.setDeprecateDelegate(true);
+
+		assertEquals("was supposed to pass", null, performRefactoring(descriptor));
+		if (!shouldPass){
+			assertTrue("incorrect renaming because of a java model bug", ! getFileContents(getOutputTestFileName("A")).equals(cu.getSource()));
+			return;
+		}
+		assertEqualLines("incorrect renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
+
+		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
+		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
+		//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
+
+		RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
+		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
+
+		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
+		assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
+		//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
+
+		RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
+		assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
+	}
+
+	private void renameMethodInInterface() throws Exception{
+		renameMethodInInterface("m", "k", new String[0], true, true, false);
+	}
+	
+	// method with a lambda method as reference
+	public void testMethod0() throws Exception{
+		renameMethodInInterface();
 	}
 }
