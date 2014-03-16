@@ -184,4 +184,9 @@ public class RenameTests18 extends RefactoringTest {
 	public void testMethod0() throws Exception{
 		renameMethodInInterface();
 	}
+	
+	// method with method references as reference
+	public void testMethod1() throws Exception{
+		renameMethodInInterface();
+	}
 }
