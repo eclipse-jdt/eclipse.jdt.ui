@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -56,6 +56,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -110,7 +111,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		}
 	}
 
-	private void helperAdd(String[] signature, ParameterInfo[] newParamInfos, int[] newIndices) throws Exception {
+	protected void helperAdd(String[] signature, ParameterInfo[] newParamInfos, int[] newIndices) throws Exception {
 		helperAdd(signature, newParamInfos, newIndices, false);
 	}
 
@@ -149,7 +150,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	/*
 	 * Rename method 'A.m(signature)' to 'A.newMethodName(signature)'
 	 */
-	private void helperRenameMethod(String[] signature, String newMethodName, boolean createDelegate, boolean markAsDeprecated) throws Exception {
+	protected void helperRenameMethod(String[] signature, String newMethodName, boolean createDelegate, boolean markAsDeprecated) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
@@ -240,7 +241,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		}
 	}
 
-	private void helper1(String[] newOrder, String[] signature) throws Exception{
+	protected void helper1(String[] newOrder, String[] signature) throws Exception {
 		helper1(newOrder, signature, null, null);
 	}
 
