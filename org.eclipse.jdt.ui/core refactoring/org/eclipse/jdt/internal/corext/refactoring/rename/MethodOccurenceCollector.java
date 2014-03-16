@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,11 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.search.MethodDeclarationMatch;
 import org.eclipse.jdt.core.search.MethodReferenceMatch;
 import org.eclipse.jdt.core.search.SearchMatch;
 
@@ -55,6 +57,14 @@ class MethodOccurenceCollector extends CuCollectingSearchRequestor {
 		//direct match:
 		if (fName.equals(matchText)) {
 			collectMatch(match);
+			return;
+		}
+
+		// lambda expression
+		if (match instanceof MethodDeclarationMatch
+				&& match.getElement() instanceof IMethod
+				&& ((IMethod) match.getElement()).isLambdaMethod()) {
+			// don't touch the lambda
 			return;
 		}
 
