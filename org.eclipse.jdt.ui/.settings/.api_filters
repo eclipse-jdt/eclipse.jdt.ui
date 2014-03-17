@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.ui" version="2">
-    <resource path="META-INF/MANIFEST.MF">
-        <filter comment="BETA_JAVA8" id="924844039">
-            <message_arguments>
-                <message_argument value="3.9.1"/>
-                <message_argument value="3.9.1"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/ReplaceInvocationsRefactoring.java" type="org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring">
         <filter id="571519004">
             <message_arguments>
@@ -72,6 +64,14 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/compare/JavaStructureDiffViewer.java" type="org.eclipse.jdt.internal.ui.compare.JavaStructureDiffViewer">
+        <filter id="571473929">
+            <message_arguments>
+                <message_argument value="StructureDiffViewer"/>
+                <message_argument value="JavaStructureDiffViewer"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/javaeditor/AddClassFileMarkerAction.java" type="org.eclipse.jdt.internal.ui.javaeditor.AddClassFileMarkerAction">
         <filter id="571473929">
             <message_arguments>
@@ -112,11 +112,27 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/javaeditor/JavaSourceViewer.java" type="org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer">
+        <filter id="571473929">
+            <message_arguments>
+                <message_argument value="ProjectionViewer"/>
+                <message_argument value="JavaSourceViewer"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/internal/ui/text/JavaOutlineInformationControl.java" type="org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl$OutlineTreeViewer">
         <filter id="571473929">
             <message_arguments>
                 <message_argument value="TreeViewer"/>
                 <message_argument value="OutlineTreeViewer"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/internal/ui/util/ViewerPane.java" type="org.eclipse.jdt.internal.ui.util.ViewerPane">
+        <filter id="571473929">
+            <message_arguments>
+                <message_argument value="ViewForm"/>
+                <message_argument value="ViewerPane"/>
             </message_arguments>
         </filter>
     </resource>
@@ -133,22 +149,6 @@
             <message_arguments>
                 <message_argument value="TreeViewer"/>
                 <message_argument value="ProblemTreeViewer"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="ui/org/eclipse/jdt/ui/JavaElementImageDescriptor.java" type="org.eclipse.jdt.ui.JavaElementImageDescriptor">
-        <filter comment="BETA_JAVA8" id="1141899266">
-            <message_arguments>
-                <message_argument value="3.10"/>
-                <message_argument value="3.9"/>
-                <message_argument value="ANNOTATION_DEFAULT"/>
-            </message_arguments>
-        </filter>
-        <filter comment="BETA_JAVA8" id="1141899266">
-            <message_arguments>
-                <message_argument value="3.10"/>
-                <message_argument value="3.9"/>
-                <message_argument value="DEFAULT_METHOD"/>
             </message_arguments>
         </filter>
     </resource>
