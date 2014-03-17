@@ -44,13 +44,18 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
@@ -79,11 +84,15 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -598,6 +607,235 @@ public class ASTNodes {
 				return referenceType;
 		}
 		
+		return null;
+	}
+
+	/**
+	 * Checks whether overloaded methods can result in ambiguous method call when the
+	 * <code>expression</code> argument is replaced with a poly expression form of the functional
+	 * interface instance.
+	 * 
+	 * @param expression the method argument which is a functional interface instance
+	 * @return <code>true</code> if overloaded methods can result in ambiguous method call,
+	 *         <code>false</code> otherwise
+	 * 
+	 * @since 3.10
+	 */
+	public static boolean isTargetAmbiguous(Expression expression) {
+		ASTNode parent= expression.getParent();
+		StructuralPropertyDescriptor locationInParent= expression.getLocationInParent();
+		IMethodBinding methodBinding;
+		int argumentIndex;
+
+		if (locationInParent == MethodInvocation.ARGUMENTS_PROPERTY) {
+			MethodInvocation methodInvocation= (MethodInvocation) parent;
+			methodBinding= methodInvocation.resolveMethodBinding();
+			argumentIndex= methodInvocation.arguments().indexOf(expression);
+		} else if (locationInParent == SuperMethodInvocation.ARGUMENTS_PROPERTY) {
+			SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) parent;
+			methodBinding= superMethodInvocation.resolveMethodBinding();
+			argumentIndex= superMethodInvocation.arguments().indexOf(expression);
+		} else if (locationInParent == ConstructorInvocation.ARGUMENTS_PROPERTY) {
+			ConstructorInvocation constructorInvocation= (ConstructorInvocation) parent;
+			methodBinding= constructorInvocation.resolveConstructorBinding();
+			argumentIndex= constructorInvocation.arguments().indexOf(expression);
+		} else if (locationInParent == SuperConstructorInvocation.ARGUMENTS_PROPERTY) {
+			SuperConstructorInvocation superConstructorInvocation= (SuperConstructorInvocation) parent;
+			methodBinding= superConstructorInvocation.resolveConstructorBinding();
+			argumentIndex= superConstructorInvocation.arguments().indexOf(expression);
+		} else if (locationInParent == ClassInstanceCreation.ARGUMENTS_PROPERTY) {
+			ClassInstanceCreation creation= (ClassInstanceCreation) parent;
+			methodBinding= creation.resolveConstructorBinding();
+			argumentIndex= creation.arguments().indexOf(expression);
+		} else if (locationInParent == EnumConstantDeclaration.ARGUMENTS_PROPERTY) {
+			EnumConstantDeclaration enumConstantDecl= (EnumConstantDeclaration) parent;
+			methodBinding= enumConstantDecl.resolveConstructorBinding();
+			argumentIndex= enumConstantDecl.arguments().indexOf(expression);
+		} else {
+			return false;
+		}
+
+		if (methodBinding != null) {
+			IMethodBinding methodDeclBinding= methodBinding.getMethodDeclaration();
+			if (methodDeclBinding != null) {
+				ITypeBinding declaringTypeBinding= methodDeclBinding.getDeclaringClass();
+				TypeBindingVisitor visitor= new AmbiguousTargetMethodAnalyzer(declaringTypeBinding, methodDeclBinding, argumentIndex);
+				return !(visitor.visit(declaringTypeBinding) && Bindings.visitHierarchy(declaringTypeBinding, visitor));
+			}
+		}
+
+		return true;
+	}
+
+	private static class AmbiguousTargetMethodAnalyzer implements TypeBindingVisitor {
+		private ITypeBinding fDeclaringType;
+		private IMethodBinding fOriginalMethod;
+		private int fArgIndex;
+
+		/**
+		 * @param declaringType the type binding declaring the <code>originalMethod</code>
+		 * @param originalMethod the method declaration binding corresponding to the method call
+		 * @param argumentIndex the index of the functional interface instance argument in the
+		 *            method call
+		 */
+		public AmbiguousTargetMethodAnalyzer(ITypeBinding declaringType, IMethodBinding originalMethod, int argumentIndex) {
+			fDeclaringType= declaringType;
+			fOriginalMethod= originalMethod;
+			fArgIndex= argumentIndex;
+		}
+
+		public boolean visit(ITypeBinding node) {
+			IMethodBinding[] methods= node.getDeclaredMethods();
+			for (int i= 0; i < methods.length; i++) {
+				IMethodBinding candidate= methods[i];
+				if (candidate == fOriginalMethod) {
+					continue;
+				}
+				ITypeBinding candidateDeclaringType= candidate.getDeclaringClass();
+				if (fDeclaringType != candidateDeclaringType) {
+					int modifiers= candidate.getModifiers();
+					if (candidateDeclaringType.isInterface() && Modifier.isStatic(modifiers)) {
+						continue;
+					}
+					if (Modifier.isPrivate(modifiers)) {
+						continue;
+					}
+				}
+				if (fOriginalMethod.getName().equals(candidate.getName())
+						&& fOriginalMethod.getParameterTypes().length == candidate.getParameterTypes().length
+						&& candidate.getParameterTypes()[fArgIndex].getFunctionalInterfaceMethod() != null) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	/**
+	 * Derives the target type defined at the location of the given expression if the target context
+	 * supports poly expressions.
+	 * 
+	 * @param expression the expression at whose location the target type is required
+	 * @return the type binding of the target type defined at the location of the given expression
+	 *         if the target context supports poly expressions, or <code>null</code> if the target
+	 *         type could not be derived
+	 * 
+	 * @since 3.10
+	 */
+	public static ITypeBinding getTargetType(Expression expression) {
+		ASTNode parent= expression.getParent();
+		StructuralPropertyDescriptor locationInParent= expression.getLocationInParent();
+
+		if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY || locationInParent == SingleVariableDeclaration.INITIALIZER_PROPERTY) {
+			return ((VariableDeclaration) parent).getName().resolveTypeBinding();
+
+		} else if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			return ((Assignment) parent).getLeftHandSide().resolveTypeBinding();
+
+		} else if (locationInParent == ReturnStatement.EXPRESSION_PROPERTY) {
+			return getTargetTypeForReturnStmt((ReturnStatement) parent);
+
+		} else if (locationInParent == ArrayInitializer.EXPRESSIONS_PROPERTY) {
+			return getTargetTypeForArrayInitializer((ArrayInitializer) parent);
+
+		} else if (locationInParent == MethodInvocation.ARGUMENTS_PROPERTY) {
+			MethodInvocation methodInvocation= (MethodInvocation) parent;
+			IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+			if (methodBinding != null) {
+				return getParameterTypeBinding(expression, methodInvocation.arguments(), methodBinding);
+			}
+
+		} else if (locationInParent == SuperMethodInvocation.ARGUMENTS_PROPERTY) {
+			SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) parent;
+			IMethodBinding superMethodBinding= superMethodInvocation.resolveMethodBinding();
+			if (superMethodBinding != null) {
+				return getParameterTypeBinding(expression, superMethodInvocation.arguments(), superMethodBinding);
+			}
+
+		} else if (locationInParent == ConstructorInvocation.ARGUMENTS_PROPERTY) {
+			ConstructorInvocation constructorInvocation= (ConstructorInvocation) parent;
+			IMethodBinding constructorBinding= constructorInvocation.resolveConstructorBinding();
+			if (constructorBinding != null) {
+				return getParameterTypeBinding(expression, constructorInvocation.arguments(), constructorBinding);
+			}
+
+		} else if (locationInParent == SuperConstructorInvocation.ARGUMENTS_PROPERTY) {
+			SuperConstructorInvocation superConstructorInvocation= (SuperConstructorInvocation) parent;
+			IMethodBinding superConstructorBinding= superConstructorInvocation.resolveConstructorBinding();
+			if (superConstructorBinding != null) {
+				return getParameterTypeBinding(expression, superConstructorInvocation.arguments(), superConstructorBinding);
+			}
+
+		} else if (locationInParent == ClassInstanceCreation.ARGUMENTS_PROPERTY) {
+			ClassInstanceCreation creation= (ClassInstanceCreation) parent;
+			IMethodBinding creationBinding= creation.resolveConstructorBinding();
+			if (creationBinding != null) {
+				return getParameterTypeBinding(expression, creation.arguments(), creationBinding);
+			}
+
+		} else if (locationInParent == EnumConstantDeclaration.ARGUMENTS_PROPERTY) {
+			EnumConstantDeclaration enumConstantDecl= (EnumConstantDeclaration) parent;
+			IMethodBinding enumConstructorBinding= enumConstantDecl.resolveConstructorBinding();
+			if (enumConstructorBinding != null) {
+				return getParameterTypeBinding(expression, enumConstantDecl.arguments(), enumConstructorBinding);
+			}
+
+		} else if (locationInParent == LambdaExpression.BODY_PROPERTY) {
+			IMethodBinding methodBinding= ((LambdaExpression) parent).resolveMethodBinding();
+			if (methodBinding != null) {
+				return methodBinding.getReturnType();
+			}
+
+		} else if (locationInParent == ConditionalExpression.THEN_EXPRESSION_PROPERTY || locationInParent == ConditionalExpression.ELSE_EXPRESSION_PROPERTY) {
+			return getTargetType((ConditionalExpression) parent);
+
+		} else if (locationInParent == CastExpression.EXPRESSION_PROPERTY) {
+			return ((CastExpression) parent).getType().resolveBinding();
+
+		} else if (locationInParent == FieldAccess.NAME_PROPERTY
+				|| locationInParent == SuperFieldAccess.NAME_PROPERTY
+				|| locationInParent == QualifiedName.NAME_PROPERTY) {
+			return getTargetType((Expression) parent);
+
+		} else if (locationInParent == ParenthesizedExpression.EXPRESSION_PROPERTY) {
+			return getTargetType((ParenthesizedExpression) parent);
+
+		}
+		return null;
+	}
+
+	private static ITypeBinding getParameterTypeBinding(Expression expression, List<Expression> arguments, IMethodBinding methodBinding) {
+		IMethodBinding methodDeclBinding= methodBinding.getMethodDeclaration();
+		return methodDeclBinding != null ? ASTResolving.getParameterTypeBinding(expression, arguments, methodDeclBinding) : null;
+	}
+
+	private static ITypeBinding getTargetTypeForArrayInitializer(ArrayInitializer arrayInitializer) {
+		ASTNode initializerParent= arrayInitializer.getParent();
+		while (initializerParent instanceof ArrayInitializer) {
+			initializerParent= initializerParent.getParent();
+		}
+		if (initializerParent instanceof ArrayCreation) {
+			return ((ArrayCreation) initializerParent).getType().getElementType().resolveBinding();
+		} else if (initializerParent instanceof VariableDeclaration) {
+			ITypeBinding typeBinding= ((VariableDeclaration) initializerParent).getName().resolveTypeBinding();
+			if (typeBinding != null) {
+				return typeBinding.getElementType();
+			}
+		}
+		return null;
+	}
+
+	private static ITypeBinding getTargetTypeForReturnStmt(ReturnStatement returnStmt) {
+		LambdaExpression enclosingLambdaExpr= ASTResolving.findEnclosingLambdaExpression(returnStmt);
+		if (enclosingLambdaExpr != null) {
+			IMethodBinding methodBinding= enclosingLambdaExpr.resolveMethodBinding();
+			return methodBinding == null ? null : methodBinding.getReturnType();
+		}
+		MethodDeclaration enclosingMethodDecl= ASTResolving.findParentMethodDeclaration(returnStmt);
+		if (enclosingMethodDecl != null) {
+			IMethodBinding methodBinding= enclosingMethodDecl.resolveBinding();
+			return methodBinding == null ? null : methodBinding.getReturnType();
+		}
 		return null;
 	}
 

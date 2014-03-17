@@ -23,16 +23,11 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.ArrayInitializer;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConditionalExpression;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
-import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -45,8 +40,6 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -61,6 +54,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -71,7 +65,6 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
@@ -246,8 +239,17 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 //				lambdaBody.accept(new InterfaceAccessQualifier(rewrite, classInstanceCreation.getType().resolveBinding())); //TODO: maybe need a separate ASTRewrite and string placeholder
 				
 				lambdaExpression.setBody(rewrite.createCopyTarget(lambdaBody));
-				rewrite.replace(classInstanceCreation, lambdaExpression, group);
-				
+				Expression replacement= lambdaExpression;
+				if (ASTNodes.isTargetAmbiguous(classInstanceCreation)) {
+					CastExpression cast= ast.newCastExpression();
+					cast.setExpression(lambdaExpression);
+					ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(classInstanceCreation, importRewrite);
+					cast.setType(importRewrite.addImport(classInstanceCreation.getType().resolveBinding(), ast, importRewriteContext));
+					replacement= cast;
+				}
+				rewrite.replace(classInstanceCreation, replacement, group);
+
 				importRemover.registerRemovedNode(classInstanceCreation);
 				importRemover.registerRetainedNode(lambdaBody);
 			}
@@ -418,6 +420,10 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 	}
 
 	private static boolean isInTargetTypeContext(ClassInstanceCreation node) {
+		ITypeBinding targetType= ASTNodes.getTargetType(node);
+		return targetType != null && targetType.getFunctionalInterfaceMethod() != null;
+
+		/*
 		//TODO: probably incomplete, should reuse https://bugs.eclipse.org/bugs/show_bug.cgi?id=408966#c6
 		StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
 		
@@ -449,5 +455,6 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				|| locationInParent == ConditionalExpression.THEN_EXPRESSION_PROPERTY
 				|| locationInParent == ConditionalExpression.ELSE_EXPRESSION_PROPERTY
 				|| locationInParent == CastExpression.EXPRESSION_PROPERTY;
-		}
+		*/
+	}
 }
