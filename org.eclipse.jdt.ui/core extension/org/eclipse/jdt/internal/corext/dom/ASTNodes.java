@@ -4,10 +4,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -422,7 +418,7 @@ public class ASTNodes {
 	 * @param type a type that has a simple name
 	 * @return the simple name, followed by array dimensions
 	 * @see #getSimpleNameIdentifier(Name)
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static String getTypeName(Type type) {
 		final StringBuffer buffer= new StringBuffer();
@@ -469,7 +465,7 @@ public class ASTNodes {
 	 * 
 	 * @param type a type that has a name
 	 * @return the name, followed by array dimensions
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static String getQualifiedTypeName(Type type) {
 		final StringBuffer buffer= new StringBuffer();

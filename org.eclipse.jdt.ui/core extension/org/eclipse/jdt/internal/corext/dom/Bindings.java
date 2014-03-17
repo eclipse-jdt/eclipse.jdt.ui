@@ -1483,7 +1483,7 @@ public class Bindings {
 	 * @param arrayType an array type binding
 	 * @param n number of dimensions to cut
 	 * @return arrayType with n dimensions removed, or <code>null</code>
-	 * @since 3.9 BETA_JAVA8
+	 * @since 3.10
 	 */
 	public static ITypeBinding getComponentType(ITypeBinding arrayType, int n) {
 		ITypeBinding type= arrayType;

@@ -5,10 +5,6 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -615,12 +611,11 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				}
 			}
 			
-			//TODO: Remove once Java SE 8 has been shipped:
-			String source= getValue(PREF_SOURCE_COMPATIBILITY);
-			if (VERSION_1_8.equals(source)) {
-				fJRE50InfoText.setText("This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
-				isVisible= true;
-			}
+//			String source= getValue(PREF_SOURCE_COMPATIBILITY);
+//			if (VERSION_1_8.equals(source)) {
+//				fJRE50InfoText.setText("This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
+//				isVisible= true;
+//			}
 			
 			fJRE50InfoText.setVisible(isVisible);
 			fJRE50InfoImage.setImage(isVisible ? JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING) : null);
