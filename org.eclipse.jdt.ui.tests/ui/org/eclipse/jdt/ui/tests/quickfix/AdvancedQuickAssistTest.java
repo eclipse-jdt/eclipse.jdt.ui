@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,6 +69,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
@@ -94,6 +95,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
@@ -5917,5 +5919,177 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertToIfReturn);
+	}
+
+	// bug 217984
+	public void testAssignToNewVariable() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.RandomAccess;\n");
+		buf.append("\n");
+		buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Gen<?> g = new Gen<>();\n");
+		buf.append("        g.get(0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Gen.java", buf.toString(), false, null);
+
+		String str= "g.get(0);";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 5);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.RandomAccess;\n");
+		buf.append("\n");
+		buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Gen<?> g = new Gen<>();\n");
+		buf.append("        List<String> list = g.get(0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.RandomAccess;\n");
+		buf.append("\n");
+		buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+		buf.append("    private List<String> list;\n");
+		buf.append("\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Gen<?> g = new Gen<>();\n");
+		buf.append("        list = g.get(0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
+
+	}
+
+	// bug 217984
+	public void testAssignToNewVariable1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.RandomAccess;\n");
+		buf.append("\n");
+		buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Gen<? extends Cloneable> ge = new Gen<>();\n");
+		buf.append("        ge.get(0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Gen.java", buf.toString(), false, null);
+
+		String str= "ge.get(0)";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 7);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.RandomAccess;\n");
+		buf.append("\n");
+		buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Gen<? extends Cloneable> ge = new Gen<>();\n");
+		buf.append("        Cloneable cloneable = ge.get(0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.RandomAccess;\n");
+		buf.append("\n");
+		buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+		buf.append("    private Cloneable cloneable;\n");
+		buf.append("\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Gen<? extends Cloneable> ge = new Gen<>();\n");
+		buf.append("        cloneable = ge.get(0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
+	}
+
+	// bug 217984
+	public void testAssignToNewVariable2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.RandomAccess;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");
+		buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Gen<? super Vector<String>> gs = new Gen<>();\n");
+		buf.append("        gs.get(0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Gen.java", buf.toString(), false, null);
+
+		String str= "gs.get(0)";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 7);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.RandomAccess;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");
+		buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Gen<? super Vector<String>> gs = new Gen<>();\n");
+		buf.append("        List<String> list = gs.get(0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.RandomAccess;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");
+		buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+		buf.append("    private List<String> list;\n");
+		buf.append("\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Gen<? super Vector<String>> gs = new Gen<>();\n");
+		buf.append("        list = gs.get(0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
 }
