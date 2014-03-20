@@ -82,6 +82,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -201,8 +202,14 @@ public class UnresolvedElementsSubProcessor {
 				node= (SimpleName) selectedNode;
 				ASTNode parent= node.getParent();
 				StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
-				if (locationInParent == MethodInvocation.EXPRESSION_PROPERTY) {
-					typeKind= SimilarElementsRequestor.CLASSES;
+				if (locationInParent == ExpressionMethodReference.EXPRESSION_PROPERTY) {
+					typeKind= SimilarElementsRequestor.REF_TYPES;
+				} else if (locationInParent == MethodInvocation.EXPRESSION_PROPERTY) {
+					if (JavaModelUtil.is18OrHigher(cu.getJavaProject())) {
+						typeKind= SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES | SimilarElementsRequestor.ENUMS;
+					} else {
+						typeKind= SimilarElementsRequestor.CLASSES;
+					}
 				} else if (locationInParent == FieldAccess.NAME_PROPERTY) {
 					Expression expression= ((FieldAccess) parent).getExpression();
 					if (expression != null) {
