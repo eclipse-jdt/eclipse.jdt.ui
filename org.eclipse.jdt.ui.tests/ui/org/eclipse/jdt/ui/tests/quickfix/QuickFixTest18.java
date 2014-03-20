@@ -379,6 +379,62 @@ public class QuickFixTest18 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
 	}
 
+	// bug 424172
+	public void testImportTypeInMethodReference() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test.one", false, null);
+		buf= new StringBuffer();
+		buf.append("package test.one;\n");
+		buf.append("\n");
+		buf.append("public class X {\n");
+		buf.append("    public static F2 staticMethod() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
+		buf= new StringBuffer();
+		buf.append("package test.one;\n");
+		buf.append("\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("public interface F2 {\n");
+		buf.append("    void foo();\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F2.java", buf.toString(), false, null);
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test.two", false, null);
+		buf= new StringBuffer();
+		buf.append("package test.two;\n");
+		buf.append("\n");
+		buf.append("import test.one.F2;\n");
+		buf.append("\n");
+		buf.append("public class C1 {\n");
+		buf.append("    public void fun1() {\n");
+		buf.append("        F2 f = X::staticMethod;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("C1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 9);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		buf= new StringBuffer();
+		buf.append("package test.two;\n");
+		buf.append("\n");
+		buf.append("import test.one.F2;\n");
+		buf.append("import test.one.X;\n");
+		buf.append("\n");
+		buf.append("public class C1 {\n");
+		buf.append("    public void fun1() {\n");
+		buf.append("        F2 f = X::staticMethod;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+	}
+
 	public void testLambdaReturnType5() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
