@@ -23,6 +23,8 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jdt.internal.junit.Messages;
 
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
 /**
  * A panel with counters for the number of Runs, Errors and Failures.
  */
@@ -77,7 +79,7 @@ public class CounterPanel extends Composite {
 		Text value= new Text(this, SWT.READ_ONLY);
 		value.setText(init);
 		// bug: 39661 Junit test counters do not repaint correctly [JUnit]
-		value.setBackground(getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+		SWTUtil.fixReadonlyTextBackground(value);
 		value.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.HORIZONTAL_ALIGN_BEGINNING));
 		return value;
 	}

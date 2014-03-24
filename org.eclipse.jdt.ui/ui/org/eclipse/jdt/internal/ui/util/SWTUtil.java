@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.core.runtime.Assert;
@@ -149,6 +150,19 @@ public class SWTUtil {
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
 		return layout;
+	}
+
+	/**
+	 * Fixes https://bugs.eclipse.org/71765 by setting the background
+	 * color to {@code SWT.COLOR_WIDGET_BACKGROUND}.
+	 * <p>
+	 * Should be applied to all SWT.READ_ONLY Texts in dialogs (or at least those which don't have an SWT.BORDER).
+	 * Search regex: {@code new Text\([^,]+,[^\)]+SWT\.READ_ONLY}
+	 * 
+	 * @param textField the text field
+	 */
+	public static void fixReadonlyTextBackground(Text textField) {
+		textField.setBackground(textField.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
 	}
 
 

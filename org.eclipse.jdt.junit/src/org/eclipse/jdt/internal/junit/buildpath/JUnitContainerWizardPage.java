@@ -48,6 +48,7 @@ import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 
 public class JUnitContainerWizardPage extends NewElementWizardPage implements IClasspathContainerPage, IClasspathContainerPageExtension {
@@ -140,6 +141,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		label.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 1, 1));
 
 		fResolvedPath= new Text(composite, SWT.READ_ONLY | SWT.WRAP);
+		SWTUtil.fixReadonlyTextBackground(fResolvedPath);
 		data= new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1);
 		data.widthHint= converter.convertWidthInCharsToPixels(60);
 		fResolvedPath.setFont(composite.getFont());
@@ -151,6 +153,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		label.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false, 1, 1));
 
 		fResolvedSourcePath= new Text(composite,  SWT.READ_ONLY | SWT.WRAP);
+		SWTUtil.fixReadonlyTextBackground(fResolvedSourcePath);
 		data= new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1);
 		data.widthHint= converter.convertWidthInCharsToPixels(60);
 		fResolvedSourcePath.setFont(composite.getFont());

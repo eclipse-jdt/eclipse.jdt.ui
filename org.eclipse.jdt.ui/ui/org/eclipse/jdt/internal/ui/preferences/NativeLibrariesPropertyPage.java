@@ -56,6 +56,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
@@ -147,6 +148,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 				label.setText(PreferencesMessages.NativeLibrariesPropertyPage_location_path);
 				
 				Text location= new Text(inner, SWT.READ_ONLY | SWT.WRAP);
+				SWTUtil.fixReadonlyTextBackground(location);
 				GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 				gd.widthHint= convertWidthInCharsToPixels(80);
 				location.setLayoutData(gd);

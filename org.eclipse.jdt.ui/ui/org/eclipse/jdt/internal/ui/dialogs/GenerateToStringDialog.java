@@ -634,6 +634,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			label.setText(JavaUIMessages.GenerateToStringDialog_templatesManagerPreview);
 
 			templateTextControl= new Text(composite, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.READ_ONLY);
+			SWTUtil.fixReadonlyTextBackground(templateTextControl);
 			GridData gd= new GridData(SWT.FILL, SWT.FILL, true, true);
 			gd.heightHint= 80;
 			gd.widthHint= 450;

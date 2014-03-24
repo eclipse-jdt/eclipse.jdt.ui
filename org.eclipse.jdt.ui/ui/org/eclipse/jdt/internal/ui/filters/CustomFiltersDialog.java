@@ -196,6 +196,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		info= new Label(parent, SWT.LEFT);
 		info.setText(FilterMessages.CustomFiltersDialog_description_label);
 		final Text description= new Text(parent, SWT.LEFT | SWT.WRAP | SWT.MULTI | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL);
+		SWTUtil.fixReadonlyTextBackground(description);
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.heightHint= convertHeightInCharsToPixels(3);
 		description.setLayoutData(data);

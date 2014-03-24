@@ -351,6 +351,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 		gd.horizontalSpan= 2;
 		descriptionLabel.setLayoutData(gd);
 		fDescription= new Text(hoverComposite, SWT.LEFT | SWT.WRAP | SWT.MULTI | SWT.READ_ONLY | SWT.BORDER);
+		SWTUtil.fixReadonlyTextBackground(fDescription);
 		gd= new GridData(GridData.FILL_BOTH);
 		gd.horizontalSpan= 2;
 		fDescription.setLayoutData(gd);

@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpTabPage;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.ContributedCleanUpTabPage;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  * The clean up registry provides a set of clean ups and there corresponding UI representatives.
@@ -68,6 +69,7 @@ public class CleanUpRegistry {
 			result.setLayout(new GridLayout(1, false));
 
 			Text text= new Text(result, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY);
+			SWTUtil.fixReadonlyTextBackground(text);
 			text.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 			text.setText(Messages.format(FixMessages.CleanUpRegistry_ErrorTabPage_description, fException.getLocalizedMessage()));
 
