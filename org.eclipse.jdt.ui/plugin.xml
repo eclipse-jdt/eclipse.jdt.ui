@@ -4207,7 +4207,7 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             platform="carbon"
-            sequence="CTRL+ALT+SHIFT+ARROW_UP"
+            sequence="CTRL+SHIFT+PAGE_UP"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.select.enclosing"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
@@ -4225,7 +4225,7 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             platform="carbon"
-            sequence="CTRL+ALT+SHIFT+ARROW_RIGHT"
+            sequence="CTRL+SHIFT+END"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.select.next"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
@@ -4242,7 +4242,7 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             platform="carbon"
-            sequence="CTRL+ALT+SHIFT+ARROW_LEFT"
+            sequence="CTRL+SHIFT+HOME"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.select.previous"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
@@ -4259,7 +4259,7 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
       <key
             platform="carbon"
-            sequence="CTRL+ALT+SHIFT+ARROW_DOWN"
+            sequence="CTRL+SHIFT+PAGE_DOWN"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.select.last"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
