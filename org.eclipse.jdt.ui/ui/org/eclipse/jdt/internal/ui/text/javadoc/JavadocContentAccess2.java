@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 IBM Corporation and others.
+ * Copyright (c) 2008, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,6 +91,7 @@ import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
@@ -600,18 +601,58 @@ public class JavadocContentAccess2 {
 		ISourceRange javadocRange= member.getJavadocRange();
 		if (javadocRange == null) {
 			if (canInheritJavadoc(member)) {
-				// Try to use the inheritDoc algorithm. If it finds nothing (in source), return null.
+				// Try to use the inheritDoc algorithm.
 				String inheritedJavadoc= javadoc2HTML(member, "/***/"); //$NON-NLS-1$
-				return inheritedJavadoc != null && inheritedJavadoc.length() > 0 ? inheritedJavadoc : null;
-			} else {
-				return null;
+				if (inheritedJavadoc != null && inheritedJavadoc.length() > 0) {
+					return inheritedJavadoc;
+				}
 			}
+			return getJavaFxPropertyDoc(member);
 		}
 
 		String rawJavadoc= buf.getText(javadocRange.getOffset(), javadocRange.getLength());
 		return javadoc2HTML(member, rawJavadoc);
 	}
+	
+	private static String getJavaFxPropertyDoc(IMember member) throws JavaModelException {
+		// XXX: should not do this by default (but we don't have settings for Javadoc, see https://bugs.eclipse.org/424283 )
+		if (member instanceof IMethod) {
+			String name= member.getElementName();
+			boolean isGetter= name.startsWith("get"); //$NON-NLS-1$
+			boolean isSetter= name.startsWith("set"); //$NON-NLS-1$
+			boolean isProperty= name.endsWith("Property"); //$NON-NLS-1$
+			if (isGetter || isSetter || isProperty) {
+				String propertyName= null;
+				if (isGetter || isSetter) {
+					propertyName= firstToLower(name.substring(3));
+				} else {
+					propertyName= name.substring(0, name.length() - 8);
+				}
 
+				IType type= member.getDeclaringType();
+				IField field= type.getField(propertyName);
+				if (field.exists()) {
+					String content= getHTMLContentFromSource(field);
+					if (content != null) {
+						if (isGetter) {
+							content= Messages.format(JavaDocMessages.JavadocContentAccess2_getproperty_message, new Object[] { propertyName, content });
+						} else if (isSetter) {
+							content= Messages.format(JavaDocMessages.JavadocContentAccess2_setproperty_message, new Object[] { propertyName, content });
+						}
+					}
+					return content;
+				}
+			}
+		}
+		return null;
+	}
+	
+	private static String firstToLower(String propertyName) {
+		char[] c = propertyName.toCharArray();
+		c[0] = Character.toLowerCase(c[0]);
+		return String.valueOf(c);
+	}
+	
 	private static Javadoc getJavadocNode(IJavaElement element, String rawJavadoc) {
 		//FIXME: take from SharedASTProvider if available
 		//Caveat: Javadoc nodes are not available when Javadoc processing has been disabled!
