@@ -21,9 +21,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -74,6 +77,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 				ReorgUserInputPage.this.viewerSelectionChanged(event);
 			}
 		});
+		fViewer.addDoubleClickListener(new TreeViewerDoubleClickListener());
 		Dialog.applyDialogFont(result);
 	}
 
@@ -155,5 +159,24 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 
 	protected TreeViewer getTreeViewer() {
 		return fViewer;
+	}
+
+	private class TreeViewerDoubleClickListener implements IDoubleClickListener {
+		public void doubleClick(DoubleClickEvent event) {
+			IStructuredSelection selection = (IStructuredSelection)event.getSelection();
+			Object element = selection.getFirstElement();
+			if (fViewer.isExpandable(element)) {
+				if (fViewer.getExpandedState(element)) {
+					fViewer.collapseToLevel(element, 1);
+				}
+				else {
+					ITreeContentProvider contentProvider = (ITreeContentProvider)fViewer.getContentProvider();
+					Object[] children = contentProvider.getChildren(element);
+					if (children.length > 0) {
+						fViewer.expandToLevel(element, 1);
+					}
+				}
+			}
+		}
 	}
 }
