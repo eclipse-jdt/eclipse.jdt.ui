@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Lars Vogel  <lars.vogel@gmail.com> - [templates][content assist] Ctrl+Space without any starting letter shows to no templates - https://bugs.eclipse.org/406463
+ *     Lukas Hanke <hanke@yatta.de> - [templates][content assist] Content assist for 'for' loop should suggest member variables - https://bugs.eclipse.org/117215
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
@@ -378,18 +379,18 @@ public class JavaContext extends CompilationUnitContext {
 	}
 
 	/**
-	 * Returns the names of local arrays.
+	 * Returns the names of arrays available in the current {@link CompilationUnit}'s scope.
 	 *
-	 * @return the names of local arrays
+	 * @return the names of local arrays available in the current {@link CompilationUnit}'s scope
 	 */
 	public Variable[] getArrays() {
-		Variable[] localArrays= getCompletion().findLocalArrays();
-		arrange(localArrays);
-		return localArrays;
+		Variable[] arrays= getCompletion().findArraysInCurrentScope();
+		arrange(arrays);
+		return arrays;
 	}
 
 	/**
-	 * Sorts already used locals behind any that are not yet used.
+	 * Sorts already used variables behind any that are not yet used.
 	 *
 	 * @param variables the variables to sort
 	 * @since 3.3
@@ -433,12 +434,12 @@ public class JavaContext extends CompilationUnitContext {
 	}
 
 	/**
-	 * Returns the names of local iterables or arrays.
+	 * Returns the names of iterables or arrays available in the current {@link CompilationUnit}'s scope.
 	 *
-	 * @return the names of local iterables or arrays
+	 * @return the names of iterables or arrays available in the current {@link CompilationUnit}'s scope
 	 */
 	public Variable[] getIterables() {
-		Variable[] iterables= getCompletion().findLocalIterables();
+		Variable[] iterables= getCompletion().findIterablesInCurrentScope();
 		arrange(iterables);
 		return iterables;
 	}

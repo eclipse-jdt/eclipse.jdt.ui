@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,37 +7,14 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Lukas Hanke <hanke@yatta.de> - [templates][content assist] Content assist for 'for' loop should suggest member variables - https://bugs.eclipse.org/117215 
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import java.util.Hashtable;
-
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.templates.Template;
-import org.eclipse.jface.text.templates.TemplateException;
-import org.eclipse.jface.text.templates.persistence.TemplateStore;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
-import org.eclipse.jdt.internal.corext.template.java.JavaContext;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 
 /**
  * Tests the automatic bracket insertion feature of the CUEditor. Also tests
@@ -45,95 +22,39 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  *
  * @since 3.1
  */
-public class NewForLoopJavaContextTest extends TestCase {
+public class NewForLoopJavaContextTest extends AbstractForLoopJavaContextTest {
 
-	private static final String PROJECT= "NewForLoopJavaContextTest";
-	private static final String SRC= "src";
-	private static final String CU_NAME= "A.java";
-
-	private static final String CU_PREFIX=
-		"package test;\n" +
-		"\n" +
-		"import java.io.Serializable;\n" +
-		"import java.util.Collection;\n" +
-		"import java.util.List;\n" +
-		"\n" +
-		"public class A<E extends Number> {\n" +
-		"	private static class Inner {\n" +
-		"	}\n" +
-		"	\n" +
-		"	private static abstract class Inner2<E> implements Iterable<E> {\n" +
-		"	}\n" +
-		"	\n" +
-		"	private static abstract class Inner3 implements Iterable<Serializable> {\n" +
-		"	}\n" +
-		"	\n" +
-		"	private static abstract class Inner4<T> implements Iterable<String> {\n" +
-		"	}\n" +
-		"	\n" +
-		"	private static abstract class Transi1<T extends Collection> implements Iterable<T> {\n" +
-		"	}\n" +
-		"	\n" +
-		"	private static abstract class Transi2<T extends List> extends Transi1<T> {\n" +
-		"	}\n" +
-		"	\n";
-	private static final String CU_POSTFIX=
-		" {\n" +
-		"	\n" +
-		"}\n" +
-		"}\n";
+	public static final String INNER_CLASS_DECLARATIONS= "	private static class Inner {\n" +
+			"	}\n" +
+			"	\n" +
+			"	private static abstract class Inner2<E> implements Iterable<E> {\n" +
+			"	}\n" +
+			"	\n" +
+			"	private static abstract class Inner3 implements Iterable<Serializable> {\n" +
+			"	}\n" +
+			"	\n" +
+			"	private static abstract class Inner4<T> implements Iterable<String> {\n" +
+			"	}\n" +
+			"	\n" +
+			"	private static abstract class Transi1<T extends Collection> implements Iterable<T> {\n" +
+			"	}\n" +
+			"	\n" +
+			"	private static abstract class Transi2<T extends List> extends Transi1<T> {\n" +
+			"	}\n" +
+			"	\n";
 
 	public static Test suite() {
 		return new TestSuite(NewForLoopJavaContextTest.class);
 	}
 
-	private IJavaProject fProject;
-	private ICompilationUnit fCU;
-
-	protected void setUp() throws Exception {
-		if (JavaCore.getPlugin() != null) {
-			Hashtable options= JavaCore.getDefaultOptions();
-			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
-			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
-//			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_LENGTH, "4");
-//			options.put(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE, "4");
-			JavaCore.setOptions(options);
-		}
-		setUpProject(JavaCore.VERSION_1_5);
+	@Override
+	protected String getInnerClasses() {
+		return INNER_CLASS_DECLARATIONS;
 	}
 
-	private void setUpProject(String sourceLevel) throws CoreException, JavaModelException {
-		fProject= JavaProjectHelper.createJavaProject(PROJECT, "bin");
-		JavaProjectHelper.addRTJar(fProject);
-		fProject.setOption(JavaCore.COMPILER_SOURCE, sourceLevel);
-		IPackageFragmentRoot fragmentRoot= JavaProjectHelper.addSourceContainer(fProject, SRC);
-		IPackageFragment fragment= fragmentRoot.createPackageFragment("test", true, new NullProgressMonitor());
-		fCU= fragment.createCompilationUnit(CU_NAME, "", true, new NullProgressMonitor());
-		fCU.becomeWorkingCopy(null);
-	}
-
-	protected void tearDown() throws Exception {
-		fCU.discardWorkingCopy();
-		JavaProjectHelper.delete(fProject);
-		if (JavaCore.getPlugin() != null) {
-			JavaCore.setOptions(JavaCore.getDefaultOptions());
-		}
-	}
-
-	private Template getTemplate(String id) {
-		TemplateStore store= JavaPlugin.getDefault().getTemplateStore();
-		return store.getTemplateData(id).getTemplate();
-	}
-
-	private Template getForLoop() {
+	@Override
+	protected Template getForLoop() {
 		return getTemplate("org.eclipse.jdt.ui.templates.for_iterable");
-	}
-
-	private String evaluateTemplateInMethod(String signature) throws BadLocationException, TemplateException, CoreException {
-		fCU.getBuffer().setContents(CU_PREFIX + signature + CU_POSTFIX);
-		int offset= CU_PREFIX.length() + signature.length() + 3;
-		fCU.reconcile(ICompilationUnit.NO_AST, false, null, null);
-		return JavaContext.evaluateTemplate(getForLoop(), fCU, offset);
 	}
 
 	public void testArray() throws Exception {
@@ -229,6 +150,22 @@ public class NewForLoopJavaContextTest extends TestCase {
 		String template= evaluateTemplateInMethod("void method(List<? extends Number> list)");
 		assertEquals(
 				"	for (Number number : list) {\n" +
+				"		\n" +
+				"	}", template);
+	}
+
+	public void testProposeField() throws Exception {
+		String template= evaluateTemplateInMethodWithField("void method()", "Collection<String> strings");
+		assertEquals(
+				"	for (String string : strings) {\n" +
+				"		\n" +
+				"	}", template);
+	}
+
+	public void testProposeParamWithField() throws Exception {
+		String template= evaluateTemplateInMethodWithField("void method(List<Number> numbers)", "Collection<String> strings");
+		assertEquals(
+				"	for (Number number : numbers) {\n" +
 				"		\n" +
 				"	}", template);
 	}

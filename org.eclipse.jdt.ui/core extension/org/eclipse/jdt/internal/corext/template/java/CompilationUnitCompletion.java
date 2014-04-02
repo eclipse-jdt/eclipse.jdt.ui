@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Lukas Hanke <hanke@yatta.de> - [templates][content assist] Content assist for 'for' loop should suggest member variables - https://bugs.eclipse.org/117215
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
@@ -839,18 +840,27 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	}
 
 	/**
-	 * Returns all local arrays in the order that they appear.
-	 *
-	 * @return all local arrays
+	 * Returns all arrays, visible in the current context's scope, in the order that they appear.
+	 * 
+	 * @return all visible arrays
 	 */
-	public Variable[] findLocalArrays() {
+	public Variable[] findArraysInCurrentScope() {
 		List<Variable> arrays= new ArrayList<Variable>();
 
+		// local variables
 		for (ListIterator<Variable> iterator= fLocalVariables.listIterator(fLocalVariables.size()); iterator.hasPrevious();) {
 			Variable localVariable= iterator.previous();
 
 			if (localVariable.isArray())
 				arrays.add(localVariable);
+		}
+		
+		// fields
+		for (ListIterator<Variable> iterator= fFields.listIterator(fFields.size()); iterator.hasPrevious();) {
+			Variable field= iterator.previous();
+
+			if (field.isArray())
+				arrays.add(field);
 		}
 
 		return arrays.toArray(new Variable[arrays.size()]);
@@ -897,21 +907,29 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	}
 
 	/**
-	 * Returns all local variables implementing <code>java.lang.Iterable</code>
-	 * <em>and</em> all local arrays, in the order that they appear. That is,
-	 * the returned variables can be used within the <code>foreach</code>
-	 * language construct.
-	 *
-	 * @return all local <code>Iterable</code>s and arrays
+	 * Returns all variables, visible in the current context's scope, implementing
+	 * <code>java.lang.Iterable</code> <em>and</em> all arrays, in the order that they appear. That
+	 * is, the returned variables can be used within the <code>foreach</code> language construct.
+	 * 
+	 * @return all visible <code>Iterable</code>s and arrays
 	 */
-	public Variable[] findLocalIterables() {
+	public Variable[] findIterablesInCurrentScope() {
 		List<Variable> iterables= new ArrayList<Variable>();
 
+		// local variables
 		for (ListIterator<Variable> iterator= fLocalVariables.listIterator(fLocalVariables.size()); iterator.hasPrevious();) {
 			Variable localVariable= iterator.previous();
 
 			if (localVariable.isArray() || localVariable.isIterable())
 				iterables.add(localVariable);
+		}
+		
+		// fields
+		for (ListIterator<Variable> iterator= fFields.listIterator(fFields.size()); iterator.hasPrevious();) {
+			Variable field= iterator.previous();
+
+			if (field.isArray() || field.isIterable())
+				iterables.add(field);
 		}
 
 		return iterables.toArray(new Variable[iterables.size()]);
