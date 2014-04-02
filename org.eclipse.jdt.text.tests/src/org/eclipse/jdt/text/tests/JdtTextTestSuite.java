@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Lukas Hanke <hanke@yatta.de> - [templates][content assist] Content assist for 'for' loop should suggest member variables - https://bugs.eclipse.org/117215
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
@@ -58,6 +59,8 @@ public class JdtTextTestSuite {
 		suite.addTest(SemanticHighlightingTest.suite());
 		suite.addTest(AutoboxingSemanticHighlightingTest.suite());
 		suite.addTest(NewForLoopJavaContextTest.suite());
+		suite.addTest(IteratorForLoopJavaContextTest.suite());
+		suite.addTest(ArrayWithTempVarForLoopJavaContextTest.suite());
 		suite.addTest(JavaDoubleClickSelectorTest.suite());
 		suite.addTest(BreakContinueTargetFinderTest.suite());
 		suite.addTest(ContentAssistTestSuite.suite());
