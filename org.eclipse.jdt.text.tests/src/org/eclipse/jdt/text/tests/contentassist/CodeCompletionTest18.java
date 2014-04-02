@@ -230,7 +230,7 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 		buf.append("        @Override\n");
 		buf.append("        public void hello() {\n");
 		buf.append("            //TODO\n");
-		buf.append("            \n");
+		buf.append("            Interface.super.hello();\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("    private static interface Interface {\n");
@@ -282,13 +282,61 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 		buf.append("        @Override\n");
 		buf.append("        public default void hello() {\n");
 		buf.append("            //TODO\n");
-		buf.append("            \n");
+		buf.append("            Foo.super.hello();\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("    private static interface Foo {\n");
 		buf.append("        default void hello() {\n");
 		buf.append("            System.out.println(\"Hello\");\n");
 		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testOverride3() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface I {\n");
+		buf.append("    default int getSize(String name) {\n");
+		buf.append("        return name.length();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I2 extends I {\n");
+		buf.append("    getSize\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("I.java", buf.toString(), false, null);
+	
+		String str= "getSize";
+		int offset= buf.toString().lastIndexOf(str) + str.length();
+	
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		codeComplete(cu, offset, collector);
+	
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+		assertEquals(1, proposals.length);
+		IEditorPart part= JavaUI.openInEditor(cu);
+		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+		proposals[0].apply(doc);
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface I {\n");
+		buf.append("    default int getSize(String name) {\n");
+		buf.append("        return name.length();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I2 extends I {\n");
+		buf.append("    /* (non-Javadoc)\n");
+		buf.append("     * @see test1.I#getSize(java.lang.String)\n");
+		buf.append("     */\n");
+		buf.append("    @Override\n");
+		buf.append("    public default int getSize(String name) {\n");
+		buf.append("        //TODO\n");
+		buf.append("        return I.super.getSize(name);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEquals(buf.toString(), doc.get());

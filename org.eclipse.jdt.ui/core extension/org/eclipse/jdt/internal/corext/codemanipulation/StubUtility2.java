@@ -349,14 +349,15 @@ public final class StubUtility2 {
 		String delimiter= unit.findRecommendedLineSeparator();
 		int modifiers= binding.getModifiers();
 		if (!(inInterface && Modifier.isAbstract(modifiers))) {
+			// generate a method body
+
 			Map<String, String> options= javaProject.getOptions(true);
 
 			Block body= ast.newBlock();
 			decl.setBody(body);
 
 			String bodyStatement= ""; //$NON-NLS-1$
-			ITypeBinding declaringType= binding.getDeclaringClass();
-			if (Modifier.isAbstract(modifiers) || declaringType.isAnnotation() || declaringType.isInterface()) {
+			if (Modifier.isAbstract(modifiers)) {
 				Expression expression= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
 				if (expression != null) {
 					ReturnStatement returnStatement= ast.newReturnStatement();
@@ -365,6 +366,12 @@ public final class StubUtility2 {
 				}
 			} else {
 				SuperMethodInvocation invocation= ast.newSuperMethodInvocation();
+				ITypeBinding declaringType= binding.getDeclaringClass();
+				if (declaringType.isInterface()) {
+					String qualifier= imports.addImport(declaringType, context);
+					Name name= ASTNodeFactory.newName(ast, qualifier);
+					invocation.setQualifier(name);
+				}
 				invocation.setName(ast.newSimpleName(binding.getName()));
 				SingleVariableDeclaration varDecl= null;
 				for (Iterator<SingleVariableDeclaration> iterator= parameters.iterator(); iterator.hasNext();) {
@@ -629,7 +636,9 @@ public final class StubUtility2 {
 		int modifiers= method.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.NATIVE & ~Modifier.PRIVATE;
 		if (inInterface) {
 			modifiers= modifiers & ~Modifier.PROTECTED;
-			modifiers= modifiers | Modifier.PUBLIC;
+			if (!method.getDeclaringClass().isInterface() ) {
+				modifiers= modifiers | Modifier.PUBLIC;
+			}
 		} else {
 			modifiers= modifiers & ~Modifier.DEFAULT;
 		}
