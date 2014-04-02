@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -217,15 +218,28 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (ifStatement.getElseStatement() != null) {
 			return false;
 		}
-		MethodDeclaration coveringMetod= ASTResolving.findParentMethodDeclaration(ifStatement);
-		if (coveringMetod == null) {
-			return false;
+
+		// enclosing lambda or method should return 'void'
+		LambdaExpression enclosingLambda= ASTResolving.findEnclosingLambdaExpression(ifStatement);
+		if (enclosingLambda != null) {
+			IMethodBinding lambdaMethodBinding= enclosingLambda.resolveMethodBinding();
+			if (lambdaMethodBinding == null) {
+				return false;
+			}
+			if (!(ifStatement.getAST().resolveWellKnownType("void").equals(lambdaMethodBinding.getReturnType()))) { //$NON-NLS-1$
+				return false;
+			}
+		} else {
+			MethodDeclaration coveringMethod= ASTResolving.findParentMethodDeclaration(ifStatement);
+			if (coveringMethod == null) {
+				return false;
+			}
+			Type returnType= coveringMethod.getReturnType2();
+			if (!isVoid(returnType)) {
+				return false;
+			}
 		}
-		// method should return 'void'
-		Type returnType= coveringMetod.getReturnType2();
-		if (!isVoid(returnType)) {
-			return false;
-		}
+
 		// should be present in a block
 		if (!(ifStatement.getParent() instanceof Block)) {
 			return false;
@@ -242,7 +256,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		// should have no further executable statement
-		if (!isLastExecutableStatementInMethod(ifStatement)) {
+		if (!isLastStatementInEnclosingMethodOrLambda(ifStatement)) {
 			return false;
 		}
 		//  we could produce quick assist
@@ -283,10 +297,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return type instanceof PrimitiveType && ((PrimitiveType) type).getPrimitiveTypeCode() == PrimitiveType.VOID;
 	}
 
-	private static boolean isLastExecutableStatementInMethod(Statement statement) {
+	private static boolean isLastStatementInEnclosingMethodOrLambda(Statement statement) {
 		ASTNode currentStructure= statement;
 		ASTNode currentParent= statement.getParent();
-		while (!(currentParent instanceof MethodDeclaration)) {
+		while (!(currentParent instanceof MethodDeclaration || currentParent instanceof LambdaExpression)) {
 			// should not be in a loop
 			if (currentParent instanceof ForStatement || currentParent instanceof EnhancedForStatement
 					|| currentParent instanceof WhileStatement || currentParent instanceof DoStatement) {
