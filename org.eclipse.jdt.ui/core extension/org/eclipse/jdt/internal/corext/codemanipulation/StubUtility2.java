@@ -332,7 +332,8 @@ public final class StubUtility2 {
 			bindingReturnType= (bound != null) ? bound : bindingReturnType.getErasure();
 		}
 		
-		if (JavaModelUtil.is50OrHigher(unit.getJavaProject())) {
+		IJavaProject javaProject= unit.getJavaProject();
+		if (JavaModelUtil.is50OrHigher(javaProject)) {
 			createTypeParameters(imports, context, ast, binding, decl);
 			
 		} else {
@@ -341,20 +342,21 @@ public final class StubUtility2 {
 		
 		decl.setReturnType2(imports.addImport(bindingReturnType, ast, context));
 
-		List<SingleVariableDeclaration> parameters= createParameters(unit.getJavaProject(), imports, context, ast, binding, parameterNames, decl);
+		List<SingleVariableDeclaration> parameters= createParameters(javaProject, imports, context, ast, binding, parameterNames, decl);
 
 		createThrownExceptions(decl, binding, imports, context, ast);
 
 		String delimiter= unit.findRecommendedLineSeparator();
-		if (!inInterface) {
-			Map<String, String> options= unit.getJavaProject().getOptions(true);
+		int modifiers= binding.getModifiers();
+		if (!(inInterface && Modifier.isAbstract(modifiers))) {
+			Map<String, String> options= javaProject.getOptions(true);
 
 			Block body= ast.newBlock();
 			decl.setBody(body);
 
 			String bodyStatement= ""; //$NON-NLS-1$
 			ITypeBinding declaringType= binding.getDeclaringClass();
-			if (Modifier.isAbstract(binding.getModifiers()) || declaringType.isAnnotation() || declaringType.isInterface()) {
+			if (Modifier.isAbstract(modifiers) || declaringType.isAnnotation() || declaringType.isInterface()) {
 				Expression expression= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
 				if (expression != null) {
 					ReturnStatement returnStatement= ast.newReturnStatement();
@@ -394,8 +396,8 @@ public final class StubUtility2 {
 				decl.setJavadoc(javadoc);
 			}
 		}
-		if (settings != null && settings.overrideAnnotation && JavaModelUtil.is50OrHigher(unit.getJavaProject())) {
-			addOverrideAnnotation(unit.getJavaProject(), rewrite, decl, binding);
+		if (settings != null && settings.overrideAnnotation && JavaModelUtil.is50OrHigher(javaProject)) {
+			addOverrideAnnotation(javaProject, rewrite, decl, binding);
 		}
 
 		return decl;
@@ -628,6 +630,8 @@ public final class StubUtility2 {
 		if (inInterface) {
 			modifiers= modifiers & ~Modifier.PROTECTED;
 			modifiers= modifiers | Modifier.PUBLIC;
+		} else {
+			modifiers= modifiers & ~Modifier.DEFAULT;
 		}
 		IAnnotationBinding[] annotations= method.getAnnotations();
 		

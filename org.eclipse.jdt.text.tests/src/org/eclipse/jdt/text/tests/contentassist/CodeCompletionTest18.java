@@ -189,4 +189,109 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 				"}\n";
 		assertEquals(expectedContents, doc.get());
 	}
+
+	public void testOverride1() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Main {\n");
+		buf.append("    private static class Cls implements Interface {\n");
+		buf.append("        hello\n");
+		buf.append("    }\n");
+		buf.append("    private static interface Interface {\n");
+		buf.append("        default void hello() {\n");
+		buf.append("            System.out.println(\"Hello\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Main.java", buf.toString(), false, null);
+
+		String str= "hello";
+		int offset= buf.toString().indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+		assertEquals(1, proposals.length);
+		IEditorPart part= JavaUI.openInEditor(cu);
+		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Main {\n");
+		buf.append("    private static class Cls implements Interface {\n");
+		buf.append("        /* (non-Javadoc)\n");
+		buf.append("         * @see test1.Main.Interface#hello()\n");
+		buf.append("         */\n");
+		buf.append("        @Override\n");
+		buf.append("        public void hello() {\n");
+		buf.append("            //TODO\n");
+		buf.append("            \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private static interface Interface {\n");
+		buf.append("        default void hello() {\n");
+		buf.append("            System.out.println(\"Hello\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testOverride2() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Main {\n");
+		buf.append("    private static interface Bar extends Foo {\n");
+		buf.append("        hello\n");
+		buf.append("    }\n");
+		buf.append("    private static interface Foo {\n");
+		buf.append("        default void hello() {\n");
+		buf.append("            System.out.println(\"Hello\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Main.java", buf.toString(), false, null);
+
+		String str= "hello";
+		int offset= buf.toString().indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+		assertEquals(1, proposals.length);
+		IEditorPart part= JavaUI.openInEditor(cu);
+		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Main {\n");
+		buf.append("    private static interface Bar extends Foo {\n");
+		buf.append("        /* (non-Javadoc)\n");
+		buf.append("         * @see test1.Main.Foo#hello()\n");
+		buf.append("         */\n");
+		buf.append("        @Override\n");
+		buf.append("        public default void hello() {\n");
+		buf.append("            //TODO\n");
+		buf.append("            \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private static interface Foo {\n");
+		buf.append("        default void hello() {\n");
+		buf.append("            System.out.println(\"Hello\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
 }
