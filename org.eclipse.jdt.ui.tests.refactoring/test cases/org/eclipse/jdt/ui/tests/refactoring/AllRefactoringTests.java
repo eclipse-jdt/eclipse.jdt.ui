@@ -53,6 +53,7 @@ public class AllRefactoringTests {
 		suite.addTest(MoveMembersTests.suite());
 		suite.addTest(MoveMembersTests18.suite());
 		suite.addTest(ExtractInterfaceTests.suite());
+		suite.addTest(ExtractInterfaceTests18.suite());
 		suite.addTest(ExtractSupertypeTests.suite());
 		suite.addTest(MoveInnerToTopLevelTests.suite());
 		suite.addTest(UseSupertypeWherePossibleTests.suite());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -833,25 +833,23 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	}
 
 	/**
-	 * Returns the extracted methods from the compilation unit.
+	 * Returns the extracted methods from the compilation unit except the default methods.
 	 *
-	 * @param unit
-	 *            the compilation unit
-	 * @return the extracted methods
+	 * @param unit the compilation unit
+	 * @return the extracted methods except the default method
+	 * @throws JavaModelException if the element does not exist
 	 */
-	protected final IMethod[] getExtractedMethods(final ICompilationUnit unit) {
+	protected final IMethod[] getExtractedMethods(final ICompilationUnit unit) throws JavaModelException {
 		Assert.isNotNull(unit);
 		final List<IJavaElement> list= new ArrayList<IJavaElement>();
 		for (int index= 0; index < fMembers.length; index++) {
 			if (fMembers[index] instanceof IMethod) {
 				final IJavaElement element= JavaModelUtil.findInCompilationUnit(unit, fMembers[index]);
-				if (element instanceof IMethod)
+				if (element instanceof IMethod && !JdtFlags.isDefaultMethod((IMethod) element))
 					list.add(element);
 			}
 		}
-		final IMethod[] methods= new IMethod[list.size()];
-		list.toArray(methods);
-		return methods;
+		return list.toArray(new IMethod[list.size()]);
 	}
 
 	/*

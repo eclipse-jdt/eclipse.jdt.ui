@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,10 +55,12 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		return new RefactoringTestSetup(someTest);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID,
@@ -80,13 +82,14 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	    JavaCore.setOptions(options);
 	}
 
-    protected void tearDown() throws Exception {
+    @Override
+	protected void tearDown() throws Exception {
     	super.tearDown();
     	JavaCore.setOptions(fOldOptions);
     	fOldOptions= null;
     }
 
-	private static String getTopLevelTypeName(String typeQualifiedTyperName){
+	protected static String getTopLevelTypeName(String typeQualifiedTyperName) {
 		int dotIndex= typeQualifiedTyperName.indexOf('.');
 		if (dotIndex == -1)
 			return typeQualifiedTyperName;
@@ -130,7 +133,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		assertEqualLines("(interface cu)", getFileContents(getOutputTestFileName(newInterfaceName)), interfaceCu.getSource());
 	}
 
-	private void validatePassingTest(String className, String newInterfaceName, boolean extractAll, boolean replaceOccurrences) throws Exception {
+	protected void validatePassingTest(String className, String newInterfaceName, boolean extractAll, boolean replaceOccurrences) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 		ICompilationUnit cu= clas.getCompilationUnit();
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
