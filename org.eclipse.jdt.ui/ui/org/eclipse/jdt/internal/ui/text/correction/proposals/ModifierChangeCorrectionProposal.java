@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -32,10 +34,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.PositionInformation;
+
+import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
@@ -55,7 +60,7 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
 	}
 
 	@Override
-	protected ASTRewrite getRewrite() {
+	protected ASTRewrite getRewrite() throws CoreException {
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
 		ASTNode boundNode= astRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
@@ -96,6 +101,10 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
 					IMethodBinding methodBinding= methodDecl.resolveBinding();
 					if (methodBinding != null && Modifier.isAbstract(methodBinding.getModifiers()) && Modifier.isStatic(fIncludedModifiers)) {
 						// add body
+						ICompilationUnit unit= getCompilationUnit();
+						String delimiter= unit.findRecommendedLineSeparator();
+						String bodyStatement= ""; //$NON-NLS-1$
+						
 						Block body= ast.newBlock();
 						rewrite.set(methodDecl, MethodDeclaration.BODY_PROPERTY, body, null);
 						Type returnType= methodDecl.getReturnType2();
@@ -104,8 +113,13 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
 							if (expression != null) {
 								ReturnStatement returnStatement= ast.newReturnStatement();
 								returnStatement.setExpression(expression);
-								body.statements().add(returnStatement);
+								bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter, unit.getJavaProject().getOptions(true));
 							}
+						}
+						String placeHolder= CodeGeneration.getMethodBodyContent(unit, methodBinding.getDeclaringClass().getName(), methodBinding.getName(), false, bodyStatement, delimiter);
+						if (placeHolder != null) {
+							ReturnStatement todoNode= (ReturnStatement) rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
+							body.statements().add(todoNode);
 						}
 					}
 				}

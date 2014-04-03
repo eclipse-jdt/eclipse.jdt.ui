@@ -79,6 +79,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NonExternalizedStringLiteral:
 			case IProblem.NonStaticAccessToStaticField:
 			case IProblem.NonStaticAccessToStaticMethod:
+			case IProblem.NonStaticOrAlienTypeReceiver:
 			case IProblem.StaticMethodRequested:
 			case IProblem.NonStaticFieldFromStaticInvocation:
 			case IProblem.InstanceMethodDuringConstructorInvocation:
@@ -415,6 +416,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.NonStaticAccessToStaticField:
 			case IProblem.NonStaticAccessToStaticMethod:
+			case IProblem.NonStaticOrAlienTypeReceiver:
 			case IProblem.IndirectAccessToStaticField:
 			case IProblem.IndirectAccessToStaticMethod:
 				LocalCorrectionsSubProcessor.addCorrectAccessToStaticProposals(context, problem, proposals);

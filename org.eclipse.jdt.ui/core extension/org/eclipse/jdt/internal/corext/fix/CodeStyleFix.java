@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -694,7 +694,8 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 
 	public static boolean isNonStaticAccess(IProblemLocation problem) {
 		return (problem.getProblemId() == IProblem.NonStaticAccessToStaticField
-				|| problem.getProblemId() == IProblem.NonStaticAccessToStaticMethod);
+				|| problem.getProblemId() == IProblem.NonStaticAccessToStaticMethod
+				|| problem.getProblemId() == IProblem.NonStaticOrAlienTypeReceiver);
 	}
 
 	private static ToStaticAccessOperation[] createToStaticAccessOperations(CompilationUnit astRoot, HashMap<ASTNode, Block> createdBlocks, IProblemLocation problem, boolean conservative) {
@@ -706,26 +707,18 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		Expression qualifier= null;
 		IBinding accessBinding= null;
 
-        if (selectedNode instanceof QualifiedName) {
-        	QualifiedName name= (QualifiedName) selectedNode;
-        	qualifier= name.getQualifier();
-        	accessBinding= name.resolveBinding();
-        } else if (selectedNode instanceof SimpleName) {
-        	ASTNode parent= selectedNode.getParent();
-        	if (parent instanceof FieldAccess) {
-        		FieldAccess fieldAccess= (FieldAccess) parent;
-        		qualifier= fieldAccess.getExpression();
-        		accessBinding= fieldAccess.getName().resolveBinding();
-        	} else if (parent instanceof QualifiedName) {
-        		QualifiedName qualifiedName= (QualifiedName) parent;
-        		qualifier= qualifiedName.getQualifier();
-        		accessBinding= qualifiedName.getName().resolveBinding();
-        	}
-        } else if (selectedNode instanceof MethodInvocation) {
-        	MethodInvocation methodInvocation= (MethodInvocation) selectedNode;
-        	qualifier= methodInvocation.getExpression();
-        	accessBinding= methodInvocation.getName().resolveBinding();
-        } else if (selectedNode instanceof FieldAccess) {
+		if (selectedNode instanceof SimpleName) {
+			selectedNode= selectedNode.getParent();
+		}
+		if (selectedNode instanceof QualifiedName) {
+			QualifiedName name= (QualifiedName) selectedNode;
+			qualifier= name.getQualifier();
+			accessBinding= name.resolveBinding();
+		} else if (selectedNode instanceof MethodInvocation) {
+			MethodInvocation methodInvocation= (MethodInvocation) selectedNode;
+			qualifier= methodInvocation.getExpression();
+			accessBinding= methodInvocation.getName().resolveBinding();
+		} else if (selectedNode instanceof FieldAccess) {
 			FieldAccess fieldAccess= (FieldAccess) selectedNode;
 			qualifier= fieldAccess.getExpression();
 			accessBinding= fieldAccess.getName().resolveBinding();
