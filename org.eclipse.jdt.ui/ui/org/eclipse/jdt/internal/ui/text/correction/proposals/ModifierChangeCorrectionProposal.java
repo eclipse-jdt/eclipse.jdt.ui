@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,13 +18,20 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
@@ -83,6 +90,25 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
 					// can't separate
 				}
 				declNode= parent;
+			} else if (declNode.getNodeType() == ASTNode.METHOD_DECLARATION) {
+				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
+				if (!methodDecl.isConstructor()) {
+					IMethodBinding methodBinding= methodDecl.resolveBinding();
+					if (methodBinding != null && Modifier.isAbstract(methodBinding.getModifiers()) && Modifier.isStatic(fIncludedModifiers)) {
+						// add body
+						Block body= ast.newBlock();
+						rewrite.set(methodDecl, MethodDeclaration.BODY_PROPERTY, body, null);
+						Type returnType= methodDecl.getReturnType2();
+						if (returnType != null) {
+							Expression expression= ASTNodeFactory.newDefaultExpression(ast, returnType, methodDecl.getExtraDimensions());
+							if (expression != null) {
+								ReturnStatement returnStatement= ast.newReturnStatement();
+								returnStatement.setExpression(expression);
+								body.statements().add(returnStatement);
+							}
+						}
+					}
+				}
 			}
 			ModifierRewrite listRewrite= ModifierRewrite.create(rewrite, declNode);
 			PositionInformation trackedDeclNode= listRewrite.setModifiers(fIncludedModifiers, fExcludedModifiers, null);

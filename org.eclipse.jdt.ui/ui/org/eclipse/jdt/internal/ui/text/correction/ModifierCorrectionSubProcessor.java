@@ -197,6 +197,9 @@ public class ModifierCorrectionSubProcessor {
 				case TO_STATIC:
 					label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertostatic_description, name);
 					includedModifiers= Modifier.STATIC;
+					if (bindingDecl.getKind() == IBinding.METHOD) {
+						excludedModifiers= Modifier.DEFAULT | Modifier.ABSTRACT;
+					}
 					break;
 				case TO_NON_STATIC:
 					if (typeBinding != null && typeBinding.isInterface())
