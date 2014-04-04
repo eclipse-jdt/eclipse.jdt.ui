@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2013 IBM Corporation and others.
+ * Copyright (c) 2008, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,12 +41,14 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
 /**
@@ -173,9 +175,22 @@ public class JavaElementLinks {
 		@Override
 		protected String getSimpleTypeName(IJavaElement enclosingElement, String typeSig) {
 			String typeName= super.getSimpleTypeName(enclosingElement, typeSig);
+			
+			String title= ""; //$NON-NLS-1$
+			String qualifiedName= Signature.toString(Signature.getTypeErasure(typeSig));
+			int qualifierLength= qualifiedName.length() - typeName.length() - 1;
+			if (qualifierLength > 0) {
+				if (qualifiedName.endsWith(typeName)) {
+					title= qualifiedName.substring(0, qualifierLength);
+					title= Messages.format(JavaUIMessages.JavaElementLinks_title, title);
+				} else {
+					title= qualifiedName; // Not expected. Just show the whole qualifiedName.
+				}
+			}
+			
 			try {
-				String uri= createURI(JAVADOC_SCHEME, enclosingElement, typeName, null, null);
-				return createHeaderLink(uri, typeName);
+				String uri= createURI(JAVADOC_SCHEME, enclosingElement, qualifiedName, null, null);
+				return createHeaderLink(uri, typeName, title);
 			} catch (URISyntaxException e) {
 				JavaPlugin.log(e);
 				return typeName;
@@ -638,7 +653,23 @@ public class JavaElementLinks {
 	 * @since 3.6
 	 */
 	public static String createHeaderLink(String uri, String label) {
-		return "<a class='header' href='" + uri + "'>" + label + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return createHeaderLink(uri, label, ""); //$NON-NLS-1$
+	}
+	
+	/**
+	 * Creates a link with the given URI, label and title text.
+	 * 
+	 * @param uri the URI
+	 * @param label the label
+	 * @param title the title to be displayed while hovering over the link (can be empty)
+	 * @return the HTML link
+	 * @since 3.10
+	 */
+	private static String createHeaderLink(String uri, String label, String title) {
+		if (title.length() > 0) {
+			title= " title='" + title + "'";  //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return "<a class='header' href='" + uri + "'" + title + ">" + label + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 	}
 	
 	/**
