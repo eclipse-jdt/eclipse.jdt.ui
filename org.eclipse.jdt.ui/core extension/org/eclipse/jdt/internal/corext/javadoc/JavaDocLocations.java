@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -453,11 +453,20 @@ public class JavaDocLocations {
 		}
 
 		String urlString= baseLocation.toExternalForm();
-
-		StringBuffer pathBuffer= new StringBuffer(urlString);
 		if (!urlString.endsWith("/")) { //$NON-NLS-1$
-			pathBuffer.append('/');
+			urlString= urlString + '/';
 		}
+
+		URI uri;
+		try {
+			uri= new URI(urlString);
+		} catch (URISyntaxException e) {
+			JavaPlugin.log(e);
+			return null;
+		}
+		
+		StringBuffer pathBuffer= new StringBuffer();
+		StringBuffer fragmentBuffer= new StringBuffer();
 
 		switch (element.getElementType()) {
 			case IJavaElement.PACKAGE_FRAGMENT:
@@ -487,14 +496,14 @@ public class JavaDocLocations {
 				IField field= (IField) element;
 				appendTypePath(field.getDeclaringType(), pathBuffer);
 				if (includeMemberReference) {
-					appendFieldReference(field, pathBuffer);
+					appendFieldReference(field, fragmentBuffer);
 				}
 				break;
 			case IJavaElement.METHOD :
 				IMethod method= (IMethod) element;
 				appendTypePath(method.getDeclaringType(), pathBuffer);
 				if (includeMemberReference) {
-					appendMethodReference(method, pathBuffer);
+					appendMethodReference(method, fragmentBuffer);
 				}
 				break;
 			case IJavaElement.INITIALIZER :
@@ -528,7 +537,15 @@ public class JavaDocLocations {
 		}
 
 		try {
-			return new URL(pathBuffer.toString());
+			String fragment= fragmentBuffer.length() == 0 ? null : fragmentBuffer.toString();
+			try {
+				URI relativeURI= new URI(null, null, pathBuffer.toString(), fragment);
+				uri= uri.resolve(relativeURI);
+				return uri.toURL();
+			} catch (URISyntaxException e) {
+				JavaPlugin.log(e);
+				return new URL(urlString + pathBuffer);
+			}
 		} catch (MalformedURLException e) {
 			JavaPlugin.log(e);
 		}
@@ -558,25 +575,32 @@ public class JavaDocLocations {
 	}
 
 	private static void appendFieldReference(IField field, StringBuffer buf) {
-		buf.append('#');
 		buf.append(field.getElementName());
 	}
 
 	private static void appendMethodReference(IMethod meth, StringBuffer buf) throws JavaModelException {
-		buf.append('#');
 		buf.append(meth.getElementName());
 
-		buf.append('(');
+		/*
+		 * The Javadoc tool for Java SE 8 changed the anchor syntax and now tries to avoid "strange" characters in URLs.
+		 * This breaks all clients that directly create such URLs.
+		 * We can't know what format is required, so we just guess by the project's compiler compliance.
+		 */
+		boolean is18OrHigher= JavaModelUtil.is18OrHigher(meth.getJavaProject());
+		buf.append(is18OrHigher ? '-' : '(');
 		String[] params= meth.getParameterTypes();
 		IType declaringType= meth.getDeclaringType();
 		boolean isVararg= Flags.isVarargs(meth.getFlags());
 		int lastParam= params.length - 1;
 		for (int i= 0; i <= lastParam; i++) {
 			if (i != 0) {
-				buf.append(", "); //$NON-NLS-1$
+				buf.append(is18OrHigher ? "-" : ", "); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			String curr= Signature.getTypeErasure(params[i]);
 			String fullName= JavaModelUtil.getResolvedTypeName(curr, declaringType);
+			if (fullName == null) { // e.g. a type parameter "QE;"
+				fullName= Signature.toString(Signature.getElementType(curr));
+			}
 			if (fullName != null) {
 				buf.append(fullName);
 				int dim= Signature.getArrayCount(curr);
@@ -584,7 +608,7 @@ public class JavaDocLocations {
 					dim--;
 				}
 				while (dim > 0) {
-					buf.append("[]"); //$NON-NLS-1$
+					buf.append(is18OrHigher ? ":A" : "[]"); //$NON-NLS-1$ //$NON-NLS-2$
 					dim--;
 				}
 				if (i == lastParam && isVararg) {
@@ -592,7 +616,7 @@ public class JavaDocLocations {
 				}
 			}
 		}
-		buf.append(')');
+		buf.append(is18OrHigher ? '-' : ')');
 	}
 
 	/**
