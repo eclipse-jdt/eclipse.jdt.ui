@@ -33,9 +33,11 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
@@ -437,23 +439,48 @@ public final class StubUtility2 {
 		}
 		for (int i= 0; i < params.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-			if (binding.isVarargs() && params[i].isArray() && i == params.length - 1) {
-				ITypeBinding type= params[i].getElementType();
-				if (!is50OrHigher)
-					type= type.getErasure();
-				StringBuffer buffer= new StringBuffer(imports.addImport(type, context));
-				for (int dim= 1; dim < params[i].getDimensions(); dim++)
-					buffer.append("[]"); //$NON-NLS-1$
-				var.setType(ASTNodeFactory.newType(ast, buffer.toString()));
+			ITypeBinding type= params[i];
+			if (type.isWildcardType()) {
+				ITypeBinding bound= type.getBound();
+				type= (bound != null) ? bound : type.getErasure();
+			}
+			if (!is50OrHigher) {
+				type= type.getErasure();
+			} else if (binding.isVarargs() && type.isArray() && i == params.length - 1) {
 				var.setVarargs(true);
-			} else {
-				ITypeBinding type= params[i];
-				if (type.isWildcardType()) {
-					ITypeBinding bound= type.getBound();
-					type= (bound != null) ? bound : type.getErasure();
+				/*
+				 * Varargs annotations are special.
+				 * Example:
+				 *     foo(@O Object @A [] @B ... arg)
+				 * => @B is not an annotation on the array dimension that constitutes the vararg.
+				 * It's the type annotation of the *innermost* array dimension.
+				 */
+				int dimensions= type.getDimensions();
+				@SuppressWarnings("unchecked")
+				List<Annotation>[] dimensionAnnotations= (List<Annotation>[]) new List<?>[dimensions];
+				for (int dim= 0; dim < dimensions; dim++) {
+					dimensionAnnotations[dim]= new ArrayList<Annotation>();
+					for (IAnnotationBinding annotation : type.getTypeAnnotations()) {
+						dimensionAnnotations[dim].add(imports.addAnnotation(annotation, ast, context));
+					}
+					type= type.getComponentType();
 				}
-				if (!is50OrHigher)
-					type= type.getErasure();
+				
+				Type elementType= imports.addImport(type, ast, context);
+				if (dimensions == 1) {
+					var.setType(elementType);
+				} else {
+					ArrayType arrayType= ast.newArrayType(elementType, dimensions - 1);
+					List<Dimension> dimensionNodes= arrayType.dimensions();
+					for (int dim= 0; dim < dimensions - 1; dim++) { // all except the innermost dimension
+						Dimension dimension= dimensionNodes.get(dim);
+						dimension.annotations().addAll(dimensionAnnotations[dim]);
+					}
+					var.setType(arrayType);
+				}
+				List<Annotation> varargTypeAnnotations= dimensionAnnotations[dimensions - 1];
+				var.varargsAnnotations().addAll(varargTypeAnnotations);
+			} else {
 				var.setType(imports.addImport(type, ast, context));
 			}
 			var.setName(ast.newSimpleName(paramNames[i]));

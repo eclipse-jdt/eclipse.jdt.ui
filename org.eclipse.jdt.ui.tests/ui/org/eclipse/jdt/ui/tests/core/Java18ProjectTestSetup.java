@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,11 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import java.io.File;
+import java.io.IOException;
+
 import junit.framework.Test;
+
+import org.osgi.framework.Bundle;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IProject;
@@ -23,6 +29,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class Java18ProjectTestSetup extends ProjectTestSetup {
 
@@ -36,6 +44,16 @@ public class Java18ProjectTestSetup extends ProjectTestSetup {
 	public static IClasspathEntry[] getDefaultClasspath() throws CoreException {
 		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_18);
 		return new IClasspathEntry[] { JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], true) };
+	}
+
+	public static String getJdtAnnotations20Path() throws IOException {
+		Bundle[] annotationsBundles= JavaPlugin.getDefault().getBundles("org.eclipse.jdt.annotation", "2.0.0"); //$NON-NLS-1$
+		File bundleFile= FileLocator.getBundleFile(annotationsBundles[0]);
+		String path= bundleFile.getPath();
+		if (bundleFile.isDirectory()) {
+			path= bundleFile.getPath() + "/bin";
+		}
+		return path;
 	}
 
 	public Java18ProjectTestSetup(Test test) {
