@@ -180,7 +180,8 @@ public class Binding extends ASTAttribute {
 					
 					String isTypeDeclaration= typeBinding == typeBinding.getTypeDeclaration() ? " ( == this)" : " ( != this)";
 					res.add(new Binding(this, "TYPE DECLARATION" + isTypeDeclaration, typeBinding.getTypeDeclaration(), true)); //$NON-NLS-1$
-					res.add(new Binding(this, "ERASURE", typeBinding.getErasure(), isNonPrimitive)); //$NON-NLS-1$
+					String isErasure= typeBinding == typeBinding.getErasure() ? " ( == this)" : " ( != this)";
+					res.add(new Binding(this, "ERASURE" + isErasure, typeBinding.getErasure(), isNonPrimitive)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE PARAMETERS", typeBinding.getTypeParameters(), isType(typeKind, GENERIC))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE ARGUMENTS", typeBinding.getTypeArguments(), isType(typeKind, PARAMETRIZED))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE BOUNDS", typeBinding.getTypeBounds(), isType(typeKind, VARIABLE_TYPE | WILDCARD_TYPE | CAPTURE_TYPE))); //$NON-NLS-1$
