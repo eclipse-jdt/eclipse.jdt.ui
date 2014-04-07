@@ -1605,8 +1605,9 @@ public class LocalCorrectionsSubProcessor {
 						method.setExpression(ast.newName(qfn));
 						method.setName(ast.newSimpleName(methodName[1]));
 						ASTNode parent= selectedNode.getParent();
-						// add explicit type arguments if necessary:
-						if (Invocations.isInvocationWithArguments(parent)) {
+						ICompilationUnit cu= context.getCompilationUnit();
+						// add explicit type arguments if necessary (for 1.8 and later, we're optimistic that inference just works):
+						if (Invocations.isInvocationWithArguments(parent) && !JavaModelUtil.is18OrHigher(cu.getJavaProject())) {
 							IMethodBinding methodBinding= Invocations.resolveBinding(parent);
 							if (methodBinding != null) {
 								ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
@@ -1615,10 +1616,13 @@ public class LocalCorrectionsSubProcessor {
 									ITypeBinding[] typeArguments= parameterTypes[i].getTypeArguments();
 									for (int j= 0; j < typeArguments.length; j++) {
 										ITypeBinding typeArgument= typeArguments[j];
+										typeArgument= Bindings.normalizeForDeclarationUse(typeArgument, ast);
 										if (! TypeRules.isJavaLangObject(typeArgument)) {
+											// add all type arguments if at least one is found to be necessary: 
 											List<Type> typeArgumentsList= method.typeArguments();
 											for (int k= 0; k < typeArguments.length; k++) {
 												typeArgument= typeArguments[k];
+												typeArgument= Bindings.normalizeForDeclarationUse(typeArgument, ast);
 												typeArgumentsList.add(importRewrite.addImport(typeArgument, ast));
 											}
 											break;
@@ -1632,7 +1636,7 @@ public class LocalCorrectionsSubProcessor {
 
 						String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_replacefieldaccesswithmethod_description, BasicElementLabels.getJavaElementName(ASTNodes.asString(method)));
 						Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-						ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), astRewrite, IProposalRelevance.REPLACE_FIELD_ACCESS_WITH_METHOD, image);
+						ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, astRewrite, IProposalRelevance.REPLACE_FIELD_ACCESS_WITH_METHOD, image);
 						proposal.setImportRewrite(importRewrite);
 						proposals.add(proposal);
 					}
