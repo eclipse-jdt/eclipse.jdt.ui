@@ -446,6 +446,7 @@ public final class StubUtility2 {
 			}
 			if (!is50OrHigher) {
 				type= type.getErasure();
+				var.setType(imports.addImport(type, ast, context));
 			} else if (binding.isVarargs() && type.isArray() && i == params.length - 1) {
 				var.setVarargs(true);
 				/*
