@@ -453,16 +453,10 @@ public class JavaDocLocations {
 		}
 
 		String urlString= baseLocation.toExternalForm();
-		if (!urlString.endsWith("/")) { //$NON-NLS-1$
-			urlString= urlString + '/';
-		}
 
-		URI uri;
-		try {
-			uri= new URI(urlString);
-		} catch (URISyntaxException e) {
-			JavaPlugin.log(e);
-			return null;
+		StringBuffer urlBuffer= new StringBuffer(urlString);
+		if (!urlString.endsWith("/")) { //$NON-NLS-1$
+			urlBuffer.append('/');
 		}
 		
 		StringBuffer pathBuffer= new StringBuffer();
@@ -540,11 +534,11 @@ public class JavaDocLocations {
 			String fragment= fragmentBuffer.length() == 0 ? null : fragmentBuffer.toString();
 			try {
 				URI relativeURI= new URI(null, null, pathBuffer.toString(), fragment);
-				uri= uri.resolve(relativeURI);
-				return uri.toURL();
+				urlBuffer.append(relativeURI.toString());
+				return new URL(urlBuffer.toString());
 			} catch (URISyntaxException e) {
 				JavaPlugin.log(e);
-				return new URL(urlString + pathBuffer);
+				return new URL(urlBuffer.append(pathBuffer).toString());
 			}
 		} catch (MalformedURLException e) {
 			JavaPlugin.log(e);
