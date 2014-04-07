@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,7 +81,6 @@ public class AddUnimplementedMethodsTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
-		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
 
 		Hashtable options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
@@ -89,6 +88,8 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "999");
 		fJavaProject.setOptions(options);
 
+		assertNotNull(JavaProjectHelper.addRTJar(fJavaProject));
+		
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "${body_statement}\n// TODO", null);
 
 		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
@@ -97,7 +98,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		ICompilationUnit cu= fPackage.getCompilationUnit("A.java");
 		fClassA= cu.createType("public abstract class A {\n}\n", null, true, null);
 		fClassA.createMethod("public abstract void a();\n", null, true, null);
-		fClassA.createMethod("public abstract void b(java.util.Vector v);\n", null, true, null);
+		fClassA.createMethod("public abstract void b(java.util.Vector<java.util.Date> v);\n", null, true, null);
 
 		cu= fPackage.getCompilationUnit("B.java");
 		fInterfaceB= cu.createType("public interface B {\n}\n", null, true, null);
@@ -149,7 +150,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		checkMethods(new String[] { "a", "b", "c", "equals", "clone", "toString", "finalize", "hashCode" }, methods);
 
 		IImportDeclaration[] imports= cu.getImports();
-		checkImports(new String[] { "java.util.Hashtable", "java.util.Vector" }, imports);
+		checkImports(new String[] { "java.util.Date", "java.util.Hashtable", "java.util.Vector" }, imports);
 	}
 
 	/*
