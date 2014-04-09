@@ -99,7 +99,7 @@ public class ModifierChangeCorrectionProposal extends LinkedCorrectionProposal {
 				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
 				if (!methodDecl.isConstructor()) {
 					IMethodBinding methodBinding= methodDecl.resolveBinding();
-					if (methodBinding != null && Modifier.isAbstract(methodBinding.getModifiers()) && Modifier.isStatic(fIncludedModifiers)) {
+					if (methodDecl.getBody() == null && methodBinding != null && Modifier.isAbstract(methodBinding.getModifiers()) && Modifier.isStatic(fIncludedModifiers)) {
 						// add body
 						ICompilationUnit unit= getCompilationUnit();
 						String delimiter= unit.findRecommendedLineSeparator();

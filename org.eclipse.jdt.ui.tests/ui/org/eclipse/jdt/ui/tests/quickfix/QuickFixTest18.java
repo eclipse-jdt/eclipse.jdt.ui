@@ -837,4 +837,33 @@ public class QuickFixTest18 extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
 	}
+
+	public void testChangeModifierToStatic2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface Test {\n");
+		buf.append("    int i= foo();\n");
+		buf.append("    abstract int foo() {\n");
+		buf.append("        return 100;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+
+		ArrayList proposals= collectCorrections(cu, astRoot, 2, 0);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface Test {\n");
+		buf.append("    int i= foo();\n");
+		buf.append("    static int foo() {\n");
+		buf.append("        return 100;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+	}
 }
