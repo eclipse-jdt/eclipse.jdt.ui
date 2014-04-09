@@ -331,15 +331,15 @@ public abstract class TestElement implements ITestElement {
 	}
 
 	public static String extractRawClassName(String testNameString) {
-		// when testNameString begins and ends with square brackets then it means the
-		// test is a parameterized test (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=102512)
-		if (testNameString.indexOf('[') == 0 && testNameString.lastIndexOf(']') == testNameString.length() - 1) {
+		if (testNameString.startsWith("[") && testNameString.endsWith("]")) { //$NON-NLS-1$ //$NON-NLS-2$
+			// a group of parameterized tests, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=102512
 			return testNameString;
 		}
 		int index= testNameString.lastIndexOf('(');
 		if (index < 0)
 			return testNameString;
-		testNameString= testNameString.substring(index + 1, testNameString.lastIndexOf(')'));
+		int end= testNameString.lastIndexOf(')');
+		testNameString= testNameString.substring(index + 1, end > index ? end : testNameString.length());
 		return testNameString;
 	}
 

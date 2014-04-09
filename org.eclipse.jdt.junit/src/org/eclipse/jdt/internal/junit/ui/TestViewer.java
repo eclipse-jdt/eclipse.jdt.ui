@@ -284,14 +284,16 @@ public class TestViewer {
 		TestElement testElement= (TestElement) selection.getFirstElement();
 
 		OpenTestAction action;
-		String testName= testElement.getTestName();
 		if (testElement instanceof TestSuiteElement) {
-			ITestElement[] children= ((TestSuiteElement)testElement).getChildren();
-			// if the TestSuiteElement is a parameterized tests i.e. name begins with '[' and ends with ']'
-			if (testName.indexOf('[') == 0 && testName.lastIndexOf(']') == testName.length() - 1 && children.length > 0 && children[0] instanceof TestCaseElement)
-				action= new OpenTestAction(fTestRunnerPart, (TestCaseElement)children[0]);
-			else
+			String testName= testElement.getTestName();
+			ITestElement[] children= ((TestSuiteElement) testElement).getChildren();
+			if (testName.startsWith("[") && testName.endsWith("]") //$NON-NLS-1$ //$NON-NLS-2$
+					&& children.length > 0 && children[0] instanceof TestCaseElement) {
+				// a group of parameterized tests
+				action= new OpenTestAction(fTestRunnerPart, (TestCaseElement) children[0]);
+			} else {
 				action= new OpenTestAction(fTestRunnerPart, testName);
+			}
 		} else if (testElement instanceof TestCaseElement) {
 			TestCaseElement testCase= (TestCaseElement)testElement;
 			action= new OpenTestAction(fTestRunnerPart, testCase);
