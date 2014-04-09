@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *     Brock Janiczak (brockj@tpg.com.au)
  *         - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102236: [JUnit] display execution time next to each test
+ *     Xavier Coulon <xcoulon@redhat.com> - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102512 - [JUnit] test method name cut off before (
+
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.ui;
@@ -282,10 +284,16 @@ public class TestViewer {
 		TestElement testElement= (TestElement) selection.getFirstElement();
 
 		OpenTestAction action;
+		String testName= testElement.getTestName();
 		if (testElement instanceof TestSuiteElement) {
-			action= new OpenTestAction(fTestRunnerPart, testElement.getTestName());
-		} else if (testElement instanceof TestCaseElement){
-			TestCaseElement testCase= (TestCaseElement) testElement;
+			ITestElement[] children= ((TestSuiteElement)testElement).getChildren();
+			// if the TestSuiteElement is a parameterized tests i.e. name begins with '[' and ends with ']'
+			if (testName.indexOf('[') == 0 && testName.lastIndexOf(']') == testName.length() - 1 && children.length > 0 && children[0] instanceof TestCaseElement)
+				action= new OpenTestAction(fTestRunnerPart, (TestCaseElement)children[0]);
+			else
+				action= new OpenTestAction(fTestRunnerPart, testName);
+		} else if (testElement instanceof TestCaseElement) {
+			TestCaseElement testCase= (TestCaseElement)testElement;
 			action= new OpenTestAction(fTestRunnerPart, testCase);
 		} else {
 			throw new IllegalStateException(String.valueOf(testElement));

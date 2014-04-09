@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Brock Janiczak (brockj@tpg.com.au)
  *         - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102236: [JUnit] display execution time next to each test
+ *     Xavier Coulon <xcoulon@redhat.com> - https://bugs.eclipse.org/bugs/show_bug.cgi?id=102512 - [JUnit] test method name cut off before (
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.junit.model;
@@ -330,11 +331,15 @@ public abstract class TestElement implements ITestElement {
 	}
 
 	public static String extractRawClassName(String testNameString) {
-		int index= testNameString.indexOf('(');
+		// when testNameString begins and ends with square brackets then it means the
+		// test is a parameterized test (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=102512)
+		if (testNameString.indexOf('[') == 0 && testNameString.lastIndexOf(']') == testNameString.length() - 1) {
+			return testNameString;
+		}
+		int index= testNameString.lastIndexOf('(');
 		if (index < 0)
 			return testNameString;
-		testNameString= testNameString.substring(index + 1);
-		testNameString= testNameString.substring(0, testNameString.indexOf(')'));
+		testNameString= testNameString.substring(index + 1, testNameString.lastIndexOf(')'));
 		return testNameString;
 	}
 
