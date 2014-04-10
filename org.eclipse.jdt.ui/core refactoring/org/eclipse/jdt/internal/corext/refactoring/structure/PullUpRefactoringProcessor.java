@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 IBM Corporation and others.
+ * Copyright (c) 2006, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1034,7 +1034,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		copyParameters(targetRewrite.getASTRewrite(), getDeclaringType().getCompilationUnit(), oldMethod, newMethod, mapping);
 		copyThrownExceptions(oldMethod, newMethod);
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(destination, targetRewrite.getImportRewrite());
-		ImportRewriteUtil.addImports(targetRewrite, context, newMethod, new HashMap<Name, String>(), new HashMap<Name, String>(), false);
+		ImportRewriteUtil.addImports(targetRewrite, context, oldMethod, new HashMap<Name, String>(), new HashMap<Name, String>(), false);
 		targetRewrite.getASTRewrite().getListRewrite(destination, destination.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, destination.bodyDeclarations()), targetRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.PullUpRefactoring_add_abstract_method, SET_PULL_UP));
 	}
 

@@ -49,6 +49,7 @@ public class AllRefactoringTests {
 		suite.addTest(ChangeSignatureTests18.suite());
 		suite.addTest(IntroduceParameterObjectTests.suite());
 		suite.addTest(PullUpTests.suite());
+		suite.addTest(PullUpTests18.suite());
 		suite.addTest(PushDownTests.suite());
 		suite.addTest(MoveMembersTests.suite());
 		suite.addTest(MoveMembersTests18.suite());

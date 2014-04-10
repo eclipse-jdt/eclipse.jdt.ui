@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,7 +71,7 @@ public class PullUpTests extends RefactoringTest {
 
 	//-------------------
 
-	private static PullUpRefactoringProcessor createRefactoringProcessor(IMember[] methods) throws JavaModelException{
+	protected static PullUpRefactoringProcessor createRefactoringProcessor(IMember[] methods) throws JavaModelException {
 		IJavaProject project= null;
 		if (methods != null && methods.length > 0)
 			project= methods[0].getJavaProject();
@@ -113,7 +113,7 @@ public class PullUpTests extends RefactoringTest {
 		return processor.getCandidateTypes(new RefactoringStatus(), new NullProgressMonitor());
 	}
 
-	private void setSuperclassAsTargetClass(PullUpRefactoringProcessor processor) throws JavaModelException {
+	protected void setSuperclassAsTargetClass(PullUpRefactoringProcessor processor) throws JavaModelException {
 		IType[] possibleClasses= getPossibleTargetClasses(processor);
 		processor.setDestinationType(possibleClasses[possibleClasses.length - 1]);
 	}
