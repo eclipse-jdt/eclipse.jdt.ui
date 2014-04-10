@@ -50,6 +50,13 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 	private static final Class THIS= LocalCorrectionsQuickFixTest.class;
 
+	/**
+	 * Bug 430818: [1.8][quick fix] Quick fix for "for loop" is not shown for bare local variable/argument/field
+	 * caused by:
+	 * Bug 430336: [1.8][compiler] Bad syntax error recovery: Lonely identifier should be variable name, not type
+	 */
+	public static final boolean BUG_430818= true;
+
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 
@@ -9747,6 +9754,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	 * @throws Exception
 	 */
 	public void testLoopOverAddedToFixesForVariable() throws Exception {
+		if (BUG_430818)
+			return;
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -9871,6 +9881,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	 * @throws Exception
 	 */
 	public void testGenerateForeachNotAddedForLowVersion() throws Exception {
+		if (BUG_430818)
+			return;
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");

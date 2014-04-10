@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8414,6 +8414,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testGenerateForSimple() throws Exception {
+		if (LocalCorrectionsQuickFixTest.BUG_430818)
+			return;
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -8472,6 +8475,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 
 	public void testGenerateForWithSemicolon() throws Exception {
+		if (LocalCorrectionsQuickFixTest.BUG_430818)
+			return;
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -8587,6 +8593,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 
 	public void testGenerateForComplexParametrization() throws Exception {
+		if (LocalCorrectionsQuickFixTest.BUG_430818)
+			return;
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -8667,6 +8676,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testGenerateForGenerics() throws Exception {
+		if (LocalCorrectionsQuickFixTest.BUG_430818)
+			return;
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -8795,6 +8807,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testGenerateForUpperboundWildcard() throws Exception {
+		if (LocalCorrectionsQuickFixTest.BUG_430818)
+			return;
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -8870,6 +8885,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 
 	public void testGenerateForLowerboundWildcard() throws Exception {
+		if (LocalCorrectionsQuickFixTest.BUG_430818)
+			return;
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -9015,6 +9033,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 
 	public void testGenerateForMissingParametrization() throws Exception {
+		if (LocalCorrectionsQuickFixTest.BUG_430818)
+			return;
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -9073,6 +9094,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 
 	public void testGenerateForLowVersion() throws Exception {
+		if (LocalCorrectionsQuickFixTest.BUG_430818)
+			return;
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -9124,6 +9148,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 
 	public void testGenerateForArray() throws Exception {
+		if (LocalCorrectionsQuickFixTest.BUG_430818)
+			return;
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -9177,6 +9204,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testGenerateForNameClash() throws Exception {
+		if (LocalCorrectionsQuickFixTest.BUG_430818)
+			return;
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
