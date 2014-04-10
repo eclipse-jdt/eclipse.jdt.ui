@@ -604,8 +604,6 @@ public class AddImportTest extends CoreTests {
 		assertEquals("Class<? extends E>", ASTNodes.asString(resNode2));
 	}
 
-	private static final boolean BUG_120082= true;
-
 	public void testAddTypesWithCaptures2() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -638,12 +636,10 @@ public class AddImportTest extends CoreTests {
 		Type resNode= rewrite.addImport(binding, astRoot.getAST());
 		assertEquals("E<?>", ASTNodes.asString(resNode));
 
-		if (!BUG_120082) {
-			String signature= new BindingKey(binding.getKey()).toSignature();
+		String signature= new BindingKey(binding.getKey()).toSignature();
 
-			Type resNode2= rewrite.addImportFromSignature(signature, astRoot.getAST());
-			assertEquals("E<?>", ASTNodes.asString(resNode2));
-		}
+		Type resNode2= rewrite.addImportFromSignature(signature, astRoot.getAST());
+		assertEquals("E<?>", ASTNodes.asString(resNode2));
 	}
 
 	public void testAddTypesWithCaptures3() throws Exception {
@@ -678,12 +674,10 @@ public class AddImportTest extends CoreTests {
 		Type resNode= rewrite.addImport(binding, astRoot.getAST());
 		assertEquals("E<?>", ASTNodes.asString(resNode));
 
-		if (!BUG_120082) {
-			String signature= new BindingKey(binding.getKey()).toSignature();
+		String signature= new BindingKey(binding.getKey()).toSignature();
 
-			Type resNode2= rewrite.addImportFromSignature(signature, astRoot.getAST());
-			assertEquals("E<?>", ASTNodes.asString(resNode2));
-		}
+		Type resNode2= rewrite.addImportFromSignature(signature, astRoot.getAST());
+		assertEquals("E<?>", ASTNodes.asString(resNode2));
 	}
 
 

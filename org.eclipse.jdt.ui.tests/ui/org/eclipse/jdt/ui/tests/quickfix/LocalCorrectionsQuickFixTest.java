@@ -1851,13 +1851,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 
-	boolean BUG_25417= true;
-
 	public void testUncaughtExceptionDuplicate() throws Exception {
-		if (BUG_25417) {
-			return;
-		}
-
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
