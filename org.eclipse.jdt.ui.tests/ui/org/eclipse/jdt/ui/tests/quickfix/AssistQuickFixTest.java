@@ -72,6 +72,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		Hashtable options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
@@ -97,6 +98,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
@@ -919,6 +921,178 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expecteds);
 	}
+
+	// bug 217984
+	public void testAssignToLocal14() throws Exception {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.ArrayList;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("import java.util.RandomAccess;\n");
+			buf.append("\n");
+			buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+			buf.append("    void foo() {\n");
+			buf.append("        Gen<?> g = new Gen<>();\n");
+			buf.append("        g.get(0);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("Gen.java", buf.toString(), false, null);
+	
+			String str= "g.get(0);";
+			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+			List proposals= collectAssists(context, false);
+			assertNumberOfProposals(proposals, 5);
+			assertCorrectLabels(proposals);
+	
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.ArrayList;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("import java.util.RandomAccess;\n");
+			buf.append("\n");
+			buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+			buf.append("    void foo() {\n");
+			buf.append("        Gen<?> g = new Gen<>();\n");
+			buf.append("        List<String> list = g.get(0);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+	
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.ArrayList;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("import java.util.RandomAccess;\n");
+			buf.append("\n");
+			buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+			buf.append("    private List<String> list;\n");
+			buf.append("\n");
+			buf.append("    void foo() {\n");
+			buf.append("        Gen<?> g = new Gen<>();\n");
+			buf.append("        list = g.get(0);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected2= buf.toString();
+	
+			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
+	
+		}
+
+	// bug 217984
+	public void testAssignToLocal15() throws Exception {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.ArrayList;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("import java.util.RandomAccess;\n");
+			buf.append("\n");
+			buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+			buf.append("    void foo() {\n");
+			buf.append("        Gen<? extends Cloneable> ge = new Gen<>();\n");
+			buf.append("        ge.get(0);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("Gen.java", buf.toString(), false, null);
+	
+			String str= "ge.get(0)";
+			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+			List proposals= collectAssists(context, false);
+			assertNumberOfProposals(proposals, 7);
+			assertCorrectLabels(proposals);
+	
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.ArrayList;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("import java.util.RandomAccess;\n");
+			buf.append("\n");
+			buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+			buf.append("    void foo() {\n");
+			buf.append("        Gen<? extends Cloneable> ge = new Gen<>();\n");
+			buf.append("        Cloneable cloneable = ge.get(0);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+	
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.ArrayList;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("import java.util.RandomAccess;\n");
+			buf.append("\n");
+			buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+			buf.append("    private Cloneable cloneable;\n");
+			buf.append("\n");
+			buf.append("    void foo() {\n");
+			buf.append("        Gen<? extends Cloneable> ge = new Gen<>();\n");
+			buf.append("        cloneable = ge.get(0);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected2= buf.toString();
+	
+			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
+		}
+
+	// bug 217984
+	public void testAssignToLocal16() throws Exception {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.ArrayList;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("import java.util.RandomAccess;\n");
+			buf.append("import java.util.Vector;\n");
+			buf.append("\n");
+			buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+			buf.append("    void foo() {\n");
+			buf.append("        Gen<? super Vector<String>> gs = new Gen<>();\n");
+			buf.append("        gs.get(0);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("Gen.java", buf.toString(), false, null);
+	
+			String str= "gs.get(0)";
+			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+			List proposals= collectAssists(context, false);
+			assertNumberOfProposals(proposals, 7);
+			assertCorrectLabels(proposals);
+	
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.ArrayList;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("import java.util.RandomAccess;\n");
+			buf.append("import java.util.Vector;\n");
+			buf.append("\n");
+			buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+			buf.append("    void foo() {\n");
+			buf.append("        Gen<? super Vector<String>> gs = new Gen<>();\n");
+			buf.append("        List<String> list = gs.get(0);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+	
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.ArrayList;\n");
+			buf.append("import java.util.List;\n");
+			buf.append("import java.util.RandomAccess;\n");
+			buf.append("import java.util.Vector;\n");
+			buf.append("\n");
+			buf.append("class Gen<E extends List<String> & RandomAccess> extends ArrayList<E> {\n");
+			buf.append("    private List<String> list;\n");
+			buf.append("\n");
+			buf.append("    void foo() {\n");
+			buf.append("        Gen<? super Vector<String>> gs = new Gen<>();\n");
+			buf.append("        list = gs.get(0);\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected2= buf.toString();
+	
+			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
+		}
 
 	public void testAssignParamToField() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -9267,7 +9441,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
-		buf.append("    class Iterator {}\n");	
+		buf.append("    class Iterator {}\n");
 		buf.append("    void foo() {\n");
 		buf.append("        B.get( /*important: empty*/ );\n");
 		buf.append("    }\n");
@@ -9311,7 +9485,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.Date;\n");
 			buf.append("\n");
 			buf.append("public class A {\n");
-			buf.append("    class Iterator {}\n");	
+			buf.append("    class Iterator {}\n");
 			buf.append("    void foo() {\n");
 			buf.append("        for (Date date : B.get( /*important: empty*/ )) {\n");
 			buf.append("            \n");
@@ -9326,7 +9500,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.Date;\n");
 			buf.append("\n");
 			buf.append("public class A {\n");
-			buf.append("    class Iterator {}\n");	
+			buf.append("    class Iterator {}\n");
 			buf.append("    void foo() {\n");
 			buf.append("        for (java.util.Iterator<Date> iterator = B.get( /*important: empty*/ ).iterator(); iterator\n");
 			buf.append("                .hasNext();) {\n");
@@ -9343,7 +9517,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.Date;\n");
 			buf.append("\n");
 			buf.append("public class A {\n");
-			buf.append("    class Iterator {}\n");	
+			buf.append("    class Iterator {}\n");
 			buf.append("    void foo() {\n");
 			buf.append("        for (int i = 0; i < B.get( /*important: empty*/ ).size(); i++) {\n");
 			buf.append("            Date date = B.get( /*important: empty*/ ).get(i);\n");
@@ -9365,7 +9539,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
 		buf.append("    class Object {}\n");
-		buf.append("    class Iterator {}\n");	
+		buf.append("    class Iterator {}\n");
 		buf.append("    void foo() {\n");
 		buf.append("        B.raw(1+ 2);\n");
 		buf.append("    }\n");
@@ -9406,8 +9580,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("public class A {\n");
-			buf.append("    class Object {}\n");	
-			buf.append("    class Iterator {}\n");	
+			buf.append("    class Object {}\n");
+			buf.append("    class Iterator {}\n");
 			buf.append("    void foo() {\n");
 			buf.append("        for (java.lang.Object object : B.raw(1+ 2)) {\n");
 			buf.append("            \n");
@@ -9420,7 +9594,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("package test1;\n");
 			buf.append("public class A {\n");
 			buf.append("    class Object {}\n");
-			buf.append("    class Iterator {}\n");	
+			buf.append("    class Iterator {}\n");
 			buf.append("    void foo() {\n");
 			buf.append("        for (java.util.Iterator iterator = B.raw(1+ 2).iterator(); iterator\n");
 			buf.append("                .hasNext();) {\n");
@@ -9442,7 +9616,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A {\n");
-		buf.append("    class Date {}\n");	
+		buf.append("    class Date {}\n");
 		buf.append("    void foo() {\n");
 		buf.append("        B.get();\n");
 		buf.append("    }\n");
@@ -9492,5 +9666,4 @@ public class AssistQuickFixTest extends QuickFixTest {
 			fJProject1.setOptions(saveOptions);
 		}
 	}
-	
 }
