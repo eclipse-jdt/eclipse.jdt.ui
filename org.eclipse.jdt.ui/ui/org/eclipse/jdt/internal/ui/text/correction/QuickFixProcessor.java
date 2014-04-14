@@ -162,6 +162,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.DuplicateTypeVariable:
 			case IProblem.DuplicateNestedType:
 			case IProblem.IllegalModifierForInterfaceMethod:
+			case IProblem.IllegalModifierForInterfaceMethod18:
 			case IProblem.IllegalModifierForInterface:
 			case IProblem.IllegalModifierForClass:
 			case IProblem.IllegalModifierForInterfaceField:
@@ -467,6 +468,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalModifierForMemberEnum:
 			case IProblem.IllegalVisibilityModifierForInterfaceMemberType:
 			case IProblem.UnexpectedStaticModifierForMethod:
+			case IProblem.IllegalModifierForInterfaceMethod18:
 				ModifierCorrectionSubProcessor.addRemoveInvalidModifiersProposal(context, problem, proposals, IProposalRelevance.REMOVE_INVALID_MODIFIERS);
 				break;
 			case IProblem.NotVisibleField:

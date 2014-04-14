@@ -866,4 +866,65 @@ public class QuickFixTest18 extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
 	}
+
+	// bug 410170
+	public void testInvalidInterfaceMethodModifier1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public interface Inter {\n");
+		buf.append("    private static int staticMethod(Object[] o) throws IOException{return 10;}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Inter.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public interface Inter {\n");
+		buf.append("    static int staticMethod(Object[] o) throws IOException{return 10;}\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+	}
+
+	//  bug 410170
+	public void testInvalidInterfaceMethodModifier2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public interface Inter {\n");
+		buf.append("    protected default int defaultMethod(Object[] o) throws IOException{return 10;}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Inter.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public interface Inter {\n");
+		buf.append("    default int defaultMethod(Object[] o) throws IOException{return 10;}\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+	}
+
 }

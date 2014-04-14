@@ -395,6 +395,9 @@ public class ModifierCorrectionSubProcessor {
 				case IProblem.IllegalModifierForInterfaceMethod:
 					excludedModifiers= ~(Modifier.PUBLIC | Modifier.ABSTRACT);
 					break;
+				case IProblem.IllegalModifierForInterfaceMethod18:
+					excludedModifiers= ~(Modifier.PUBLIC | Modifier.ABSTRACT | Modifier.STRICTFP | Modifier.DEFAULT | Modifier.STATIC);
+					break;
 				case IProblem.IllegalModifierForInterface:
 					excludedModifiers= ~(Modifier.PUBLIC | Modifier.ABSTRACT | Modifier.STRICTFP);
 					break;
