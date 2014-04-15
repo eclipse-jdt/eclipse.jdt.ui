@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,11 +73,9 @@ public class ReplaceInvocationsTests extends AbstractSelectionTestCase {
 		refactoring.setBody(body, params);
 
 		String out= null;
-		switch (mode) {
-			case COMPARE_WITH_OUTPUT:
-				out= getProofedContent(outputFolder, id);
-				break;
-		}
+		if (mode == COMPARE_WITH_OUTPUT)
+			out= getProofedContent(outputFolder, id);
+
 		performTest(unit, refactoring, mode, out, true);
 	}
 

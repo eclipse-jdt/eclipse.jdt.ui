@@ -107,6 +107,9 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 			case INVALID_SELECTION:
 				if (!status.isOK())
 					return;
+				break;
+			default:
+				break;
 		}
 		List parameters= refactoring.getParameterInfos();
 		if (newNames != null && newNames.length > 0) {
@@ -125,11 +128,9 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		refactoring.setDestination(destination);
 
 		String out= null;
-		switch (mode) {
-			case COMPARE_WITH_OUTPUT:
-				out= getProofedContent(outputFolder, id);
-				break;
-		}
+		if (mode == COMPARE_WITH_OUTPUT)
+			out= getProofedContent(outputFolder, id);
+
 		performTest(unit, refactoring, mode, out, true);
 	}
 
