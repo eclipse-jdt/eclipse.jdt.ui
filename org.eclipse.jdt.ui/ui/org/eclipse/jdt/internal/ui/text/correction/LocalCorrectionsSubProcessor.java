@@ -1248,7 +1248,7 @@ public class LocalCorrectionsSubProcessor {
 			}
 			
 			MethodDeclaration method= ASTResolving.findParentMethodDeclaration(selectedNode);
-			if (method != null) {
+			if (method != null && !method.isConstructor()) {
 				ASTRewrite rewrite= ASTRewrite.create(ast);
 				TightSourceRangeComputer sourceRangeComputer= new TightSourceRangeComputer();
 				rewrite.setTargetSourceRangeComputer(sourceRangeComputer);

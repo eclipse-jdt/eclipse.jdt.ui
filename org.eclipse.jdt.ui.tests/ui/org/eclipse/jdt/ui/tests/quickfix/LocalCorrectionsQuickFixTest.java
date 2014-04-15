@@ -7698,7 +7698,48 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		assertExpectedExistInProposals(proposals, expected);
 	}
-	
+
+	public void testUnusedObjectAllocation3() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_UNUSED_OBJECT_ALLOCATION, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    private Object name;\n");
+		buf.append("    public E() {\n");
+		buf.append("        if (name == null)\n");
+		buf.append("            new IllegalArgumentException();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 5);
+
+		String expected= new String();
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    private Object name;\n");
+		buf.append("    public E() {\n");
+		buf.append("        if (name == null)\n");
+		buf.append("            throw new IllegalArgumentException();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected= buf.toString();
+
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
 	public void testUnnessecaryNLSTag1() throws Exception {
 		Hashtable options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.WARNING);
