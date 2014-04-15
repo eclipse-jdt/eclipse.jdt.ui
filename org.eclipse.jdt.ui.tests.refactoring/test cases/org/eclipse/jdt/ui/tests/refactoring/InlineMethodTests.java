@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,12 +79,11 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		int[] selection= getSelection();
 		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, true), selection[0], selection[1]);
+
 		String out= null;
-		switch (mode) {
-			case COMPARE_WITH_OUTPUT:
-				out= getProofedContent(outputFolder, id);
-				break;
-		}
+		if (mode == COMPARE_WITH_OUTPUT)
+			out= getProofedContent(outputFolder, id);
+
 		performTest(unit, refactoring, mode, out, true);
 	}
 
@@ -93,12 +92,11 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		IType type= unit.getTypes()[0];
 		IMethod method= getMethodToInline(type);
 		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, true), method.getNameRange().getOffset(), method.getNameRange().getLength());
+
 		String out= null;
-		switch (mode) {
-			case COMPARE_WITH_OUTPUT:
-				out= getProofedContent(outputFolder, id);
-				break;
-		}
+		if (mode == COMPARE_WITH_OUTPUT)
+			out= getProofedContent(outputFolder, id);
+
 		performTest(unit, refactoring, mode, out, true);
 	}
 
@@ -116,12 +114,11 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		IType type= unit.getTypes()[0];
 		IMethod method= getFirstConstructor(type);
 		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, true), method.getNameRange().getOffset(), method.getNameRange().getLength());
+
 		String out= null;
-		switch (mode) {
-			case COMPARE_WITH_OUTPUT:
-				out= getProofedContent(outputFolder, id);
-				break;
-		}
+		if (mode == COMPARE_WITH_OUTPUT)
+			out= getProofedContent(outputFolder, id);
+
 		performTest(unit, refactoring, mode, out, true);
 	}
 
@@ -896,6 +893,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performEnumTest();
 	}
 
+	public void test_416198() throws Exception {
+		performEnumTest();
+	}
+
 	/* *********************** Generic Tests ******************************* */
 
 	private void performGenericTest() throws Exception {
@@ -983,13 +984,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		assertFalse(refactoring.canEnableDeleteSource());
 		refactoring.setCurrentMode(InlineMethodRefactoring.Mode.INLINE_ALL);
 
-		String out= null;
-		switch (COMPARE_WITH_OUTPUT) {
-			case COMPARE_WITH_OUTPUT:
-				out= getProofedContent("binary_out", id);
-				break;
-		}
-		performTest(unit, refactoring, COMPARE_WITH_OUTPUT, out, true);
+		performTest(unit, refactoring, COMPARE_WITH_OUTPUT, getProofedContent("binary_out", id), true);
 	}
 
 	public void testBinaryNoSource() throws Exception {

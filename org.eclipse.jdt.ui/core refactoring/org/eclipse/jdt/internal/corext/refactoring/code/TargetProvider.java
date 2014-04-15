@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -240,6 +241,19 @@ abstract class TargetProvider {
 			fBinding= binding.getMethodDeclaration();
 			Assert.isNotNull(fBinding);
 		}
+		@Override
+		public boolean visit(EnumConstantDeclaration node) {
+			return visitNonTypeBodyDeclaration();
+		}
+
+		@Override
+		public void endVisit(EnumConstantDeclaration node) {
+			if (fCurrent.hasInvocations()) {
+				result.put(node, fCurrent);
+			}
+			endVisitBodyDeclaration();
+		}
+
 		@Override
 		public boolean visit(MethodInvocation node) {
 			if (node.resolveTypeBinding() != null && matches(node.resolveMethodBinding()) && fCurrent != null) {
