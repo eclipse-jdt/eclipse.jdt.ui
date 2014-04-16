@@ -47,6 +47,8 @@ public interface IProposalRelevance {
 	public static final int CREATE_FIELD_PREFIX_OR_SUFFIX_MATCH= 9;
 
 	public static final int ADD_ABSTRACT_MODIFIER= 8;
+	public static final int ADD_STATIC_MODIFIER= 8;
+	public static final int ADD_DEFAULT_MODIFIER= 8;
 	public static final int ADD_PARENTHESES_AROUND_CAST= 8;
 	public static final int REMOVE_ARGUMENTS= 8;
 	public static final int QUALIFY_WITH_ENCLOSING_TYPE= 8;

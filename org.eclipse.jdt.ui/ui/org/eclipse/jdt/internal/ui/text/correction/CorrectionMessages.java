@@ -37,6 +37,7 @@ public final class CorrectionMessages extends NLS {
 	public static String ModifierCorrectionSubProcessor_addsynchronized_description;
 	public static String ModifierCorrectionSubProcessor_changefieldmodifiertononstatic_description;
 	public static String ModifierCorrectionSubProcessor_changemodifiertostaticfinal_description;
+	public static String ModifierCorrectionSubProcessor_changemodifiertodefault_description;
 	public static String ModifierCorrectionSubProcessor_overrides_deprecated_description;
 	public static String ModifierCorrectionSubProcessor_remove_override;
 	public static String ModifierCorrectionSubProcessor_removefinal_description;
@@ -135,6 +136,8 @@ public final class CorrectionMessages extends NLS {
 	public static String RemoveDeclarationCorrectionProposal_removeunusedvar_description;
 	public static String RenameRefactoringProposal_additionalInfo;
 	public static String RenameRefactoringProposal_name;
+
+	public static String ModifierCorrectionSubProcessor_changemodifiertoabstract_description;
 	public static String ModifierCorrectionSubProcessor_changemodifiertostatic_description;
 	public static String ModifierCorrectionSubProcessor_changemodifiertononstatic_description;
 	public static String ModifierCorrectionSubProcessor_changemodifiertofinal_description;
@@ -146,7 +149,6 @@ public final class CorrectionMessages extends NLS {
 	public static String ModifierCorrectionSubProcessor_addabstract_description;
 	public static String ModifierCorrectionSubProcessor_removenative_description;
 	public static String ModifierCorrectionSubProcessor_addmissingbody_description;
-	public static String ModifierCorrectionSubProcessor_setmethodabstract_description;
 	public static String ModifierCorrectionSubProcessor_changemethodtononfinal_description;
 	public static String ModifierCorrectionSubProcessor_changeoverriddenvisibility_description;
 	public static String ModifierCorrectionSubProcessor_changemethodvisibility_description;

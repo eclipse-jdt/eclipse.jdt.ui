@@ -927,4 +927,117 @@ public class QuickFixTest18 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
 	}
 
+	// bug 414084
+	public void testAbstractInterfaceMethodWithBody1() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface Snippet{\n");
+		buf.append("\n");
+		buf.append("    public char m1(int arg0) {\n");
+		buf.append("    }\n\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface Snippet{\n");
+		buf.append("\n");
+		buf.append("    public char m1(int arg0);\n\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface Snippet{\n");
+		buf.append("\n");
+		buf.append("    public static char m1(int arg0) {\n");
+		buf.append("    }\n\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		proposal= (CUCorrectionProposal)proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface Snippet{\n");
+		buf.append("\n");
+		buf.append("    public default char m1(int arg0) {\n");
+		buf.append("    }\n\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
+
+	}
+
+	// bug 414084
+	public void testAbstractInterfaceMethodWithBody2() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface Snippet{\n");
+		buf.append("\n");
+		buf.append("    public abstract char m1(int arg0) {\n");
+		buf.append("    }\n\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface Snippet{\n");
+		buf.append("\n");
+		buf.append("    public abstract char m1(int arg0);\n\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface Snippet{\n");
+		buf.append("\n");
+		buf.append("    public static char m1(int arg0) {\n");
+		buf.append("    }\n\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		proposal= (CUCorrectionProposal)proposals.get(2);
+		String preview3= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface Snippet{\n");
+		buf.append("\n");
+		buf.append("    public default char m1(int arg0) {\n");
+		buf.append("    }\n\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
+	}
+
 }
