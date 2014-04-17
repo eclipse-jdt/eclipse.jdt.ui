@@ -765,7 +765,7 @@ public class ModifierCorrectionSubProcessor {
 		if (modifierNode == null && binding != null) {
 			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertoabstract_description, getMethodLabel(binding));
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			int included= Modifier.ABSTRACT;
+			int included= binding.getDeclaringClass().isInterface() ? Modifier.NONE : Modifier.ABSTRACT;
 			int excluded= Modifier.STATIC | Modifier.DEFAULT;
 			ModifierChangeCorrectionProposal proposal= new ModifierChangeCorrectionProposal(label, cu, binding, decl, included, excluded, IProposalRelevance.ADD_ABSTRACT_MODIFIER, image);
 
