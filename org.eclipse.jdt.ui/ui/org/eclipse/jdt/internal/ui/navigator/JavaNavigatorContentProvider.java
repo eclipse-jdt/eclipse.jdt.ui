@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.navigator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -17,6 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IContainer;
@@ -45,6 +47,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.navigator.IExtensionStateConstants.Values;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 
@@ -119,14 +122,33 @@ public class JavaNavigatorContentProvider extends
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof IWorkspaceRoot) {
 			IWorkspaceRoot root = (IWorkspaceRoot) inputElement;
-			return root.getProjects();
+			return filterResourceProjects(root.getProjects());
 		} else if (inputElement instanceof IJavaModel) {
-			return ((IJavaModel)inputElement).getWorkspace().getRoot().getProjects();
+			return filterResourceProjects(((IJavaModel) inputElement).getWorkspace().getRoot().getProjects());
 		}
 		if (inputElement instanceof IProject) {
 			return super.getElements(JavaCore.create((IProject)inputElement));
 		}
 		return super.getElements(inputElement);
+	}
+
+	private static IProject[] filterResourceProjects(IProject[] projects) {
+		List<IProject> filteredProjects= new ArrayList<IProject>(projects.length);
+		for (int i= 0; i < projects.length; i++) {
+			IProject project= projects[i];
+			if (!project.isOpen() || isJavaProject(project))
+				filteredProjects.add(project);
+		}
+		return filteredProjects.toArray(new IProject[filteredProjects.size()]);
+	}
+
+	private static boolean isJavaProject(IProject project) {
+		try {
+			return project.hasNature(JavaCore.NATURE_ID);
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}
+		return false;
 	}
 
 	@Override
@@ -141,7 +163,7 @@ public class JavaNavigatorContentProvider extends
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof IWorkspaceRoot) {
 			IWorkspaceRoot root = (IWorkspaceRoot) parentElement;
-			return root.getProjects();
+			return filterResourceProjects(root.getProjects());
 		}
 		if (parentElement instanceof IProject) {
 			return super.getChildren(JavaCore.create((IProject)parentElement));
