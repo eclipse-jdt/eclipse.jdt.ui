@@ -138,10 +138,10 @@ public class RenameTests18 extends RefactoringTest {
 	}
 
 
-	private void renameMethodInInterface(String methodName, String newMethodName, String[] signatures, boolean shouldPass, boolean updateReferences, boolean createDelegate) throws Exception{
+	private void renameMethod(String methodName, String newMethodName, String[] signatures, boolean shouldPass, boolean updateReferences, boolean createDelegate) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
-		IType interfaceI= getType(cu, "I");
-		IMethod method= interfaceI.getMethod(methodName, signatures);
+		IType typeI= getType(cu, "I");
+		IMethod method= typeI.getMethod(methodName, signatures);
 
 		RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_METHOD);
 		descriptor.setJavaElement(method);
@@ -173,7 +173,7 @@ public class RenameTests18 extends RefactoringTest {
 	}
 
 	private void renameMethodInInterface() throws Exception{
-		renameMethodInInterface("m", "k", new String[0], true, true, false);
+		renameMethod("m", "k", new String[0], true, true, false);
 	}
 	
 	// method with a lambda method as reference
@@ -184,5 +184,9 @@ public class RenameTests18 extends RefactoringTest {
 	// method with method references as reference
 	public void testMethod1() throws Exception{
 		renameMethodInInterface();
+	}
+
+	public void testMethodReference0() throws Exception {
+		renameMethod("searchForRefs", "searchForRefs1", new String[0], true, true, false);
 	}
 }
