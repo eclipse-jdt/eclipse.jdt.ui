@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -118,12 +118,15 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 		 * @see CompilationUnitSorter#sort(int, org.eclipse.jdt.core.ICompilationUnit, int[], java.util.Comparator, int, org.eclipse.core.runtime.IProgressMonitor)
 		 */
 		public int compare(BodyDeclaration bodyDeclaration1, BodyDeclaration bodyDeclaration2) {
-			if (fDoNotSortFields && isSortPreserved(bodyDeclaration1) && isSortPreserved(bodyDeclaration2)) {
+			boolean preserved1= fDoNotSortFields && isSortPreserved(bodyDeclaration1);
+			boolean preserved2= fDoNotSortFields && isSortPreserved(bodyDeclaration2);
+			if (preserved1 && preserved2) {
 				return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
 			}
-
-			int cat1= category(bodyDeclaration1);
-			int cat2= category(bodyDeclaration2);
+			
+			// Bug 407759: need to use a common category (FIELDS_INDEX) for all isSortPreserved members:
+			int cat1= preserved1 ? getMemberCategory(MembersOrderPreferenceCache.FIELDS_INDEX) : category(bodyDeclaration1);
+			int cat2= preserved2 ? getMemberCategory(MembersOrderPreferenceCache.FIELDS_INDEX) : category(bodyDeclaration2);
 
 			if (cat1 != cat2) {
 				return cat1 - cat2;
