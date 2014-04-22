@@ -1663,8 +1663,8 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		else if (node instanceof LambdaExpression)
 			return new LambdaExpressionUpdate((LambdaExpression) node, cuRewrite, result);
 
-		else if (node instanceof ExpressionMethodReference)
-			return new ExpressionMethodRefUpdate((ExpressionMethodReference) node, cuRewrite, result);
+		else if (node.getLocationInParent() == ExpressionMethodReference.NAME_PROPERTY)
+			return new ExpressionMethodRefUpdate((ExpressionMethodReference) node.getParent(), cuRewrite, result);
 
 		else
 			return new NullOccurrenceUpdate(node, cuRewrite, result);
