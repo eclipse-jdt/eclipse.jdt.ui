@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -350,7 +350,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isExtractInterfaceAvailable(final IType type) throws JavaModelException {
-		return Checks.isAvailable(type) && !type.isBinary() && !type.isReadOnly() && !type.isAnnotation() && !type.isAnonymous();
+		return Checks.isAvailable(type) && !type.isBinary() && !type.isReadOnly() && !type.isAnnotation() && !type.isAnonymous() && !type.isLambda();
 	}
 
 	public static boolean isExtractInterfaceAvailable(final JavaTextSelection selection) throws JavaModelException {
@@ -405,6 +405,8 @@ public final class RefactoringAvailabilityTester {
 				return false;
 			if (((IType)member).isAnonymous())
 				return false; // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=253727
+			if (((IType)member).isLambda())
+				return false;
 		}
 		return true;
 	}
@@ -1131,6 +1133,8 @@ public final class RefactoringAvailabilityTester {
 			return false;
 		if (type.isAnonymous())
 			return false;
+		if (type.isLambda())
+			return false;
 		if (!Checks.isAvailable(type))
 			return false;
 		if (isRenameProhibited(type))
@@ -1267,7 +1271,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isUseSuperTypeAvailable(final IType type) throws JavaModelException {
-		return type != null && type.exists() && !type.isAnnotation() && !type.isAnonymous();
+		return type != null && type.exists() && !type.isAnnotation() && !type.isAnonymous() && !type.isLambda();
 	}
 
 	public static boolean isUseSuperTypeAvailable(final JavaTextSelection selection) throws JavaModelException {
@@ -1299,6 +1303,6 @@ public final class RefactoringAvailabilityTester {
 			return false;
 		if (!type.exists())
 			return false;
-		return ReorgUtils.isInsideCompilationUnit(type) && type.isClass() && !type.isAnonymous();
+		return ReorgUtils.isInsideCompilationUnit(type) && type.isClass() && !type.isAnonymous()  && !type.isLambda();
 	}
 }

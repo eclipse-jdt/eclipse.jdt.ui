@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddJavaDocStubOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -227,8 +228,18 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 					} else if (!cu.equals(member.getCompilationUnit())) {
 						return null;
 					}
-					if (member instanceof IType && member.getElementName().length() == 0) {
-						return null; // anonymous type
+					if (member instanceof IMethod && ((IMethod) member).isLambdaMethod()) {
+						return null;
+					}
+					try {
+						if (member instanceof IType) {
+							IType type= (IType) member;
+							if (type.isAnonymous() || type.isLambda()) {
+								return null;
+							}
+						}
+					} catch (JavaModelException e) {
+						return null;
 					}
 					res[i]= member;
 				} else {

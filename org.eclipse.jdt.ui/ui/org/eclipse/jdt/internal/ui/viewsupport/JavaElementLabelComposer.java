@@ -982,9 +982,9 @@ public class JavaElementLabelComposer {
 			}
 		}
 
-		String typeName= getElementName(type);
-		
-		if (isLambdaType(type)) {
+		String typeName;
+		boolean isAnonymous= false;
+		if (type.isLambda()) {
 			typeName= "() -> {...}"; //$NON-NLS-1$
 			try {
 				String[] superInterfaceSignatures= type.getSuperInterfaceTypeSignatures();
@@ -996,10 +996,11 @@ public class JavaElementLabelComposer {
 			}
 			
 		} else {
-			boolean isAnonymous;
+			typeName= getElementName(type);
 			try {
 				isAnonymous= type.isAnonymous();
 			} catch (JavaModelException e1) {
+				// should not happen, but let's play safe:
 				isAnonymous= typeName.length() == 0;
 			}
 			if (isAnonymous) {
@@ -1057,8 +1058,8 @@ public class JavaElementLabelComposer {
 			int offset= fBuffer.length();
 			fBuffer.append(JavaElementLabels.CONCAT_STRING);
 			IType declaringType= type.getDeclaringType();
-			if (declaringType == null && type.isBinary() && type.getElementName().length() == 0) {
-				// workaround for Bug 87165: [model] IType#getDeclaringType() does not work for anonymous binary type 
+			if (declaringType == null && type.isBinary() && isAnonymous) {
+				// workaround for Bug 87165: [model] IType#getDeclaringType() does not work for anonymous binary type
 				String tqn= type.getTypeQualifiedName();
 				int lastDollar= tqn.lastIndexOf('$');
 				if (lastDollar != 1) {
@@ -1090,16 +1091,6 @@ public class JavaElementLabelComposer {
 			if (getFlag(flags, JavaElementLabels.COLORIZE)) {
 				fBuffer.setStyle(offset, fBuffer.length() - offset, QUALIFIER_STYLE);
 			}
-		}
-	}
-
-	private static boolean isLambdaType(IType type) {
-		// TODO: use IType#isLambda() from bug 430195
-		try {
-			IMethod[] methods= type.getMethods();
-			return methods.length == 1 && methods[0].isLambdaMethod();
-		} catch (JavaModelException e) {
-			return false;
 		}
 	}
 

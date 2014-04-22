@@ -128,7 +128,7 @@ public class JavaElementLinks {
 			if (element.equals(fElement)) { // linking to the member itself would be a no-op
 				return elementName;
 			}
-			if (elementName.length() == 0) { // anonymous
+			if (elementName.length() == 0) { // anonymous or lambda
 				return elementName;
 			}
 			try {
