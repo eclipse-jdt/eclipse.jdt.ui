@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -761,7 +761,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 				if (prefs.beforeClosingBracket) {
 					secondBracketOffset++;
 				}
-				secondBracketPosition= new Position(secondBracketOffset, 1);
+				secondBracketPosition= new Position(secondBracketOffset, 0);
 				document.addPosition(secondBracketPosition);
 
 				model.addLinkingListener(new ILinkedModeListener() {
@@ -846,7 +846,9 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 
 	private void openErrorDialog(BadLocationException e) {
 		Shell shell= getTextViewer().getTextWidget().getShell();
-		MessageDialog.openError(shell, JavaTextMessages.FilledArgumentNamesMethodProposal_error_msg, e.getMessage());
+		String message= e.getMessage();
+		MessageDialog.openError(shell, JavaTextMessages.FilledArgumentNamesMethodProposal_error_msg,
+				message == null ? e.toString() : message);
 	}
 
 	/*
