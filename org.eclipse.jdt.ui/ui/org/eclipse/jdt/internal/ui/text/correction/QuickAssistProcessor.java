@@ -62,6 +62,7 @@ import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -523,8 +524,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static boolean getConvertAnonymousClassCreationsToLambdaProposals(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		while (covering.getLocationInParent() == MethodDeclaration.NAME_PROPERTY
-				|| covering.getLocationInParent() == MethodDeclaration.BODY_PROPERTY
+		while (covering instanceof Name
+				|| covering instanceof Type
+				|| covering instanceof Dimension
+				|| covering.getParent() instanceof MethodDeclaration
 				|| covering.getLocationInParent() == AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY) {
 			covering= covering.getParent();
 		}
