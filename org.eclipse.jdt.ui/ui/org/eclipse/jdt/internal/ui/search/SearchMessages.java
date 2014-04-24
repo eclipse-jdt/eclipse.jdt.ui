@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -311,6 +311,8 @@ public final class SearchMessages extends NLS {
 	public static String MatchLocations_parameter_types_label;
 	public static String MatchLocations_qualified_description;
 	public static String MatchLocations_qualified_label;
+	public static String MatchLocations_method_reference_description;
+	public static String MatchLocations_method_reference_label;
 	public static String MatchLocations_super_description;
 	public static String MatchLocations_super_label;
 	public static String MatchLocations_super_types_description;

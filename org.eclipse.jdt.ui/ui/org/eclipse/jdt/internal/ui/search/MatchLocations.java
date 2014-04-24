@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -140,11 +140,17 @@ public class MatchLocations {
 			blayout.marginHeight= 0;
 			composite.setLayout(blayout);
 
-			createButton(composite, SearchMessages.MatchLocations_this_label, IJavaSearchConstants.THIS_REFERENCE);
-			createButton(composite, SearchMessages.MatchLocations_implicit_this_label, IJavaSearchConstants.IMPLICIT_THIS_REFERENCE);
-
-			createButton(composite, SearchMessages.MatchLocations_super_label, IJavaSearchConstants.SUPER_REFERENCE);
-			createButton(composite, SearchMessages.MatchLocations_qualified_label, IJavaSearchConstants.QUALIFIED_REFERENCE);
+			if (fSearchFor == IJavaSearchConstants.METHOD || fSearchFor == IJavaSearchConstants.FIELD) {
+				createButton(composite, SearchMessages.MatchLocations_this_label, IJavaSearchConstants.THIS_REFERENCE);
+				createButton(composite, SearchMessages.MatchLocations_implicit_this_label, IJavaSearchConstants.IMPLICIT_THIS_REFERENCE);
+	
+				createButton(composite, SearchMessages.MatchLocations_super_label, IJavaSearchConstants.SUPER_REFERENCE);
+				createButton(composite, SearchMessages.MatchLocations_qualified_label, IJavaSearchConstants.QUALIFIED_REFERENCE);
+			}
+			
+			if (fSearchFor == IJavaSearchConstants.METHOD || fSearchFor == IJavaSearchConstants.CONSTRUCTOR) {
+				createButton(composite, SearchMessages.MatchLocations_method_reference_label, IJavaSearchConstants.METHOD_REFERENCE_EXPRESSION);
+			}
 		}
 
 		private void createTypeMatchLocationsControls(Composite contents) {
@@ -318,6 +324,9 @@ public class MatchLocations {
 		if (isSet(locations, IJavaSearchConstants.QUALIFIED_REFERENCE)) {
 			args.add(SearchMessages.MatchLocations_qualified_description);
 		}
+		if (isSet(locations, IJavaSearchConstants.METHOD_REFERENCE_EXPRESSION)) {
+			args.add(SearchMessages.MatchLocations_method_reference_description);
+		}
 		if (isSet(locations, IJavaSearchConstants.THIS_REFERENCE)) {
 			args.add(SearchMessages.MatchLocations_this_description);
 		}
@@ -344,7 +353,11 @@ public class MatchLocations {
 	public static int getTotalNumberOfSettings(int searchFor) {
 		if (searchFor == IJavaSearchConstants.TYPE) {
 			return 15;
-		} else if (searchFor == IJavaSearchConstants.METHOD || searchFor == IJavaSearchConstants.FIELD) {
+		} else if (searchFor == IJavaSearchConstants.CONSTRUCTOR) {
+			return 1;
+		} else if (searchFor == IJavaSearchConstants.METHOD) {
+			return 5;
+		} else if (searchFor == IJavaSearchConstants.FIELD) {
 			return 4;
 		}
 		return 0;
@@ -410,6 +423,11 @@ public class MatchLocations {
 				count++;
 			}
 			if (isSet(locations, IJavaSearchConstants.IMPLICIT_THIS_REFERENCE)) {
+				count++;
+			}
+		}
+		if (searchFor == IJavaSearchConstants.METHOD || searchFor == IJavaSearchConstants.CONSTRUCTOR) {
+			if (isSet(locations, IJavaSearchConstants.METHOD_REFERENCE_EXPRESSION)) {
 				count++;
 			}
 		}
