@@ -186,6 +186,10 @@ public class RenameTests18 extends RefactoringTest {
 		renameMethodInInterface();
 	}
 
+	public void testMethod2() throws Exception {
+		renameMethodInInterface();
+	}
+
 	public void testMethodReference0() throws Exception {
 		renameMethod("searchForRefs", "searchForRefs1", new String[0], true, true, false);
 	}
