@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,6 +83,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.CollectionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -242,7 +243,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private void initializeMethodsToRename(IProgressMonitor pm, ReferencesInBinaryContext binaryRefs) throws CoreException {
 		if (fMethodsToRename == null) {
 			IMethod[] rippleMethods= RippleMethodFinder2.getRelatedMethods(getMethod(), binaryRefs, pm, null);
-			fMethodsToRename= new HashSet<IMethod>(Arrays.asList(rippleMethods));
+			fMethodsToRename= new HashSet<IMethod>();
+			for (IMethod method : rippleMethods) {
+				if (!method.isLambdaMethod()) {
+					fMethodsToRename.add(method);
+				}
+			}
 		}
 	}
 
@@ -530,8 +536,13 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				IMethod method= iter.next();
 				ICompilationUnit newCu= RenameAnalyzeUtil.findWorkingCopyForCu(newDeclarationWCs, method.getCompilationUnit());
 				IType typeWc= (IType) JavaModelUtil.findInCompilationUnit(newCu, method.getDeclaringType());
-				if (typeWc == null)
+				if (typeWc == null) {
+					// should not happen
+					i--;
+					wcOldMethods= CollectionsUtil.toArray(Arrays.asList(wcOldMethods).subList(0, wcOldMethods.length - 1), IMethod.class);
+					wcNewMethods= CollectionsUtil.toArray(Arrays.asList(wcNewMethods).subList(0, wcNewMethods.length - 1), IMethod.class);
 					continue;
+				}
 				wcOldMethods[i]= getMethodInWorkingCopy(method, getCurrentElementName(), typeWc);
 				wcNewMethods[i]= getMethodInWorkingCopy(method, getNewElementName(), typeWc);
 			}
