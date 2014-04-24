@@ -28,6 +28,7 @@ public class AllRefactoringTests {
 		suite.addTest(ExtractMethodTests17.suite());
 		suite.addTest(ExtractMethodTests18.suite());
 		suite.addTest(InlineMethodTests.suite());
+		suite.addTest(InlineMethodTests18.suite());
 		suite.addTest(ReplaceInvocationsTests.suite());
 		suite.addTest(SefTests.suite());
 		suite.addTest(InlineTempTests.suite());
