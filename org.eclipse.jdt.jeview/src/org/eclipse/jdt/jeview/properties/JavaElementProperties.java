@@ -414,6 +414,11 @@ public class JavaElementProperties implements IPropertySource {
 				return ((IType) element).isMember();
 			}
 		});
+		addProperty(new Property(IType.class, "isLambda") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IType) element).isLambda();
+			}
+		});
 	}
 
 	private static void addPackageFragmentProperties() {
