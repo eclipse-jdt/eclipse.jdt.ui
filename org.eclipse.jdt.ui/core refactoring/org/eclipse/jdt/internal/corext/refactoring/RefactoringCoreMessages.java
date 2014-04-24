@@ -978,11 +978,11 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String IntroduceIndirectionRefactoring_checking_conditions;
 
-	public static String IntroduceIndirectionRefactoring_class_does_not_exist_error;
+	public static String IntroduceIndirectionRefactoring_type_does_not_exist_error;
 
-	public static String IntroduceIndirectionRefactoring_class_not_selected_error;
+	public static String IntroduceIndirectionRefactoring_type_not_selected_error;
 
-	public static String IntroduceIndirectionRefactoring_could_not_parse_declaring_class_error;
+	public static String IntroduceIndirectionRefactoring_could_not_parse_declaring_type_error;
 
 	public static String IntroduceIndirectionRefactoring_declaring_pattern;
 
@@ -990,7 +990,7 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String IntroduceIndirectionRefactoring_descriptor_description_short;
 
-	public static String IntroduceIndirectionRefactoring_duplicate_method_name_in_declaring_class_error;
+	public static String IntroduceIndirectionRefactoring_duplicate_method_name_in_declaring_type_error;
 
 	public static String IntroduceIndirectionRefactoring_group_description_create_new_method;
 
