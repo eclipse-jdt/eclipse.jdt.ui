@@ -839,6 +839,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performCastTest();
 	}
 
+	public void testHierarchyOverloadedMultiLevel() throws Exception {
+		performCastTest();
+	}
+	
 	public void testHierarchyOverloadedPrivate() throws Exception {
 		performCastTest();
 	}

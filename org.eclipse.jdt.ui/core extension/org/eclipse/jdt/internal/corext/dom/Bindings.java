@@ -603,7 +603,7 @@ public class Bindings {
 	 */
 	public static boolean visitHierarchy(ITypeBinding type, TypeBindingVisitor visitor) {
 		boolean result= visitSuperclasses(type, visitor);
-		if(result) {
+		if (result) {
 			result= visitInterfaces(type, visitor);
 		}
 		return result;
@@ -617,9 +617,19 @@ public class Bindings {
 	 * @return <code>false</code> if the visiting got interrupted
 	 */
 	public static boolean visitInterfaces(ITypeBinding type, TypeBindingVisitor visitor) {
+		return visitInterfaces(type, visitor, new HashSet<ITypeBinding>());
+	}
+
+	private static boolean visitInterfaces(ITypeBinding type, TypeBindingVisitor visitor, HashSet<ITypeBinding> visited) {
+		boolean unvisited= visited.add(type);
+		if (!unvisited)
+			return true;
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
 			if (!visitor.visit(interfaces[i])) {
+				return false;
+			}
+			if (!visitInterfaces(interfaces[i], visitor, visited)) {
 				return false;
 			}
 		}
