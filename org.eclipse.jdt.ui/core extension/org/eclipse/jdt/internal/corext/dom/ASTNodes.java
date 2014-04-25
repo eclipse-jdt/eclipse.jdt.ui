@@ -91,7 +91,6 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.UnionType;
@@ -611,22 +610,29 @@ public class ASTNodes {
 	}
 
 	/**
-	 * Checks whether overloaded methods can result in ambiguous method call when the
+	 * Checks whether overloaded methods can result in an ambiguous method call or a semantic change when the
 	 * <code>expression</code> argument is replaced with a poly expression form of the functional
 	 * interface instance.
 	 * 
-	 * @param expression the method argument which is a functional interface instance
-	 * @return <code>true</code> if overloaded methods can result in ambiguous method call,
+	 * @param expression the method argument, which is a functional interface instance
+	 * @return <code>true</code> if overloaded methods can result in an ambiguous method call or a semantic change,
 	 *         <code>false</code> otherwise
 	 * 
 	 * @since 3.10
 	 */
 	public static boolean isTargetAmbiguous(Expression expression) {
-		ASTNode parent= expression.getParent();
 		StructuralPropertyDescriptor locationInParent= expression.getLocationInParent();
+
+		while (locationInParent == ParenthesizedExpression.EXPRESSION_PROPERTY
+				|| locationInParent == ConditionalExpression.THEN_EXPRESSION_PROPERTY
+				|| locationInParent == ConditionalExpression.ELSE_EXPRESSION_PROPERTY) {
+			expression= (Expression) expression.getParent();
+			locationInParent= expression.getLocationInParent();
+		}
+		
+		ASTNode parent= expression.getParent();
 		IMethodBinding methodBinding;
 		int argumentIndex;
-
 		if (locationInParent == MethodInvocation.ARGUMENTS_PROPERTY) {
 			MethodInvocation methodInvocation= (MethodInvocation) parent;
 			methodBinding= methodInvocation.resolveMethodBinding();
@@ -657,11 +663,9 @@ public class ASTNodes {
 
 		if (methodBinding != null) {
 			IMethodBinding methodDeclBinding= methodBinding.getMethodDeclaration();
-			if (methodDeclBinding != null) {
-				ITypeBinding declaringTypeBinding= methodDeclBinding.getDeclaringClass();
-				TypeBindingVisitor visitor= new AmbiguousTargetMethodAnalyzer(declaringTypeBinding, methodDeclBinding, argumentIndex);
-				return !(visitor.visit(declaringTypeBinding) && Bindings.visitHierarchy(declaringTypeBinding, visitor));
-			}
+			ITypeBinding declaringTypeBinding= methodDeclBinding.getDeclaringClass();
+			TypeBindingVisitor visitor= new AmbiguousTargetMethodAnalyzer(declaringTypeBinding, methodDeclBinding, argumentIndex);
+			return !(visitor.visit(declaringTypeBinding) && Bindings.visitHierarchy(declaringTypeBinding, visitor));
 		}
 
 		return true;
@@ -684,8 +688,8 @@ public class ASTNodes {
 			fArgIndex= argumentIndex;
 		}
 
-		public boolean visit(ITypeBinding node) {
-			IMethodBinding[] methods= node.getDeclaredMethods();
+		public boolean visit(ITypeBinding type) {
+			IMethodBinding[] methods= type.getDeclaredMethods();
 			for (int i= 0; i < methods.length; i++) {
 				IMethodBinding candidate= methods[i];
 				if (candidate == fOriginalMethod) {
@@ -701,10 +705,16 @@ public class ASTNodes {
 						continue;
 					}
 				}
-				if (fOriginalMethod.getName().equals(candidate.getName())
-						&& fOriginalMethod.getParameterTypes().length == candidate.getParameterTypes().length
-						&& candidate.getParameterTypes()[fArgIndex].getFunctionalInterfaceMethod() != null) {
-					return false;
+				if (fOriginalMethod.getName().equals(candidate.getName())) {
+					ITypeBinding[] originalParameterTypes= fOriginalMethod.getParameterTypes();
+					ITypeBinding[] candidateParameterTypes= candidate.getParameterTypes();
+					if (originalParameterTypes.length == candidateParameterTypes.length
+							|| fOriginalMethod.isVarargs() || candidate.isVarargs()) {
+						ITypeBinding parameterType= ASTResolving.getParameterTypeBinding(candidate, fArgIndex);
+						if (parameterType != null && parameterType.getFunctionalInterfaceMethod() != null) {
+							return false;
+						}
+					}
 				}
 			}
 			return true;
@@ -792,11 +802,6 @@ public class ASTNodes {
 		} else if (locationInParent == CastExpression.EXPRESSION_PROPERTY) {
 			return ((CastExpression) parent).getType().resolveBinding();
 
-		} else if (locationInParent == FieldAccess.NAME_PROPERTY
-				|| locationInParent == SuperFieldAccess.NAME_PROPERTY
-				|| locationInParent == QualifiedName.NAME_PROPERTY) {
-			return getTargetType((Expression) parent);
-
 		} else if (locationInParent == ParenthesizedExpression.EXPRESSION_PROPERTY) {
 			return getTargetType((ParenthesizedExpression) parent);
 
@@ -806,7 +811,8 @@ public class ASTNodes {
 
 	private static ITypeBinding getParameterTypeBinding(Expression expression, List<Expression> arguments, IMethodBinding methodBinding) {
 		IMethodBinding methodDeclBinding= methodBinding.getMethodDeclaration();
-		return methodDeclBinding != null ? ASTResolving.getParameterTypeBinding(expression, arguments, methodDeclBinding) : null;
+		int index= arguments.indexOf(expression);
+		return ASTResolving.getParameterTypeBinding(methodDeclBinding, index);
 	}
 
 	private static ITypeBinding getTargetTypeForArrayInitializer(ArrayInitializer arrayInitializer) {
