@@ -725,7 +725,12 @@ public class CallInliner {
 			ITypeBinding[] parameters= method.getParameterTypes();
 			int argumentIndex= methodInvocation.arguments().indexOf(fInvocation);
 
-			parameters[argumentIndex]= returnExprs.get(0).resolveTypeBinding();
+			ITypeBinding parameterType= returnExprs.get(0).resolveTypeBinding();
+			if (method.isVarargs() && argumentIndex >= parameters.length - 1) {
+				argumentIndex= parameters.length - 1;
+				parameterType= parameterType.createArrayType(1);
+			}
+			parameters[argumentIndex]= parameterType;
 
 			ITypeBinding type= ASTNodes.getReceiverTypeBinding(methodInvocation);
 			TypeBindingVisitor visitor= new AmbiguousMethodAnalyzer(
