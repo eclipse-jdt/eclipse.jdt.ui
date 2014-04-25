@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,11 +15,17 @@ package org.eclipse.jdt.internal.corext.dom;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 /**
- * The interface is used in type binding visiting algorithms.
+ * Interface used in type binding visiting algorithms.
  *
  * @see Bindings#visitHierarchy(ITypeBinding, TypeBindingVisitor)
  */
 public interface TypeBindingVisitor {
 
-	public boolean visit(ITypeBinding node);
+	/**
+	 * @param type a type binding
+	 * @return <code>true</code> to continue visiting types,
+	 *         or <code>false</code> to abort and return <code>false</code>
+	 * @since 3.9
+	 */
+	public boolean visit(ITypeBinding type);
 }

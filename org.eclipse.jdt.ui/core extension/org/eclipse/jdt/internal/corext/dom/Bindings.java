@@ -596,10 +596,13 @@ public class Bindings {
 
 	/**
 	 * Method to visit a type hierarchy defined by a given type.
+	 * The given type itself is not visited.
 	 *
-	 * @param type the type which hierarchy is to be visited
+	 * @param type the type whose hierarchy is to be visited
 	 * @param visitor the visitor
-	 * @return <code>false</code> if the visiting got interrupted
+	 * @return <code>true</code> if all types were visited,
+	 *         or <code>false</code> if the visiting got aborted because the <code>visit</code>
+	 *         method returned <code>false</code> for a type
 	 */
 	public static boolean visitHierarchy(ITypeBinding type, TypeBindingVisitor visitor) {
 		boolean result= visitSuperclasses(type, visitor);
@@ -610,11 +613,14 @@ public class Bindings {
 	}
 
 	/**
-	 * Method to visit a interface hierarchy defined by a given type.
+	 * Method to visit an interface hierarchy defined by a given type.
+	 * The given type itself is not visited.
 	 *
-	 * @param type the type which interface hierarchy is to be visited
+	 * @param type the type whose interface hierarchy is to be visited
 	 * @param visitor the visitor
-	 * @return <code>false</code> if the visiting got interrupted
+	 * @return <code>true</code> if all types were visited,
+	 *         or <code>false</code> if the visiting got aborted because the <code>visit</code>
+	 *         method returned <code>false</code> for a type
 	 */
 	public static boolean visitInterfaces(ITypeBinding type, TypeBindingVisitor visitor) {
 		return visitInterfaces(type, visitor, new HashSet<ITypeBinding>());
@@ -638,10 +644,13 @@ public class Bindings {
 
 	/**
 	 * Method to visit a super class hierarchy defined by a given type.
+	 * The given type itself is not visited.
 	 *
-	 * @param type the type which super class hierarchy is to be visited
+	 * @param type the type whose super class hierarchy is to be visited
 	 * @param visitor the visitor
-	 * @return <code>false</code> if the visiting got interrupted
+	 * @return <code>true</code> if all types were visited,
+	 *         or <code>false</code> if the visiting got aborted because the <code>visit</code>
+	 *         method returned <code>false</code> for a type
 	 */
 	public static boolean visitSuperclasses(ITypeBinding type, TypeBindingVisitor visitor) {
 		while ((type= type.getSuperclass()) != null) {
