@@ -5,7 +5,7 @@ public interface Foo {
 	/**
 	 * @param foo
 	 */
-	public static void d(Foo foo) {
+	static void d(Foo foo) {
 		foo.d();
 	}
 

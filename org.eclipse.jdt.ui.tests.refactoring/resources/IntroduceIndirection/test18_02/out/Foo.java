@@ -9,7 +9,7 @@ public interface Foo {
 	/**
 	 * 
 	 */
-	public static void s() {
+	static void s() {
 		Foo.s();
 	}
 

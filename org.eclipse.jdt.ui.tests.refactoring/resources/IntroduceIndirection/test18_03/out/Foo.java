@@ -4,7 +4,7 @@ public interface Foo {
 	/**
 	 * @param foo
 	 */
-	public static void a(Foo foo) {
+	static void a(Foo foo) {
 		foo.a();
 	}
 
