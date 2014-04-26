@@ -712,7 +712,12 @@ public class ASTNodes {
 							|| fOriginalMethod.isVarargs() || candidate.isVarargs()) {
 						ITypeBinding parameterType= ASTResolving.getParameterTypeBinding(candidate, fArgIndex);
 						if (parameterType != null && parameterType.getFunctionalInterfaceMethod() != null) {
-							return false;
+							ITypeBinding origParamType= ASTResolving.getParameterTypeBinding(fOriginalMethod, fArgIndex);
+							boolean originalIsVoidCompatible=  Bindings.isVoidType(origParamType.getFunctionalInterfaceMethod().getReturnType());
+							boolean candidateIsVoidCompatible= Bindings.isVoidType(parameterType.getFunctionalInterfaceMethod().getReturnType());
+							if (originalIsVoidCompatible == candidateIsVoidCompatible) {
+								return false;
+							}
 						}
 					}
 				}

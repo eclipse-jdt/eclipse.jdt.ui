@@ -245,7 +245,9 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 					cast.setExpression(lambdaExpression);
 					ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(classInstanceCreation, importRewrite);
-					cast.setType(importRewrite.addImport(classInstanceCreation.getType().resolveBinding(), ast, importRewriteContext));
+					Type castType= importRewrite.addImport(classInstanceCreation.getType().resolveBinding(), ast, importRewriteContext);
+					cast.setType(castType);
+					importRemover.registerAddedImports(castType);
 					replacement= cast;
 				}
 				rewrite.replace(classInstanceCreation, replacement, group);
