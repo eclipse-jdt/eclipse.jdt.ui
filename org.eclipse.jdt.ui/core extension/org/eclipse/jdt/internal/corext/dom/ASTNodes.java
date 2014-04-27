@@ -705,7 +705,7 @@ public class ASTNodes {
 						continue;
 					}
 				}
-				if (fOriginalMethod.getName().equals(candidate.getName())) {
+				if (fOriginalMethod.getName().equals(candidate.getName()) && !fOriginalMethod.overrides(candidate)) {
 					ITypeBinding[] originalParameterTypes= fOriginalMethod.getParameterTypes();
 					ITypeBinding[] candidateParameterTypes= candidate.getParameterTypes();
 					if (originalParameterTypes.length == candidateParameterTypes.length

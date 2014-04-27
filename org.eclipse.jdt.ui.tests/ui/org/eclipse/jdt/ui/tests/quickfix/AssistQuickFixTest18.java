@@ -672,6 +672,47 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
 	}
 
+	public void testConvertToLambdaAmbiguousOverridden() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.function.Predicate;\n");
+		buf.append("\n");
+		buf.append("public class Test {\n");
+		buf.append("    void foo(ArrayList<String> list) {\n");
+		buf.append("        list.removeIf(new Predicate<String>() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public boolean test(String t) {\n");
+		buf.append("                return t.isEmpty();\n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+		
+		int offset= buf.toString().indexOf("public boolean test(");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("\n");
+		buf.append("public class Test {\n");
+		buf.append("    void foo(ArrayList<String> list) {\n");
+		buf.append("        list.removeIf(t -> t.isEmpty());\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+	
 	public void testConvertToAnonymousClassCreation1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
