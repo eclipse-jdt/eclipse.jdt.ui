@@ -75,6 +75,7 @@ import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
@@ -600,7 +601,17 @@ public class ASTNodes {
 			
 		} else if (initializerType.isRawType() && referenceType.isParameterizedType()) {
 			return referenceType; // don't lose the unchecked conversion
-			
+
+		} else if (initializer instanceof LambdaExpression || initializer instanceof MethodReference) {
+			if (isTargetAmbiguous(reference)) {
+				return referenceType;
+			} else {
+				ITypeBinding targetType= getTargetType(reference);
+				if (targetType == null || targetType != referenceType) {
+					return referenceType;
+				}
+			}
+
 		} else if (! TypeRules.canAssign(initializerType, referenceType)) {
 			if (!Bindings.containsTypeVariables(referenceType))
 				return referenceType;

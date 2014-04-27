@@ -22,6 +22,8 @@ public class AllRefactoringTests {
 		TestSuite suite= new TestSuite(clazz.getName());
 
 		suite.addTest(RenameTests18.suite());
+		suite.addTest(InlineTempTests18.suite());
+		suite.addTest(InlineConstantTests18.suite());
 
 		//--code
 		suite.addTest(ExtractMethodTests.suite());
