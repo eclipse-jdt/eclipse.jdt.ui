@@ -324,7 +324,13 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				classInstanceCreation.setType(creationType);
 				classInstanceCreation.setAnonymousClassDeclaration(anonymousClassDeclaration);
 
-				rewrite.replace(lambdaExpression, classInstanceCreation, group);
+				ASTNode toReplace= lambdaExpression;
+				if (lambdaExpression.getLocationInParent() == CastExpression.EXPRESSION_PROPERTY
+						&& lambdaTypeBinding.isEqualTo(((CastExpression) lambdaExpression.getParent()).resolveTypeBinding())) {
+					// remove cast to same type as the anonymous will use
+					toReplace= lambdaExpression.getParent();
+				}
+				rewrite.replace(toReplace, classInstanceCreation, group);
 			}
 		}
 	}
