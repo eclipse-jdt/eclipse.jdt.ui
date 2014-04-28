@@ -1400,4 +1400,24 @@ public class ASTNodes {
 		return (T) ASTNode.copySubtree(target, node);
 	}
 
+	/**
+	 * Returns a list of local variable names which are visible at the given node.
+	 *
+	 * @param node the AST node
+	 * @return a list of local variable names visible at the given node
+	 * @see ScopeAnalyzer#getDeclarationsInScope(int, int)
+	 * @since 3.10
+	 */
+	public static List<String> getVisibleLocalVariablesInScope(ASTNode node) {
+		List<String> variableNames= new ArrayList<String>();
+		CompilationUnit root= (CompilationUnit) node.getRoot();
+		IBinding[] bindings= new ScopeAnalyzer(root).
+				getDeclarationsInScope(node.getStartPosition(), ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY);
+		for (IBinding binding : bindings) {
+			if (binding instanceof IVariableBinding && !((IVariableBinding) binding).isField()) {
+				variableNames.add(binding.getName());
+			}
+		}
+		return variableNames;
+	}
 }

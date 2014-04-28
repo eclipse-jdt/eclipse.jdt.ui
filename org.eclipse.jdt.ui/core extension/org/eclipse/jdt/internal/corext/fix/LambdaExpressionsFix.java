@@ -22,6 +22,7 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -57,6 +58,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
+import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -208,6 +210,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				if (!(object instanceof MethodDeclaration))
 					continue;
 				MethodDeclaration methodDeclaration= (MethodDeclaration) object;
+				makeNamesUnique(methodDeclaration, rewrite, group);
 				List<SingleVariableDeclaration> methodParameters= methodDeclaration.parameters();
 
 				// use short form with inferred parameter types and without parentheses if possible
@@ -255,6 +258,88 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				importRemover.registerRemovedNode(classInstanceCreation);
 				importRemover.registerRetainedNode(lambdaBody);
 			}
+		}
+
+		private void makeNamesUnique(MethodDeclaration methodDeclaration, ASTRewrite rewrite, TextEditGroup group) {
+			List<String> excludedNames= ASTNodes.getVisibleLocalVariablesInScope(methodDeclaration);
+			List<SimpleName> simpleNamesInMethod= getNamesInMethod(methodDeclaration);
+			List<String> namesInMethod= new ArrayList<String>();
+			for (SimpleName name : simpleNamesInMethod) {
+				namesInMethod.add(name.getIdentifier());
+			}
+
+			for (int i= 0; i < simpleNamesInMethod.size(); i++) {
+				SimpleName name= simpleNamesInMethod.get(i);
+				String identifier= namesInMethod.get(i);
+				List<String> allNamesToExclude= getNamesToExclude(excludedNames, namesInMethod, i);
+				if (allNamesToExclude.contains(identifier)) {
+					String newIdentifier= createName(identifier, allNamesToExclude);
+					excludedNames.add(newIdentifier);
+					SimpleName[] references= LinkedNodeFinder.findByNode(name.getRoot(), name);
+					for (SimpleName ref : references) {
+						rewrite.set(ref, SimpleName.IDENTIFIER_PROPERTY, newIdentifier, group);
+					}
+				}
+			}
+		}
+
+		private List<String> getNamesToExclude(List<String> excludedNames, List<String> namesInMethod, int i) {
+			List<String> allNamesToExclude= new ArrayList<String>(excludedNames);
+			allNamesToExclude.addAll(namesInMethod.subList(0, i));
+			allNamesToExclude.addAll(namesInMethod.subList(i + 1, namesInMethod.size()));
+			return allNamesToExclude;
+		}
+
+		private List<SimpleName> getNamesInMethod(MethodDeclaration methodDeclaration) {
+			class NamesCollector extends HierarchicalASTVisitor {
+				private int fTypeCounter;
+
+				private List<SimpleName> fNames= new ArrayList<SimpleName>();
+
+				@Override
+				public boolean visit(AbstractTypeDeclaration node) {
+					if (fTypeCounter++ == 0) {
+						fNames.add(node.getName());
+					}
+					return true;
+				}
+
+				@Override
+				public void endVisit(AbstractTypeDeclaration node) {
+					fTypeCounter--;
+				}
+
+				@Override
+				public boolean visit(AnonymousClassDeclaration node) {
+					fTypeCounter++;
+					return true;
+				}
+
+				@Override
+				public void endVisit(AnonymousClassDeclaration node) {
+					fTypeCounter--;
+				}
+
+				@Override
+				public boolean visit(VariableDeclaration node) {
+					if (fTypeCounter == 0)
+						fNames.add(node.getName());
+					return true;
+				}
+			}
+
+			NamesCollector namesCollector= new NamesCollector();
+			methodDeclaration.accept(namesCollector);
+			return namesCollector.fNames;
+		}
+
+		private String createName(String candidate, List<String> excludedNames) {
+			int i= 1;
+			String result= candidate;
+			while (excludedNames.contains(result)) {
+				result= candidate + i++;
+			}
+			return result;
 		}
 	}
 

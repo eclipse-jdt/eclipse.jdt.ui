@@ -672,6 +672,206 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
 	}
 
+	public void testConvertToLambda14() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("interface FI {\n");
+		buf.append("    int foo(int x, int y, int z);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class C {\n");
+		buf.append("    int i;\n");
+		buf.append("    private void test(int x) {\n");
+		buf.append("        int y;\n");
+		buf.append("        FI fi = new FI() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public int foo(int x/*km*/, int i /*inches*/, int y/*yards*/) {\n");
+		buf.append("                return x + i + y;\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("FI()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("interface FI {\n");
+		buf.append("    int foo(int x, int y, int z);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class C {\n");
+		buf.append("    int i;\n");
+		buf.append("    private void test(int x) {\n");
+		buf.append("        int y;\n");
+		buf.append("        FI fi = (x1/*km*/, i /*inches*/, y1/*yards*/) -> x1 + i + y1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertToLambda15() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("interface FI {\n");
+		buf.append("    int foo(int x, int y, int z);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class C {\n");
+		buf.append("    int i;\n");
+		buf.append("    private void test(int x, int y, int z) {\n");
+		buf.append("        FI fi = new FI() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public int foo(int a, int b, int z) {\n");
+		buf.append("                int x= 0, y=0; \n");
+		buf.append("                return x + y + z;\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("FI()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("interface FI {\n");
+		buf.append("    int foo(int x, int y, int z);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class C {\n");
+		buf.append("    int i;\n");
+		buf.append("    private void test(int x, int y, int z) {\n");
+		buf.append("        FI fi = (a, b, z1) -> {\n");
+		buf.append("            int x1= 0, y1=0; \n");
+		buf.append("            return x1 + y1 + z1;\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertToLambda16() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface FI {\n");
+		buf.append("    void foo();\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class C1 {\n");
+		buf.append("    void fun1() {\n");
+		buf.append("        int c = 0; // [1]\n");
+		buf.append("        FI test = new FI() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public void foo() {\n");
+		buf.append("                for (int c = 0; c < 10;) { /* [2] */ }\n");
+		buf.append("                for (int c = 0; c < 20;) { /* [3] */ }\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("FI()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface FI {\n");
+		buf.append("    void foo();\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class C1 {\n");
+		buf.append("    void fun1() {\n");
+		buf.append("        int c = 0; // [1]\n");
+		buf.append("        FI test = () -> {\n");
+		buf.append("            for (int c1 = 0; c1 < 10;) { /* [2] */ }\n");
+		buf.append("            for (int c2 = 0; c2 < 20;) { /* [3] */ }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertToLambda17() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface X {\n");
+		buf.append("    void foo();\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("public class CX {\n");
+		buf.append("    private void fun(int a) {\n");
+		buf.append("        X x= new X() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public void foo() {\n");
+		buf.append("                int a; \n");
+		buf.append("                int a1;\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("CX.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("X()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface X {\n");
+		buf.append("    void foo();\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("public class CX {\n");
+		buf.append("    private void fun(int a) {\n");
+		buf.append("        X x= () -> {\n");
+		buf.append("            int a2; \n");
+		buf.append("            int a1;\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
 	public void testConvertToLambdaAmbiguousOverridden() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
