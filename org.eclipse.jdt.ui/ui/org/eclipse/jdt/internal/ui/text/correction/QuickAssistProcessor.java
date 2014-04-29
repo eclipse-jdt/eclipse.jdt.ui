@@ -2596,9 +2596,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				VariableDeclarationStatement varDeclaration= ast.newVariableDeclarationStatement(varFragment);
 				Type varType;
 				if (initializerIsArray) {
-					ArrayType varArrayType= (ArrayType) DimensionRewrite.copyTypeAndAddDimensions(parameter.getType(), parameter.extraDimensions(), rewrite);
-					varArrayType.dimensions().add(0, ast.newDimension());
-					varType= varArrayType;
+					Type copiedType= DimensionRewrite.copyTypeAndAddDimensions(parameter.getType(), parameter.extraDimensions(), rewrite);
+					varType= ASTNodeFactory.newArrayType(copiedType);
 				} else {
 					ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
 					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, imports);

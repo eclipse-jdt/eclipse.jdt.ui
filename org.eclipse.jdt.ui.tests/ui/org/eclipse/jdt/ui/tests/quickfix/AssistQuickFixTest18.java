@@ -1711,4 +1711,40 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression);
 	}
+
+	public void testBug433754() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("class E {\n");
+		buf.append("    private void foo() {\n");
+		buf.append("        for (String str : new String[1]) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("str");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("class E {\n");
+		buf.append("    private void foo() {\n");
+		buf.append("        String[] strings = new String[1];\n");
+		buf.append("        for (int i = 0; i < strings.length; i++) {\n");
+		buf.append("            String str = strings[i];\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
 }
