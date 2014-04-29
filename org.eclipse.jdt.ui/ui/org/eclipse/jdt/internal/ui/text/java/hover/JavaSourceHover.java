@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,14 +75,14 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * The upward shift in location in lines for the bracket hover.
-	 * 
+	 *
 	 * @since 3.8
 	 */
 	private int fUpwardShiftInLines;
 
 	/**
 	 * The status text for the bracket hover.
-	 * 
+	 *
 	 * @since 3.8
 	 */
 	private String fBracketHoverStatus;
@@ -125,7 +125,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 	}
 
 	private String getBracketHoverInfo(final ITextViewer textViewer, IRegion region) {
-		boolean isElseBracket= false;
+		boolean isElsePart= false;
 		IEditorPart editor= getEditor();
 		ITypeRoot editorInput= getEditorInputJavaElement();
 		if (!(editor instanceof JavaEditor) || editorInput == null) {
@@ -158,11 +158,14 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 				return null;
 			ASTNode node;
 			ASTNode parent= bracketNode.getParent();
-			if (parent instanceof IfStatement && ((IfStatement) parent).getElseStatement() != null
-					&& ASTNodes.getInclusiveEnd(((IfStatement) parent).getElseStatement()) == offset) {
-				isElseBracket= true; // if-[else if]*-else
-				while (parent.getParent() instanceof IfStatement) {
-					parent= parent.getParent();
+			if (parent instanceof IfStatement) {
+				IfStatement parentIfStmt= (IfStatement) parent;
+				if ((parentIfStmt.getElseStatement() != null && ASTNodes.getInclusiveEnd(parentIfStmt.getElseStatement()) == offset) // if [else if]* else
+						|| (parentIfStmt.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY && ASTNodes.getInclusiveEnd(parentIfStmt.getThenStatement()) == offset)) { // if [else if]+ else?
+					isElsePart= true;
+					while (parent.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY) {
+						parent= parent.getParent();
+					}
 				}
 			}
 			if (bracketNode instanceof Block && !(parent instanceof Block) && !(parent instanceof SwitchStatement)) {
@@ -223,8 +226,8 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			int wLine2= ((JavaSourceViewer) textViewer).modelLine2WidgetLine(line2);
 			if ((line1 < topLine) || (wLine1 != -1 && (wLine2 - wLine1 != line2 - line1))) {
 				// match not visible or content is folded - see bug 399997
-				if (isElseBracket) {
-					return getBracketHoverInfoForElse((IfStatement) node, document, editorInput, delim); // see bug 377141
+				if (isElsePart) {
+					return getBracketHoverInfo((IfStatement) node, bracketNode, document, editorInput, delim); // see bug 377141, 410650
 				}
 				noOfSourceLines= 3;
 				if ((line2 - line1) < noOfSourceLines) {
@@ -268,21 +271,23 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 	}
 
 	/**
-	 * Creates the hover text for 'else' closing bracket in 'if-[else if]*-else' cases when the
-	 * beginning of the first 'if' is not visible in the text editor by stitching together all the
-	 * headers.
-	 * 
-	 * @param ifNode the first 'if' node in 'if-[else if]*-else' structure
+	 * Creates the hover text for 'else if' or 'else' closing bracket in 'if [else if]+ else?' or
+	 * 'if [else if]* else' cases by stitching together all the headers when the beginning of the
+	 * first 'if' is not visible in the text editor.
+	 *
+	 * @param ifNode the first 'if' node in the structure
+	 * @param bracketNode the node at whose closing bracket the hover text is required
 	 * @param document the input document of the text viewer on which the hover popup should be
 	 *            shown
 	 * @param editorInput the editor's input as {@link ITypeRoot}
 	 * @param delim the line delimiter used for the editorInput
-	 * @return the hover text for 'else' closing bracket in 'if-[else if]*-else' cases
+	 * @return the hover text for 'else if' or 'else' closing bracket in 'if [else if]+ else?' or
+	 *         'if [else if]* else' cases respectively
 	 * @throws BadLocationException if an attempt has been performed to access a non-existing
 	 *             position in the document
 	 * @since 3.9
 	 */
-	private String getBracketHoverInfoForElse(IfStatement ifNode, final IDocument document, final ITypeRoot editorInput, final String delim) throws BadLocationException {
+	private String getBracketHoverInfo(IfStatement ifNode, ASTNode bracketNode, final IDocument document, final ITypeRoot editorInput, final String delim) throws BadLocationException {
 		int totalSkippedLines= 0;
 		String hoverText= null;
 
@@ -294,7 +299,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			int sourceOffset= document.getLineOffset(line1);
 			int line2= document.getLineOfOffset(nodeStart + nodeLength);
 			int line3= line2;
-			if (ifNode != null && ifNode.getElseStatement() != null) {
+			if (currentStatement != bracketNode && ifNode != null && ifNode.getElseStatement() != null) {
 				int elseStartOffset= getNextElseOffset(ifNode.getThenStatement(), editorInput);
 				if (elseStartOffset != -1) {
 					line3= document.getLineOfOffset(elseStartOffset); // next 'else'
@@ -333,9 +338,9 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 					hoverText= hoverText.concat(delim).concat(source);
 				}
 			}
-			// advance currentStatement to the next 'else if' or 'else' statement; set it to null when no further statement is left for processing
+			// advance currentStatement to the next 'else if' or 'else' statement; set it to null when no further processing is required
 			// advance ifNode to the 'if' in next 'else if'; set it to null if 'else' is reached
-			if (ifNode != null && ifNode.getElseStatement() != null) {
+			if (currentStatement != bracketNode) {
 				Statement thenStatement= ifNode.getThenStatement();
 				Statement nextStatement= ifNode.getElseStatement();
 				if (nextStatement instanceof IfStatement) {
@@ -378,7 +383,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * Returns the trimmed source lines.
-	 * 
+	 *
 	 * @param source the source string, could be <code>null</code>
 	 * @param javaElement the java element
 	 * @return the trimmed source lines or <code>null</code>
@@ -445,7 +450,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 
 	/**
 	 * Returns the information control creator.
-	 * 
+	 *
 	 * @param isResizable <code>true</code> if resizable
 	 * @param statusFieldText the text to be used in the optional status field or <code>null</code>
 	 *            if the status field should be hidden
