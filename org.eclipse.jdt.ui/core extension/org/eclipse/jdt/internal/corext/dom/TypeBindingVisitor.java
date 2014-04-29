@@ -25,7 +25,6 @@ public interface TypeBindingVisitor {
 	 * @param type a type binding
 	 * @return <code>true</code> to continue visiting types,
 	 *         or <code>false</code> to abort and return <code>false</code>
-	 * @since 3.9
 	 */
 	public boolean visit(ITypeBinding type);
 }
