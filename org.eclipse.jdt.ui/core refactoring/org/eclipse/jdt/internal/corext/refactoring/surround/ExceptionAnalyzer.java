@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -83,6 +84,15 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 		}
 		Collections.sort(exceptions, new ExceptionComparator());
 		return exceptions.toArray(new ITypeBinding[exceptions.size()]);
+	}
+	
+	@Override
+	public boolean visit(LambdaExpression node) {
+		/*
+		 * FIXME: Remove this method. It's just a workaround for bug 433426.
+		 * ExceptionAnalyzer forces clients to on the wrong enclosing node (BodyDeclaration instead of LambdaExpression's body).
+		 */
+		return true;
 	}
 
 	@Override

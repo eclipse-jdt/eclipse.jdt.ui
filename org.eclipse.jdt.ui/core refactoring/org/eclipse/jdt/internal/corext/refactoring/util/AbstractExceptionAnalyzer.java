@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -81,6 +82,12 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
 		// Don't dive into a local type.
+		return false;
+	}
+
+	@Override
+	public boolean visit(LambdaExpression node) {
+		// Don't dive into a lambda type.
 		return false;
 	}
 

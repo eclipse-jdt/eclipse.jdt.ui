@@ -83,6 +83,10 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 		defaultMethodsTest(0, Modifier.PUBLIC);
 	}
 
+	public void test6() throws Exception {
+		defaultMethodsTest(0, Modifier.PUBLIC);
+	}
+
 	//====================================================================================
 	// Testing Static Methods
 	//====================================================================================
@@ -222,7 +226,7 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 	public void test321() throws Exception {
 		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
 	}
-	
+
 	public void test322() throws Exception {
 		performTest(fgTestSetup.getLambdaExpressionPackage(), "A", INVALID_SELECTION, null);
 	}
@@ -237,5 +241,9 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 
 	public void test325() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
+	}
+
+	public void test326() throws Exception {
+		lambdaExpressionTest(0, Modifier.PUBLIC);
 	}
 }
