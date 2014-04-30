@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,8 +17,6 @@ import java.util.List;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.viewers.StyledString;
 
@@ -29,19 +26,15 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.part.FileEditorInput;
-
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
+
 
 /**
  * @since 3.2 (renamed from JavaDocCompletionEvaluator which got introduced in 2.0)
@@ -139,25 +132,21 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 		ICompilationUnit cu= docContext.getCompilationUnit();
 		if (cu == null)
 			return Collections.emptyList();
-		IEditorInput editorInput= new FileEditorInput((IFile) cu.getResource());
-		fDocument= JavaUI.getDocumentProvider().getDocument(editorInput);
+		fDocument= docContext.getDocument();
 		if (fDocument == null) {
-			return null;
+			return Collections.emptyList();
 		}
 
 		try {
 			fResult= new ArrayList<ICompletionProposal>(100);
 			evalProposals();
 			return fResult;
-		} catch (JavaModelException e) {
-			fErrorMessage= e.getLocalizedMessage();
 		} finally {
 			fResult= null;
 		}
-		return null;
 	}
 
-	private void evalProposals() throws JavaModelException {
+	private void evalProposals() {
 		try {
 
 			IRegion info= fDocument.getLineInformationOfOffset(fCurrentPos);
