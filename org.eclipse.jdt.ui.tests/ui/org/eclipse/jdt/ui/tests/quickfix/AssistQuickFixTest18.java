@@ -872,6 +872,64 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
+	public void testConvertToLambda18() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface FIOther {\n");
+		buf.append("    void run(int x);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("public class TestOther {\n");
+		buf.append("    void init() {\n");
+		buf.append("        String x;\n");
+		buf.append("        m(x1 -> {\n");
+		buf.append("            FIOther fi = new FIOther() {\n");
+		buf.append("                @Override\n");
+		buf.append("                public void run(int x1) { \n");
+		buf.append("                    return;\n");
+		buf.append("                }\n");
+		buf.append("            };\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void m(FIOther fi) {\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("TestOther.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("FIOther()");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface FIOther {\n");
+		buf.append("    void run(int x);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("public class TestOther {\n");
+		buf.append("    void init() {\n");
+		buf.append("        String x;\n");
+		buf.append("        m(x1 -> {\n");
+		buf.append("            FIOther fi = x11 -> { \n");
+		buf.append("                return;\n");
+		buf.append("            };\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void m(FIOther fi) {\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
 	public void testConvertToLambdaAmbiguousOverridden() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

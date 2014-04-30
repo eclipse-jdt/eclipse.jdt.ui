@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
-import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -702,7 +701,7 @@ public class ScopeAnalyzer {
 		}
 		
 		@Override
-		public boolean visit(LambdaExpression node) {
+		public boolean visit(Expression node) {
 			return !fBreak && isInside(node);
 		}
 
