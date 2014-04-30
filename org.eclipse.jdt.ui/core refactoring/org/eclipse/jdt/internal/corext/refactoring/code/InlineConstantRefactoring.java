@@ -62,6 +62,7 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -77,8 +78,11 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -309,6 +313,13 @@ public class InlineConstantRefactoring extends Refactoring {
 
 			@Override
 			public boolean visit(Name name) {
+				StructuralPropertyDescriptor locationInParent= name.getLocationInParent();
+				if (locationInParent == ExpressionMethodReference.NAME_PROPERTY
+						|| locationInParent == TypeMethodReference.NAME_PROPERTY
+						|| locationInParent == SuperMethodReference.NAME_PROPERTY) {
+					return false;
+				}
+
 				SimpleName leftmost= getLeftmost(name);
 
 				IBinding leftmostBinding= leftmost.resolveBinding();
