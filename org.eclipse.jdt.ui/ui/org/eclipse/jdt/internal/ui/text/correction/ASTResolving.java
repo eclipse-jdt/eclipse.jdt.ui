@@ -399,13 +399,13 @@ public class ASTResolving {
 		return getParameterTypeBinding(binding, index);
 	}
 
-	public static ITypeBinding getParameterTypeBinding(IMethodBinding methodBinding, int parameterIndex) {
+	public static ITypeBinding getParameterTypeBinding(IMethodBinding methodBinding, int argumentIndex) {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
-		if (methodBinding.isVarargs() && parameterIndex >= paramTypes.length - 1) {
+		if (methodBinding.isVarargs() && argumentIndex >= paramTypes.length - 1) {
 			return paramTypes[paramTypes.length - 1].getComponentType();
 		}
-		if (parameterIndex >= 0 && parameterIndex < paramTypes.length) {
-			return paramTypes[parameterIndex];
+		if (argumentIndex >= 0 && argumentIndex < paramTypes.length) {
+			return paramTypes[argumentIndex];
 		}
 		return null;
 	}

@@ -644,38 +644,44 @@ public class ASTNodes {
 		ASTNode parent= expression.getParent();
 		IMethodBinding methodBinding;
 		int argumentIndex;
+		int argumentCount;
 		if (locationInParent == MethodInvocation.ARGUMENTS_PROPERTY) {
 			MethodInvocation methodInvocation= (MethodInvocation) parent;
 			methodBinding= methodInvocation.resolveMethodBinding();
 			argumentIndex= methodInvocation.arguments().indexOf(expression);
+			argumentCount= methodInvocation.arguments().size();
 		} else if (locationInParent == SuperMethodInvocation.ARGUMENTS_PROPERTY) {
 			SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) parent;
 			methodBinding= superMethodInvocation.resolveMethodBinding();
 			argumentIndex= superMethodInvocation.arguments().indexOf(expression);
+			argumentCount= superMethodInvocation.arguments().size();
 		} else if (locationInParent == ConstructorInvocation.ARGUMENTS_PROPERTY) {
 			ConstructorInvocation constructorInvocation= (ConstructorInvocation) parent;
 			methodBinding= constructorInvocation.resolveConstructorBinding();
 			argumentIndex= constructorInvocation.arguments().indexOf(expression);
+			argumentCount= constructorInvocation.arguments().size();
 		} else if (locationInParent == SuperConstructorInvocation.ARGUMENTS_PROPERTY) {
 			SuperConstructorInvocation superConstructorInvocation= (SuperConstructorInvocation) parent;
 			methodBinding= superConstructorInvocation.resolveConstructorBinding();
 			argumentIndex= superConstructorInvocation.arguments().indexOf(expression);
+			argumentCount= superConstructorInvocation.arguments().size();
 		} else if (locationInParent == ClassInstanceCreation.ARGUMENTS_PROPERTY) {
 			ClassInstanceCreation creation= (ClassInstanceCreation) parent;
 			methodBinding= creation.resolveConstructorBinding();
 			argumentIndex= creation.arguments().indexOf(expression);
+			argumentCount= creation.arguments().size();
 		} else if (locationInParent == EnumConstantDeclaration.ARGUMENTS_PROPERTY) {
 			EnumConstantDeclaration enumConstantDecl= (EnumConstantDeclaration) parent;
 			methodBinding= enumConstantDecl.resolveConstructorBinding();
 			argumentIndex= enumConstantDecl.arguments().indexOf(expression);
+			argumentCount= enumConstantDecl.arguments().size();
 		} else {
 			return false;
 		}
 
 		if (methodBinding != null) {
-			IMethodBinding methodDeclBinding= methodBinding.getMethodDeclaration();
-			ITypeBinding declaringTypeBinding= methodDeclBinding.getDeclaringClass();
-			TypeBindingVisitor visitor= new AmbiguousTargetMethodAnalyzer(declaringTypeBinding, methodDeclBinding, argumentIndex);
+			ITypeBinding declaringTypeBinding= methodBinding.getDeclaringClass();
+			TypeBindingVisitor visitor= new AmbiguousTargetMethodAnalyzer(declaringTypeBinding, methodBinding, argumentIndex, argumentCount);
 			return !(visitor.visit(declaringTypeBinding) && Bindings.visitHierarchy(declaringTypeBinding, visitor));
 		}
 
@@ -686,24 +692,27 @@ public class ASTNodes {
 		private ITypeBinding fDeclaringType;
 		private IMethodBinding fOriginalMethod;
 		private int fArgIndex;
+		private int fArgumentCount;
 
 		/**
 		 * @param declaringType the type binding declaring the <code>originalMethod</code>
 		 * @param originalMethod the method declaration binding corresponding to the method call
 		 * @param argumentIndex the index of the functional interface instance argument in the
 		 *            method call
+		 * @param argumentCount the number of arguments in the method call
 		 */
-		public AmbiguousTargetMethodAnalyzer(ITypeBinding declaringType, IMethodBinding originalMethod, int argumentIndex) {
+		public AmbiguousTargetMethodAnalyzer(ITypeBinding declaringType, IMethodBinding originalMethod, int argumentIndex, int argumentCount) {
 			fDeclaringType= declaringType;
 			fOriginalMethod= originalMethod;
 			fArgIndex= argumentIndex;
+			fArgumentCount= argumentCount;
 		}
 
 		public boolean visit(ITypeBinding type) {
 			IMethodBinding[] methods= type.getDeclaredMethods();
 			for (int i= 0; i < methods.length; i++) {
 				IMethodBinding candidate= methods[i];
-				if (candidate == fOriginalMethod) {
+				if (candidate.getMethodDeclaration() == fOriginalMethod.getMethodDeclaration()) {
 					continue;
 				}
 				ITypeBinding candidateDeclaringType= candidate.getDeclaringClass();
@@ -719,8 +728,19 @@ public class ASTNodes {
 				if (fOriginalMethod.getName().equals(candidate.getName()) && !fOriginalMethod.overrides(candidate)) {
 					ITypeBinding[] originalParameterTypes= fOriginalMethod.getParameterTypes();
 					ITypeBinding[] candidateParameterTypes= candidate.getParameterTypes();
-					if (originalParameterTypes.length == candidateParameterTypes.length
-							|| fOriginalMethod.isVarargs() || candidate.isVarargs()) {
+					
+					boolean couldBeAmbiguous;
+					if (originalParameterTypes.length == candidateParameterTypes.length) {
+						couldBeAmbiguous= true;
+					} else if (fOriginalMethod.isVarargs() || candidate.isVarargs() ) {
+						int candidateMinArgumentCount= candidateParameterTypes.length;
+						if (candidate.isVarargs())
+							candidateMinArgumentCount--;
+						couldBeAmbiguous= fArgumentCount >= candidateMinArgumentCount;
+					} else {
+						couldBeAmbiguous= false;
+					}
+					if (couldBeAmbiguous) {
 						ITypeBinding parameterType= ASTResolving.getParameterTypeBinding(candidate, fArgIndex);
 						if (parameterType != null && parameterType.getFunctionalInterfaceMethod() != null) {
 							ITypeBinding origParamType= ASTResolving.getParameterTypeBinding(fOriginalMethod, fArgIndex);
@@ -826,9 +846,8 @@ public class ASTNodes {
 	}
 
 	private static ITypeBinding getParameterTypeBinding(Expression expression, List<Expression> arguments, IMethodBinding methodBinding) {
-		IMethodBinding methodDeclBinding= methodBinding.getMethodDeclaration();
 		int index= arguments.indexOf(expression);
-		return ASTResolving.getParameterTypeBinding(methodDeclBinding, index);
+		return ASTResolving.getParameterTypeBinding(methodBinding, index);
 	}
 
 	private static ITypeBinding getTargetTypeForArrayInitializer(ArrayInitializer arrayInitializer) {

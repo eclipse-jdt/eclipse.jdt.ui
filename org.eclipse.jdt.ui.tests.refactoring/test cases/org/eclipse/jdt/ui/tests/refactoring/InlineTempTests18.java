@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,10 @@ public class InlineTempTests18 extends InlineTempTests {
 
 	public void test2() throws Exception {
 		helper1(5, 20, 5, 25);
+	}
+	
+	public void test3() throws Exception {
+		helper1(9, 29, 9, 36);
 	}
 
 	//--- tests for method references
