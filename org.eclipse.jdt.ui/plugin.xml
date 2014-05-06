@@ -6790,4 +6790,13 @@
           </description>
        </transfer>
    </extension>
+   <extension
+         point="org.eclipse.e4.ui.css.swt.theme">
+      <stylesheet
+            uri="css/e4-dark_jdt_syntaxhighlighing.css">
+         <themeid
+               refid="org.eclipse.e4.ui.css.theme.e4_dark">
+         </themeid>
+      </stylesheet>
+   </extension>
 </plugin>
