@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.astview; singleton:=true
-Bundle-Version: 1.1.9.qualifier
+Bundle-Version: 1.1.100.qualifier
 Eclipse-SourceReferences: scm:git:git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git;path="org.eclipse.jdt.astview";tag=R4_4
 Bundle-Activator: org.eclipse.jdt.astview.ASTViewPlugin
 Bundle-Vendor: %providerName
