@@ -618,29 +618,33 @@ public class JavadocContentAccess2 {
 		// XXX: should not do this by default (but we don't have settings for Javadoc, see https://bugs.eclipse.org/424283 )
 		if (member instanceof IMethod) {
 			String name= member.getElementName();
-			boolean isGetter= name.startsWith("get"); //$NON-NLS-1$
-			boolean isSetter= name.startsWith("set"); //$NON-NLS-1$
-			boolean isProperty= name.endsWith("Property"); //$NON-NLS-1$
-			if (isGetter || isSetter || isProperty) {
-				String propertyName= null;
-				if (isGetter || isSetter) {
-					propertyName= firstToLower(name.substring(3));
-				} else {
-					propertyName= name.substring(0, name.length() - 8);
+			boolean isGetter= name.startsWith("get") && name.length() > 3; //$NON-NLS-1$
+			boolean isBooleanGetter= name.startsWith("is") && name.length() > 2; //$NON-NLS-1$
+			boolean isSetter= name.startsWith("set") && name.length() > 3; //$NON-NLS-1$
+
+			if (isGetter || isBooleanGetter || isSetter) {
+				String propertyName= firstToLower(name.substring(isBooleanGetter ? 2 : 3));
+				IType type= member.getDeclaringType();
+				IMethod method= type.getMethod(propertyName + "Property", new String[0]); //$NON-NLS-1$
+
+				if (method.exists()) {
+					String content= getHTMLContentFromSource(method);
+					if (content != null) {
+						if (isSetter) {
+							content= Messages.format(JavaDocMessages.JavadocContentAccess2_setproperty_message, new Object[] { propertyName, content });
+						} else {
+							content= Messages.format(JavaDocMessages.JavadocContentAccess2_getproperty_message, new Object[] { propertyName, content });
+						}
+					}
+					return content;
 				}
+			} else if (name.endsWith("Property")) { //$NON-NLS-1$
+				String propertyName= name.substring(0, name.length() - 8);
 
 				IType type= member.getDeclaringType();
 				IField field= type.getField(propertyName);
 				if (field.exists()) {
-					String content= getHTMLContentFromSource(field);
-					if (content != null) {
-						if (isGetter) {
-							content= Messages.format(JavaDocMessages.JavadocContentAccess2_getproperty_message, new Object[] { propertyName, content });
-						} else if (isSetter) {
-							content= Messages.format(JavaDocMessages.JavadocContentAccess2_setproperty_message, new Object[] { propertyName, content });
-						}
-					}
-					return content;
+					return getHTMLContentFromSource(field);
 				}
 			}
 		}
