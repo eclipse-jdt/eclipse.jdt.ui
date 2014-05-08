@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,8 +25,10 @@ import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.InclusivePositionUpdater;
@@ -49,6 +51,7 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -162,9 +165,17 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 							for (int i= 0; i < fPositions.length - 1; i++) { // not for the last one
 								Position position= fPositions[i];
 								if (position.offset <= offset2 && offset2 + length <= position.offset + position.length) {
-									event.character= '\t';
-									event.keyCode= SWT.TAB;
-									return null;
+									try {
+										ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset2 + length, false);
+										if (IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())
+												|| offset2 + length == partition.getOffset() + partition.getLength()) {
+											event.character= '\t';
+											event.keyCode= SWT.TAB;
+											return null;
+										}
+									} catch (BadLocationException e) {
+										// continue; not serious enough to log
+									}
 								}
 							}
 						} else if (event.character == ')' && exitChar != ')') {
