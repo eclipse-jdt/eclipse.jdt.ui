@@ -645,16 +645,19 @@ public class ASTNodes {
 		IMethodBinding methodBinding;
 		int argumentIndex;
 		int argumentCount;
+		Expression invocationQualifier= null;
 		if (locationInParent == MethodInvocation.ARGUMENTS_PROPERTY) {
 			MethodInvocation methodInvocation= (MethodInvocation) parent;
 			methodBinding= methodInvocation.resolveMethodBinding();
 			argumentIndex= methodInvocation.arguments().indexOf(expression);
 			argumentCount= methodInvocation.arguments().size();
+			invocationQualifier= methodInvocation.getExpression();
 		} else if (locationInParent == SuperMethodInvocation.ARGUMENTS_PROPERTY) {
 			SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) parent;
 			methodBinding= superMethodInvocation.resolveMethodBinding();
 			argumentIndex= superMethodInvocation.arguments().indexOf(expression);
 			argumentCount= superMethodInvocation.arguments().size();
+			invocationQualifier= superMethodInvocation.getQualifier();
 		} else if (locationInParent == ConstructorInvocation.ARGUMENTS_PROPERTY) {
 			ConstructorInvocation constructorInvocation= (ConstructorInvocation) parent;
 			methodBinding= constructorInvocation.resolveConstructorBinding();
@@ -680,9 +683,37 @@ public class ASTNodes {
 		}
 
 		if (methodBinding != null) {
-			ITypeBinding declaringTypeBinding= methodBinding.getDeclaringClass();
-			TypeBindingVisitor visitor= new AmbiguousTargetMethodAnalyzer(declaringTypeBinding, methodBinding, argumentIndex, argumentCount);
-			return !(visitor.visit(declaringTypeBinding) && Bindings.visitHierarchy(declaringTypeBinding, visitor));
+			ITypeBinding invocationTargetType;
+			if (parent instanceof MethodInvocation || parent instanceof SuperMethodInvocation) {
+				if (invocationQualifier != null) {
+					invocationTargetType= invocationQualifier.resolveTypeBinding();
+					if (invocationTargetType != null && parent instanceof SuperMethodInvocation) {
+						invocationTargetType= invocationTargetType.getSuperclass();
+					}
+				} else {
+					ITypeBinding enclosingType= getEnclosingType(parent);
+					if (enclosingType != null && parent instanceof SuperMethodInvocation) {
+						enclosingType= enclosingType.getSuperclass();
+					}
+					if (enclosingType != null) {
+						IMethodBinding methodInHierarchy= Bindings.findMethodInHierarchy(enclosingType, methodBinding.getName(), methodBinding.getParameterTypes());
+						if (methodInHierarchy != null) {
+							invocationTargetType= enclosingType;
+						} else {
+							invocationTargetType= methodBinding.getDeclaringClass();
+						}
+					} else {
+						// not expected
+						invocationTargetType= methodBinding.getDeclaringClass();
+					}
+				}
+			} else {
+				invocationTargetType= methodBinding.getDeclaringClass();
+			}
+			if (invocationTargetType != null) {
+				TypeBindingVisitor visitor= new AmbiguousTargetMethodAnalyzer(invocationTargetType, methodBinding, argumentIndex, argumentCount);
+				return !(visitor.visit(invocationTargetType) && Bindings.visitHierarchy(invocationTargetType, visitor));
+			}
 		}
 
 		return true;
