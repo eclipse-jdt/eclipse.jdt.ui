@@ -20,7 +20,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
 
@@ -38,6 +40,12 @@ public class CleanUpTest18 extends CleanUpTestCase {
 	
 	public static Test setUpTest(Test test) {
 		return new Java18ProjectTestSetup(test);
+	}
+
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
+		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, "", null);
 	}
 
 	protected IJavaProject getProject() {
@@ -62,7 +70,8 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("        };\n");
 		buf.append("    };\n");
 		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String original= buf.toString();
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
 
 		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
 		enable(CleanUpConstants.USE_LAMBDA);
@@ -77,6 +86,11 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		String expected1= buf.toString();
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		
+		disable(CleanUpConstants.USE_LAMBDA);
+		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
 	public void testConvertToLambda02() throws Exception {
@@ -100,7 +114,8 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("        };\n");
 		buf.append("    };\n");
 		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		String original= buf.toString();
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
 
 		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
 		enable(CleanUpConstants.USE_LAMBDA);
@@ -119,9 +134,59 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		String expected1= buf.toString();
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		
+		disable(CleanUpConstants.USE_LAMBDA);
+		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 	
-	public void testConvertToAnonymous_andBack_WithWildcards() throws Exception {
+	public void testConvertToLambdaNestedWithImports() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.util.concurrent.Callable;\n");
+		buf.append("import java.util.concurrent.Executors;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        new Thread(new Runnable() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public void run() {\n");
+		buf.append("                Executors.newSingleThreadExecutor().submit(new Callable<String>() {\n");
+		buf.append("                    @Override\n");
+		buf.append("                    public String call() throws Exception {\n");
+		buf.append("                        return \"hi\";\n");
+		buf.append("                    }\n");
+		buf.append("                });\n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String original= buf.toString();
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
+		
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.util.concurrent.Executors;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        new Thread(() -> Executors.newSingleThreadExecutor().submit(() -> \"hi\"));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		
+		disable(CleanUpConstants.USE_LAMBDA);
+		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+	}
+
+	public void testConvertToAnonymousWithWildcards() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -146,28 +211,24 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("public class E {\n");
 		buf.append("    void foo(Integer[] ints){\n");
 		buf.append("        Arrays.sort(ints, new Comparator<Integer>() {\n");
-		buf.append("            /* comment */\n");
 		buf.append("            @Override\n");
 		buf.append("            public int compare(Integer i1, Integer i2) {\n");
 		buf.append("                return i1 - i2;\n");
 		buf.append("            }\n");
 		buf.append("        });\n");
 		buf.append("        Comparator<?> cw = new Comparator<Object>() {\n");
-		buf.append("            /* comment */\n");
 		buf.append("            @Override\n");
 		buf.append("            public int compare(Object w1, Object w2) {\n");
 		buf.append("                return 0;\n");
 		buf.append("            }\n");
 		buf.append("        };\n");
 		buf.append("        Comparator cr = new Comparator() {\n");
-		buf.append("            /* comment */\n");
 		buf.append("            @Override\n");
 		buf.append("            public int compare(Object r1, Object r2) {\n");
 		buf.append("                return 0;\n");
 		buf.append("            }\n");
 		buf.append("        };\n");
 		buf.append("        Comparator<? extends Number> ce = new Comparator<Number>() {\n");
-		buf.append("            /* comment */\n");
 		buf.append("            @Override\n");
 		buf.append("            public int compare(Number n1, Number n2) {\n");
 		buf.append("                return -0;\n");
@@ -185,7 +246,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
-	public void testConvertToAnonymous_andBack_WithWildcards1() throws Exception {
+	public void testConvertToAnonymousWithWildcards1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
@@ -212,7 +273,6 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("\n");
 		buf.append("class Test {\n");
 		buf.append("    I<?> li = new I<Object>() {\n");
-		buf.append("        /* comment */\n");
 		buf.append("        @Override\n");
 		buf.append("        public Object run(Object s) {\n");
 		buf.append("            return null;\n");
@@ -229,7 +289,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
-	public void testConvertToAnonymous_andBack_WithJoinedSAM() throws Exception {
+	public void testConvertToAnonymousWithJoinedSAM() throws Exception {
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=428526#c1 and #c6
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -259,7 +319,6 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("interface Baz extends Foo<Integer, Integer> {}\n");
 		buf.append("class Test {\n");
 		buf.append("    Baz baz = new Baz() {\n");
-		buf.append("        /* comment */\n");
 		buf.append("        @Override\n");
 		buf.append("        public void m(Integer x) { return; }\n");
 		buf.append("    };\n");
@@ -272,45 +331,6 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		enable(CleanUpConstants.USE_LAMBDA);
 	
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
-	}
-
-	public void testConvertToLambdaNestedWithImports() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("import java.util.concurrent.Callable;\n");
-		buf.append("import java.util.concurrent.Executors;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        new Thread(new Runnable() {\n");
-		buf.append("            @Override\n");
-		buf.append("            public void run() {\n");
-		buf.append("                Executors.newSingleThreadExecutor().submit(new Callable<String>() {\n");
-		buf.append("                    @Override\n");
-		buf.append("                    public String call() throws Exception {\n");
-		buf.append("                        return \"hi\";\n");
-		buf.append("                    }\n");
-		buf.append("                });\n");
-		buf.append("            }\n");
-		buf.append("        });\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
-		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
-		enable(CleanUpConstants.USE_LAMBDA);
-		
-		buf= new StringBuffer();
-		buf.append("package test;\n");
-		buf.append("import java.util.concurrent.Executors;\n");
-		buf.append("public class E {\n");
-		buf.append("    void foo() {\n");
-		buf.append("        new Thread(() -> Executors.newSingleThreadExecutor().submit(() -> \"hi\"));\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();
-		
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 	}
 
 }
