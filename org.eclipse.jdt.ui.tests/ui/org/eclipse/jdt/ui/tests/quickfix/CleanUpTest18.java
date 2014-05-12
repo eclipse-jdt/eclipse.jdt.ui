@@ -186,6 +186,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
+	// fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=434507#c5
 	public void testConvertToLambdaAmbiguous01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -334,6 +335,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 
+	// fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=434507#c5
 	public void testConvertToLambdaAmbiguous02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -472,6 +474,75 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("}\n");
 		String expected1= buf.toString();
 	
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+		
+		disable(CleanUpConstants.USE_LAMBDA);
+		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
+		
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+	}
+
+	// fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=434507#c2
+	public void testConvertToLambdaAmbiguous03() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public interface E {\n");
+		buf.append("    default void m() {\n");
+		buf.append("        bar(0, new FI() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public int foo(int x) {\n");
+		buf.append("                return x++;\n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("        baz(0, new ZI() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public int zoo() {\n");
+		buf.append("                return 1;\n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void bar(int i, FI fi);\n");
+		buf.append("    void bar(int i, FV fv);\n");
+		buf.append("\n");
+		buf.append("    void baz(int i, ZI zi);\n");
+		buf.append("    void baz(int i, ZV zv);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("@FunctionalInterface interface FI { int  foo(int a); }\n");
+		buf.append("@FunctionalInterface interface FV { void foo(int a); }\n");
+		buf.append("\n");
+		buf.append("@FunctionalInterface interface ZI { int  zoo(); }\n");
+		buf.append("@FunctionalInterface interface ZV { void zoo(); }\n");
+		String original= buf.toString();
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
+		
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public interface E {\n");
+		buf.append("    default void m() {\n");
+		buf.append("        bar(0, (FI) x -> x++);\n");
+		buf.append("        baz(0, () -> 1);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void bar(int i, FI fi);\n");
+		buf.append("    void bar(int i, FV fv);\n");
+		buf.append("\n");
+		buf.append("    void baz(int i, ZI zi);\n");
+		buf.append("    void baz(int i, ZV zv);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("@FunctionalInterface interface FI { int  foo(int a); }\n");
+		buf.append("@FunctionalInterface interface FV { void foo(int a); }\n");
+		buf.append("\n");
+		buf.append("@FunctionalInterface interface ZI { int  zoo(); }\n");
+		buf.append("@FunctionalInterface interface ZV { void zoo(); }\n");
+		String expected1= buf.toString();
+		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
 		
 		disable(CleanUpConstants.USE_LAMBDA);

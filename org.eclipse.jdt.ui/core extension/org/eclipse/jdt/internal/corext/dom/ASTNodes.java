@@ -603,7 +603,7 @@ public class ASTNodes {
 			return referenceType; // don't lose the unchecked conversion
 
 		} else if (initializer instanceof LambdaExpression || initializer instanceof MethodReference) {
-			if (isTargetAmbiguous(reference)) {
+			if (isTargetAmbiguous(reference, isExplicitlyTypedLambda(initializer))) {
 				return referenceType;
 			} else {
 				ITypeBinding targetType= getTargetType(reference);
@@ -626,12 +626,14 @@ public class ASTNodes {
 	 * interface instance.
 	 * 
 	 * @param expression the method argument, which is a functional interface instance
+	 * @param expressionIsExplicitlyTyped <code>true</code> iff the intended replacement for <code>expression</code>
+	 *         is an explicitly typed lambda expression (JLS8 15.27.1)
 	 * @return <code>true</code> if overloaded methods can result in an ambiguous method call or a semantic change,
 	 *         <code>false</code> otherwise
 	 * 
 	 * @since 3.10
 	 */
-	public static boolean isTargetAmbiguous(Expression expression) {
+	public static boolean isTargetAmbiguous(Expression expression, boolean expressionIsExplicitlyTyped) {
 		StructuralPropertyDescriptor locationInParent= expression.getLocationInParent();
 
 		while (locationInParent == ParenthesizedExpression.EXPRESSION_PROPERTY
@@ -711,7 +713,7 @@ public class ASTNodes {
 				invocationTargetType= methodBinding.getDeclaringClass();
 			}
 			if (invocationTargetType != null) {
-				TypeBindingVisitor visitor= new AmbiguousTargetMethodAnalyzer(invocationTargetType, methodBinding, argumentIndex, argumentCount);
+				TypeBindingVisitor visitor= new AmbiguousTargetMethodAnalyzer(invocationTargetType, methodBinding, argumentIndex, argumentCount, expressionIsExplicitlyTyped);
 				return !(visitor.visit(invocationTargetType) && Bindings.visitHierarchy(invocationTargetType, visitor));
 			}
 		}
@@ -724,6 +726,7 @@ public class ASTNodes {
 		private IMethodBinding fOriginalMethod;
 		private int fArgIndex;
 		private int fArgumentCount;
+		private boolean fExpressionIsExplicitlyTyped;
 
 		/**
 		 * @param declaringType the type binding declaring the <code>originalMethod</code>
@@ -731,12 +734,15 @@ public class ASTNodes {
 		 * @param argumentIndex the index of the functional interface instance argument in the
 		 *            method call
 		 * @param argumentCount the number of arguments in the method call
+		 * @param expressionIsExplicitlyTyped <code>true</code> iff the intended replacement for <code>expression</code>
+		 *         is an explicitly typed lambda expression (JLS8 15.27.1)
 		 */
-		public AmbiguousTargetMethodAnalyzer(ITypeBinding declaringType, IMethodBinding originalMethod, int argumentIndex, int argumentCount) {
+		public AmbiguousTargetMethodAnalyzer(ITypeBinding declaringType, IMethodBinding originalMethod, int argumentIndex, int argumentCount, boolean expressionIsExplicitlyTyped) {
 			fDeclaringType= declaringType;
 			fOriginalMethod= originalMethod;
 			fArgIndex= argumentIndex;
 			fArgumentCount= argumentCount;
+			fExpressionIsExplicitlyTyped= expressionIsExplicitlyTyped;
 		}
 
 		public boolean visit(ITypeBinding type) {
@@ -774,6 +780,20 @@ public class ASTNodes {
 					if (couldBeAmbiguous) {
 						ITypeBinding parameterType= ASTResolving.getParameterTypeBinding(candidate, fArgIndex);
 						if (parameterType != null && parameterType.getFunctionalInterfaceMethod() != null) {
+							if (!fExpressionIsExplicitlyTyped) {
+								/* According to JLS8 15.12.2.2, implicitly typed lambda expressions are not "pertinent to applicability"
+								 * and hence potentially applicable methods are always "applicable by strict invocation",
+								 * regardless of whether argument expressions are compatible with the method's parameter types or not.
+								 * If there are multiple such methods, 15.12.2.5 results in an ambiguous method invocation.
+								 */
+								return false;
+							}
+							/* Explicitly typed lambda expressions are pertinent to applicability, and hence
+							 * compatibility with the corresponding method parameter type is checked. And since this check
+							 * separates functional interface methods by their void-compatibility state, functional interfaces
+							 * with a different void compatibility are not applicable any more and hence can't cause
+							 * an ambiguous method invocation.
+							 */
 							ITypeBinding origParamType= ASTResolving.getParameterTypeBinding(fOriginalMethod, fArgIndex);
 							boolean originalIsVoidCompatible=  Bindings.isVoidType(origParamType.getFunctionalInterfaceMethod().getReturnType());
 							boolean candidateIsVoidCompatible= Bindings.isVoidType(parameterType.getFunctionalInterfaceMethod().getReturnType());
@@ -929,6 +949,16 @@ public class ASTNodes {
 			return true;
 		
 		return false;
+	}
+
+	private static boolean isExplicitlyTypedLambda(Expression expression) {
+		if (!(expression instanceof LambdaExpression))
+			return false;
+		LambdaExpression lambda= (LambdaExpression) expression;
+		List<VariableDeclaration> parameters= lambda.parameters();
+		if (parameters.isEmpty())
+			return true;
+		return parameters.get(0) instanceof SingleVariableDeclaration;
 	}
 
 	/**

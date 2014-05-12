@@ -243,7 +243,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				
 				lambdaExpression.setBody(rewrite.createCopyTarget(lambdaBody));
 				Expression replacement= lambdaExpression;
-				if (ASTNodes.isTargetAmbiguous(classInstanceCreation)) {
+				if (ASTNodes.isTargetAmbiguous(classInstanceCreation, lambdaParameters.isEmpty())) {
 					CastExpression cast= ast.newCastExpression();
 					cast.setExpression(lambdaExpression);
 					ImportRewrite importRewrite= cuRewrite.getImportRewrite();
