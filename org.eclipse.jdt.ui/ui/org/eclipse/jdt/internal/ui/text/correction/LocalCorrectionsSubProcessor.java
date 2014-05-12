@@ -80,7 +80,6 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
-import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
@@ -123,6 +122,7 @@ import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 import org.eclipse.jdt.internal.corext.fix.StringFix;
+import org.eclipse.jdt.internal.corext.fix.TypeParametersFix;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
@@ -150,6 +150,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
+import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -1501,32 +1502,15 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addRemoveRedundantTypeArgumentsProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		CompilationUnit astRoot= context.getASTRoot();
-		ASTNode selectedNode= problem.getCoveringNode(astRoot);
-		if (selectedNode == null)
-			return;
-
-		while (!(selectedNode instanceof ParameterizedType) && !(selectedNode instanceof Statement)) {
-			selectedNode= selectedNode.getParent();
+		IProposableFix fix= TypeParametersFix.createRemoveRedundantTypeArgumentsFix(context.getASTRoot(), problem);
+		if (fix != null) {
+			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			Map<String, String> options= new HashMap<String, String>();
+			options.put(CleanUpConstants.USE_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
+			options.put(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new TypeParametersCleanUp(options), IProposalRelevance.REMOVE_REDUNDANT_TYPE_ARGUMENTS, image, context);
+			proposals.add(proposal);
 		}
-		if (!(selectedNode instanceof ParameterizedType)) {
-			return;
-		}
-		ParameterizedType parameterizedType= (ParameterizedType) selectedNode;
-
-		AST ast= astRoot.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-		ListRewrite listRewrite= rewrite.getListRewrite(parameterizedType, ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
-
-		List<Type> typeArguments= parameterizedType.typeArguments();
-		for (Iterator<Type> iterator= typeArguments.iterator(); iterator.hasNext();) {
-			listRewrite.remove(iterator.next(), null);
-		}
-
-		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-		String label= CorrectionMessages.LocalCorrectionsSubProcessor_remove_type_arguments;
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REMOVE_REDUNDANT_TYPE_ARGUMENTS, image);
-		proposals.add(proposal);
 	}
 
 	public static void addFallThroughProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
@@ -1618,7 +1602,7 @@ public class LocalCorrectionsSubProcessor {
 										ITypeBinding typeArgument= typeArguments[j];
 										typeArgument= Bindings.normalizeForDeclarationUse(typeArgument, ast);
 										if (! TypeRules.isJavaLangObject(typeArgument)) {
-											// add all type arguments if at least one is found to be necessary: 
+											// add all type arguments if at least one is found to be necessary:
 											List<Type> typeArgumentsList= method.typeArguments();
 											for (int k= 0; k < typeArguments.length; k++) {
 												typeArgument= typeArguments[k];

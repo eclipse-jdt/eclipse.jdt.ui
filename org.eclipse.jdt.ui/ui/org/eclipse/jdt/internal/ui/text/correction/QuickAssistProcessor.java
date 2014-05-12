@@ -133,6 +133,7 @@ import org.eclipse.jdt.internal.corext.fix.ConvertLoopFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.LambdaExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.TypeParametersFix;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
@@ -161,6 +162,7 @@ import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
@@ -702,8 +704,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	public static boolean getInferDiamondArgumentsProposal(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
+		// don't add if already added as quick fix
+		if (containsMatchingProblem(locations, IProblem.DiamondNotBelow17))
+			return false;
 		ParameterizedType createdType= null;
-		
+
 		if (node instanceof Name) {
 			Name name= ASTNodes.getTopMostName((Name) node);
 			if (name.getLocationInParent() == SimpleType.NAME_PROPERTY ||
@@ -728,48 +733,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				createdType= (ParameterizedType) type;
 			}
 		}
-		
-		if (createdType == null || createdType.typeArguments().size() != 0) {
-			return false;
-		}
-		
-		ITypeBinding binding= createdType.resolveBinding();
-		if (binding == null) {
-			return false;
-		}
-		
-		ITypeBinding[] typeArguments= binding.getTypeArguments();
-		if (typeArguments.length == 0) {
-			return false;
-		}
-		
-		if (resultingCollections == null) {
-			return true;
-		}
 
-		// don't add if already added as quick fix
-		if (containsMatchingProblem(locations, IProblem.DiamondNotBelow17))
-			return false;
-		
-		AST ast= node.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-		ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
-		ContextSensitiveImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(context.getASTRoot(), createdType.getStartPosition(), importRewrite);
-
-		String label= CorrectionMessages.QuickAssistProcessor_infer_diamond_description;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		int relevance= locations == null ? IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS : IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS_ERROR; // if error -> higher than ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals()
-		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, relevance, image);
-
-		ListRewrite argumentsRewrite= rewrite.getListRewrite(createdType, ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
-		for (int i= 0; i < typeArguments.length; i++) {
-			ITypeBinding typeArgument= typeArguments[i];
-			Type argumentNode= importRewrite.addImport(typeArgument, ast, importContext);
-			argumentsRewrite.insertLast(argumentNode, null);
-			proposal.addLinkedPosition(rewrite.track(argumentNode), true, "arg" + i); //$NON-NLS-1$
+		IProposableFix fix= TypeParametersFix.createInsertInferredTypeArgumentsFix(context.getASTRoot(), createdType);
+		if (fix != null && resultingCollections != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			int relevance= locations == null ? IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS : IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS_ERROR; // if error -> higher than ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals()
+			Map<String, String> options= new HashMap<String, String>();
+			options.put(CleanUpConstants.USE_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
+			options.put(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new TypeParametersCleanUp(options), relevance, image, context);
+			resultingCollections.add(proposal);
 		}
-
-		resultingCollections.add(proposal);
 		return true;
 	}
 
