@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@innoopract.com> - [quick fix] Shouldn't offer "Add throws declaration" quickfix for overriding signature if result would conflict with overridden signature
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
+ *     Lukas Hanke <hanke@yatta.de> - Bug 430818 [1.8][quick fix] Quick fix for "for loop" is not shown for bare local variable/argument/field - https://bugs.eclipse.org/bugs/show_bug.cgi?id=430818
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -55,7 +56,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	 * caused by:
 	 * Bug 430336: [1.8][compiler] Bad syntax error recovery: Lonely identifier should be variable name, not type
 	 */
-	public static final boolean BUG_430818= true;
+	public static final boolean BUG_430818= false;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -9814,7 +9815,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
-			List proposals= collectCorrections(cu, getASTRoot(cu), 2, null);
+			List proposals= collectCorrections(cu, getASTRoot(cu), 3, null);
 
 			assertNumberOfProposals(proposals, 2);
 			assertCorrectLabels(proposals);
@@ -9838,8 +9839,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.Iterator;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(Collection<String> collection) {\n");
-			buf.append("        for (Iterator<String> iterator = collection.iterator(); iterator\n");
-			buf.append("                .hasNext();) {\n");
+			buf.append("        for (Iterator<String> iterator = collection.iterator(); iterator.hasNext();) {\n");
 			buf.append("            String string = iterator.next();\n");
 			buf.append("            \n");
 			buf.append("        }\n");
@@ -9942,7 +9942,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
-			List proposals= collectCorrections(cu, getASTRoot(cu), 2, null);
+			List proposals= collectCorrections(cu, getASTRoot(cu), 3, null);
 
 			assertNumberOfProposals(proposals, 1);
 			assertCorrectLabels(proposals);
@@ -9957,8 +9957,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.Iterator;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(Collection collection) {\n");
-			buf.append("        for (Iterator iterator = collection.iterator(); iterator\n");
-			buf.append("                .hasNext();) {\n");
+			buf.append("        for (Iterator iterator = collection.iterator(); iterator.hasNext();) {\n");
 			buf.append("            Object object = iterator.next();\n");
 			buf.append("            \n");
 			buf.append("        }\n");

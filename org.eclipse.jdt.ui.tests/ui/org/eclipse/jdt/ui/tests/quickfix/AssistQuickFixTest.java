@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids <sdavids@gmx.de> - testInvertEquals1-23
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
+ *     Lukas Hanke <hanke@yatta.de> - Bug 430818 [1.8][quick fix] Quick fix for "for loop" is not shown for bare local variable/argument/field - https://bugs.eclipse.org/bugs/show_bug.cgi?id=430818
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -8611,7 +8612,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 2);
+			assertNumberOfProposals(proposals, 4);
 			assertCorrectLabels(proposals);
 
 			String[] expected= new String[2];
@@ -8633,8 +8634,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.Iterator;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(Collection<String> collection) {\n");
-			buf.append("        for (Iterator<String> iterator = collection.iterator(); iterator\n");
-			buf.append("                .hasNext();) {\n");
+			buf.append("        for (Iterator<String> iterator = collection.iterator(); iterator.hasNext();) {\n");
 			buf.append("            String string = iterator.next();\n");
 			buf.append("            \n");
 			buf.append("        }\n");
@@ -8672,7 +8672,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 4);
+			assertNumberOfProposals(proposals, 2);
 			assertCorrectLabels(proposals);
 
 			String[] expected= new String[2];
@@ -8793,7 +8793,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 3);
+			assertNumberOfProposals(proposals, 5);
 			assertCorrectLabels(proposals);
 
 			String[] expected= new String[3];
@@ -8817,8 +8817,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.LinkedList;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(MySecondOwnIterable collection) {\n");
-			buf.append("        for (Iterator<String> iterator = collection.iterator(); iterator\n");
-			buf.append("                .hasNext();) {\n");
+			buf.append("        for (Iterator<String> iterator = collection.iterator(); iterator.hasNext();) {\n");
 			buf.append("            String string = iterator.next();\n");
 			buf.append("            \n");
 			buf.append("        }\n");
@@ -8874,7 +8873,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 2);
+			assertNumberOfProposals(proposals, 4);
 			assertCorrectLabels(proposals);
 
 			String[] expected= new String[2];
@@ -8898,8 +8897,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.Iterator;\n");
 			buf.append("public class E {\n");
 			buf.append("    void <T extends Date> foo(Collection<T> collection) {\n");
-			buf.append("        for (Iterator<T> iterator = collection.iterator(); iterator\n");
-			buf.append("                .hasNext();) {\n");
+			buf.append("        for (Iterator<T> iterator = collection.iterator(); iterator.hasNext();) {\n");
 			buf.append("            T t = iterator.next();\n");
 			buf.append("            \n");
 			buf.append("        }\n");
@@ -9005,7 +9003,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 3);
+			assertNumberOfProposals(proposals, 5);
 			assertCorrectLabels(proposals);
 
 			String[] expected= new String[3];
@@ -9083,7 +9081,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 3);
+			assertNumberOfProposals(proposals, 5);
 			assertCorrectLabels(proposals);
 
 			String[] expected= new String[3];
@@ -9230,7 +9228,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 2);
+			assertNumberOfProposals(proposals, 4);
 			assertCorrectLabels(proposals);
 
 			String[] expected= new String[2];
@@ -9252,8 +9250,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.Iterator;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(Collection collection) {\n");
-			buf.append("        for (Iterator iterator = collection.iterator(); iterator\n");
-			buf.append("                .hasNext();) {\n");
+			buf.append("        for (Iterator iterator = collection.iterator(); iterator.hasNext();) {\n");
 			buf.append("            Object object = iterator.next();\n");
 			buf.append("            \n");
 			buf.append("        }\n");
@@ -9293,7 +9290,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 1);
+			assertNumberOfProposals(proposals, 3);
 			assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_generate_enhanced_for_loop);
 			assertCorrectLabels(proposals);
 
@@ -9306,8 +9303,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.Iterator;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(Collection collection) {\n");
-			buf.append("        for (Iterator iterator = collection.iterator(); iterator\n");
-			buf.append("                .hasNext();) {\n");
+			buf.append("        for (Iterator iterator = collection.iterator(); iterator.hasNext();) {\n");
 			buf.append("            Object object = iterator.next();\n");
 			buf.append("            \n");
 			buf.append("        }\n");
@@ -9344,7 +9340,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 	
-			assertNumberOfProposals(proposals, 2);
+			assertNumberOfProposals(proposals, 4);
 			assertCorrectLabels(proposals);
 	
 			String[] expected= new String[2];
@@ -9401,7 +9397,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 	
-			assertNumberOfProposals(proposals, 2);
+			assertNumberOfProposals(proposals, 4);
 			assertCorrectLabels(proposals);
 	
 			String[] expected= new String[2];

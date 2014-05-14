@@ -12,6 +12,7 @@
  *     Chris West (Faux) <eclipse@goeswhere.com> - [quick assist] "Use 'StringBuilder' for string concatenation" could fix existing misuses - https://bugs.eclipse.org/bugs/show_bug.cgi?id=282755
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *     Eugene Lucash <e.lucash@gmail.com> - [quick assist] Add key binding for Extract method Quick Assist - https://bugs.eclipse.org/424166
+ *     Lukas Hanke <hanke@yatta.de> - Bug 430818 [1.8][quick fix] Quick fix for "for loop" is not shown for bare local variable/argument/field - https://bugs.eclipse.org/bugs/show_bug.cgi?id=430818
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -67,7 +68,6 @@ import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -90,6 +90,7 @@ import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -124,6 +125,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
@@ -2741,26 +2743,31 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	public static boolean getGenerateForLoopProposals(IInvocationContext context, ASTNode coveringNode, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
-		Statement statement= ASTResolving.findParentStatement(coveringNode);
-		if (!(statement instanceof ExpressionStatement)) {
-			return false;
-		}
-
 		if (containsMatchingProblem(locations, IProblem.ParsingErrorInsertToComplete))
 			return false;
 
-		Expression expression= ((ExpressionStatement) statement).getExpression();
+		Statement statement= ASTResolving.findParentStatement(coveringNode);
 		ICompilationUnit cu= context.getCompilationUnit();
 		ITypeBinding expressionType= null;
+		Expression expression= null;
+		int relevanceBoost= 0;
 
-		if (expression instanceof MethodInvocation
-				|| expression instanceof SimpleName
-				|| expression instanceof FieldAccess) {
-			expressionType= expression.resolveTypeBinding();
-		} else if (expression instanceof Assignment
-				&& ((Assignment) expression).getRightHandSide().resolveTypeBinding() == null
-				&& ((Assignment) expression).getLeftHandSide().resolveTypeBinding() != null) {
-			expressionType= ((Assignment) expression).getLeftHandSide().resolveTypeBinding();
+		if (statement instanceof ExpressionStatement) {
+			expressionType= extractExpressionType((ExpressionStatement) statement);
+			expression= ((ExpressionStatement) statement).getExpression();
+			
+		} else if (statement instanceof VariableDeclarationStatement && ((VariableDeclarationStatement) statement).fragments().size() == 1
+				&& ((VariableDeclarationStatement) statement).fragments().get(0).toString().equals("$missing$")) { //$NON-NLS-1$
+			// variable name is resolved to the type in a variable declaration statement, see https://bugs.eclipse.org/430336
+			Type type= ((VariableDeclarationStatement) statement).getType();
+			if (type instanceof SimpleType) {
+				SimpleType simpleType= (SimpleType) type;
+				expressionType= extractExpressionType(simpleType);
+				expression= simpleType.getName();
+				relevanceBoost+= 6; // need to overrule the bad UnresolvedElementsSubProcessor#addNewTypeProposals(..)
+			}
+		} else {
+			return false;
 		}
 
 		if (expressionType == null)
@@ -2769,23 +2776,61 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (Bindings.findTypeInHierarchy(expressionType, "java.lang.Iterable") != null) { //$NON-NLS-1$
 			if (resultingCollections == null)
 				return true;
-			resultingCollections.add(new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATOR_FOR));
+			GenerateForLoopAssistProposal proposal= new GenerateForLoopAssistProposal(cu, expressionType, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATOR_FOR);
+			proposal.setRelevance(proposal.getRelevance() + relevanceBoost);
+			resultingCollections.add(proposal);
 			if (Bindings.findTypeInHierarchy(expressionType, "java.util.List") != null) { //$NON-NLS-1$
-				resultingCollections.add(new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATE_LIST));
+				proposal= new GenerateForLoopAssistProposal(cu, expressionType, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATE_LIST);
+				proposal.setRelevance(proposal.getRelevance() + relevanceBoost);
+				resultingCollections.add(proposal);
 			}
 		} else if (expressionType.isArray()) {
 			if (resultingCollections == null)
 				return true;
-			resultingCollections.add(new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATE_ARRAY));
+			GenerateForLoopAssistProposal proposal= new GenerateForLoopAssistProposal(cu, expressionType, statement, expression, GenerateForLoopAssistProposal.GENERATE_ITERATE_ARRAY);
+			proposal.setRelevance(proposal.getRelevance() + relevanceBoost);
+			resultingCollections.add(proposal);
 		} else {
 			return false;
 		}
 
 		if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
-			resultingCollections.add(new GenerateForLoopAssistProposal(cu, statement, expression, GenerateForLoopAssistProposal.GENERATE_FOREACH));
+			GenerateForLoopAssistProposal proposal= new GenerateForLoopAssistProposal(cu, expressionType, statement, expression, GenerateForLoopAssistProposal.GENERATE_FOREACH);
+			proposal.setRelevance(proposal.getRelevance() + relevanceBoost);
+			resultingCollections.add(proposal);
 		}
 
 		return true;
+	}
+
+	private static ITypeBinding extractExpressionType(ExpressionStatement statement) {
+		Expression expression= statement.getExpression();
+		if (expression.getNodeType() == ASTNode.METHOD_INVOCATION
+				|| expression.getNodeType() == ASTNode.FIELD_ACCESS) {
+			return expression.resolveTypeBinding();
+		}
+		return null;
+	}
+
+	private static ITypeBinding extractExpressionType(SimpleType variableIdentifier) {
+		ScopeAnalyzer analyzer= new ScopeAnalyzer((CompilationUnit) variableIdentifier.getRoot());
+		// get the name of the variable to search the type for
+		Name name= null;
+		if (variableIdentifier.getName() instanceof SimpleName) {
+			name= variableIdentifier.getName();
+		} else if (variableIdentifier.getName() instanceof QualifiedName) {
+			name= ((QualifiedName) variableIdentifier.getName()).getName();
+		}
+
+		// analyze variables which are available in the scope at the position of the quick assist invokation
+		IBinding[] declarationsInScope= analyzer.getDeclarationsInScope(name.getStartPosition(), ScopeAnalyzer.VARIABLES);
+		for (int i= 0; i < declarationsInScope.length; i++) {
+			IBinding currentVariable= declarationsInScope[i];
+			if (((IVariableBinding) currentVariable).getName().equals(name.getFullyQualifiedName())) {
+				return ((IVariableBinding) currentVariable).getType();
+			}
+		}
+		return null;
 	}
 
 	private static ForStatement getEnclosingForStatementHeader(ASTNode node) {
