@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -199,8 +201,9 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			ImportRemover importRemover= cuRewrite.getImportRemover();
 			AST ast= rewrite.getAST();
 
-			for (Iterator<ClassInstanceCreation> iterator= fExpressions.iterator(); iterator.hasNext();) {
-				ClassInstanceCreation classInstanceCreation= iterator.next();
+			HashMap<ClassInstanceCreation, HashSet<String>> cicToNewNames= new HashMap<ClassInstanceCreation, HashSet<String>>();
+			for (int i= 0; i < fExpressions.size(); i++) {
+				ClassInstanceCreation classInstanceCreation= fExpressions.get(i);
 				TextEditGroup group= createTextEditGroup(FixMessages.LambdaExpressionsFix_convert_to_lambda_expression, cuRewrite);
 
 				AnonymousClassDeclaration anonymTypeDecl= classInstanceCreation.getAnonymousClassDeclaration();
@@ -210,7 +213,16 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				if (!(object instanceof MethodDeclaration))
 					continue;
 				MethodDeclaration methodDeclaration= (MethodDeclaration) object;
-				makeNamesUnique(methodDeclaration, rewrite, group);
+				HashSet<String> excludedNames= new HashSet<String>();
+				if (i != 0) {
+					for (ClassInstanceCreation convertedCic : fExpressions.subList(0, i)) {
+						if (ASTNodes.isParent(classInstanceCreation, convertedCic)) {
+							excludedNames.addAll(cicToNewNames.get(convertedCic));
+						}
+					}
+				}
+				HashSet<String> newNames= makeNamesUnique(excludedNames, methodDeclaration, rewrite, group);
+				cicToNewNames.put(classInstanceCreation, new HashSet<String>(newNames));
 				List<SingleVariableDeclaration> methodParameters= methodDeclaration.parameters();
 
 				// use short form with inferred parameter types and without parentheses if possible
@@ -260,8 +272,9 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			}
 		}
 
-		private void makeNamesUnique(MethodDeclaration methodDeclaration, ASTRewrite rewrite, TextEditGroup group) {
-			List<String> excludedNames= ASTNodes.getVisibleLocalVariablesInScope(methodDeclaration);
+		private HashSet<String> makeNamesUnique(HashSet<String> excludedNames, MethodDeclaration methodDeclaration, ASTRewrite rewrite, TextEditGroup group) {
+			HashSet<String> newNames= new HashSet<String>();
+			excludedNames.addAll(ASTNodes.getVisibleLocalVariablesInScope(methodDeclaration));
 			List<SimpleName> simpleNamesInMethod= getNamesInMethod(methodDeclaration);
 			List<String> namesInMethod= new ArrayList<String>();
 			for (SimpleName name : simpleNamesInMethod) {
@@ -271,20 +284,23 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			for (int i= 0; i < simpleNamesInMethod.size(); i++) {
 				SimpleName name= simpleNamesInMethod.get(i);
 				String identifier= namesInMethod.get(i);
-				List<String> allNamesToExclude= getNamesToExclude(excludedNames, namesInMethod, i);
+				HashSet<String> allNamesToExclude= getNamesToExclude(excludedNames, namesInMethod, i);
 				if (allNamesToExclude.contains(identifier)) {
 					String newIdentifier= createName(identifier, allNamesToExclude);
 					excludedNames.add(newIdentifier);
+					newNames.add(newIdentifier);
 					SimpleName[] references= LinkedNodeFinder.findByNode(name.getRoot(), name);
 					for (SimpleName ref : references) {
 						rewrite.set(ref, SimpleName.IDENTIFIER_PROPERTY, newIdentifier, group);
 					}
 				}
 			}
+
+			return newNames;
 		}
 
-		private List<String> getNamesToExclude(List<String> excludedNames, List<String> namesInMethod, int i) {
-			List<String> allNamesToExclude= new ArrayList<String>(excludedNames);
+		private HashSet<String> getNamesToExclude(HashSet<String> excludedNames, List<String> namesInMethod, int i) {
+			HashSet<String> allNamesToExclude= new HashSet<String>(excludedNames);
 			allNamesToExclude.addAll(namesInMethod.subList(0, i));
 			allNamesToExclude.addAll(namesInMethod.subList(i + 1, namesInMethod.size()));
 			return allNamesToExclude;
@@ -333,7 +349,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			return namesCollector.fNames;
 		}
 
-		private String createName(String candidate, List<String> excludedNames) {
+		private String createName(String candidate, HashSet<String> excludedNames) {
 			int i= 1;
 			String result= candidate;
 			while (excludedNames.contains(result)) {
