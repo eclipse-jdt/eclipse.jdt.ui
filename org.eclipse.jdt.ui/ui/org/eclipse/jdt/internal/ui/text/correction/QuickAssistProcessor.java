@@ -2743,8 +2743,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	public static boolean getGenerateForLoopProposals(IInvocationContext context, ASTNode coveringNode, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {
-		if (containsMatchingProblem(locations, IProblem.ParsingErrorInsertToComplete))
-			return false;
+//		if (containsMatchingProblem(locations, IProblem.ParsingErrorInsertToComplete))
+//			return false;
 
 		Statement statement= ASTResolving.findParentStatement(coveringNode);
 		ICompilationUnit cu= context.getCompilationUnit();

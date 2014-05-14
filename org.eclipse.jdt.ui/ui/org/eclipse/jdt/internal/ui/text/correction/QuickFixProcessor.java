@@ -265,7 +265,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NullableFieldReference:
 			case IProblem.ConflictingNullAnnotations:
 			case IProblem.ConflictingInheritedNullAnnotations:
-			case IProblem.ParsingErrorInsertToComplete:
 			case IProblem.ExplicitThisParameterNotBelow18:
 			case IProblem.DefaultMethodNotBelow18:
 			case IProblem.StaticInterfaceMethodNotBelow18:
@@ -760,9 +759,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ConflictingInheritedNullAnnotations:
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, ChangeKind.LOCAL, proposals);
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, ChangeKind.INVERSE, proposals);
-				break;
-			case IProblem.ParsingErrorInsertToComplete:
-				LocalCorrectionsSubProcessor.getGenerateForLoopProposals(context, problem, proposals);
 				break;
 			default:
 		}

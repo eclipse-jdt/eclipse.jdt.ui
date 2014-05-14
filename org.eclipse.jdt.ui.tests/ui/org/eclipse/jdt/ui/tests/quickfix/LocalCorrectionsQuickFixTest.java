@@ -57,6 +57,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	 * Bug 430336: [1.8][compiler] Bad syntax error recovery: Lonely identifier should be variable name, not type
 	 */
 	public static final boolean BUG_430818= false;
+	
+	/**
+	 * Bug 434188: [quick fix] shows sign of quick fix, but says no suggestions available.
+	 */
+	public static final boolean BUG_434188= true;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -9796,6 +9801,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	 * @throws Exception
 	 */
 	public void testLoopOverAddedToFixesForVariable() throws Exception {
+		if (BUG_434188)
+			return;
 		if (BUG_430818)
 			return;
 		
@@ -9860,6 +9867,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	 * @throws Exception
 	 */
 	public void testLoopOverAddedToFixesForMethodInvocation() throws Exception {
+		if (BUG_434188)
+			return;
+
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -9922,6 +9932,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	 * @throws Exception
 	 */
 	public void testGenerateForeachNotAddedForLowVersion() throws Exception {
+		if (BUG_434188)
+			return;
 		if (BUG_430818)
 			return;
 		
