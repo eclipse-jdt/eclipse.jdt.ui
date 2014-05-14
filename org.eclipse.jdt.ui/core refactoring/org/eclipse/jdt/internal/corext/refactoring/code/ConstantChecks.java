@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,12 +108,7 @@ class ConstantChecks {
 			else if (binding instanceof ITypeBinding)
 				return ! ((ITypeBinding) binding).isTypeVariable();
 			else {
-					/*  IPackageBinding is not expected, as a package name not
-					    used as a type name prefix is not expected in such an
-					    expression.  Other types are not expected either.
-					 */
-					Assert.isTrue(false);
-					return true;
+				return true; // e.g. a NameQualifiedType's qualifier, which can be a package binding
 			}
 		}
 
@@ -185,12 +180,7 @@ class ConstantChecks {
 				return false; // It's o.k.  Don't descend deeper.
 
 			} else {
-					/*  IPackageBinding is not expected, as a package name not
-					    used as a type name prefix is not expected in such an
-					    expression.  Other types are not expected either.
-					 */
-					Assert.isTrue(false);
-					return false;
+				return false; // e.g. a NameQualifiedType's qualifier, which can be a package binding
 			}
 
 			//Descend deeper:
