@@ -40,6 +40,7 @@ public class AllRefactoringTests {
 		suite.addTest(RenameTempTests.suite());
 		suite.addTest(ExtractConstantTests.suite());
 		suite.addTest(PromoteTempToFieldTests.suite());
+		suite.addTest(PromoteTempToFieldTests18.suite());
 		suite.addTest(ConvertAnonymousToNestedTests.suite());
 		suite.addTest(InlineConstantTests.suite());
 		suite.addTest(InlineConstantTests17.suite());
