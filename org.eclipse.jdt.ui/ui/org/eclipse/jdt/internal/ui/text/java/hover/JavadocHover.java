@@ -1070,9 +1070,14 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	}
 
 	private static void addAnnotation(StringBuffer buf, IJavaElement element, IAnnotationBinding annotation) throws URISyntaxException {
-		String uri= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, annotation.getAnnotationType().getJavaElement());
+		IJavaElement javaElement= annotation.getAnnotationType().getJavaElement();
 		buf.append('@');
-		addLink(buf, uri, annotation.getName());
+		if (javaElement != null) {
+			String uri= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, javaElement);
+			addLink(buf, uri, annotation.getName());
+		} else {
+			buf.append(annotation.getName());
+		}
 		
 		IMemberValuePairBinding[] mvPairs= annotation.getDeclaredMemberValuePairs();
 		if (mvPairs.length > 0) {
