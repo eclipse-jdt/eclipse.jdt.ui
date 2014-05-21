@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRewriteTarget;
+import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -197,6 +198,10 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 			if (disabledStyledText != null) {
 				disabledStyledText.setEditable(true);
 				disabledStyledText.removeTraverseListener(traverseBlocker);
+				// Workaround to fix bug 434791 during 4.4 RC2. Will be replaced by official API during 4.5.
+				ITextOperationTarget textOperationTarget= (ITextOperationTarget) activeEditor.getAdapter(ITextOperationTarget.class);
+				if (textOperationTarget != null && textOperationTarget.canDoOperation(-100))
+					textOperationTarget.doOperation(-100);
 			}
 			if (rewriteTarget != null) {
 				rewriteTarget.endCompoundChange();
