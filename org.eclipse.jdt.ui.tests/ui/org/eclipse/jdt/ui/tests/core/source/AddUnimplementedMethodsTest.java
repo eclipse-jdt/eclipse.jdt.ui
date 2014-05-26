@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
+import static org.junit.Assert.assertArrayEquals;
+
 import java.util.Hashtable;
 
 import junit.framework.Test;
@@ -36,6 +38,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -347,6 +351,64 @@ public class AddUnimplementedMethodsTest extends TestCase {
 				}
 			}
 		}
+	}
+
+	/**
+	 * @throws Exception
+	 * @deprecated tests deprecated API
+	 */
+	public void testJLS3() throws Exception {
+		doTestOldAstLevel(AST.JLS3);
+	}
+
+	/**
+	 * @throws Exception
+	 * @deprecated tests deprecated API
+	 */
+	public void testJLS4() throws Exception {
+		doTestOldAstLevel(AST.JLS4);
+	}
+	
+	public void testJLS8() throws Exception {
+		doTestOldAstLevel(AST.JLS8);
+	}
+	
+	/**
+	 * @param astLevel AST.JLS*
+	 * @throws Exception
+	 * @deprecated tests deprecated API
+	 */
+	public void doTestOldAstLevel(int astLevel) throws Exception {
+		ICompilationUnit cu= fPackage.getCompilationUnit("Test1.java");
+		IType testClass= cu.createType(
+				  "public class Test1 extends A implements B {\n"
+				+ "    @Deprecated\n"
+				+ "    java.util.List<String>[][] getArray() throws RuntimeException {\n"
+				+ "        return (ArrayList<String>[][]) new ArrayList<?>[1][2];\n"
+				+ "    }\n"
+				+ "}\n", null, true, null);
+		cu.createImport("java.util.ArrayList", null, null);
+
+		RefactoringASTParser parser= new RefactoringASTParser(astLevel);
+		CompilationUnit unit= parser.parse(cu, true);
+		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, testClass.getNameRange()), AbstractTypeDeclaration.class);
+		assertNotNull("Could not find type declaration node", declaration);
+		ITypeBinding binding= declaration.resolveBinding();
+		assertNotNull("Binding for type declaration could not be resolved", binding);
+		
+		IMethodBinding[] overridableMethods= StubUtility2.getOverridableMethods(unit.getAST(), binding, false);
+		
+		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(unit, binding, overridableMethods, -1, true, true, true);
+		op.run(new NullProgressMonitor());
+
+		IMethod[] methods= testClass.getMethods();
+		checkMethods(new String[] { "a", "b", "c", "getArray", "equals", "clone", "toString", "finalize", "hashCode" }, methods);
+
+		IImportDeclaration[] imports= cu.getImports();
+		checkImports(new String[] { "java.util.Date", "java.util.Hashtable", "java.util.Vector", "java.util.ArrayList" }, imports);
+		
+		IProblem[] problems= parser.parse(cu, true).getProblems();
+		assertArrayEquals(new IProblem[0], problems);
 	}
 
 	private void testHelper(IType testClass) throws JavaModelException, CoreException {

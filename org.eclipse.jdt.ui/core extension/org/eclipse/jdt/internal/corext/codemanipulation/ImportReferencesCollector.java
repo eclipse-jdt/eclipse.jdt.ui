@@ -11,12 +11,15 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnnotatableType;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.CreationReference;
@@ -200,17 +203,17 @@ public class ImportReferencesCollector extends GenericVisitor {
 	@Override
 	public boolean visit(SimpleType node) {
 		typeRefFound(node.getName());
-		doVisitChildren(node.annotations());
+		visitAnnotations(node);
 		return false;
 	}
-	
+
 	/*
 	 * @see ASTVisitor#visit(NameQualifiedType)
 	 */
 	@Override
 	public boolean visit(NameQualifiedType node) {
 		possibleTypeRefFound(node.getQualifier());
-		doVisitChildren(node.annotations());
+		visitAnnotations(node);
 		return false;
 	}
 
@@ -220,8 +223,14 @@ public class ImportReferencesCollector extends GenericVisitor {
 	@Override
 	public boolean visit(QualifiedType node) {
 		doVisitNode(node.getQualifier());
-		doVisitChildren(node.annotations());
+		visitAnnotations(node);
 		return false;
+	}
+
+	private void visitAnnotations(AnnotatableType node) {
+		if (node.getAST().apiLevel() >= AST.JLS8) {
+			doVisitChildren(node.annotations());
+		}
 	}
 
 	/*
@@ -420,16 +429,36 @@ public class ImportReferencesCollector extends GenericVisitor {
 			doVisitNode(node.getReturnType2());
 		}
 		// name not visited
-		doVisitNode(node.getReceiverType());
+		
+		int apiLevel= node.getAST().apiLevel();
+		if (apiLevel >= AST.JLS8) {
+			doVisitNode(node.getReceiverType());
+		}
 		// receiverQualifier not visited:
 		//   Enclosing class names cannot be shadowed by an import (qualification is always redundant).
 		doVisitChildren(node.parameters());
-		doVisitChildren(node.extraDimensions());
-		doVisitChildren(node.thrownExceptionTypes());
+		if (apiLevel >= AST.JLS8) {
+			doVisitChildren(node.extraDimensions());
+			doVisitChildren(node.thrownExceptionTypes());
+		} else {
+			Iterator<Name> iter= getThrownExceptions(node).iterator();
+			while (iter.hasNext()) {
+				typeRefFound(iter.next());
+			}
+		}
 		if (!fSkipMethodBodies) {
 			doVisitNode(node.getBody());
 		}
 		return false;
+	}
+
+	/**
+	 * @param decl method declaration
+	 * @return thrown exception names
+	 * @deprecated to avoid deprecation warnings
+	 */
+	private static List<Name> getThrownExceptions(MethodDeclaration decl) {
+		return decl.thrownExceptions();
 	}
 
 	@Override
