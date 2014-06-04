@@ -269,7 +269,6 @@ public interface IProposalRelevance {
 
 	public static final int CONVERT_TO_MESSAGE_FORMAT= 0;
 	public static final int COPY_ANNOTATION_JAR= 0;
-	public static final int ADD_ANNOTATION_BUNDLE= 0;
 	public static final int NO_SUGGESSTIONS_AVAILABLE= 0;
 	public static final int ADD_QUOTE= 0;
 	public static final int NEW_TYPE= 0;

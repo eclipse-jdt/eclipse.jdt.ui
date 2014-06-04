@@ -34,29 +34,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-import org.eclipse.core.filebuffers.LocationKind;
-
-import org.eclipse.text.edits.InsertEdit;
-import org.eclipse.text.edits.MultiTextEdit;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.FindReplaceDocumentAdapter;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.ISharedImages;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.NullChange;
-import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.core.refactoring.resource.DeleteResourceChange;
 import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 
@@ -126,7 +109,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ClasspathChange;
-import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateFileChange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
@@ -703,71 +685,9 @@ public class UnresolvedElementsSubProcessor {
 		if (annotationsBundles == null)
 			return;
 		
-		if (! addAddToBuildPropertiesProposal(cu, node, nullityAnnotation, proposals))
+		if (! cu.getJavaProject().getProject().hasNature("org.eclipse.pde.PluginNature")) //$NON-NLS-1$
 			addCopyAnnotationsJarProposal(cu, node, nullityAnnotation, annotationsBundles[0], proposals);
 	}
-
-	private static boolean addAddToBuildPropertiesProposal(final ICompilationUnit cu, final Name name, final String fullyQualifiedName, Collection<ICommandAccess> proposals) throws CoreException {
-		IProject project= cu.getJavaProject().getProject();
-		final IFile buildProperties= project.getFile("build.properties"); //$NON-NLS-1$
-		boolean isBundle= project.hasNature("org.eclipse.pde.PluginNature"); //$NON-NLS-1$
-		if (!isBundle)
-			return false;
-		
-		final String changeName= CorrectionMessages.UnresolvedElementsSubProcessor_add_annotation_bundle_description;
-		final String buildPropertiesEntry= "additional.bundles = org.eclipse.jdt.annotation"; //$NON-NLS-1$
-		
-		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(changeName, null, IProposalRelevance.ADD_ANNOTATION_BUNDLE) {
-			@Override
-			protected Change createChange() throws CoreException {
-				if (!buildProperties.exists()) {
-					return new CreateFileChange(buildProperties.getFullPath(), buildPropertiesEntry, null);
-					
-				} else {
-					TextFileChange change= new TextFileChange(changeName, buildProperties);
-					change.setEdit(new MultiTextEdit());
-					
-					ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
-					manager.connect(buildProperties.getFullPath(), LocationKind.IFILE, null);
-					try {
-						ITextFileBuffer textFileBuffer= manager.getTextFileBuffer(buildProperties.getFullPath(), LocationKind.IFILE);
-						IDocument document= textFileBuffer.getDocument();
-						String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
-						
-						IRegion match= new FindReplaceDocumentAdapter(document).find(0, "additional\\.bundles\\s*=\\s*", true, false, false, true); //$NON-NLS-1$
-						if (match != null) {
-							StringBuilder buf= new StringBuilder("org.eclipse.jdt.annotation,\\").append(lineDelim); //$NON-NLS-1$
-							int spaces= match.getOffset() + match.getLength() - document.getLineOffset(document.getLineOfOffset(match.getOffset()));
-							while (spaces-- > 0)
-								buf.append(' ');
-							change.addEdit(new InsertEdit(match.getOffset() + match.getLength(), buf.toString()));
-						} else {
-							String entry= buildPropertiesEntry + lineDelim;
-							int len= document.getLength();
-							if (len > 0 && document.getLineInformation(document.getNumberOfLines() - 1).getLength() != 0) {
-								entry= lineDelim + entry;
-							}
-							change.addEdit(new InsertEdit(len, entry));
-						}
-						CompilationUnitChange addImportChange= createAddImportChange(cu, name, fullyQualifiedName);
-						return new CompositeChange(changeName, new Change[] { change, addImportChange});
-					} catch (BadLocationException e) {
-						JavaPlugin.log(e);
-						return new NullChange();
-					} finally {
-						manager.disconnect(buildProperties.getFullPath(), LocationKind.IFILE, null);
-					}
-				}
-			}
-			@Override
-			public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-				return Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_annotation_bundle_info, buildPropertiesEntry);
-			}
-		};
-		proposals.add(proposal);
-		return true;
-	}
-	
 
 	private static void addCopyAnnotationsJarProposal(final ICompilationUnit cu, final Name name, final String fullyQualifiedName, Bundle annotationsBundle, Collection<ICommandAccess> proposals) {
 		final IJavaProject javaProject= cu.getJavaProject();

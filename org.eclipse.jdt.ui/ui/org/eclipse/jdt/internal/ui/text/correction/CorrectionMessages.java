@@ -173,8 +173,6 @@ public final class CorrectionMessages extends NLS {
 	public static String UnimplementedCodeFix_TextEditGroup_label;
 
 	public static String UnresolvedElementsSubProcessor_swaparguments_description;
-	public static String UnresolvedElementsSubProcessor_add_annotation_bundle_description;
-	public static String UnresolvedElementsSubProcessor_add_annotation_bundle_info;
 	public static String UnresolvedElementsSubProcessor_add_static_import_description;
 	public static String UnresolvedElementsSubProcessor_addargumentcast_description;
 	public static String UnresolvedElementsSubProcessor_changemethod_description;
