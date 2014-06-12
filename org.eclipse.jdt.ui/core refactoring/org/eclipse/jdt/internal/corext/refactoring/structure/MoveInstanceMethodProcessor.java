@@ -313,7 +313,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		public EnclosingInstanceReferenceFinder(final ITypeBinding binding) {
 			Assert.isNotNull(binding);
 			ITypeBinding declaring= binding.getDeclaringClass();
-			while (declaring != null) {
+			while (declaring != null && !Modifier.isStatic(binding.getModifiers())) {
 				fEnclosingTypes.add(declaring);
 				declaring= declaring.getDeclaringClass();
 			}
@@ -336,6 +336,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				declaring= method.getDeclaringClass();
 			}
 			if (declaring != null) {
+				declaring= declaring.getTypeDeclaration();
 				ITypeBinding enclosing= null;
 				for (final Iterator<ITypeBinding> iterator= fEnclosingTypes.iterator(); iterator.hasNext();) {
 					enclosing= iterator.next();
@@ -660,9 +661,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				final IVariableBinding variable= (IVariableBinding) binding;
 				final IMethodBinding method= fDeclaration.resolveBinding();
 				ITypeBinding declaring= variable.getDeclaringClass();
-				if (method != null) {
-					if (declaring != null && Bindings.isSuperType(declaring, method.getDeclaringClass(), false)) {
-						declaring= declaring.getTypeDeclaration();
+				if (method != null && declaring != null) {
+					declaring= declaring.getTypeDeclaration();
+					if (Bindings.isSuperType(declaring, method.getDeclaringClass(), false)) {
 						if (JdtFlags.isStatic(variable))
 							rewrite.replace(node, ast.newQualifiedName(ASTNodeFactory.newName(ast, fTargetRewrite.getImportRewrite().addImport(declaring)), ast.newSimpleName(node.getFullyQualifiedName())), null);
 						else {

@@ -570,6 +570,11 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		helper1(new String[] { "A" }, "A", 2, 17, 2, 20, PARAMETER, "a", true, true);
 	}
 
+	// bug 436997 - references enclosing generic type
+	public void test67() throws Exception {
+		helper1(new String[] { "A" }, "A", 6, 14, 6, 15, FIELD, "b", true, true);
+	}
+	
 	// Move mA1 to field fB, do not inline delegator
 	public void test3() throws Exception {
 		helper1(new String[] { "p1.A", "p2.B", "p3.C"}, "p1.A", 9, 17, 9, 20, FIELD, "fB", false, false);
@@ -646,6 +651,11 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	// bug 404477 / bug 286221 - target method already exists
 	public void testFail15() throws Exception {
 		failHelper1(new String[] { "A" }, "A", 3, 17, 3, 18, FIELD, "fB", true, true);
+	}
+	
+	// bug 436997 - references enclosing instance
+	public void testFail16() throws Exception {
+		failHelper1(new String[] { "p1.A", "p1.B"}, "p1.A", 8, 14, 8, 15, PARAMETER, "b", true, true);
 	}
 	
 	// Cannot move static method
