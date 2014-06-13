@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
  *     Samrat Dhillon <samrat.dhillon@gmail.com> - [introduce factory] Introduce Factory on an abstract class adds a statement to create an instance of that class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=395016
+ *     Yves Joan <yves.joan@oracle.com> - [reorg] Copy action should NOT add 'copy of' prefix - https://bugs.eclipse.org/bugs/show_bug.cgi?id=151668
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
@@ -276,17 +277,9 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String CopyPackageFragmentRootChange_copy;
 
-	public static String CopyRefactoring_cu_copyOf1;
-
-	public static String CopyRefactoring_cu_copyOfMore;
-
 	public static String CopyRefactoring_package_copyOf1;
 
 	public static String CopyRefactoring_package_copyOfMore;
-
-	public static String CopyRefactoring_resource_copyOf1;
-
-	public static String CopyRefactoring_resource_copyOfMore;
 
 	public static String CopyRefactoring_update_ref;
 

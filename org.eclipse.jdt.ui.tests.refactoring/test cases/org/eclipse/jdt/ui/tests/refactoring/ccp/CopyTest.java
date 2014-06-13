@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Yves Joan <yves.joan@oracle.com> - [reorg] Copy action should NOT add 'copy of' prefix - https://bugs.eclipse.org/bugs/show_bug.cgi?id=151668
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.ccp;
 
@@ -173,12 +174,16 @@ public class CopyTest extends RefactoringTest {
 		private static final String NEW_FILE_NAME= "UnusedName.gif";
 		private static final String NEW_FOLDER_NAME= "UnusedName";
 		private static final String NEW_CU_NAME= "UnusedName";
+		private String fCuInitialSuggestedName= "unset";
+		private String fResourceInitialSuggestedName= "unset";
 
 		public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String s) {
+			setCuInitialSuggestedName(s);
 			return createStaticQuery(NEW_CU_NAME);
 		}
 
 		public INewNameQuery createNewResourceNameQuery(IResource res, String s) {
+			setResourceInitialSuggestedName(s);
 			if (res instanceof IFile)
 				return createStaticQuery(NEW_FILE_NAME);
 			else
@@ -203,6 +208,22 @@ public class CopyTest extends RefactoringTest {
 
 		public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName) {
 			return createStaticQuery(NEW_PACKAGE_FRAGMENT_ROOT_NAME);
+		}
+
+		public String getCuInitialSuggestedName() {
+			return fCuInitialSuggestedName;
+		}
+
+		private void setCuInitialSuggestedName(String cuInitialSuggestedName) {
+			this.fCuInitialSuggestedName= cuInitialSuggestedName;
+		}
+
+		public String getResourceInitialSuggestedName() {
+			return fResourceInitialSuggestedName;
+		}
+
+		public void setResourceInitialSuggestedName(String resourceInitialSuggestedName) {
+			fResourceInitialSuggestedName= resourceInitialSuggestedName;
 		}
 	}
 
@@ -1481,6 +1502,7 @@ public class CopyTest extends RefactoringTest {
 		ParticipantTesting.testCopy(handles, new CopyArguments[] {
 				new CopyArguments(destination, log)
 		});
+		assertEquals("a2.txt", ((MockNewNameQueries)queries).getResourceInitialSuggestedName());
 	}
 
 	public void testCopy_File_to_Same_Folder_Cancel() throws Exception {
@@ -1539,6 +1561,54 @@ public class CopyTest extends RefactoringTest {
 
 		IFile newFile= parentFolder.getFile(MockNewNameQueries.NEW_FILE_NAME);
 		assertTrue("new file does not exist after copying", newFile.exists());
+	}
+
+	public void testCopy_File_to_Itself_2() throws Exception {
+		copy_File_to_Itself_impl("A.java", "A2.java", "A3.java");
+	}
+
+	public void testCopy_File_to_Itself_3() throws Exception {
+		copy_File_to_Itself_impl("A.B8.java", "A.B9.java", "A.B10.java");
+	}
+
+	public void testCopy_File_to_Itself_4() throws Exception {
+		copy_File_to_Itself_impl("fileNameWithoutAnyDot", "fileNameWithoutAnyDot2", "fileNameWithoutAnyDot3");
+	}
+
+	public void testCopy_File_to_Itself_5() throws Exception {
+		copy_File_to_Itself_impl(".fileNameStartingWithDot", ".fileNameStartingWithDot2", ".fileNameStartingWithDot3");
+	}
+
+	public void testCopy_File_to_Itself_6() throws Exception {
+		copy_File_to_Itself_impl("..fileNameStartingWithTwoDots", ".2.fileNameStartingWithTwoDots", ".3.fileNameStartingWithTwoDots");
+	}
+
+	public void copy_File_to_Itself_impl(String fileName, String conflictingFileName, String initialSuggestedName) throws Exception {
+		IFolder parentFolder= (IFolder)getPackageP().getResource();
+		IFile file= parentFolder.getFile(fileName);
+		file.create(getStream("123"), true, null);
+		IFile conflictingFile= parentFolder.getFile(conflictingFileName);
+		conflictingFile.create(getStream("456"), true, null);
+
+		INewNameQueries queries= new MockNewNameQueries();
+
+		IJavaElement[] javaElements= {};
+		IResource[] resources= { file };
+		JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+
+		Object destination= file;
+		verifyValidDestination(ref, destination);
+
+		assertTrue("source file does not exist before copying", file.exists());
+
+		RefactoringStatus status= performRefactoring(ref, false);
+		assertEquals(null, status);
+
+		assertTrue("source file does not exist after copying", file.exists());
+
+		IFile newFile= parentFolder.getFile(MockNewNameQueries.NEW_FILE_NAME);
+		assertTrue("new file does not exist after copying", newFile.exists());
+		assertEquals(initialSuggestedName, ((MockNewNameQueries)queries).getResourceInitialSuggestedName());
 	}
 
 	public void testCopy_File_to_AnotherFile() throws Exception {
@@ -1919,6 +1989,7 @@ public class CopyTest extends RefactoringTest {
 
 		ICompilationUnit newCu= getPackageP().getCompilationUnit(MockNewNameQueries.NEW_CU_NAME + ".java");
 		assertTrue("new file does not exist after copying", newCu.exists());
+		assertEquals("A2", ((MockNewNameQueries)queries).getCuInitialSuggestedName());
 	}
 
 	public void testCopy_Cu_to_OtherPackage() throws Exception {
@@ -2322,7 +2393,9 @@ public class CopyTest extends RefactoringTest {
 		folder.create(true, true, null);
 		IJavaElement[] javaElements= {};
 		IResource[] resources= {folder};
-		JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
+		INewNameQueries queries= new MockNewNameQueries();
+
+		JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 		String[] handles= ParticipantTesting.createHandles(folder);
 
 		Object destination= superFolder;
@@ -2342,6 +2415,52 @@ public class CopyTest extends RefactoringTest {
 		ParticipantTesting.testCopy(handles, new CopyArguments[] {
 				new CopyArguments(destination, log)
 		});
+		assertEquals(folderName + "2", ((MockNewNameQueries)queries).getResourceInitialSuggestedName());
+
+	}
+
+
+	public void testCopy_folder_to_same_container_2() throws Exception {
+		copy_folder_to_same_container_impl("folder.name.with.segments");
+	}
+
+	public void testCopy_folder_to_same_container_3() throws Exception {
+		copy_folder_to_same_container_impl(".folderNameStartingWithDot");
+	}
+
+	public void copy_folder_to_same_container_impl(String folderName) throws Exception {
+		ParticipantTesting.reset();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
+		IFolder folder= superFolder.getFolder(folderName);
+		folder.create(true, true, null);
+		IJavaElement[] javaElements= {};
+		IResource[] resources= { folder };
+		INewNameQueries queries= new MockNewNameQueries();
+
+		IFolder secondFolder= superFolder.getFolder(folderName + "2");
+		secondFolder.create(true, true, null);
+
+		JavaCopyProcessor ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
+		String[] handles= ParticipantTesting.createHandles(folder);
+
+		Object destination= superFolder;
+		verifyValidDestination(ref, destination);
+
+		assertTrue("source does not exist before copying", folder.exists());
+
+		RefactoringStatus status= performRefactoring(ref, false);
+		assertEquals(null, status);
+
+		assertTrue("source does not exist after copying", folder.exists());
+		IFolder newFolder= superFolder.getFolder(MockNewNameQueries.NEW_FOLDER_NAME);
+		assertTrue("copied folder does not exist after copying", newFolder.exists());
+		ReorgExecutionLog log= new ReorgExecutionLog();
+		log.markAsProcessed(folder);
+		log.setNewName(folder, MockNewNameQueries.NEW_FOLDER_NAME);
+		ParticipantTesting.testCopy(handles, new CopyArguments[] {
+				new CopyArguments(destination, log)
+		});
+		assertEquals(folderName + "3", ((MockNewNameQueries)queries).getResourceInitialSuggestedName());
 
 	}
 
