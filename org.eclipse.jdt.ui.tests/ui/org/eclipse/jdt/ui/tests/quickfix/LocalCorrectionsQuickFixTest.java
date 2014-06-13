@@ -10,6 +10,7 @@
  *     Benjamin Muskalla <bmuskalla@innoopract.com> - [quick fix] Shouldn't offer "Add throws declaration" quickfix for overriding signature if result would conflict with overridden signature
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *     Lukas Hanke <hanke@yatta.de> - Bug 430818 [1.8][quick fix] Quick fix for "for loop" is not shown for bare local variable/argument/field - https://bugs.eclipse.org/bugs/show_bug.cgi?id=430818
+ *     Sandra Lions <sandra.lions-piron@oracle.com> - [quick fix] for qualified enum constants in switch-case labels - https://bugs.eclipse.org/bugs/90140
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -9171,6 +9172,90 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		expected[2]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testReplaceWithUnqualifiedEnumConstant1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    public enum color {black, white}\n");
+		buf.append("    public void foo(color c) {\n");
+		buf.append("		switch (c) {\n");
+		buf.append("            case color.black:\n");
+		buf.append("                System.out.println(\"Black\");\n");
+		buf.append("                break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2, 1);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    public enum color {black, white}\n");
+		buf.append("    public void foo(color c) {\n");
+		buf.append("		switch (c) {\n");
+		buf.append("            case black:\n");
+		buf.append("                System.out.println(\"Black\");\n");
+		buf.append("                break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+		String expected= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testReplaceWithUnqualifiedEnumConstant2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    public enum color {black, white}\n");
+		buf.append("    public void foo(color c) {\n");
+		buf.append("		switch (c) {\n");
+		buf.append("            case (color.black):\n");
+		buf.append("                System.out.println(\"Black\");\n");
+		buf.append("                break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 3, 2);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    public enum color {black, white}\n");
+		buf.append("    public void foo(color c) {\n");
+		buf.append("		switch (c) {\n");
+		buf.append("            case black:\n");
+		buf.append("                System.out.println(\"Black\");\n");
+		buf.append("                break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+		String expected= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
 	public void testCollectionsFieldMethodReplacement() throws Exception {

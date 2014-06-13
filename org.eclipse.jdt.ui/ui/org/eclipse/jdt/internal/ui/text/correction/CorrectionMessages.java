@@ -10,6 +10,7 @@
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [quick fix] Quick fix for missing synchronized modifier - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245250
  *     Billy Huang <billyhuang31@gmail.com> - [quick assist] concatenate/merge string literals - https://bugs.eclipse.org/77632
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
+ *     Sandra Lions <sandra.lions-piron@oracle.com> - [quick fix] for qualified enum constants in switch-case labels - https://bugs.eclipse.org/bugs/90140
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -390,6 +391,7 @@ public final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_insert_cases_omitted;
 	public static String LocalCorrectionsSubProcessor_insert_fall_through;
 	public static String LocalCorrectionsSubProcessor_override_hashCode_description;
+	public static String LocalCorrectionsSubProcessor_replace_with_unqualified_enum_constant;
 	public static String LocalCorrectionsSubProcessor_throw_allocated_description;
 	public static String SuppressWarningsSubProcessor_fix_suppress_token_label;
 	public static String SuppressWarningsSubProcessor_remove_annotation_label;

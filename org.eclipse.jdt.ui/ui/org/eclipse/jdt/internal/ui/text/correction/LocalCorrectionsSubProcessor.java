@@ -10,6 +10,7 @@
  *     Renaud Waldura &lt;renaud+eclipse@waldura.com&gt; - Access to static proposal
  *     Benjamin Muskalla <bmuskalla@innoopract.com> - [quick fix] Shouldn't offer "Add throws declaration" quickfix for overriding signature if result would conflict with overridden signature
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
+ *     Sandra Lions <sandra.lions-piron@oracle.com> - [quick fix] for qualified enum constants in switch-case labels - https://bugs.eclipse.org/bugs/90140
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -764,6 +765,28 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(proposal);
 		}
 
+	}
+
+	public static void addIllegalQualifiedEnumConstantLabelProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
+
+		ASTNode curr= coveringNode;
+		while (curr instanceof ParenthesizedExpression) {
+			curr= ((ParenthesizedExpression) curr).getExpression();
+		}
+
+		if (!(curr instanceof QualifiedName)) {
+			return;
+		}
+
+		SimpleName simpleName= ((QualifiedName) curr).getName();
+		final ASTRewrite rewrite= ASTRewrite.create(curr.getAST());
+		rewrite.replace(coveringNode, simpleName, null);
+
+		String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_replace_with_unqualified_enum_constant, BasicElementLabels.getJavaElementName(simpleName.getIdentifier()));
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.REPLACE_WITH_UNQUALIFIED_ENUM_CONSTANT, image);
+		proposals.add(proposal);
 	}
 
 	public static void addUnnecessaryThrownExceptionProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {

@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Billy Huang <billyhuang31@gmail.com> - [quick assist] concatenate/merge string literals - https://bugs.eclipse.org/77632
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
+ *     Sandra Lions <sandra.lions-piron@oracle.com> - [quick fix] for qualified enum constants in switch-case labels - https://bugs.eclipse.org/bugs/90140
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -180,6 +181,7 @@ public interface IProposalRelevance {
 	public static final int CORRECT_PACKAGE_DECLARATION= 5;
 	public static final int TYPE_ARGUMENTS_FROM_CONTEXT= 5;
 	public static final int REMOVE_REDUNDANT_NULLNESS_ANNOTATION= 5;
+	public static final int REPLACE_WITH_UNQUALIFIED_ENUM_CONSTANT= 5;
 
 	public static final int ADD_MISSING_TAG= 4;
 	public static final int INSERT_FALL_THROUGH= 4;
