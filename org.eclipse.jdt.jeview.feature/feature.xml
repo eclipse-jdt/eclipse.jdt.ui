@@ -6,7 +6,7 @@
       provider-name="Eclipse.org">
 
    <description>
-      JavaElement View for JDT UI 4.4 and later
+      JavaElement View for Eclipse 4.4 (Luna) and later (jdt.core 3.10)
    </description>
 
    <license url="%licenseURL">
@@ -18,8 +18,8 @@
    </url>
 
    <requires>
-      <import plugin="org.eclipse.jdt.core" version="3.9.0" match="compatible"/>
-      <import plugin="org.eclipse.jdt.ui" version="3.9.0" match="compatible"/>
+      <import plugin="org.eclipse.jdt.core" version="3.10.0" match="compatible"/>
+      <import plugin="org.eclipse.jdt.ui" version="3.10.0" match="compatible"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.core.resources"/>
