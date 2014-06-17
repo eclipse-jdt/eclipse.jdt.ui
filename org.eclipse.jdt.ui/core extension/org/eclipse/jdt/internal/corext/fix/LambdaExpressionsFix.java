@@ -170,7 +170,9 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		
 		@Override
 		public boolean visit(SuperFieldAccess node) {
-			throw new AbortSearchException();
+			if (node.getQualifier() == null)
+				throw new AbortSearchException();
+			return true; // references to outer scope are harmless
 		}
 		
 		@Override
