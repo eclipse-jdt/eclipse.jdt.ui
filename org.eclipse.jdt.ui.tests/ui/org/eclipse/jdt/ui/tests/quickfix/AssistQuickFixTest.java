@@ -10,6 +10,7 @@
  *     Sebastian Davids <sdavids@gmx.de> - testInvertEquals1-23
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *     Lukas Hanke <hanke@yatta.de> - Bug 430818 [1.8][quick fix] Quick fix for "for loop" is not shown for bare local variable/argument/field - https://bugs.eclipse.org/bugs/show_bug.cgi?id=430818
+ *     Sandra Lions <sandra.lions-piron@oracle.com> - [quick fix] Provide a quickfix to add 'finally' block - https://bugs.eclipse.org/bugs/show_bug.cgi?id=338785
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -60,6 +61,11 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
+	
+	/**
+	 * Bug 432539: [parser][ast rewrite] Fake 'finally' block from recovery causes problems in rewrite
+	 */
+	public static final boolean BUG_432539= true;
 
 	public AssistQuickFixTest(String name) {
 		super(name);
@@ -2322,7 +2328,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
 	}
 
-	public void testUnwrapTryStatement() throws Exception {
+	public void testUnwrapTryStatement1() throws Exception {
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -2362,6 +2368,70 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
+	}
+
+	public void testUnwrapTryStatement2() throws Exception {
+		if(BUG_432539){
+			return;
+		}
+
+		final IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            StringBuffer buf= new StringBuffer();\n");
+		buf.append("            buf.append(1);\n");
+		buf.append("            buf.append(2);\n");
+		buf.append("            buf.append(3);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		final String str= "try";
+		final AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+		final List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		final String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            StringBuffer buf= new StringBuffer();\n");
+		buf.append("            buf.append(1);\n");
+		buf.append("            buf.append(2);\n");
+		buf.append("            buf.append(3);\n");
+		buf.append("        } finally {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		final String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+		final String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        StringBuffer buf= new StringBuffer();\n");
+		buf.append("        buf.append(1);\n");
+		buf.append("        buf.append(2);\n");
+		buf.append("        buf.append(3);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		final String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
 	public void testUnwrapAnonymous() throws Exception {

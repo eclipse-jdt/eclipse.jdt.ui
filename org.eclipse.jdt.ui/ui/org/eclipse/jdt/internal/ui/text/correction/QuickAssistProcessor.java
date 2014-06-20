@@ -13,6 +13,7 @@
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *     Eugene Lucash <e.lucash@gmail.com> - [quick assist] Add key binding for Extract method Quick Assist - https://bugs.eclipse.org/424166
  *     Lukas Hanke <hanke@yatta.de> - Bug 430818 [1.8][quick fix] Quick fix for "for loop" is not shown for bare local variable/argument/field - https://bugs.eclipse.org/bugs/show_bug.cgi?id=430818
+ *     Sandra Lions <sandra.lions-piron@oracle.com> - [quick fix] Provide a quickfix to add 'finally' block - https://bugs.eclipse.org/bugs/show_bug.cgi?id=338785
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -1388,9 +1389,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean getAddFinallyProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+	public static boolean getAddFinallyProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
 		TryStatement tryStatement= ASTResolving.findParentTryStatement(node);
-		if (tryStatement == null || tryStatement.getFinally() != null) {
+		if (tryStatement == null || (tryStatement.getFinally() != null && tryStatement.getFinally().getLength() != 0)) {
 			return false;
 		}
 		Statement statement= ASTResolving.findParentStatement(node);
