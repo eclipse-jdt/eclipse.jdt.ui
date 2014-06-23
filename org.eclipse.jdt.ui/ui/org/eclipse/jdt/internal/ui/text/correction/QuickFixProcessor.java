@@ -15,7 +15,6 @@
  *								[quickfix] Update null annotation quick fixes for bug 388281 - https://bugs.eclipse.org/395555
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *     Sandra Lions <sandra.lions-piron@oracle.com> - [quick fix] for qualified enum constants in switch-case labels - https://bugs.eclipse.org/bugs/90140
- *     Sandra Lions <sandra.lions-piron@oracle.com> - [quick fix] Provide a quickfix to add 'finally' block - https://bugs.eclipse.org/bugs/show_bug.cgi?id=338785
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -276,7 +275,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ConstructorReferenceNotBelow18:
 			case IProblem.IntersectionCastNotBelow18:
 			case IProblem.InvalidUsageOfTypeAnnotations:
-			case IProblem.ParsingErrorInsertToComplete:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId);
@@ -766,9 +764,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.IllegalQualifiedEnumConstantLabel:
 				LocalCorrectionsSubProcessor.addIllegalQualifiedEnumConstantLabelProposal(context, problem, proposals);
-				break;
-			case IProblem.ParsingErrorInsertToComplete:
-				LocalCorrectionsSubProcessor.getAddFinallyProposals(context, problem, proposals);
 				break;
 			default:
 		}

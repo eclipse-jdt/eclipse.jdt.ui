@@ -11,7 +11,6 @@
  *     Benjamin Muskalla <bmuskalla@innoopract.com> - [quick fix] Shouldn't offer "Add throws declaration" quickfix for overriding signature if result would conflict with overridden signature
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *     Sandra Lions <sandra.lions-piron@oracle.com> - [quick fix] for qualified enum constants in switch-case labels - https://bugs.eclipse.org/bugs/90140
- *     Sandra Lions <sandra.lions-piron@oracle.com> - [quick fix] Provide a quickfix to add 'finally' block - https://bugs.eclipse.org/bugs/show_bug.cgi?id=338785
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -1885,10 +1884,4 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-	public static void getAddFinallyProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
-		ASTNode coveringNode= problem.getCoveringNode(context.getASTRoot());
-		if (coveringNode != null) {
-			QuickAssistProcessor.getAddFinallyProposals(context, coveringNode, proposals);
-		}
-	}
 }
