@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -10107,6 +10108,40 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		String expected1= buf.toString();
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	// regression test for https://bugs.eclipse.org/434188 - [quick fix] shows sign of quick fix, but says no suggestions available.
+	public void testNoFixFor_ParsingErrorInsertToComplete() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("class E {\n");
+		buf.append("    public class MyLayout {\n");
+		buf.append("        int indent;\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        new MyLayout().indent // no real quick fix\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("    private int[] fField;\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        fField[0] // no quick fix\n");
+		buf.append("    }\n");
+		buf.append("    void foo(Map<String, String> map) {\n");
+		buf.append("        map..keySet(); // no quick fix\n");
+		buf.append("    }\n");
+		buf.append("    void // no quick fix\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		List proposals= collectCorrections(cu, astRoot, 8, null);
+		assertNumberOfProposals(proposals, 0);
+		
+		for (IProblem problem : astRoot.getProblems()) {
+			assertEquals(IProblem.ParsingErrorInsertToComplete, problem.getID());
+		}
 	}
 
 }
