@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 219530 [jar application] add Jar-in-Jar ClassLoader option
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262766 [jar exporter] ANT file for Jar-in-Jar option contains relative path to jar-rsrc-loader.zip
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262763 [jar exporter] remove Built-By attribute in ANT files from Fat JAR Exporter
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 269201 [jar exporter] ant file produced by Export runnable jar contains absolut paths instead of relative to workspace
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
@@ -78,13 +79,14 @@ public class UnpackJarAntExporter extends FatJarAntExporter {
 			comment= document.createComment("ANT 1.7 is required                                        "); //$NON-NLS-1$
 			project.appendChild(comment);
 			document.appendChild(project);
+			addBaseDirProperties(document, project);
 
 			Element target= document.createElement("target"); //$NON-NLS-1$
 			target.setAttribute("name", "create_run_jar"); //$NON-NLS-1$ //$NON-NLS-2$
 			project.appendChild(target);
 
 			Element jar= document.createElement("jar"); //$NON-NLS-1$
-			jar.setAttribute("destfile", absJarname); //$NON-NLS-1$s
+			jar.setAttribute("destfile", substituteBaseDirs(absJarname)); //$NON-NLS-1$s
 			target.appendChild(jar);
 
 			Element manifest= document.createElement("manifest"); //$NON-NLS-1$
@@ -114,18 +116,18 @@ public class UnpackJarAntExporter extends FatJarAntExporter {
 				SourceInfo sourceInfo= sourceInfos[i];
 				if (!sourceInfo.isJar) {
 					Element fileset= document.createElement("fileset"); //$NON-NLS-1$
-					fileset.setAttribute("dir", sourceInfo.absPath); //$NON-NLS-1$
+					fileset.setAttribute("dir", substituteBaseDirs(sourceInfo.absPath)); //$NON-NLS-1$
 					jar.appendChild(fileset);
 				}
 			}
 
 
 			Element delete= document.createElement("delete"); //$NON-NLS-1$
-			delete.setAttribute("dir", absSubfolder); //$NON-NLS-1$s
+			delete.setAttribute("dir", substituteBaseDirs(absSubfolder)); //$NON-NLS-1$s
 			target.appendChild(delete);
 
 			Element mkdir= document.createElement("mkdir"); //$NON-NLS-1$
-			mkdir.setAttribute("dir", absSubfolder); //$NON-NLS-1$s
+			mkdir.setAttribute("dir", substituteBaseDirs(absSubfolder)); //$NON-NLS-1$s
 			target.appendChild(mkdir);
 
 			// add libraries
@@ -133,8 +135,8 @@ public class UnpackJarAntExporter extends FatJarAntExporter {
 				SourceInfo sourceInfo= sourceInfos[i];
 				if (sourceInfo.isJar) {
 					Element copy= document.createElement("copy"); //$NON-NLS-1$
-					copy.setAttribute("file", sourceInfo.absPath); //$NON-NLS-1$
-					copy.setAttribute("todir", absSubfolder); //$NON-NLS-1$
+					copy.setAttribute("file", substituteBaseDirs(sourceInfo.absPath)); //$NON-NLS-1$
+					copy.setAttribute("todir", substituteBaseDirs(absSubfolder)); //$NON-NLS-1$
 					target.appendChild(copy);
 				}
 			}

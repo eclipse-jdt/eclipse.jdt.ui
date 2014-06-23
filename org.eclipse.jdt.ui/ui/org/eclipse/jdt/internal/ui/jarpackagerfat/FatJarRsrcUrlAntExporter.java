@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262766 [jar exporter] ANT file for Jar-in-Jar option contains relative path to jar-rsrc-loader.zip
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262763 [jar exporter] remove Built-By attribute in ANT files from Fat JAR Exporter
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 262748 [jar exporter] extract constants for string literals in JarRsrcLoader et al.
+ *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 269201 [jar exporter] ant file produced by Export runnable jar contains absolut paths instead of relative to workspace
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
@@ -94,18 +95,20 @@ public class FatJarRsrcUrlAntExporter extends FatJarAntExporter {
 		Element project= document.createElement("project"); //$NON-NLS-1$
 		project.setAttribute("name", "Create Runnable Jar for Project " + projectName + " with Jar-in-Jar Loader"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		project.setAttribute("default", "create_run_jar"); //$NON-NLS-1$ //$NON-NLS-2$
-		comment= document.createComment("this file was created by Eclipse Runnable JAR Export Wizard"); //$NON-NLS-1$
+		comment= document.createComment("this file was created by Eclipse Runnable JAR file Export Wizard"); //$NON-NLS-1$
 		project.appendChild(comment);
-		comment= document.createComment("ANT 1.7 is required                                        "); //$NON-NLS-1$
+		comment= document.createComment("ANT 1.7 is required"); //$NON-NLS-1$
 		project.appendChild(comment);
 		document.appendChild(project);
+
+		addBaseDirProperties(document, project);
 
 		Element target= document.createElement("target"); //$NON-NLS-1$
 		target.setAttribute("name", "create_run_jar"); //$NON-NLS-1$ //$NON-NLS-2$
 		project.appendChild(target);
 
 		Element jar= document.createElement("jar"); //$NON-NLS-1$
-		jar.setAttribute("destfile", absJarname); //$NON-NLS-1$s 
+		jar.setAttribute("destfile", substituteBaseDirs(absJarname)); //$NON-NLS-1$s 
 		target.appendChild(jar);
 
 		Element manifest= document.createElement("manifest"); //$NON-NLS-1$
@@ -149,12 +152,12 @@ public class FatJarRsrcUrlAntExporter extends FatJarAntExporter {
 			if (sourceInfo.isJar) {
 				File jarFile= new File(sourceInfo.absPath);
 				Element fileset= document.createElement("zipfileset"); //$NON-NLS-1$
-				fileset.setAttribute("dir", jarFile.getParent()); //$NON-NLS-1$
+				fileset.setAttribute("dir", substituteBaseDirs(jarFile.getParent())); //$NON-NLS-1$
 				fileset.setAttribute("includes", jarFile.getName()); //$NON-NLS-1$ 
 				jar.appendChild(fileset);
 			} else {
 				Element fileset= document.createElement("fileset"); //$NON-NLS-1$
-				fileset.setAttribute("dir", sourceInfo.absPath); //$NON-NLS-1$
+				fileset.setAttribute("dir", substituteBaseDirs(sourceInfo.absPath)); //$NON-NLS-1$
 				jar.appendChild(fileset);
 			}
 		}
