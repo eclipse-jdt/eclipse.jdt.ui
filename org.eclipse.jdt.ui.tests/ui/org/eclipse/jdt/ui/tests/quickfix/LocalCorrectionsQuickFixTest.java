@@ -10128,6 +10128,10 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    public void bar() {\n");
 		buf.append("        fField[0] // no quick fix\n");
 		buf.append("    }\n");
+		buf.append("    public void baz() {\n");
+		buf.append("        try { // no quick fix\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
 		buf.append("    void foo(Map<String, String> map) {\n");
 		buf.append("        map..keySet(); // no quick fix\n");
 		buf.append("    }\n");
@@ -10136,7 +10140,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		List proposals= collectCorrections(cu, astRoot, 8, null);
+		List proposals= collectAllCorrections(cu, astRoot, 9);
 		assertNumberOfProposals(proposals, 0);
 		
 		for (IProblem problem : astRoot.getProblems()) {

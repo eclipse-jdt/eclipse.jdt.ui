@@ -215,6 +215,14 @@ public class QuickFixTest extends TestCase {
 		return collectCorrections(cu, astRoot, 1, null);
 	}
 
+	/**
+	 * Bad design: only collects corrections for the <b>first</b> problem!
+	 * @param cu
+	 * @param astRoot
+	 * @param nProblems
+	 * @return
+	 * @throws CoreException
+	 */
 	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) throws CoreException {
 		return collectCorrections(cu, astRoot, nProblems, null);
 	}
@@ -223,6 +231,15 @@ public class QuickFixTest extends TestCase {
 		return collectCorrections(cu, astRoot, nProblems, problem, null);
 	}
 
+	/**
+	 * Bad design: only collects corrections for the <b>first</b> problem!
+	 * @param cu
+	 * @param astRoot
+	 * @param nProblems
+	 * @param context
+	 * @return
+	 * @throws CoreException
+	 */
 	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, AssistContext context) throws CoreException {
 		return collectCorrections(cu, astRoot, nProblems, 0, context);
 	}
@@ -233,6 +250,18 @@ public class QuickFixTest extends TestCase {
 
 		return collectCorrections(cu, problems[problem], context);
 	}
+
+	protected static final ArrayList collectAllCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) throws CoreException {
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(nProblems, problems);
+		
+		ArrayList<IProblem> corrections= new ArrayList<IProblem>();
+		for (int i= 0; i < nProblems; i++) {
+			corrections.addAll(collectCorrections(cu, problems[i], null));
+		}
+		return corrections;
+	}
+
 
 	protected static void assertNumberOfProblems(int nProblems, IProblem[] problems) {
 		if (problems.length != nProblems) {
@@ -247,6 +276,13 @@ public class QuickFixTest extends TestCase {
 		}
 	}
 
+	/**
+	 * Bad design: only collects corrections for the <b>first</b> problem!
+	 * @param cu
+	 * @param nProblems
+	 * @return
+	 * @throws CoreException
+	 */
 	protected static final ArrayList collectCorrections2(ICompilationUnit cu, int nProblems) throws CoreException {
 
 		final ArrayList problemsList= new ArrayList();
