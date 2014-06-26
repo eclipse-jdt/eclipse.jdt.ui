@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -130,7 +130,11 @@ public class ChkpiiTests extends TestCase {
 		assertTrue("Could not run chkpii test on " + type + " files. See console for details.", isExecuted); //$NON-NLS-1$
 		StringBuffer buf= new StringBuffer();
 		boolean isValid= checkLogFile(type, buf);
-		assertTrue(buf + "See " + type.getOutputFile() + " for details.", isValid); //$NON-NLS-1$ //$NON-NLS-2$
+		String outputFile= type.getOutputFile();
+		if (!isValid) {
+			System.out.println(outputFile);
+		}
+		assertTrue(buf + "See " + outputFile + " for details.", isValid); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private boolean executeChkpiiProcess(FileCategory type) {
@@ -216,7 +220,11 @@ public class ChkpiiTests extends TestCase {
 	 * @return String
 	 */
 	private String getExcludeFile() {
-		return toLocation(getClass().getResource("ignoreFiles.txt"));
+		URL ignoreFiles= getClass().getResource("ignoreFiles.local.txt");
+		if (ignoreFiles == null) {
+			ignoreFiles= getClass().getResource("ignoreFiles.txt");
+		}
+		return toLocation(ignoreFiles);
 	}
 
 	/**
