@@ -29,6 +29,7 @@ import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -47,6 +48,7 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 
 public class LocalCorrectionsQuickFixTest extends QuickFixTest {
@@ -10146,6 +10148,8 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		for (IProblem problem : astRoot.getProblems()) {
 			assertEquals(IProblem.ParsingErrorInsertToComplete, problem.getID());
 		}
+		assertFalse("IProblem.ParsingErrorInsertToComplete is very general and should not trigger the quick fix lightbulb everywhere",
+				JavaCorrectionProcessor.hasCorrections(cu, IProblem.ParsingErrorInsertToComplete, IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER));
 	}
 
 }
