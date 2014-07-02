@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Jerome Cambon <jerome.cambon@oracle.com> - [1.8][clean up][quick assist] Convert lambda to anonymous must qualify references to 'this'/'super' - https://bugs.eclipse.org/430573
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -1299,6 +1300,162 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    };\n");
 		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertToAnonymousClassCreation8() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.IntSupplier;\n");
+		buf.append("public class B extends C {\n");
+		buf.append("    private int var;\n");
+		buf.append("    B() {\n");
+		buf.append("        IntSupplier i = () -> {\n");
+		buf.append("            int j = this.var;\n");
+		buf.append("            super.o();\n");
+		buf.append("            int k = super.varC;\n");
+		buf.append("            return this.m();\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public int m() {\n");
+		buf.append("        return 7;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class C {\n");
+		buf.append("    int varC;\n");
+		buf.append("    public void o() {}\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("->");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.IntSupplier;\n");
+		buf.append("public class B extends C {\n");
+		buf.append("    private int var;\n");
+		buf.append("    B() {\n");
+		buf.append("        IntSupplier i = new IntSupplier() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public int getAsInt() {\n");
+		buf.append("                int j = B.this.var;\n");
+		buf.append("                B.super.o();\n");
+		buf.append("                int k = B.super.varC;\n");
+		buf.append("                return B.this.m();\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public int m() {\n");
+		buf.append("        return 7;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class C {\n");
+		buf.append("    int varC;\n");
+		buf.append("    public void o() {}\n");
+		buf.append("}\n");
+
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertToAnonymousClassCreation9() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.IntSupplier;\n");
+		buf.append("public class D {\n");
+		buf.append("    D() {\n");
+		buf.append("        F<Object> f = new F<Object>() {\n");
+		buf.append("            int x= 10;\n");
+		buf.append("            @Override\n");
+		buf.append("            public void run() {\n");
+		buf.append("                IntSupplier i = () -> {\n");
+		buf.append("                    class CX {\n");
+		buf.append("                        int n=10;\n");
+		buf.append("                        {\n");
+		buf.append("                            this.n= 0;\n");
+		buf.append("                        }\n");
+		buf.append("                    }\n");
+		buf.append("                    D.this.n();\n");
+		buf.append("                    return this.x;\n");
+		buf.append("                };\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("    public int n() {\n");
+		buf.append("        return 7;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    @FunctionalInterface\n");
+		buf.append("    public interface F<T> {\n");
+		buf.append("        void run();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("D.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("->");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.IntSupplier;\n");
+		buf.append("\n");
+		buf.append("import test1.D.F;\n");
+		buf.append("public class D {\n");
+		buf.append("    D() {\n");
+		buf.append("        F<Object> f = new F<Object>() {\n");
+		buf.append("            int x= 10;\n");
+		buf.append("            @Override\n");
+		buf.append("            public void run() {\n");
+		buf.append("                IntSupplier i = new IntSupplier() {\n");
+		buf.append("                    @Override\n");
+		buf.append("                    public int getAsInt() {\n");
+		buf.append("                        class CX {\n");
+		buf.append("                            int n=10;\n");
+		buf.append("                            {\n");
+		buf.append("                                this.n= 0;\n");
+		buf.append("                            }\n");
+		buf.append("                        }\n");
+		buf.append("                        D.this.n();\n");
+		buf.append("                        return F.this.x;\n");
+		buf.append("                    }\n");
+		buf.append("                };\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("    public int n() {\n");
+		buf.append("        return 7;\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    @FunctionalInterface\n");
+		buf.append("    public interface F<T> {\n");
+		buf.append("        void run();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+
 		String expected1= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });

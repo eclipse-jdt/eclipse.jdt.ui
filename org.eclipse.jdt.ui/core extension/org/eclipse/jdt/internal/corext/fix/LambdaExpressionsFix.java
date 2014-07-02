@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Jerome Cambon <jerome.cambon@oracle.com> - [1.8][clean up][quick assist] Convert lambda to anonymous must qualify references to 'this'/'super' - https://bugs.eclipse.org/430573
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -39,6 +40,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -69,6 +71,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
@@ -185,6 +188,62 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 	
+	private static final class SuperThisQualifier extends HierarchicalASTVisitor {
+
+		private ITypeBinding fQualifierTypeBinding;
+		private ImportRewrite fImportRewrite;
+		private ASTRewrite fASTRewrite;
+		private TextEditGroup fGroup;
+
+		public static void perform(LambdaExpression lambdaExpression, ITypeBinding parentTypeBinding, CompilationUnitRewrite cuRewrite, TextEditGroup group) {
+			SuperThisQualifier qualifier= new SuperThisQualifier();
+			qualifier.fQualifierTypeBinding= parentTypeBinding;
+			qualifier.fImportRewrite= cuRewrite.getImportRewrite();
+			qualifier.fASTRewrite= cuRewrite.getASTRewrite();
+			qualifier.fGroup= group;
+			lambdaExpression.accept(qualifier);
+		}
+
+		public Name getQualifierTypeName() {
+			String typeName= fImportRewrite.addImport(fQualifierTypeBinding);
+			return fASTRewrite.getAST().newName(typeName);
+		}
+
+		@Override
+		public boolean visit(AnonymousClassDeclaration node) {
+			return false;
+		}
+
+		@Override
+		public boolean visit(BodyDeclaration node) {
+			return false;
+		}
+
+		@Override
+		public boolean visit(SuperFieldAccess node) {
+			if (node.getQualifier() == null) {
+				fASTRewrite.set(node, SuperFieldAccess.QUALIFIER_PROPERTY, getQualifierTypeName(), fGroup);
+			}
+			return true;
+		}
+
+		@Override
+		public boolean visit(SuperMethodInvocation node) {
+			if (node.getQualifier() == null) {
+				fASTRewrite.set(node, SuperMethodInvocation.QUALIFIER_PROPERTY, getQualifierTypeName(), fGroup);
+			}
+			return true;
+		}
+
+		@Override
+		public boolean visit(ThisExpression node) {
+			if (node.getQualifier() == null) {
+				fASTRewrite.set(node, ThisExpression.QUALIFIER_PROPERTY, getQualifierTypeName(), fGroup);
+			}
+			return true;
+		}
+	}
+
 	private static class CreateLambdaOperation extends CompilationUnitRewriteOperation {
 
 		private final List<ClassInstanceCreation> fExpressions;
@@ -397,6 +456,21 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				MethodDeclaration methodDeclaration= StubUtility2.createImplementationStub(cuRewrite.getCu(), rewrite, importRewrite, importContext,
 						methodBinding, parameterNames, lambdaTypeBinding.getName(), settings, false);
 
+				// Qualify reference to this or super
+				ASTNode parentType= ASTResolving.findParentType(lambdaExpression);
+				ITypeBinding parentTypeBinding= null;
+				if (parentType instanceof AbstractTypeDeclaration) {
+					parentTypeBinding= ((AbstractTypeDeclaration) parentType).resolveBinding();
+				} else if (parentType instanceof AnonymousClassDeclaration) {
+					parentTypeBinding= ((AnonymousClassDeclaration) parentType).resolveBinding();
+				}
+				if (parentTypeBinding != null) {
+					parentTypeBinding= Bindings.normalizeTypeBinding(parentTypeBinding);
+					if (parentTypeBinding != null) {
+						SuperThisQualifier.perform(lambdaExpression, parentTypeBinding.getTypeDeclaration(), cuRewrite, group);
+					}
+				}
+
 				Block block;
 				ASTNode lambdaBody= lambdaExpression.getBody();
 				if (lambdaBody instanceof Block) {
@@ -549,7 +623,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			return methodBinding.getReturnType().getFunctionalInterfaceMethod() != null;
 		}
 		
-		//TODO: should also check whether variable is of a functional type 
+		//TODO: should also check whether variable is of a functional type
 		return locationInParent == SingleVariableDeclaration.INITIALIZER_PROPERTY
 				|| locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY
 				|| locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY
