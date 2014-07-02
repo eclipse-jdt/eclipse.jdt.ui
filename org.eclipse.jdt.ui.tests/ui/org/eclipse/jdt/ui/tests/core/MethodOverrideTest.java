@@ -226,11 +226,13 @@ public class MethodOverrideTest extends CoreTests {
 	public void testOverrideMethodTypeParams1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
+		// ATTENTION: Method names in this test must be in alphabetic order!
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class A<S> {\n");
 		buf.append("    public A() {}\n");
+		buf.append("    public <T extends Enum<T>> T getEnum(String name, Class<T> clazz) { return null; }\n");
 		buf.append("    public <X> void tp1_foo1(S s, X x) {}\n");
 		buf.append("    public <X, Y> void tp1_foo2(S s, X x, Y y) {}\n");
 		buf.append("    public <X, Y> void tp1_foo3(X x, Y y) {}\n");
@@ -244,6 +246,7 @@ public class MethodOverrideTest extends CoreTests {
 		buf.append("}\n");
 		buf.append("class B extends A<String> {\n");
 		buf.append("    public B() {}\n");
+		buf.append("    @Override public <E extends Enum<E>> E getEnum(String name, Class<E> clazz) { return null; }\n");
 		buf.append("    @Override public <X> void tp1_foo1(String s, X x) {}\n");
 		buf.append("    @Override public void tp1_foo2(String s, Object x, Object y) {}\n");
 		buf.append("    @Override public <V, W> void tp1_foo3(V x, W y) {}\n");
@@ -349,7 +352,7 @@ public class MethodOverrideTest extends CoreTests {
 
 					System.out.println("IMethodBinding.overrides(): " +  String.valueOf(bindingOverrides));
 					System.out.println("IMethodBinding.isSubsignature(): " +  String.valueOf(bindingIsSubsignature));
-					//System.out.println("MethodOverrideTester.isSubsignature(): " +  String.valueOf(testerOverrides));
+					System.out.println("MethodOverrideTester.isSubsignature(): " +  String.valueOf(testerOverrides));
 					System.out.println("Bindings.isSubsignature(): " +  String.valueOf(uiBindingsIsSubsignature));
 					System.out.println("Override Annotation: " +  String.valueOf(overrideAnnotationResult));
 					System.out.println();

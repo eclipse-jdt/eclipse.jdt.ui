@@ -464,7 +464,7 @@ public class MethodOverrideTester {
 	private String getTypeParameterErasure(ITypeParameter typeParameter, IType context) throws JavaModelException {
 		String[] bounds= typeParameter.getBounds();
 		if (bounds.length > 0) {
-			return getSubstitutedTypeName(Signature.createTypeSignature(bounds[0], false), context);
+			return getErasedTypeName(Signature.createTypeSignature(bounds[0], false), context);
 		}
 		return "Object"; //$NON-NLS-1$
 	}
