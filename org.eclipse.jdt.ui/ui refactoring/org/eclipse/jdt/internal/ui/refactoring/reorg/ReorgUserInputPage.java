@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Dirk Olmes <dirk@xanthippe.ping.de> - [refactoring] Allow expanding/collapsing folders on the ReorgUserInputPage - https://bugs.eclipse.org/bugs/show_bug.cgi?id=430750
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
@@ -161,17 +162,17 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		return fViewer;
 	}
 
-	private class TreeViewerDoubleClickListener implements IDoubleClickListener {
+	private final class TreeViewerDoubleClickListener implements IDoubleClickListener {
 		public void doubleClick(DoubleClickEvent event) {
-			IStructuredSelection selection = (IStructuredSelection)event.getSelection();
-			Object element = selection.getFirstElement();
+			IStructuredSelection selection= (IStructuredSelection) event.getSelection();
+			Object element= selection.getFirstElement();
 			if (fViewer.isExpandable(element)) {
 				if (fViewer.getExpandedState(element)) {
 					fViewer.collapseToLevel(element, 1);
 				}
 				else {
-					ITreeContentProvider contentProvider = (ITreeContentProvider)fViewer.getContentProvider();
-					Object[] children = contentProvider.getChildren(element);
+					ITreeContentProvider contentProvider= (ITreeContentProvider) fViewer.getContentProvider();
+					Object[] children= contentProvider.getChildren(element);
 					if (children.length > 0) {
 						fViewer.expandToLevel(element, 1);
 					}
