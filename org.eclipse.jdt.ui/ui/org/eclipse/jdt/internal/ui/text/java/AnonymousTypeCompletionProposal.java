@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,6 +71,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.OverrideMethodDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
+import org.eclipse.jdt.internal.ui.text.Symbols;
 
 
 public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal implements ICompletionProposalExtension4 {
@@ -82,7 +84,9 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	private int fContextInformationPosition;
 
 	private ImportRewrite fImportRewrite;
-
+	
+	private final String SEMICOLON= ";"; //$NON-NLS-1$
+	private final String ESCAPE_CHAR= "\r"; //$NON-NLS-1$
 
 	public AnonymousTypeCompletionProposal(IJavaProject jproject, ICompilationUnit cu, JavaContentAssistInvocationContext invocationContext, int start, int length, String constructorCompletion, StyledString displayName, String declarationSignature, IType superType, int relevance) {
 		super(constructorCompletion, cu, start, length, null, displayName, relevance, null, invocationContext);
@@ -371,7 +375,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		if (newBody == null)
 			return false;
 
-		CompletionProposal coreProposal= ((MemberProposalInfo)getProposalInfo()).fProposal;
+		CompletionProposal coreProposal= ((MemberProposalInfo) getProposalInfo()).fProposal;
 		boolean isAnonymousConstructorInvoc= coreProposal.getKind() == CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION;
 
 		boolean replacementStringEndsWithParentheses= isAnonymousConstructorInvoc || getReplacementString().endsWith(")"); //$NON-NLS-1$
@@ -392,21 +396,31 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, DefaultCodeFormatterConstants.TRUE);
 		String replacementString= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, buf.toString(), 0, lineDelim, options);
 
-		int lineEndOffset= lineInfo.getOffset() + lineInfo.getLength();
+		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
+		IRegion region= scanner.findSurroundingBlock(lineInfo.getOffset());
+		int surroundingBlockBound= region.getOffset() + region.getLength();
 
 		int p= offset;
 		char ch= document.getChar(p);
-		while (p < lineEndOffset) {
+		while (p < surroundingBlockBound) {
 			if (ch == '(' || ch == ')' || ch == ';' || ch == ',')
 				break;
 			ch= document.getChar(++p);
 		}
 
-		if (ch != ';' && ch != ',' && ch != ')')
+		String closingString= getMatchingClosingSymbols(document, offset, lineInfo.getOffset(), lineInfo.getLength());
+		if (closingString.length() != 0 && !ESCAPE_CHAR.equals(closingString)) {
+			if (ch != ';' && ch != ',' && ch != ')') {
+				replacementString= replacementString + closingString + ';';
+			} else {
+				replacementString= replacementString + closingString;
+			}
+		}
+		if (closingString.length() == 0 && ch != ';' && ch != ',' && ch != ')' && ch != '}')
 			replacementString= replacementString + ';';
 
 		replacementString= Strings.changeIndent(replacementString, 0, project, CodeFormatterUtil.createIndentString(indent, project), lineDelim);
-		
+
 		int beginIndex= replacementString.indexOf('(');
 		if (!isAnonymousConstructorInvoc)
 			beginIndex++;
@@ -417,18 +431,12 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			// Keep existing code
 			int endPos= pos;
 			ch= document.getChar(endPos);
+			int lineEndOffset= lineInfo.getOffset() + lineInfo.getLength();
 			while (endPos < lineEndOffset && ch != '(' && ch != ')' && ch != ';' && ch != ',' && !Character.isWhitespace(ch))
 				ch= document.getChar(++endPos);
 
-			int keepLength= endPos - pos;
-			if (keepLength > 0) {
-				String keepStr= document.get(pos, keepLength);
-				replacementString= replacementString + keepStr;
-				setCursorPosition(replacementString.length() - keepLength);
-			}
-		} else
-			setCursorPosition(replacementString.length());
-		
+		}
+		setCursorPosition(replacementString.length());
 		setReplacementString(replacementString);
 
 		if (pos < document.getLength() && document.getChar(pos) == ')') {
@@ -439,6 +447,77 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 				setReplacementLength(currentLength + pos - offset + 1);
 		}
 		return false;
+	}
+
+	private String getMatchingClosingSymbols(IDocument doc, int currentOffset, int lineOffset, int bound) throws BadLocationException {
+		String lineUnderModification= doc.get(lineOffset, bound);
+		char[] charArray= lineUnderModification.toCharArray();
+		String returnChar= ""; //$NON-NLS-1$
+		JavaHeuristicScanner scanner= new JavaHeuristicScanner(doc);
+		IRegion region= scanner.findSurroundingBlock(lineOffset);
+		int surroundingBlockBound= region.getOffset() + region.getLength();
+
+		for (int i= 0; i < charArray.length; i++) {
+			char c= charArray[i];
+			if (c == '(' || c == '{') {
+				char closingChar= getClosingChar(c);
+				if (c == '(' && lineOffset + i + 1 == currentOffset)
+					continue;
+				int scanForward= scanner.findClosingPeer(lineOffset + i + 1, surroundingBlockBound, c, closingChar);
+				if (scanForward == -1) {
+					returnChar= closingChar + returnChar;
+				}
+			}
+		}
+
+		int nextToken1= scanner.nextToken(currentOffset, surroundingBlockBound);
+		if (nextToken1 != -1) {
+			int position= scanner.getPosition();
+			// make sure we do not set the bound more than the document length
+			if (surroundingBlockBound + 1 < doc.getLength())
+				surroundingBlockBound++;
+			int nextToken2= scanner.nextToken(position, surroundingBlockBound);
+			if (nextToken2 != -1) {
+				//  e.g. foo(new Run|, null) or new Run|; or Runnable run= new Runnable(|); or Runnable jobs[] = {new Run|};
+				if (Symbols.TokenCOMMA == nextToken1 || Symbols.TokenSEMICOLON == nextToken1 ||
+						((Symbols.TokenRBRACE == nextToken1 || Symbols.TokenRPAREN == nextToken1) && Symbols.TokenSEMICOLON == nextToken2) ||
+						(Symbols.TokenRBRACE == nextToken1 && Symbols.TokenRPAREN == nextToken2)) {
+					// No need to append semicolon as the code already has a ';' or ','
+					return returnChar.length() != 0 ? returnChar : ESCAPE_CHAR;
+				}
+
+				if (Symbols.TokenRBRACE == nextToken1 && Symbols.TokenRPAREN == nextToken2) {
+					return ESCAPE_CHAR;
+				}
+
+				// e.g. Runnable jobs[] = {new Runn}
+				// We have to append semicolon, but not as part of the replacement string.
+				if (Symbols.TokenRBRACE == nextToken1) {
+					doc.replace(position, 0, SEMICOLON);
+					return ESCAPE_CHAR;
+				}
+			}
+
+			// We have to append semicolon, but not as part of the replacement string.
+			if (Symbols.TokenRPAREN == nextToken1 && !lineUnderModification.trim().endsWith(SEMICOLON)) {
+				doc.replace(position, 0, SEMICOLON);
+				return ESCAPE_CHAR;
+			}
+		}
+		return returnChar;
+	}
+
+	private char getClosingChar(char c) {
+		switch (c) {
+			case '(':
+				return ')';
+
+			case '{':
+				return '}';
+
+			default:
+				return '\0';
+		}
 	}
 
 	/*

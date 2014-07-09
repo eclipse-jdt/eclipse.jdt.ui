@@ -199,6 +199,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
 
 		codeComplete(cu, offset, collector);
 
@@ -489,6 +490,612 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	public void testAnonymousTypeCompletion7() throws Exception {
+		// bug 333428#c0 => button.addSelectionListener(new SelectionL
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("    	foo(new Runn\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		String str= "foo(new Runn";
+
+		int offset= contents.indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("    	foo(new Runnable() {\n");
+		buf.append("            \n");
+		buf.append("            public void run() {\n");
+		buf.append("                //TODO\n");
+		buf.append("                \n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testAnonymousTypeCompletion8() throws Exception {
+		// bug 333428#c0 => button.addSelectionListener(new SelectionL)
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("    	foo(new Runn)\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		String str= "foo(new Runn";
+
+		int offset= contents.indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("    	foo(new Runnable() {\n");
+		buf.append("            \n");
+		buf.append("            public void run() {\n");
+		buf.append("                //TODO\n");
+		buf.append("                \n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+
+	public void testAnonymousTypeCompletion9() throws Exception {
+		// bug 333428#c0 => button.addSelectionListener(new SelectionL);
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("    	foo(new Runn);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		String str= "foo(new Runn";
+
+		int offset= contents.indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("    	foo(new Runnable() {\n");
+		buf.append("            \n");
+		buf.append("            public void run() {\n");
+		buf.append("                //TODO\n");
+		buf.append("                \n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testAnonymousTypeCompletion10() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    private Runnable jobs[] = {\n");
+		buf.append("    new Runn\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		String str= "new Runn";
+
+		int offset= contents.indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    private Runnable jobs[] = {\n");
+		buf.append("    new Runnable() {\n");
+		buf.append("        \n");
+		buf.append("        public void run() {\n");
+		buf.append("            //TODO\n");
+		buf.append("            \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	
+
+	public void testAnonymousTypeCompletion11() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    private Runnable jobs[] = {new Runn}\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		String str= "new Runn";
+
+		int offset= contents.indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    private Runnable jobs[] = {new Runnable() {\n");
+		buf.append("        \n");
+		buf.append("        public void run() {\n");
+		buf.append("            //TODO\n");
+		buf.append("            \n");
+		buf.append("        }\n");
+		buf.append("    }};\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testAnonymousTypeCompletion12() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("    	foo(new Runn)\n");
+		buf.append("    	System.out.println();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		String str= "foo(new Runn";
+
+		int offset= contents.indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("    	foo(new Runnable() {\n");
+		buf.append("            \n");
+		buf.append("            public void run() {\n");
+		buf.append("                //TODO\n");
+		buf.append("                \n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("    	System.out.println();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testAnonymousTypeCompletion13() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+	
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    private void foo() {\n");
+		buf.append("        bar(new Runnable());\n");
+		buf.append("    }\n");
+		buf.append("    void bar(Runnable rs) {}\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+	
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+	
+		String str= "bar(new Runnable(";
+	
+		int offset= contents.indexOf(str) + str.length();
+		System.out.println(contents.charAt(offset));
+	
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+	
+		codeComplete(cu, offset, collector);
+	
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+	
+		assertNumberOf("proposals", proposals.length, 1);
+	
+		IDocument doc= new Document(contents);
+	
+		proposals[0].apply(doc);
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    private void foo() {\n");
+		buf.append("        bar(new Runnable() {\n");
+		buf.append("            \n");
+		buf.append("            public void run() {\n");
+		buf.append("                //TODO\n");
+		buf.append("                \n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("    void bar(Runnable rs) {}\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+	
+	public void testAnonymousTypeCompletion14() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+	
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    private void foo() {\n");
+		buf.append("        bar(new Runnable[] {\n");
+		buf.append("                new Runnable(\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void bar(Runnable[] rs) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+	
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+	
+		String str= "  new Runnable(";
+	
+		int offset= contents.indexOf(str) + str.length();
+		System.out.println(contents.charAt(offset));
+	
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+	
+		codeComplete(cu, offset, collector);
+	
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+	
+		assertNumberOf("proposals", proposals.length, 1);
+	
+		IDocument doc= new Document(contents);
+	
+		proposals[0].apply(doc);
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    private void foo() {\n");
+		buf.append("        bar(new Runnable[] {\n");
+		buf.append("                new Runnable() {\n");
+		buf.append("                    \n");
+		buf.append("                    public void run() {\n");
+		buf.append("                        //TODO\n");
+		buf.append("                        \n");
+		buf.append("                    }\n");
+		buf.append("                }\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    void bar(Runnable[] rs) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+	
+	public void testAnonymousTypeCompletion15() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+	
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        foo(new Runna\n");
+		buf.append("                );\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+	
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+	
+		String str= "foo(new Runna";
+	
+		int offset= contents.indexOf(str) + str.length();
+		System.out.println(contents.charAt(offset));
+	
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+	
+		codeComplete(cu, offset, collector);
+	
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+	
+		assertNumberOf("proposals", proposals.length, 1);
+	
+		IDocument doc= new Document(contents);
+	
+		proposals[0].apply(doc);
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        foo(new Runnable() {\n");
+		buf.append("            \n");
+		buf.append("            public void run() {\n");
+		buf.append("                //TODO\n");
+		buf.append("                \n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("                );\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+	
+	public void testAnonymousTypeCompletion16() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+	
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        foo(new Runna\n");
+		buf.append("                )\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+	
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+	
+		String str= "foo(new Runna";
+	
+		int offset= contents.indexOf(str) + str.length();
+		System.out.println(contents.charAt(offset));
+	
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+	
+		codeComplete(cu, offset, collector);
+	
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+	
+		assertNumberOf("proposals", proposals.length, 1);
+	
+		IDocument doc= new Document(contents);
+	
+		proposals[0].apply(doc);
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        foo(new Runnable() {\n");
+		buf.append("            \n");
+		buf.append("            public void run() {\n");
+		buf.append("                //TODO\n");
+		buf.append("                \n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("                );\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+	
+	public void testAnonymousTypeCompletion17() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+	
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        foo(new Runna\n");
+		buf.append("                ;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+	
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+	
+		String str= "foo(new Runna";
+	
+		int offset= contents.indexOf(str) + str.length();
+		System.out.println(contents.charAt(offset));
+	
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		collector.setAllowsRequiredProposals(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF, true);
+	
+		codeComplete(cu, offset, collector);
+	
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+	
+		assertNumberOf("proposals", proposals.length, 1);
+	
+		IDocument doc= new Document(contents);
+	
+		proposals[0].apply(doc);
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo(Runnable r) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        foo(new Runnable() {\n");
+		buf.append("            \n");
+		buf.append("            public void run() {\n");
+		buf.append("                //TODO\n");
+		buf.append("                \n");
+		buf.append("            }\n");
+		buf.append("        })\n");
+		buf.append("                ;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
 	public void testAnonymousTypeCompletionBug280801() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -627,7 +1234,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("                //TODO\n");
 		buf.append("                \n");
 		buf.append("            }\n");
-		buf.append("        })\n");
+		buf.append("        });\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEquals("", buf.toString(), doc.get());
