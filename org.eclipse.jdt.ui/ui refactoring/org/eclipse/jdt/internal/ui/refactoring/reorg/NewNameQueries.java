@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,27 +82,27 @@ public class NewNameQueries implements INewNameQueries {
 	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String initialSuggestedName) {
 		String[] keys= { BasicElementLabels.getJavaElementName(JavaCore.removeJavaLikeExtension(cu.getElementName()))};
 		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys);
-		return createStaticQuery(createCompilationUnitNameValidator(cu), message, initialSuggestedName, getShell());
+		return createStaticQuery(createCompilationUnitNameValidator(cu), message, initialSuggestedName, true, getShell());
 	}
 
 
 	public INewNameQuery createNewResourceNameQuery(IResource res, String initialSuggestedName) {
 		String[] keys= { BasicElementLabels.getResourceName(res)};
 		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys);
-		return createStaticQuery(createResourceNameValidator(res), message, initialSuggestedName, getShell());
+		return createStaticQuery(createResourceNameValidator(res), message, initialSuggestedName, res.getType() == IResource.FILE, getShell());
 	}
 
 
 	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String initialSuggestedName) {
 		String[] keys= {JavaElementLabels.getElementLabel(pack, JavaElementLabels.ALL_DEFAULT)};
 		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys);
-		return createStaticQuery(createPackageNameValidator(pack), message, initialSuggestedName, getShell());
+		return createStaticQuery(createPackageNameValidator(pack), message, initialSuggestedName, false, getShell());
 	}
 
 	public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName) {
 		String[] keys= {JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT)};
 		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys);
-		return createStaticQuery(createPackageFragmentRootNameValidator(root), message, initialSuggestedName, getShell());
+		return createStaticQuery(createPackageFragmentRootNameValidator(root), message, initialSuggestedName, false, getShell());
 	}
 
 
@@ -119,18 +119,25 @@ public class NewNameQueries implements INewNameQueries {
 		};
 	}
 
-	private static INewNameQuery createStaticQuery(final IInputValidator validator, final String message, final String initial, final Shell shell){
+	private static INewNameQuery createStaticQuery(final IInputValidator validator, final String message, final String initial, final boolean isFile, final Shell shell) {
 		return new INewNameQuery(){
 			public String getNewName() throws OperationCanceledException {
 				InputDialog dialog= new InputDialog(shell, ReorgMessages.ReorgQueries_nameConflictMessage, message, initial, validator) {
-					/* (non-Javadoc)
-					 * @see org.eclipse.jface.dialogs.InputDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
-					 */
 					@Override
 					protected Control createDialogArea(Composite parent) {
 						Control area= super.createDialogArea(parent);
 						TextFieldNavigationHandler.install(getText());
 						return area;
+					}
+
+					@Override
+					protected Control createContents(Composite parent) {
+						Control contents= super.createContents(parent);
+						int lastIndexOfDot= initial.lastIndexOf('.');
+						if (isFile && lastIndexOfDot > 0) {
+							getText().setSelection(0, lastIndexOfDot);
+						}
+						return contents;
 					}
 				};
 				if (dialog.open() == Window.CANCEL)
