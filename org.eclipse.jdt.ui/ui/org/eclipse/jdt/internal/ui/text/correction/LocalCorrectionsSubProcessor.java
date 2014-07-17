@@ -1117,16 +1117,29 @@ public class LocalCorrectionsSubProcessor {
 			// also offer split && / || condition proposals:
 			InfixExpression infixExpression= (InfixExpression)parent;
 			Expression leftOperand= infixExpression.getLeftOperand();
-			List<Expression> extendedOperands= infixExpression.extendedOperands();
 			
 			ASTRewrite rewrite= ASTRewrite.create(parent.getAST());
-			if (extendedOperands.size() == 0) {
-				rewrite.replace(infixExpression, rewrite.createMoveTarget(leftOperand), null);
-			} else {
-				ASTNode firstExtendedOp= rewrite.createMoveTarget(extendedOperands.get(0));
-				rewrite.set(infixExpression, InfixExpression.RIGHT_OPERAND_PROPERTY, firstExtendedOp, null);
-				rewrite.remove(leftOperand, null);
+			
+			Expression replacement= leftOperand;
+			while (replacement instanceof ParenthesizedExpression) {
+				replacement= ((ParenthesizedExpression) replacement).getExpression();
 			}
+			
+			Expression toReplace= infixExpression;
+			while (toReplace.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
+				toReplace= (Expression) toReplace.getParent();
+			}
+			
+			if (NecessaryParenthesesChecker.needsParentheses(replacement, toReplace.getParent(), toReplace.getLocationInParent())) {
+				if (leftOperand instanceof ParenthesizedExpression) {
+					replacement= (Expression) replacement.getParent();
+				} else if (infixExpression.getLocationInParent() == ParenthesizedExpression.EXPRESSION_PROPERTY) {
+					toReplace= ((ParenthesizedExpression) toReplace).getExpression();
+				}
+			}
+			
+			rewrite.replace(toReplace, rewrite.createMoveTarget(replacement), null);
+
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_removeunreachablecode_description;
 			addRemoveProposal(context, rewrite, label, proposals);
 			
