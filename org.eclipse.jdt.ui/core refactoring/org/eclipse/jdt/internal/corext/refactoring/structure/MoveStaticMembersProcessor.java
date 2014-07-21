@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Jerome Cambon <jerome.cambon@oracle.com> - [code style] don't generate redundant modifiers "public static final abstract" for interface members - https://bugs.eclipse.org/71627
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -962,6 +963,15 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 						ModifierRewrite.create(fSource.getASTRewrite(), methodDecl).setModifiers(methodDecl.getModifiers() | psModifiers, null);
 					}
 				}
+			}
+			if (fDestinationType.isInterface()) {
+				int modifiers= declaration.getModifiers();
+				modifiers= JdtFlags.clearAccessModifiers(modifiers);
+				modifiers= JdtFlags.clearFlag(Modifier.ABSTRACT | Modifier.FINAL, modifiers);
+				if (!(declaration instanceof MethodDeclaration)) {
+					modifiers= JdtFlags.clearFlag(Modifier.STATIC, modifiers);
+				}
+				ModifierRewrite.create(fSource.getASTRewrite(), declaration).setModifiers(modifiers, null);
 			}
 			ITrackedNodePosition trackedPosition= fSource.getASTRewrite().track(declaration);
 			declaration.setProperty(TRACKED_POSITION_PROPERTY, trackedPosition);

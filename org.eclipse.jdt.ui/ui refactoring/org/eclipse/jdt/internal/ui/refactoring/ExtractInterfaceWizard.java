@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Jerome Cambon <jerome.cambon@oracle.com> - [code style] don't generate redundant modifiers "public static final abstract" for interface members - https://bugs.eclipse.org/71627
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
@@ -43,7 +44,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -76,15 +76,11 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 	private static class ExtractInterfaceInputPage extends TextInputWizardPage {
 
 		private Button fReplaceAllCheckbox;
-		private Button fDeclarePublicCheckbox;
-		private Button fDeclareAbstractCheckbox;
 		private Button fGenerateAnnotationsCheckbox;
 		private Button fGenerateCommentsCheckbox;
 		private Button fInstanceofCheckbox;
 		private CheckboxTableViewer fTableViewer;
 		private static final String DESCRIPTION = RefactoringMessages.ExtractInterfaceInputPage_description;
-		private static final String SETTING_PUBLIC= 		"Public";//$NON-NLS-1$
-		private static final String SETTING_ABSTRACT= 		"Abstract";//$NON-NLS-1$
 		private static final String SETTING_ANNOTATIONS= 		"Annotations";//$NON-NLS-1$
 		private static final String SETTING_REPLACE= "Replace"; //$NON-NLS-1$
 		private static final String SETTING_COMMENTS= "Comments"; //$NON-NLS-1$
@@ -123,8 +119,6 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 					fInstanceofCheckbox.setEnabled(fReplaceAllCheckbox.getSelection());
 				}
 			});
-			addDeclareAsPublicCheckbox(result);
-			addDeclareAsAbstractCheckbox(result);
 			addGenerateAnnotationsCheckbox(result);
 
 			Label separator= new Label(result, SWT.NONE);
@@ -156,7 +150,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 				public void widgetSelected(SelectionEvent e) {
 					fProcessor.setAnnotations(fGenerateAnnotationsCheckbox.getSelection());
 				}
-			});		
+			});
 		}
 
 		private void addGenerateCommentsCheckbox(Composite result) {
@@ -236,8 +230,6 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 				JavaPlugin.log(exception);
 			}
 			final boolean enabled= containsMethods(checked);
-			fDeclarePublicCheckbox.setEnabled(enabled);
-			fDeclareAbstractCheckbox.setEnabled(enabled);
 			fGenerateAnnotationsCheckbox.setEnabled(enabled);
 			fGenerateCommentsCheckbox.setEnabled(enabled);
 			fInstanceofCheckbox.setEnabled(fReplaceAllCheckbox.getSelection());
@@ -320,35 +312,6 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			});
 		}
 
-		private void addDeclareAsPublicCheckbox(Composite result) {
-			String[] keys= {RefactoringMessages.ExtractInterfaceWizard_public_label};
-			String title= Messages.format(RefactoringMessages.ExtractInterfaceWizard_12, keys);
-			boolean defaultValue= fProcessor.getPublic();
-			fDeclarePublicCheckbox= createCheckbox(result,  title, defaultValue);
-			fProcessor.setPublic(fDeclarePublicCheckbox.getSelection());
-			fDeclarePublicCheckbox.addSelectionListener(new SelectionAdapter(){
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					fProcessor.setPublic(fDeclarePublicCheckbox.getSelection());
-				}
-			});
-		}
-
-		private void addDeclareAsAbstractCheckbox(Composite result) {
-			final ExtractInterfaceProcessor processor= fProcessor;
-			String[] keys= {RefactoringMessages.ExtractInterfaceWizard_abstract_label};
-			String title= Messages.format(RefactoringMessages.ExtractInterfaceWizard_12, keys);
-			boolean defaultValue= processor.getAbstract();
-			fDeclareAbstractCheckbox= createCheckbox(result,  title, defaultValue);
-			processor.setAbstract(fDeclareAbstractCheckbox.getSelection());
-			fDeclareAbstractCheckbox.addSelectionListener(new SelectionAdapter(){
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					processor.setAbstract(fDeclareAbstractCheckbox.getSelection());
-				}
-			});
-		}
-
 		private static Button createCheckbox(Composite parent, String title, boolean value){
 			Button checkBox= new Button(parent, SWT.CHECK);
 			checkBox.setText(title);
@@ -404,8 +367,6 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			fProcessor.setTypeName(getText());
 			fProcessor.setReplace(fReplaceAllCheckbox.getSelection());
 			fProcessor.setExtractedMembers(getCheckedMembers());
-			fProcessor.setAbstract(fDeclareAbstractCheckbox.getSelection());
-			fProcessor.setPublic(fDeclarePublicCheckbox.getSelection());
 			fProcessor.setAnnotations(fGenerateAnnotationsCheckbox.getSelection());
 			fProcessor.setComments(fGenerateCommentsCheckbox.getSelection());
 			fProcessor.setInstanceOf(fInstanceofCheckbox.getSelection());
@@ -426,9 +387,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		}
 
 		private void initializeCheckboxes() {
-			initializeCheckBox(fDeclarePublicCheckbox, SETTING_PUBLIC, true);
-			initializeCheckBox(fDeclareAbstractCheckbox, SETTING_ABSTRACT, true);
-			initializeCheckBox(fGenerateAnnotationsCheckbox, SETTING_ANNOTATIONS, true);				
+			initializeCheckBox(fGenerateAnnotationsCheckbox, SETTING_ANNOTATIONS, true);
 			initializeCheckBox(fReplaceAllCheckbox, SETTING_REPLACE, true);
 			initializeCheckBox(fGenerateCommentsCheckbox, SETTING_COMMENTS, true);
 			initializeCheckBox(fInstanceofCheckbox, SETTING_INSTANCEOF, false);
@@ -444,8 +403,6 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 
 		private void storeDialogSettings() {
 			final IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
-			settings.put(SETTING_PUBLIC, fDeclarePublicCheckbox.getSelection());
-			settings.put(SETTING_ABSTRACT, fDeclareAbstractCheckbox.getSelection());
 			settings.put(SETTING_ANNOTATIONS, fGenerateAnnotationsCheckbox.getSelection());
 			settings.put(SETTING_REPLACE, fReplaceAllCheckbox.getSelection());
 			settings.put(SETTING_COMMENTS, fGenerateCommentsCheckbox.getSelection());

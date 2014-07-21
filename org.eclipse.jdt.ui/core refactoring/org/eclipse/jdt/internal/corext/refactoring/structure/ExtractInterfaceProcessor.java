@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Jerome Cambon <jerome.cambon@oracle.com> - [code style] don't generate redundant modifiers "public static final abstract" for interface members - https://bugs.eclipse.org/71627
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -134,11 +135,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  */
 public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcessor {
 
-	private static final String ATTRIBUTE_ABSTRACT= "abstract"; //$NON-NLS-1$
-
 	private static final String ATTRIBUTE_COMMENTS= "comments"; //$NON-NLS-1$
-
-	private static final String ATTRIBUTE_PUBLIC= "public"; //$NON-NLS-1$
 
 	/** The identifier of this processor */
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.extractInterfaceProcessor"; //$NON-NLS-1$
@@ -169,9 +166,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		}
 	}
 
-	/** Should extracted methods be declared as abstract? */
-	private boolean fAbstract= true;
-
 	/** Should override annotations be generated? */
 	private boolean fAnnotations= false;
 
@@ -183,9 +177,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/** The members to extract */
 	private IMember[] fMembers= null;
-
-	/** Should extracted methods be declared as public? */
-	private boolean fPublic= true;
 
 	/** The subtype where to extract the supertype */
 	private IType fSubType;
@@ -371,9 +362,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fSuperName);
 			for (int index= 0; index < fMembers.length; index++)
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1), JavaRefactoringDescriptorUtil.elementToHandle(project, fMembers[index]));
-			arguments.put(ATTRIBUTE_ABSTRACT, Boolean.valueOf(fAbstract).toString());
 			arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fComments).toString());
-			arguments.put(ATTRIBUTE_PUBLIC, Boolean.valueOf(fPublic).toString());
 			arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
 			arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
 			final DynamicValidationRefactoringChange change= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.ExtractInterfaceRefactoring_name, fChangeManager.getAllChanges());
@@ -478,6 +467,10 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			if (!current.getName().getIdentifier().equals(fragment.getName().getIdentifier()))
 				rewriter.remove(current, null);
 		}
+		int modifiers= field.getModifiers();
+		modifiers= JdtFlags.clearAccessModifiers(modifiers);
+		modifiers= JdtFlags.clearFlag(Modifier.ABSTRACT | Modifier.STATIC | Modifier.FINAL, modifiers);
+		ModifierRewrite.create(rewrite, field).setModifiers(modifiers, null);
 		final ICompilationUnit unit= sourceRewrite.getCu();
 		final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(unit);
 		try {
@@ -671,20 +664,10 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		if (declaration.getBody() != null)
 			rewrite.remove(declaration.getBody(), null);
 		ListRewrite list= rewrite.getListRewrite(declaration, declaration.getModifiersProperty());
-		boolean publicFound= false;
-		boolean abstractFound= false;
 		Annotation annotation= null;
 		for (IExtendedModifier extended : (List<IExtendedModifier>) declaration.modifiers()) {
 			if (!extended.isAnnotation()) {
 				Modifier modifier= (Modifier) extended;
-				if (fPublic && modifier.getKeyword().equals(Modifier.ModifierKeyword.PUBLIC_KEYWORD)) {
-					publicFound= true;
-					continue;
-				}
-				if (fAbstract && modifier.getKeyword().equals(Modifier.ModifierKeyword.ABSTRACT_KEYWORD)) {
-					abstractFound= true;
-					continue;
-				}
 				list.remove(modifier, null);
 			} else if (extended.isAnnotation()) {
 				annotation= (Annotation) extended;
@@ -693,11 +676,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					list.remove(annotation, null);
 			}
 		}
-		ModifierRewrite rewriter= ModifierRewrite.create(rewrite, declaration);
-		if (fPublic && !publicFound)
-			rewriter.setVisibility(Modifier.PUBLIC, null);
-		if (fAbstract && !abstractFound)
-			rewriter.setModifiers(Modifier.ABSTRACT, 0, null);
 		
 		for (SingleVariableDeclaration param : (List<SingleVariableDeclaration>) declaration.parameters()) {
 			ListRewrite modifierRewrite= rewrite.getListRewrite(param, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
@@ -771,16 +749,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		} finally {
 			monitor.done();
 		}
-	}
-
-	/**
-	 * Should extracted methods be declared as abstract?
-	 *
-	 * @return <code>true</code> if the should be declared as abstract,
-	 *         <code>false</code> otherwise
-	 */
-	public final boolean getAbstract() {
-		return fAbstract;
 	}
 
 	/*
@@ -869,16 +837,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	}
 
 	/**
-	 * Should extracted methods be declared as public?
-	 *
-	 * @return <code>true</code> if the should be declared as public,
-	 *         <code>false</code> otherwise
-	 */
-	public final boolean getPublic() {
-		return fPublic;
-	}
-
-	/**
 	 * Returns the type where to extract an interface.
 	 *
 	 * @return the type where to extract an interface
@@ -923,11 +881,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				return status;
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME));
-		final String deferred= extended.getAttribute(ATTRIBUTE_ABSTRACT);
-		if (deferred != null) {
-			fAbstract= Boolean.valueOf(deferred).booleanValue();
-		} else
-			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ABSTRACT));
 		final String comment= extended.getAttribute(ATTRIBUTE_COMMENTS);
 		if (comment != null) {
 			fComments= Boolean.valueOf(comment).booleanValue();
@@ -938,11 +891,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			fInstanceOf= Boolean.valueOf(instance).booleanValue();
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INSTANCEOF));
-		final String visibility= extended.getAttribute(ATTRIBUTE_PUBLIC);
-		if (visibility != null) {
-			fPublic= Boolean.valueOf(visibility).booleanValue();
-		} else
-			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PUBLIC));
 		final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
 		if (replace != null) {
 			fReplace= Boolean.valueOf(replace).booleanValue();
@@ -1190,17 +1138,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	}
 
 	/**
-	 * Determines whether extracted methods should be declared as abstract.
-	 *
-	 * @param declare
-	 *            <code>true</code> to declare them public, <code>false</code>
-	 *            otherwise
-	 */
-	public final void setAbstract(final boolean declare) {
-		fAbstract= declare;
-	}
-
-	/**
 	 * Determines whether override annotations should be generated.
 	 * 
 	 * @param annotations <code>true</code> to generate override annotations, <code>false</code> otherwise
@@ -1230,17 +1167,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 */
 	public final void setExtractedMembers(final IMember[] members) throws JavaModelException {
 		fMembers= members;
-	}
-
-	/**
-	 * Determines whether extracted methods should be declared as public.
-	 *
-	 * @param declare
-	 *            <code>true</code> to declare them public, <code>false</code>
-	 *            otherwise
-	 */
-	public final void setPublic(final boolean declare) {
-		fPublic= declare;
 	}
 
 	/**

@@ -1,9 +1,9 @@
 package p;
 interface A{
 
-	public static final int CONST = 0;
+	int CONST = 0;
 
-	public int getConst();
+	int getConst();
 }
 class B implements A {
 

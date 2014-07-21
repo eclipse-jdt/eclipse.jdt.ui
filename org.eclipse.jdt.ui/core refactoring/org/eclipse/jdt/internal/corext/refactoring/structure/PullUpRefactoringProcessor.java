@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla - 228950: [pull up] exception if target calls super with multiple parameters
+ *     Jerome Cambon <jerome.cambon@oracle.com> - [code style] don't generate redundant modifiers "public static final abstract" for interface members - https://bugs.eclipse.org/71627
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -1153,8 +1154,6 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 								final VariableDeclarationFragment oldField= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) member, root);
 								if (oldField != null) {
 									int flags= getModifiersWithUpdatedVisibility(member, member.getFlags(), adjustments, new SubProgressMonitor(subsub, 1), true, status);
-									if (destination.isInterface())
-										flags|= Flags.AccFinal;
 									final FieldDeclaration newField= createNewFieldDeclarationNode(rewriter, root, (IField) member, oldField, mapping, new SubProgressMonitor(subsub, 1), status, flags);
 									rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, ASTNodes.getInsertionIndex(newField, declaration.bodyDeclarations()), rewrite.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, SET_PULL_UP));
 									ImportRewriteUtil.addImports(rewrite, context, oldField.getParent(), new HashMap<Name, String>(), new HashMap<Name, String>(), false);
@@ -1626,9 +1625,8 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 			return JdtFlags.clearAccessModifiers(modifiers) | Modifier.PROTECTED;
 		}
 		if (getDestinationType().isInterface()) {
-			final int flags= JdtFlags.clearAccessModifiers(modifiers) | Modifier.PUBLIC;
-			if (member instanceof IMethod)
-				return JdtFlags.clearFlag(Modifier.STATIC, flags);
+			int flags= JdtFlags.clearAccessModifiers(modifiers);
+			flags= JdtFlags.clearFlag(Modifier.ABSTRACT | Modifier.STATIC | Modifier.FINAL, flags);
 			return flags;
 		}
 		return modifiers;

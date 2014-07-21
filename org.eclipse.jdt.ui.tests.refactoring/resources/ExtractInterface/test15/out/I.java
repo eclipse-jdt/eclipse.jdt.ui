@@ -3,8 +3,8 @@ package p;
 /** typecomment template*/
 interface I {
 
-	public abstract void m();
+	void m();
 
-	public abstract void m1();
+	void m1();
 
 }

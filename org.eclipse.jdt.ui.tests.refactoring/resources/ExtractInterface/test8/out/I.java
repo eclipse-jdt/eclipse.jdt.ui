@@ -7,6 +7,6 @@ import java.util.Set;
 /** typecomment template*/
 interface I {
 
-	public abstract List m(Set set, String string) throws IOException;
+	List m(Set set, String string) throws IOException;
 
 }

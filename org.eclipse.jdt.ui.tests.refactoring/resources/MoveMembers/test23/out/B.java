@@ -1,5 +1,5 @@
 package p;
 interface B{
 
-	public static final int FRED= 1;
+	int FRED= 1;
 }
