@@ -24,6 +24,10 @@ public interface IProposalRelevance {
 	public static final int ADD_OVERRIDE_ANNOTATION= 15;
 	public static final int ADD_DEPRECATED_ANNOTATION= 15;
 
+	public static final int CREATE_NON_STATIC_ACCESS_USING_DECLARING_TYPE= 12;
+	public static final int CREATE_INDIRECT_ACCESS_TO_STATIC= 12;
+	public static final int CREATE_NON_STATIC_ACCESS_USING_INSTANCE_TYPE= 11;
+	
 	public static final int REMOVE_UNUSED_CAST= 10;
 	public static final int ADD_UNIMPLEMENTED_METHODS= 10;
 	public static final int UNUSED_MEMBER= 10;
@@ -104,8 +108,6 @@ public interface IProposalRelevance {
 	public static final int CHANGE_METHOD_RETURN_TYPE= 6;
 	public static final int UNNECESSARY_NLS_TAG= 6;
 	public static final int RAW_TYPE_REFERENCE= 6;
-	public static final int CREATE_NON_STATIC_ACCESS_USING_DECLARING_TYPE= 6;
-	public static final int CREATE_INDIRECT_ACCESS_TO_STATIC= 6;
 	public static final int SURROUND_WITH_TRY_CATCH= 6;
 	public static final int REMOVE_REDUNDANT_TYPE_ARGUMENTS= 6;
 	public static final int REMOVE_REDUNDANT_SUPER_INTERFACE= 6;
@@ -142,7 +144,6 @@ public interface IProposalRelevance {
 	public static final int ADD_BLOCK= 5;
 	public static final int MAKE_TYPE_ABSTRACT= 5;
 	public static final int ADD_MISSING_NLS_TAGS= 5;
-	public static final int CREATE_NON_STATIC_ACCESS_USING_INSTANCE_TYPE= 5;
 	public static final int MAKE_TYPE_ABSTRACT_FIX= 5;
 	public static final int CONVERT_LOCAL_TO_FIELD= 5;
 	public static final int CONVERT_ANONYMOUS_TO_NESTED= 5;
