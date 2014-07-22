@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [extract local] Extract to local variable not replacing multiple occurrences in same statement - https://bugs.eclipse.org/406347
+ *     Nicolaj Hoess <nicohoess@gmail.com> - [extract local] puts declaration at wrong position - https://bugs.eclipse.org/65875
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -680,6 +681,16 @@ public class ExtractTempTests extends RefactoringTest {
 	public void test109() throws Exception {
 		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=335173
 		helper1(5, 20, 5, 29, true, false, "temp", "i");
+	}
+	
+	public void test110() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=65875
+		helper1(6, 9, 6, 25, true, false, "temp", "calculateCount");
+	}
+	
+	public void test111() throws Exception {
+		//test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=65875
+		helper1(11, 9, 11, 25, true, false, "temp", "calculateCount");
 	}
 
 	public void test113() throws Exception {

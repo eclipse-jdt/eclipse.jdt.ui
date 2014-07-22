@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [extract local] Extract to local variable not replacing multiple occurrences in same statement - https://bugs.eclipse.org/406347
+ *     Nicolaj Hoess <nicohoess@gmail.com> - [extract local] puts declaration at wrong position - https://bugs.eclipse.org/65875
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -666,7 +667,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		Expression initializer= getSelectedExpression().createCopyTarget(fCURewrite.getASTRewrite(), true);
 		VariableDeclarationStatement vds= createTempDeclaration(initializer);
 
-		if ((!fReplaceAllOccurrences) || (retainOnlyReplacableMatches(getMatchingFragments()).length <= 1)) {
+		IASTFragment[] replacableMatches= retainOnlyReplacableMatches(getMatchingFragments());
+		if (!fReplaceAllOccurrences
+				|| replacableMatches.length == 0
+				|| replacableMatches.length == 1 && replacableMatches[0].equals(getSelectedExpression().getAssociatedExpression())) {
 			insertAt(getSelectedExpression().getAssociatedNode(), vds);
 			return;
 		}
@@ -999,6 +1003,9 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private boolean shouldReplaceSelectedExpressionWithTempDeclaration() throws JavaModelException {
 		IExpressionFragment selectedFragment= getSelectedExpression();
+		IExpressionFragment firstExpression= getFirstReplacedExpression();
+		if (firstExpression.getStartPosition() < selectedFragment.getStartPosition())
+			return false;
 		return selectedFragment.getAssociatedNode().getParent() instanceof ExpressionStatement
 			&& selectedFragment.matches(ASTFragmentFactory.createFragmentForFullSubtree(selectedFragment.getAssociatedNode()));
 	}
