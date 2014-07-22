@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +31,6 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -595,8 +596,8 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		IProblem[] problems= compilationUnit.getProblems();
 		IProblemLocation[] locations= new IProblemLocation[problems.length];
 		for (int i= 0; i < problems.length; i++) {
-	        locations[i]= new ProblemLocation(problems[i]);
-        }
+			locations[i]= new ProblemLocation(problems[i]);
+		}
 		addToStaticAccessOperations(compilationUnit, locations, changeNonStaticAccessToStatic, changeIndirectStaticAccessToDirect, operations);
 
 		if (removeFieldQualifier || removeMethodQualifier) {
@@ -644,6 +645,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		if (!changeNonStaticAccessToStatic && !changeIndirectStaticAccessToDirect)
 			return;
 
+		List<ToStaticAccessOperation> operations= new ArrayList<ToStaticAccessOperation>();
 		HashMap<ASTNode, Block> createdBlocks= new HashMap<ASTNode, Block>();
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= problems[i];
@@ -655,36 +657,32 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 					ToStaticAccessOperation op= nonStaticAccessInformation[0];
 
 					Expression qualifier= op.fQualifier;
-					if (!(qualifier instanceof MethodInvocation) || !isMethodArgument(qualifier)) {
-						for (Iterator<CompilationUnitRewriteOperation> it= result.iterator(); it.hasNext();) { // see bug 346230
-							CompilationUnitRewriteOperation oper= it.next();
-							if (oper instanceof CodeStyleFix.AddThisQualifierOperation
-									&& ((CodeStyleFix.AddThisQualifierOperation) oper).fName.equals(qualifier)) {
-								result.remove(oper);
-								break;
-							}
+					for (Iterator<CompilationUnitRewriteOperation> it= result.iterator(); it.hasNext();) { // see bug 346230
+						CompilationUnitRewriteOperation oper= it.next();
+						if (oper instanceof CodeStyleFix.AddThisQualifierOperation
+								&& ((CodeStyleFix.AddThisQualifierOperation) oper).fName.equals(qualifier)) {
+							result.remove(oper);
+							break;
 						}
-						result.add(op);
 					}
+					operations.add(op);
 				}
 			}
 		}
-	}
-
-	private static boolean isMethodArgument(Expression expression) {
-		ASTNode parent= expression;
-		while (parent instanceof Expression) {
-
-			if (parent.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY)
-				return true;
-
-			if (parent.getLocationInParent() == ConstructorInvocation.ARGUMENTS_PROPERTY)
-				return true;
-
-			parent= ((Expression) parent).getParent();
-		}
-
-		return false;
+		// Make sure qualifiers are processed inside-out and left-to-right, so that
+		// ToStaticAccessOperation#extractQualifier(..) extracts qualifiers in execution order:
+		Collections.sort(operations, new Comparator<ToStaticAccessOperation>() {
+			public int compare(ToStaticAccessOperation o1, ToStaticAccessOperation o2) {
+				if (ASTNodes.isParent(o1.fQualifier, o2.fQualifier)) {
+					return -1;
+				} else if (ASTNodes.isParent(o2.fQualifier, o1.fQualifier)) {
+					return 1;
+				} else {
+					return o1.fQualifier.getStartPosition() - o2.fQualifier.getStartPosition();
+				}
+			}
+		});
+		result.addAll(operations);
 	}
 
 	public static boolean isIndirectStaticAccess(IProblemLocation problem) {
