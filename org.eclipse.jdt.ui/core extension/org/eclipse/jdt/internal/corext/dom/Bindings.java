@@ -299,7 +299,7 @@ public class Bindings {
 	}
 
 	/**
-	 * Finds the field specified by <code>fieldName<code> in
+	 * Finds the field specified by <code>fieldName</code> in
 	 * the given <code>type</code>. Returns <code>null</code> if no such field exits.
 	 * @param type the type to search the field in
 	 * @param fieldName the field name
@@ -346,7 +346,7 @@ public class Bindings {
 	}
 
 	/**
-	 * Finds the method specified by <code>methodName<code> and </code>parameters</code> in
+	 * Finds the method specified by <code>methodName</code> and <code>parameters</code> in
 	 * the given <code>type</code>. Returns <code>null</code> if no such method exits.
 	 * @param type The type to search the method in
 	 * @param methodName The name of the method to find
@@ -371,7 +371,7 @@ public class Bindings {
 	}
 
 	/**
-	 * Finds the method specified by <code>methodName</code> and </code>parameters</code> in
+	 * Finds the method specified by <code>methodName</code> and <code>parameters</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
 	 * exists. If the method is defined in more than one super type only the first match is
 	 * returned. First the super class is examined and then the implemented interfaces.
@@ -401,7 +401,7 @@ public class Bindings {
 	}
 
 	/**
-	 * Finds the method specified by <code>methodName<code> and </code>parameters</code> in
+	 * Finds the method specified by <code>methodName</code> and <code>parameters</code> in
 	 * the given <code>type</code>. Returns <code>null</code> if no such method exits.
 	 * @param type The type to search the method in
 	 * @param methodName The name of the method to find
@@ -425,7 +425,7 @@ public class Bindings {
 	}
 
 	/**
-	 * Finds the method specified by <code>methodName</code> and </code>parameters</code> in
+	 * Finds the method specified by <code>methodName</code> and <code>parameters</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
 	 * exists. If the method is defined in more than one super type only the first match is
 	 * returned. First the super class is examined and then the implemented interfaces.
@@ -454,11 +454,11 @@ public class Bindings {
 	}
 
 	/**
-	 * Finds the method in the given <code>type</code> that is overridden by the specified <code>method<code>.
+	 * Finds the method in the given <code>type</code> that is overridden by the specified <code>method</code>.
 	 * Returns <code>null</code> if no such method exits.
 	 * @param type The type to search the method in
 	 * @param method The specified method that would override the result
-	 * @return the method binding of the method that is overridden by the specified <code>method<code>, or <code>null</code>
+	 * @return the method binding of the method that is overridden by the specified <code>method</code>, or <code>null</code>
 	 */
 	public static IMethodBinding findOverriddenMethodInType(ITypeBinding type, IMethodBinding method) {
 		IMethodBinding[] methods= type.getDeclaredMethods();
@@ -470,7 +470,7 @@ public class Bindings {
 	}
 
 	/**
-	 * Finds a method in the hierarchy of <code>type</code> that is overridden by </code>binding</code>.
+	 * Finds a method in the hierarchy of <code>type</code> that is overridden by <code>binding</code>.
 	 * Returns <code>null</code> if no such method exists. If the method is defined in more than one super type only the first match is
 	 * returned. First the super class is examined and then the implemented interfaces.
 	 * @param type The type to search the method in
