@@ -17,6 +17,7 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
@@ -150,7 +151,19 @@ public class RenameTests18 extends RefactoringTest {
 		descriptor.setKeepOriginal(createDelegate);
 		descriptor.setDeprecateDelegate(true);
 
-		assertEquals("was supposed to pass", null, performRefactoring(descriptor));
+		try {
+			assertEquals("was supposed to pass", null, performRefactoring(descriptor));
+		} catch (CoreException e) {
+			System.out.println("RenameTest18." + getName() + ": " + e.toString());
+			System.out.println(cu.getResource().getLocationURI());
+			System.out.println(cu.getResource().getModificationStamp());
+			System.out.println(cu.getResource().getLocalTimeStamp());
+			System.out.println(cu.getResource().isSynchronized(0));
+			System.out.println("---");
+			System.out.println(cu.getSource());
+			System.out.println("---");
+			throw e;
+		}
 		if (!shouldPass){
 			assertTrue("incorrect renaming because of a java model bug", ! getFileContents(getOutputTestFileName("A")).equals(cu.getSource()));
 			return;
