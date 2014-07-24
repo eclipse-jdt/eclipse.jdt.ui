@@ -310,10 +310,12 @@ public class Binding extends ASTAttribute {
 					IVariableBinding variableBinding= (IVariableBinding) fBinding;
 					if (!variableBinding.isField()) {
 						buf.append(variableBinding.getName());
-					} else if (variableBinding.getDeclaringClass() == null) {
-						buf.append("array type"); //$NON-NLS-1$
 					} else {
-						buf.append(variableBinding.getDeclaringClass().getName());
+						if (variableBinding.getDeclaringClass() == null) {
+							buf.append("<some array type>"); //$NON-NLS-1$
+						} else {
+							buf.append(variableBinding.getDeclaringClass().getName());
+						}
 						buf.append('.');
 						buf.append(variableBinding.getName());
 					}
