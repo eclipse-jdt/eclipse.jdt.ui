@@ -101,8 +101,20 @@ public class RenameTests18 extends RefactoringTest {
 		args.add(new RenameArguments(newFieldName, updateReferences));
 		String[] renameHandles= ParticipantTesting.createHandles(list.toArray());
 
-		RefactoringStatus result= performRefactoring(refactoring);
-		assertEquals("was supposed to pass", null, result);
+		try {
+			RefactoringStatus result= performRefactoring(refactoring);
+			assertEquals("was supposed to pass", null, result);
+		} catch (CoreException e) {
+			System.out.println("RenameTest18." + getName() + ": " + e.toString());
+			System.out.println(cu.getResource().getLocationURI());
+			System.out.println(cu.getResource().getModificationStamp());
+			System.out.println(cu.getResource().getLocalTimeStamp());
+			System.out.println(cu.getResource().isSynchronized(0));
+			System.out.println("---");
+			System.out.println(cu.getSource());
+			System.out.println("---");
+			throw e;
+		}
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 
 		ParticipantTesting.testRename(
