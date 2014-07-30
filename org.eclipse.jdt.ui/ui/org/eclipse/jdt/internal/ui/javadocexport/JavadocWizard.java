@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -472,30 +472,41 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		}
 
 		public void launchesTerminated(ILaunch[] launches) {
-			for (int i= 0; i < launches.length; i++) {
-				if (launches[i] == fLaunch) {
-					onTerminated();
-					return;
-				}
+			if (containsJavadocLaunch(launches)) {
+				onTerminated();
 			}
 		}
 
-		public void onTerminated() {
-			try {
-				if (fLaunch != null) {
-					fFile.delete();
-					spawnInBrowser(fDisplay);
-					refresh(fDestination);
-					fLaunch= null;
+		private boolean containsJavadocLaunch(ILaunch[] launches) {
+			for (int i= 0; i < launches.length; i++) {
+				if (launches[i] == fLaunch) {
+					return true;
 				}
-			} finally {
-				DebugPlugin.getDefault().getLaunchManager().removeLaunchListener(this);
+			}
+			return false;
+		}
+
+		public void onTerminated() {
+			if (fLaunch != null) {
+				fFile.deleteOnExit(); // Just to be safe. #launchesRemoved(..) is not called on shutdown.
+				spawnInBrowser(fDisplay);
+				refresh(fDestination);
+			}
+		}
+
+		public void launchesRemoved(ILaunch[] launches) {
+			if (containsJavadocLaunch(launches)) {
+				try {
+					fFile.delete();
+					fLaunch= null;
+				} finally {
+					DebugPlugin.getDefault().getLaunchManager().removeLaunchListener(this);
+				}
 			}
 		}
 
 		public void launchesAdded(ILaunch[] launches) { }
 		public void launchesChanged(ILaunch[] launches) { }
-		public void launchesRemoved(ILaunch[] launches) { }
 	}
 
 	@Override
