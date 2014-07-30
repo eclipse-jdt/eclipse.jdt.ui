@@ -20,10 +20,10 @@ import java.util.Hashtable;
 import java.util.List;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
+import org.eclipse.test.OrderedTestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -45,6 +45,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -79,7 +80,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 	private static final Class THIS= CodeCompletionTest.class;
 
 	public static Test suite() {
-		return new TestSuite(THIS, suiteName(THIS));
+		return new OrderedTestSuite(THIS); //predictable order for https://bugs.eclipse.org/bugs/show_bug.cgi?id=423416
 	}
 
 	private IJavaProject fJProject1;
@@ -117,6 +118,17 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			e1.printStackTrace();
 		} catch (IOException e1) {
 			e1.printStackTrace();
+		}
+		System.out.println();
+		
+		IJavaProject project= cu.getJavaProject();
+		System.out.println(project);
+		for (IPackageFragmentRoot root : project.getAllPackageFragmentRoots()) {
+			if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
+				for (IJavaElement pack : root.getChildren()) {
+					System.out.println(pack);
+				}
+			}
 		}
 		System.out.println();
 
