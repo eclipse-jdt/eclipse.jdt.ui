@@ -126,6 +126,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		for (IPackageFragmentRoot root : project.getAllPackageFragmentRoots()) {
 			if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
 				for (IJavaElement pack : root.getChildren()) {
+					((IPackageFragment) pack).getChildren(); // side-effect: opens the package
 					System.out.println(pack);
 				}
 			}
