@@ -120,10 +120,11 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 	protected abstract Object getInitiallySelectedElement();
 
 	/**
-	 * Set and verify destination
-	 * @param selected
+	 * Set and verify the destination.
+	 * 
+	 * @param selected the selected destination
 	 * @return the resulting status
-	 * @throws JavaModelException
+	 * @throws JavaModelException the JavaModelException in case it fails
 	 */
 	protected abstract RefactoringStatus verifyDestination(Object selected) throws JavaModelException;
 
