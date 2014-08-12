@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -769,11 +769,11 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 							case IJavaElement.JAVA_PROJECT :
 							case IJavaElement.PACKAGE_FRAGMENT_ROOT :
 							case IJavaElement.PACKAGE_FRAGMENT :
-								ICommandService service = (ICommandService) getSite().getService(ICommandService.class);
+								ICommandService service= getSite().getService(ICommandService.class);
 								Command showInCommand= service.getCommand(IWorkbenchCommandConstants.NAVIGATE_SHOW_IN);
 								Map<String, String> params= Collections.singletonMap("org.eclipse.ui.navigate.showIn.targetId", JavaUI.ID_PACKAGES);
 								try {
-									Object context= ((IHandlerService) getSite().getService(IHandlerService.class)).getCurrentState();
+									Object context= getSite().getService(IHandlerService.class).getCurrentState();
 									showInCommand.executeWithChecks(new ExecutionEvent(null, params, null, context));
 								} catch (ExecutionException e1) {
 									showAndLogError("Could not show element", e1);

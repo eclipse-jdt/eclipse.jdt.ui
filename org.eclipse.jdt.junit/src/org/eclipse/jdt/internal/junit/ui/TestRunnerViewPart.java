@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1557,7 +1557,7 @@ action enablement
 		if (fTestRunSessionListener != null)
 			JUnitCorePlugin.getModel().removeTestRunSessionListener(fTestRunSessionListener);
 
-		IHandlerService handlerService= (IHandlerService) getSite().getWorkbenchWindow().getService(IHandlerService.class);
+		IHandlerService handlerService= getSite().getWorkbenchWindow().getService(IHandlerService.class);
 		handlerService.deactivateHandler(fRerunLastActivation);
 		handlerService.deactivateHandler(fRerunFailedFirstActivation);
 		setActiveTestRunSession(null);
@@ -1888,7 +1888,7 @@ action enablement
 		fStopAction.setEnabled(false);
 
 		fRerunLastTestAction= new RerunLastAction();
-		IHandlerService handlerService= (IHandlerService) getSite().getWorkbenchWindow().getService(IHandlerService.class);
+		IHandlerService handlerService= getSite().getWorkbenchWindow().getService(IHandlerService.class);
 		IHandler handler = new AbstractHandler() {
 			public Object execute(ExecutionEvent event) throws ExecutionException {
 				fRerunLastTestAction.run();

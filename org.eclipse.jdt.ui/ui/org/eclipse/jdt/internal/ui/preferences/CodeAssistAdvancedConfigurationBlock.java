@@ -735,7 +735,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 	private static BindingManager fgLocalBindingManager;
 	static {
 		fgLocalBindingManager= new BindingManager(new ContextManager(), new CommandManager());
-		final IBindingService bindingService= (IBindingService)PlatformUI.getWorkbench().getService(IBindingService.class);
+		final IBindingService bindingService= PlatformUI.getWorkbench().getService(IBindingService.class);
 		final Scheme[] definedSchemes= bindingService.getDefinedSchemes();
 		if (definedSchemes != null) {
 			try {

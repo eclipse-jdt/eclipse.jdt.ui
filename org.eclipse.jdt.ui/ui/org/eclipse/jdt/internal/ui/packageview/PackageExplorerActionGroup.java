@@ -226,7 +226,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 		fRefactorActionGroup.retargetFileMenuActions(actionBars);
 
-		IHandlerService handlerService= (IHandlerService) fPart.getViewSite().getService(IHandlerService.class);
+		IHandlerService handlerService= fPart.getViewSite().getService(IHandlerService.class);
 		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR, new ActionHandler(fToggleLinkingAction));
 		handlerService.activateHandler(CollapseAllHandler.COMMAND_ID, new ActionHandler(fCollapseAllAction));
 	}

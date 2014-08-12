@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -507,12 +507,12 @@ public class JavaMergeViewer extends TextMergeViewer {
 		if (fEditor != null) {
 			Object editor= fEditor.get(sourceViewer);
 			if (editor instanceof CompilationUnitEditorAdapter) {
-				CompilationUnitEditorAdapter cuea = (CompilationUnitEditorAdapter)editor;
+				CompilationUnitEditorAdapter cuea= (CompilationUnitEditorAdapter)editor;
 				cuea.setActionsActivated(state);
 
 				IAction saveAction= cuea.getAction(ITextEditorActionConstants.SAVE);
 				if (saveAction instanceof IPageListener) {
-					PartEventAction partEventAction = (PartEventAction) saveAction;
+					PartEventAction partEventAction= (PartEventAction) saveAction;
 					IWorkbenchPart compareEditorPart= getCompareConfiguration().getContainer().getWorkbenchPart();
 					if (state)
 						partEventAction.partActivated(compareEditorPart);
@@ -526,9 +526,9 @@ public class JavaMergeViewer extends TextMergeViewer {
 	@Override
 	protected void createControls(Composite composite) {
 		super.createControls(composite);
-		IWorkbenchPart workbenchPart = getCompareConfiguration().getContainer().getWorkbenchPart();
+		IWorkbenchPart workbenchPart= getCompareConfiguration().getContainer().getWorkbenchPart();
 		if (workbenchPart != null) {
-			IContextService service = (IContextService)workbenchPart.getSite().getService(IContextService.class);
+			IContextService service= workbenchPart.getSite().getService(IContextService.class);
 			if (service != null) {
 				service.activateContext("org.eclipse.jdt.ui.javaEditorScope"); //$NON-NLS-1$
 			}

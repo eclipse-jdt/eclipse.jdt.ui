@@ -382,7 +382,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		getViewSite().getPage().addPostSelectionListener(this);
 		getViewSite().getPage().addPartListener(fPartListener);
 
-		activateHandlers((IHandlerService) getViewSite().getService(IHandlerService.class));
+		activateHandlers(getViewSite().getService(IHandlerService.class));
 		fillActionBars(getViewSite().getActionBars());
 
 		setHelp();
