@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -3882,7 +3882,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.SPELLING_USER_DICTIONARY_ENCODING, System.getProperty("file.encoding")); //$NON-NLS-1$
 
 		store.setDefault(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD, 20);
-		store.setDefault(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD, 100);
+		store.setDefault(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD, 1000);
 		/*
 		 * XXX: This is currently disabled because the spelling engine
 		 * cannot return word proposals but only correction proposals.
