@@ -161,11 +161,14 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 		if ("java".equals(textType)) { //$NON-NLS-1$
 			textTools.setupJavaDocumentPartitioner(document);
 			fSourceViewer.configure(new JavaSourceViewerConfiguration(textTools.getColorManager(), store, null, null));
+			fSourceViewer.getTextWidget().setOrientation(SWT.LEFT_TO_RIGHT);
 		} else if ("properties".equals(textType)) { //$NON-NLS-1$
 			PropertiesFileDocumentSetupParticipant.setupDocument(document);
 			fSourceViewer.configure(new PropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, null, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING));
+			fSourceViewer.getTextWidget().setOrientation(SWT.LEFT_TO_RIGHT);
 		} else {
 			fSourceViewer.configure(new SourceViewerConfiguration());
+			fSourceViewer.getTextWidget().setOrientation(fSourceViewer.getTextWidget().getParent().getOrientation());
 		}
 		fSourceViewer.setInput(document);
 	}
