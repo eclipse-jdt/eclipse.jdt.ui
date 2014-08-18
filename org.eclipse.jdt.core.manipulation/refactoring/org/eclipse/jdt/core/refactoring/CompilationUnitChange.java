@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,6 +81,7 @@ public class CompilationUnitChange extends TextFileChange {
 	protected IDocument acquireDocument(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		fCUnit.becomeWorkingCopy(new SubProgressMonitor(pm, 1));
+		Assert.isTrue(fCUnit.isWorkingCopy(), fCUnit.toString());
 		return super.acquireDocument(new SubProgressMonitor(pm, 1));
 	}
 
