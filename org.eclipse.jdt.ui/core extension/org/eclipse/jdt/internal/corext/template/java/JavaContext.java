@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Lars Vogel  <lars.vogel@gmail.com> - [templates][content assist] Ctrl+Space without any starting letter shows to no templates - https://bugs.eclipse.org/406463
  *     Lukas Hanke <hanke@yatta.de> - [templates][content assist] Content assist for 'for' loop should suggest member variables - https://bugs.eclipse.org/117215
+ *     Nicolaj Hoess <nicohoess@gmail.com> - Make some internal methods accessible to help Postfix Code Completion plug-in - https://bugs.eclipse.org/433500
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
@@ -759,7 +760,7 @@ public class JavaContext extends CompilationUnitContext {
 		return buffer.getString();
 	}
 
-	TemplateVariable getTemplateVariable(String name) {
+	public TemplateVariable getTemplateVariable(String name) {
 		TemplateVariable variable= fVariables.get(name);
 		if (variable != null && !variable.isResolved())
 			getContextType().resolve(variable, this);

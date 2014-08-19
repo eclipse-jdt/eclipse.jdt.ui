@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nicolaj Hoess <nicohoess@gmail.com> - Make some internal methods accessible to help Postfix Code Completion plug-in - https://bugs.eclipse.org/433500
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
@@ -148,7 +149,15 @@ public class TemplateEngine {
 		}
 	}
 
-	private Image getImage() {
+	protected TemplateContextType getContextType() {
+		return fContextType;
+	}
+
+	protected ArrayList<TemplateProposal> getProposals() {
+		return fProposals;
+	}
+
+	protected Image getImage() {
 		if (fContextType instanceof SWTContextType)
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SWT_TEMPLATE);
 		else
