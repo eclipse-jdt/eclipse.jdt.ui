@@ -1,4 +1,4 @@
-Contributing to JDT UI - Java development tools UX
+Contributing to JDT UI - Java development tools UI
 ============================================
 
 Thanks for your interest in this project.
