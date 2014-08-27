@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -658,6 +658,6 @@ public class JavaElementLabelsTest extends CoreTests {
 
 		IJavaElement foo2= cu.getElementAt(content.indexOf("foo2"));
 		lab= JavaElementLabels.getTextLabel(foo2, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_ANNOTATIONS);
-		assertEqualString(lab, "org.test.Annotations.foo2(@Ann(value=\"\", cl=Annotations.class, ints={1, 2, -19}, ch='\\0', sh=32767, r=@Retention(value=RetentionPolicy.SOURCE)) String)");
+		assertEqualString(lab, "org.test.Annotations.foo2(@Ann(value=\"\", cl=Annotations.class, ints={1, 2, -19}, ch='\\u0000', sh=32767, r=@Retention(value=RetentionPolicy.SOURCE)) String)");
 	}
 }
