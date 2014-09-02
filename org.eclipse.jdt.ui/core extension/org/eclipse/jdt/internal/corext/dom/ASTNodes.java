@@ -23,6 +23,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -1451,6 +1452,28 @@ public class ASTNodes {
 		CharacterLiteral characterLiteral= AST.newAST(ASTProvider.SHARED_AST_LEVEL).newCharacterLiteral();
 		characterLiteral.setCharValue(ch);
 		return characterLiteral.getEscapedValue();
+	}
+
+	/**
+	 * If the given <code>node</code> has already been rewritten, undo that rewrite and return the
+	 * replacement version of the node. Otherwise, return the result of
+	 * {@link ASTRewrite#createCopyTarget(ASTNode)}.
+	 * 
+	 * @param rewrite ASTRewrite for the given node
+	 * @param node the node to get the replacement or to create a copy placeholder for
+	 * @param group the edit group which collects the corresponding text edits, or <code>null</code>
+	 *            if ungrouped
+	 * @return the replacement node if the given <code>node</code> has already been rewritten or the
+	 *         new copy placeholder node
+	 */
+	public static ASTNode getCopyOrReplacement(ASTRewrite rewrite, ASTNode node, TextEditGroup group) {
+		ASTNode rewrittenNode= (ASTNode) rewrite.get(node.getParent(), node.getLocationInParent());
+		if (rewrittenNode != node) {
+			// Undo previous rewrite to avoid the problem that the same node would be inserted in two places:
+			rewrite.replace(rewrittenNode, node, group);
+			return rewrittenNode;
+		}
+		return rewrite.createCopyTarget(node);
 	}
 
 	/**

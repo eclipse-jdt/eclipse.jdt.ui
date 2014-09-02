@@ -277,7 +277,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				HashSet<String> excludedNames= new HashSet<String>();
 				if (i != 0) {
 					for (ClassInstanceCreation convertedCic : fExpressions.subList(0, i)) {
-						if (ASTNodes.isParent(classInstanceCreation, convertedCic)) {
+						if (ASTNodes.isParent(convertedCic, classInstanceCreation)) {
 							excludedNames.addAll(cicToNewNames.get(convertedCic));
 						}
 					}
@@ -314,7 +314,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				//TODO: Bug 421479: [1.8][clean up][quick assist] convert anonymous to lambda must consider lost scope of interface
 //				lambdaBody.accept(new InterfaceAccessQualifier(rewrite, classInstanceCreation.getType().resolveBinding())); //TODO: maybe need a separate ASTRewrite and string placeholder
 				
-				lambdaExpression.setBody(rewrite.createCopyTarget(lambdaBody));
+				lambdaExpression.setBody(ASTNodes.getCopyOrReplacement(rewrite, lambdaBody, group));
 				Expression replacement= lambdaExpression;
 				if (ASTNodes.isTargetAmbiguous(classInstanceCreation, lambdaParameters.isEmpty())) {
 					CastExpression cast= ast.newCastExpression();
@@ -474,12 +474,12 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				Block block;
 				ASTNode lambdaBody= lambdaExpression.getBody();
 				if (lambdaBody instanceof Block) {
-					block= (Block) rewrite.createCopyTarget(lambdaBody);
+					block= (Block) ASTNodes.getCopyOrReplacement(rewrite, lambdaBody, group);
 				} else {
 					block= ast.newBlock();
 					List<Statement> statements= block.statements();
 					ITypeBinding returnType= methodBinding.getReturnType();
-					Expression copyTarget= (Expression) rewrite.createCopyTarget(lambdaBody);
+					Expression copyTarget= (Expression) ASTNodes.getCopyOrReplacement(rewrite, lambdaBody, group);
 					if (Bindings.isVoidType(returnType)) {
 						ExpressionStatement newExpressionStatement= ast.newExpressionStatement(copyTarget);
 						statements.add(newExpressionStatement);
@@ -544,6 +544,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			if (convertibleNodes.isEmpty())
 				return null;
 
+			Collections.reverse(convertibleNodes); // process nested anonymous classes first
 			CompilationUnitRewriteOperation op= new CreateLambdaOperation(convertibleNodes);
 			return new LambdaExpressionsFix(FixMessages.LambdaExpressionsFix_convert_to_lambda_expression, compilationUnit, new CompilationUnitRewriteOperation[] { op });
 			
@@ -552,6 +553,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			if (convertibleNodes.isEmpty())
 				return null;
 			
+			Collections.reverse(convertibleNodes); // process nested lambdas first
 			CompilationUnitRewriteOperation op= new CreateAnonymousClassCreationOperation(convertibleNodes);
 			return new LambdaExpressionsFix(FixMessages.LambdaExpressionsFix_convert_to_anonymous_class_creation, compilationUnit, new CompilationUnitRewriteOperation[] { op });
 			

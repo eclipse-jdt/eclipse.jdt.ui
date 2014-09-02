@@ -140,7 +140,47 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
-	
+
+	public void testConvertToLambda03() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Supplier;\n");
+		buf.append("class E {\n");
+		buf.append("    Supplier<Supplier<String>> s= new Supplier<Supplier<String>>() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public Supplier<String> get() {\n");
+		buf.append("            return new Supplier<String>() {\n");
+		buf.append("                @Override\n");
+		buf.append("                public String get() {\n");
+		buf.append("                    return \"a\";\n");
+		buf.append("                }\n");
+		buf.append("            };\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		String original= buf.toString();
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Supplier;\n");
+		buf.append("class E {\n");
+		buf.append("    Supplier<Supplier<String>> s= () -> () -> \"a\";\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+
+		disable(CleanUpConstants.USE_LAMBDA);
+		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+	}
+
 	public void testConvertToLambdaNestedWithImports() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -628,12 +668,12 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("public class Test {\n");
 		buf.append("    {\n");
 		buf.append("        int e;\n");
-		buf.append("        FI fi = e1 -> {\n");
+		buf.append("        FI fi = e4 -> {\n");
 		buf.append("            class C1 {\n");
 		buf.append("                void init1() {\n");
-		buf.append("                    m(e2 -> {\n");
-		buf.append("                        FI fi1 = e3 -> {\n");
-		buf.append("                            FI fi2 = e4 -> {\n");
+		buf.append("                    m(e3 -> {\n");
+		buf.append("                        FI fi2 = e2 -> {\n");
+		buf.append("                            FI fi1 = e1 -> {\n");
 		buf.append("                                return;\n");
 		buf.append("                            };\n");
 		buf.append("                        };\n");
@@ -644,7 +684,7 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("                    m(e2 -> new FI() {\n");
 		buf.append("                        @Override\n");
 		buf.append("                        public void run(int e3) {\n");
-		buf.append("                            FI fi = e4 -> {\n");
+		buf.append("                            FI fi = e1 -> {\n");
 		buf.append("                                return;\n");
 		buf.append("                            };\n");
 		buf.append("                        }\n");
