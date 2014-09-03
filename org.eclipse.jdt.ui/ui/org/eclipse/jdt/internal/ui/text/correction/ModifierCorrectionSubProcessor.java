@@ -72,6 +72,7 @@ import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
@@ -397,6 +398,9 @@ public class ModifierCorrectionSubProcessor {
 					break;
 				case IProblem.IllegalModifierForInterfaceMethod18:
 					excludedModifiers= ~(Modifier.PUBLIC | Modifier.ABSTRACT | Modifier.STRICTFP | Modifier.DEFAULT | Modifier.STATIC);
+					if (Modifier.isAbstract(binding.getModifiers())) {
+						excludedModifiers= excludedModifiers | Modifier.STRICTFP;
+					}
 					break;
 				case IProblem.IllegalModifierForInterface:
 					excludedModifiers= ~(Modifier.PUBLIC | Modifier.ABSTRACT | Modifier.STRICTFP);
@@ -580,6 +584,14 @@ public class ModifierCorrectionSubProcessor {
 				ASTRewrite rewrite= ASTRewrite.create(ast);
 				rewrite.remove(decl.getBody(), null);
 
+				int excluded;
+				if (parentTypeDecl.isInterface()) {
+					excluded= ~(Modifier.PUBLIC | Modifier.ABSTRACT);
+				} else {
+					excluded= ~(Modifier.PUBLIC | Modifier.PROTECTED | Modifier.ABSTRACT);
+				}
+				ModifierRewrite.create(rewrite, decl).setModifiers(0, excluded, null);
+
 				String label= CorrectionMessages.ModifierCorrectionSubProcessor_removebody_description;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, IProposalRelevance.REMOVE_METHOD_BODY, image);
@@ -589,11 +601,6 @@ public class ModifierCorrectionSubProcessor {
 			if (JavaModelUtil.is18OrHigher(cu.getJavaProject()) && parentTypeDecl.isInterface()) {
 				{
 					// insert proposal to add static modifier
-					ASTRewrite rewrite= ASTRewrite.create(ast);
-					removeModifier(decl, rewrite, Modifier.ABSTRACT);
-					Modifier newModifier= ast.newModifier(Modifier.ModifierKeyword.STATIC_KEYWORD);
-					rewrite.getListRewrite(decl, MethodDeclaration.MODIFIERS2_PROPERTY).insertLast(newModifier, null);
-
 					String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertostatic_description, decl.getName());
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 					int included= Modifier.STATIC;
@@ -604,11 +611,6 @@ public class ModifierCorrectionSubProcessor {
 
 				{
 					// insert proposal to add default modifier
-					ASTRewrite rewrite= ASTRewrite.create(ast);
-					removeModifier(decl, rewrite, Modifier.ABSTRACT);
-					Modifier newModifier= ast.newModifier(Modifier.ModifierKeyword.DEFAULT_KEYWORD);
-					rewrite.getListRewrite(decl, MethodDeclaration.MODIFIERS2_PROPERTY).insertLast(newModifier, null);
-
 					String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertodefault_description, decl.getName());
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 					int included= Modifier.DEFAULT;

@@ -1040,6 +1040,41 @@ public class QuickFixTest18 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
 	}
 
+	// bug 434173
+	public void testAbstractInterfaceMethodWithBody3() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface I {\n");
+		buf.append("    public strictfp native void foo() {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("I.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectAllCorrections(cu, astRoot, 3);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(3);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface I {\n");
+		buf.append("    public void foo() {}\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+
+		proposal= (CUCorrectionProposal)proposals.get(0);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface I {\n");
+		buf.append("    public void foo();\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+	}
+
 	// bug 424616
 	public void testInferredExceptionType() throws Exception {
 		StringBuffer buf= new StringBuffer();
