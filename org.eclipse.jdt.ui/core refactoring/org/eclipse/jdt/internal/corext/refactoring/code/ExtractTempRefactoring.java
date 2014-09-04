@@ -986,7 +986,11 @@ public class ExtractTempRefactoring extends Refactoring {
 			replacement= block;
 
 		}
-		rewrite.replace(parent, replacement, fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable));
+		if (ASTNodes.hasSemicolon(parent, fCu)) {
+			rewrite.replace(parent, replacement, fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable));
+		} else {
+			rewrite.replace(selectedExpression, replacement, fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable));
+		}
 	}
 
 	public void setDeclareFinal(boolean declareFinal) {

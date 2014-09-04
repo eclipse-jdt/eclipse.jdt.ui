@@ -8612,7 +8612,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 4);
+			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
 
 			String[] expected= new String[2];
@@ -8672,7 +8672,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 2);
+			assertNumberOfProposals(proposals, 4);
 			assertCorrectLabels(proposals);
 
 			String[] expected= new String[2];
@@ -8793,7 +8793,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 5);
+			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
 
 			String[] expected= new String[3];
@@ -8873,7 +8873,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 4);
+			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
 
 			String[] expected= new String[2];
@@ -9003,7 +9003,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 5);
+			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
 
 			String[] expected= new String[3];
@@ -9081,7 +9081,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 5);
+			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
 
 			String[] expected= new String[3];
@@ -9228,7 +9228,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 4);
+			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
 
 			String[] expected= new String[2];
@@ -9290,7 +9290,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 
-			assertNumberOfProposals(proposals, 3);
+			assertNumberOfProposals(proposals, 5);
 			assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_generate_enhanced_for_loop);
 			assertCorrectLabels(proposals);
 
@@ -9340,7 +9340,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 	
-			assertNumberOfProposals(proposals, 4);
+			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
 	
 			String[] expected= new String[2];
@@ -9397,7 +9397,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
 			List proposals= collectAssists(context, false);
 	
-			assertNumberOfProposals(proposals, 4);
+			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
 	
 			String[] expected= new String[2];

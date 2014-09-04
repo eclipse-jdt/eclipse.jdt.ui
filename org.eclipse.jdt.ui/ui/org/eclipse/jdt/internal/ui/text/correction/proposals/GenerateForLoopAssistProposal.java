@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -47,6 +48,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 
@@ -68,7 +70,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 
 	public static final int GENERATE_ITERATE_LIST= 3;
 
-	private ASTNode fCurrentNode;
+	private ExpressionStatement fCurrentStatement;
 
 	private Expression fCurrentExpression;
 
@@ -80,21 +82,19 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	 * Creates an instance of a {@link GenerateForLoopAssistProposal}.
 	 * 
 	 * @param cu the current {@link ICompilationUnit}
-	 * @param expressionType the {@link ITypeBinding} of the element to iterate over
-	 * @param currentNode the {@link ASTNode} instance representing the statement on which the
-	 *            assist was called
-	 * @param currentExpression the {@link Expression} contained in the currentNode
+	 * @param currentStatement the {@link ExpressionStatement} representing the statement on which
+	 *            the assist was called
 	 * @param loopTypeToGenerate the type of the loop to generate, possible values are
 	 *            {@link GenerateForLoopAssistProposal#GENERATE_FOREACH},
 	 *            {@link GenerateForLoopAssistProposal#GENERATE_ITERATOR_FOR} or
 	 *            {@link GenerateForLoopAssistProposal#GENERATE_ITERATE_ARRAY}
 	 */
-	public GenerateForLoopAssistProposal(ICompilationUnit cu, ITypeBinding expressionType, ASTNode currentNode, Expression currentExpression, int loopTypeToGenerate) {
+	public GenerateForLoopAssistProposal(ICompilationUnit cu, ExpressionStatement currentStatement, int loopTypeToGenerate) {
 		super("", cu, null, IProposalRelevance.GENERATE_FOR_LOOP, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
-		fCurrentNode= currentNode;
-		fCurrentExpression= currentExpression;
+		fCurrentStatement= currentStatement;
+		fCurrentExpression= fCurrentStatement.getExpression();
 		fLoopTypeToGenerate= loopTypeToGenerate;
-		fExpressionType= expressionType;
+		fExpressionType= fCurrentExpression.resolveTypeBinding();
 
 		switch (loopTypeToGenerate) {
 			case GenerateForLoopAssistProposal.GENERATE_FOREACH:
@@ -122,7 +122,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 
-		AST ast= fCurrentNode.getAST();
+		AST ast= fCurrentStatement.getAST();
 		createImportRewrite((CompilationUnit) fCurrentExpression.getRoot());
 
 		switch (fLoopTypeToGenerate) {
@@ -139,6 +139,13 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		}
 	}
 
+	private void replace(Statement loopStatement, ASTRewrite rewrite) {
+		if (ASTNodes.hasSemicolon(fCurrentStatement, getCompilationUnit())) {
+			rewrite.replace(fCurrentStatement, loopStatement, null);
+		} else {
+			rewrite.replace(fCurrentExpression, loopStatement, null);
+		}
+	}
 
 	/**
 	 * Helper to generate a <code>foreach</code> loop to iterate over an {@link Iterable}.
@@ -157,7 +164,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		SimpleName forDeclarationName= resolveLinkedVariableNameWithProposals(rewrite, loopOverType.getName(), null, true);
 
 		SingleVariableDeclaration forLoopInitializer= ast.newSingleVariableDeclaration();
-		forLoopInitializer.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentNode, getImportRewrite())));
+		forLoopInitializer.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentStatement, getImportRewrite())));
 		forLoopInitializer.setName(forDeclarationName);
 
 		loopStatement.setParameter(forLoopInitializer);
@@ -168,7 +175,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 
 		loopStatement.setBody(forLoopBody);
 
-		rewrite.replace(fCurrentNode, loopStatement, null);
+		replace(loopStatement, rewrite);
 
 		return rewrite;
 	}
@@ -204,7 +211,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 
 		loopStatement.setBody(forLoopBody);
 
-		rewrite.replace(fCurrentNode, loopStatement, null);
+		replace(loopStatement, rewrite);
 
 		return rewrite;
 	}
@@ -230,7 +237,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 
 		// declaration
 		VariableDeclarationExpression varDeclarationExpression= ast.newVariableDeclarationExpression(varDeclarationFragment);
-		varDeclarationExpression.setType(getImportRewrite().addImport(iteratorMethodBinding.getReturnType(), ast, new ContextSensitiveImportRewriteContext(fCurrentNode, getImportRewrite())));
+		varDeclarationExpression.setType(getImportRewrite().addImport(iteratorMethodBinding.getReturnType(), ast, new ContextSensitiveImportRewriteContext(fCurrentStatement, getImportRewrite())));
 
 		return varDeclarationExpression;
 	}
@@ -255,7 +262,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		VariableDeclarationFragment resolvedVariableDeclarationFragment= ast.newVariableDeclarationFragment();
 		resolvedVariableDeclarationFragment.setName(resolvedVariableName);
 		VariableDeclarationExpression resolvedVariableDeclaration= ast.newVariableDeclarationExpression(resolvedVariableDeclarationFragment);
-		resolvedVariableDeclaration.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentNode, getImportRewrite())));
+		resolvedVariableDeclaration.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentStatement, getImportRewrite())));
 		assignResolvedVariable.setLeftHandSide(resolvedVariableDeclaration);
 
 		// right hand side
@@ -295,7 +302,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		forLoopBody.statements().add(ast.newExpressionStatement(getForBodyAssignment(rewrite, loopVariableName)));
 		forLoopBody.statements().add(createBlankLineStatementWithCursorPosition(rewrite));
 		loopStatement.setBody(forLoopBody);
-		rewrite.replace(fCurrentNode, loopStatement, null);
+		replace(loopStatement, rewrite);
 
 		return rewrite;
 	}
@@ -321,7 +328,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		VariableDeclarationFragment resolvedVariableDeclarationFragment= ast.newVariableDeclarationFragment();
 		resolvedVariableDeclarationFragment.setName(resolvedVariableName);
 		VariableDeclarationExpression resolvedVariableDeclaration= ast.newVariableDeclarationExpression(resolvedVariableDeclarationFragment);
-		resolvedVariableDeclaration.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentNode, getImportRewrite())));
+		resolvedVariableDeclaration.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentStatement, getImportRewrite())));
 		assignResolvedVariable.setLeftHandSide(resolvedVariableDeclaration);
 
 		// right hand side
@@ -431,7 +438,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		forLoopBody.statements().add(ast.newExpressionStatement(getIndexBasedForBodyAssignment(rewrite, loopVariableName)));
 		forLoopBody.statements().add(createBlankLineStatementWithCursorPosition(rewrite));
 		loopStatement.setBody(forLoopBody);
-		rewrite.replace(fCurrentNode, loopStatement, null);
+		replace(loopStatement, rewrite);
 
 		return rewrite;
 	}
@@ -457,7 +464,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		VariableDeclarationFragment resolvedVariableDeclarationFragment= ast.newVariableDeclarationFragment();
 		resolvedVariableDeclarationFragment.setName(resolvedVariableName);
 		VariableDeclarationExpression resolvedVariableDeclaration= ast.newVariableDeclarationExpression(resolvedVariableDeclarationFragment);
-		resolvedVariableDeclaration.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentNode, getImportRewrite())));
+		resolvedVariableDeclaration.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentStatement, getImportRewrite())));
 		assignResolvedVariable.setLeftHandSide(resolvedVariableDeclaration);
 
 		// right hand side
@@ -519,7 +526,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	 * @return an array of proposal strings
 	 */
 	private String[] getVariableNameProposals(String basename, String excludedName) {
-		ASTNode surroundingBlock= fCurrentNode;
+		ASTNode surroundingBlock= fCurrentStatement;
 		while ((surroundingBlock= surroundingBlock.getParent()) != null) {
 			if (surroundingBlock instanceof Block) {
 				break;

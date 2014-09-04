@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -30,6 +31,7 @@ import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -39,6 +41,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -61,6 +64,7 @@ import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -1522,5 +1526,27 @@ public class ASTNodes {
 			}
 		}
 		return variableNames;
+	}
+
+	/**
+	 * Checks whether the given <code>exprStatement</code> has a semicolon at the end.
+	 * 
+	 * @param exprStatement the {@link ExpressionStatement} to check the semicolon
+	 * @param cu the compilation unit
+	 * @return <code>true</code> if the given <code>exprStatement</code> has a semicolon at the end,
+	 *         <code>false</code> otherwise
+	 */
+	public static boolean hasSemicolon(ExpressionStatement exprStatement, ICompilationUnit cu) {
+		boolean hasSemicolon= true;
+		if ((exprStatement.getFlags() & ASTNode.RECOVERED) != 0) {
+			try {
+				Expression expression= exprStatement.getExpression();
+				TokenScanner scanner= new TokenScanner(cu);
+				hasSemicolon= scanner.readNext(expression.getStartPosition() + expression.getLength(), true) == ITerminalSymbols.TokenNameSEMICOLON;
+			} catch (CoreException e) {
+				hasSemicolon= false;
+			}
+		}
+		return hasSemicolon;
 	}
 }
