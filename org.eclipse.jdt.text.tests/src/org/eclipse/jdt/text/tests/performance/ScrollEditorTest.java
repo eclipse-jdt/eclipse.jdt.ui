@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -199,9 +199,8 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 				// 0: assert that we are at the top and the selection at 0
 				assertTrue("editor must be scrolled to the top before starting", text.getTopIndex() == 0);
 				assertTrue("selection must be at (0,0) before starting", text.getSelection().x == 0 && text.getSelection().y == 0);
-
 				// 1: post scroll events
-				long delay= 3000;
+				long delay= 6000;
 				Timeout timeout= waiter.restart(delay);
 				performanceMeter.start();
 				for (int j= 0; j < operations && !timeout.hasTimedOut(); j++) {
@@ -209,8 +208,8 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 					SWTEventHelper.pressKeyCodeCombination(display, mode.SCROLL_COMBO, false);
 					runEventQueue(display);
 					// average for select & scroll is 30ms/line
-					// - give it ten time as much to allow for GCs (300ms),
-					// check back every 10 lines == never wait longer than 3s.
+					// - give it 20 times as much to allow for GCs (600ms),
+					// check back every 10 lines == never wait longer than 6s.
 					if (j % 10 == 9)
 						timeout= waiter.restart(delay);
 				}

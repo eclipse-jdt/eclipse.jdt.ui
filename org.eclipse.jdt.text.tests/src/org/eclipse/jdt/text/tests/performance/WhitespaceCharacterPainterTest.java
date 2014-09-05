@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,13 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import java.lang.reflect.Field;
+import java.util.Set;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.eclipse.test.internal.performance.PerformanceMeterFactory;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -34,6 +39,21 @@ public class WhitespaceCharacterPainterTest extends ScrollEditorTest {
 
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
+	}
+	
+	public static Test setUpTest(Test test) {
+		return new PerformanceTestSetup(test) {
+			@Override
+			protected void setUp() throws Exception {
+				// reset the PerformanceMeterFactory, so that the same scenario can be run again:
+				Field field = PerformanceMeterFactory.class.getDeclaredField("fScenarios");
+				field.setAccessible(true);
+				Set set = (Set) field.get(null);
+				set.clear();
+				
+				super.setUp();
+			}
+		};
 	}
 
 	protected String getEditor() {
