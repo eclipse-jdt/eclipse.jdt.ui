@@ -4682,6 +4682,17 @@
             sequence="M1+M2+U"
             commandId="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file.quickMenu"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <!-- Ctrl+Shift+U is the Unicode Input Method on gtk, see https://developer.gnome.org/gtk3/stable/GtkIMContext.html#GtkIMContext.description -->
+      <key
+            platform="gtk"
+            sequence="M1+M2+U"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <key
+            platform="gtk"
+            sequence="CTRL+ALT+U"
+            commandId="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file.quickMenu"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
 
 <!-- perspectives -->
 
