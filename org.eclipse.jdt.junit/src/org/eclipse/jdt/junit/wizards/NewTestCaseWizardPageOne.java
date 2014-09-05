@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -334,7 +334,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		} else if (fieldName.equals(JUNIT4TOGGLE)) {
 			updateBuildPathMessage();
 			fMethodStubsButtons.setEnabled(IDX_SETUP_CLASS, isJUnit4());
-			fMethodStubsButtons.setEnabled(IDX_TEARDOWN_CLASS, isJUnit4());
+			fMethodStubsButtons.setEnabled(IDX_TEARDOWN_CLASS, isJUnit4() && fMethodStubsButtons.isSelected(IDX_SETUP_CLASS));
 			fMethodStubsButtons.setEnabled(IDX_CONSTRUCTOR, !isJUnit4());
 		}
 		updateStatus(getStatusList());
