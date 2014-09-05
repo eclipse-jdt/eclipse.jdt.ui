@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,6 @@ package org.eclipse.jdt.ui.tests.performance;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
@@ -31,6 +30,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.launching.JavaRuntime;
 
 
 public class SWTTestProject {
@@ -64,10 +65,13 @@ public class SWTTestProject {
 		IProject project= createExistingProject(PROJECT);
 		fProject= JavaCore.create(project);
 		
-		//some classes in the archive are not 1.4 compliant, e.g. GridData uses 'enum' as identifier
-		Map options= fProject.getOptions(false);
-		JavaCore.setComplianceOptions(JavaCore.VERSION_1_3, options);
-		fProject.setOptions(options);
+		/* Can't use the default system JRE:
+		 * - some classes in the archive are not 1.4 compliant, e.g. GridData uses 'enum' as identifier
+		 * - search engine reports wrong inaccurate matches, see bug 443411
+		 * - using the System JRE in a performance test is obviously wrong
+		 */
+		JavaProjectHelper.removeFromClasspath(fProject, new Path(JavaRuntime.JRE_CONTAINER));
+		JavaProjectHelper.addRTJar13(fProject);
 		
 		Assert.assertTrue(fProject.exists());
 	}
