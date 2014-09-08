@@ -7,9 +7,9 @@ Project description:
 --------------------
 
 The JDT UI implements the user interface for the Java IDE. This includes views like Package Explorer and JUnit, the Java and properties files editors, Java search, and refactorings.
-Website: http://www.eclipse.org/jdt/ui/
+Website: <http://www.eclipse.org/jdt/ui/>
 
-- https://projects.eclipse.org/projects/eclipse.jdt.ui
+- <https://projects.eclipse.org/projects/eclipse.jdt.ui>
 
 How to contribute:
 --------------------
@@ -22,39 +22,42 @@ Developer resources:
 
 Information regarding source code management, builds, coding standards, and more.
 
-- [https://projects.eclipse.org/projects/eclipse.jdt.ui/developer] [2]
+- <https://projects.eclipse.org/projects/eclipse.jdt.ui/developer>
 
 Contributor License Agreement:
 ------------------------------
 
 Before your contribution can be accepted by the project, you need to create and electronically sign the Eclipse Foundation Contributor License Agreement (CLA).
 
-- [http://www.eclipse.org/legal/CLA.php] [3]
+- <http://www.eclipse.org/legal/CLA.php>
 
-Contact:
---------
+Forum:
+------
 
-Contact the project developers via the project's "dev" list.
+Public forum for Eclipse JDT users.
 
-- [https://dev.eclipse.org/mailman/listinfo/jdt-ui-dev] [4]
+- <http://www.eclipse.org/forums/eclipse.tools.jdt>
 
 Search for bugs:
 ----------------
 
 This project uses Bugzilla to track ongoing development and issues.
 
-- [https://bugs.eclipse.org/bugs/buglist.cgi?product=JDT;component=UI] [5]
+- <https://bugs.eclipse.org/bugs/buglist.cgi?product=JDT;component=UI>
 
 Create a new bug:
 -----------------
 
 Be sure to search for existing bugs before you create another one. Remember that contributions are always welcome!
 
-- [https://bugs.eclipse.org/bugs/enter_bug.cgi?product=JDT;component=UI] [6]
+- <https://bugs.eclipse.org/bugs/enter_bug.cgi?product=JDT;component=UI>
+
+Contact:
+--------
+
+Contact the project developers via the project's "dev" list.
+
+- <https://dev.eclipse.org/mailman/listinfo/jdt-ui-dev>
+
 
 [1]: https://wiki.eclipse.org/JDT_UI/How_to_Contribute
-[2]: https://projects.eclipse.org/projects/eclipse.jdt.ui/developer
-[3]: http://www.eclipse.org/legal/CLA.php
-[4]: https://dev.eclipse.org/mailman/listinfo/jdt-ui-dev
-[5]: https://bugs.eclipse.org/bugs/buglist.cgi?product=JDT;component=UI
-[6]: https://bugs.eclipse.org/bugs/enter_bug.cgi?product=JDT;component=UI
