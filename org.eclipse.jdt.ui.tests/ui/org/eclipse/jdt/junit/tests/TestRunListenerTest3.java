@@ -25,7 +25,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.junit.JUnitMessages;
 import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 
-public class TestRunListenerTest extends AbstractTestRunListenerTest {
+public class TestRunListenerTest3 extends AbstractTestRunListenerTest {
 
 	private String[] runSequenceTest(IType typeToLaunch) throws Exception {
 		TestRunLog log= new TestRunLog();
