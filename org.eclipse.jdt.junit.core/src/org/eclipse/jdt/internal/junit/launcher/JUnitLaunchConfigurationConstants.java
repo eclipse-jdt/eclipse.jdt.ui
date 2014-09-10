@@ -40,9 +40,14 @@ public class JUnitLaunchConfigurationConstants {
 	public static final String ATTR_PORT= JUnitCorePlugin.PLUGIN_ID+".PORT"; //$NON-NLS-1$
 
 	/**
-	 * The test method, or "" iff running the whole test type.
+	 * The test name, or "" iff running the whole test type.
 	 */
-	public static final String ATTR_TEST_METHOD_NAME= JUnitCorePlugin.PLUGIN_ID+".TESTNAME"; //$NON-NLS-1$
+	public static final String ATTR_TEST_NAME= JUnitCorePlugin.PLUGIN_ID + ".TESTNAME"; //$NON-NLS-1$
+
+	/**
+	 * @Deprecated use {@link #ATTR_TEST_NAME}
+	 **/
+	public static final String ATTR_TEST_METHOD_NAME= ATTR_TEST_NAME;
 
 	public static final String ATTR_KEEPRUNNING = JUnitCorePlugin.PLUGIN_ID+ ".KEEPRUNNING_ATTR"; //$NON-NLS-1$
 	/**

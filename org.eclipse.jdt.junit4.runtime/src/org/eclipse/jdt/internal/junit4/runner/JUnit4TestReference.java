@@ -12,7 +12,7 @@
 
 package org.eclipse.jdt.internal.junit4.runner;
 
-import org.junit.runner.Request;
+import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.Runner;
 import org.junit.runner.notification.RunListener;
@@ -20,17 +20,53 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runner.notification.StoppedByUserException;
 
 import org.eclipse.jdt.internal.junit.runner.IStopListener;
+import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
 import org.eclipse.jdt.internal.junit.runner.ITestReference;
+import org.eclipse.jdt.internal.junit.runner.IVisitsTestTrees;
 import org.eclipse.jdt.internal.junit.runner.TestExecution;
 
-public abstract class JUnit4TestReference implements ITestReference {
-	protected Runner fRunner;
+public class JUnit4TestReference implements ITestReference {
+	protected final Runner fRunner;
 
-	public JUnit4TestReference(Request request, String[] failureNames) {
-		if (failureNames != null) {
-			request= request.sortWith(new FailuresFirstSorter(failureNames));
+	protected final Description fRoot;
+
+	public JUnit4TestReference(Runner runner, Description root) {
+		fRunner= runner;
+		fRoot= root;
+	}
+
+	public int countTestCases() {
+		return countTestCases(fRoot);
+	}
+
+	private int countTestCases(Description description) {
+		if (description.isTest()) {
+			return 1;
+		} else {
+			int result= 0;
+			for (Description child : description.getChildren()) {
+				result+= countTestCases(child);
+			}
+			return result;
 		}
-		fRunner= request.getRunner();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof JUnit4TestReference))
+			return false;
+
+		JUnit4TestReference ref= (JUnit4TestReference)obj;
+		return (ref.fRoot.equals(fRoot));
+	}
+
+	public ITestIdentifier getIdentifier() {
+		return new JUnit4Identifier(fRoot);
+	}
+
+	@Override
+	public int hashCode() {
+		return fRoot.hashCode();
 	}
 
 	public void run(TestExecution execution) {
@@ -49,10 +85,30 @@ public abstract class JUnit4TestReference implements ITestReference {
 			notifier.fireTestRunStarted(fRunner.getDescription());
 			fRunner.run(notifier);
 			notifier.fireTestRunFinished(result);
-		} catch (StoppedByUserException e) {
+		} catch (@SuppressWarnings("unused") StoppedByUserException e) {
 			// not interesting, see https://bugs.eclipse.org/329498
 		} finally {
 			notifier.removeListener(listener);
 		}
+	}
+
+	public void sendTree(IVisitsTestTrees notified) {
+		sendTree(notified, fRoot);
+	}
+
+	private void sendTree(final IVisitsTestTrees notified, Description description) {
+		if (description.isTest()) {
+			notified.visitTreeEntry(new JUnit4Identifier(description), false, 1);
+		} else {
+			notified.visitTreeEntry(new JUnit4Identifier(description), true, description.getChildren().size());
+			for (Description child : description.getChildren()) {
+				sendTree(notified, child);
+			}
+		}
+	}
+
+	@Override
+	public String toString() {
+		return fRoot.toString();
 	}
 }

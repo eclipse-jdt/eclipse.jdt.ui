@@ -2094,7 +2094,7 @@ action enablement
 						// reset the container
 						tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
 						if (testName != null) {
-							tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, testName);
+							tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME, testName);
 						}
 						relaunch(tmp, launchMode);
 						return;

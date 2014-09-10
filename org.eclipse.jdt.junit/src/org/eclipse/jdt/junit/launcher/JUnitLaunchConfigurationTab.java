@@ -465,7 +465,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fOriginalTestMethodName= ""; //$NON-NLS-1$
 		try {
 			testTypeName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""); //$NON-NLS-1$
-			fOriginalTestMethodName = config.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, ""); //$NON-NLS-1$
+			fOriginalTestMethodName = config.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME, ""); //$NON-NLS-1$
 		} catch (CoreException ce) {
 		}
 		fTestRadioButton.setSelection(true);
@@ -508,12 +508,12 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, fContainerElement.getHandleIdentifier());
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""); //$NON-NLS-1$
 			 //workaround for bug 65399
-			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, ""); //$NON-NLS-1$
+			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME, ""); //$NON-NLS-1$
 		} else {
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fProjText.getText());
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, fTestText.getText());
 			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
-			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, fTestMethodText.getText());
+			config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME, fTestMethodText.getText());
 		}
 		config.setAttribute(JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING, fKeepRunning.getSelection());
 		try {

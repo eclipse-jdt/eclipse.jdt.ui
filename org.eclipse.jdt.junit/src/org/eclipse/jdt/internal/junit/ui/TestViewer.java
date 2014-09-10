@@ -34,6 +34,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableItem;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -53,18 +55,22 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.PageBook;
 
+import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.junit.launcher.ITestFinder;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.model.TestRoot;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
+
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
 import org.eclipse.jdt.internal.ui.viewsupport.ColoringLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
@@ -221,9 +227,14 @@ public class TestViewer {
 			if (testElement instanceof TestSuiteElement) {
 				manager.add(new OpenTestAction(fTestRunnerPart, testLabel));
 				manager.add(new Separator());
-				if (testClassExists(className) && !fTestRunnerPart.lastLaunchIsKeptAlive()) {
-					manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testElement.getId(), className, null, ILaunchManager.RUN_MODE));
-					manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testElement.getId(), className, null, ILaunchManager.DEBUG_MODE));
+				if (!fTestRunnerPart.lastLaunchIsKeptAlive()) {
+					IType testType= findTestClass(testElement);
+					if (testType != null) {
+						String qualifiedName= testType.getFullyQualifiedName();
+						String testName= qualifiedName.equals(className) ? null : testElement.getTestName();
+						manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testElement.getId(), qualifiedName, testName, ILaunchManager.RUN_MODE));
+						manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testElement.getId(), qualifiedName, testName, ILaunchManager.DEBUG_MODE));
+					}
 				}
 			} else {
 				TestCaseElement testCaseElement= (TestCaseElement) testElement;
@@ -253,17 +264,37 @@ public class TestViewer {
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end")); //$NON-NLS-1$
 	}
 
-	private boolean testClassExists(String className) {
+	/*
+	 * Returns the element's test class or the next container's test class, which exists, and for which ITestFinder.isTest() is true.
+	 */
+	private IType findTestClass(ITestElement element) {
+		ITestFinder finder= ((TestRunSession)element.getTestRunSession()).getTestRunnerKind().getFinder();
 		IJavaProject project= fTestRunnerPart.getLaunchedProject();
 		if (project == null)
-			return false;
-		try {
-			IType type= project.findType(className);
-			return type != null;
-		} catch (JavaModelException e) {
-			// fall through
+			return null;
+		ITestElement current= element;
+		while (current != null) {
+			try {
+				String className= null;
+				if (current instanceof TestRoot) {
+					ILaunchConfiguration configuration= ((TestRunSession)element.getTestRunSession()).getLaunch().getLaunchConfiguration();
+					className= configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
+				} else if (current instanceof TestElement) {
+					className= ((TestElement)current).getClassName();
+				}
+				if (className != null) {
+					IType type= project.findType(className);
+					if (type != null && finder.isTest(type))
+						return type;
+				}
+			} catch (JavaModelException e) {
+				// fall through
+			} catch (CoreException e) {
+				// fall through
+			}
+			current= current instanceof TestElement ? ((TestElement)current).getParent() : null;
 		}
-		return false;
+		return null;
 	}
 
 	public Control getTestViewerControl() {

@@ -249,7 +249,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		IJavaProject javaProject= getJavaProject(configuration);
 
 		IJavaElement testTarget= getTestTarget(configuration, javaProject);
-		String testMethodName= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_METHOD_NAME, ""); //$NON-NLS-1$
+		String testMethodName= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME, ""); //$NON-NLS-1$
 		if (testMethodName.length() > 0) {
 			if (testTarget instanceof IType) {
 				return new IMember[] { ((IType) testTarget).getMethod(testMethodName, new String[0]) };

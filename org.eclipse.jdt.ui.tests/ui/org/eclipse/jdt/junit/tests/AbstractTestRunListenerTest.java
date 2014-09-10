@@ -92,8 +92,8 @@ public class AbstractTestRunListenerTest extends TestCase {
 	}
 
 	private static class TestJUnitLaunchShortcut extends JUnitLaunchShortcut {
-		public static ILaunchConfigurationWorkingCopy createConfiguration(IJavaElement element) throws CoreException {
-			ILaunchConfigurationWorkingCopy copy= new TestJUnitLaunchShortcut().createLaunchConfiguration(element);
+		public static ILaunchConfigurationWorkingCopy createConfiguration(IJavaElement element, String testName) throws CoreException {
+			ILaunchConfigurationWorkingCopy copy= new TestJUnitLaunchShortcut().createLaunchConfiguration(element, testName);
 			return copy;
 		}
 	}
@@ -107,6 +107,10 @@ public class AbstractTestRunListenerTest extends TestCase {
 	}
 
 	protected void launchJUnit(IJavaElement aTest, String testKindID) throws CoreException {
+		launchJUnit(aTest, testKindID, (String)null);
+	}
+	
+	protected void launchJUnit(IJavaElement aTest, String testKindID, String testName) throws CoreException {
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
 
 		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
@@ -151,7 +155,7 @@ public class AbstractTestRunListenerTest extends TestCase {
 		};
 		lm.addLaunchListener(launchesListener);
 
-		ILaunchConfigurationWorkingCopy configuration= TestJUnitLaunchShortcut.createConfiguration(aTest);
+		ILaunchConfigurationWorkingCopy configuration= TestJUnitLaunchShortcut.createConfiguration(aTest, testName);
 		if (testKindID != null) {
 			configuration.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_RUNNER_KIND, testKindID);
 		}
@@ -176,7 +180,11 @@ public class AbstractTestRunListenerTest extends TestCase {
 	}
 	
 	protected String[] launchJUnit(IJavaElement aTest, String testKindID, final TestRunLog log) throws CoreException {
-		launchJUnit(aTest, testKindID);
+		return launchJUnit(aTest, testKindID, null, log);
+	}
+	
+	protected String[] launchJUnit(IJavaElement aTest, String testKindID, String testName, final TestRunLog log) throws CoreException {
+		launchJUnit(aTest, testKindID, testName);
 
 		boolean success= new DisplayHelper(){
 			protected boolean condition() {
