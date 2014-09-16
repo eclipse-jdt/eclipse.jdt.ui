@@ -188,7 +188,7 @@ public class MethodStubsSelectionButtonGroup {
 	 */
 	public boolean isSelected(int index) {
 		if (index >= 0 && index < fButtonsSelected.length) {
-			return fButtonsSelected[index];
+			return fButtonsSelected[index] && fButtonsEnabled[index];
 		}
 		return false;
 	}
@@ -237,7 +237,11 @@ public class MethodStubsSelectionButtonGroup {
 					Button button= fButtons[index];
 					if (isOkToUse(button)) {
 						button.setEnabled(enabled);
-						button.setSelection(fButtonsSelected[index]);
+						if (!enabled) {
+							button.setSelection(false);
+						} else {
+							button.setSelection(fButtonsSelected[index]);
+						}
 					}
 				}
 			}
