@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,7 +18,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
@@ -35,8 +34,6 @@ public class MethodStubsSelectionButtonGroup {
 	private Label fLabel;
 	protected String fLabelText;
 
-	private SelectionButtonGroupListener fGroupListener;
-
 	private boolean fEnabled;
 
 	private Composite fButtonComposite;
@@ -49,15 +46,6 @@ public class MethodStubsSelectionButtonGroup {
 	private int fGroupBorderStyle;
 	private int fGroupNumberOfColumns;
 	private int fButtonsStyle;
-
-
-	public interface SelectionButtonGroupListener {
-		/**
-		 * The dialog field has changed.
-		 * @param field The changed dialog field
-		 */
-		void groupChanged(MethodStubsSelectionButtonGroup field);
-	}
 
 	/**
 	 * Creates a group without border.
@@ -179,25 +167,8 @@ public class MethodStubsSelectionButtonGroup {
 			for (int i= 0; i < nFillElements; i++) {
 				createEmptySpace(fButtonComposite);
 			}
-			setSelectionGroupListener(new SelectionButtonGroupListener() {
-				public void groupChanged(MethodStubsSelectionButtonGroup field) {
-					field.setEnabled(1, isEnabled() && field.isSelected(0));
-				}
-			});
 		}
 		return fButtonComposite;
-	}
-
-	/**
-	 * Returns a button from the group or <code>null</code> if not yet created.
-	 * @param index the button index
-	 * @return the button
-	 */
-	public Button getSelectionButton(int index) {
-		if (index >= 0 && index < fButtons.length) {
-			return fButtons[index];
-		}
-		return null;
 	}
 
 	protected void doWidgetSelected(SelectionEvent e) {
@@ -205,7 +176,6 @@ public class MethodStubsSelectionButtonGroup {
 		for (int i= 0; i < fButtons.length; i++) {
 			if (fButtons[i] == button) {
 				fButtonsSelected[i]= button.getSelection();
-				dialogFieldChanged();
 				return;
 			}
 		}
@@ -295,49 +265,6 @@ public class MethodStubsSelectionButtonGroup {
 	 */
 	public void setLabelText(String labeltext) {
 		fLabelText= labeltext;
-	}
-
-	/**
-	 * Defines the listener for this dialog field.
-	 * @param listener the listener
-	 */
-	public final void setSelectionGroupListener(SelectionButtonGroupListener listener) {
-		fGroupListener= listener;
-	}
-
-	/**
-	 * A dialog field has changed.
-	 */
-	public void dialogFieldChanged() {
-		if (fGroupListener != null) {
-			fGroupListener.groupChanged(this);
-		}
-	}
-
-	/**
-	 * Tries to set the focus to the dialog field.
-	 * Returns <code>true</code> if the dialog field can take focus.
-	 * 	To be re-implemented by dialog field implementors.
-	 * @return returns <code>true</code> if the dialog field can take focus
-	 */
-	public boolean setFocus() {
-		return false;
-	}
-
-	/**
-	 * Posts <code>setFocus</code> to the display event queue.
-	 * @param display the display
-	 */
-	public void postSetFocusOnDialogField(Display display) {
-		if (display != null) {
-			display.asyncExec(
-				new Runnable() {
-					public void run() {
-						setFocus();
-					}
-				}
-			);
-		}
 	}
 
 	protected static GridData gridDataForLabel(int span) {

@@ -334,7 +334,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		} else if (fieldName.equals(JUNIT4TOGGLE)) {
 			updateBuildPathMessage();
 			fMethodStubsButtons.setEnabled(IDX_SETUP_CLASS, isJUnit4());
-			fMethodStubsButtons.setEnabled(IDX_TEARDOWN_CLASS, isJUnit4() && fMethodStubsButtons.isSelected(IDX_SETUP_CLASS));
+			fMethodStubsButtons.setEnabled(IDX_TEARDOWN_CLASS, isJUnit4());
 			fMethodStubsButtons.setEnabled(IDX_CONSTRUCTOR, !isJUnit4());
 		}
 		updateStatus(getStatusList());
