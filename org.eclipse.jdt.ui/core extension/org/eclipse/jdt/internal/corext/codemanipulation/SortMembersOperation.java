@@ -71,45 +71,44 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 					{
 						MethodDeclaration method= (MethodDeclaration) bodyDeclaration;
 						if (method.isConstructor()) {
-							return getMemberCategory(MembersOrderPreferenceCache.CONSTRUCTORS_INDEX);
+							return MembersOrderPreferenceCache.CONSTRUCTORS_INDEX;
 						}
 						int flags= method.getModifiers();
 						if (Modifier.isStatic(flags))
-							return getMemberCategory(MembersOrderPreferenceCache.STATIC_METHODS_INDEX);
+							return MembersOrderPreferenceCache.STATIC_METHODS_INDEX;
 						else
-							return getMemberCategory(MembersOrderPreferenceCache.METHOD_INDEX);
+							return MembersOrderPreferenceCache.METHOD_INDEX;
 					}
 				case ASTNode.FIELD_DECLARATION :
 					{
-						int flags= ((FieldDeclaration) bodyDeclaration).getModifiers();
-						if (Modifier.isStatic(flags))
-							return getMemberCategory(MembersOrderPreferenceCache.STATIC_FIELDS_INDEX);
+						if (JdtFlags.isStatic(bodyDeclaration))
+							return MembersOrderPreferenceCache.STATIC_FIELDS_INDEX;
 						else
-							return getMemberCategory(MembersOrderPreferenceCache.FIELDS_INDEX);
+							return MembersOrderPreferenceCache.FIELDS_INDEX;
 					}
 				case ASTNode.INITIALIZER :
 					{
 						int flags= ((Initializer) bodyDeclaration).getModifiers();
 						if (Modifier.isStatic(flags))
-							return getMemberCategory(MembersOrderPreferenceCache.STATIC_INIT_INDEX);
+							return MembersOrderPreferenceCache.STATIC_INIT_INDEX;
 						else
-							return getMemberCategory(MembersOrderPreferenceCache.INIT_INDEX);
+							return MembersOrderPreferenceCache.INIT_INDEX;
 					}
 				case ASTNode.TYPE_DECLARATION :
 				case ASTNode.ENUM_DECLARATION :
 				case ASTNode.ANNOTATION_TYPE_DECLARATION :
-					return getMemberCategory(MembersOrderPreferenceCache.TYPE_INDEX);
+					return MembersOrderPreferenceCache.TYPE_INDEX;
 				case ASTNode.ENUM_CONSTANT_DECLARATION :
-					return getMemberCategory(MembersOrderPreferenceCache.ENUM_CONSTANTS_INDEX);
+					return MembersOrderPreferenceCache.ENUM_CONSTANTS_INDEX;
 				case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
-					return getMemberCategory(MembersOrderPreferenceCache.METHOD_INDEX); // reusing the method index
+					return MembersOrderPreferenceCache.METHOD_INDEX; // reusing the method index
 
 			}
 			return 0; // should never happen
 		}
 
-		private int getMemberCategory(int kind) {
-			return fMemberOrderCache.getCategoryIndex(kind);
+		private int getCategoryIndex(int category) {
+			return fMemberOrderCache.getCategoryIndex(category);
 		}
 
 		/**
@@ -120,16 +119,25 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 		public int compare(BodyDeclaration bodyDeclaration1, BodyDeclaration bodyDeclaration2) {
 			boolean preserved1= fDoNotSortFields && isSortPreserved(bodyDeclaration1);
 			boolean preserved2= fDoNotSortFields && isSortPreserved(bodyDeclaration2);
-			if (preserved1 && preserved2) {
-				return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
-			}
 			
-			// Bug 407759: need to use a common category (FIELDS_INDEX) for all isSortPreserved members:
-			int cat1= preserved1 ? getMemberCategory(MembersOrderPreferenceCache.FIELDS_INDEX) : category(bodyDeclaration1);
-			int cat2= preserved2 ? getMemberCategory(MembersOrderPreferenceCache.FIELDS_INDEX) : category(bodyDeclaration2);
+			// Bug 407759: need to use a common category for all isSortPreserved members that are to be sorted in the same group:
+			int cat1= category(bodyDeclaration1);
+			if (preserved1) {
+				cat1= sortPreservedCategory(cat1);
+			}
+			int cat2= category(bodyDeclaration2);
+			if (preserved2) {
+				cat2= sortPreservedCategory(cat2);
+			}
 
 			if (cat1 != cat2) {
-				return cat1 - cat2;
+				return getCategoryIndex(cat1) - getCategoryIndex(cat2);
+			}
+			
+			// cat1 == cat2 implies preserved1 == preserved2
+			
+			if (preserved1) {
+				return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
 			}
 
 			if (fMemberOrderCache.isSortByVisibility()) {
@@ -185,18 +193,14 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 					}
 				case ASTNode.FIELD_DECLARATION :
 					{
-						if (!fDoNotSortFields) {
-							FieldDeclaration field1= (FieldDeclaration) bodyDeclaration1;
-							FieldDeclaration field2= (FieldDeclaration) bodyDeclaration2;
+						FieldDeclaration field1= (FieldDeclaration) bodyDeclaration1;
+						FieldDeclaration field2= (FieldDeclaration) bodyDeclaration2;
 
-							String name1= ((VariableDeclarationFragment) field1.fragments().get(0)).getName().getIdentifier();
-							String name2= ((VariableDeclarationFragment) field2.fragments().get(0)).getName().getIdentifier();
+						String name1= ((VariableDeclarationFragment) field1.fragments().get(0)).getName().getIdentifier();
+						String name2= ((VariableDeclarationFragment) field2.fragments().get(0)).getName().getIdentifier();
 
-							// field declarations are sorted by name
-							return compareNames(bodyDeclaration1, bodyDeclaration2, name1, name2);
-						} else {
-							return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
-						}
+						// field declarations are sorted by name
+						return compareNames(bodyDeclaration1, bodyDeclaration2, name1, name2);
 					}
 				case ASTNode.INITIALIZER :
 					{
@@ -218,18 +222,14 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 					}
 				case ASTNode.ENUM_CONSTANT_DECLARATION :
 					{
-						if (!fDoNotSortFields) {
-							EnumConstantDeclaration decl1= (EnumConstantDeclaration) bodyDeclaration1;
-							EnumConstantDeclaration decl2= (EnumConstantDeclaration) bodyDeclaration2;
+						EnumConstantDeclaration decl1= (EnumConstantDeclaration) bodyDeclaration1;
+						EnumConstantDeclaration decl2= (EnumConstantDeclaration) bodyDeclaration2;
 
-							String name1= decl1.getName().getIdentifier();
-							String name2= decl2.getName().getIdentifier();
+						String name1= decl1.getName().getIdentifier();
+						String name2= decl2.getName().getIdentifier();
 
-							// enum constants declarations are sorted by name
-							return compareNames(bodyDeclaration1, bodyDeclaration2, name1, name2);
-						} else {
-							return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
-						}
+						// enum constants declarations are sorted by name
+						return compareNames(bodyDeclaration1, bodyDeclaration2, name1, name2);
 					}
 				case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION :
 					{
@@ -244,6 +244,19 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 					}
 			}
 			return 0;
+		}
+
+		private static int sortPreservedCategory(int category) {
+			switch (category) {
+				case MembersOrderPreferenceCache.STATIC_FIELDS_INDEX:
+				case MembersOrderPreferenceCache.STATIC_INIT_INDEX:
+					return MembersOrderPreferenceCache.STATIC_FIELDS_INDEX;
+				case MembersOrderPreferenceCache.FIELDS_INDEX:
+				case MembersOrderPreferenceCache.INIT_INDEX:
+					return MembersOrderPreferenceCache.FIELDS_INDEX;
+				default:
+					return category;
+			}
 		}
 
 		private boolean isSortPreserved(BodyDeclaration bodyDeclaration) {
