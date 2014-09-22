@@ -56,13 +56,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistPr
 public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 	private static final Class THIS= LocalCorrectionsQuickFixTest.class;
-
-	/**
-	 * Bug 430818: [1.8][quick fix] Quick fix for "for loop" is not shown for bare local variable/argument/field
-	 * caused by:
-	 * Bug 430336: [1.8][compiler] Bad syntax error recovery: Lonely identifier should be variable name, not type
-	 */
-	public static final boolean BUG_430818= false;
 	
 	/**
 	 * Bug 434188: [quick fix] shows sign of quick fix, but says no suggestions available.
@@ -10628,8 +10621,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	public void testLoopOverAddedToFixesForVariable() throws Exception {
 		if (BUG_434188)
 			return;
-		if (BUG_430818)
-			return;
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -10758,8 +10749,6 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	 */
 	public void testGenerateForeachNotAddedForLowVersion() throws Exception {
 		if (BUG_434188)
-			return;
-		if (BUG_430818)
 			return;
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

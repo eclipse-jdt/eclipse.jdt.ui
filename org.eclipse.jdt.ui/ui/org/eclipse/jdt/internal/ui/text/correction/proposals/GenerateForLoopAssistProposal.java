@@ -158,7 +158,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		EnhancedForStatement loopStatement= ast.newEnhancedForStatement();
 
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		ITypeBinding loopOverType= extractElementType(ast);
+		ITypeBinding loopOverType= extractType(ast);
 
 		// generate name proposals and add them to the variable declaration
 		SimpleName forDeclarationName= resolveLinkedVariableNameWithProposals(rewrite, loopOverType.getName(), null, true);
@@ -191,7 +191,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		ForStatement loopStatement= ast.newForStatement();
 
-		ITypeBinding loopOverType= extractElementType(ast);
+		ITypeBinding loopOverType= extractType(ast);
 
 		SimpleName loopVariableName= resolveLinkedVariableNameWithProposals(rewrite, "iterator", null, true); //$NON-NLS-1$
 		loopStatement.initializers().add(getIteratorBasedForInitializer(rewrite, loopVariableName));
@@ -319,7 +319,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	 */
 	private Assignment getForBodyAssignment(ASTRewrite rewrite, SimpleName loopVariableName) {
 		AST ast= rewrite.getAST();
-		ITypeBinding loopOverType= extractElementType(ast);
+		ITypeBinding loopOverType= extractType(ast);
 
 		Assignment assignResolvedVariable= ast.newAssignment();
 
@@ -455,7 +455,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	 */
 	private Expression getIndexBasedForBodyAssignment(ASTRewrite rewrite, SimpleName loopVariableName) {
 		AST ast= rewrite.getAST();
-		ITypeBinding loopOverType= extractElementType(ast);
+		ITypeBinding loopOverType= extractType(ast);
 
 		Assignment assignResolvedVariable= ast.newAssignment();
 
@@ -547,9 +547,9 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 	 * @param ast the current {@link AST} instance
 	 * @return the {@link ITypeBinding} of the elements to iterate over
 	 */
-	private ITypeBinding extractElementType(AST ast) {
+	private ITypeBinding extractType(AST ast) {
 		if (fExpressionType.isArray()) {
-			return Bindings.normalizeForDeclarationUse(fExpressionType.getElementType(), ast);
+			return Bindings.normalizeForDeclarationUse(fExpressionType.getComponentType(), ast);
 		}
 
 		// extract elements type directly out of the bindings
