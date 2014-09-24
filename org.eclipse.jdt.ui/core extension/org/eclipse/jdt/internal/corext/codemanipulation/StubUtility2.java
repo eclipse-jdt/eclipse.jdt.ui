@@ -370,7 +370,7 @@ public final class StubUtility2 {
 				SuperMethodInvocation invocation= ast.newSuperMethodInvocation();
 				ITypeBinding declaringType= binding.getDeclaringClass();
 				if (declaringType.isInterface()) {
-					String qualifier= imports.addImport(declaringType, context);
+					String qualifier= imports.addImport(declaringType.getErasure(), context);
 					Name name= ASTNodeFactory.newName(ast, qualifier);
 					invocation.setQualifier(name);
 				}
