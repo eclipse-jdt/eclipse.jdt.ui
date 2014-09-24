@@ -342,4 +342,44 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
+	public void testOverride4() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Collection;\n");
+		buf.append("abstract class X implements Collection<Integer> {\n");
+		buf.append("    parallelS\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("X.java", buf.toString(), false, null);
+
+		String str= "parallelS";
+		int offset= buf.toString().lastIndexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+		assertEquals(2, proposals.length);
+		IEditorPart part= JavaUI.openInEditor(cu);
+		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Collection;\n");
+		buf.append("import java.util.stream.Stream;\n");
+		buf.append("abstract class X implements Collection<Integer> {\n");
+		buf.append("    /* (non-Javadoc)\n");
+		buf.append("     * @see java.util.Collection#parallelStream()\n");
+		buf.append("     */\n");
+		buf.append("    @Override\n");
+		buf.append("    public Stream<Integer> parallelStream() {\n");
+		buf.append("        //TODO\n");
+		buf.append("        return Collection.super.parallelStream();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
 }
