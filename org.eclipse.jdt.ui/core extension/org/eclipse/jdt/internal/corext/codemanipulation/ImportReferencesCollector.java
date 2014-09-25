@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -266,6 +267,12 @@ public class ImportReferencesCollector extends GenericVisitor {
 	 */
 	@Override
 	public boolean visit(ThisExpression node) {
+		typeRefFound(node.getQualifier());
+		return false;
+	}
+	
+	@Override
+	public boolean visit(SuperFieldAccess node) {
 		typeRefFound(node.getQualifier());
 		return false;
 	}
