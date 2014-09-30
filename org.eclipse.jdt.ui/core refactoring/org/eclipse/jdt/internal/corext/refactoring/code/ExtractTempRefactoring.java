@@ -1003,14 +1003,14 @@ public class ExtractTempRefactoring extends Refactoring {
 
 		Expression initializer= (Expression) rewrite.createMoveTarget(selectedExpression);
 		VariableDeclarationStatement tempDeclaration= createTempDeclaration(initializer);
-		ASTNode replacement= tempDeclaration;
+		ASTNode replacement;
 
 		ASTNode parent= selectedExpression.getParent();
 		boolean isParentLambda= parent instanceof LambdaExpression;
 		AST ast= rewrite.getAST();
 		if (isParentLambda) {
 			Block blockBody= ast.newBlock();
-			blockBody.statements().add(replacement);
+			blockBody.statements().add(tempDeclaration);
 			if (!Bindings.isVoidType(((LambdaExpression) parent).resolveMethodBinding().getReturnType())) {
 				List<VariableDeclarationFragment> fragments= tempDeclaration.fragments();
 				SimpleName varName= fragments.get(0).getName();
@@ -1021,15 +1021,13 @@ public class ExtractTempRefactoring extends Refactoring {
 			replacement= blockBody;
 		} else if (ASTNodes.isControlStatementBody(parent.getLocationInParent())) {
 			Block block= ast.newBlock();
-			block.statements().add(replacement);
+			block.statements().add(tempDeclaration);
 			replacement= block;
-
-		}
-		if (isParentLambda || !ASTNodes.hasSemicolon((ExpressionStatement) parent, fCu)) {
-			rewrite.replace(selectedExpression, replacement, fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable));
 		} else {
-			rewrite.replace(parent, replacement, fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable));
+			replacement= tempDeclaration;
 		}
+		ASTNode replacee= isParentLambda || !ASTNodes.hasSemicolon((ExpressionStatement) parent, fCu) ? selectedExpression : parent;
+		rewrite.replace(replacee, replacement, fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable));
 	}
 
 	public void setDeclareFinal(boolean declareFinal) {
