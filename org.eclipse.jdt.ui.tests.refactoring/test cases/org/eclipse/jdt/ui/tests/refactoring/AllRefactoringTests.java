@@ -37,6 +37,7 @@ public class AllRefactoringTests {
 		suite.addTest(InlineTempTests17.suite());
 		suite.addTest(ExtractTempTests.suite());
 		suite.addTest(ExtractTempTests17.suite());
+		suite.addTest(ExtractTempTests18.suite());
 		suite.addTest(RenameTempTests.suite());
 		suite.addTest(ExtractConstantTests.suite());
 		suite.addTest(PromoteTempToFieldTests.suite());

@@ -72,6 +72,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
@@ -80,6 +81,7 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -195,6 +197,8 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (isThrowableInCatchBlock(node))
 			return false;
 		if (parent instanceof ExpressionStatement)
+			return false;
+		if (parent instanceof LambdaExpression)
 			return false;
 		if (isLeftValue(node))
 			return false;
@@ -735,6 +739,23 @@ public class ExtractTempRefactoring extends Refactoring {
 				replacementRewrite.insertLast(rewrite.createMoveTarget(target), null);
 				rewrite.replace(target, replacement, groupDescription);
 				return;
+			} else if (locationInParent == LambdaExpression.BODY_PROPERTY && ((LambdaExpression) parent).getBody() instanceof Expression) {
+				Block replacement= rewrite.getAST().newBlock();
+				ListRewrite replacementRewrite= rewrite.getListRewrite(replacement, Block.STATEMENTS_PROPERTY);
+				replacementRewrite.insertFirst(declaration, null);
+				ASTNode moveTarget= rewrite.createMoveTarget(target);
+				AST ast= rewrite.getAST();
+				if (Bindings.isVoidType(((LambdaExpression) parent).resolveMethodBinding().getReturnType())) {
+					ExpressionStatement expressionStatement= ast.newExpressionStatement((Expression) moveTarget);
+					moveTarget= expressionStatement;
+				} else {
+					ReturnStatement returnStatement= ast.newReturnStatement();
+					returnStatement.setExpression((Expression) moveTarget);
+					moveTarget= returnStatement;
+				}
+				replacementRewrite.insertLast(moveTarget, null);
+				rewrite.replace(target, replacement, groupDescription);
+				return;
 			}
 			target= parent;
 			parent= parent.getParent();
@@ -779,18 +800,22 @@ public class ExtractTempRefactoring extends Refactoring {
 		return l.toArray(new ASTNode[l.size()]);
 	}
 
-	private Block getEnclosingBodyNode() throws JavaModelException {
+	private ASTNode getEnclosingBodyNode() throws JavaModelException {
 		ASTNode node= getSelectedExpression().getAssociatedNode();
 
-		// expression must be in a method or initializer body
+		// expression must be in a method, lambda or initializer body
 		// make sure it is not in method or parameter annotation
 		StructuralPropertyDescriptor location= null;
 		while (node != null && !(node instanceof BodyDeclaration)) {
 			location= node.getLocationInParent();
 			node= node.getParent();
+			if (node instanceof LambdaExpression) {
+				break;
+			}
 		}
-		if (location == MethodDeclaration.BODY_PROPERTY || location == Initializer.BODY_PROPERTY) {
-			return (Block) node.getStructuralProperty(location);
+		if (location == MethodDeclaration.BODY_PROPERTY || location == Initializer.BODY_PROPERTY
+				|| (location == LambdaExpression.BODY_PROPERTY && ((LambdaExpression) node).resolveMethodBinding() != null)) {
+			return (ASTNode) node.getStructuralProperty(location);
 		}
 		return null;
 	}
@@ -977,19 +1002,33 @@ public class ExtractTempRefactoring extends Refactoring {
 		Expression selectedExpression= getSelectedExpression().getAssociatedExpression(); // whole expression selected
 
 		Expression initializer= (Expression) rewrite.createMoveTarget(selectedExpression);
-		ASTNode replacement= createTempDeclaration(initializer); // creates a VariableDeclarationStatement
+		VariableDeclarationStatement tempDeclaration= createTempDeclaration(initializer);
+		ASTNode replacement= tempDeclaration;
 
-		ExpressionStatement parent= (ExpressionStatement) selectedExpression.getParent();
-		if (ASTNodes.isControlStatementBody(parent.getLocationInParent())) {
-			Block block= rewrite.getAST().newBlock();
+		ASTNode parent= selectedExpression.getParent();
+		boolean isParentLambda= parent instanceof LambdaExpression;
+		AST ast= rewrite.getAST();
+		if (isParentLambda) {
+			Block blockBody= ast.newBlock();
+			blockBody.statements().add(replacement);
+			if (!Bindings.isVoidType(((LambdaExpression) parent).resolveMethodBinding().getReturnType())) {
+				List<VariableDeclarationFragment> fragments= tempDeclaration.fragments();
+				SimpleName varName= fragments.get(0).getName();
+				ReturnStatement returnStatement= ast.newReturnStatement();
+				returnStatement.setExpression(ast.newSimpleName(varName.getIdentifier()));
+				blockBody.statements().add(returnStatement);
+			}
+			replacement= blockBody;
+		} else if (ASTNodes.isControlStatementBody(parent.getLocationInParent())) {
+			Block block= ast.newBlock();
 			block.statements().add(replacement);
 			replacement= block;
 
 		}
-		if (ASTNodes.hasSemicolon(parent, fCu)) {
-			rewrite.replace(parent, replacement, fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable));
-		} else {
+		if (isParentLambda || !ASTNodes.hasSemicolon((ExpressionStatement) parent, fCu)) {
 			rewrite.replace(selectedExpression, replacement, fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable));
+		} else {
+			rewrite.replace(parent, replacement, fCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractTempRefactoring_declare_local_variable));
 		}
 	}
 
@@ -1010,8 +1049,9 @@ public class ExtractTempRefactoring extends Refactoring {
 		IExpressionFragment firstExpression= getFirstReplacedExpression();
 		if (firstExpression.getStartPosition() < selectedFragment.getStartPosition())
 			return false;
-		return selectedFragment.getAssociatedNode().getParent() instanceof ExpressionStatement
-			&& selectedFragment.matches(ASTFragmentFactory.createFragmentForFullSubtree(selectedFragment.getAssociatedNode()));
+		ASTNode associatedNode= selectedFragment.getAssociatedNode();
+		return (associatedNode.getParent() instanceof ExpressionStatement || associatedNode.getParent() instanceof LambdaExpression)
+				&& selectedFragment.matches(ASTFragmentFactory.createFragmentForFullSubtree(associatedNode));
 	}
 
 	private RefactoringStatus initialize(JavaRefactoringArguments arguments) {
