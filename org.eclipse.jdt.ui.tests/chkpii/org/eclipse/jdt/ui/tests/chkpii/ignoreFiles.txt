@@ -152,6 +152,7 @@ org.w3c.*/*
 
 Git/eclipse/*
 Git/pde/*
+Git/news/*
 
 www*eclipse.org-root/*
 www*eclipse.org-eclipse-root/*
