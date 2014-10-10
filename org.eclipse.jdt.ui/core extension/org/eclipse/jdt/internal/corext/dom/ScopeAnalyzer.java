@@ -180,6 +180,10 @@ public class ScopeAnalyzer {
 	 * @return return <code>true</code> if the requestor has reported the binding as found and no further results are required
 	 */
 	private boolean addInherited(ITypeBinding binding, int flags, IBindingRequestor requestor) {
+		return addInherited(binding, false, flags, requestor);
+	}
+
+	private boolean addInherited(ITypeBinding binding, boolean isSuperInterfaceBinding, int flags, IBindingRequestor requestor) {
 		if (!fTypesVisited.add(binding)) {
 			return false;
 		}
@@ -195,6 +199,9 @@ public class ScopeAnalyzer {
 			IMethodBinding[] methodBindings= binding.getDeclaredMethods();
 			for (int i= 0; i < methodBindings.length; i++) {
 				IMethodBinding curr= methodBindings[i];
+				if (isSuperInterfaceBinding && Modifier.isStatic(curr.getModifiers())) {
+					continue;
+				}
 				if (!curr.isSynthetic() && !curr.isConstructor()) {
 					if (requestor.acceptBinding(curr))
 						return true;
@@ -223,7 +230,7 @@ public class ScopeAnalyzer {
 
 		ITypeBinding[] interfaces= binding.getInterfaces(); // includes looking for methods: abstract, unimplemented methods
 		for (int i= 0; i < interfaces.length; i++) {
-			if (addInherited(interfaces[i], flags, requestor)) // recursive
+			if (addInherited(interfaces[i], true, flags, requestor)) // recursive
 				return true;
 		}
 		return false;
