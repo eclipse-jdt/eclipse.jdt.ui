@@ -207,6 +207,7 @@ public interface IProposalRelevance {
 	public static final int CHANGE_TO_ATTRIBUTE= 3;
 	public static final int CHANGE_LAMBDA_BODY_TO_BLOCK= 3;
 	public static final int CHANGE_LAMBDA_BODY_TO_EXPRESSION= 3;
+	public static final int ADD_INFERRED_LAMBDA_PARAMETER_TYPES= 3;
 
 	public static final int CONVERT_TO_INDEXED_FOR_LOOP= 2;
 	public static final int GENERATE_ENHANCED_FOR_LOOP= 2;

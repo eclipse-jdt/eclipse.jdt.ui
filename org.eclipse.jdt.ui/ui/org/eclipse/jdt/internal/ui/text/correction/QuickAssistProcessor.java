@@ -235,6 +235,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getConvertLambdaToAnonymousClassCreationsProposals(context, coveringNode, null)
 				|| getChangeLambdaBodyToBlockProposal(context, coveringNode, null)
 				|| getChangeLambdaBodyToExpressionProposal(context, coveringNode, null)
+				|| getAddInferredLambdaParameterTypes(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
 				|| getMakeVariableDeclarationFinalProposals(context, null)
 				|| getMissingCaseStatementProposals(context, coveringNode, null)
@@ -283,6 +284,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getConvertLambdaToAnonymousClassCreationsProposals(context, coveringNode, resultingCollections);
 				getChangeLambdaBodyToBlockProposal(context, coveringNode, resultingCollections);
 				getChangeLambdaBodyToExpressionProposal(context, coveringNode, resultingCollections);
+				getAddInferredLambdaParameterTypes(context, coveringNode, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getConvertEnhancedForLoopProposal(context, coveringNode, resultingCollections);
@@ -702,6 +704,56 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 		return isValidExpressionBody;
+	}
+
+	public static boolean getAddInferredLambdaParameterTypes(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+		LambdaExpression lambda;
+		if (covering instanceof LambdaExpression) {
+			lambda= (LambdaExpression) covering;
+		} else if (covering.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY &&
+				((VariableDeclarationFragment) covering.getParent()).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
+			lambda= (LambdaExpression) covering.getParent().getParent();
+		} else {
+			return false;
+		}
+
+		List<VariableDeclaration> lambdaParameters= lambda.parameters();
+		int noOfLambdaParams= lambdaParameters.size();
+		if (noOfLambdaParams == 0)
+			return false;
+
+		if (lambdaParameters.get(0) instanceof SingleVariableDeclaration)
+			return false;
+
+		IMethodBinding methodBinding= lambda.resolveMethodBinding();
+		if (methodBinding == null)
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		AST ast= lambda.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
+
+		rewrite.set(lambda, LambdaExpression.PARENTHESES_PROPERTY, Boolean.valueOf(true), null);
+
+		ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+		for (int i= 0; i < noOfLambdaParams; i++) {
+			VariableDeclaration param= lambdaParameters.get(i);
+			SingleVariableDeclaration newParam= ast.newSingleVariableDeclaration();
+			newParam.setName(ast.newSimpleName(param.getName().getIdentifier()));
+			newParam.setType(importRewrite.addImport(parameterTypes[i], ast));
+			rewrite.replace(param, newParam, null);
+		}
+
+		// add proposal
+		String label= CorrectionMessages.QuickAssistProcessor_add_inferred_lambda_parameter_types;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
+		proposal.setImportRewrite(importRewrite);
+		resultingCollections.add(proposal);
+		return true;
 	}
 
 	public static boolean getInferDiamondArgumentsProposal(IInvocationContext context, ASTNode node, IProblemLocation[] locations, Collection<ICommandAccess> resultingCollections) {

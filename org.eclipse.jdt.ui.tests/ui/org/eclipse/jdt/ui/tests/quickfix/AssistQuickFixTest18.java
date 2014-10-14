@@ -1193,7 +1193,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1242,7 +1242,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1514,7 +1514,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1554,7 +1554,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1595,7 +1595,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1635,7 +1635,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1676,7 +1676,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1718,7 +1718,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1759,7 +1759,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1808,7 +1808,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("interface FI2 {\n");
 		buf.append("    void foo(int x);\n");
 		buf.append("}\n");
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		String expected1= buf.toString();
@@ -1846,7 +1846,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("interface FI2 {\n");
 		buf.append("    void foo(int x);\n");
 		buf.append("}\n");
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		String expected1= buf.toString();
@@ -1872,7 +1872,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression);
 	}
@@ -1897,7 +1897,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression);
 	}
@@ -1922,7 +1922,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression);
 	}
@@ -1960,6 +1960,144 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 
 		String expected1= buf.toString();
 
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testAddInferredLambdaParamTypes1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    FI fi= (i, s) -> {};\n");
+		buf.append("}\n");
+		buf.append("interface FI {\n");
+		buf.append("    void foo(Integer i, String[]... s);\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("->");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    FI fi= (Integer i, String[][] s) -> {};\n"); // no varargs
+		buf.append("}\n");
+		buf.append("interface FI {\n");
+		buf.append("    void foo(Integer i, String[]... s);\n");
+		buf.append("}\n");
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testAddInferredLambdaParamTypes2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E2<T> {\n");
+		buf.append("    Function<T, Object> fi = t -> null;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("->");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E2<T> {\n");
+		buf.append("    Function<T, Object> fi = (T t) -> null;\n");
+		buf.append("}\n");
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testAddInferredLambdaParamTypes3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.IntFunction;\n");
+		buf.append("import java.util.function.Supplier;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    Supplier<String> s = () -> \"\";\n");
+		buf.append("    IntFunction<Object> ifn= (int i) -> null; \n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E3.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("->");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_add_inferred_lambda_parameter_types);
+
+		offset= buf.toString().indexOf("-> null");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_add_inferred_lambda_parameter_types);
+	}
+
+	public void testAddInferredLambdaParamTypes4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("public class E4 {\n");
+		buf.append("    FI fi= (i, s) -> {};\n");
+		buf.append("}\n");
+		buf.append("interface FI {\n");
+		buf.append("    void foo(@A Integer i, @A String @B [] s @C []);\n");
+		buf.append("}\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface A {}\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface B {}\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface C {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E4.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("->");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("public class E4 {\n");
+		buf.append("    FI fi= (@A Integer i, @A String @C [] @B [] s) -> {};\n");
+		buf.append("}\n");
+		buf.append("interface FI {\n");
+		buf.append("    void foo(@A Integer i, @A String @B [] s @C []);\n");
+		buf.append("}\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface A {}\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface B {}\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface C {}\n");
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		String expected1= buf.toString();
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 }
