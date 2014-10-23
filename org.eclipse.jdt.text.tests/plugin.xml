@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <!-- See org.eclipse.jdt.text.tests.performance.ScrollEditorTest.CTRL_DOWN.
+        Ctrl+ARROW_DOWN is "Application windows" on Mac OS X. -->
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="org.eclipse.ui.edit.text.scroll.lineDown"
+            contextId="org.eclipse.ui.textEditorScope"
+            platform="carbon"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="COMMAND+SHIFT+ALT+CTRL+ARROW_DOWN">
+      </key>
+   </extension>
+
+</plugin>

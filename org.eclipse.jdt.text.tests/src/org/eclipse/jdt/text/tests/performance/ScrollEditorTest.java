@@ -21,6 +21,8 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jface.util.Util;
+
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 public abstract class ScrollEditorTest extends TextPerformanceTestCase {
@@ -34,7 +36,11 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 	private static final String LINE_SCROLLING_FILE= PerformanceTestSetup.TEXT_LAYOUT;
 
 	private static final int[] CTRL_HOME= new int[] { SWT.CTRL, SWT.HOME };
-	private static final int[] CTRL_DOWN= new int[] { SWT.CTRL, SWT.ARROW_DOWN };
+	/* Ctrl+ARROW_DOWN is "Application windows" on Mac OS X.
+	 * COMMAND+SHIFT+ALT+CTRL+ARROW_DOWN is defined in org.eclipse.jdt.text.tests/plugin.xml */
+	private static final int[] CTRL_DOWN= Util.isMac()
+			? new int[] { SWT.COMMAND, SWT.SHIFT, SWT.ALT, SWT.CTRL, SWT.ARROW_DOWN }
+			: new int[] { SWT.CTRL, SWT.ARROW_DOWN };
 	private static final int[] PG_DOWN= new int[] { SWT.PAGE_DOWN };
 	private static final int[] SHIFT_PG_DOWN= new int[] { SWT.SHIFT, SWT.PAGE_DOWN };
 	private static final int[] DOWN= new int[] { SWT.ARROW_DOWN };

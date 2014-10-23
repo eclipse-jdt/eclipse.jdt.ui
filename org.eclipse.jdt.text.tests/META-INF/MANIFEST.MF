@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Plugin.name
-Bundle-SymbolicName: org.eclipse.jdt.text.tests
-Bundle-Version: 3.10.0.qualifier
+Bundle-SymbolicName: org.eclipse.jdt.text.tests;singleton:=true
+Bundle-Version: 3.10.100.qualifier
 Bundle-Activator: org.eclipse.jdt.text.tests.JdtTextTestPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %Plugin.providerName
