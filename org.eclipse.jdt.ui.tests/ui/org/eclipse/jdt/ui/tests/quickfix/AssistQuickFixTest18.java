@@ -1093,7 +1093,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1242,7 +1242,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1476,7 +1476,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 	
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 	
 		buf= new StringBuffer();
@@ -2098,6 +2098,1417 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertCorrectLabels(proposals);
 
 		String expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertMethodReferenceToLambda1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    Baz bm = E1::test;\n");
+		buf.append("    static <X> void test(X x) {}\n");
+		buf.append("}\n");
+		buf.append("interface Foo<T, N extends Number> {\n");
+		buf.append("    void m(N arg2);\n");
+		buf.append("    void m(T arg1);\n");
+		buf.append("}\n");
+		buf.append("interface Baz extends Foo<Integer, Integer> {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("::") + 1;
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    Baz bm = arg2 -> E1.test(arg2);\n");
+		buf.append("    static <X> void test(X x) {}\n");
+		buf.append("}\n");
+		buf.append("interface Foo<T, N extends Number> {\n");
+		buf.append("    void m(N arg2);\n");
+		buf.append("    void m(T arg1);\n");
+		buf.append("}\n");
+		buf.append("interface Baz extends Foo<Integer, Integer> {}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertMethodReferenceToLambda2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface J<R> {\n");
+		buf.append("    <T> R run(T t);\n");
+		buf.append("}\n");
+		buf.append("public class E2 {\n");
+		buf.append("    J<String> j1 = E2::<Object>test;    \n");
+		buf.append("    \n");
+		buf.append("    static <T> String test(T t) {\n");
+		buf.append("        return \"\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("::") + 1;
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_lambda_expression);
+	}
+
+	public void testConvertMethodReferenceToLambda3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("import java.util.HashSet;\n");
+		buf1.append("import java.util.function.*;\n");
+		buf1.append("class E3<T> {\n");
+		buf1.append("    IntFunction<int[][][]> ma = int[][][]::/*[1]*/new;\n");
+		buf1.append("    Supplier<MyHashSet<Integer>> mb = MyHashSet::/*[2]*/new;\n");
+		buf1.append("    Function<T, MyHashSet<Number>> mc = MyHashSet<Number>::/*[3]*/<T> new;\n");
+		buf1.append("    Function<String, MyHashSet<Integer>> md = MyHashSet::/*[4]*/new;\n");
+		buf1.append("}\n");
+		buf1.append("class MyHashSet<T> extends HashSet<T> {\n");
+		buf1.append("    public MyHashSet() {}\n");
+		buf1.append("    public <A> MyHashSet(A a) {}\n");
+		buf1.append("    public MyHashSet(String i) {}\n");
+		buf1.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E3.java", buf1.toString(), false, null);
+
+		// [1]
+		int offset= buf1.toString().indexOf("::/*[1]*/") + 1;
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.HashSet;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("class E3<T> {\n");
+		buf.append("    IntFunction<int[][][]> ma = arg0 -> new int[arg0][][];\n");
+		buf.append("    Supplier<MyHashSet<Integer>> mb = MyHashSet::/*[2]*/new;\n");
+		buf.append("    Function<T, MyHashSet<Number>> mc = MyHashSet<Number>::/*[3]*/<T> new;\n");
+		buf.append("    Function<String, MyHashSet<Integer>> md = MyHashSet::/*[4]*/new;\n");
+		buf.append("}\n");
+		buf.append("class MyHashSet<T> extends HashSet<T> {\n");
+		buf.append("    public MyHashSet() {}\n");
+		buf.append("    public <A> MyHashSet(A a) {}\n");
+		buf.append("    public MyHashSet(String i) {}\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+		// [2]
+		offset= buf1.toString().indexOf("::/*[2]*/") + 1;
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.HashSet;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("class E3<T> {\n");
+		buf.append("    IntFunction<int[][][]> ma = int[][][]::/*[1]*/new;\n");
+		buf.append("    Supplier<MyHashSet<Integer>> mb = () -> new MyHashSet<>();\n");
+		buf.append("    Function<T, MyHashSet<Number>> mc = MyHashSet<Number>::/*[3]*/<T> new;\n");
+		buf.append("    Function<String, MyHashSet<Integer>> md = MyHashSet::/*[4]*/new;\n");
+		buf.append("}\n");
+		buf.append("class MyHashSet<T> extends HashSet<T> {\n");
+		buf.append("    public MyHashSet() {}\n");
+		buf.append("    public <A> MyHashSet(A a) {}\n");
+		buf.append("    public MyHashSet(String i) {}\n");
+		buf.append("}\n");
+		expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+		// [3]
+		offset= buf1.toString().indexOf("::/*[3]*/") + 1;
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.HashSet;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("class E3<T> {\n");
+		buf.append("    IntFunction<int[][][]> ma = int[][][]::/*[1]*/new;\n");
+		buf.append("    Supplier<MyHashSet<Integer>> mb = MyHashSet::/*[2]*/new;\n");
+		buf.append("    Function<T, MyHashSet<Number>> mc = arg0 -> new<T> MyHashSet<Number>(arg0);\n");
+		buf.append("    Function<String, MyHashSet<Integer>> md = MyHashSet::/*[4]*/new;\n");
+		buf.append("}\n");
+		buf.append("class MyHashSet<T> extends HashSet<T> {\n");
+		buf.append("    public MyHashSet() {}\n");
+		buf.append("    public <A> MyHashSet(A a) {}\n");
+		buf.append("    public MyHashSet(String i) {}\n");
+		buf.append("}\n");
+		expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+		// [4]
+		offset= buf1.toString().indexOf("::/*[4]*/") + 1;
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.HashSet;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("class E3<T> {\n");
+		buf.append("    IntFunction<int[][][]> ma = int[][][]::/*[1]*/new;\n");
+		buf.append("    Supplier<MyHashSet<Integer>> mb = MyHashSet::/*[2]*/new;\n");
+		buf.append("    Function<T, MyHashSet<Number>> mc = MyHashSet<Number>::/*[3]*/<T> new;\n");
+		buf.append("    Function<String, MyHashSet<Integer>> md = arg0 -> new MyHashSet<>(arg0);\n");
+		buf.append("}\n");
+		buf.append("class MyHashSet<T> extends HashSet<T> {\n");
+		buf.append("    public MyHashSet() {}\n");
+		buf.append("    public <A> MyHashSet(A a) {}\n");
+		buf.append("    public MyHashSet(String i) {}\n");
+		buf.append("}\n");
+		expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testConvertMethodReferenceToLambda4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E4 {\n");
+		buf.append("    Function<String, String> p1 = E4::<Float> staticMethod;\n");
+		buf.append("    static <F> String staticMethod(String s) {\n");
+		buf.append("        return \"s\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E4.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("::") + 1;
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E4 {\n");
+		buf.append("    Function<String, String> p1 = arg0 -> E4.<Float> staticMethod(arg0);\n");
+		buf.append("    static <F> String staticMethod(String s) {\n");
+		buf.append("        return \"s\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertMethodReferenceToLambda5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("import java.util.function.*;\n");
+		buf1.append("public class E5<T> {\n");
+		buf1.append("    <F> String method1() {\n");
+		buf1.append("        return \"a\";\n");
+		buf1.append("    }\n");
+		buf1.append("    <F> String method1(E5<T> e) {\n");
+		buf1.append("        return \"b\";\n");
+		buf1.append("    }\n");
+		buf1.append("}\n");
+		buf1.append("class Sub extends E5<Integer> {\n");
+		buf1.append("    Supplier<String> s1 = super::/*[1]*/method1;\n");
+		buf1.append("    Supplier<String> s2 = Sub.super::/*[2]*/<Float>method1;\n");
+		buf1.append("    Function<E5<Integer>, String> s3 = super::/*[3]*/<Float>method1;\n");
+		buf1.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E5.java", buf1.toString(), false, null);
+
+		// [1]
+		int offset= buf1.toString().indexOf("::/*[1]*/") + 1;
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("public class E5<T> {\n");
+		buf.append("    <F> String method1() {\n");
+		buf.append("        return \"a\";\n");
+		buf.append("    }\n");
+		buf.append("    <F> String method1(E5<T> e) {\n");
+		buf.append("        return \"b\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Sub extends E5<Integer> {\n");
+		buf.append("    Supplier<String> s1 = () -> super./*[1]*/method1();\n");
+		buf.append("    Supplier<String> s2 = Sub.super::/*[2]*/<Float>method1;\n");
+		buf.append("    Function<E5<Integer>, String> s3 = super::/*[3]*/<Float>method1;\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+		// [2]
+		offset= buf1.toString().indexOf("::/*[2]*/") + 1;
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("public class E5<T> {\n");
+		buf.append("    <F> String method1() {\n");
+		buf.append("        return \"a\";\n");
+		buf.append("    }\n");
+		buf.append("    <F> String method1(E5<T> e) {\n");
+		buf.append("        return \"b\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Sub extends E5<Integer> {\n");
+		buf.append("    Supplier<String> s1 = super::/*[1]*/method1;\n");
+		buf.append("    Supplier<String> s2 = () -> Sub.super.<Float> method1();\n");
+		buf.append("    Function<E5<Integer>, String> s3 = super::/*[3]*/<Float>method1;\n");
+		buf.append("}\n");
+		expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+		// [3]
+		offset= buf1.toString().indexOf("::/*[3]*/") + 1;
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("public class E5<T> {\n");
+		buf.append("    <F> String method1() {\n");
+		buf.append("        return \"a\";\n");
+		buf.append("    }\n");
+		buf.append("    <F> String method1(E5<T> e) {\n");
+		buf.append("        return \"b\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Sub extends E5<Integer> {\n");
+		buf.append("    Supplier<String> s1 = super::/*[1]*/method1;\n");
+		buf.append("    Supplier<String> s2 = Sub.super::/*[2]*/<Float>method1;\n");
+		buf.append("    Function<E5<Integer>, String> s3 = arg0 -> super.<Float> method1(arg0);\n");
+		buf.append("}\n");
+		expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testConvertMethodReferenceToLambda6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("import java.util.function.*;\n");
+		buf1.append("public class E6<T> {\n");
+		buf1.append("    <F> String method1() {\n");
+		buf1.append("        return \"a\";\n");
+		buf1.append("    }\n");
+		buf1.append("    <F> String method1(E6<T> e) {\n");
+		buf1.append("        return \"b\";\n");
+		buf1.append("    }\n");
+		buf1.append("    Supplier<String> v1 = new E6<Integer>()::/*[1]*/method1;\n");
+		buf1.append("    Supplier<String> v2 = this::/*[2]*/<Float>method1;\n");
+		buf1.append("    Function<E6<Integer>, String> v3 = new E6<Integer>()::/*[3]*/<Float>method1;\n");
+		buf1.append("    T1[] ts = new T1[5];\n");
+		buf1.append("    BiFunction<Integer, Integer, Integer> m6 = ts[1]::/*[4]*/bar;\n");
+		buf1.append("    int[] is = new int[5];\n");
+		buf1.append("    Supplier<int[]> m10 = is::/*[5]*/clone;\n");
+		buf1.append("}\n");
+		buf1.append("class T1 {\n");
+		buf1.append("    int bar(int i, int j) { return i + j; }\n");
+		buf1.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E6.java", buf1.toString(), false, null);
+
+		// [1]
+		int offset= buf1.toString().indexOf("::/*[1]*/") + 1;
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("public class E6<T> {\n");
+		buf.append("    <F> String method1() {\n");
+		buf.append("        return \"a\";\n");
+		buf.append("    }\n");
+		buf.append("    <F> String method1(E6<T> e) {\n");
+		buf.append("        return \"b\";\n");
+		buf.append("    }\n");
+		buf.append("    Supplier<String> v1 = () -> new E6<Integer>()./*[1]*/method1();\n");
+		buf.append("    Supplier<String> v2 = this::/*[2]*/<Float>method1;\n");
+		buf.append("    Function<E6<Integer>, String> v3 = new E6<Integer>()::/*[3]*/<Float>method1;\n");
+		buf.append("    T1[] ts = new T1[5];\n");
+		buf.append("    BiFunction<Integer, Integer, Integer> m6 = ts[1]::/*[4]*/bar;\n");
+		buf.append("    int[] is = new int[5];\n");
+		buf.append("    Supplier<int[]> m10 = is::/*[5]*/clone;\n");
+		buf.append("}\n");
+		buf.append("class T1 {\n");
+		buf.append("    int bar(int i, int j) { return i + j; }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+		// [2]
+		offset= buf1.toString().indexOf("::/*[2]*/") + 1;
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("public class E6<T> {\n");
+		buf.append("    <F> String method1() {\n");
+		buf.append("        return \"a\";\n");
+		buf.append("    }\n");
+		buf.append("    <F> String method1(E6<T> e) {\n");
+		buf.append("        return \"b\";\n");
+		buf.append("    }\n");
+		buf.append("    Supplier<String> v1 = new E6<Integer>()::/*[1]*/method1;\n");
+		buf.append("    Supplier<String> v2 = () -> this.<Float> method1();\n");
+		buf.append("    Function<E6<Integer>, String> v3 = new E6<Integer>()::/*[3]*/<Float>method1;\n");
+		buf.append("    T1[] ts = new T1[5];\n");
+		buf.append("    BiFunction<Integer, Integer, Integer> m6 = ts[1]::/*[4]*/bar;\n");
+		buf.append("    int[] is = new int[5];\n");
+		buf.append("    Supplier<int[]> m10 = is::/*[5]*/clone;\n");
+		buf.append("}\n");
+		buf.append("class T1 {\n");
+		buf.append("    int bar(int i, int j) { return i + j; }\n");
+		buf.append("}\n");
+		expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+		// [3]
+		offset= buf1.toString().indexOf("::/*[3]*/") + 1;
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("public class E6<T> {\n");
+		buf.append("    <F> String method1() {\n");
+		buf.append("        return \"a\";\n");
+		buf.append("    }\n");
+		buf.append("    <F> String method1(E6<T> e) {\n");
+		buf.append("        return \"b\";\n");
+		buf.append("    }\n");
+		buf.append("    Supplier<String> v1 = new E6<Integer>()::/*[1]*/method1;\n");
+		buf.append("    Supplier<String> v2 = this::/*[2]*/<Float>method1;\n");
+		buf.append("    Function<E6<Integer>, String> v3 = arg0 -> new E6<Integer>().<Float> method1(arg0);\n");
+		buf.append("    T1[] ts = new T1[5];\n");
+		buf.append("    BiFunction<Integer, Integer, Integer> m6 = ts[1]::/*[4]*/bar;\n");
+		buf.append("    int[] is = new int[5];\n");
+		buf.append("    Supplier<int[]> m10 = is::/*[5]*/clone;\n");
+		buf.append("}\n");
+		buf.append("class T1 {\n");
+		buf.append("    int bar(int i, int j) { return i + j; }\n");
+		buf.append("}\n");
+		expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+		// [4]
+		offset= buf1.toString().indexOf("::/*[4]*/") + 1;
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("public class E6<T> {\n");
+		buf.append("    <F> String method1() {\n");
+		buf.append("        return \"a\";\n");
+		buf.append("    }\n");
+		buf.append("    <F> String method1(E6<T> e) {\n");
+		buf.append("        return \"b\";\n");
+		buf.append("    }\n");
+		buf.append("    Supplier<String> v1 = new E6<Integer>()::/*[1]*/method1;\n");
+		buf.append("    Supplier<String> v2 = this::/*[2]*/<Float>method1;\n");
+		buf.append("    Function<E6<Integer>, String> v3 = new E6<Integer>()::/*[3]*/<Float>method1;\n");
+		buf.append("    T1[] ts = new T1[5];\n");
+		buf.append("    BiFunction<Integer, Integer, Integer> m6 = (arg0, arg1) -> ts[1]./*[4]*/bar(arg0, arg1);\n");
+		buf.append("    int[] is = new int[5];\n");
+		buf.append("    Supplier<int[]> m10 = is::/*[5]*/clone;\n");
+		buf.append("}\n");
+		buf.append("class T1 {\n");
+		buf.append("    int bar(int i, int j) { return i + j; }\n");
+		buf.append("}\n");
+		expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+		// [5]
+		offset= buf1.toString().indexOf("::/*[5]*/") + 1;
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("public class E6<T> {\n");
+		buf.append("    <F> String method1() {\n");
+		buf.append("        return \"a\";\n");
+		buf.append("    }\n");
+		buf.append("    <F> String method1(E6<T> e) {\n");
+		buf.append("        return \"b\";\n");
+		buf.append("    }\n");
+		buf.append("    Supplier<String> v1 = new E6<Integer>()::/*[1]*/method1;\n");
+		buf.append("    Supplier<String> v2 = this::/*[2]*/<Float>method1;\n");
+		buf.append("    Function<E6<Integer>, String> v3 = new E6<Integer>()::/*[3]*/<Float>method1;\n");
+		buf.append("    T1[] ts = new T1[5];\n");
+		buf.append("    BiFunction<Integer, Integer, Integer> m6 = ts[1]::/*[4]*/bar;\n");
+		buf.append("    int[] is = new int[5];\n");
+		buf.append("    Supplier<int[]> m10 = () -> is./*[5]*/clone();\n");
+		buf.append("}\n");
+		buf.append("class T1 {\n");
+		buf.append("    int bar(int i, int j) { return i + j; }\n");
+		buf.append("}\n");
+		expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testConvertMethodReferenceToLambda7() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("import java.util.function.*;\n");
+		buf1.append("public class E7<T> {\n");
+		buf1.append("    <F> String method1() {\n");
+		buf1.append("        return \"a\";\n");
+		buf1.append("    }\n");
+		buf1.append("    Function<E7<Integer>, String> v1 = E7<Integer>::/*[1]*/<Float> method1;\n");
+		buf1.append("    Function<int[], int[]> v2 = int[]::/*[2]*/clone;\n");
+		buf1.append("    BiFunction<int[], int[], Boolean> v3 = int[]::/*[3]*/equals;\n");
+		buf1.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E7.java", buf1.toString(), false, null);
+
+		// [1]
+		int offset= buf1.toString().indexOf("::/*[1]*/") + 1;
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("public class E7<T> {\n");
+		buf.append("    <F> String method1() {\n");
+		buf.append("        return \"a\";\n");
+		buf.append("    }\n");
+		buf.append("    Function<E7<Integer>, String> v1 = arg0 -> arg0.<Float> method1();\n");
+		buf.append("    Function<int[], int[]> v2 = int[]::/*[2]*/clone;\n");
+		buf.append("    BiFunction<int[], int[], Boolean> v3 = int[]::/*[3]*/equals;\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+		// [2]
+		offset= buf1.toString().indexOf("::/*[2]*/") + 1;
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("public class E7<T> {\n");
+		buf.append("    <F> String method1() {\n");
+		buf.append("        return \"a\";\n");
+		buf.append("    }\n");
+		buf.append("    Function<E7<Integer>, String> v1 = E7<Integer>::/*[1]*/<Float> method1;\n");
+		buf.append("    Function<int[], int[]> v2 = arg0 -> arg0./*[2]*/clone();\n");
+		buf.append("    BiFunction<int[], int[], Boolean> v3 = int[]::/*[3]*/equals;\n");
+		buf.append("}\n");
+		expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+		// [3]
+		offset= buf1.toString().indexOf("::/*[3]*/") + 1;
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("public class E7<T> {\n");
+		buf.append("    <F> String method1() {\n");
+		buf.append("        return \"a\";\n");
+		buf.append("    }\n");
+		buf.append("    Function<E7<Integer>, String> v1 = E7<Integer>::/*[1]*/<Float> method1;\n");
+		buf.append("    Function<int[], int[]> v2 = int[]::/*[2]*/clone;\n");
+		buf.append("    BiFunction<int[], int[], Boolean> v3 = (arg0, arg1) -> arg0./*[3]*/equals(arg1);\n");
+		buf.append("}\n");
+		expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testConvertMethodReferenceToLambda8() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("import java.util.function.Supplier;\n");
+		buf.append("public class E8 {\n");
+		buf.append("    List<String> list = new ArrayList<>();\n");
+		buf.append("    Supplier<Iterator<String>> mr = (list.size() == 5 ? list.subList(0, 3) : list)::iterator;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E8.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("::") + 1;
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("import java.util.function.Supplier;\n");
+		buf.append("public class E8 {\n");
+		buf.append("    List<String> list = new ArrayList<>();\n");
+		buf.append("    Supplier<Iterator<String>> mr = () -> (list.size() == 5 ? list.subList(0, 3) : list).iterator();\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertMethodReferenceToLambda9() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E9 {\n");
+		buf.append("    private void test(int t) {\n");
+		buf.append("        FI t1= E9::bar;\n");
+		buf.append("    }\n");
+		buf.append("    private static void bar(int x, int y, int z) {}\n");
+		buf.append("}\n");
+		buf.append("interface FI {\n");
+		buf.append("    void foo(int t, int t1, int t2);\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E9.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("::") + 1;
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E9 {\n");
+		buf.append("    private void test(int t) {\n");
+		buf.append("        FI t1= (t3, t11, t2) -> E9.bar(t3, t11, t2);\n");
+		buf.append("    }\n");
+		buf.append("    private static void bar(int x, int y, int z) {}\n");
+		buf.append("}\n");
+		buf.append("interface FI {\n");
+		buf.append("    void foo(int t, int t1, int t2);\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertMethodReferenceToLambda10() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.*;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface Great {}\n");
+		buf.append("\n");
+		buf.append("public class E10 {\n");
+		buf.append("    LongSupplier foo() {\n");
+		buf.append("        return @Great System::currentTimeMillis;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E10.java", buf.toString(), false, null);
+		
+		int offset= buf.toString().indexOf("::") + 1;
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.lang.annotation.*;\n");
+		buf.append("import java.util.function.*;\n");
+		buf.append("\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface Great {}\n");
+		buf.append("\n");
+		buf.append("public class E10 {\n");
+		buf.append("    LongSupplier foo() {\n");
+		buf.append("        return () -> System.currentTimeMillis();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+	
+	public void testConvertLambdaToMethodReference1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.BiFunction;\n");
+		buf.append("import java.util.function.Consumer;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("import java.util.function.IntFunction;\n");
+		buf.append("import java.util.function.Supplier;\n");
+		buf.append("public class E1 extends E {\n");
+		buf.append("    Supplier<String> a1= () ->/*[1]*/ {\n");
+		buf.append("        String s = \"\";\n");
+		buf.append("        return s;\n");
+		buf.append("    };\n");
+		buf.append("    Consumer<String> a2= s ->/*[2]*/ {\n");
+		buf.append("        return;\n");
+		buf.append("    };\n");
+		buf.append("\n");
+		buf.append("    Supplier<E1.In> a3= () ->/*[3]*/ (new E1()).new In();\n");
+		buf.append("    Supplier<E1> a4= () ->/*[4]*/ new E1() {\n");
+		buf.append("        void test() {\n");
+		buf.append("            System.out.println(\"hey\");\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("    Function<String, Integer> a5= s ->/*[5]*/ new Integer(s+1);\n");
+		buf.append("\n");
+		buf.append("    BiFunction<Integer, Integer, int[][][]> a6 = (a, b) ->/*[6]*/ new int[a][b][];\n");
+		buf.append("    IntFunction<Integer[][][]> a61 = value ->/*[61]*/ new Integer[][][] {{{7, 8}}};\n");
+		buf.append("    Function<Integer, int[]> a7 = t ->/*[7]*/ new int[100];\n");
+		buf.append("\n");
+		buf.append("    BiFunction<Character, Integer, String> a8 = (c, i) ->/*[8]*/ super.method1();\n");
+		buf.append("    BiFunction<Character, Integer, String> a9 = (c, i) ->/*[9]*/ method1();\n");
+		buf.append("    \n");
+		buf.append("    class In {}\n");
+		buf.append("}\n");
+		buf.append("class E {\n");
+		buf.append("    String method1() {\n");
+		buf.append("        return \"a\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("->/*[1]*/");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
+
+		offset= buf.toString().indexOf("->/*[2]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
+
+		offset= buf.toString().indexOf("->/*[3]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
+
+		offset= buf.toString().indexOf("->/*[4]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
+
+		offset= buf.toString().indexOf("->/*[5]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
+
+		offset= buf.toString().indexOf("->/*[6]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
+
+		offset= buf.toString().indexOf("->/*[61]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
+
+		offset= buf.toString().indexOf("->/*[7]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
+
+		offset= buf.toString().indexOf("->/*[8]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
+
+		offset= buf.toString().indexOf("->/*[9]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
+	}
+
+	public void testConvertLambdaToMethodReference2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("import java.util.function.Function;\n");
+		buf1.append("public class E2<T> {\n");
+		buf1.append("    public <A> E2(A a) {}\n");
+		buf1.append("    public E2(String s) {}\n");
+		buf1.append("    \n");
+		buf1.append("    Function<T, E2<Integer>> a1 = t ->/*[1]*/ (new<T> E2<Integer>(t));\n");
+		buf1.append("    Function<String, E2<Integer>> a2 = t ->/*[2]*/ new E2<>(t);\n");
+		buf1.append("    \n");
+		buf1.append("    Function<Integer, Float[]> a3 = t ->/*[3]*/ new Float[t];\n");
+		buf1.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf1.toString(), false, null);
+
+		int offset= buf1.toString().indexOf("->/*[1]*/");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E2<T> {\n");
+		buf.append("    public <A> E2(A a) {}\n");
+		buf.append("    public E2(String s) {}\n");
+		buf.append("    \n");
+		buf.append("    Function<T, E2<Integer>> a1 = E2<Integer>::<T> new;\n");
+		buf.append("    Function<String, E2<Integer>> a2 = t ->/*[2]*/ new E2<>(t);\n");
+		buf.append("    \n");
+		buf.append("    Function<Integer, Float[]> a3 = t ->/*[3]*/ new Float[t];\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+		offset= buf1.toString().indexOf("->/*[2]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E2<T> {\n");
+		buf.append("    public <A> E2(A a) {}\n");
+		buf.append("    public E2(String s) {}\n");
+		buf.append("    \n");
+		buf.append("    Function<T, E2<Integer>> a1 = t ->/*[1]*/ (new<T> E2<Integer>(t));\n");
+		buf.append("    Function<String, E2<Integer>> a2 = E2::new;\n");
+		buf.append("    \n");
+		buf.append("    Function<Integer, Float[]> a3 = t ->/*[3]*/ new Float[t];\n");
+		buf.append("}\n");
+		expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+		offset= buf1.toString().indexOf("->/*[3]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E2<T> {\n");
+		buf.append("    public <A> E2(A a) {}\n");
+		buf.append("    public E2(String s) {}\n");
+		buf.append("    \n");
+		buf.append("    Function<T, E2<Integer>> a1 = t ->/*[1]*/ (new<T> E2<Integer>(t));\n");
+		buf.append("    Function<String, E2<Integer>> a2 = t ->/*[2]*/ new E2<>(t);\n");
+		buf.append("    \n");
+		buf.append("    Function<Integer, Float[]> a3 = Float[]::new;\n");
+		buf.append("}\n");
+		expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertLambdaToMethodReference3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("import java.util.function.Function;\n");
+		buf1.append("public class E3<T> extends SuperE3<Number> {\n");
+		buf1.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
+		buf1.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
+		buf1.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf1.append("\n");
+		buf1.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
+		buf1.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
+		buf1.append("\n");
+		buf1.append("    Function<Integer, String> b1 = t -> /*[6]*/method1(t);\n");
+		buf1.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
+		buf1.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
+		buf1.append("\n");
+		buf1.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf1.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
+		buf1.append("\n");
+		buf1.append("    <V> String method2() { return \"m2\";    }\n");
+		buf1.append("}\n");
+		buf1.append("class SuperE3<S> {\n");
+		buf1.append("    String method1(int i) { return \"m1\"; }\n");
+		buf1.append("    static <V> String staticMethod1(int i) { return \"s\"; }\n");
+		buf1.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E3.java", buf1.toString(), false, null);
+
+		int offset= buf1.toString().indexOf("-> /*[1]*/");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E3<T> extends SuperE3<Number> {\n");
+		buf.append("    Function<Integer, String> a1 = super::method1;\n");
+		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> b1 = t -> /*[6]*/method1(t);\n");
+		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
+		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
+		buf.append("\n");
+		buf.append("    <V> String method2() { return \"m2\";    }\n");
+		buf.append("}\n");
+		buf.append("class SuperE3<S> {\n");
+		buf.append("    String method1(int i) { return \"m1\"; }\n");
+		buf.append("    static <V> String staticMethod1(int i) { return \"s\"; }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+		offset= buf1.toString().indexOf("-> /*[2]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E3<T> extends SuperE3<Number> {\n");
+		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
+		buf.append("    Function<Integer, String> a2 = E3.super::method1;\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> b1 = t -> /*[6]*/method1(t);\n");
+		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
+		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
+		buf.append("\n");
+		buf.append("    <V> String method2() { return \"m2\";    }\n");
+		buf.append("}\n");
+		buf.append("class SuperE3<S> {\n");
+		buf.append("    String method1(int i) { return \"m1\"; }\n");
+		buf.append("    static <V> String staticMethod1(int i) { return \"s\"; }\n");
+		buf.append("}\n");
+		expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+		offset= buf1.toString().indexOf("-> /*[3]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E3<T> extends SuperE3<Number> {\n");
+		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
+		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
+		buf.append("    Function<Integer, String> a3 = SuperE3::<Float> staticMethod1;\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> b1 = t -> /*[6]*/method1(t);\n");
+		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
+		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
+		buf.append("\n");
+		buf.append("    <V> String method2() { return \"m2\";    }\n");
+		buf.append("}\n");
+		buf.append("class SuperE3<S> {\n");
+		buf.append("    String method1(int i) { return \"m1\"; }\n");
+		buf.append("    static <V> String staticMethod1(int i) { return \"s\"; }\n");
+		buf.append("}\n");
+		expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+		offset= buf1.toString().indexOf("-> /*[4]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E3<T> extends SuperE3<Number> {\n");
+		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
+		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> s1 = E3::staticMethod1;\n");
+		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> b1 = t -> /*[6]*/method1(t);\n");
+		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
+		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
+		buf.append("\n");
+		buf.append("    <V> String method2() { return \"m2\";    }\n");
+		buf.append("}\n");
+		buf.append("class SuperE3<S> {\n");
+		buf.append("    String method1(int i) { return \"m1\"; }\n");
+		buf.append("    static <V> String staticMethod1(int i) { return \"s\"; }\n");
+		buf.append("}\n");
+		expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+		offset= buf1.toString().indexOf("-> /*[5]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E3<T> extends SuperE3<Number> {\n");
+		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
+		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> s2 = E3::staticMethod1;\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> b1 = t -> /*[6]*/method1(t);\n");
+		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
+		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
+		buf.append("\n");
+		buf.append("    <V> String method2() { return \"m2\";    }\n");
+		buf.append("}\n");
+		buf.append("class SuperE3<S> {\n");
+		buf.append("    String method1(int i) { return \"m1\"; }\n");
+		buf.append("    static <V> String staticMethod1(int i) { return \"s\"; }\n");
+		buf.append("}\n");
+		expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+		offset= buf1.toString().indexOf("-> /*[6]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E3<T> extends SuperE3<Number> {\n");
+		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
+		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> b1 = this::method1;\n");
+		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
+		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
+		buf.append("\n");
+		buf.append("    <V> String method2() { return \"m2\";    }\n");
+		buf.append("}\n");
+		buf.append("class SuperE3<S> {\n");
+		buf.append("    String method1(int i) { return \"m1\"; }\n");
+		buf.append("    static <V> String staticMethod1(int i) { return \"s\"; }\n");
+		buf.append("}\n");
+		expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+		offset= buf1.toString().indexOf("-> /*[7]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E3<T> extends SuperE3<Number> {\n");
+		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
+		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> b1 = t -> /*[6]*/method1(t);\n");
+		buf.append("    Function<Integer, String> b2 = this::method1;\n");
+		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
+		buf.append("\n");
+		buf.append("    <V> String method2() { return \"m2\";    }\n");
+		buf.append("}\n");
+		buf.append("class SuperE3<S> {\n");
+		buf.append("    String method1(int i) { return \"m1\"; }\n");
+		buf.append("    static <V> String staticMethod1(int i) { return \"s\"; }\n");
+		buf.append("}\n");
+		expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+		offset= buf1.toString().indexOf("-> /*[8]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E3<T> extends SuperE3<Number> {\n");
+		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
+		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> b1 = t -> /*[6]*/method1(t);\n");
+		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
+		buf.append("    Function<Integer, String> b3 = (new SuperE3<String>())::method1;\n");
+		buf.append("\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
+		buf.append("\n");
+		buf.append("    <V> String method2() { return \"m2\";    }\n");
+		buf.append("}\n");
+		buf.append("class SuperE3<S> {\n");
+		buf.append("    String method1(int i) { return \"m1\"; }\n");
+		buf.append("    static <V> String staticMethod1(int i) { return \"s\"; }\n");
+		buf.append("}\n");
+		expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+		offset= buf1.toString().indexOf("-> /*[9]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E3<T> extends SuperE3<Number> {\n");
+		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
+		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> b1 = t -> /*[6]*/method1(t);\n");
+		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
+		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<E3<Integer>, String> p1 = E3<Integer>::<Float> method2;\n");
+		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
+		buf.append("\n");
+		buf.append("    <V> String method2() { return \"m2\";    }\n");
+		buf.append("}\n");
+		buf.append("class SuperE3<S> {\n");
+		buf.append("    String method1(int i) { return \"m1\"; }\n");
+		buf.append("    static <V> String staticMethod1(int i) { return \"s\"; }\n");
+		buf.append("}\n");
+		expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+		offset= buf1.toString().indexOf("-> /*[10]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E3<T> extends SuperE3<Number> {\n");
+		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
+		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<Integer, String> b1 = t -> /*[6]*/method1(t);\n");
+		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
+		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
+		buf.append("\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3, String> p2 = E3::method2;\n");
+		buf.append("\n");
+		buf.append("    <V> String method2() { return \"m2\";    }\n");
+		buf.append("}\n");
+		buf.append("class SuperE3<S> {\n");
+		buf.append("    String method1(int i) { return \"m1\"; }\n");
+		buf.append("    static <V> String staticMethod1(int i) { return \"s\"; }\n");
+		buf.append("}\n");
+		expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertLambdaToMethodReference4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("import java.util.function.BiFunction;\n");
+		buf1.append("import java.util.function.Function;\n");
+		buf1.append("public class E4 {\n");
+		buf1.append("    static String staticMethod1() {    return \"s\"; }\n");
+		buf1.append("    Function<E4, String> s1 = t ->/*[1]*/ staticMethod1();\n");
+		buf1.append("    \n");
+		buf1.append("    int myVal= 0;\n");
+		buf1.append("    String method1(int i) { return \"m1\"; }\n");
+		buf1.append("    BiFunction<Float, Integer, String> p1 = (t, u) ->/*[2]*/ method1(u);\n");
+		buf1.append("    BiFunction<SubE4, Integer, String> p2 = (t, u) ->/*[3]*/ method1(u);\n");
+		buf1.append("    \n");
+		buf1.append("    BiFunction<SubE4, Integer, String> p3 = (t, u) ->/*[4]*/ t.method1(u);\n");
+		buf1.append("    BiFunction<E4, Integer, String> p4 = (t, u) ->/*[5]*/ t.method1(u);\n");
+		buf1.append("    \n");
+		buf1.append("    Function<int[], int[]> a1 = t ->/*[6]*/ t.clone();\n");
+		buf1.append("}\n");
+		buf1.append("class SubE4 extends E4 {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E4.java", buf1.toString(), false, null);
+
+		int offset= buf1.toString().indexOf("->/*[1]*/");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
+
+		offset= buf1.toString().indexOf("->/*[2]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
+
+		offset= buf1.toString().indexOf("->/*[3]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
+
+		offset= buf1.toString().indexOf("->/*[4]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.BiFunction;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E4 {\n");
+		buf.append("    static String staticMethod1() {    return \"s\"; }\n");
+		buf.append("    Function<E4, String> s1 = t ->/*[1]*/ staticMethod1();\n");
+		buf.append("    \n");
+		buf.append("    int myVal= 0;\n");
+		buf.append("    String method1(int i) { return \"m1\"; }\n");
+		buf.append("    BiFunction<Float, Integer, String> p1 = (t, u) ->/*[2]*/ method1(u);\n");
+		buf.append("    BiFunction<SubE4, Integer, String> p2 = (t, u) ->/*[3]*/ method1(u);\n");
+		buf.append("    \n");
+		buf.append("    BiFunction<SubE4, Integer, String> p3 = SubE4::method1;\n");
+		buf.append("    BiFunction<E4, Integer, String> p4 = (t, u) ->/*[5]*/ t.method1(u);\n");
+		buf.append("    \n");
+		buf.append("    Function<int[], int[]> a1 = t ->/*[6]*/ t.clone();\n");
+		buf.append("}\n");
+		buf.append("class SubE4 extends E4 {}\n");
+		String expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+		offset= buf1.toString().indexOf("->/*[5]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.BiFunction;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E4 {\n");
+		buf.append("    static String staticMethod1() {    return \"s\"; }\n");
+		buf.append("    Function<E4, String> s1 = t ->/*[1]*/ staticMethod1();\n");
+		buf.append("    \n");
+		buf.append("    int myVal= 0;\n");
+		buf.append("    String method1(int i) { return \"m1\"; }\n");
+		buf.append("    BiFunction<Float, Integer, String> p1 = (t, u) ->/*[2]*/ method1(u);\n");
+		buf.append("    BiFunction<SubE4, Integer, String> p2 = (t, u) ->/*[3]*/ method1(u);\n");
+		buf.append("    \n");
+		buf.append("    BiFunction<SubE4, Integer, String> p3 = (t, u) ->/*[4]*/ t.method1(u);\n");
+		buf.append("    BiFunction<E4, Integer, String> p4 = E4::method1;\n");
+		buf.append("    \n");
+		buf.append("    Function<int[], int[]> a1 = t ->/*[6]*/ t.clone();\n");
+		buf.append("}\n");
+		buf.append("class SubE4 extends E4 {}\n");
+		expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+
+		offset= buf1.toString().indexOf("->/*[6]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.BiFunction;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E4 {\n");
+		buf.append("    static String staticMethod1() {    return \"s\"; }\n");
+		buf.append("    Function<E4, String> s1 = t ->/*[1]*/ staticMethod1();\n");
+		buf.append("    \n");
+		buf.append("    int myVal= 0;\n");
+		buf.append("    String method1(int i) { return \"m1\"; }\n");
+		buf.append("    BiFunction<Float, Integer, String> p1 = (t, u) ->/*[2]*/ method1(u);\n");
+		buf.append("    BiFunction<SubE4, Integer, String> p2 = (t, u) ->/*[3]*/ method1(u);\n");
+		buf.append("    \n");
+		buf.append("    BiFunction<SubE4, Integer, String> p3 = (t, u) ->/*[4]*/ t.method1(u);\n");
+		buf.append("    BiFunction<E4, Integer, String> p4 = (t, u) ->/*[5]*/ t.method1(u);\n");
+		buf.append("    \n");
+		buf.append("    Function<int[], int[]> a1 = int[]::clone;\n");
+		buf.append("}\n");
+		buf.append("class SubE4 extends E4 {}\n");
+		expected1= buf.toString();
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 }

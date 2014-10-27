@@ -691,32 +691,7 @@ public class ASTNodes {
 
 		if (methodBinding != null) {
 			ITypeBinding invocationTargetType;
-			if (parent instanceof MethodInvocation || parent instanceof SuperMethodInvocation) {
-				if (invocationQualifier != null) {
-					invocationTargetType= invocationQualifier.resolveTypeBinding();
-					if (invocationTargetType != null && parent instanceof SuperMethodInvocation) {
-						invocationTargetType= invocationTargetType.getSuperclass();
-					}
-				} else {
-					ITypeBinding enclosingType= getEnclosingType(parent);
-					if (enclosingType != null && parent instanceof SuperMethodInvocation) {
-						enclosingType= enclosingType.getSuperclass();
-					}
-					if (enclosingType != null) {
-						IMethodBinding methodInHierarchy= Bindings.findMethodInHierarchy(enclosingType, methodBinding.getName(), methodBinding.getParameterTypes());
-						if (methodInHierarchy != null) {
-							invocationTargetType= enclosingType;
-						} else {
-							invocationTargetType= methodBinding.getDeclaringClass();
-						}
-					} else {
-						// not expected
-						invocationTargetType= methodBinding.getDeclaringClass();
-					}
-				}
-			} else {
-				invocationTargetType= methodBinding.getDeclaringClass();
-			}
+			invocationTargetType= getInvocationType(parent, methodBinding, invocationQualifier);
 			if (invocationTargetType != null) {
 				TypeBindingVisitor visitor= new AmbiguousTargetMethodAnalyzer(invocationTargetType, methodBinding, argumentIndex, argumentCount, expressionIsExplicitlyTyped);
 				return !(visitor.visit(invocationTargetType) && Bindings.visitHierarchy(invocationTargetType, visitor));
@@ -724,6 +699,47 @@ public class ASTNodes {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Returns the binding of the type which declares the method being invoked.
+	 * 
+	 * @param invocationNode the method invocation node
+	 * @param methodBinding binding of the method being invoked
+	 * @param invocationQualifier the qualifier used for method invocation, or <code>null</code> if
+	 *            none
+	 * @return the binding of the type which declares the method being invoked, or <code>null</code>
+	 *         if the type cannot be resolved
+	 */
+	public static ITypeBinding getInvocationType(ASTNode invocationNode, IMethodBinding methodBinding, Expression invocationQualifier) {
+		ITypeBinding invocationType;
+		if (invocationNode instanceof MethodInvocation || invocationNode instanceof SuperMethodInvocation) {
+			if (invocationQualifier != null) {
+				invocationType= invocationQualifier.resolveTypeBinding();
+				if (invocationType != null && invocationNode instanceof SuperMethodInvocation) {
+					invocationType= invocationType.getSuperclass();
+				}
+			} else {
+				ITypeBinding enclosingType= getEnclosingType(invocationNode);
+				if (enclosingType != null && invocationNode instanceof SuperMethodInvocation) {
+					enclosingType= enclosingType.getSuperclass();
+				}
+				if (enclosingType != null) {
+					IMethodBinding methodInHierarchy= Bindings.findMethodInHierarchy(enclosingType, methodBinding.getName(), methodBinding.getParameterTypes());
+					if (methodInHierarchy != null) {
+						invocationType= enclosingType;
+					} else {
+						invocationType= methodBinding.getDeclaringClass();
+					}
+				} else {
+					// not expected
+					invocationType= methodBinding.getDeclaringClass();
+				}
+			}
+		} else {
+			invocationType= methodBinding.getDeclaringClass();
+		}
+		return invocationType;
 	}
 
 	private static class AmbiguousTargetMethodAnalyzer implements TypeBindingVisitor {

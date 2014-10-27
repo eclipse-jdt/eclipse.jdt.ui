@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -63,10 +64,12 @@ import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -81,6 +84,7 @@ import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
@@ -99,6 +103,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodReference;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.SynchronizedStatement;
@@ -106,6 +111,7 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -123,6 +129,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
+import org.eclipse.jdt.internal.corext.dom.JdtASTMatcher;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -236,6 +243,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getChangeLambdaBodyToBlockProposal(context, coveringNode, null)
 				|| getChangeLambdaBodyToExpressionProposal(context, coveringNode, null)
 				|| getAddInferredLambdaParameterTypes(context, coveringNode, null)
+				|| getConvertMethodReferenceToLambdaProposal(context, coveringNode, null)
+				|| getConvertLambdaToMethodReferenceProposal(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
 				|| getMakeVariableDeclarationFinalProposals(context, null)
 				|| getMissingCaseStatementProposals(context, coveringNode, null)
@@ -285,6 +294,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getChangeLambdaBodyToBlockProposal(context, coveringNode, resultingCollections);
 				getChangeLambdaBodyToExpressionProposal(context, coveringNode, resultingCollections);
 				getAddInferredLambdaParameterTypes(context, coveringNode, resultingCollections);
+				getConvertMethodReferenceToLambdaProposal(context, coveringNode, resultingCollections);
+				getConvertLambdaToMethodReferenceProposal(context, coveringNode, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getConvertEnhancedForLoopProposal(context, coveringNode, resultingCollections);
@@ -595,6 +606,219 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
+	private static boolean getConvertMethodReferenceToLambdaProposal(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) throws JavaModelException {
+		MethodReference methodReference;
+		if (covering instanceof MethodReference) {
+			methodReference= (MethodReference) covering;
+		} else if (covering.getParent() instanceof MethodReference) {
+			methodReference= (MethodReference) covering.getParent();
+		} else {
+			return false;
+		}
+
+		IMethodBinding referredMethodBinding= methodReference.resolveMethodBinding();
+		if (referredMethodBinding == null && !(methodReference instanceof CreationReference))
+			return false;
+
+		ITypeBinding targetTypeBinding= ASTNodes.getTargetType(methodReference);
+		if (targetTypeBinding == null)
+			return false;
+
+		IMethodBinding functionalMethod= targetTypeBinding.getFunctionalInterfaceMethod();
+		if (functionalMethod.isSynthetic()) {
+			functionalMethod= Bindings.findOverriddenMethodInType(functionalMethod.getDeclaringClass(), functionalMethod);
+		}
+		if (functionalMethod == null)
+			return false;
+		if (functionalMethod.isGenericMethod()) // generic lambda expressions are not allowed
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		AST ast= methodReference.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		ImportRewrite importRewrite= null;
+		LambdaExpression lambda= ast.newLambdaExpression();
+
+		String[] lambdaParamNames= getUniqueParameterNames(methodReference, functionalMethod);
+		List<VariableDeclaration> lambdaParameters= lambda.parameters();
+		for (String paramName : lambdaParamNames) {
+			VariableDeclarationFragment lambdaParameter= ast.newVariableDeclarationFragment();
+			lambdaParameter.setName(ast.newSimpleName(paramName));
+			lambdaParameters.add(lambdaParameter);
+		}
+
+		int noOfLambdaParameters= lambdaParamNames.length;
+		lambda.setParentheses(noOfLambdaParameters != 1);
+
+		if (methodReference instanceof CreationReference) {
+			CreationReference creationRef= (CreationReference) methodReference;
+			Type type= creationRef.getType();
+			if (type instanceof ArrayType) {
+				ArrayCreation arrayCreation= ast.newArrayCreation();
+				lambda.setBody(arrayCreation);
+
+				ArrayType arrayType= (ArrayType) type;
+				Type copiedElementType= (Type) rewrite.createCopyTarget(arrayType.getElementType());
+				arrayCreation.setType(ast.newArrayType(copiedElementType, arrayType.getDimensions()));
+				arrayCreation.dimensions().add(ast.newSimpleName(lambdaParamNames[0]));
+			} else {
+				ClassInstanceCreation cic= ast.newClassInstanceCreation();
+				lambda.setBody(cic);
+
+				ITypeBinding typeBinding= type.resolveBinding();
+				if (!(type instanceof ParameterizedType) && typeBinding != null && typeBinding.getTypeDeclaration().isGenericType()) {
+					cic.setType(ast.newParameterizedType((Type) rewrite.createCopyTarget(type)));
+				} else {
+					cic.setType((Type) rewrite.createCopyTarget(type));
+				}
+				cic.arguments().addAll(getInvocationArguments(ast, 0, noOfLambdaParameters, lambdaParamNames));
+				cic.typeArguments().addAll(getCopiedTypeArguments(rewrite, methodReference.typeArguments()));
+			}
+			
+		} else if (Modifier.isStatic(referredMethodBinding.getModifiers()) && !referredMethodBinding.isSynthetic()) { // TODO: Remove #isSynthetic check after bug 440344 is fixed (eg: int[]::clone)
+			MethodInvocation methodInvocation= ast.newMethodInvocation();
+			lambda.setBody(methodInvocation);
+
+			Expression expr= null;
+			if (methodReference instanceof ExpressionMethodReference) {
+				ExpressionMethodReference expressionMethodReference= (ExpressionMethodReference) methodReference;
+				expr= (Expression) rewrite.createCopyTarget(expressionMethodReference.getExpression());
+			} else if (methodReference instanceof TypeMethodReference) {
+				Type type= ((TypeMethodReference) methodReference).getType();
+				ITypeBinding typeBinding= type.resolveBinding();
+				if (typeBinding != null) {
+					importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
+					expr= ast.newName(importRewrite.addImport(typeBinding));
+				}
+			}
+			if (expr == null) {
+				return false;
+			}
+			methodInvocation.setExpression(expr);
+			SimpleName name= getMethodInvocationName(methodReference);
+			methodInvocation.setName((SimpleName) rewrite.createCopyTarget(name));
+			methodInvocation.arguments().addAll(getInvocationArguments(ast, 0, noOfLambdaParameters, lambdaParamNames));
+			methodInvocation.typeArguments().addAll(getCopiedTypeArguments(rewrite, methodReference.typeArguments()));
+			
+		} else if (methodReference instanceof SuperMethodReference) {
+			SuperMethodInvocation superMethodInvocation= ast.newSuperMethodInvocation();
+			lambda.setBody(superMethodInvocation);
+
+			Name superQualifier= ((SuperMethodReference) methodReference).getQualifier();
+			if (superQualifier != null) {
+				superMethodInvocation.setQualifier((Name) rewrite.createCopyTarget(superQualifier));
+			}
+			SimpleName name= getMethodInvocationName(methodReference);
+			superMethodInvocation.setName((SimpleName) rewrite.createCopyTarget(name));
+			superMethodInvocation.arguments().addAll(getInvocationArguments(ast, 0, noOfLambdaParameters, lambdaParamNames));
+			superMethodInvocation.typeArguments().addAll(getCopiedTypeArguments(rewrite, methodReference.typeArguments()));
+			
+		} else {
+			MethodInvocation methodInvocation= ast.newMethodInvocation();
+			lambda.setBody(methodInvocation);
+
+			boolean isTypeReference= isTypeReferenceToInstanceMethod(methodReference);
+			if (isTypeReference) {
+				methodInvocation.setExpression(ast.newSimpleName(lambdaParamNames[0]));
+			} else {
+				Expression expr= ((ExpressionMethodReference) methodReference).getExpression();
+				methodInvocation.setExpression((Expression) rewrite.createCopyTarget(expr));
+			}
+			SimpleName name= getMethodInvocationName(methodReference);
+			methodInvocation.setName((SimpleName) rewrite.createCopyTarget(name));
+			methodInvocation.arguments().addAll(getInvocationArguments(ast, isTypeReference ? 1 : 0, noOfLambdaParameters, lambdaParamNames));
+			methodInvocation.typeArguments().addAll(getCopiedTypeArguments(rewrite, methodReference.typeArguments()));
+		}
+
+		rewrite.replace(methodReference, lambda, null);
+
+		// add proposal
+		String label= CorrectionMessages.QuickAssistProcessor_convert_to_lambda_expression;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_METHOD_REFERENCE_TO_LAMBDA, image);
+		if (importRewrite != null) {
+			proposal.setImportRewrite(importRewrite);
+		}
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private static String[] getUniqueParameterNames(MethodReference methodReference, IMethodBinding functionalMethod) throws JavaModelException {
+		String[] parameterNames= ((IMethod) functionalMethod.getJavaElement()).getParameterNames();
+		List<String> oldNames= new ArrayList<String>(Arrays.asList(parameterNames));
+		String[] newNames= new String[oldNames.size()];
+		List<String> excludedNames= new ArrayList<String>(ASTNodes.getVisibleLocalVariablesInScope(methodReference));
+
+		for (int i= 0; i < oldNames.size(); i++) {
+			String paramName= oldNames.get(i);
+			List<String> allNamesToExclude= new ArrayList<String>(excludedNames);
+			allNamesToExclude.addAll(oldNames.subList(0, i));
+			allNamesToExclude.addAll(oldNames.subList(i + 1, oldNames.size()));
+			if (allNamesToExclude.contains(paramName)) {
+				String newParamName= createName(paramName, allNamesToExclude);
+				excludedNames.add(newParamName);
+				newNames[i]= newParamName;
+			} else {
+				newNames[i]= paramName;
+			}
+		}
+		return newNames;
+	}
+
+	private static String createName(String candidate, List<String> excludedNames) {
+		int i= 1;
+		String result= candidate;
+		while (excludedNames.contains(result)) {
+			result= candidate + i++;
+		}
+		return result;
+	}
+
+	private static boolean isTypeReferenceToInstanceMethod(MethodReference methodReference) {
+		if (methodReference instanceof TypeMethodReference)
+			return true;
+		if (methodReference instanceof ExpressionMethodReference) {
+			Expression expression= ((ExpressionMethodReference) methodReference).getExpression();
+			if (expression instanceof Name) {
+				IBinding nameBinding= ((Name) expression).resolveBinding();
+				if (nameBinding != null && nameBinding instanceof ITypeBinding) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private static List<SimpleName> getInvocationArguments(AST ast, int begIndex, int noOfLambdaParameters, String[] lambdaParamNames) {
+		List<SimpleName> args= new ArrayList<SimpleName>();
+		for (int i= begIndex; i < noOfLambdaParameters; i++) {
+			args.add(ast.newSimpleName(lambdaParamNames[i]));
+		}
+		return args;
+	}
+
+	private static List<Type> getCopiedTypeArguments(ASTRewrite rewrite, List<Type> typeArguments) {
+		List<Type> copiedTypeArgs= new ArrayList<Type>();
+		for (Type typeArg : typeArguments) {
+			copiedTypeArgs.add((Type) rewrite.createCopyTarget(typeArg));
+		}
+		return copiedTypeArgs;
+	}
+
+	private static SimpleName getMethodInvocationName(MethodReference methodReference) {
+		SimpleName name= null;
+		if (methodReference instanceof ExpressionMethodReference) {
+			name= ((ExpressionMethodReference) methodReference).getName();
+		} else if (methodReference instanceof TypeMethodReference) {
+			name= ((TypeMethodReference) methodReference).getName();
+		} else if (methodReference instanceof SuperMethodReference) {
+			name= ((SuperMethodReference) methodReference).getName();
+		}
+		return name;
+	}
+
 	private static boolean getChangeLambdaBodyToBlockProposal(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		LambdaExpression lambda;
 		if (covering instanceof LambdaExpression) {
@@ -653,26 +877,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 
 		Block lambdaBody= (Block) lambda.getBody();
-		if (lambdaBody.statements().size() != 1)
-			return false;
 
-		Expression exprBody;
-		Statement singleStatement= (Statement) lambdaBody.statements().get(0);
-		if (singleStatement instanceof ReturnStatement) {
-			Expression returnExpr= ((ReturnStatement) singleStatement).getExpression();
-			if (returnExpr == null)
-				return false;
-			exprBody= returnExpr;
-		} else if (singleStatement instanceof ExpressionStatement) {
-			Expression expression= ((ExpressionStatement) singleStatement).getExpression();
-			if (isValidExpressionBody(expression)) {
-				exprBody= expression;
-			} else {
-				return false;
-			}
-		} else {
+		Expression exprBody= getExpressionFromLambdaBody(lambdaBody);
+		if (exprBody == null)
 			return false;
-		}
 		
 		if (resultingCollections == null)
 			return true;
@@ -691,20 +899,233 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
+	private static Expression getExpressionFromLambdaBody(Block lambdaBody) {
+		if (lambdaBody.statements().size() != 1)
+			return null;
+		Statement singleStatement= (Statement) lambdaBody.statements().get(0);
+		if (singleStatement instanceof ReturnStatement) {
+			return ((ReturnStatement) singleStatement).getExpression();
+		} else if (singleStatement instanceof ExpressionStatement) {
+			Expression expression= ((ExpressionStatement) singleStatement).getExpression();
+			if (isValidExpressionBody(expression)) {
+				return expression;
+			}
+		}
+		return null;
+	}
+
 	private static boolean isValidExpressionBody(Expression expression) {
-		boolean isValidExpressionBody= expression instanceof Assignment
+		if (expression instanceof Assignment
 				|| expression instanceof ClassInstanceCreation
 				|| expression instanceof MethodInvocation
 				|| expression instanceof PostfixExpression
-				|| expression instanceof SuperMethodInvocation;
+				|| expression instanceof SuperMethodInvocation) {
+			return true;
+		}
 		if (expression instanceof PrefixExpression) {
 			Operator operator= ((PrefixExpression) expression).getOperator();
 			if (operator == Operator.INCREMENT || operator == Operator.DECREMENT) {
-				isValidExpressionBody= true;
+				return true;
 			}
 		}
-		return isValidExpressionBody;
+		return false;
 	}
+
+	private static boolean getConvertLambdaToMethodReferenceProposal(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
+		LambdaExpression lambda;
+		if (coveringNode instanceof LambdaExpression) {
+			lambda= (LambdaExpression) coveringNode;
+		} else if (coveringNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
+			lambda= (LambdaExpression) coveringNode.getParent();
+		} else {
+			return false;
+		}
+
+		ASTNode lambdaBody= lambda.getBody();
+		Expression exprBody;
+		if (lambdaBody instanceof Block) {
+			exprBody= getExpressionFromLambdaBody((Block) lambdaBody);
+		} else {
+			exprBody= (Expression) lambdaBody;
+		}
+		while (exprBody instanceof ParenthesizedExpression) {
+			exprBody= ((ParenthesizedExpression) exprBody).getExpression();
+		}
+		if (exprBody == null || !isValidReferenceToMethod(exprBody))
+			return false;
+
+		List<Expression> lambdaParameters= new ArrayList<Expression>();
+		for (VariableDeclaration param : (List<VariableDeclaration>) lambda.parameters()) {
+			lambdaParameters.add(param.getName());
+		}
+		if (exprBody instanceof ClassInstanceCreation) {
+			ClassInstanceCreation cic= (ClassInstanceCreation) exprBody;
+			if (cic.getExpression() != null || cic.getAnonymousClassDeclaration() != null)
+				return false;
+			if (!matches(lambdaParameters, cic.arguments()))
+				return false;
+		} else if (exprBody instanceof ArrayCreation) {
+			List<Expression> dimensions= ((ArrayCreation) exprBody).dimensions();
+			if (dimensions.size() != 1)
+				return false;
+			if (!matches(lambdaParameters, dimensions))
+				return false;
+		} else if (exprBody instanceof SuperMethodInvocation) {
+			SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) exprBody;
+			IMethodBinding methodBinding= superMethodInvocation.resolveMethodBinding();
+			if (methodBinding == null)
+				return false;
+			if (Modifier.isStatic(methodBinding.getModifiers())) {
+				ITypeBinding invocationTypeBinding= ASTNodes.getInvocationType(superMethodInvocation, methodBinding, superMethodInvocation.getQualifier());
+				if (invocationTypeBinding == null)
+					return false;
+			}
+			if (!matches(lambdaParameters, superMethodInvocation.arguments()))
+				return false;
+		} else { // MethodInvocation
+			MethodInvocation methodInvocation= (MethodInvocation) exprBody;
+			IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+			if (methodBinding == null)
+				return false;
+
+			Expression invocationExpr= methodInvocation.getExpression();
+			if (Modifier.isStatic(methodBinding.getModifiers())) {
+				ITypeBinding invocationTypeBinding= ASTNodes.getInvocationType(methodInvocation, methodBinding, invocationExpr);
+				if (invocationTypeBinding == null)
+					return false;
+				if (!matches(lambdaParameters, methodInvocation.arguments()))
+					return false;
+			} else if ((lambda.parameters().size() - methodInvocation.arguments().size()) == 1) {
+				if (invocationExpr == null)
+					return false;
+				ITypeBinding invocationTypeBinding= invocationExpr.resolveTypeBinding();
+				if (invocationTypeBinding == null)
+					return false;
+				IMethodBinding lambdaMethodBinding= lambda.resolveMethodBinding();
+				if (lambdaMethodBinding == null)
+					return false;
+				ITypeBinding firstParamType= lambdaMethodBinding.getParameterTypes()[0];
+				if (!((Bindings.equals(invocationTypeBinding, firstParamType) || Bindings.isSuperType(invocationTypeBinding, firstParamType))
+						&& JdtASTMatcher.doNodesMatch(lambdaParameters.get(0), invocationExpr)
+						&& matches(lambdaParameters.subList(1, lambdaParameters.size()), methodInvocation.arguments())))
+					return false;
+			} else if (!matches(lambdaParameters, methodInvocation.arguments())) {
+				return false;
+			}
+		}
+
+		if (resultingCollections == null)
+			return true;
+
+		AST ast= lambda.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		ImportRewrite importRewrite= null;
+		MethodReference replacement;
+
+		if (exprBody instanceof ClassInstanceCreation) {
+			CreationReference creationReference= ast.newCreationReference();
+			replacement= creationReference;
+
+			ClassInstanceCreation cic= (ClassInstanceCreation) exprBody;
+			Type type= cic.getType();
+			if (type.isParameterizedType() && ((ParameterizedType) type).typeArguments().size() == 0) {
+				type= ((ParameterizedType) type).getType();
+			}
+			creationReference.setType((Type) rewrite.createCopyTarget(type));
+			creationReference.typeArguments().addAll(getCopiedTypeArguments(rewrite, cic.typeArguments()));
+		} else if (exprBody instanceof ArrayCreation) {
+			CreationReference creationReference= ast.newCreationReference();
+			replacement= creationReference;
+
+			ArrayType arrayType= ((ArrayCreation) exprBody).getType();
+			Type copiedElementType= (Type) rewrite.createCopyTarget(arrayType.getElementType());
+			creationReference.setType(ast.newArrayType(copiedElementType, arrayType.getDimensions()));
+		} else if (exprBody instanceof SuperMethodInvocation) {
+			SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) exprBody;
+			IMethodBinding methodBinding= superMethodInvocation.resolveMethodBinding();
+			Name superQualifier= superMethodInvocation.getQualifier();
+
+			if (Modifier.isStatic(methodBinding.getModifiers())) {
+				TypeMethodReference typeMethodReference= ast.newTypeMethodReference();
+				replacement= typeMethodReference;
+
+				typeMethodReference.setName((SimpleName) rewrite.createCopyTarget(superMethodInvocation.getName()));
+				importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
+				ITypeBinding invocationTypeBinding= ASTNodes.getInvocationType(superMethodInvocation, methodBinding, superQualifier);
+				typeMethodReference.setType(importRewrite.addImport(invocationTypeBinding.getTypeDeclaration(), ast));
+				typeMethodReference.typeArguments().addAll(getCopiedTypeArguments(rewrite, superMethodInvocation.typeArguments()));
+			} else {
+				SuperMethodReference superMethodReference= ast.newSuperMethodReference();
+				replacement= superMethodReference;
+
+				if (superQualifier != null) {
+					superMethodReference.setQualifier((Name) rewrite.createCopyTarget(superQualifier));
+				}
+				superMethodReference.setName((SimpleName) rewrite.createCopyTarget(superMethodInvocation.getName()));
+				superMethodReference.typeArguments().addAll(getCopiedTypeArguments(rewrite, superMethodInvocation.typeArguments()));
+			}
+		} else { // MethodInvocation
+			MethodInvocation methodInvocation= (MethodInvocation) exprBody;
+			IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+			Expression invocationQualifier= methodInvocation.getExpression();
+
+			boolean isStaticMethod= Modifier.isStatic(methodBinding.getModifiers());
+			boolean isTypeRefToInstanceMethod= methodInvocation.arguments().size() != lambda.parameters().size();
+
+			if (isStaticMethod || isTypeRefToInstanceMethod) {
+				TypeMethodReference typeMethodReference= ast.newTypeMethodReference();
+				replacement= typeMethodReference;
+
+				typeMethodReference.setName((SimpleName) rewrite.createCopyTarget(methodInvocation.getName()));
+				importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
+				ITypeBinding invocationTypeBinding= ASTNodes.getInvocationType(methodInvocation, methodBinding, invocationQualifier);
+				typeMethodReference.setType(importRewrite.addImport(invocationTypeBinding, ast));
+				typeMethodReference.typeArguments().addAll(getCopiedTypeArguments(rewrite, methodInvocation.typeArguments()));
+
+			} else {
+				ExpressionMethodReference exprMethodReference= ast.newExpressionMethodReference();
+				replacement= exprMethodReference;
+
+				exprMethodReference.setName((SimpleName) rewrite.createCopyTarget(methodInvocation.getName()));
+				if (invocationQualifier != null) {
+					exprMethodReference.setExpression((Expression) rewrite.createCopyTarget(invocationQualifier));
+				} else {
+					exprMethodReference.setExpression(ast.newThisExpression());
+				}
+				exprMethodReference.typeArguments().addAll(getCopiedTypeArguments(rewrite, methodInvocation.typeArguments()));
+			}
+		}
+
+		rewrite.replace(lambda, replacement, null);
+
+		// add correction proposal
+		String label= CorrectionMessages.QuickAssistProcessor_convert_to_method_reference;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_TO_METHOD_REFERENCE, image);
+		if (importRewrite != null) {
+			proposal.setImportRewrite(importRewrite);
+		}
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	private static boolean isValidReferenceToMethod(Expression expression) {
+		return expression instanceof ClassInstanceCreation
+				|| expression instanceof ArrayCreation
+				|| expression instanceof SuperMethodInvocation
+				|| expression instanceof MethodInvocation;
+	}
+
+	private static boolean matches(List<Expression> expected, List<Expression> toMatch) {
+		if (toMatch.size() != expected.size())
+			return false;
+		for (int i= 0; i < toMatch.size(); i++) {
+			if (!JdtASTMatcher.doNodesMatch(expected.get(i), toMatch.get(i)))
+				return false;
+		}
+		return true;
+	}
+
 
 	public static boolean getAddInferredLambdaParameterTypes(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		LambdaExpression lambda;

@@ -126,6 +126,8 @@ public interface IProposalRelevance {
 	public static final int CHANGE_TO_ATTRIBUTE_SIMILAR_NAME= 6;
 	public static final int CREATE_FIELD= 6;
 	public static final int CONVERT_TO_LAMBDA_EXPRESSION= 6;
+	public static final int CONVERT_METHOD_REFERENCE_TO_LAMBDA= 6;
+	public static final int CONVERT_TO_METHOD_REFERENCE= 6;
 
 	public static final int ADD_ALL_MISSING_TAGS= 5;
 	public static final int QUALIFY_INNER_TYPE_NAME= 5;
@@ -290,7 +292,7 @@ public interface IProposalRelevance {
 	public static final int ADD_PARANOIDAL_PARENTHESES= -9;
 
 	public static final int ADD_PARENTHESES_FOR_EXPRESSION= -10;
-	
+
 	//Be careful while tweaking these values because WordCorrectionProposal uses -distance (between the words) as relevance.
 	public static final int DISABLE_SPELL_CHECKING= Integer.MIN_VALUE + 1;
 	public static final int WORD_IGNORE= Integer.MIN_VALUE + 1;
