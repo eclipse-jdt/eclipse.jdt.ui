@@ -7,10 +7,12 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Harry Terkelsen (het@google.com) - Bug 449262 - Allow the use of third-party Java formatters
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.swt.widgets.Composite;
@@ -24,6 +26,8 @@ import org.eclipse.jface.text.formatter.IContentFormatter;
 import org.eclipse.jface.text.formatter.IContentFormatterExtension;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingContext;
@@ -32,6 +36,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaFormattingContext;
 public class CompilationUnitPreview extends JavaPreview {
 
     private String fPreviewText;
+	private String fFormatterId;
 
     /**
      * @param workingValues
@@ -56,7 +61,12 @@ public class CompilationUnitPreview extends JavaPreview {
 			final IContentFormatter formatter =	fViewerConfiguration.getContentFormatter(fSourceViewer);
 			if (formatter instanceof IContentFormatterExtension) {
 				final IContentFormatterExtension extension = (IContentFormatterExtension) formatter;
-				context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, fWorkingValues);
+				Map<String, String> prefs= fWorkingValues;
+				if (fFormatterId != null) {
+					prefs= new HashMap<String, String>(fWorkingValues);
+					prefs.put(JavaCore.JAVA_FORMATTER, fFormatterId);
+				}
+				context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, prefs);
 				context.setProperty(FormattingContextProperties.CONTEXT_DOCUMENT, Boolean.valueOf(true));
 				extension.format(fPreviewDocument, context);
 			} else
@@ -76,4 +86,8 @@ public class CompilationUnitPreview extends JavaPreview {
         fPreviewText= previewText;
         update();
     }
+
+	public void setFormatterId(String formatterId) {
+		fFormatterId= formatterId;
+	}
 }

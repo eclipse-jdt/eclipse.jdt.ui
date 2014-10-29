@@ -11,6 +11,7 @@
  *     Aaron Luchko, aluchko@redhat.com - 105926 [Formatter] Exporting Unnamed profile fails silently
  *     Brock Janiczak <brockj@tpg.com.au> - [formatter] Add  option: "add new line after label" - https://bugs.eclipse.org/bugs/show_bug.cgi?id=150741
  *     Ray V. (voidstar@gmail.com) - Contribution for bug 282988
+ *     Harry Terkelsen (het@google.com) - Bug 449262 - Allow the use of third-party Java formatters
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
@@ -501,6 +502,9 @@ final class FormatterMessages extends NLS {
 	public static String CodingStyleConfigurationBlock_error_serializing_xml_message;
 	public static String CodingStyleConfigurationBlock_delete_confirmation_title;
 	public static String CodingStyleConfigurationBlock_delete_confirmation_question;
+
+	public static String CustomCodeFormatterBlock_formatter_name;
+	public static String CustomCodeFormatterBlock_default_formatter;
 
 	public static String CreateProfileDialog_status_message_profile_with_this_name_already_exists;
 	public static String CreateProfileDialog_status_message_profile_name_is_empty;

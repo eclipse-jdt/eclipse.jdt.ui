@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -421,7 +421,7 @@ public abstract class ProfileConfigurationBlock {
 		fNewButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_new_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING);
 		fLoadButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_load_button_desc, GridData.HORIZONTAL_ALIGN_END);
 		fExportAllButton= createButton(fComposite, FormatterMessages.CodingStyleConfigurationBlock_export_all_button_desc, GridData.HORIZONTAL_ALIGN_BEGINNING);
-		createLabel(fComposite, "", 3); //$NON-NLS-1$
+		createLabel(fComposite, "", 2); //$NON-NLS-1$
 
 		configurePreview(fComposite, numColumns, fProfileManager);
 
