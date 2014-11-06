@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -121,7 +121,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 
 		private ChangeParametersControl createParameterTableControl(Composite composite) {
 			String labelText= RefactoringMessages.IntroduceParameterWizard_parameters;
-			ChangeParametersControl cp= new ChangeParametersControl(composite, SWT.NONE, labelText, new IParameterListChangeListener() {
+			final ChangeParametersControl cp= new ChangeParametersControl(composite, SWT.NONE, labelText, new IParameterListChangeListener() {
 				public void parameterChanged(ParameterInfo parameter) {
 					update(true);
 				}
@@ -134,7 +134,15 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			}, ChangeParametersControl.Mode.INTRODUCE_PARAMETER, fParamNameProposals);
 			cp.setLayoutData(new GridData(GridData.FILL_BOTH));
 			cp.setInput(getIntroduceParameterRefactoring().getParameterInfos());
-			cp.editParameter(getIntroduceParameterRefactoring().getAddedParameterInfo());
+			/*
+			 * The asyncExec is a workaround for bug 450286:
+			 * Only set/reveal the table selection after the shell has been opened and laid out.
+			 */
+			composite.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					cp.editParameter(getIntroduceParameterRefactoring().getAddedParameterInfo());
+				}
+			});
 			return cp;
 		}
 
