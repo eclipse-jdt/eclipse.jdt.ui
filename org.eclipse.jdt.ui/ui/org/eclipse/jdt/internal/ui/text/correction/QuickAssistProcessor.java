@@ -641,12 +641,16 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ImportRewrite importRewrite= null;
 		LambdaExpression lambda= ast.newLambdaExpression();
 
+		LinkedProposalModel linkedProposalModel= new LinkedProposalModel();
 		String[] lambdaParamNames= getUniqueParameterNames(methodReference, functionalMethod);
 		List<VariableDeclaration> lambdaParameters= lambda.parameters();
-		for (String paramName : lambdaParamNames) {
+		for (int i= 0; i < lambdaParamNames.length; i++) {
+			String paramName= lambdaParamNames[i];
 			VariableDeclarationFragment lambdaParameter= ast.newVariableDeclarationFragment();
-			lambdaParameter.setName(ast.newSimpleName(paramName));
+			SimpleName name= ast.newSimpleName(paramName);
+			lambdaParameter.setName(name);
 			lambdaParameters.add(lambdaParameter);
+			linkedProposalModel.getPositionGroup(name.getIdentifier(), true).addPosition(rewrite.track(name), i == 0);
 		}
 
 		int noOfLambdaParameters= lambdaParamNames.length;
@@ -662,7 +666,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				ArrayType arrayType= (ArrayType) type;
 				Type copiedElementType= (Type) rewrite.createCopyTarget(arrayType.getElementType());
 				arrayCreation.setType(ast.newArrayType(copiedElementType, arrayType.getDimensions()));
-				arrayCreation.dimensions().add(ast.newSimpleName(lambdaParamNames[0]));
+				SimpleName name= ast.newSimpleName(lambdaParamNames[0]);
+				arrayCreation.dimensions().add(name);
+				linkedProposalModel.getPositionGroup(name.getIdentifier(), false).addPosition(rewrite.track(name), LinkedPositionGroup.NO_STOP);
 			} else {
 				ClassInstanceCreation cic= ast.newClassInstanceCreation();
 				lambda.setBody(cic);
@@ -673,7 +679,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				} else {
 					cic.setType((Type) rewrite.createCopyTarget(type));
 				}
-				cic.arguments().addAll(getInvocationArguments(ast, 0, noOfLambdaParameters, lambdaParamNames));
+				List<SimpleName> invocationArgs= getInvocationArguments(ast, 0, noOfLambdaParameters, lambdaParamNames);
+				cic.arguments().addAll(invocationArgs);
+				for (SimpleName name : invocationArgs) {
+					linkedProposalModel.getPositionGroup(name.getIdentifier(), false).addPosition(rewrite.track(name), LinkedPositionGroup.NO_STOP);
+				}
 				cic.typeArguments().addAll(getCopiedTypeArguments(rewrite, methodReference.typeArguments()));
 			}
 			
@@ -697,9 +707,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				return false;
 			}
 			methodInvocation.setExpression(expr);
-			SimpleName name= getMethodInvocationName(methodReference);
-			methodInvocation.setName((SimpleName) rewrite.createCopyTarget(name));
-			methodInvocation.arguments().addAll(getInvocationArguments(ast, 0, noOfLambdaParameters, lambdaParamNames));
+			SimpleName methodName= getMethodInvocationName(methodReference);
+			methodInvocation.setName((SimpleName) rewrite.createCopyTarget(methodName));
+			List<SimpleName> invocationArgs= getInvocationArguments(ast, 0, noOfLambdaParameters, lambdaParamNames);
+			methodInvocation.arguments().addAll(invocationArgs);
+			for (SimpleName name : invocationArgs) {
+				linkedProposalModel.getPositionGroup(name.getIdentifier(), false).addPosition(rewrite.track(name), LinkedPositionGroup.NO_STOP);
+			}
 			methodInvocation.typeArguments().addAll(getCopiedTypeArguments(rewrite, methodReference.typeArguments()));
 			
 		} else if (methodReference instanceof SuperMethodReference) {
@@ -710,9 +724,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (superQualifier != null) {
 				superMethodInvocation.setQualifier((Name) rewrite.createCopyTarget(superQualifier));
 			}
-			SimpleName name= getMethodInvocationName(methodReference);
-			superMethodInvocation.setName((SimpleName) rewrite.createCopyTarget(name));
-			superMethodInvocation.arguments().addAll(getInvocationArguments(ast, 0, noOfLambdaParameters, lambdaParamNames));
+			SimpleName methodName= getMethodInvocationName(methodReference);
+			superMethodInvocation.setName((SimpleName) rewrite.createCopyTarget(methodName));
+			List<SimpleName> invocationArgs= getInvocationArguments(ast, 0, noOfLambdaParameters, lambdaParamNames);
+			superMethodInvocation.arguments().addAll(invocationArgs);
+			for (SimpleName name : invocationArgs) {
+				linkedProposalModel.getPositionGroup(name.getIdentifier(), false).addPosition(rewrite.track(name), LinkedPositionGroup.NO_STOP);
+			}
 			superMethodInvocation.typeArguments().addAll(getCopiedTypeArguments(rewrite, methodReference.typeArguments()));
 			
 		} else {
@@ -721,14 +739,20 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 			boolean isTypeReference= isTypeReferenceToInstanceMethod(methodReference);
 			if (isTypeReference) {
-				methodInvocation.setExpression(ast.newSimpleName(lambdaParamNames[0]));
+				SimpleName name= ast.newSimpleName(lambdaParamNames[0]);
+				methodInvocation.setExpression(name);
+				linkedProposalModel.getPositionGroup(name.getIdentifier(), false).addPosition(rewrite.track(name), LinkedPositionGroup.NO_STOP);
 			} else {
 				Expression expr= ((ExpressionMethodReference) methodReference).getExpression();
 				methodInvocation.setExpression((Expression) rewrite.createCopyTarget(expr));
 			}
-			SimpleName name= getMethodInvocationName(methodReference);
-			methodInvocation.setName((SimpleName) rewrite.createCopyTarget(name));
-			methodInvocation.arguments().addAll(getInvocationArguments(ast, isTypeReference ? 1 : 0, noOfLambdaParameters, lambdaParamNames));
+			SimpleName methodName= getMethodInvocationName(methodReference);
+			methodInvocation.setName((SimpleName) rewrite.createCopyTarget(methodName));
+			List<SimpleName> invocationArgs= getInvocationArguments(ast, isTypeReference ? 1 : 0, noOfLambdaParameters, lambdaParamNames);
+			methodInvocation.arguments().addAll(invocationArgs);
+			for (SimpleName name : invocationArgs) {
+				linkedProposalModel.getPositionGroup(name.getIdentifier(), false).addPosition(rewrite.track(name), LinkedPositionGroup.NO_STOP);
+			}
 			methodInvocation.typeArguments().addAll(getCopiedTypeArguments(rewrite, methodReference.typeArguments()));
 		}
 
@@ -737,7 +761,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		// add proposal
 		String label= CorrectionMessages.QuickAssistProcessor_convert_to_lambda_expression;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_METHOD_REFERENCE_TO_LAMBDA, image);
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.CONVERT_METHOD_REFERENCE_TO_LAMBDA, image);
+		proposal.setLinkedProposalModel(linkedProposalModel);
+		proposal.setEndPosition(rewrite.track(lambda));
 		if (importRewrite != null) {
 			proposal.setImportRewrite(importRewrite);
 		}
