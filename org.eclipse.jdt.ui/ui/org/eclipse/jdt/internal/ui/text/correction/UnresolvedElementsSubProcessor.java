@@ -1130,21 +1130,20 @@ public class UnresolvedElementsSubProcessor {
 				if (parameterTypes != null) {
 					String sig= ASTResolving.getMethodSignature(methodName, parameterTypes, false);
 
-					if (ASTResolving.isUseableTypeInContext(parameterTypes, senderDeclBinding, false)) {
-						if (nodeParentType == senderDeclBinding) {
-							label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_description, sig);
-							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
-						} else {
-							label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, new Object[] { sig, BasicElementLabels.getJavaElementName(senderDeclBinding.getName()) } );
-							image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
-						}
-						proposals.add(new NewMethodCorrectionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD, image));
+					if (nodeParentType == senderDeclBinding) {
+						label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_description, sig);
+						image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PRIVATE);
+					} else {
+						label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, new Object[] { sig, BasicElementLabels.getJavaElementName(senderDeclBinding.getName()) } );
+						image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 					}
+					proposals.add(new NewMethodCorrectionProposal(label, targetCU, invocationNode, arguments, senderDeclBinding, IProposalRelevance.CREATE_METHOD, image));
+
 					if (senderDeclBinding.isNested() && cu.equals(targetCU) && sender == null && Bindings.findMethodInHierarchy(senderDeclBinding, methodName, (ITypeBinding[]) null) == null) { // no covering method
 						ASTNode anonymDecl= astRoot.findDeclaringNode(senderDeclBinding);
 						if (anonymDecl != null) {
 							senderDeclBinding= Bindings.getBindingOfParentType(anonymDecl.getParent());
-							if (!senderDeclBinding.isAnonymous() && ASTResolving.isUseableTypeInContext(parameterTypes, senderDeclBinding, false)) {
+							if (!senderDeclBinding.isAnonymous()) {
 								String[] args= new String[] { sig, ASTResolving.getTypeSignature(senderDeclBinding) };
 								label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createmethod_other_description, args);
 								image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PROTECTED);

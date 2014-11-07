@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -589,6 +589,85 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 
+	}
+
+	public void testParameterWithTypeVariable() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Bork<T> {\n");
+		buf.append("    private Help help = new Help();\n");
+		buf.append("    public void method() {\n");
+		buf.append("        help.help(this);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class Help {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Bork.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class Bork<T> {\n");
+		buf.append("    private Help help = new Help();\n");
+		buf.append("    public void method() {\n");
+		buf.append("        help.help(this);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class Help {\n");
+		buf.append("\n");
+		buf.append("    public void help(Bork<T> bork) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testParameterAnonymous() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public E() {\n");
+		buf.append("        foo(new Runnable() {\n");
+		buf.append("            public void run() {}\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList proposals= collectCorrections(cu1, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public E() {\n");
+		buf.append("        foo(new Runnable() {\n");
+		buf.append("            public void run() {}\n");
+		buf.append("        });\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private void foo(Runnable runnable) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertEqualString(preview1, expected1);
 	}
 
 	public void testMethodInGenericType() throws Exception {
@@ -3299,12 +3378,11 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
-
+		String preview= getPreviewContent(proposal);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E<T> {\n");
@@ -3312,9 +3390,25 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("        x.xoo(x.toString());\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		String expected1= buf.toString();
+		String expected= buf.toString();
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		preview= getPreviewContent(proposal);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class X<T> {\n");
+		buf.append("    /**\n");
+		buf.append("     * @param i The int value\n");
+		buf.append("     */\n");
+		buf.append("    public void xoo(String s) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void xoo(String string, X<T> x, int i) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected= buf.toString();
+		assertEqualStringsIgnoreOrder(new String[] { preview }, new String[] { expected });
 	}
 
 

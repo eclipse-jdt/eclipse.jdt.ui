@@ -1096,16 +1096,6 @@ public class ASTResolving {
 		return false;
 	}
 
-	public static boolean isUseableTypeInContext(ITypeBinding[] binding, IBinding context, boolean noWildcards) {
-		for (int i= 0; i < binding.length; i++) {
-			if (!isUseableTypeInContext(binding[i], context, noWildcards)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-
 	public static boolean isUseableTypeInContext(ITypeBinding type, IBinding context, boolean noWildcards) {
 		if (type.isArray()) {
 			type= type.getElementType();
