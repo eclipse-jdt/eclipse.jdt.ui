@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -193,7 +193,7 @@ public class PackageJavadocTests extends CoreTests {
 
 
 	public void testGetPackageAttacheddoc() throws Exception {
-		//  http://download.oracle.com/javase/6/docs/api/
+		//  https://docs.oracle.com/javase/8/docs/api/
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/PackageJavadocTests/JavadocHover_src.zip"));
 
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
@@ -206,7 +206,7 @@ public class PackageJavadocTests extends CoreTests {
 		IClasspathAttribute attribute=
 				JavaCore.newClasspathAttribute(
 						IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
-						"url:http://download.oracle.com/javase/6/docs/api/");
+						"https://docs.oracle.com/javase/8/docs/api/");
 		IClasspathEntry[] rawClasspath= fJProject1.getRawClasspath();
 		IClasspathEntry newEntry= JavaCore.newLibraryEntry(new Path(JavaTestPlugin.getDefault().getFileInPlugin(new Path("/testresources/rtstubs15.jar")).getAbsolutePath()), null, null, null,
 				new IClasspathAttribute[] { attribute }, false);
@@ -225,11 +225,14 @@ public class PackageJavadocTests extends CoreTests {
 		String actualHtmlContent= hoverInfo.getHtml();
 		Assert.assertNotNull(actualHtmlContent, actualHtmlContent);
 
+		String connectionTestUrl= "https://docs.oracle.com/";
 		try {
 			//trying to connect to the internet. Exception will be thrown if there is no net connection.
-			new URL("url:http://download.oracle.com/").openConnection().connect();
-			Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains("Provides classes for performing arbitrary-precision integer arithmetic"));
+			new URL(connectionTestUrl).openConnection().connect();
+			Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains("Provides classes for performing arbitrary-precision integer"));
 		} catch (Exception e) {
+			System.out.println("PackageJavadocTests.testGetPackageAttacheddoc(): no internet connection to access docs at " + connectionTestUrl);
+			e.printStackTrace(System.out);
 			//there is no internet connection, so the Javadoc cannot be retrieved.
 			Assert.assertTrue(actualHtmlContent, actualHtmlContent.contains(CorextMessages.JavaDocLocations_noAttachedSource) || actualHtmlContent.contains(CorextMessages.JavaDocLocations_error_gettingJavadoc)
 					|| actualHtmlContent.contains(CorextMessages.JavaDocLocations_error_gettingAttachedJavadoc));
@@ -307,7 +310,7 @@ public class PackageJavadocTests extends CoreTests {
 		IClasspathAttribute attribute=
 				JavaCore.newClasspathAttribute(
 						IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME,
-						"url:http://download.oracle.com/javase/6/docs/apii/");
+						"https://docs.oracle.com/javase/6/docs/apii/");
 		IClasspathEntry[] rawClasspath= fJProject1.getRawClasspath();
 		IClasspathEntry newEntry= JavaCore.newLibraryEntry(new Path(JavaTestPlugin.getDefault().getFileInPlugin(new Path("/testresources/rtstubs15.jar")).getAbsolutePath()), null, null, null,
 				new IClasspathAttribute[] { attribute }, false);
