@@ -10871,8 +10871,14 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		List proposals= collectAllCorrections(cu, astRoot, 9);
 		assertNumberOfProposals(proposals, 0);
 		
-		for (IProblem problem : astRoot.getProblems()) {
-			assertEquals(IProblem.ParsingErrorInsertToComplete, problem.getID());
+		IProblem[] problems= astRoot.getProblems();
+		for (int i= 0; i < problems.length; i++) {
+			IProblem problem= problems[i];
+			if (i == 5) {
+				assertEquals(IProblem.ParsingErrorDeleteToken, problem.getID());
+			} else {
+				assertEquals(IProblem.ParsingErrorInsertToComplete, problem.getID());
+			}
 		}
 		assertFalse("IProblem.ParsingErrorInsertToComplete is very general and should not trigger the quick fix lightbulb everywhere",
 				JavaCorrectionProcessor.hasCorrections(cu, IProblem.ParsingErrorInsertToComplete, IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER));
