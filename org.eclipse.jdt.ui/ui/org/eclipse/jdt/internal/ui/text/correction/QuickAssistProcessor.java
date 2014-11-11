@@ -132,6 +132,7 @@ import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.JdtASTMatcher;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
@@ -692,19 +693,19 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			lambda.setBody(methodInvocation);
 
 			Expression expr= null;
-			if (methodReference instanceof ExpressionMethodReference) {
-				ExpressionMethodReference expressionMethodReference= (ExpressionMethodReference) methodReference;
-				expr= (Expression) rewrite.createCopyTarget(expressionMethodReference.getExpression());
-			} else if (methodReference instanceof TypeMethodReference) {
-				Type type= ((TypeMethodReference) methodReference).getType();
-				ITypeBinding typeBinding= type.resolveBinding();
-				if (typeBinding != null) {
-					importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
-					expr= ast.newName(importRewrite.addImport(typeBinding));
+			boolean hasConflict= hasConflict(methodReference.getStartPosition(), referredMethodBinding, ScopeAnalyzer.METHODS | ScopeAnalyzer.CHECK_VISIBILITY, context.getASTRoot());
+			if (hasConflict || !Bindings.isSuperType(referredMethodBinding.getDeclaringClass(), ASTNodes.getEnclosingType(methodReference)) || methodReference.typeArguments().size() != 0) {
+				if (methodReference instanceof ExpressionMethodReference) {
+					ExpressionMethodReference expressionMethodReference= (ExpressionMethodReference) methodReference;
+					expr= (Expression) rewrite.createCopyTarget(expressionMethodReference.getExpression());
+				} else if (methodReference instanceof TypeMethodReference) {
+					Type type= ((TypeMethodReference) methodReference).getType();
+					ITypeBinding typeBinding= type.resolveBinding();
+					if (typeBinding != null) {
+						importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
+						expr= ast.newName(importRewrite.addImport(typeBinding));
+					}
 				}
-			}
-			if (expr == null) {
-				return false;
 			}
 			methodInvocation.setExpression(expr);
 			SimpleName methodName= getMethodInvocationName(methodReference);
@@ -744,7 +745,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				linkedProposalModel.getPositionGroup(name.getIdentifier(), false).addPosition(rewrite.track(name), LinkedPositionGroup.NO_STOP);
 			} else {
 				Expression expr= ((ExpressionMethodReference) methodReference).getExpression();
-				methodInvocation.setExpression((Expression) rewrite.createCopyTarget(expr));
+				if (!(expr instanceof ThisExpression && methodReference.typeArguments().size() == 0)) {
+					methodInvocation.setExpression((Expression) rewrite.createCopyTarget(expr));
+				}
 			}
 			SimpleName methodName= getMethodInvocationName(methodReference);
 			methodInvocation.setName((SimpleName) rewrite.createCopyTarget(methodName));
@@ -769,6 +772,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		resultingCollections.add(proposal);
 		return true;
+	}
+
+	private static boolean hasConflict(int startPosition, IMethodBinding referredMethodBinding, int flags, CompilationUnit cu) {
+		ScopeAnalyzer analyzer= new ScopeAnalyzer(cu);
+		IBinding[] declarationsInScope= analyzer.getDeclarationsInScope(startPosition, flags);
+		for (int i= 0; i < declarationsInScope.length; i++) {
+			IBinding decl= declarationsInScope[i];
+			if (decl.getName().equals(referredMethodBinding.getName()) && !referredMethodBinding.getMethodDeclaration().isEqualTo(decl))
+				return true;
+		}
+		return false;
 	}
 
 	private static String[] getUniqueParameterNames(MethodReference methodReference, IMethodBinding functionalMethod) throws JavaModelException {
