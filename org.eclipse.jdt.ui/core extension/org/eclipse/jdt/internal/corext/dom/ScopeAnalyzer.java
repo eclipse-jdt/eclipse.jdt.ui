@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
@@ -326,10 +327,13 @@ public class ScopeAnalyzer {
 					return getBinding(fieldAccess.getExpression());
 				}
 				return null;
-			case ASTNode.SUPER_FIELD_ACCESS: {
-				ITypeBinding curr= Bindings.getBindingOfParentType(parent);
-				return curr.getSuperclass();
-			}
+			case ASTNode.SUPER_FIELD_ACCESS:
+				SuperFieldAccess superFieldAccess= (SuperFieldAccess) parent;
+				if (selector == superFieldAccess.getName()) {
+					ITypeBinding curr= Bindings.getBindingOfParentType(parent);
+					return curr.getSuperclass();
+				}
+				return null;
 			case ASTNode.SUPER_METHOD_INVOCATION: {
 				SuperMethodInvocation superInv= (SuperMethodInvocation) parent;
 				if (selector == superInv.getName()) {

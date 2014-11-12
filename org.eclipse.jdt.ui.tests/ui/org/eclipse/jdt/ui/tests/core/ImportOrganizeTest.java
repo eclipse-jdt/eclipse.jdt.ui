@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -3208,6 +3208,34 @@ public class ImportOrganizeTest extends CoreTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
+	public void test_bug450858() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("bug", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package bug;\n");
+		buf.append("\n");
+		buf.append("class S {\n");
+		buf.append("    public final int f = 0;\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class X {\n");
+		buf.append("    class C extends S {\n");
+		buf.append("        public void foo() {\n");
+		buf.append("            System.out.println(C.super.f);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("S.java", buf.toString(), false, null);
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("test_bug450858", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		assertImports(cu, new String[] {});
+	}
 
 	protected OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) {
 		setOrganizeImportSettings(order, threshold, threshold, cu.getJavaProject());
