@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,8 +73,12 @@ public class JavaProjectHelper {
 
 	/**
 	 * XXX: Flag to enable/disable dummy search to synchronize with indexer. See https://bugs.eclipse.org/391927 .
+	 * <p>
+	 * 0 if disabled, >0 if enabled.
+	 * <p>
+	 * If external code increases this counter, then it MUST decrease it again (e.g. in TestSetup's setUp/tearDown).
 	 */
-	private static final boolean PERFORM_DUMMY_SEARCH= false;
+	public static int PERFORM_DUMMY_SEARCH= 0;
 	
 	/**
 	 * @deprecated use {@link #RT_STUBS_15}
@@ -404,11 +408,11 @@ public class JavaProjectHelper {
 	}
 	
 	public static void performDummySearch() throws JavaModelException {
-		performDummySearch(SearchEngine.createWorkspaceScope(), PERFORM_DUMMY_SEARCH);
+		performDummySearch(SearchEngine.createWorkspaceScope(), PERFORM_DUMMY_SEARCH > 0);
 	}
 
 	public static void performDummySearch(IJavaElement element) throws JavaModelException {
-		performDummySearch(SearchEngine.createJavaSearchScope(new IJavaElement[] { element }), PERFORM_DUMMY_SEARCH);
+		performDummySearch(SearchEngine.createJavaSearchScope(new IJavaElement[] { element }), PERFORM_DUMMY_SEARCH > 0);
 	}
 
 	private static void performDummySearch(IJavaSearchScope searchScope, boolean doIt) throws JavaModelException {

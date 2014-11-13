@@ -57,7 +57,18 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 	}
 
 	public static Test setUpTest(Test test) {
-		return new Java18ProjectTestSetup(test);
+		return new Java18ProjectTestSetup(test) {
+			@Override
+			protected void setUp() throws Exception {
+				JavaProjectHelper.PERFORM_DUMMY_SEARCH++;
+				super.setUp();
+			}
+			@Override
+			protected void tearDown() throws Exception {
+				super.tearDown();
+				JavaProjectHelper.PERFORM_DUMMY_SEARCH--;
+			}
+		};
 	}
 
 	protected void setUp() throws Exception {

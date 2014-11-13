@@ -18,6 +18,8 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -58,7 +60,18 @@ public class RenameTests18 extends RefactoringTest {
 	}
 
 	public static Test setUpTest(Test someTest) {
-		return new Java18Setup(someTest);
+		return new Java18Setup(someTest) {
+			@Override
+			protected void setUp() throws Exception {
+				JavaProjectHelper.PERFORM_DUMMY_SEARCH++;
+				super.setUp();
+			}
+			@Override
+			protected void tearDown() throws Exception {
+				super.tearDown();
+				JavaProjectHelper.PERFORM_DUMMY_SEARCH--;
+			}
+		};
 	}
 
 	protected String getRefactoringPath() {

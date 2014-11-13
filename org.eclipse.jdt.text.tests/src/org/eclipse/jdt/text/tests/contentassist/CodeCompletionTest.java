@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 
+import junit.extensions.TestSetup;
 import junit.framework.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -80,7 +81,20 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 	private static final Class THIS= CodeCompletionTest.class;
 
 	public static Test suite() {
-		return new OrderedTestSuite(THIS); //predictable order for https://bugs.eclipse.org/bugs/show_bug.cgi?id=423416
+		OrderedTestSuite suite= new OrderedTestSuite(THIS); //predictable order for https://bugs.eclipse.org/bugs/show_bug.cgi?id=423416
+		return new TestSetup(suite) {
+			@Override
+			protected void setUp() throws Exception {
+				JavaProjectHelper.PERFORM_DUMMY_SEARCH++;
+				super.setUp();
+			}
+
+			@Override
+			protected void tearDown() throws Exception {
+				super.tearDown();
+				JavaProjectHelper.PERFORM_DUMMY_SEARCH--;
+			}
+		};
 	}
 
 	private IJavaProject fJProject1;
