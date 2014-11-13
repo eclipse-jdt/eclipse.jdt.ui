@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -142,6 +142,8 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private static final String METHODNAME_DEEP_EQUALS= "deepEquals"; //$NON-NLS-1$
 
 	private static final String METHODNAME_HASH_CODE= "hashCode"; //$NON-NLS-1$
+
+	private static final String METHODNAME_DEEP_HASH_CODE= "deepHashCode"; //$NON-NLS-1$
 
 	private static final String METHODNAME_OUTER_TYPE= "getOuterType"; //$NON-NLS-1$
 
@@ -541,7 +543,11 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private Statement createAddArrayHashCode(IVariableBinding binding) {
 		MethodInvocation invoc= fAst.newMethodInvocation();
 		if (JavaModelUtil.is50OrHigher(fRewrite.getCu().getJavaProject())) {
-			invoc.setName(fAst.newSimpleName(METHODNAME_HASH_CODE));
+			if (binding.getType().getDimensions() > 1) {
+				invoc.setName(fAst.newSimpleName(METHODNAME_DEEP_HASH_CODE));
+			} else {
+				invoc.setName(fAst.newSimpleName(METHODNAME_HASH_CODE));
+			}
 			invoc.setExpression(getQualifiedName(JAVA_UTIL_ARRAYS));
 			invoc.arguments().add(getThisAccessForHashCode(binding.getName()));
 		} else {

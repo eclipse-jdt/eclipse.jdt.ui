@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1464,8 +1464,8 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 					"	public int hashCode() {\r\n" +
 					"		final int prime = 31;\r\n" +
 					"		int result = 1;\r\n" +
-					"		result = prime * result + Arrays.hashCode(a);\r\n" +
-					"		result = prime * result + Arrays.hashCode(b);\r\n" +
+					"		result = prime * result + Arrays.deepHashCode(a);\r\n" +
+					"		result = prime * result + Arrays.deepHashCode(b);\r\n" +
 					"		return result;\r\n" +
 					"	}\r\n" +
 					"	/* (non-Javadoc)\r\n" +
