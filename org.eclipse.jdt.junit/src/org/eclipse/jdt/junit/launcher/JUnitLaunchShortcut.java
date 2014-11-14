@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IResource;
 
@@ -298,8 +296,11 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 * element type can only be of type {@link IJavaProject}, {@link IPackageFragmentRoot},
 	 * {@link IPackageFragment}, {@link IType} or {@link IMethod}.
 	 *
-	 * Clients can extend this method (should call super) to configure additional attributes on the
-	 * launch configuration working copy.
+	 * <p>Clients can extend this method (should call super) to configure additional attributes on the
+	 * launch configuration working copy. Note that this method calls
+	 * <code>{@link #createLaunchConfiguration(IJavaElement, String) createLaunchConfiguration}(element, null)</code>.
+	 * Extenders are recommended to extend the two-args method instead of this method.
+	 * </p>
 	 * 
 	 * @param element element to launch
 	 *
@@ -316,15 +317,18 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 * element type can only be of type {@link IJavaProject}, {@link IPackageFragmentRoot},
 	 * {@link IPackageFragment}, {@link IType} or {@link IMethod}.
 	 *
-	 * Clients can extend this method (should call super) to configure additional attributes on the
+	 * <p>Clients can extend this method (should call super) to configure additional attributes on the
 	 * launch configuration working copy.
+	 * </p>
 	 * 
 	 * @param element element to launch
 	 * @param testName name of the test to launch, e.g. the method name or an artificial name
-	 *            created by a JUnit runner
+	 *            created by a JUnit runner, or <code>null</code> if none. The testName is
+	 *            ignored if the element is an IMethod; the method name is used in that case.
 	 *
 	 * @return a launch configuration working copy for the given element
 	 * @throws CoreException if creation failed
+	 * @since 3.8
 	 */
 	protected ILaunchConfigurationWorkingCopy createLaunchConfiguration(IJavaElement element, String testName) throws CoreException {
 		final String mainTypeQualifiedName;
@@ -344,11 +348,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 				break;
 			}
 			case IJavaElement.METHOD: {
-				if (testName != null) {
-					String message= "Test-names can not be specified when launching a Java method.";
-					throw new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, message));
-				}
-				testName= element.getElementName();
+				testName= element.getElementName(); // Test-names can not be specified when launching a Java method.
 				IMethod method= (IMethod)element;
 				containerHandleId= EMPTY_STRING;
 				mainTypeQualifiedName= method.getDeclaringType().getFullyQualifiedName('.');
@@ -378,13 +378,14 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	}
 
 	/**
-	 * Computes a human-readable name for a launch configuration. The name serve's as suggestion and
-	 * it's the callers responsibility to make it valid and unique.
+	 * Computes a human-readable name for a launch configuration. The name serves as a suggestion and
+	 * it's the caller's responsibility to make it valid and unique.
 	 * 
 	 * @param element The Java Element that will be executed.
 	 * @param fullTestName The test name. See
 	 *            org.eclipse.jdt.internal.junit4.runner.DescriptionMatcher for supported formats.
 	 * @return The suggested name for the launch configuration.
+	 * @since 3.8
 	 */
 	protected String suggestLaunchConfigurationName(IJavaElement element, String fullTestName) {
 		switch (element.getElementType()) {

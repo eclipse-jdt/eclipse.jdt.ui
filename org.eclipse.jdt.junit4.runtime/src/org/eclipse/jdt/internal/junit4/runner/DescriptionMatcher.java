@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Moritz Eysholdt and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Moritz Eysholdt <moritz.eysholdt@itemis.de> - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.jdt.internal.junit4.runner;
 
 import java.util.ArrayList;
@@ -12,8 +22,6 @@ import org.junit.runners.Parameterized;
  * This class matches JUnit's {@link Description} against a string.
  * 
  * See {@link #create(Class, String)} for details.
- * 
- * @author Moritz Eysholdt
  */
 public abstract class DescriptionMatcher {
 
@@ -69,8 +77,6 @@ public abstract class DescriptionMatcher {
 	 * Please be aware that {@link Description#getMethodName()} can be any value a JUnit runner has
 	 * computed. It is not necessarily a valid method name. For example, {@link Parameterized} uses
 	 * the format 'methodname[i]', with 'i' being the row index in the table of test data.
-	 * 
-	 * @author Moritz Eysholdt
 	 */
 	private static class LeadingIdentifierMatcher extends DescriptionMatcher {
 

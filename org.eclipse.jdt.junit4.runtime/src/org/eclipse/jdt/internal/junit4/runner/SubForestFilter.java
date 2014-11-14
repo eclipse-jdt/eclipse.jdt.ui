@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Moritz Eysholdt and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Moritz Eysholdt <moritz.eysholdt@itemis.de> - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.jdt.internal.junit4.runner;
 
 import java.util.HashSet;
@@ -12,9 +22,7 @@ import org.junit.runner.manipulation.NoTestsRemainException;
  * This filter keeps all matched {@link Description}s in a tree, including the children and
  * container of the matched Description.
  * 
- * It is allowed to match more then one Description.
- * 
- * @author Moritz Eysholdt
+ * It is allowed to match more than one Description.
  */
 public class SubForestFilter extends Filter {
 

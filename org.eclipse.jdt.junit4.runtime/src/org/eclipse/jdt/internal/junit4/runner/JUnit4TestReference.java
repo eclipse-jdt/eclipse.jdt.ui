@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,7 +85,7 @@ public class JUnit4TestReference implements ITestReference {
 			notifier.fireTestRunStarted(fRunner.getDescription());
 			fRunner.run(notifier);
 			notifier.fireTestRunFinished(result);
-		} catch (@SuppressWarnings("unused") StoppedByUserException e) {
+		} catch (StoppedByUserException e) {
 			// not interesting, see https://bugs.eclipse.org/329498
 		} finally {
 			notifier.removeListener(listener);
