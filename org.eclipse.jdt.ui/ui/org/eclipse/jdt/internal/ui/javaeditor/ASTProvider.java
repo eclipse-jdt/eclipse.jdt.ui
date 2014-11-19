@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 
@@ -68,14 +67,6 @@ public final class ASTProvider {
 	 */
 	public static final WAIT_FLAG WAIT_NO= SharedASTProvider.WAIT_NO;
 
-
-	/**
-	 * Tells whether this class is in debug mode.
-	 * @since 3.0
-	 */
-	private static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ASTProvider"));  //$NON-NLS-1$//$NON-NLS-2$
-
-
 	/**
 	 * Internal activation listener.
 	 *
@@ -105,7 +96,7 @@ public final class ASTProvider {
 		 */
 		public void partClosed(IWorkbenchPartReference ref) {
 			if (isActiveEditor(ref)) {
-				if (DEBUG)
+				if (JavaPlugin.DEBUG_AST_PROVIDER)
 					System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "closed active editor: " + ref.getTitle()); //$NON-NLS-1$ //$NON-NLS-2$
 
 				activeJavaEditorChanged(null);
@@ -168,7 +159,7 @@ public final class ASTProvider {
 		 */
 		public void windowClosed(IWorkbenchWindow window) {
 			if (fActiveEditor != null && fActiveEditor.getSite() != null && window == fActiveEditor.getSite().getWorkbenchWindow()) {
-				if (DEBUG)
+				if (JavaPlugin.DEBUG_AST_PROVIDER)
 					System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "closed active editor: " + fActiveEditor.getTitle()); //$NON-NLS-1$ //$NON-NLS-2$
 
 				activeJavaEditorChanged(null);
@@ -262,7 +253,7 @@ public final class ASTProvider {
 			cache(null, javaElement);
 		}
 
-		if (DEBUG)
+		if (JavaPlugin.DEBUG_AST_PROVIDER)
 			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "active editor is: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		synchronized (fReconcileLock) {
@@ -310,7 +301,7 @@ public final class ASTProvider {
 		if (javaElement == null)
 			return;
 
-		if (DEBUG)
+		if (JavaPlugin.DEBUG_AST_PROVIDER)
 			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "about to reconcile: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
 
 		synchronized (fReconcileLock) {
@@ -328,7 +319,7 @@ public final class ASTProvider {
 		if (fAST == null)
 			return;
 
-		if (DEBUG)
+		if (JavaPlugin.DEBUG_AST_PROVIDER)
 			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "disposing AST: " + toString(fAST) + " for: " + toString(fActiveJavaElement)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		fAST= null;
@@ -376,12 +367,12 @@ public final class ASTProvider {
 	private synchronized void cache(CompilationUnit ast, ITypeRoot javaElement) {
 
 		if (fActiveJavaElement != null && !fActiveJavaElement.equals(javaElement)) {
-			if (DEBUG && javaElement != null) // don't report call from disposeAST()
+			if (JavaPlugin.DEBUG_AST_PROVIDER && javaElement != null) // don't report call from disposeAST()
 				System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "don't cache AST for inactive: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 
-		if (DEBUG && (javaElement != null || ast != null)) // don't report call from disposeAST()
+		if (JavaPlugin.DEBUG_AST_PROVIDER && (javaElement != null || ast != null)) // don't report call from disposeAST()
 			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "caching AST: " + toString(ast) + " for: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		if (fAST != null)
@@ -419,13 +410,13 @@ public final class ASTProvider {
 			isActiveElement= input.equals(fActiveJavaElement);
 			if (isActiveElement) {
 				if (fAST != null) {
-					if (DEBUG)
+					if (JavaPlugin.DEBUG_AST_PROVIDER)
 						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "returning cached AST:" + toString(fAST) + " for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 					return fAST;
 				}
 				if (waitFlag == SharedASTProvider.WAIT_NO) {
-					if (DEBUG)
+					if (JavaPlugin.DEBUG_AST_PROVIDER)
 						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "returning null (WAIT_NO) for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 
 					return null;
@@ -452,7 +443,7 @@ public final class ASTProvider {
 				// Wait for AST
 				synchronized (fWaitLock) {
 					if (isReconciling(input)) {
-						if (DEBUG)
+						if (JavaPlugin.DEBUG_AST_PROVIDER)
 							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "waiting for AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 						fWaitLock.wait(30000); // XXX: The 30 seconds timeout is an attempt to at least avoid a deadlock. See https://bugs.eclipse.org/366048#c21
 					}
@@ -461,7 +452,7 @@ public final class ASTProvider {
 				// Check whether active element is still valid
 				synchronized (this) {
 					if (activeElement == fActiveJavaElement && fAST != null) {
-						if (DEBUG)
+						if (JavaPlugin.DEBUG_AST_PROVIDER)
 							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "...got AST: " + toString(fAST) + " for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 						return fAST;
@@ -480,14 +471,14 @@ public final class ASTProvider {
 			ast= createAST(input, progressMonitor);
 			if (progressMonitor != null && progressMonitor.isCanceled()) {
 				ast= null;
-				if (DEBUG)
+				if (JavaPlugin.DEBUG_AST_PROVIDER)
 					System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "Ignore created AST for: " + input.getElementName() + " - operation has been cancelled"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 		} finally {
 			if (isActiveElement) {
 				if (fAST != null) {
 					// in the meantime, reconcile created a new AST. Return that one
-					if (DEBUG)
+					if (JavaPlugin.DEBUG_AST_PROVIDER)
 						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "Ignore created AST for " + input.getElementName() + " - AST from reconciler is newer"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					reconciled(fAST, input, null);
 					return fAST;
@@ -539,7 +530,7 @@ public final class ASTProvider {
 				try {
 					if (progressMonitor != null && progressMonitor.isCanceled())
 						return;
-					if (DEBUG)
+					if (JavaPlugin.DEBUG_AST_PROVIDER)
 						System.err.println(getThreadName() + " - " + DEBUG_PREFIX + "creating AST for: " + input.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 					root[0]= (CompilationUnit)parser.createAST(progressMonitor);
 
@@ -604,14 +595,14 @@ public final class ASTProvider {
 	 *      boolean, IProgressMonitor)
 	 */
 	void reconciled(CompilationUnit ast, ITypeRoot javaElement, IProgressMonitor progressMonitor) {
-		if (DEBUG)
+		if (JavaPlugin.DEBUG_AST_PROVIDER)
 			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "reconciled: " + toString(javaElement) + ", AST: " + toString(ast)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		synchronized (fReconcileLock) {
 			fIsReconciling= false;
 			if (javaElement == null || !javaElement.equals(fReconcilingJavaElement)) {
 
-				if (DEBUG)
+				if (JavaPlugin.DEBUG_AST_PROVIDER)
 					System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "  ignoring AST of out-dated editor"); //$NON-NLS-1$ //$NON-NLS-2$
 
 				// Signal - threads might wait for wrong element

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,7 +20,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -92,10 +91,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
  * @since 3.1
  */
 public class CompletionProposalCollector extends CompletionRequestor {
-
-	/** Tells whether this class is in debug mode. */
-	private static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));  //$NON-NLS-1$//$NON-NLS-2$
-
 	/** Triggers for method proposals without parameters. Do not modify. */
 	protected final static char[] METHOD_TRIGGERS= new char[] { ';', ',', '.', '\t', '[', ' ' };
 	/** Triggers for method proposals. Do not modify. */
@@ -245,7 +240,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 */
 	@Override
 	public void accept(CompletionProposal proposal) {
-		long start= DEBUG ? System.currentTimeMillis() : 0;
+		long start= JavaPlugin.DEBUG_RESULT_COLLECTOR ? System.currentTimeMillis() : 0;
 		try {
 			if (isFiltered(proposal))
 				return;
@@ -267,7 +262,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "Exception when processing proposal for: " + String.valueOf(proposal.getCompletion()), e)); //$NON-NLS-1$
 		}
 
-		if (DEBUG) fUITime += System.currentTimeMillis() - start;
+		if (JavaPlugin.DEBUG_RESULT_COLLECTOR) fUITime += System.currentTimeMillis() - start;
 	}
 
 	/**
@@ -290,7 +285,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 */
 	@Override
 	public void beginReporting() {
-		if (DEBUG) {
+		if (JavaPlugin.DEBUG_RESULT_COLLECTOR) {
 			fStartTime= System.currentTimeMillis();
 			fUITime= 0;
 		}
@@ -318,7 +313,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 */
 	@Override
 	public void endReporting() {
-		if (DEBUG) {
+		if (JavaPlugin.DEBUG_RESULT_COLLECTOR) {
 			long total= System.currentTimeMillis() - fStartTime;
 			System.err.println("Core Collector (core):\t" + (total - fUITime)); //$NON-NLS-1$
 			System.err.println("Core Collector (ui):\t" + fUITime); //$NON-NLS-1$

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,6 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFile;
 
@@ -83,14 +82,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
  * @since 3.4
  */
 class BreadcrumbItemDropDown {
-
-	/**
-	 * Tells whether this class is in debug mode.
-	 *
-	 * @since 3.5
-	 */
-	private static boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/BreadcrumbItemDropDown")); //$NON-NLS-1$//$NON-NLS-2$
-
 	private static final boolean IS_MAC_WORKAROUND= "carbon".equals(SWT.getPlatform()); //$NON-NLS-1$
 
 	/**
@@ -302,7 +293,7 @@ class BreadcrumbItemDropDown {
 	 * Opens the drop down menu.
 	 */
 	public void showMenu() {
-		if (DEBUG)
+		if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN)
 			System.out.println("BreadcrumbItemDropDown.showMenu()"); //$NON-NLS-1$
 
 		if (!fEnabled || fMenuIsShown)
@@ -311,7 +302,7 @@ class BreadcrumbItemDropDown {
 		fMenuIsShown= true;
 
 		fShell= new Shell(fToolBar.getShell(), SWT.RESIZE | SWT.TOOL | SWT.ON_TOP);
-		if (DEBUG)
+		if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN)
 			System.out.println("	creating new shell"); //$NON-NLS-1$
 
 		GridLayout layout= new GridLayout(1, false);
@@ -354,7 +345,7 @@ class BreadcrumbItemDropDown {
 
 		fDropDownViewer.addOpenListener(new IOpenListener() {
 			public void open(OpenEvent event) {
-				if (DEBUG)
+				if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN)
 					System.out.println("BreadcrumbItemDropDown.showMenu()$treeViewer>open"); //$NON-NLS-1$
 
 				ISelection selection= event.getSelection();
@@ -371,7 +362,7 @@ class BreadcrumbItemDropDown {
 
 		tree.addMouseListener(new MouseListener() {
 			public void mouseUp(MouseEvent e) {
-				if (DEBUG)
+				if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN)
 					System.out.println("BreadcrumbItemDropDown.showMenu()$treeViewer>mouseUp"); //$NON-NLS-1$
 
 				if (e.button != 1)
@@ -531,7 +522,7 @@ class BreadcrumbItemDropDown {
 
 		boolean treeHasFocus= !fShell.isDisposed() && fDropDownViewer.getTree().isFocusControl();
 
-		if (DEBUG) {
+		if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN) {
 			System.out.println("	isDisposed: " + fShell.isDisposed()); //$NON-NLS-1$
 			System.out.println("	shell hasFocus: " + (!fShell.isDisposed() && fShell.isFocusControl())); //$NON-NLS-1$
 			System.out.println("	tree hasFocus: " + treeHasFocus); //$NON-NLS-1$
@@ -577,22 +568,22 @@ class BreadcrumbItemDropDown {
 
 				switch (event.type) {
 					case SWT.FocusIn:
-						if (DEBUG)
+						if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN)
 							System.out.println("focusIn - is breadcrumb tree: " + isFocusBreadcrumbTreeFocusWidget); //$NON-NLS-1$
 
 						if (!isFocusBreadcrumbTreeFocusWidget && !isFocusWidgetParentShell) {
-							if (DEBUG)
+							if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN)
 								System.out.println("==> closing shell since focus in other widget"); //$NON-NLS-1$
 							shell.close();
 						}
 						break;
 
 					case SWT.FocusOut:
-						if (DEBUG)
+						if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN)
 							System.out.println("focusOut - is breadcrumb tree: " + isFocusBreadcrumbTreeFocusWidget); //$NON-NLS-1$
 
 						if (event.display.getActiveShell() == null) {
-							if (DEBUG)
+							if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN)
 								System.out.println("==> closing shell since event.display.getActiveShell() == null"); //$NON-NLS-1$
 							shell.close();
 						}
@@ -621,7 +612,7 @@ class BreadcrumbItemDropDown {
 
 		shell.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
-				if (DEBUG)
+				if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN)
 					System.out.println("==> shell disposed"); //$NON-NLS-1$
 
 				display.removeFilter(SWT.FocusIn, focusListener);
@@ -637,7 +628,7 @@ class BreadcrumbItemDropDown {
 			}
 
 			public void shellClosed(ShellEvent e) {
-				if (DEBUG)
+				if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN)
 					System.out.println("==> shellClosed"); //$NON-NLS-1$
 
 				if (!fMenuIsShown)

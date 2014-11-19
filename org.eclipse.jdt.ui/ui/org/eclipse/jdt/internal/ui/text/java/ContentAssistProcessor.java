@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.action.LegacyActionTools;
@@ -206,8 +205,6 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		}
 	}
 
-	private static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));  //$NON-NLS-1$//$NON-NLS-2$
-
 	/**
 	 * Dialog settings key for the "all categories are disabled" warning dialog. See
 	 * {@link OptionalMessageDialog}.
@@ -268,7 +265,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeCompletionProposals(org.eclipse.jface.text.ITextViewer, int)
 	 */
 	public final ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
-		long start= DEBUG ? System.currentTimeMillis() : 0;
+		long start= JavaPlugin.DEBUG_RESULT_COLLECTOR ? System.currentTimeMillis() : 0;
 
 		clearState();
 
@@ -276,11 +273,11 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		monitor.beginTask(JavaTextMessages.ContentAssistProcessor_computing_proposals, fCategories.size() + 1);
 
 		ContentAssistInvocationContext context= createContext(viewer, offset);
-		long setup= DEBUG ? System.currentTimeMillis() : 0;
+		long setup= JavaPlugin.DEBUG_RESULT_COLLECTOR ? System.currentTimeMillis() : 0;
 
 		monitor.subTask(JavaTextMessages.ContentAssistProcessor_collecting_proposals);
 		List<ICompletionProposal> proposals= collectProposals(viewer, offset, monitor, context);
-		long collect= DEBUG ? System.currentTimeMillis() : 0;
+		long collect= JavaPlugin.DEBUG_RESULT_COLLECTOR ? System.currentTimeMillis() : 0;
 
 		monitor.subTask(JavaTextMessages.ContentAssistProcessor_sorting_proposals);
 		if (fNeedsSortingAfterFiltering)
@@ -288,12 +285,12 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		else
 			proposals= sortProposals(proposals, monitor, context);
 		fNumberOfComputedResults= proposals.size();
-		long filter= DEBUG ? System.currentTimeMillis() : 0;
+		long filter= JavaPlugin.DEBUG_RESULT_COLLECTOR ? System.currentTimeMillis() : 0;
 
 		ICompletionProposal[] result= proposals.toArray(new ICompletionProposal[proposals.size()]);
 		monitor.done();
 
-		if (DEBUG) {
+		if (JavaPlugin.DEBUG_RESULT_COLLECTOR) {
 			System.err.println("Code Assist Stats (" + result.length + " proposals)"); //$NON-NLS-1$ //$NON-NLS-2$
 			System.err.println("Code Assist (setup):\t" + (setup - start) ); //$NON-NLS-1$
 			System.err.println("Code Assist (collect):\t" + (collect - setup) ); //$NON-NLS-1$

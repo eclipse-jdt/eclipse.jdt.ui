@@ -11,14 +11,19 @@
 package org.eclipse.jdt.internal.ui;
 
 import java.io.IOException;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.prefs.BackingStoreException;
+
+import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.osgi.service.debug.DebugOptionsListener;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -119,7 +124,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathAttributeConfigur
  * access to the workbench, keeps track of elements shared by all editors and viewers
  * of the plug-in such as document providers and find-replace-dialogs.
  */
-public class JavaPlugin extends AbstractUIPlugin {
+public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener {
 
 
 	/**
@@ -148,6 +153,14 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @since 3.0
 	 */
 	private static final String CODE_TEMPLATES_MIGRATION_KEY= "org.eclipse.jdt.ui.text.code_templates_migrated"; //$NON-NLS-1$
+
+	public static boolean DEBUG_AST_PROVIDER;
+
+	public static boolean DEBUG_BREADCRUMB_ITEM_DROP_DOWN;
+
+	public static boolean DEBUG_TYPE_CONSTRAINTS;
+
+	public static boolean DEBUG_RESULT_COLLECTOR;
 
 	private static JavaPlugin fgJavaPlugin;
 
@@ -273,6 +286,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 	private BundleContext fBundleContext;
 
+	private ServiceRegistration<DebugOptionsListener> fDebugRegistration;
+
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
 	}
@@ -365,6 +380,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		fBundleContext= context;
+
+		// register debug options listener
+		Hashtable<String, String> properties= new Hashtable<String, String>(2);
+		properties.put(DebugOptions.LISTENER_SYMBOLICNAME, getPluginId());
+		fDebugRegistration= context.registerService(DebugOptionsListener.class, this, properties);
 
 		WorkingCopyOwner.setPrimaryBufferProvider(new WorkingCopyOwner() {
 			@Override
@@ -550,6 +570,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		try {
+			// unregister debug options listener
+			fDebugRegistration.unregister();
+			fDebugRegistration= null;
+
 			if (fImageDescriptorRegistry != null)
 				fImageDescriptorRegistry.dispose();
 
@@ -1123,4 +1147,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 		return null;
 	}
 
+	public void optionsChanged(DebugOptions options) {
+		DEBUG_AST_PROVIDER= options.getBooleanOption("org.eclipse.jdt.ui/debug/ASTProvider", false); //$NON-NLS-1$
+		DEBUG_BREADCRUMB_ITEM_DROP_DOWN= options.getBooleanOption("org.eclipse.jdt.ui/debug/BreadcrumbItemDropDown", false); //$NON-NLS-1$
+		DEBUG_TYPE_CONSTRAINTS= options.getBooleanOption("org.eclipse.jdt.ui/debug/TypeConstraints", false); //$NON-NLS-1$
+		DEBUG_RESULT_COLLECTOR= options.getBooleanOption("org.eclipse.jdt.ui/debug/ResultCollector", false); //$NON-NLS-1$
+	}
 }

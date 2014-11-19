@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -146,8 +145,6 @@ import org.eclipse.jdt.internal.ui.text.java.JavaFormattingContext;
  * Java specific text editor.
  */
 public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilingListener {
-	private static final boolean CODE_ASSIST_DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));  //$NON-NLS-1$//$NON-NLS-2$
-
 	/**
 	 * Text operation code for requesting common prefix completion.
 	 */
@@ -179,9 +176,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 			switch (operation) {
 				case CONTENTASSIST_PROPOSALS:
-					long time= CODE_ASSIST_DEBUG ? System.currentTimeMillis() : 0;
+					long time= JavaPlugin.DEBUG_RESULT_COLLECTOR ? System.currentTimeMillis() : 0;
 					String msg= fContentAssistant.showPossibleCompletions();
-					if (CODE_ASSIST_DEBUG) {
+					if (JavaPlugin.DEBUG_RESULT_COLLECTOR) {
 						long delta= System.currentTimeMillis() - time;
 						System.err.println("Code Assist (total): " + delta); //$NON-NLS-1$
 					}

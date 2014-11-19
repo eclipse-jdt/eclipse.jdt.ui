@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CastExpression;
@@ -60,18 +59,14 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class InferTypeArgumentsTCModel {
-
-	protected static final boolean DEBUG= Boolean.valueOf(Platform.getDebugOption("org.eclipse.jdt.ui/debug/TypeConstraints")).booleanValue(); //$NON-NLS-1$
-
 	private static final String INDEXED_COLLECTION_ELEMENTS= "IndexedCollectionElements"; //$NON-NLS-1$
 	private static final String ARRAY_ELEMENT= "ArrayElement"; //$NON-NLS-1$
 	private static final String USED_IN= "UsedIn"; //$NON-NLS-1$
 	private static final String METHOD_RECEIVER= "MethodReceiver"; //$NON-NLS-1$
 	private static final Map<String, CollectionElementVariable2> EMPTY_COLLECTION_ELEMENT_VARIABLES_MAP= Collections.emptyMap();
-
-	protected static boolean fStoreToString= DEBUG;
 
 	/**
 	 * Map from a {@link ConstraintVariable2} to itself.
@@ -211,16 +206,6 @@ public class InferTypeArgumentsTCModel {
 		return fCastVariables.toArray(new CastVariable2[fCastVariables.size()]);
 	}
 
-	/**
-	 * Controls calculation and storage of information for more readable toString() messages.
-	 * <p><em>Warning: This method is for testing purposes only and should not be called except from unit tests.</em></p>
-	 *
-	 * @param store <code>true</code> iff information for toString() should be stored
-	 */
-	public static void setStoreToString(boolean store) {
-		fStoreToString= store;
-	}
-
 	public void createSubtypeConstraint(ConstraintVariable2 cv1, ConstraintVariable2 cv2) {
 		if (! keep(cv1, cv2))
 			return;
@@ -333,7 +318,7 @@ public class InferTypeArgumentsTCModel {
 				fCuScopedConstraintVariables.add(storedCv);
 			makeElementVariables(storedCv, type);
 			makeArrayElementVariable(storedCv);
-			if (fStoreToString)
+			if (JavaPlugin.DEBUG_TYPE_CONSTRAINTS)
 				storedCv.setData(ConstraintVariable2.TO_STRING, '[' + variableBinding.getName() + ']');
 		}
 		return storedCv;
@@ -361,7 +346,7 @@ public class InferTypeArgumentsTCModel {
 			if (isAGenericType(ttype))
 				makeElementVariables(storedCv, ttype);
 			makeArrayElementVariable(storedCv);
-			if (fStoreToString)
+			if (JavaPlugin.DEBUG_TYPE_CONSTRAINTS)
 				storedCv.setData(ConstraintVariable2.TO_STRING, type.toString());
 		}
 		return storedCv;
@@ -374,7 +359,7 @@ public class InferTypeArgumentsTCModel {
 			fCuScopedConstraintVariables.add(storedCv);
 //			if (isAGenericType(typeBinding)) // would lead to infinite recursion!
 //				makeElementVariables(storedCv, typeBinding);
-			if (fStoreToString)
+			if (JavaPlugin.DEBUG_TYPE_CONSTRAINTS)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "IndependentType(" + type.getPrettySignature() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return storedCv;
@@ -395,7 +380,7 @@ public class InferTypeArgumentsTCModel {
 		if (cv == storedCv) {
 			fCuScopedConstraintVariables.add(storedCv);
 			makeElementVariables(storedCv, type);
-			if (fStoreToString)
+			if (JavaPlugin.DEBUG_TYPE_CONSTRAINTS)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "ParameterizedType(" + type.getPrettySignature() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return storedCv;
@@ -414,7 +399,7 @@ public class InferTypeArgumentsTCModel {
 		if (cv == storedCv) {
 			fCuScopedConstraintVariables.add(storedCv);
 			makeArrayElementVariable(storedCv);
-			if (fStoreToString)
+			if (JavaPlugin.DEBUG_TYPE_CONSTRAINTS)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "ArrayType(" + type.getPrettySignature() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return storedCv;
@@ -434,7 +419,7 @@ public class InferTypeArgumentsTCModel {
 				fCuScopedConstraintVariables.add(cv);
 			makeElementVariables(storedCv, type);
 			makeArrayElementVariable(storedCv);
-			if (fStoreToString)
+			if (JavaPlugin.DEBUG_TYPE_CONSTRAINTS)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "[Parameter(" + parameterIndex + "," + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		return storedCv;
@@ -470,7 +455,7 @@ public class InferTypeArgumentsTCModel {
 		if (cv == storedCv) {
 			makeElementVariables(storedCv, returnType);
 			makeArrayElementVariable(storedCv);
-			if (fStoreToString)
+			if (JavaPlugin.DEBUG_TYPE_CONSTRAINTS)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "[ReturnType(" + Bindings.asString(methodBinding) + ")]"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return storedCv;

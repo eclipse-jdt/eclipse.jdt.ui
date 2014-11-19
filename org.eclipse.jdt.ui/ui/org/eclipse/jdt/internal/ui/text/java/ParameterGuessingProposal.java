@@ -16,8 +16,6 @@ import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.Platform;
-
 import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -81,11 +79,6 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
  		}
  		return null;
 	}
-
-
-
-	/** Tells whether this class is in debug mode. */
-	private static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));  //$NON-NLS-1$//$NON-NLS-2$
 
 	private ICompletionProposal[][] fChoices; // initialized by guessParameters()
 	private Position[] fPositions; // initialized by guessParameters()
@@ -225,7 +218,7 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 		if (!hasParameters() || !hasArgumentList())
 			return super.computeReplacementString();
 
-		long millis= DEBUG ? System.currentTimeMillis() : 0;
+		long millis= JavaPlugin.DEBUG_RESULT_COLLECTOR ? System.currentTimeMillis() : 0;
 		String replacement;
 		try {
 			replacement= computeGuessingCompletion();
@@ -236,7 +229,7 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 			openErrorDialog(x);
 			return super.computeReplacementString();
 		}
-		if (DEBUG) System.err.println("Parameter Guessing: " + (System.currentTimeMillis() - millis)); //$NON-NLS-1$
+		if (JavaPlugin.DEBUG_RESULT_COLLECTOR) System.err.println("Parameter Guessing: " + (System.currentTimeMillis() - millis)); //$NON-NLS-1$
 
 		return replacement;
 	}
