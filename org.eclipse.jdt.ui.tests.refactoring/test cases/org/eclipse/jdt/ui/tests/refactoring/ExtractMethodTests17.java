@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,10 @@ public class ExtractMethodTests17 extends ExtractMethodTests {
 	}
 
 	public void test7() throws Exception {
+		try17Test();
+	}
+
+	public void test8() throws Exception {
 		try17Test();
 	}
 

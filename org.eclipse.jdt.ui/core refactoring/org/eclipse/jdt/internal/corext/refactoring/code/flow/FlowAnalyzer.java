@@ -314,6 +314,9 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	public boolean visit(TryStatement node) {
 		if (traverseNode(node)) {
 			fFlowContext.pushExcptions(node);
+			for (Iterator<VariableDeclarationExpression> iterator= node.resources().iterator(); iterator.hasNext();) {
+				iterator.next().accept(this);
+			}
 			node.getBody().accept(this);
 			fFlowContext.popExceptions();
 			List<CatchClause> catchClauses= node.catchClauses();
@@ -942,6 +945,9 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			return;
 		TryFlowInfo info= createTry();
 		setFlowInfo(node, info);
+		for (Iterator<VariableDeclarationExpression> iterator= node.resources().iterator(); iterator.hasNext();) {
+			info.mergeResources(getFlowInfo(iterator.next()), fFlowContext);
+		}
 		info.mergeTry(getFlowInfo(node.getBody()), fFlowContext);
 		for (Iterator<CatchClause> iter= node.catchClauses().iterator(); iter.hasNext();) {
 			CatchClause element= iter.next();
