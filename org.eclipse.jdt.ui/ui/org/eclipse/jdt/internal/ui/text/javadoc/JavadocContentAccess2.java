@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
@@ -66,6 +67,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -308,8 +310,25 @@ public class JavadocContentAccess2 {
 		}
 
 		/**
-		 * For the given method, returns the @param tag description for the given parameter
+		 * For the given method, returns the @param tag description for the given type parameter
 		 * from an overridden method.
+		 *
+		 * @param method a method
+		 * @param typeParamIndex the index of the type parameter
+		 * @return the description that replaces the <code>{&#64;inheritDoc}</code> tag, or
+		 *         <code>null</code> if none could be found
+		 */
+		public CharSequence getInheritedTypeParamDescription(IMethod method, final int typeParamIndex) {
+			return getInheritedDescription(method, new DescriptionGetter() {
+				public CharSequence getDescription(JavadocContentAccess2 contentAccess) throws JavaModelException {
+					return contentAccess.getInheritedTypeParamDescription(typeParamIndex);
+				}
+			});
+		}
+
+		/**
+		 * For the given method, returns the @param tag description for the given parameter from an
+		 * overridden method.
 		 *
 		 * @param method a method
 		 * @param paramIndex the index of the parameter
@@ -459,20 +478,22 @@ public class JavadocContentAccess2 {
 	private int fLiteralContent;
 	private StringBuffer fMainDescription;
 	private StringBuffer fReturnDescription;
+	private StringBuffer[] fTypeParamDescriptions;
 	private StringBuffer[] fParamDescriptions;
 	private HashMap<String, StringBuffer> fExceptionDescriptions;
 
-	private JavadocContentAccess2(IMethod method, Javadoc javadoc, String source, JavadocLookup lookup) {
-		Assert.isNotNull(method);
-		fElement= method;
-		fMethod= method;
+	private JavadocContentAccess2(IJavaElement element, Javadoc javadoc, String source, JavadocLookup lookup) {
+		Assert.isNotNull(element);
+		Assert.isTrue(element instanceof IMethod || element instanceof ILocalVariable || element instanceof ITypeParameter);
+		fElement= element;
+		fMethod= (IMethod) ((element instanceof ILocalVariable || element instanceof ITypeParameter) ? element.getParent() : element);
 		fJavadoc= javadoc;
 		fSource= source;
 		fJavadocLookup= lookup;
 	}
 
 	private JavadocContentAccess2(IJavaElement element, Javadoc javadoc, String source) {
-		Assert.isTrue(element instanceof IMember || element instanceof IPackageFragment);
+		Assert.isTrue(element instanceof IMember || element instanceof IPackageFragment || element instanceof ILocalVariable || element instanceof ITypeParameter);
 		fElement= element;
 		fMethod= null;
 		fJavadoc= javadoc;
@@ -481,23 +502,40 @@ public class JavadocContentAccess2 {
 	}
 
 	/**
-	 * Gets an IMember's Javadoc comment content from the source or Javadoc attachment
+	 * Gets an IJavaElement's Javadoc comment content from the source or Javadoc attachment
 	 * and renders the tags and links in HTML.
-	 * Returns <code>null</code> if the member does not contain a Javadoc comment or if no source is available.
+	 * Returns <code>null</code> if the element does not have a Javadoc comment or if no source is available.
 	 *
-	 * @param member				the member to get the Javadoc of
+	 * @param element				the element to get the Javadoc of
 	 * @param useAttachedJavadoc	if <code>true</code> Javadoc will be extracted from attached Javadoc
 	 * 									if there's no source
-	 * @return the Javadoc comment content in HTML or <code>null</code> if the member
+	 * @return the Javadoc comment content in HTML or <code>null</code> if the element
 	 * 			does not have a Javadoc comment or if no source is available
-	 * @throws JavaModelException is thrown when the element's Javadoc cannot be accessed
+	 * @throws CoreException is thrown when the element's Javadoc cannot be accessed
 	 */
-	public static String getHTMLContent(IMember member, boolean useAttachedJavadoc) throws JavaModelException {
-		String sourceJavadoc= getHTMLContentFromSource(member);
+	public static String getHTMLContent(IJavaElement element, boolean useAttachedJavadoc) throws CoreException {
+		if (element instanceof IPackageFragment) {
+			return getHTMLContent((IPackageFragment) element);
+		}
+		if (element instanceof IPackageDeclaration) {
+			return getHTMLContent((IPackageDeclaration) element);
+		}
+		if (!(element instanceof IMember || element instanceof ITypeParameter || (element instanceof ILocalVariable && (((ILocalVariable) element).isParameter())))) {
+			return null;
+		}
+		String sourceJavadoc= getHTMLContentFromSource(element);
 		if (sourceJavadoc == null || sourceJavadoc.length() == 0 || sourceJavadoc.trim().equals("{@inheritDoc}")) { //$NON-NLS-1$
 			if (useAttachedJavadoc) {
-				if (member.getOpenable().getBuffer() == null) { // only if no source available
-					return member.getAttachedJavadoc(null);
+				if (element.getOpenable().getBuffer() == null) { // only if no source available
+					return element.getAttachedJavadoc(null);
+				}
+				IMember member= null;
+				if (element instanceof ILocalVariable) {
+					member= ((ILocalVariable) element).getDeclaringMember();
+				} else if (element instanceof ITypeParameter) {
+					member= ((ITypeParameter) element).getDeclaringMember();
+				} else if (element instanceof IMember) {
+					member= (IMember) element;
 				}
 				if (canInheritJavadoc(member)) {
 					IMethod method= (IMethod) member;
@@ -592,7 +630,18 @@ public class JavadocContentAccess2 {
 		return buf;
 	}
 
-	private static String getHTMLContentFromSource(IMember member) throws JavaModelException {
+	private static String getHTMLContentFromSource(IJavaElement element) throws JavaModelException {
+		IMember member;
+		if (element instanceof ILocalVariable) {
+			member= ((ILocalVariable) element).getDeclaringMember();
+		} else if (element instanceof ITypeParameter) {
+			member= ((ITypeParameter) element).getDeclaringMember();
+		} else if (element instanceof IMember) {
+			member= (IMember) element;
+		} else {
+			return null;
+		}
+
 		IBuffer buf= member.getOpenable().getBuffer();
 		if (buf == null) {
 			return null; // no source attachment found
@@ -602,7 +651,7 @@ public class JavadocContentAccess2 {
 		if (javadocRange == null) {
 			if (canInheritJavadoc(member)) {
 				// Try to use the inheritDoc algorithm.
-				String inheritedJavadoc= javadoc2HTML(member, "/***/"); //$NON-NLS-1$
+				String inheritedJavadoc= javadoc2HTML(member, element, "/***/"); //$NON-NLS-1$
 				if (inheritedJavadoc != null && inheritedJavadoc.length() > 0) {
 					return inheritedJavadoc;
 				}
@@ -611,7 +660,7 @@ public class JavadocContentAccess2 {
 		}
 
 		String rawJavadoc= buf.getText(javadocRange.getOffset(), javadocRange.getLength());
-		return javadoc2HTML(member, rawJavadoc);
+		return javadoc2HTML(member, element, rawJavadoc);
 	}
 	
 	private static String getJavaFxPropertyDoc(IMember member) throws JavaModelException {
@@ -698,7 +747,7 @@ public class JavadocContentAccess2 {
 		return (CompilationUnit) parser.createAST(null);
 	}
 	
-	private static String javadoc2HTML(IMember member, String rawJavadoc) {
+	private static String javadoc2HTML(IMember member, IJavaElement element, String rawJavadoc) {
 		Javadoc javadoc= getJavadocNode(member, rawJavadoc);
 
 		if (javadoc == null) {
@@ -724,9 +773,9 @@ public class JavadocContentAccess2 {
 
 		if (canInheritJavadoc(member)) {
 			IMethod method= (IMethod) member;
-			return new JavadocContentAccess2(method, javadoc, rawJavadoc, new JavadocLookup(method.getDeclaringType())).toHTML();
+			return new JavadocContentAccess2(element, javadoc, rawJavadoc, new JavadocLookup(method.getDeclaringType())).toHTML();
 		}
-		return new JavadocContentAccess2(member, javadoc, rawJavadoc).toHTML();
+		return new JavadocContentAccess2(element, javadoc, rawJavadoc).toHTML();
 	}
 
 	private static boolean canInheritJavadoc(IMember member) {
@@ -797,12 +846,78 @@ public class JavadocContentAccess2 {
 		fBuf= new StringBuffer();
 		fLiteralContent= 0;
 
+		if (fElement instanceof ILocalVariable || fElement instanceof ITypeParameter) {
+			parameterToHTML();
+		} else {
+			elementToHTML();
+		}
+
+		String result= fBuf.toString();
+		fBuf= null;
+		return result;
+	}
+
+	private void parameterToHTML() {
+		String elementName= fElement.getElementName();
+		List<TagElement> tags= fJavadoc.tags();
+		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext();) {
+			TagElement tag= iter.next();
+			String tagName= tag.getTagName();
+			if (TagElement.TAG_PARAM.equals(tagName)) {
+				List<? extends ASTNode> fragments= tag.fragments();
+				int size= fragments.size();
+				if (size > 0) {
+					Object first= fragments.get(0);
+					if (first instanceof SimpleName) {
+						String name= ((SimpleName) first).getIdentifier();
+						if (elementName.equals(name)) {
+							handleContentElements(fragments.subList(1, size));
+							return;
+						}
+					} else if (size > 2 && fElement instanceof ITypeParameter && first instanceof TextElement) {
+						String firstText= ((TextElement) first).getText();
+						if ("<".equals(firstText)) { //$NON-NLS-1$
+							Object second= fragments.get(1);
+							Object third= fragments.get(2);
+							if (second instanceof SimpleName && third instanceof TextElement) {
+								String name= ((SimpleName) second).getIdentifier();
+								String thirdText= ((TextElement) third).getText();
+								if (elementName.equals(name) && ">".equals(thirdText)) { //$NON-NLS-1$
+									handleContentElements(fragments.subList(3, size));
+									return;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		if (fElement instanceof ILocalVariable) {
+			List<String> parameterNames= initParameterNames();
+			int i= parameterNames.indexOf(elementName);
+			if (i != -1) {
+				CharSequence inheritedParamDescription= fJavadocLookup.getInheritedParamDescription(fMethod, i);
+				handleInherited(inheritedParamDescription);
+			}
+		} else if (fElement instanceof ITypeParameter) {
+			List<String> typeParameterNames= initTypeParameterNames();
+			int i= typeParameterNames.indexOf(elementName);
+			if (i != -1) {
+				CharSequence inheritedTypeParamDescription= fJavadocLookup.getInheritedTypeParamDescription(fMethod, i);
+				handleInherited(inheritedTypeParamDescription);
+			}
+		}
+	}
+
+	private void elementToHTML() {
 		// After first loop, non-null entries in the following two lists are missing and need to be inherited:
+		List<String> typeParameterNames= initTypeParameterNames();
 		List<String> parameterNames= initParameterNames();
 		List<String> exceptionNames= initExceptionNames();
 
 		TagElement deprecatedTag= null;
 		TagElement start= null;
+		List<TagElement> typeParameters= new ArrayList<TagElement>();
 		List<TagElement> parameters= new ArrayList<TagElement>();
 		TagElement returnTag= null;
 		List<TagElement> exceptions= new ArrayList<TagElement>();
@@ -820,15 +935,33 @@ public class JavadocContentAccess2 {
 				start= tag;
 
 			} else if (TagElement.TAG_PARAM.equals(tagName)) {
-				parameters.add(tag);
 				List<? extends ASTNode> fragments= tag.fragments();
-				if (fragments.size() > 0) {
+				int size= fragments.size();
+				if (size > 0) {
 					Object first= fragments.get(0);
 					if (first instanceof SimpleName) {
 						String name= ((SimpleName) first).getIdentifier();
 						int paramIndex= parameterNames.indexOf(name);
 						if (paramIndex != -1) {
 							parameterNames.set(paramIndex, null);
+							parameters.add(tag);
+						}
+					} else if (size > 2 && first instanceof TextElement) {
+						String firstText= ((TextElement) first).getText();
+						if ("<".equals(firstText)) { //$NON-NLS-1$
+							Object second= fragments.get(1);
+							Object third= fragments.get(2);
+							if (second instanceof SimpleName && third instanceof TextElement) {
+								String name= ((SimpleName) second).getIdentifier();
+								String thirdText= ((TextElement) third).getText();
+								if (">".equals(thirdText)) { //$NON-NLS-1$
+									int paramIndex= typeParameterNames.indexOf(name);
+									if (paramIndex != -1) {
+										typeParameterNames.set(paramIndex, null);
+									}
+									typeParameters.add(tag);
+								}
+							}
 						}
 					}
 				}
@@ -879,6 +1012,10 @@ public class JavadocContentAccess2 {
 			handleInherited(inherited);
 		}
 
+		CharSequence[] typeParameterDescriptions= new CharSequence[typeParameterNames.size()];
+		boolean hasInheritedTypeParameters= inheritTypeParameterDescriptions(typeParameterNames, typeParameterDescriptions);
+		boolean hasTypeParameters= typeParameters.size() > 0 || hasInheritedTypeParameters;
+
 		CharSequence[] parameterDescriptions= new CharSequence[parameterNames.size()];
 		boolean hasInheritedParameters= inheritParameterDescriptions(parameterNames, parameterDescriptions);
 		boolean hasParameters= parameters.size() > 0 || hasInheritedParameters;
@@ -892,13 +1029,14 @@ public class JavadocContentAccess2 {
 		boolean hasInheritedExceptions= inheritExceptionDescriptions(exceptionNames, exceptionDescriptions);
 		boolean hasExceptions= exceptions.size() > 0 || hasInheritedExceptions;
 
-		if (hasParameters || hasReturnTag || hasExceptions
+		if (hasParameters || hasTypeParameters || hasReturnTag || hasExceptions
 				|| versions.size() > 0 || authors.size() > 0 || since.size() > 0 || sees.size() > 0 || rest.size() > 0
 				|| (fBuf.length() > 0 && (parameterDescriptions.length > 0 || exceptionDescriptions.length > 0))
 				) {
 			handleSuperMethodReferences();
 			fBuf.append(BLOCK_TAG_START);
-			handleParameterTags(parameters, parameterNames, parameterDescriptions);
+			handleParameterTags(typeParameters, typeParameterNames, typeParameterDescriptions, true);
+			handleParameterTags(parameters, parameterNames, parameterDescriptions, false);
 			handleReturnTag(returnTag, returnDescription);
 			handleExceptionTags(exceptions, exceptionNames, exceptionDescriptions);
 			handleBlockTags(JavaDocMessages.JavaDoc2HTMLTextReader_since_section, since);
@@ -911,10 +1049,6 @@ public class JavadocContentAccess2 {
 		} else if (fBuf.length() > 0) {
 			handleSuperMethodReferences();
 		}
-
-		String result= fBuf.toString();
-		fBuf= null;
-		return result;
 	}
 
 	private void handleDeprecatedTag(TagElement tag) {
@@ -935,6 +1069,21 @@ public class JavadocContentAccess2 {
 				JavaPlugin.log(e);
 			}
 		}
+	}
+
+	private List<String> initTypeParameterNames() {
+		if (fMethod != null) {
+			try {
+				ArrayList<String> typeParameterNames= new ArrayList<String>();
+				for (ITypeParameter typeParameter : fMethod.getTypeParameters()) {
+					typeParameterNames.add(typeParameter.getElementName());
+				}
+				return typeParameterNames;
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+		}
+		return Collections.emptyList();
 	}
 
 	private List<String> initParameterNames() {
@@ -973,6 +1122,19 @@ public class JavadocContentAccess2 {
 			JavaPlugin.log(e);
 			return false;
 		}
+	}
+
+	private boolean inheritTypeParameterDescriptions(List<String> typeParameterNames, CharSequence[] typeParameterDescriptions) {
+		boolean hasInheritedTypeParameters= false;
+		for (int i= 0; i < typeParameterNames.size(); i++) {
+			String name= typeParameterNames.get(i);
+			if (name != null) {
+				typeParameterDescriptions[i]= fJavadocLookup.getInheritedTypeParamDescription(fMethod, i);
+				if (typeParameterDescriptions[i] != null)
+					hasInheritedTypeParameters= true;
+			}
+		}
+		return hasInheritedTypeParameters;
 	}
 
 	private boolean inheritParameterDescriptions(List<String> parameterNames, CharSequence[] parameterDescriptions) {
@@ -1041,6 +1203,55 @@ public class JavadocContentAccess2 {
 			fBuf= null;
 		}
 		return fReturnDescription.length() > 0 ? fReturnDescription : null;
+	}
+
+	CharSequence getInheritedTypeParamDescription(int typeParamIndex) {
+		if (fMethod != null) {
+			List<String> typeParameterNames= initTypeParameterNames();
+			if (fTypeParamDescriptions == null) {
+				fTypeParamDescriptions= new StringBuffer[typeParameterNames.size()];
+			} else {
+				StringBuffer description= fTypeParamDescriptions[typeParamIndex];
+				if (description != null) {
+					return description.length() > 0 ? description : null;
+				}
+			}
+
+			StringBuffer description= new StringBuffer();
+			fTypeParamDescriptions[typeParamIndex]= description;
+			fBuf= description;
+			fLiteralContent= 0;
+
+			String typeParamName= typeParameterNames.get(typeParamIndex);
+			List<TagElement> tags= fJavadoc.tags();
+			for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext();) {
+				TagElement tag= iter.next();
+				String tagName= tag.getTagName();
+				if (TagElement.TAG_PARAM.equals(tagName)) {
+					List<? extends ASTNode> fragments= tag.fragments();
+					if (fragments.size() > 2) {
+						Object first= fragments.get(0);
+						Object second= fragments.get(1);
+						Object third= fragments.get(2);
+						if (first instanceof TextElement && second instanceof SimpleName && third instanceof TextElement) {
+							String firstText= ((TextElement) first).getText();
+							String thirdText= ((TextElement) third).getText();
+							if ("<".equals(firstText) && ">".equals(thirdText)) { //$NON-NLS-1$ //$NON-NLS-2$
+								String name= ((SimpleName) second).getIdentifier();
+								if (name.equals(typeParamName)) {
+									handleContentElements(fragments.subList(3, fragments.size()));
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+
+			fBuf= null;
+			return description.length() > 0 ? description : null;
+		}
+		return null;
 	}
 
 	CharSequence getInheritedParamDescription(int paramIndex) throws JavaModelException {
@@ -1413,7 +1624,8 @@ public class JavadocContentAccess2 {
 
 			} else if (TagElement.TAG_PARAM.equals(blockTagName)) {
 				List<? extends ASTNode> fragments= blockTag.fragments();
-				if (fragments.size() > 0) {
+				int size= fragments.size();
+				if (size > 0) {
 					Object first= fragments.get(0);
 					if (first instanceof SimpleName) {
 						String name= ((SimpleName) first).getIdentifier();
@@ -1422,6 +1634,26 @@ public class JavadocContentAccess2 {
 							if (name.equals(parameterNames[i])) {
 								CharSequence inherited= fJavadocLookup.getInheritedParamDescription(fMethod, i);
 								return handleInherited(inherited);
+							}
+						}
+					} else if (size > 2 && first instanceof TextElement) {
+						String firstText= ((TextElement) first).getText();
+						if ("<".equals(firstText)) { //$NON-NLS-1$
+							Object second= fragments.get(1);
+							Object third= fragments.get(2);
+							if (second instanceof SimpleName && third instanceof TextElement) {
+								String thirdText= ((TextElement) third).getText();
+								if (">".equals(thirdText)) { //$NON-NLS-1$
+									String name= ((SimpleName) second).getIdentifier();
+									ITypeParameter[] typeParameters= fMethod.getTypeParameters();
+									for (int i= 0; i < typeParameters.length; i++) {
+										ITypeParameter typeParameter= typeParameters[i];
+										if (name.equals(typeParameter.getElementName())) {
+											CharSequence inherited= fJavadocLookup.getInheritedTypeParamDescription(fMethod, i);
+											return handleInherited(inherited);
+										}
+									}
+								}
 							}
 						}
 					}
@@ -1546,11 +1778,12 @@ public class JavadocContentAccess2 {
 		}
 	}
 
-	private void handleParameterTags(List<TagElement> tags, List<String> parameterNames, CharSequence[] parameterDescriptions) {
+	private void handleParameterTags(List<TagElement> tags, List<String> parameterNames, CharSequence[] parameterDescriptions, boolean isTypeParameters) {
 		if (tags.size() == 0 && containsOnlyNull(parameterNames))
 			return;
 
-		handleBlockTagTitle(JavaDocMessages.JavaDoc2HTMLTextReader_parameters_section);
+		String tagTitle= isTypeParameters ? JavaDocMessages.JavaDoc2HTMLTextReader_type_parameters_section : JavaDocMessages.JavaDoc2HTMLTextReader_parameters_section;
+		handleBlockTagTitle(tagTitle);
 
 		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
 			TagElement tag= iter.next();
@@ -1564,7 +1797,13 @@ public class JavadocContentAccess2 {
 			if (name != null) {
 				fBuf.append(BlOCK_TAG_ENTRY_START);
 				fBuf.append(PARAM_NAME_START);
+				if (isTypeParameters) {
+					fBuf.append("&lt;"); //$NON-NLS-1$
+				}
 				fBuf.append(name);
+				if (isTypeParameters) {
+					fBuf.append("&gt;"); //$NON-NLS-1$
+				}
 				fBuf.append(PARAM_NAME_END);
 				if (description != null)
 					fBuf.append(description);

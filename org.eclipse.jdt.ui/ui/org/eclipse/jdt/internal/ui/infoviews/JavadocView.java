@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,7 +108,9 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -1068,22 +1070,29 @@ public class JavadocView extends AbstractInfoView {
 				if (reader != null) {
 					HTMLPrinter.addParagraph(buffer, reader);
 				}
-			} else if (curr instanceof IMember) {
-				final IMember member= (IMember) curr;
+			} else if (curr instanceof IMember || curr instanceof ILocalVariable || curr instanceof ITypeParameter) {
+				final IJavaElement element= curr;
 
 				String constantValue= null;
-				if (member instanceof IField) {
-					constantValue= computeFieldConstant(activePart, selection, (IField) member, monitor);
+				if (element instanceof IField) {
+					constantValue= computeFieldConstant(activePart, selection, (IField) element, monitor);
 					if (constantValue != null)
 						constantValue= HTMLPrinter.convertToHTMLContentWithWhitespace(constantValue);
 				}
 
-				HTMLPrinter.addSmallHeader(buffer, getInfoText(member, constantValue, true));
+				HTMLPrinter.addSmallHeader(buffer, getInfoText(element, constantValue, true));
 
 				try {
-					ISourceRange nameRange= ((IMember) curr).getNameRange();
+					ISourceRange nameRange= ((ISourceReference) curr).getNameRange();
 					if (SourceRange.isAvailable(nameRange)) {
-						ITypeRoot typeRoot= ((IMember) curr).getTypeRoot();
+						ITypeRoot typeRoot;
+						if (element instanceof ILocalVariable) {
+							typeRoot= ((ILocalVariable) curr).getTypeRoot();
+						} else if (element instanceof ITypeParameter) {
+							typeRoot= ((ITypeParameter) curr).getTypeRoot();
+						} else {
+							typeRoot= ((IMember) curr).getTypeRoot();
+						}
 						Region hoverRegion= new Region(nameRange.getOffset(), nameRange.getLength());
 						buffer.append("<br>"); //$NON-NLS-1$
 						JavadocHover.addAnnotations(buffer, curr, typeRoot, hoverRegion);
@@ -1094,33 +1103,32 @@ public class JavadocView extends AbstractInfoView {
 
 				Reader reader= null;
 				try {
-					String content= JavadocContentAccess2.getHTMLContent(member, true);
-					IPackageFragmentRoot root= (IPackageFragmentRoot) member.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					String content= JavadocContentAccess2.getHTMLContent(element, true);
+					IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					if (content != null) {
+						IMember member;
+						if (element instanceof ILocalVariable) {
+							member= ((ILocalVariable) element).getDeclaringMember();
+						} else if (element instanceof ITypeParameter) {
+							member= ((ITypeParameter) element).getDeclaringMember();
+						} else {
+							member= (IMember) element;
+						}
 						base= JavaDocLocations.getBaseURL(member, member.isBinary());
 						reader= new StringReader(content);
 					} else {
-						String explanationForMissingJavadoc= JavaDocLocations.getExplanationForMissingJavadoc(member, root);
+						String explanationForMissingJavadoc= JavaDocLocations.getExplanationForMissingJavadoc(element, root);
 						if (explanationForMissingJavadoc != null) {
 							reader= new StringReader(explanationForMissingJavadoc);
 						}
 					}
-				} catch (JavaModelException ex) {
+				} catch (CoreException ex) {
 					reader= new StringReader(JavaDocLocations.handleFailedJavadocFetch(ex));
 				}
 				if (reader != null) {
 					HTMLPrinter.addParagraph(buffer, reader);
 				}
 
-			} else if (curr.getElementType() == IJavaElement.LOCAL_VARIABLE || curr.getElementType() == IJavaElement.TYPE_PARAMETER) {
-				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr, null, true));
-				if (curr instanceof ILocalVariable) {
-					ISourceRange nameRange= ((ILocalVariable) curr).getNameRange();
-					ITypeRoot typeRoot= ((ILocalVariable) curr).getTypeRoot();
-					Region hoverRegion= new Region(nameRange.getOffset(), nameRange.getLength());
-					buffer.append("<br>"); //$NON-NLS-1$
-					JavadocHover.addAnnotations(buffer, curr, typeRoot, hoverRegion);
-				}
 			}
 		}
 
@@ -1156,6 +1164,10 @@ public class JavadocView extends AbstractInfoView {
 
 	private long getHeaderFlags(IJavaElement element) {
 		switch (element.getElementType()) {
+			case IJavaElement.LOCAL_VARIABLE:
+				return LABEL_FLAGS & ~JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
+			case IJavaElement.TYPE_PARAMETER:
+				return LABEL_FLAGS | JavaElementLabels.TP_POST_QUALIFIED;
 			case IJavaElement.PACKAGE_FRAGMENT:
 			case IJavaElement.PACKAGE_DECLARATION:
 				return LABEL_FLAGS ^ JavaElementLabels.ALL_FULLY_QUALIFIED;

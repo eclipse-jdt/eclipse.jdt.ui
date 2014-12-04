@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,8 +15,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
@@ -89,14 +87,7 @@ public class ProposalInfo {
 	 * @throws CoreException if fetching the Javadoc for the given element failed connected
 	 */
 	private String extractJavadoc(IJavaElement element) throws CoreException {
-		if (element instanceof IMember) {
-			return JavadocContentAccess2.getHTMLContent((IMember) element, true);
-		} else if (element instanceof IPackageDeclaration) {
-			return JavadocContentAccess2.getHTMLContent((IPackageDeclaration) element);
-		} else if (element instanceof IPackageFragment) {
-			return JavadocContentAccess2.getHTMLContent((IPackageFragment) element);
-		}
-		return null;
+		return JavadocContentAccess2.getHTMLContent(element, true);
 	}
 
 }

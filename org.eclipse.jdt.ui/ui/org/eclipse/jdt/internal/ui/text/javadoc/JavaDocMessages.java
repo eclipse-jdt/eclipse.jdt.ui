@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,6 +26,7 @@ final class JavaDocMessages extends NLS {
 	public static String JavaDoc2HTMLTextReader_parameters_section;
 	public static String JavaDoc2HTMLTextReader_returns_section;
 	public static String JavaDoc2HTMLTextReader_throws_section;
+	public static String JavaDoc2HTMLTextReader_type_parameters_section;
 	public static String JavaDoc2HTMLTextReader_author_section;
 	public static String JavaDoc2HTMLTextReader_deprecated_section;
 	public static String JavaDoc2HTMLTextReader_method_in_type;

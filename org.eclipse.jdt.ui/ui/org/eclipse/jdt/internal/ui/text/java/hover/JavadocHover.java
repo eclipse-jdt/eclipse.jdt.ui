@@ -65,10 +65,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -678,16 +680,15 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			}
 		} else {
 			element= elements[0];
-			
-			if (element instanceof IPackageFragment || element instanceof IMember) {
+
+			if (element instanceof IPackageFragment || element instanceof IMember
+					|| element instanceof ILocalVariable || element instanceof ITypeParameter) {
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(element, editorInputElement, hoverRegion, true));
 				buffer.append("<br>"); //$NON-NLS-1$
 				addAnnotations(buffer, element, editorInputElement, hoverRegion);
 				Reader reader= null;
 				try {
-					String content= element instanceof IMember
-							? JavadocContentAccess2.getHTMLContent((IMember) element, true)
-							: JavadocContentAccess2.getHTMLContent((IPackageFragment) element);
+					String content= JavadocContentAccess2.getHTMLContent(element, true);
 					IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					boolean isBinary= root.exists() && root.getKind() == IPackageFragmentRoot.K_BINARY;
 					if (content != null) {
@@ -705,12 +706,6 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				if (reader != null) {
 					HTMLPrinter.addParagraph(buffer, reader);
 				}
-				hasContents= true;
-
-			} else if (element.getElementType() == IJavaElement.LOCAL_VARIABLE || element.getElementType() == IJavaElement.TYPE_PARAMETER) {
-				addAnnotations(buffer, element, editorInputElement, hoverRegion);
-				HTMLPrinter.addSmallHeader(buffer, getInfoText(element, editorInputElement, hoverRegion, true));
-				// could add info from @param tag here...
 				hasContents= true;
 			}
 			leadingImageWidth= 20;
