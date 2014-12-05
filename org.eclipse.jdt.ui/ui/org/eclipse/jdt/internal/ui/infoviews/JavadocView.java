@@ -377,12 +377,6 @@ public class JavadocView extends AbstractInfoView {
 	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=73558
 	private static final boolean WARNING_DIALOG_ENABLED= false;
 
-	/** Flags used to render a label in the text widget. */
-	private static final long LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
-		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_ANNOTATIONS | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS
-		| JavaElementLabels.F_PRE_TYPE_SIGNATURE | JavaElementLabels.T_TYPE_PARAMETERS;
-
-
 	/** The HTML widget. */
 	private Browser fBrowser;
 	/** The text widget. */
@@ -1154,26 +1148,11 @@ public class JavadocView extends AbstractInfoView {
 	 * @return a string containing the member's label
 	 */
 	private String getInfoText(IJavaElement member, String constantValue, boolean allowImage) {
-		StringBuffer label= new StringBuffer(JavaElementLinks.getElementLabel(member, getHeaderFlags(member)));
+		StringBuffer label= new StringBuffer(JavaElementLinks.getElementLabel(member, JavadocHover.getHeaderFlags(member)));
 		if (member.getElementType() == IJavaElement.FIELD && constantValue != null) {
 			label.append(constantValue);
 		}
 		return JavadocHover.getImageAndLabel(member, allowImage, label.toString());
-	}
-
-
-	private long getHeaderFlags(IJavaElement element) {
-		switch (element.getElementType()) {
-			case IJavaElement.LOCAL_VARIABLE:
-				return LABEL_FLAGS & ~JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
-			case IJavaElement.TYPE_PARAMETER:
-				return LABEL_FLAGS | JavaElementLabels.TP_POST_QUALIFIED;
-			case IJavaElement.PACKAGE_FRAGMENT:
-			case IJavaElement.PACKAGE_DECLARATION:
-				return LABEL_FLAGS ^ JavaElementLabels.ALL_FULLY_QUALIFIED;
-			default:
-				return LABEL_FLAGS;
-		}
 	}
 
 	/*

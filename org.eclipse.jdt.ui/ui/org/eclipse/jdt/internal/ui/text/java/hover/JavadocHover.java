@@ -759,13 +759,14 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		return imageName;
 	}
 
-	private static long getHeaderFlags(IJavaElement element) {
+	public static long getHeaderFlags(IJavaElement element) {
 		switch (element.getElementType()) {
 			case IJavaElement.LOCAL_VARIABLE:
 				return LOCAL_VARIABLE_FLAGS;
 			case IJavaElement.TYPE_PARAMETER:
 				return TYPE_PARAMETER_FLAGS;
 			case IJavaElement.PACKAGE_FRAGMENT:
+			case IJavaElement.PACKAGE_DECLARATION:
 				return PACKAGE_FLAGS;
 			default:
 				return LABEL_FLAGS;
