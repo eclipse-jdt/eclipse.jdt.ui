@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [introduce indirection] ClassCastException when introducing indirection on method in generic class - https://bugs.eclipse.org/395231
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [introduce indirection] Adds unneccessary import when inner class is used as parameter in surrounding class - https://bugs.eclipse.org/395228
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -829,20 +830,20 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			intermediary.parameters().add(parameter);
 		}
 		// Add other params
-		copyArguments(intermediary, imRewrite);
+		copyArguments(intermediary, imRewrite, context);
 
 		// Add type parameters of declaring type (and enclosing types)
 		if (!isStaticTarget() && fIntermediaryFirstParameterType.isGenericType())
-			addTypeParameters(imRewrite, intermediary.typeParameters(), fIntermediaryFirstParameterType);
+			addTypeParameters(imRewrite, intermediary.typeParameters(), fIntermediaryFirstParameterType, context);
 
 		// Add type params of method
-		copyTypeParameters(intermediary, imRewrite);
+		copyTypeParameters(intermediary, imRewrite, context);
 
 		// Return type
 		intermediary.setReturnType2(imRewrite.getImportRewrite().addImport(fTargetMethodBinding.getReturnType(), ast, context));
 
 		// Exceptions
-		copyExceptions(intermediary, imRewrite);
+		copyExceptions(intermediary, imRewrite, context);
 
 		// Body
 		MethodInvocation invocation= imRewrite.getAST().newMethodInvocation();
@@ -878,11 +879,11 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 				.createGroupDescription(RefactoringCoreMessages.IntroduceIndirectionRefactoring_group_description_create_new_method));
 	}
 
-	private void addTypeParameters(CompilationUnitRewrite imRewrite, List<TypeParameter> list, ITypeBinding parent) {
+	private void addTypeParameters(CompilationUnitRewrite imRewrite, List<TypeParameter> list, ITypeBinding parent, ImportRewriteContext context) {
 
 		ITypeBinding enclosing= parent.getDeclaringClass();
 		if (enclosing != null)
-			addTypeParameters(imRewrite, list, enclosing);
+			addTypeParameters(imRewrite, list, enclosing, context);
 
 		ITypeBinding[] typeParameters= parent.getTypeParameters();
 		for (int i= 0; i < typeParameters.length; i++) {
@@ -891,7 +892,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			ITypeBinding[] bounds= typeParameters[i].getTypeBounds();
 			for (int j= 0; j < bounds.length; j++)
 				if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) //$NON-NLS-1$
-					ntp.typeBounds().add(imRewrite.getImportRewrite().addImport(bounds[j], imRewrite.getAST()));
+					ntp.typeBounds().add(imRewrite.getImportRewrite().addImport(bounds[j], imRewrite.getAST(), context));
 			list.add(ntp);
 		}
 	}
@@ -913,7 +914,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			invocation.arguments().add(ast.newSimpleName(names[i]));
 	}
 
-	private void copyArguments(MethodDeclaration intermediary, CompilationUnitRewrite rew) throws JavaModelException {
+	private void copyArguments(MethodDeclaration intermediary, CompilationUnitRewrite rew, ImportRewriteContext context) throws JavaModelException {
 		String[] names= fTargetMethod.getParameterNames();
 		ITypeBinding[] types= fTargetMethodBinding.getParameterTypes();
 		for (int i= 0; i < names.length; i++) {
@@ -927,12 +928,12 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					typeBinding= typeBinding.getComponentType();
 			}
 
-			newElement.setType(rew.getImportRewrite().addImport(typeBinding, rew.getAST()));
+			newElement.setType(rew.getImportRewrite().addImport(typeBinding, rew.getAST(), context));
 			intermediary.parameters().add(newElement);
 		}
 	}
 
-	private void copyTypeParameters(MethodDeclaration intermediary, CompilationUnitRewrite rew) {
+	private void copyTypeParameters(MethodDeclaration intermediary, CompilationUnitRewrite rew,  ImportRewriteContext context) {
 		ITypeBinding[] typeParameters= fTargetMethodBinding.getTypeParameters();
 		for (int i= 0; i < typeParameters.length; i++) {
 			ITypeBinding current= typeParameters[i];
@@ -942,16 +943,16 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			ITypeBinding[] bounds= current.getTypeBounds();
 			for (int j= 0; j < bounds.length; j++)
 				if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) //$NON-NLS-1$
-					parameter.typeBounds().add(rew.getImportRewrite().addImport(bounds[j], rew.getAST()));
+					parameter.typeBounds().add(rew.getImportRewrite().addImport(bounds[j], rew.getAST(), context));
 
 			intermediary.typeParameters().add(parameter);
 		}
 	}
 
-	private void copyExceptions(MethodDeclaration intermediary, CompilationUnitRewrite imRewrite) {
+	private void copyExceptions(MethodDeclaration intermediary, CompilationUnitRewrite imRewrite,  ImportRewriteContext context) {
 		ITypeBinding[] exceptionTypes= fTargetMethodBinding.getExceptionTypes();
 		for (int i= 0; i < exceptionTypes.length; i++) {
-			Type exceptionType= imRewrite.getImportRewrite().addImport(exceptionTypes[i], imRewrite.getAST());
+			Type exceptionType= imRewrite.getImportRewrite().addImport(exceptionTypes[i], imRewrite.getAST(), context);
 			intermediary.thrownExceptionTypes().add(exceptionType);
 		}
 	}
@@ -971,8 +972,9 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		List<Expression> newInvocationArgs= newInvocation.arguments();
 		List<Expression> originalInvocationArgs= originalInvocation.arguments();
 
+		ContextSensitiveImportRewriteContext context= new ContextSensitiveImportRewriteContext(originalInvocation, unitRewriter.getImportRewrite());
 		// static call => always use a qualifier
-		String qualifier= unitRewriter.getImportRewrite().addImport(fIntermediaryTypeBinding);
+		String qualifier= unitRewriter.getImportRewrite().addImport(fIntermediaryTypeBinding, context);
 		newInvocation.setExpression(ASTNodeFactory.newName(unitRewriter.getAST(), qualifier));
 		newInvocation.setName(unitRewriter.getAST().newSimpleName(getIntermediaryMethodName()));
 
