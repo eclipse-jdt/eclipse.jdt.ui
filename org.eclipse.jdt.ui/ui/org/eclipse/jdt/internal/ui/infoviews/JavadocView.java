@@ -1049,7 +1049,10 @@ public class JavadocView extends AbstractInfoView {
 				try {
 					boolean isBinary= root.getKind() == IPackageFragmentRoot.K_BINARY;
 					if (content != null) {
-						base= JavaDocLocations.getBaseURL(curr, isBinary);
+						base= JavadocContentAccess2.extractBaseURL(content);
+						if (base == null) {
+							base= JavaDocLocations.getBaseURL(curr, isBinary);
+						}
 						reader= new StringReader(content);
 					} else if (reader == null) {
 						String explanationForMissingJavadoc= JavaDocLocations.getExplanationForMissingJavadoc(curr, root);
@@ -1108,7 +1111,10 @@ public class JavadocView extends AbstractInfoView {
 						} else {
 							member= (IMember) element;
 						}
-						base= JavaDocLocations.getBaseURL(member, member.isBinary());
+						base= JavadocContentAccess2.extractBaseURL(content);
+						if (base == null) {
+							base= JavaDocLocations.getBaseURL(member, member.isBinary());
+						}
 						reader= new StringReader(content);
 					} else {
 						String explanationForMissingJavadoc= JavaDocLocations.getExplanationForMissingJavadoc(element, root);

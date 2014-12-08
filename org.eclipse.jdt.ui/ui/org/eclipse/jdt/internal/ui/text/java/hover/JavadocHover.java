@@ -692,7 +692,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					boolean isBinary= root.exists() && root.getKind() == IPackageFragmentRoot.K_BINARY;
 					if (content != null) {
-						base= JavaDocLocations.getBaseURL(element, isBinary);
+						base= JavadocContentAccess2.extractBaseURL(content);
+						if (base == null) {
+							base= JavaDocLocations.getBaseURL(element, isBinary);
+						}
 						reader= new StringReader(content);
 					} else {
 						String explanationForMissingJavadoc= JavaDocLocations.getExplanationForMissingJavadoc(element, root);

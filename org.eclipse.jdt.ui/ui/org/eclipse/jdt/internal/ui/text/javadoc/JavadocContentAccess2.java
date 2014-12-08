@@ -91,6 +91,7 @@ import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -119,6 +120,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
  */
 public class JavadocContentAccess2 {
 
+	private static final String BASE_URL_COMMENT_INTRO= "<!-- baseURL=\""; //$NON-NLS-1$
+	
 	private static final String BLOCK_TAG_START= "<dl>"; //$NON-NLS-1$
 	private static final String BLOCK_TAG_END= "</dl>"; //$NON-NLS-1$
 
@@ -831,11 +834,17 @@ public class JavadocContentAccess2 {
 					return InheritDocVisitor.CONTINUE;
 
 				if (overridden.getOpenable().getBuffer() == null) { // only if no source available
-					//TODO: BaseURL for method can be wrong for attached Javadoc from overridden
-					// (e.g. when overridden is from rt.jar). Fix would be to add baseURL here.
 					String attachedJavadoc= overridden.getAttachedJavadoc(null);
-					if (attachedJavadoc != null)
+					if (attachedJavadoc != null) {
+						// BaseURL for the original method can be wrong for attached Javadoc from overridden
+						// (e.g. when overridden is from rt.jar).
+						// Fix is to store the baseURL inside the doc content and later fetch it with #extractBaseURL(String).
+						String baseURL= JavaDocLocations.getBaseURL(overridden, overridden.isBinary());
+						if (baseURL != null) {
+							attachedJavadoc= BASE_URL_COMMENT_INTRO + baseURL + "\"--> " + attachedJavadoc; //$NON-NLS-1$
+						}
 						return attachedJavadoc;
+					}
 				}
 				return CONTINUE;
 			}
@@ -1944,6 +1953,23 @@ public class JavadocContentAccess2 {
 				return false;
 		}
 		return true;
+	}
+
+	/**
+	 * @param content HTML content produced by <code>getHTMLContent(...)</code>
+	 * @return the baseURL to use for the given content, or <code>null</code> if none
+	 * @since 3.10
+	 */
+	public static String extractBaseURL(String content) {
+		int introStart= content.indexOf(BASE_URL_COMMENT_INTRO);
+		if (introStart != -1) {
+			int introLength= BASE_URL_COMMENT_INTRO.length();
+			int endIndex= content.indexOf('"', introStart + introLength);
+			if (endIndex != -1) {
+				return content.substring(introStart + introLength, endIndex);
+			}
+		}
+		return null;
 	}
 
 	/**
