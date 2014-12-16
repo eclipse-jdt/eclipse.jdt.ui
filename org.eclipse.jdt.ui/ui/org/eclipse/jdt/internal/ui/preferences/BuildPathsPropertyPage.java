@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2014 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -74,8 +74,8 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	 */
 	@Override
 	protected Control createContents(Composite parent) {
-		// ensure the page has no special buttons
-		noDefaultAndApplyButton();
+		// ensure the page has no 'Default' button
+		noDefaultButton();
 
 		IProject project= getProject();
 		Control result;
