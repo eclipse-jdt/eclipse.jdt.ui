@@ -1203,6 +1203,10 @@ public class SemanticHighlightings {
 							return declaringClass.getSuperclass().isDeprecated();
 					}
 					return declaringClass.isDeprecated();
+				} else if (binding instanceof IVariableBinding) {
+					IVariableBinding variableBinding= (IVariableBinding) binding;
+					ITypeBinding declaringClass= variableBinding.getDeclaringClass();
+					return declaringClass != null && declaringClass.isDeprecated();
 				}
 			}
 			return false;
