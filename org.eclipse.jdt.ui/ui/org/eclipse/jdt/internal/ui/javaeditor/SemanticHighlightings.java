@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.ParameterizedType;
@@ -51,7 +52,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-/**
+	/**
  * Semantic highlightings
  *
  * @since 3.0
@@ -1202,11 +1203,11 @@ public class SemanticHighlightings {
 						else
 							return declaringClass.getSuperclass().isDeprecated();
 					}
-					return declaringClass.isDeprecated();
+					return (token.getNode().getParent() instanceof MethodInvocation) && declaringClass.isDeprecated();
 				} else if (binding instanceof IVariableBinding) {
 					IVariableBinding variableBinding= (IVariableBinding) binding;
 					ITypeBinding declaringClass= variableBinding.getDeclaringClass();
-					return declaringClass != null && declaringClass.isDeprecated();
+					return (token.getNode().getParent() instanceof QualifiedName) && declaringClass != null && declaringClass.isDeprecated();
 				}
 			}
 			return false;
