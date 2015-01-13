@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -537,50 +537,48 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	}
 	
 	public void refreshComplianceSettings() {
-		if (fProject != null) {
-			if (fOriginalStoredCompliance == null) {
-				fOriginalStoredCompliance= new String[] { // caution: order depends on IDX_* constants
-						getOriginalStoredValue(PREF_PB_ASSERT_AS_IDENTIFIER),
-						getOriginalStoredValue(PREF_PB_ENUM_AS_IDENTIFIER),
-						getOriginalStoredValue(PREF_SOURCE_COMPATIBILITY),
-						getOriginalStoredValue(PREF_CODEGEN_TARGET_PLATFORM),
-						getOriginalStoredValue(PREF_COMPLIANCE),
-						getOriginalStoredValue(PREF_CODEGEN_INLINE_JSR_BYTECODE),
-						getOriginalStoredValue(PREF_CODEGEN_METHOD_PARAMETERS_ATTR)
-					};
+		if (fOriginalStoredCompliance == null) {
+			fOriginalStoredCompliance= new String[] { // caution: order depends on IDX_* constants
+					getOriginalStoredValue(PREF_PB_ASSERT_AS_IDENTIFIER),
+					getOriginalStoredValue(PREF_PB_ENUM_AS_IDENTIFIER),
+					getOriginalStoredValue(PREF_SOURCE_COMPATIBILITY),
+					getOriginalStoredValue(PREF_CODEGEN_TARGET_PLATFORM),
+					getOriginalStoredValue(PREF_COMPLIANCE),
+					getOriginalStoredValue(PREF_CODEGEN_INLINE_JSR_BYTECODE),
+					getOriginalStoredValue(PREF_CODEGEN_METHOD_PARAMETERS_ATTR)
+				};
+			
+		} else {
+			String[] storedCompliance= new String[] {
+					getOriginalStoredValue(PREF_PB_ASSERT_AS_IDENTIFIER),
+					getOriginalStoredValue(PREF_PB_ENUM_AS_IDENTIFIER),
+					getOriginalStoredValue(PREF_SOURCE_COMPATIBILITY),
+					getOriginalStoredValue(PREF_CODEGEN_TARGET_PLATFORM),
+					getOriginalStoredValue(PREF_COMPLIANCE),
+					getOriginalStoredValue(PREF_CODEGEN_INLINE_JSR_BYTECODE),
+					getOriginalStoredValue(PREF_CODEGEN_METHOD_PARAMETERS_ATTR)
+				};
+			if (!Arrays.equals(fOriginalStoredCompliance, storedCompliance)) {
+				// compliance changed on disk -> override user modifications
 				
-			} else {
-				String[] storedCompliance= new String[] {
-						getOriginalStoredValue(PREF_PB_ASSERT_AS_IDENTIFIER),
-						getOriginalStoredValue(PREF_PB_ENUM_AS_IDENTIFIER),
-						getOriginalStoredValue(PREF_SOURCE_COMPATIBILITY),
-						getOriginalStoredValue(PREF_CODEGEN_TARGET_PLATFORM),
-						getOriginalStoredValue(PREF_COMPLIANCE),
-						getOriginalStoredValue(PREF_CODEGEN_INLINE_JSR_BYTECODE),
-						getOriginalStoredValue(PREF_CODEGEN_METHOD_PARAMETERS_ATTR)
-					};
-				if (!Arrays.equals(fOriginalStoredCompliance, storedCompliance)) {
-					// compliance changed on disk -> override user modifications
-					
-					fOriginalStoredCompliance= storedCompliance;
-					
-					setValue(PREF_PB_ASSERT_AS_IDENTIFIER, storedCompliance[IDX_ASSERT_AS_IDENTIFIER]);
-					setValue(PREF_PB_ENUM_AS_IDENTIFIER, storedCompliance[IDX_ENUM_AS_IDENTIFIER]);
-					setValue(PREF_SOURCE_COMPATIBILITY, storedCompliance[IDX_SOURCE_COMPATIBILITY]);
-					setValue(PREF_CODEGEN_TARGET_PLATFORM, storedCompliance[IDX_CODEGEN_TARGET_PLATFORM]);
-					setValue(PREF_COMPLIANCE, storedCompliance[IDX_COMPLIANCE]);
-					setValue(PREF_CODEGEN_INLINE_JSR_BYTECODE, storedCompliance[IDX_INLINE_JSR_BYTECODE]);
-					setValue(PREF_CODEGEN_METHOD_PARAMETERS_ATTR, storedCompliance[IDX_METHOD_PARAMETERS_ATTR]);
-					
-				}
+				fOriginalStoredCompliance= storedCompliance;
 				
-				updateComplianceFollowsEE();
-				updateControls();
-				updateComplianceEnableState();
-				validateComplianceStatus();
-				updateInlineJSREnableState();
-				updateStoreMethodParamNamesEnableState();
+				setValue(PREF_PB_ASSERT_AS_IDENTIFIER, storedCompliance[IDX_ASSERT_AS_IDENTIFIER]);
+				setValue(PREF_PB_ENUM_AS_IDENTIFIER, storedCompliance[IDX_ENUM_AS_IDENTIFIER]);
+				setValue(PREF_SOURCE_COMPATIBILITY, storedCompliance[IDX_SOURCE_COMPATIBILITY]);
+				setValue(PREF_CODEGEN_TARGET_PLATFORM, storedCompliance[IDX_CODEGEN_TARGET_PLATFORM]);
+				setValue(PREF_COMPLIANCE, storedCompliance[IDX_COMPLIANCE]);
+				setValue(PREF_CODEGEN_INLINE_JSR_BYTECODE, storedCompliance[IDX_INLINE_JSR_BYTECODE]);
+				setValue(PREF_CODEGEN_METHOD_PARAMETERS_ATTR, storedCompliance[IDX_METHOD_PARAMETERS_ATTR]);
+				
 			}
+			
+			updateComplianceFollowsEE();
+			updateControls();
+			updateComplianceEnableState();
+			validateComplianceStatus();
+			updateInlineJSREnableState();
+			updateStoreMethodParamNamesEnableState();
 		}
 	}
 
