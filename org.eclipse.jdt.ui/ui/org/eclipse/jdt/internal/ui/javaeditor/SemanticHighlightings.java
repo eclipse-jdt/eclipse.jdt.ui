@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.ParameterizedType;
@@ -1196,6 +1195,8 @@ public class SemanticHighlightings {
 				if (binding instanceof IMethodBinding) {
 					IMethodBinding methodBinding= (IMethodBinding) binding;
 					ITypeBinding declaringClass= methodBinding.getDeclaringClass();
+					if (declaringClass == null)
+						return false;
 					if (declaringClass.isAnonymous()) {
 						ITypeBinding[] interfaces= declaringClass.getInterfaces();
 						if (interfaces.length > 0)
@@ -1203,11 +1204,11 @@ public class SemanticHighlightings {
 						else
 							return declaringClass.getSuperclass().isDeprecated();
 					}
-					return (token.getNode().getParent() instanceof MethodInvocation) && declaringClass.isDeprecated();
+					return declaringClass.isDeprecated() && !(token.getNode().getParent() instanceof MethodDeclaration);
 				} else if (binding instanceof IVariableBinding) {
 					IVariableBinding variableBinding= (IVariableBinding) binding;
 					ITypeBinding declaringClass= variableBinding.getDeclaringClass();
-					return (token.getNode().getParent() instanceof QualifiedName) && declaringClass != null && declaringClass.isDeprecated();
+					return declaringClass != null && declaringClass.isDeprecated() && !(token.getNode().getParent() instanceof VariableDeclaration);
 				}
 			}
 			return false;
