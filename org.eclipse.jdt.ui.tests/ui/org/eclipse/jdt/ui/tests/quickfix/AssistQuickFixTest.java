@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1694,6 +1694,64 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        int c = 1;\n");
 		buf.append("        int d = c + a + b;\n");
 		buf.append("        int e = a + b + c;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex3= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { ex1, ex2, ex3 });
+	}
+
+	public void testExtractToLocalVariable4() throws Exception {
+		//bug 457547
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public E() {\n");
+		buf.append("        int a = 1;\n");
+		buf.append("        int b = 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String selection= "1";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public E() {\n");
+		buf.append("        int i = 1;\n");
+		buf.append("        int a = i;\n");
+		buf.append("        int b = i;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex1= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public E() {\n");
+		buf.append("        int i = 1;\n");
+		buf.append("        int a = i;\n");
+		buf.append("        int b = 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String ex2= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static final int _1 = 1;\n");
+		buf.append("\n");
+		buf.append("    public E() {\n");
+		buf.append("        int a = _1;\n");
+		buf.append("        int b = 1;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String ex3= buf.toString();
