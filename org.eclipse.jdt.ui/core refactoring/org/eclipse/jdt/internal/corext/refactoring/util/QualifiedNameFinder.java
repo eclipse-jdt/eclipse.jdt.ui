@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Terry Parker <tparker@google.com> (Google Inc.) - Bug 458852 - Speed up JDT text searches by supporting parallelism in its TextSearchRequestors
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
@@ -55,12 +56,17 @@ public class QualifiedNameFinder {
 
 	private static class ResultCollector extends TextSearchRequestor {
 
-		private String fNewValue;
-		private QualifiedNameSearchResult fResult;
+		private final String fNewValue;
+		private final QualifiedNameSearchResult fResult;
 
 		public ResultCollector(QualifiedNameSearchResult result, String newValue) {
 			fResult= result;
 			fNewValue= newValue;
+		}
+
+		@Override
+		public boolean canRunInParallel() {
+			return true;
 		}
 
 		@Override
@@ -101,11 +107,13 @@ public class QualifiedNameFinder {
 			}
 
 			IFile file= matchAccess.getFile();
-			TextChange change= fResult.getChange(file);
-			TextChangeCompatibility.addTextEdit(
-				change,
-				RefactoringCoreMessages.QualifiedNameFinder_update_name,
-				new ReplaceEdit(start, length, fNewValue), QUALIFIED_NAMES);
+			synchronized(fResult) {
+				TextChange change= fResult.getChange(file);
+				TextChangeCompatibility.addTextEdit(
+					change,
+					RefactoringCoreMessages.QualifiedNameFinder_update_name,
+					new ReplaceEdit(start, length, fNewValue), QUALIFIED_NAMES);
+			}
 
 			return true;
 		}

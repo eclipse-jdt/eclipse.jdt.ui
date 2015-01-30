@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Terry Parker <tparker@google.com> (Google Inc.) - Bug 458852 - Speed up JDT text searches by supporting parallelism in its TextSearchRequestors
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
@@ -190,12 +191,17 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 	private static class ResultCollector extends TextSearchRequestor {
 
-		private List<KeyReference> fResult;
-		private boolean fIsKeyDoubleQuoted;
+		private final List<KeyReference> fResult;
+		private final boolean fIsKeyDoubleQuoted;
 
 		public ResultCollector(List<KeyReference> result, boolean isKeyDoubleQuoted) {
 			fResult= result;
 			fIsKeyDoubleQuoted= isKeyDoubleQuoted;
+		}
+
+		@Override
+		public boolean canRunInParallel() {
+			return true;
 		}
 
 		@Override
@@ -207,7 +213,9 @@ public class PropertyKeyHyperlink implements IHyperlink {
 				start= start + 1;
 				length= length - 2;
 			}
-			fResult.add(new KeyReference(matchAccess.getFile(), null, start, length, true));
+			synchronized(fResult) {
+				fResult.add(new KeyReference(matchAccess.getFile(), null, start, length, true));
+			}
 			return true;
 		}
 	}
