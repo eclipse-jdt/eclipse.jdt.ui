@@ -312,8 +312,14 @@
 		<proposalCategory
 			icon="$nl$/icons/full/elcl16/swtassist_co.png"/>
 	</extension>
-
 	<!-- java completions -->
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="javaPostfixProposalCategory"
+		name="%JavaPostfixProposalCategory">
+		<proposalCategory
+			icon="icons/full/elcl16/templateprop_co.png"/>
+	</extension>
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="JavaTypeCompletionProposalComputer">
@@ -425,6 +431,16 @@
       </javaCompletionProposalComputer>
     </extension>
 	<!-- hippie word completions -->
+	<extension
+         point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+         id="postfixCompletion">
+      <javaCompletionProposalComputer
+            class="org.eclipse.jdt.internal.ui.text.java.PostfixCompletionProposalComputer"
+            categoryId="org.eclipse.jdt.ui.javaPostfixProposalCategory">
+            <partition type="__dftl_partition_content_type"/>
+			<partition type="__java_string"/>
+      </javaCompletionProposalComputer>
+	</extension>
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="HippieCompletionProposalComputer">
@@ -5559,6 +5575,12 @@
             class="org.eclipse.jdt.internal.corext.template.java.SWTContextType"
             id="swt-members"
             registryId="org.eclipse.jdt.ui.CompilationUnitEditor">
+      </contextType>      
+      <contextType
+            name="%templates.postfix.members.contextType.name"
+            class="org.eclipse.jdt.internal.corext.template.java.JavaPostfixContextType"
+            id="postfix"
+            registryId="org.eclipse.jdt.ui.CompilationUnitEditor">
       </contextType>
       <include
       		file="templates/default-templates.xml"
@@ -5570,6 +5592,10 @@
       </include>
       <include
             file="templates/default-swttemplates.xml"
+            translations="$nl$/templates/default-templates.properties">
+      </include>
+      <include
+            file="templates/default-postfixtemplates.xml"
             translations="$nl$/templates/default-templates.properties">
       </include>
       <resolver
@@ -5639,6 +5665,18 @@
             name="%templates.java.resolvers.ExceptionVariableName.name"
             type="exception_variable_name">
       </resolver>
+      <resolver
+            class="org.eclipse.jdt.internal.corext.template.java.ActualTypeResolver"
+            contextTypeId="java"
+            description="%templates.java.resolvers.ActualType.description"
+            name="%templates.java.resolvers.ActualType.name"
+            type="newActualType"/>
+      <resolver
+            class="org.eclipse.jdt.internal.corext.template.java.NewFieldResolver"
+            contextTypeId="java"
+            description="%templates.java.resolvers.NewField.description"
+            name="%templates.java.resolvers.NewField.name"
+            type="newField"/>
    </extension>
    <extension
          point="org.eclipse.ui.views">

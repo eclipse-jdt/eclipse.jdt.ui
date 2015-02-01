@@ -1,0 +1,266 @@
+/*******************************************************************************
+ * Copyright (c) 2019 Nicolaj Hoess.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     Nicolaj Hoess - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.core.runtime.Assert;
+
+import org.eclipse.jdt.core.CompletionContext;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.StringLiteral;
+
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.corext.template.java.JavaPostfixContextType;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.java.AbstractTemplateCompletionProposalComputer;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.PostfixTemplateEngine;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.templates.TemplateContextType;
+
+import org.eclipse.text.templates.ContextTypeRegistry;
+
+/**
+ * Computer that computes the template proposals for the Java postfix type.
+ */
+public class PostfixCompletionProposalComputer extends AbstractTemplateCompletionProposalComputer {
+
+	private final PostfixTemplateEngine postfixCompletionTemplateEngine;
+
+	public PostfixCompletionProposalComputer() {
+		ContextTypeRegistry templateContextRegistry = JavaPlugin.getDefault().getTemplateContextRegistry();
+		postfixCompletionTemplateEngine = createTemplateEngine(templateContextRegistry, JavaPostfixContextType.ID_ALL);
+	}
+
+	private static PostfixTemplateEngine createTemplateEngine(ContextTypeRegistry templateContextRegistry, String contextTypeId) {
+		TemplateContextType contextType = templateContextRegistry.getContextType(contextTypeId);
+		Assert.isNotNull(contextType);
+		return new PostfixTemplateEngine(contextType);
+	}
+
+	@Override
+	protected TemplateEngine computeCompletionEngine(JavaContentAssistInvocationContext context) {
+		ICompilationUnit unit = context.getCompilationUnit();
+		if (unit == null)
+			return null;
+
+		IJavaProject javaProject = unit.getJavaProject();
+		if (javaProject == null)
+			return null;
+
+		if (context.getViewer().getSelectedRange().y > 0) {
+			// If there is an active selection we must not contribute to the CA
+			return null;
+		}
+
+		CompletionContext coreContext = context.getCoreContext();
+		if (coreContext != null) {
+			int tokenLocation= coreContext.getTokenLocation();
+			int tokenStart= coreContext.getTokenStart();
+			int tokenKind= coreContext.getTokenKind();
+			if ((tokenLocation == 0 && tokenStart > -1)
+					|| ((tokenLocation & CompletionContext.TL_MEMBER_START) != 0 && tokenKind == CompletionContext.TOKEN_KIND_NAME && tokenStart > -1)
+					|| (tokenLocation == 0 && isAfterTrigger(context.getDocument(), context.getInvocationOffset()))) {
+
+				analyzeCoreContext(context, coreContext);
+				return postfixCompletionTemplateEngine;
+			}
+		}
+		return null;
+	}
+
+	private void analyzeCoreContext(JavaContentAssistInvocationContext context,
+			CompletionContext coreContext) {
+		// If the coreContext is not extended atm for some reason we have to extend it ourself in order get to the needed information
+		if (coreContext.isExtended()) {
+			updateTemplateEngine(coreContext);
+		} else {
+			final ICompilationUnit cu= context.getCompilationUnit();
+			final CompletionProposalCollector collector= new CompletionProposalCollector(cu) {
+				@Override
+				public void acceptContext(final CompletionContext c) {
+					super.acceptContext(c);
+					updateTemplateEngine(c);
+				}
+			};
+			collector.setInvocationContext(context);
+			collector.setRequireExtendedContext(true);
+			try {
+				cu.codeComplete(context.getInvocationOffset(), collector);
+			} catch (JavaModelException e) {
+				// continue
+			}
+		}
+	}
+
+	private void updateTemplateEngine(CompletionContext context) {
+		IJavaElement enclosingElement= context.getEnclosingElement();
+		if (enclosingElement == null) {
+			return;
+		}
+
+		ICompilationUnit cu = (ICompilationUnit) enclosingElement.getAncestor(IJavaElement.COMPILATION_UNIT);
+		ASTParser parser = createParser(cu);
+		IBinding[] res;
+		try {
+			res = parser.createBindings(new IJavaElement [] { enclosingElement }, null);
+		} catch (Exception e) {
+			return;
+		}
+
+		if (res.length > 0 && res[0] != null) {
+			parser = createParser(cu);
+			CompilationUnit cuRoot = (CompilationUnit) parser.createAST(null);
+			ASTNode completionNode = cuRoot.findDeclaringNode(res[0].getKey());
+
+			ASTNode [] bestNode = new ASTNode [] {completionNode};
+			int tokenLength= context.getToken() != null ? context.getToken().length : 0;
+			int invOffset = context.getOffset() - tokenLength - 1;
+			completionNode.accept(new ASTVisitor() {
+				@Override
+				public boolean visit(StringLiteral node) {
+					int start = node.getStartPosition();
+					if (invOffset > start && start > bestNode[0].getStartPosition()) {
+						bestNode[0] = node;
+					}
+					return true;
+				}
+
+				@Override
+				public boolean visit(ExpressionStatement node) {
+					int start = node.getStartPosition();
+					if (invOffset > start && start > bestNode[0].getStartPosition()) {
+						bestNode[0] = node;
+					}
+					return true;
+				}
+
+				@Override
+				public boolean visit(SimpleName node) {
+					int start = node.getStartPosition();
+					if (invOffset > start && start > bestNode[0].getStartPosition()) {
+						bestNode[0] = node;
+					}
+					return true;
+				}
+
+				@Override
+				public boolean visit(QualifiedName node) {
+					int start = node.getStartPosition();
+					if (invOffset > start && start > bestNode[0].getStartPosition()) {
+						bestNode[0] = node;
+					}
+					return true;
+				}
+
+				@Override
+				public boolean visit(BooleanLiteral node) {
+					int start = node.getStartPosition();
+					if (invOffset > start && start > bestNode[0].getStartPosition()) {
+						bestNode[0] = node;
+					}
+					return true;
+				}
+			});
+
+			completionNode = bestNode[0];
+			ASTNode completionNodeParent = findBestMatchingParentNode(completionNode);
+			postfixCompletionTemplateEngine.setASTNodes(completionNode, completionNodeParent);
+			postfixCompletionTemplateEngine.setContext(context);
+		}
+	}
+
+	/**
+	 * This method determines the best matching parent {@link ASTNode} of the given {@link ASTNode}.
+	 * Consider the following example for the definition of <i>best matching parent</i>:<br/>
+	 * <code>("two" + 2).var$</code> has <code>"two"</code> as completion {@link ASTNode}.
+	 * The parent node is <code>"two" + 2</code> which will result in a syntactically incorrect result,
+	 * if the template is applied, because the parentheses aren't taken into account.
+	 * @param node The current {@link ASTNode}
+	 * @return {@link ASTNode} which either is the parent of the given node or another predecessor
+	 * 			{@link ASTNode} in the abstract syntax tree.
+	 */
+	private ASTNode findBestMatchingParentNode(ASTNode node) {
+		ASTNode result = node.getParent();
+		if (result instanceof InfixExpression) {
+			ASTNode completionNodeGrandParent = result.getParent();
+			int safeGuard = 0;
+			while (completionNodeGrandParent != null
+					&& completionNodeGrandParent instanceof ParenthesizedExpression
+					&& safeGuard++ < 64) {
+				result = completionNodeGrandParent;
+				completionNodeGrandParent = result.getParent();
+			}
+		}
+		if (node instanceof SimpleName && result instanceof SimpleType) {
+			ASTNode completionNodeGrandParent = result.getParent();
+			if (completionNodeGrandParent instanceof ClassInstanceCreation) {
+				result = completionNodeGrandParent;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Returns true if the given offset is directly after an assist trigger character.
+	 * @param document the actual document of type {@link IDocument}
+	 * @param offset the current location in the document
+	 * @return <code>true</code> if the given offset is directly after an assist trigger character, <code>false</code> otherwise.
+	 * If the given offset is out of the given document <code>false</code> is returned.
+	 */
+	private boolean isAfterTrigger(IDocument document, int offset) {
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		String triggers= preferenceStore.getString(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA);
+		try {
+			return triggers.contains(document.get(offset - 1, 1));
+		} catch (BadLocationException e) {
+			return false;
+		}
+	}
+
+	private static ASTParser createParser (ICompilationUnit cu) {
+		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setProject(cu.getJavaProject());
+		parser.setSource(cu);
+		parser.setResolveBindings(true);
+		parser.setBindingsRecovery(true);
+		parser.setStatementsRecovery(true);
+		return parser;
+	}
+}

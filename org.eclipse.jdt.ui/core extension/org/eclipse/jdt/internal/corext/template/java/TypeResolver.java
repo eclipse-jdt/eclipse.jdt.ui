@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -45,14 +45,31 @@ public class TypeResolver extends TemplateVariableResolver {
 	@Override
 	public void resolve(TemplateVariable variable, TemplateContext context) {
 		List<String> params= variable.getVariableType().getParams();
-		String param;
-		if (params.size() == 0)
-			param= fDefaultType;
-		else
-			param= params.get(0);
-
+		String param= fDefaultType;
 		JavaContext jc= (JavaContext) context;
 		MultiVariable mv= (MultiVariable) variable;
+		if (params.size() != 0 && context instanceof JavaContext) {
+			param= params.get(0);
+			TemplateVariable ref = jc.getTemplateVariable(param);
+
+			if (ref instanceof JavaVariable) {
+				// Reference is another variable
+				JavaVariable refVar= (JavaVariable) ref;
+				jc.addDependency(refVar, mv);
+				param= refVar.getParamType();
+				if (param != null && "".equals(param) == false) { //$NON-NLS-1$
+					String reference;
+					if (jc instanceof JavaPostfixContext)
+						reference= ((JavaPostfixContext)jc).addImportGenericClass(param);
+					else
+						reference= jc.addImport(param);
+					mv.setValue(reference);
+					mv.setUnambiguous(true);
+					mv.setResolved(true);
+					return;
+				}
+			}
+		}
 
 		String reference= jc.addImport(param);
 		mv.setValue(reference);
