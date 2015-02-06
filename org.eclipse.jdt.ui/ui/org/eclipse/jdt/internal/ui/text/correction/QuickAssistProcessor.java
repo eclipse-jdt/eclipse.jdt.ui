@@ -618,9 +618,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		IMethodBinding referredMethodBinding= methodReference.resolveMethodBinding();
-		if (referredMethodBinding == null && !(methodReference instanceof CreationReference))
-			return false;
+		IMethodBinding referredMethodBinding= methodReference.resolveMethodBinding(); // too often null, see bug 440000, bug 440344, bug 333665
 
 		ITypeBinding targetTypeBinding= ASTNodes.getTargetType(methodReference);
 		if (targetTypeBinding == null)
@@ -689,7 +687,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				cic.typeArguments().addAll(getCopiedTypeArguments(rewrite, methodReference.typeArguments()));
 			}
 			
-		} else if (Modifier.isStatic(referredMethodBinding.getModifiers()) && !referredMethodBinding.isSynthetic()) { // TODO: Remove #isSynthetic check after bug 440344 is fixed (eg: int[]::clone)
+		} else if (referredMethodBinding != null && Modifier.isStatic(referredMethodBinding.getModifiers())) {
 			MethodInvocation methodInvocation= ast.newMethodInvocation();
 			lambda.setBody(methodInvocation);
 
