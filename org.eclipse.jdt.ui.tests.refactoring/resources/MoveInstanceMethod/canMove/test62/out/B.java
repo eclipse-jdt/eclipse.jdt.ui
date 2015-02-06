@@ -1,6 +1,7 @@
 package q;
 
 import static java.util.Arrays.asList;
+
 import p.A;
 
 public class B {

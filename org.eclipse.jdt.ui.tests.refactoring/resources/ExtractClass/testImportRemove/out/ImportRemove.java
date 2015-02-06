@@ -10,7 +10,6 @@
  *******************************************************************************/
 package p;
 
-
 public class ImportRemove {
 	private ImportRemoveParameter parameterObject = new ImportRemoveParameter();
 }

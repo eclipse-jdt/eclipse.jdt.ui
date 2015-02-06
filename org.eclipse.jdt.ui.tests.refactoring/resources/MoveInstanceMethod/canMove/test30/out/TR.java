@@ -1,4 +1,5 @@
 package p1;
+
 public enum TR implements P {
 	PASSED, FAILED;
 	/**

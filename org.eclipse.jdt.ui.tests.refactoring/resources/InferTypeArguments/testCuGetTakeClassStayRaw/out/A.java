@@ -1,5 +1,7 @@
 package p;
 
+import p.A.Z;
+
 public class A {
 	static void takeP(Class c) {}
 	static void takePQ(Class c) {}

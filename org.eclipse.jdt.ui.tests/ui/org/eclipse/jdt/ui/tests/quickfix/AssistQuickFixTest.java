@@ -9032,8 +9032,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
 		buf.append("import java.util.Date;\n");
+		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo(List<? extends Date> list) {\n");
 		buf.append("        list\n");
@@ -9056,8 +9056,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 			String[] expected= new String[3];
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
-			buf.append("import java.util.List;\n");
 			buf.append("import java.util.Date;\n");
+			buf.append("import java.util.List;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(List<? extends Date> list) {\n");
 			buf.append("        for (Date date : list) {\n");
@@ -9069,9 +9069,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
+			buf.append("import java.util.Date;\n");
 			buf.append("import java.util.Iterator;\n");
 			buf.append("import java.util.List;\n");
-			buf.append("import java.util.Date;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(List<? extends Date> list) {\n");
 			buf.append("        for (Iterator<? extends Date> iterator = list.iterator(); iterator\n");
@@ -9085,8 +9085,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
-			buf.append("import java.util.List;\n");
 			buf.append("import java.util.Date;\n");
+			buf.append("import java.util.List;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(List<? extends Date> list) {\n");
 			buf.append("        for (int i = 0; i < list.size(); i++) {\n");
@@ -9107,8 +9107,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.util.List;\n");
 		buf.append("import java.util.Date;\n");
+		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo(List<? super Date> list) {\n");
 		buf.append("        list\n");
@@ -9131,8 +9131,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 			String[] expected= new String[3];
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
-			buf.append("import java.util.List;\n");
 			buf.append("import java.util.Date;\n");
+			buf.append("import java.util.List;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(List<? super Date> list) {\n");
 			buf.append("        for (Object object : list) {\n");
@@ -9144,9 +9144,9 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
+			buf.append("import java.util.Date;\n");
 			buf.append("import java.util.Iterator;\n");
 			buf.append("import java.util.List;\n");
-			buf.append("import java.util.Date;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(List<? super Date> list) {\n");
 			buf.append("        for (Iterator<? super Date> iterator = list.iterator(); iterator\n");
@@ -9160,8 +9160,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
-			buf.append("import java.util.List;\n");
 			buf.append("import java.util.Date;\n");
+			buf.append("import java.util.List;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(List<? super Date> list) {\n");
 			buf.append("        for (int i = 0; i < list.size(); i++) {\n");

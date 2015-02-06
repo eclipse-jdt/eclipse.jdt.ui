@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,9 +90,9 @@ public class AddImportTest extends CoreTests {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package pack1;\n");
 		buf.append("\n");
+		buf.append("import java.util.Map;\n");
 		buf.append("import java.util.Set;\n");
 		buf.append("import java.util.Vector;\n");
-		buf.append("import java.util.Map;\n");
 		buf.append("\n");
 		buf.append("import pack.List;\n");
 		buf.append("import pack.List2;\n");
@@ -114,16 +114,16 @@ public class AddImportTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import java.net.Socket;\n");
+		buf.append("import java.util.Map;\n");
 		buf.append("import java.util.Set;\n");
 		buf.append("import java.util.Vector;\n");
-		buf.append("import java.util.Map;\n");
 		buf.append("\n");
 		buf.append("import com.something.Foo;\n");
 		buf.append("\n");
-		buf.append("import p.A;\n");
-		buf.append("\n");
 		buf.append("import pack.List;\n");
 		buf.append("import pack.List2;\n");
+		buf.append("\n");
+		buf.append("import p.A;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("}\n");
@@ -225,8 +225,7 @@ public class AddImportTest extends CoreTests {
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
 		buf.append("\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("import java.util.Map;\n");
+		buf.append("import java.util.*;\n");
 		buf.append("\n");
 		buf.append("import pack.List2;\n");
 		buf.append("\n");

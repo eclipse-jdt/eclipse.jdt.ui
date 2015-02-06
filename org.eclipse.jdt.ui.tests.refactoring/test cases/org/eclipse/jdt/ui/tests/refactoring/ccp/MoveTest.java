@@ -1027,7 +1027,7 @@ public class MoveTest extends RefactoringTest {
 		String oldD= "import org.test.Reference;public class Default {Reference ref;}";
 		String oldRef= "package org.test;import Default;public class Reference{Default d;}";
 		String newD= "package org;\nimport org.test.Reference;public class Default {Reference ref;}";
-		String newRef= "package org.test;import org.Default;\npublic class Reference{Default d;}";
+		String newRef= "package org.test;import org.Default;public class Reference{Default d;}";
 		ICompilationUnit cuD= getRoot().getPackageFragment("").createCompilationUnit("Default.java", oldD, false, new NullProgressMonitor());
 		IPackageFragment orgTest= getRoot().createPackageFragment("org.test", false, new NullProgressMonitor());
 		ICompilationUnit cuRef= orgTest.createCompilationUnit("Reference.java", oldRef, false, new NullProgressMonitor());
@@ -1074,7 +1074,7 @@ public class MoveTest extends RefactoringTest {
 		String oldD= "import org.test.Reference;public class Default {Reference ref;}";
 		String oldRef= "package org.test;import Default;public class Reference{Default d;}";
 		String newD= "package org;\nimport org.test.Reference;public class Default {Reference ref;}";
-		String newRef= "package org.test;import org.Default;\npublic class Reference{Default d;}";
+		String newRef= "package org.test;import org.Default;public class Reference{Default d;}";
 		ICompilationUnit cuD= getRoot().getPackageFragment("").createCompilationUnit("Default.java", oldD, false, new NullProgressMonitor());
 		IPackageFragment orgTest= getRoot().createPackageFragment("org.test", false, new NullProgressMonitor());
 		ICompilationUnit cuRef= orgTest.createCompilationUnit("Reference.java", oldRef, false, new NullProgressMonitor());

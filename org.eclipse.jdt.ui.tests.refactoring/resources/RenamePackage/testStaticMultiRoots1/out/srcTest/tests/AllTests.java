@@ -1,8 +1,10 @@
 package tests;
 
+import static q.A.*;
+
+/* p.p - textual ref */
 import p.p.ATest;
 import q.*;
-import static q.A.*;
 
 /**
  * The field {@link aTest aTest} has an {@link ATest#a}.

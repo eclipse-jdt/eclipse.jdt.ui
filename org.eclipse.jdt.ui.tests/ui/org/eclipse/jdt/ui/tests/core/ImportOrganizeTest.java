@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     John Glassmyer <jogl@google.com> - import group sorting is broken - https://bugs.eclipse.org/430303
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
@@ -418,6 +419,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
+		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
@@ -682,8 +684,13 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("// comment 1\n");
-		buf.append("/*lead 1*//*lead 2*/ /**lead 3*/import java.util.*; //test3\n");
-		buf.append("//test1/*test2*/\n");
+		buf.append("/*lead 1*/\n");
+		buf.append("//test1\n");
+		buf.append("/*lead 2*/\n");
+		buf.append("/*test2*/\n");
+		buf.append("/**lead 3*/\n");
+		buf.append("//test3\n");
+		buf.append("import java.util.*;\n");
 		buf.append("");
 		buf.append("\n");
 		buf.append("/**comment 2*/\n");
@@ -715,6 +722,12 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");
 		pack2.createCompilationUnit("List2.java", buf.toString(), false, null);
 
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class List3 {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("List3.java", buf.toString(), false, null);
+
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
 		buf= new StringBuffer();
@@ -726,6 +739,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("\n");
 		buf.append("import pack.List;\n");
 		buf.append("import pack.List2;\n");
+		buf.append("import pack.List3;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    Vector v;\n");
@@ -733,7 +747,8 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("    Map v3;\n");
 		buf.append("    List v4;\n");
 		buf.append("    List2 v5;\n");
-		buf.append("    String v6;\n");
+		buf.append("    List3 v6;\n");
+		buf.append("    String v7;\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 
@@ -741,6 +756,8 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
+		// Setting on-demand threshold to 2 ensures that the 2 reducible imports (pack.List2 and
+		// pack.List3) will be reduced into an on-demand import.
 		OrganizeImportsOperation op= createOperation(cu, order, 2, false, true, true, query);
 		op.run(null);
 
@@ -758,7 +775,8 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("    Map v3;\n");
 		buf.append("    List v4;\n");
 		buf.append("    List2 v5;\n");
-		buf.append("    String v6;\n");
+		buf.append("    List3 v6;\n");
+		buf.append("    String v7;\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
@@ -2203,7 +2221,6 @@ public class ImportOrganizeTest extends CoreTests {
 		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("\n");
-		buf.append("\n");
 		buf.append("public class Test {\n");
 		buf.append("        /**\n");
 		buf.append("         * @see #max\n");
@@ -2453,9 +2470,10 @@ public class ImportOrganizeTest extends CoreTests {
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
 		buf.append("/**comment1*/\n");
-		buf.append("/*lead1*/");
+		buf.append("/*lead1*/\n");
+		buf.append("// trail 1\n");
 		buf.append("import java.util.ArrayList;\n");
-		buf.append("import java.util.HashMap;// trail 1\n");
+		buf.append("import java.util.HashMap;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    public void foo() {\n");
@@ -2679,8 +2697,6 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("\n");
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("import java.util.HashMap;\n");
-		buf.append("// some comment;\n");
-		buf.append("/*another comment*/\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    public void foo() {\n");
@@ -2731,8 +2747,6 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("import java.util.HashMap;\n");
 		buf.append("\n");
 		buf.append("import static java.io.File.pathSeparator;\n");
-		buf.append("// some comment;\n");
-		buf.append("/*another comment*/\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
 		buf.append("    public void foo() {\n");
@@ -2914,6 +2928,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf= new StringBuffer();
 		buf.append("@Foo\n");
 		buf.append("package pack1;\n");
+		buf.append("\n");
 		buf.append("import pack2.Foo;\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
@@ -2996,6 +3011,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append(" */\n");
 		buf.append("@Foo\n");
 		buf.append("package pack1;\n");
+		buf.append("\n");
 		buf.append("import pack2.Foo;\n"); // no import for Bar
 		assertEqualString(cu.getSource(), buf.toString());
 	}
@@ -3194,7 +3210,6 @@ public class ImportOrganizeTest extends CoreTests {
 		
 		buf= new StringBuffer();
 		buf.append("package p;\n");
-		buf.append("\n");
 		buf.append("\n");
 		buf.append("/**\n");
 		buf.append(" * {@link I}.\n");

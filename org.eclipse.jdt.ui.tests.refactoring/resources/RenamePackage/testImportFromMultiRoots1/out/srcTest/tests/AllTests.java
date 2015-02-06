@@ -1,5 +1,6 @@
 package tests;
 
+/* q - textual ref */
 import p.p.ATest;
 import q.*;
 

@@ -1,6 +1,7 @@
 package p;
 
 import static java.lang.Math.E;
+
 import p.A.Stat;
 
 class Inner {

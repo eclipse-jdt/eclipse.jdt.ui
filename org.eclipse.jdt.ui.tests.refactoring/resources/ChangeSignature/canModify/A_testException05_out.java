@@ -1,6 +1,5 @@
 package org.eclipse.p;
 
-
 class A {
 	/**
 	 * @throws Exception
