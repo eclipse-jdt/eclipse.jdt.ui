@@ -33,7 +33,7 @@ public class OrderedRunner extends BlockJUnit4ClassRunner {
 
 	@Override
 	protected List<FrameworkMethod> computeTestMethods() {
-		List<FrameworkMethod> methods= super.computeTestMethods();
+		List<FrameworkMethod> methods= new ArrayList<FrameworkMethod>(super.computeTestMethods());
 		
 		Order order= getTestClass().getJavaClass().getAnnotation(Order.class);
 		final List<String> orderedNames= Arrays.asList(order.value());

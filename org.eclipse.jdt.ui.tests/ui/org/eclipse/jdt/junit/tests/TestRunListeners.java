@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,12 +14,12 @@ package org.eclipse.jdt.junit.tests;
 import org.eclipse.jdt.junit.TestRunListener;
 import org.eclipse.jdt.junit.model.ITestCaseElement;
 import org.eclipse.jdt.junit.model.ITestElement;
-import org.eclipse.jdt.junit.model.ITestElementContainer;
-import org.eclipse.jdt.junit.model.ITestRunSession;
-import org.eclipse.jdt.junit.model.ITestSuiteElement;
 import org.eclipse.jdt.junit.model.ITestElement.FailureTrace;
 import org.eclipse.jdt.junit.model.ITestElement.ProgressState;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
+import org.eclipse.jdt.junit.model.ITestElementContainer;
+import org.eclipse.jdt.junit.model.ITestRunSession;
+import org.eclipse.jdt.junit.model.ITestSuiteElement;
 import org.eclipse.jdt.junit.tests.AbstractTestRunListenerTest.TestRunLog;
 
 
@@ -74,6 +74,11 @@ public class TestRunListeners {
 		}
 		public void sessionFinished(ITestRunSession session) {
 			process(session);
+			if (fLog.getLog().length == 0) {
+				fLog.add("<empty>\n\n"
+						+ "To see why the test log finished early, try to reduce\n"
+						+ "the step number passed to new TreeTest(..., step).");
+			}
 			fLog.setDone();
 		}
 		public void testCaseStarted(ITestCaseElement testCaseElement) {
