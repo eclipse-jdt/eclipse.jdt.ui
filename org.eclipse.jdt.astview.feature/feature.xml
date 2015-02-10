@@ -6,7 +6,6 @@
       provider-name="Eclipse.org"
       license-feature="org.eclipse.license"
       license-feature-version="0.0.0">
-   <install-handler/>
 
    <description>
       AST View for Eclipse 4.4 (Luna) and later (jdt.core 3.10)
