@@ -2,16 +2,14 @@
 <feature
       id="org.eclipse.jdt.jeview.feature"
       label="JavaElement View"
-      version="1.0.9.qualifier"
-      provider-name="Eclipse.org">
+      version="1.0.100.qualifier"
+      provider-name="Eclipse.org"
+      license-feature="org.eclipse.license"
+      license-feature-version="0.0.0">
 
    <description>
       JavaElement View for Eclipse 4.4 (Luna) and later (jdt.core 3.10)
    </description>
-
-   <license url="%licenseURL">
-      %license
-   </license>
 
    <url>
       <update label="JDT UI Tools" url="http://www.eclipse.org/jdt/ui/update-site"/>
