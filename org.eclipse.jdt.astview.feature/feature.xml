@@ -11,6 +11,10 @@
       AST View for Eclipse 4.4 (Luna) and later (jdt.core 3.10)
    </description>
 
+   <license url="%licenseURL">
+      %license
+   </license>
+
    <url>
       <update label="JDT UI Tools" url="http://www.eclipse.org/jdt/ui/update-site"/>
    </url>
