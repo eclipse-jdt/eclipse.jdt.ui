@@ -10,6 +10,7 @@
  *     Sebastian Davids <sdavids@gmx.de> - testInvertEquals1-23
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *     Lukas Hanke <hanke@yatta.de> - Bug 430818 [1.8][quick fix] Quick fix for "for loop" is not shown for bare local variable/argument/field - https://bugs.eclipse.org/bugs/show_bug.cgi?id=430818
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [formatter] Formatter does not format Java code correctly, especially when max line width is set
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -7333,8 +7334,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("\n");
 			buf.append("public class A {\n");
 			buf.append("    public void foo(Object o1, Object o2) {\n");
-			buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" {1}\", new Object[]{o1,\n");
-			buf.append("                o2}));\n");
+			buf.append("        System.out.println(MessageFormat.format(\"foo{0} \\\"bar\\\" {1}\",\n");
+			buf.append("                new Object[]{o1, o2}));\n");
 			buf.append("    }\n");
 			buf.append("}\n");
 			String expected1= buf.toString();
@@ -8530,8 +8531,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
 		buf.append("    void foo() {\n");
-		buf.append("        for (Iterator<? extends Number> iterator = getNums().iterator(); iterator\n");
-		buf.append("                .hasNext();) {\n");
+		buf.append("        for (Iterator<? extends Number> iterator = getNums()\n");
+		buf.append("                .iterator(); iterator.hasNext();) {\n");
 		buf.append("            Number number = iterator.next();\n");
 		buf.append("            System.out.println(number.doubleValue());\n");
 		buf.append("        }\n");
@@ -8689,7 +8690,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.Iterator;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(Collection<String> collection) {\n");
-			buf.append("        for (Iterator<String> iterator = collection.iterator(); iterator.hasNext();) {\n");
+			buf.append("        for (Iterator<String> iterator = collection.iterator(); iterator\n");
+			buf.append("                .hasNext();) {\n");
 			buf.append("            String string = iterator.next();\n");
 			buf.append("            \n");
 			buf.append("        }\n");
@@ -8746,7 +8748,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.Iterator;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(Collection<String> collection) {\n");
-			buf.append("        for (Iterator<String> iterator = collection.iterator(); iterator.hasNext();) {\n");
+			buf.append("        for (Iterator<String> iterator = collection.iterator(); iterator\n");
+			buf.append("                .hasNext();) {\n");
 			buf.append("            String string = iterator.next();\n");
 			buf.append("            \n");
 			buf.append("        }\n");
@@ -8866,7 +8869,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 			buf.append("import java.util.LinkedList;\n");
 			buf.append("public class E {\n");
 			buf.append("    void foo(MySecondOwnIterable collection) {\n");
-			buf.append("        for (Iterator<String> iterator = collection.iterator(); iterator.hasNext();) {\n");
+			buf.append("        for (Iterator<String> iterator = collection.iterator(); iterator\n");
+			buf.append("                .hasNext();) {\n");
 			buf.append("            String string = iterator.next();\n");
 			buf.append("            \n");
 			buf.append("        }\n");

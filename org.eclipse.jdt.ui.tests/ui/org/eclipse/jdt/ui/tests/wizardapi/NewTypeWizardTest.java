@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [formatter] Formatter does not format Java code correctly, especially when max line width is set
  *******************************************************************************/
 
 package org.eclipse.jdt.ui.tests.wizardapi;
@@ -711,8 +712,8 @@ public class NewTypeWizardTest extends TestCase {
 	{
 		typeBodyTest( new NewClassWizardPage(),
 			CodeTemplateContextType.CLASSBODY_ID,
-			"    // test comment\n    String testMember = \"${type_name}\"\n",
-			"    // test comment\n    String testMember = \"TestClassBodyType\"\n",
+			"    // test comment\n    String testMember = \"${type_name}\";\n",
+			"    // test comment\n    String testMember = \"TestClassBodyType\";\n",
 			"testclassbodypackage",
 			"TestClassBodyType",
 			"class" );
@@ -744,8 +745,8 @@ public class NewTypeWizardTest extends TestCase {
 	{
 		typeBodyTest( new NewAnnotationWizardPage(),
 			CodeTemplateContextType.ANNOTATIONBODY_ID,
-			"\n    @SomeOtherSpecialAnnotation ${package_name}_${type_name}\n",
-			"\n    @SomeOtherSpecialAnnotation annotationbodypackage_AnnotationBodyType\n",
+			"\n    @SomeOtherSpecialAnnotation\n    int ${package_name}_${type_name};\n",
+			"\n    @SomeOtherSpecialAnnotation\n    int annotationbodypackage_AnnotationBodyType;\n",
 			"annotationbodypackage",
 			"AnnotationBodyType",
 			"@interface" );

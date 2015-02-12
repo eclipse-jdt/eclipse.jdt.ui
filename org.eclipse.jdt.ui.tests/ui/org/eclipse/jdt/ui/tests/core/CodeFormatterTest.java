@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Tom Eicher <eclipse@tom.eicher.name> - [formatting] 'Format Element' in JavaDoc does also format method body - https://bugs.eclipse.org/bugs/show_bug.cgi?id=238746
+ *     Mateusz Matela <mateusz.matela@gmail.com> - [formatter] Formatter does not format Java code correctly, especially when max line width is set
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
@@ -201,7 +202,7 @@ public class CodeFormatterTest extends CoreTests {
 				+ "    /** \n"
 				+ "* javadoc\n"
 				+ "     */\n"
-				+ "    public method() {\n"
+				+ "    public void method() {\n"
 				+ "int local;\n"
 				+ "    }\n"
 				+ "}\n";
@@ -219,7 +220,7 @@ public class CodeFormatterTest extends CoreTests {
 				+ "    /**\n"
 				+ "     * javadoc\n" // javadoc is formatted
 				+ "     */\n"
-				+ "    public method() {\n"
+				+ "    public void method() {\n"
 				+ "        int local;\n" // local is formatted
 				+ "    }\n"
 				+ "}\n";
@@ -242,7 +243,7 @@ public class CodeFormatterTest extends CoreTests {
 				+ "    /** \n"
 				+ "* javadoc\n"
 				+ "     */\n"
-				+ "    public method() {\n"
+				+ "    public void method() {\n"
 				+ "int local;\n"
 				+ "    }\n"
 				+ "}\n";
@@ -260,7 +261,7 @@ public class CodeFormatterTest extends CoreTests {
 				+ "    /**\n"
 				+ "     * javadoc\n" // javadoc is formatted
 				+ "     */\n"
-				+ "    public method() {\n"
+				+ "    public void method() {\n"
 				+ "int local;\n" // local does not get formatted
 				+ "    }\n"
 				+ "}\n";
@@ -283,7 +284,7 @@ public class CodeFormatterTest extends CoreTests {
 			+ "    /** \n"
 			+ "* javadoc\n"
 			+ "     */\n"
-			+ "    public method() {\n"
+			+ "    public void method() {\n"
 			+ "/* a\n"
 			+ "comment */\n"
 			+ "int local;\n"
@@ -303,7 +304,7 @@ public class CodeFormatterTest extends CoreTests {
 			+ "    /** \n"
 			+ "* javadoc\n" // javadoc is not formatted
 			+ "     */\n"
-			+ "    public method() {\n"
+			+ "    public void method() {\n"
 			+ "        /*\n" // comment is formatted
 			+ "         * a comment\n"
 			+ "         */\n"
