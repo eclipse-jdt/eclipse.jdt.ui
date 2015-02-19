@@ -248,7 +248,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 
 		IJavaProject javaProject= null;
 		if (element != null) {
-			IProject project= (IProject)element.getAdapter(IProject.class);
+			IProject project= element.getAdapter(IProject.class);
 			if (project != null) {
 				IJavaProject jProject= JavaCore.create(project);
 				if (jProject != null && jProject.exists()) {

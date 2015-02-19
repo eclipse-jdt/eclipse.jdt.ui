@@ -319,7 +319,7 @@ public class JavaSearchScopeFactory {
 				IWorkingSet ws= (IWorkingSet)selectedElement;
 				addJavaElements(result, ws);
 			} else if (selectedElement instanceof IAdaptable) {
-				IResource resource= (IResource) ((IAdaptable) selectedElement).getAdapter(IResource.class);
+				IResource resource= ((IAdaptable) selectedElement).getAdapter(IResource.class);
 				if (resource != null)
 					addJavaElements(result, resource);
 			}
@@ -355,7 +355,7 @@ public class JavaSearchScopeFactory {
 	}
 
 	private void addJavaElements(Set<IJavaElement> javaElements, IResource resource) {
-		IJavaElement javaElement= (IJavaElement)resource.getAdapter(IJavaElement.class);
+		IJavaElement javaElement= resource.getAdapter(IJavaElement.class);
 		if (javaElement == null)
 			// not a Java resource
 			return;
@@ -392,12 +392,12 @@ public class JavaSearchScopeFactory {
 
 		IAdaptable[] elements= workingSet.getElements();
 		for (int i= 0; i < elements.length; i++) {
-			IJavaElement javaElement=(IJavaElement) elements[i].getAdapter(IJavaElement.class);
+			IJavaElement javaElement=elements[i].getAdapter(IJavaElement.class);
 			if (javaElement != null) {
 				addJavaElements(javaElements, javaElement);
 				continue;
 			}
-			IResource resource= (IResource)elements[i].getAdapter(IResource.class);
+			IResource resource= elements[i].getAdapter(IResource.class);
 			if (resource != null) {
 				addJavaElements(javaElements, resource);
 			}

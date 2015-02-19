@@ -282,7 +282,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	private String getShowInMenuLabel() {
 		String keyBinding= null;
 
-		IBindingService bindingService= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+		IBindingService bindingService= PlatformUI.getWorkbench().getAdapter(IBindingService.class);
 		if (bindingService != null)
 			keyBinding= bindingService.getBestActiveBindingFormattedFor(IWorkbenchCommandConstants.NAVIGATE_SHOW_IN_QUICK_MENU);
 

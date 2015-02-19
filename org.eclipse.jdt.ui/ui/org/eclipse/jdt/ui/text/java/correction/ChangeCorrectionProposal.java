@@ -140,7 +140,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 					LinkedModeModel.closeAllModels(document);
 				}
 				if (activeEditor != null) {
-					rewriteTarget= (IRewriteTarget) activeEditor.getAdapter(IRewriteTarget.class);
+					rewriteTarget= activeEditor.getAdapter(IRewriteTarget.class);
 					if (rewriteTarget != null) {
 						rewriteTarget.beginCompoundChange();
 					}
@@ -199,7 +199,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 				disabledStyledText.setEditable(true);
 				disabledStyledText.removeTraverseListener(traverseBlocker);
 				// Workaround to fix bug 434791 during 4.4 RC2. Will be replaced by official API during 4.5.
-				ITextOperationTarget textOperationTarget= (ITextOperationTarget) activeEditor.getAdapter(ITextOperationTarget.class);
+				ITextOperationTarget textOperationTarget= activeEditor.getAdapter(ITextOperationTarget.class);
 				if (textOperationTarget != null && textOperationTarget.canDoOperation(-100))
 					textOperationTarget.doOperation(-100);
 			}

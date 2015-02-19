@@ -756,7 +756,7 @@ public final class JavaUI {
 		if (je != null)
 			return je;
 
-		return (IJavaElement)editorInput.getAdapter(IJavaElement.class);
+		return editorInput.getAdapter(IJavaElement.class);
 	}
 
 	/**
@@ -774,7 +774,7 @@ public final class JavaUI {
 		if (cu != null)
 			return cu;
 
-		IJavaElement je= (IJavaElement) editorInput.getAdapter(IJavaElement.class);
+		IJavaElement je= editorInput.getAdapter(IJavaElement.class);
 		if (je instanceof ITypeRoot)
 			return (ITypeRoot) je;
 

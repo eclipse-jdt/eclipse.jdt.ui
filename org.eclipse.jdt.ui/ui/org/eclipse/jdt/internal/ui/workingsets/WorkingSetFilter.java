@@ -61,11 +61,11 @@ public class WorkingSetFilter extends JavaViewerFilter {
 			} else if (a instanceof IJarEntryResource) {
 				init((IJarEntryResource)a);
 			} else {
-				IJavaElement je= (IJavaElement) a.getAdapter(IJavaElement.class);
+				IJavaElement je= a.getAdapter(IJavaElement.class);
 				if (je != null) {
 					init(je);
 				} else {
-					IResource resource= (IResource) a.getAdapter(IResource.class);
+					IResource resource= a.getAdapter(IResource.class);
 					if (resource != null) {
 						init(resource);
 					} else {

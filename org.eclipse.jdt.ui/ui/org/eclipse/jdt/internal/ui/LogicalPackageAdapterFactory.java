@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,20 +34,21 @@ public class LogicalPackageAdapterFactory implements IAdapterFactory {
 	// Must be Object to allow lazy loading
 	private Object fSearchPageScoreComputer;
 
-	public Class[] getAdapterList() {
+	public Class<?>[] getAdapterList() {
 		updateLazyLoadedAdapters();
 		return PROPERTIES;
 	}
 
-	public Object getAdapter(Object element, Class key) {
+	@SuppressWarnings("unchecked")
+	public <T> T getAdapter(Object element, Class<T> key) {
 		updateLazyLoadedAdapters();
 
 		if (fSearchPageScoreComputer != null && ISearchPageScoreComputer.class.equals(key)) {
-			return fSearchPageScoreComputer;
+			return (T) fSearchPageScoreComputer;
 		} else if (ResourceMapping.class.equals(key)) {
 			if (!(element instanceof LogicalPackage))
 				return null;
-			return JavaElementResourceMapping.create((LogicalPackage)element);
+			return (T) JavaElementResourceMapping.create((LogicalPackage) element);
 		}
 		return null;
 	}

@@ -321,7 +321,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 * @param editor the editor for which to open the quick hierarchy
 	 */
 	private static void openQuickHierarchy(IEditorPart editor) {
-		ITextOperationTarget textOperationTarget= (ITextOperationTarget)editor.getAdapter(ITextOperationTarget.class);
+		ITextOperationTarget textOperationTarget= editor.getAdapter(ITextOperationTarget.class);
 		textOperationTarget.doOperation(JavaSourceViewer.SHOW_HIERARCHY);
 	}
 }

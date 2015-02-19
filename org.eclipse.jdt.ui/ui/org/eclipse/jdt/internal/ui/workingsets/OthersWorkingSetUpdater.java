@@ -184,7 +184,7 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 			IAdaptable[] elements= activeWorkingSets[i].getElements();
 			for (int j= 0; j < elements.length; j++) {
 				IAdaptable element= elements[j];
-				IResource resource= (IResource)element.getAdapter(IResource.class);
+				IResource resource= element.getAdapter(IResource.class);
 				if (resource != null && resource.getType() == IResource.PROJECT) {
 					projects.add(resource);
 				}

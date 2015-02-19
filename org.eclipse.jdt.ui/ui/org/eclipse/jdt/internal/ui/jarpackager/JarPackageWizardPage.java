@@ -479,7 +479,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			for (int index= 0; index < elements.length; index++) {
 				if (elements[index] instanceof IAdaptable) {
 					final IAdaptable adaptable= (IAdaptable) elements[index];
-					final IResource resource= (IResource) adaptable.getAdapter(IResource.class);
+					final IResource resource= adaptable.getAdapter(IResource.class);
 					if (resource != null)
 						set.add(resource.getProject());
 				}

@@ -1055,7 +1055,7 @@ public class JavadocOptionsManager {
 	private IJavaElement getSelectableJavaElement(Object obj) throws JavaModelException {
 		IJavaElement je= null;
 		if (obj instanceof IAdaptable) {
-			je= (IJavaElement) ((IAdaptable) obj).getAdapter(IJavaElement.class);
+			je= ((IAdaptable) obj).getAdapter(IJavaElement.class);
 		}
 
 		if (je != null) {

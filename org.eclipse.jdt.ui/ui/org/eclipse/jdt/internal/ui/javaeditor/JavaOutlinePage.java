@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -241,12 +241,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					return JavaEditorMessages.JavaOutlinePage_error_NoTopLevelType;
 				}
 
-				/*
-				 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(Class)
-				 */
-				public Object getAdapter(Class clas) {
+				@SuppressWarnings("unchecked")
+				public <T> T getAdapter(Class<T> clas) {
 					if (clas == IWorkbenchAdapter.class)
-						return this;
+						return (T) this;
 					return null;
 				}
 			}
@@ -1148,15 +1146,13 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		return fActions.get(actionID);
 	}
 
-	/*
-	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
-	 */
-	public Object getAdapter(Class key) {
+	@SuppressWarnings("unchecked")
+	public <T> T getAdapter(Class<T> key) {
 		if (key == IShowInSource.class) {
-			return getShowInSource();
+			return (T) getShowInSource();
 		}
 		if (key == IShowInTargetList.class) {
-			return new IShowInTargetList() {
+			return (T) new IShowInTargetList() {
 				public String[] getShowInTargetIds() {
 					return new String[] { JavaUI.ID_PACKAGES };
 				}
@@ -1164,7 +1160,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			};
 		}
 		if (key == IShowInTarget.class) {
-			return getShowInTarget();
+			return (T) getShowInTarget();
 		}
 
 		return null;

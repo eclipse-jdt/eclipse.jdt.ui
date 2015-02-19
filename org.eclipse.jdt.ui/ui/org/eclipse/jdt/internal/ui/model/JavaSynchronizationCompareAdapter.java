@@ -158,7 +158,7 @@ public final class JavaSynchronizationCompareAdapter extends AbstractSynchroniza
 			final Object object= mappings[index].getModelObject();
 			if (object instanceof IJavaElement) {
 				final IJavaElement element= (IJavaElement) object;
-				final IResource resource= (IResource) element.getAdapter(IResource.class);
+				final IResource resource= element.getAdapter(IResource.class);
 				if (resource != null) {
 					final IMemento child= memento.createChild(RESOURCES);
 					child.putInteger(RESOURCE_TYPE, resource.getType());

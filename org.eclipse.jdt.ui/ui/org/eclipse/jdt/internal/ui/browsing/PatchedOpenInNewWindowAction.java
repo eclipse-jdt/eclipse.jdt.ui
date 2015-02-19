@@ -56,7 +56,7 @@ public class PatchedOpenInNewWindowAction extends OpenInNewWindowAction {
 				if (selectedElement instanceof IJavaElement)
 					return (IJavaElement)selectedElement;
 				if (!(selectedElement instanceof IJavaElement) && selectedElement instanceof IAdaptable)
-					return (IJavaElement)((IAdaptable)selectedElement).getAdapter(IJavaElement.class);
+					return ((IAdaptable)selectedElement).getAdapter(IJavaElement.class);
 				else if (selectedElement instanceof IWorkspace)
 						return JavaCore.create(((IWorkspace)selectedElement).getRoot());
 			}

@@ -130,7 +130,7 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 	}
 
 	private ResourceMapping[] getResourceMappings(IJavaProject project) {
-		ResourceMapping mapping = (ResourceMapping)project.getResource().getAdapter(ResourceMapping.class);
+		ResourceMapping mapping = project.getResource().getAdapter(ResourceMapping.class);
 		return new ResourceMapping[] { mapping };
 	}
 

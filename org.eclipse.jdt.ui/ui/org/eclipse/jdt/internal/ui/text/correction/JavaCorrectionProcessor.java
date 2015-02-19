@@ -208,7 +208,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 			}
 
 			private String getQuickAssistBinding() {
-				final IBindingService bindingSvc= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+				final IBindingService bindingSvc= PlatformUI.getWorkbench().getAdapter(IBindingService.class);
 				return bindingSvc.getBestActiveBindingFormattedFor(ITextEditorActionDefinitionIds.QUICK_ASSIST);
 			}
 		});

@@ -139,7 +139,7 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 
 	private PropertiesAssistContext createAssistContext(IQuickAssistInvocationContext invocationContext) {
 		IEditorPart editorPart= fAssistant.getEditor();
-		IFile file= (IFile) editorPart.getEditorInput().getAdapter(IFile.class);
+		IFile file= editorPart.getEditorInput().getAdapter(IFile.class);
 		ISourceViewer sourceViewer= invocationContext.getSourceViewer();
 		IType accessorType= ((PropertiesFileEditor) editorPart).getAccessorType();
 		return new PropertiesAssistContext(sourceViewer, invocationContext.getOffset(), invocationContext.getLength(), file, sourceViewer.getDocument(), accessorType);

@@ -614,8 +614,8 @@ public class RenamePackageTests extends RefactoringTest {
 			assertTrue(status.toString(), status.isOK());
 
 		RefactoringProcessor processor= ((RenameRefactoring) refactoring).getProcessor();
-		IResourceMapper rm= (IResourceMapper) processor.getAdapter(IResourceMapper.class);
-		IJavaElementMapper jm= (IJavaElementMapper) processor.getAdapter(IJavaElementMapper.class);
+		IResourceMapper rm= processor.getAdapter(IResourceMapper.class);
+		IJavaElementMapper jm= processor.getAdapter(IJavaElementMapper.class);
 		checkMappingUnchanged(jm, rm, new Object[] { getRoot().getJavaProject(), getRoot(), file });
 		IFile newFile= ((IContainer) getRoot().getResource()).getFile(new Path("x.properties"));
 		assertEquals("This is about 'org.test2' and more", getContents(newFile));
@@ -650,8 +650,8 @@ public class RenamePackageTests extends RefactoringTest {
 			assertTrue(status.toString(), status.isOK());
 
 		RefactoringProcessor processor= ((RenameRefactoring) refactoring).getProcessor();
-		IResourceMapper rm= (IResourceMapper) processor.getAdapter(IResourceMapper.class);
-		IJavaElementMapper jm= (IJavaElementMapper) processor.getAdapter(IJavaElementMapper.class);
+		IResourceMapper rm= processor.getAdapter(IResourceMapper.class);
+		IJavaElementMapper jm= processor.getAdapter(IJavaElementMapper.class);
 		checkMappingUnchanged(jm, rm, new Object[] { getRoot().getJavaProject(), getRoot() });
 		IPackageFragment newFragment= getRoot().getPackageFragment("org.test2");
 		IFile newFile= ((IContainer) newFragment.getResource()).getFile(new Path("x.properties"));
@@ -1077,8 +1077,8 @@ public class RenamePackageTests extends RefactoringTest {
 	public void test1() throws Exception{
 		fIsPreDeltaTest= true;
 		RenamePackageProcessor proc= helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1");
-		IJavaElementMapper jm= (IJavaElementMapper) proc.getAdapter(IJavaElementMapper.class);
-		IResourceMapper rm= (IResourceMapper) proc.getAdapter(IResourceMapper.class);
+		IJavaElementMapper jm= proc.getAdapter(IJavaElementMapper.class);
+		IResourceMapper rm= proc.getAdapter(IResourceMapper.class);
 
 		IJavaModel javaModel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 		IJavaProject project= getRoot().getJavaProject();

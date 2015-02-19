@@ -201,7 +201,7 @@ public class ElementValidator {
 				}
 				resource= je.getResource();
 			} else {
-				resource= (IResource)element.getAdapter(IResource.class);
+				resource= element.getAdapter(IResource.class);
 			}
 			if (resource != null)
 				result.add(resource);

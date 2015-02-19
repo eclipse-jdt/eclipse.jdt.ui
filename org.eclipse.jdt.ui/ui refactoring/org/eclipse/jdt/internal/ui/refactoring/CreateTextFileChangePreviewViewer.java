@@ -134,7 +134,7 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 			Object element= change.getModifiedElement();
 			if (element instanceof IAdaptable) {
 				IAdaptable adaptable= (IAdaptable) element;
-				IWorkbenchAdapter workbenchAdapter= (IWorkbenchAdapter) adaptable.getAdapter(IWorkbenchAdapter.class);
+				IWorkbenchAdapter workbenchAdapter= adaptable.getAdapter(IWorkbenchAdapter.class);
 				if (workbenchAdapter != null) {
 					fPane.setImageDescriptor(workbenchAdapter.getImageDescriptor(element));
 				} else {

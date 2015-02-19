@@ -98,7 +98,7 @@ public class RefreshAction extends SelectionDispatchAction {
 				if (curr instanceof IWorkingSet) {
 					IAdaptable[] members= ((IWorkingSet) curr).getElements();
 					for (int k= 0; k < members.length; k++) {
-						IResource adapted= (IResource) members[k].getAdapter(IResource.class);
+						IResource adapted= members[k].getAdapter(IResource.class);
 						if (adapted != null) {
 							selectedResources.add(adapted);
 						}
@@ -165,7 +165,7 @@ public class RefreshAction extends SelectionDispatchAction {
 				// too expensive to look at children. assume we can refresh
 				okToRefresh= true;
 			} else if (element instanceof IAdaptable) { // test for IAdaptable last (types before are IAdaptable as well)
-				IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
+				IResource resource= ((IAdaptable)element).getAdapter(IResource.class);
 				okToRefresh|= resource != null && (resource.getType() != IResource.PROJECT || ((IProject) resource).isOpen());
 			} else {
 				// nothing to say;
@@ -208,7 +208,7 @@ public class RefreshAction extends SelectionDispatchAction {
 			} else if (curr instanceof IWorkingSet) {
 				IAdaptable[] members= ((IWorkingSet) curr).getElements();
 				for (int k= 0; k < members.length; k++) {
-					IJavaElement adapted= (IJavaElement)members[k].getAdapter(IJavaElement.class);
+					IJavaElement adapted= members[k].getAdapter(IJavaElement.class);
 					if (adapted instanceof IPackageFragmentRoot) {
 						javaElements.add(adapted);
 					}

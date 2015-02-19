@@ -225,7 +225,7 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 				Object[] elements= selection.toArray();
 				for (int i= 0; i < elements.length; i++) {
 					if (elements[i] instanceof IResource) {
-						IJavaElement je= (IJavaElement)((IResource)elements[i]).getAdapter(IJavaElement.class);
+						IJavaElement je= ((IResource)elements[i]).getAdapter(IJavaElement.class);
 						if (je != null && je.exists() &&  je.getJavaProject().isOnClasspath((IResource)elements[i]))
 							elements[i]= je;
 					}

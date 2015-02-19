@@ -215,12 +215,12 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	private IPackageFragmentRoot getJARPackageFragmentRoot() throws CoreException {
 		// try to find it as Java element (needed for external jars)
 		IAdaptable adaptable= getElement();
-		IJavaElement elem= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
+		IJavaElement elem= adaptable.getAdapter(IJavaElement.class);
 		if (elem instanceof IPackageFragmentRoot) {
 			return (IPackageFragmentRoot) elem;
 		}
 		// not on classpath or not in a java project
-		IResource resource= (IResource) adaptable.getAdapter(IResource.class);
+		IResource resource= adaptable.getAdapter(IResource.class);
 		if (resource instanceof IFile) {
 			IProject proj= resource.getProject();
 			if (proj.hasNature(JavaCore.NATURE_ID)) {

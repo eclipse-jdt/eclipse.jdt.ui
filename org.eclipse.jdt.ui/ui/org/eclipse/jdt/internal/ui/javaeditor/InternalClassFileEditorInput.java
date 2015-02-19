@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -116,14 +116,12 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 		return fClassFile.exists();
 	}
 
-	/*
-	 * @see IAdaptable#getAdapter(Class)
-	 */
-	public Object getAdapter(Class adapter) {
+	@SuppressWarnings("unchecked")
+	public <T> T getAdapter(Class<T> adapter) {
 		if (adapter == IClassFile.class)
-			return fClassFile;
+			return (T) fClassFile;
 		else if (adapter == IJavaElement.class)
-			return fClassFile;
+			return (T) fClassFile;
 		return null;
 	}
 

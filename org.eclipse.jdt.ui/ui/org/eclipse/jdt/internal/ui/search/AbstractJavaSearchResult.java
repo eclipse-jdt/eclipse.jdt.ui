@@ -52,12 +52,12 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult 
 	}
 
 	private Match[] computeContainedMatches(IAdaptable adaptable) {
-		IJavaElement javaElement= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
+		IJavaElement javaElement= adaptable.getAdapter(IJavaElement.class);
 		Set<Match> matches= new HashSet<Match>();
 		if (javaElement != null) {
 			collectMatches(matches, javaElement);
 		}
-		IFile file= (IFile) adaptable.getAdapter(IFile.class);
+		IFile file= adaptable.getAdapter(IFile.class);
 		if (file != null) {
 			collectMatches(matches, file);
 		}

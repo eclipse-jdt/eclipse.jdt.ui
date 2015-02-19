@@ -37,7 +37,7 @@ public class JavaElementContainmentAdapter implements IContainmentAdapter {
 			resource= jElement.getResource();
 		} else {
 			if (element instanceof IAdaptable) {
-				resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
+				resource= ((IAdaptable)element).getAdapter(IResource.class);
 				if (resource != null) {
 					if (fJavaModel.contains(resource)) {
 						jElement= JavaCore.create(resource);

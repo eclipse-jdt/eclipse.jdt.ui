@@ -599,7 +599,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	// ---- Helpers -------------------------------------------------------------------
 
 	private void run(ICompilationUnit cu, IType type, IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IEditorPart editor, CompilationUnit unit, IJavaElement elementPosition) {
-		IRewriteTarget target= (IRewriteTarget) editor.getAdapter(IRewriteTarget.class);
+		IRewriteTarget target= editor.getAdapter(IRewriteTarget.class);
 		if (target != null) {
 			target.beginCompoundChange();
 		}

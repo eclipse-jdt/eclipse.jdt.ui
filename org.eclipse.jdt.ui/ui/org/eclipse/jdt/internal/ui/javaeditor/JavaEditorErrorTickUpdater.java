@@ -56,7 +56,7 @@ public class JavaEditorErrorTickUpdater implements IProblemChangedListener {
 
 		IEditorInput input= fJavaEditor.getEditorInput();
 		if (input != null) { // might run async, tests needed
-			IJavaElement jelement= (IJavaElement) input.getAdapter(IJavaElement.class);
+			IJavaElement jelement= input.getAdapter(IJavaElement.class);
 			if (jelement != null) {
 				IResource resource= jelement.getResource();
 				for (int i = 0; i < changedResources.length; i++) {

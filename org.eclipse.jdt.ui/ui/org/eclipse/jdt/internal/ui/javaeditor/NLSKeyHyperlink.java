@@ -137,7 +137,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 		if (editor instanceof ITextEditor)
 			document= ((ITextEditor)editor).getDocumentProvider().getDocument(editorInput);
 		else {
-			IFile file= (IFile)editorInput.getAdapter(IFile.class);
+			IFile file= editorInput.getAdapter(IFile.class);
 			if (file != null) {
 				IPath path= file.getFullPath();
 				ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
@@ -215,7 +215,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 	private static void showErrorInStatusLine(IEditorPart editor, final String message) {
 		final Display display= editor.getSite().getShell().getDisplay();
 		display.beep();
-		final IEditorStatusLine statusLine= (IEditorStatusLine)editor.getAdapter(IEditorStatusLine.class);
+		final IEditorStatusLine statusLine= editor.getAdapter(IEditorStatusLine.class);
 		if (statusLine != null) {
 			display.asyncExec(new Runnable() {
 				/*

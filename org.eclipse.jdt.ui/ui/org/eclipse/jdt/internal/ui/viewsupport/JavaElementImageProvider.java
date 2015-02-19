@@ -176,7 +176,7 @@ public class JavaElementImageProvider {
 	 * @return returns the image descriptor
 	 */
 	public ImageDescriptor getWorkbenchImageDescriptor(IAdaptable adaptable, int flags) {
-		IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter) adaptable.getAdapter(IWorkbenchAdapter.class);
+		IWorkbenchAdapter wbAdapter= adaptable.getAdapter(IWorkbenchAdapter.class);
 		if (wbAdapter == null) {
 			return null;
 		}
@@ -290,7 +290,7 @@ public class JavaElementImageProvider {
 					IJavaProject jp= (IJavaProject)element;
 					if (jp.getProject().isOpen()) {
 						IProject project= jp.getProject();
-						IWorkbenchAdapter adapter= (IWorkbenchAdapter)project.getAdapter(IWorkbenchAdapter.class);
+						IWorkbenchAdapter adapter= project.getAdapter(IWorkbenchAdapter.class);
 						if (adapter != null) {
 							ImageDescriptor result= adapter.getImageDescriptor(project);
 							if (result != null)
@@ -312,7 +312,7 @@ public class JavaElementImageProvider {
 				default:
 					// ignore. Must be a new, yet unknown Java element
 					// give an advanced IWorkbenchAdapter the chance
-					IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter) element.getAdapter(IWorkbenchAdapter.class);
+					IWorkbenchAdapter wbAdapter= element.getAdapter(IWorkbenchAdapter.class);
 					if (wbAdapter != null && !(wbAdapter instanceof JavaWorkbenchAdapter)) { // avoid recursion
 						ImageDescriptor imageDescriptor= wbAdapter.getImageDescriptor(element);
 						if (imageDescriptor != null) {

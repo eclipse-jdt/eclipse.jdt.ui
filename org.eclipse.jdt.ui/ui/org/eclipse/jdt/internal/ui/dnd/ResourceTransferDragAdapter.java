@@ -106,7 +106,7 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 				// don't use IAdaptable as for members only the top level type adapts
 				resource= ((IJavaElement) element).getResource();
 			} else if (element instanceof IAdaptable) {
-				resource= (IResource) ((IAdaptable) element).getAdapter(IResource.class);
+				resource= ((IAdaptable) element).getAdapter(IResource.class);
 			}
 			if (resource != null)
 				result.add(resource);

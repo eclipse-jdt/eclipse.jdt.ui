@@ -272,7 +272,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 
 		ModelElement(CompletionProposalCategory category, PreferenceModel model) {
 			fCategory= category;
-			ICommandService commandSvc= (ICommandService) PlatformUI.getWorkbench().getAdapter(ICommandService.class);
+			ICommandService commandSvc= PlatformUI.getWorkbench().getAdapter(ICommandService.class);
 			fCommand= commandSvc.getCommand("org.eclipse.jdt.ui.specific_content_assist.command"); //$NON-NLS-1$
 			IParameter type;
 			try {
@@ -397,7 +397,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 	}
 
 	private void createDefaultLabel(Composite composite, int h_span) {
-	    final ICommandService commandSvc= (ICommandService) PlatformUI.getWorkbench().getAdapter(ICommandService.class);
+	    final ICommandService commandSvc= PlatformUI.getWorkbench().getAdapter(ICommandService.class);
 		final Command command= commandSvc.getCommand(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
 		ParameterizedCommand pCmd= new ParameterizedCommand(command, null);
 		String key= getKeyboardShortcut(pCmd);
@@ -753,7 +753,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 	}
 
 	private static String getKeyboardShortcut(ParameterizedCommand command) {
-		IBindingService bindingService= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+		IBindingService bindingService= PlatformUI.getWorkbench().getAdapter(IBindingService.class);
 		fgLocalBindingManager.setBindings(bindingService.getBindings());
 		try {
 			Scheme activeScheme= bindingService.getActiveScheme();

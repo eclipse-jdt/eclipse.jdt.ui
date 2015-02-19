@@ -67,7 +67,7 @@ public class RenameSelectionState {
 			return;
 		ISetSelectionTarget target= null;
 		if (!(part instanceof ISetSelectionTarget)) {
-			target= (ISetSelectionTarget)part.getAdapter(ISetSelectionTarget.class);
+			target= part.getAdapter(ISetSelectionTarget.class);
 			if (target == null)
 				return;
 		} else {

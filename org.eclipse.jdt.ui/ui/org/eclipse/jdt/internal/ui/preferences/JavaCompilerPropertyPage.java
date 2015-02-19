@@ -54,7 +54,7 @@ public class JavaCompilerPropertyPage extends PropertyPage {
 	@Override
 	public void createControl(Composite parent) {
 		IAdaptable adaptable= getElement();
-		IJavaElement elem= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
+		IJavaElement elem= adaptable.getAdapter(IJavaElement.class);
 		try {
 			if (elem instanceof IPackageFragmentRoot) {
 				fProject= elem.getJavaProject();

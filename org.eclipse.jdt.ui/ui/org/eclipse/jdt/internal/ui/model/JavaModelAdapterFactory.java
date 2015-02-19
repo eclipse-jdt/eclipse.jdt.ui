@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,20 +32,21 @@ public final class JavaModelAdapterFactory implements IAdapterFactory {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object getAdapter(final Object adaptable, final Class adapter) {
+	@SuppressWarnings("unchecked")
+	public <T> T getAdapter(Object adaptable, Class<T> adapter) {
 		if (adaptable instanceof JavaModelProvider) {
 			if (adapter == IResourceMappingMerger.class)
-				return new JavaModelMerger((ModelProvider) adaptable);
+				return (T) new JavaModelMerger((ModelProvider) adaptable);
 			else if (adapter == ISynchronizationCompareAdapter.class)
-				return new JavaSynchronizationCompareAdapter();
+				return (T) new JavaSynchronizationCompareAdapter();
 		} else if (adaptable instanceof RefactoringHistory) {
 			if (adapter == ResourceMapping.class)
-				return new JavaRefactoringHistoryResourceMapping((RefactoringHistory) adaptable);
+				return (T) new JavaRefactoringHistoryResourceMapping((RefactoringHistory) adaptable);
 			else if (adapter == IResource.class)
-				return new JavaRefactoringHistoryResourceMapping((RefactoringHistory) adaptable).getResource();
+				return (T) new JavaRefactoringHistoryResourceMapping((RefactoringHistory) adaptable).getResource();
 		} else if (adaptable instanceof RefactoringDescriptorProxy) {
 			if (adapter == ResourceMapping.class)
-				return new JavaRefactoringDescriptorResourceMapping((RefactoringDescriptorProxy) adaptable);
+				return (T) new JavaRefactoringDescriptorResourceMapping((RefactoringDescriptorProxy) adaptable);
 		}
 		return null;
 	}
@@ -53,7 +54,7 @@ public final class JavaModelAdapterFactory implements IAdapterFactory {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Class[] getAdapterList() {
+	public Class<?>[] getAdapterList() {
 		return new Class[] { ResourceMapping.class, ISynchronizationCompareAdapter.class, IResource.class};
 	}
 }

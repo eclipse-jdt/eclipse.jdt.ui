@@ -61,7 +61,7 @@ public class ClasspathContainerPreferencePage extends WizardPropertyPage {
 		if (element instanceof ClassPathContainer) {
 			container= (ClassPathContainer) element;
 		} else {
-			container= (ClassPathContainer) element.getAdapter(ClassPathContainer.class);
+			container= element.getAdapter(ClassPathContainer.class);
 		}
 		fJavaProject= container.getJavaProject();
 		fEntry= container.getClasspathEntry();

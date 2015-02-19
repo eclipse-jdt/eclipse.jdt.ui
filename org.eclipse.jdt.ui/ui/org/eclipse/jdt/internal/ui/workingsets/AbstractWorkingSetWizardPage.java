@@ -463,7 +463,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 				if (oldItems[i] instanceof IResource) {
 					oldResource= (IResource) oldItems[i];
 				} else {
-					oldResource= (IResource) oldItems[i].getAdapter(IResource.class);
+					oldResource= oldItems[i].getAdapter(IResource.class);
 				}
 				if (oldResource != null && oldResource.isAccessible() == false) {
 					IProject project= oldResource.getProject();

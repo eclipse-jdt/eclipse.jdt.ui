@@ -225,7 +225,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 			if (o instanceof IResource) {
 				r= (IResource)o;
 			} else if (o instanceof IAdaptable) {
-				r= (IResource)((IAdaptable)o).getAdapter(IResource.class);
+				r= ((IAdaptable)o).getAdapter(IResource.class);
 			}
 			// Only add resource for which we have a location
 			// in the local file system.

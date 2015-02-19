@@ -146,7 +146,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 			if (firstElement instanceof IJavaElement)
 				elem= (IJavaElement) firstElement;
 			else if (firstElement instanceof IAdaptable)
-				elem= (IJavaElement) ((IAdaptable) firstElement).getAdapter(IJavaElement.class);
+				elem= ((IAdaptable) firstElement).getAdapter(IJavaElement.class);
 			if (elem != null) {
 				return getTypeIfPossible(elem, silent);
 			}

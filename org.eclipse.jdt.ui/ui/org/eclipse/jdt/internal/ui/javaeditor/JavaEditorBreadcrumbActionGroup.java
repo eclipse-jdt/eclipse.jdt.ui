@@ -126,7 +126,7 @@ final class JavaEditorBreadcrumbActionGroup extends CompositeActionGroup	 {
 	public JavaEditorBreadcrumbActionGroup(JavaEditor javaEditor, ISelectionProvider selectionProvider) {
 		super(new ActionGroup[] {
 				new BreadcrumbActionGroup(javaEditor),
-				new UndoRedoActionGroup(javaEditor.getEditorSite(), (IUndoContext) ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class), true),
+				new UndoRedoActionGroup(javaEditor.getEditorSite(), ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class), true),
 				new NewWizardsActionGroup(javaEditor.getEditorSite()),
 				new JavaSearchActionGroup(javaEditor.getEditorSite(), selectionProvider),
 				new NavigateActionGroup(javaEditor.getEditorSite(), selectionProvider),

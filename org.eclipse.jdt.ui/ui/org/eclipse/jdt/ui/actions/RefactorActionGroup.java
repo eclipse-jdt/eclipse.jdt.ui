@@ -204,7 +204,7 @@ public class RefactorActionGroup extends ActionGroup {
 	public RefactorActionGroup(IViewPart part) {
 		this(part.getSite(), null);
 
-		IUndoContext workspaceContext= (IUndoContext)ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class);
+		IUndoContext workspaceContext= ResourcesPlugin.getWorkspace().getAdapter(IUndoContext.class);
 		fUndoRedoActionGroup= new UndoRedoActionGroup(part.getViewSite(), workspaceContext, true);
 
 		installQuickAccessAction();

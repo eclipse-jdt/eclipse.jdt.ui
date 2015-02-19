@@ -1303,7 +1303,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				ITextEditorExtension3 extension= (ITextEditorExtension3) part;
 				return extension.getInsertMode() == ITextEditorExtension3.SMART_INSERT;
 			} else if (part != null && EditorUtility.isCompareEditorInput(part.getEditorInput())) {
-				ITextEditorExtension3 extension = (ITextEditorExtension3)part.getAdapter(ITextEditorExtension3.class);
+				ITextEditorExtension3 extension = part.getAdapter(ITextEditorExtension3.class);
 				if (extension != null)
 					return extension.getInsertMode() == ITextEditorExtension3.SMART_INSERT;
 			}

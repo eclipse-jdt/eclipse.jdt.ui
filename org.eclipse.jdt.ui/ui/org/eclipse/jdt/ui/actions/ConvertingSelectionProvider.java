@@ -105,11 +105,11 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 				result.add(element);
 			} else if (element instanceof IAdaptable) {
 				IAdaptable adaptable= (IAdaptable)element;
-				IJavaElement jElement= (IJavaElement)adaptable.getAdapter(IJavaElement.class);
+				IJavaElement jElement= adaptable.getAdapter(IJavaElement.class);
 				if (jElement != null) {
 					result.add(jElement);
 				} else {
-					IResource resource= (IResource)adaptable.getAdapter(IResource.class);
+					IResource resource= adaptable.getAdapter(IResource.class);
 					if (resource != null) {
 						result.add(resource);
 					} else {

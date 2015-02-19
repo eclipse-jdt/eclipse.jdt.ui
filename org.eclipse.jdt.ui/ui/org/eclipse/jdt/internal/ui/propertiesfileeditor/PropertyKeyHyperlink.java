@@ -117,13 +117,11 @@ public class PropertyKeyHyperlink implements IHyperlink {
 			this.showLineNumber= showLineNumber;
 		}
 
-		/*
-		 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
-		 */
+		@SuppressWarnings("unchecked")
 		@Override
-		public Object getAdapter(Class adapter) {
+		public <T> T getAdapter(Class<T> adapter) {
 			if (adapter == IWorkbenchAdapter.class)
-				return this;
+				return (T) this;
 			else
 				return super.getAdapter(adapter);
 		}
@@ -137,7 +135,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getImageDescriptor(java.lang.Object)
 		 */
 		public ImageDescriptor getImageDescriptor(Object object) {
-			IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter) resource.getAdapter(IWorkbenchAdapter.class);
+			IWorkbenchAdapter wbAdapter= resource.getAdapter(IWorkbenchAdapter.class);
 			if (wbAdapter != null)
 				return wbAdapter.getImageDescriptor(resource);
 			return null;
@@ -368,7 +366,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 			String message= null;
 
-			IWorkbenchAdapter wbAdapter= (IWorkbenchAdapter)((IAdaptable)keyReference).getAdapter(IWorkbenchAdapter.class);
+			IWorkbenchAdapter wbAdapter= ((IAdaptable)keyReference).getAdapter(IWorkbenchAdapter.class);
 			if (wbAdapter != null)
 				message= Messages.format(PropertiesFileEditorMessages.OpenAction_error_messageArgs,
 						new String[] { wbAdapter.getLabel(keyReference), x.getLocalizedMessage() } );
@@ -392,7 +390,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 
 	private void showErrorInStatusLine(final String message) {
 		fShell.getDisplay().beep();
-		final IEditorStatusLine statusLine= (IEditorStatusLine)fEditor.getAdapter(IEditorStatusLine.class);
+		final IEditorStatusLine statusLine= fEditor.getAdapter(IEditorStatusLine.class);
 		if (statusLine != null) {
 			fShell.getDisplay().asyncExec(new Runnable() {
 				/*

@@ -75,7 +75,7 @@ public class NamePatternFilter extends ViewerFilter {
 		} else if (element instanceof IWorkingSet) {
 			matchName= ((IWorkingSet) element).getLabel();
 		} else if (element instanceof IAdaptable) {
-			IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)element).getAdapter(IWorkbenchAdapter.class);
+			IWorkbenchAdapter wbadapter= ((IAdaptable)element).getAdapter(IWorkbenchAdapter.class);
 			if (wbadapter != null) {
 				matchName= wbadapter.getLabel(element);
 			}

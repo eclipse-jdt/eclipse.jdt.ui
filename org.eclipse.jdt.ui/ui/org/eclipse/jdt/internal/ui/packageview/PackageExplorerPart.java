@@ -895,11 +895,11 @@ public class PackageExplorerPart extends ViewPart
 			}
 		} else if (original instanceof IAdaptable) {
 			IAdaptable adaptable= (IAdaptable)original;
-			IJavaElement je= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
+			IJavaElement je= adaptable.getAdapter(IJavaElement.class);
 			if (je != null && je.exists())
 				return je;
 
-			IResource r= (IResource) adaptable.getAdapter(IResource.class);
+			IResource r= adaptable.getAdapter(IResource.class);
 			if (r != null) {
 				je= JavaCore.create(r);
 				if (je != null && je.exists())

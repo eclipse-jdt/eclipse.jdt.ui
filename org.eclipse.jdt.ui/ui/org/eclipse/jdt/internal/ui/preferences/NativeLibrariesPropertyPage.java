@@ -255,10 +255,10 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 
 	private IJavaElement getJavaElement() {
 		IAdaptable adaptable= getElement();
-		IJavaElement elem= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
+		IJavaElement elem= adaptable.getAdapter(IJavaElement.class);
 		if (elem == null) {
 
-			IResource resource= (IResource) adaptable.getAdapter(IResource.class);
+			IResource resource= adaptable.getAdapter(IResource.class);
 			//special case when the .jar is a file
 			try {
 				if (resource instanceof IFile && ArchiveFileFilter.isArchivePath(resource.getFullPath(), false)) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1123,7 +1123,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			IEditorPart part = page.getActiveEditor();
 			if (part != null) {
 				IEditorInput input = part.getEditorInput();
-				return (IJavaElement) input.getAdapter(IJavaElement.class);
+				return input.getAdapter(IJavaElement.class);
 			}
 		}
 		return null;

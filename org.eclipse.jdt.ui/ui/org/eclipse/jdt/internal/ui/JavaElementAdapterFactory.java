@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,37 +76,38 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 	private static ITaskListResourceAdapter fgTaskListAdapter;
 	private static JavaElementContainmentAdapter fgJavaElementContainmentAdapter;
 
-	public Class[] getAdapterList() {
+	public Class<?>[] getAdapterList() {
 		updateLazyLoadedAdapters();
 		return ADAPTER_LIST;
 	}
 
-	public Object getAdapter(Object element, Class key) {
+	@SuppressWarnings("unchecked")
+	public <T> T getAdapter(Object element, Class<T> key) {
 		updateLazyLoadedAdapters();
 		IJavaElement java= getJavaElement(element);
 
 		if (IPropertySource.class.equals(key)) {
-			return getProperties(java);
+			return (T) getProperties(java);
 		} if (IResource.class.equals(key)) {
-			return getResource(java);
+			return (T) getResource(java);
 		} if (fSearchPageScoreComputer != null && ISearchPageScoreComputer.class.equals(key)) {
-			return fSearchPageScoreComputer;
+			return (T) fSearchPageScoreComputer;
 		} if (IWorkbenchAdapter.class.equals(key)) {
-			return getJavaWorkbenchAdapter();
+			return (T) getJavaWorkbenchAdapter();
 		} if (IResourceLocator.class.equals(key)) {
-			return getResourceLocator();
+			return (T) getResourceLocator();
 		} if (IPersistableElement.class.equals(key)) {
-			return new PersistableJavaElementFactory(java);
+			return (T) new PersistableJavaElementFactory(java);
 		} if (IContributorResourceAdapter.class.equals(key)) {
-			return this;
+			return (T) this;
 		} if (IContributorResourceAdapter2.class.equals(key)) {
-			return this;
+			return (T) this;
 		} if (ITaskListResourceAdapter.class.equals(key)) {
-			return getTaskListAdapter();
+			return (T) getTaskListAdapter();
 		} if (IContainmentAdapter.class.equals(key)) {
-			return getJavaElementContainmentAdapter();
+			return (T) getJavaElementContainmentAdapter();
 		} if (fIsTeamUILoaded && IHistoryPageSource.class.equals(key) && JavaElementHistoryPageSource.hasEdition(java)) {
-			return JavaElementHistoryPageSource.getInstance();
+			return (T) JavaElementHistoryPageSource.getInstance();
 		}
 		return null;
 	}

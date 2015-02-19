@@ -34,7 +34,7 @@ public class Changes {
 			Change change= changes[i];
 			Object modifiedElement= change.getModifiedElement();
 			if (modifiedElement instanceof IAdaptable) {
-				IFile file= (IFile)((IAdaptable)modifiedElement).getAdapter(IFile.class);
+				IFile file= ((IAdaptable)modifiedElement).getAdapter(IFile.class);
 				if (file != null)
 					result.add(file);
 			}

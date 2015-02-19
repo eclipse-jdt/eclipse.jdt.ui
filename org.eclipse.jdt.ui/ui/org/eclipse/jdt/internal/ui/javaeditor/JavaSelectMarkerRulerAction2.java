@@ -68,7 +68,7 @@ public class JavaSelectMarkerRulerAction2 extends SelectAnnotationRulerAction {
 			return;
 
 		if (isQuickFixTarget(annotation)) {
-			ITextOperationTarget operation= (ITextOperationTarget) getTextEditor().getAdapter(ITextOperationTarget.class);
+			ITextOperationTarget operation= getTextEditor().getAdapter(ITextOperationTarget.class);
 			final int opCode= ISourceViewer.QUICK_ASSIST;
 			if (operation != null && operation.canDoOperation(opCode)) {
 				getTextEditor().selectAndReveal(position.getOffset(), position.getLength());

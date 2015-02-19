@@ -120,7 +120,7 @@ public class PropertiesFileEditor extends TextEditor {
 		if (fJob != null)
 			fJob.cancel();
 
-		fFile= (IFile) getEditorInput().getAdapter(IFile.class);
+		fFile= getEditorInput().getAdapter(IFile.class);
 		if (fFile == null)
 			return;
 

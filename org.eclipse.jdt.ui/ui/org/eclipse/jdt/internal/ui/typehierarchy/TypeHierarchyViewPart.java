@@ -1820,7 +1820,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			return;
 		}
 
-		IJavaElement elem= (IJavaElement)editor.getEditorInput().getAdapter(IJavaElement.class);
+		IJavaElement elem= editor.getEditorInput().getAdapter(IJavaElement.class);
 		if (elem instanceof ITypeRoot) {
 			IType type= ((ITypeRoot) elem).findPrimaryType();
 			if (type != null) {

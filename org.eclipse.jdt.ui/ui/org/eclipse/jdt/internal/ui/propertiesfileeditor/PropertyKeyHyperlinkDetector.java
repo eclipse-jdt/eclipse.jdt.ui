@@ -170,7 +170,7 @@ public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 	private void showErrorInStatusLine(final String message, ITextEditor textEditor) {
 		Display display= textEditor.getEditorSite().getShell().getDisplay();
 		display.beep();
-		final IEditorStatusLine statusLine= (IEditorStatusLine)textEditor.getAdapter(IEditorStatusLine.class);
+		final IEditorStatusLine statusLine= textEditor.getAdapter(IEditorStatusLine.class);
 		if (statusLine != null) {
 			display.asyncExec(new Runnable() {
 				/*

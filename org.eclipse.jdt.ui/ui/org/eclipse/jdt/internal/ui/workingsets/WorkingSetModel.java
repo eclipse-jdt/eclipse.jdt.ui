@@ -180,14 +180,14 @@ public class WorkingSetModel {
 		}
 		private void addElement(IAdaptable element, IWorkingSet ws) {
 			addToMap(fElementToWorkingSet, element, ws);
-			IResource resource= (IResource)element.getAdapter(IResource.class);
+			IResource resource= element.getAdapter(IResource.class);
 			if (resource != null) {
 				addToMap(fResourceToWorkingSet, resource, ws);
 			}
 		}
 		private void removeElement(IAdaptable element, IWorkingSet ws) {
 			removeFromMap(fElementToWorkingSet, element, ws);
-			IResource resource= (IResource)element.getAdapter(IResource.class);
+			IResource resource= element.getAdapter(IResource.class);
 			if (resource != null) {
 				removeFromMap(fResourceToWorkingSet, resource, ws);
 			}
@@ -678,7 +678,7 @@ public class WorkingSetModel {
 		IAdaptable[] elements= workingSet.getElements();
 		for (int i= 0; i < elements.length; i++) {
 			IAdaptable element= elements[i];
-			IProject p= (IProject)element.getAdapter(IProject.class);
+			IProject p= element.getAdapter(IProject.class);
 			if (p != null && p.exists())
 				return true;
 		}

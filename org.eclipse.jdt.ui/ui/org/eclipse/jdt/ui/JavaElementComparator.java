@@ -300,7 +300,7 @@ public class JavaElementComparator extends ViewerComparator {
 			return ((IStorage) element).getName();
 		}
 		if (element instanceof IAdaptable) {
-			IWorkbenchAdapter adapter= (IWorkbenchAdapter) ((IAdaptable) element).getAdapter(IWorkbenchAdapter.class);
+			IWorkbenchAdapter adapter= ((IAdaptable) element).getAdapter(IWorkbenchAdapter.class);
 			if (adapter != null) {
 				return adapter.getLabel(element);
 			}

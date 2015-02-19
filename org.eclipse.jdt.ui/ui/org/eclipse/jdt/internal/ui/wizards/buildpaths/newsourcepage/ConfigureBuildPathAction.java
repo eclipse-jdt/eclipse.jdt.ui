@@ -83,7 +83,7 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 			IClasspathEntry entry= container instanceof ClassPathContainer ? ((ClassPathContainer) container).getClasspathEntry() : JavaCore.newLibraryEntry(new Path("/x/y"), null, null); //$NON-NLS-1$
 			data.put(BuildPathsPropertyPage.DATA_REVEAL_ENTRY, entry);
 		} else {
-			project= ((IResource) ((IAdaptable) firstElement).getAdapter(IResource.class)).getProject();
+			project= ((IAdaptable) firstElement).getAdapter(IResource.class).getProject();
 		}
 		PreferencesUtil.createPropertyDialogOn(getShell(), project, BuildPathsPropertyPage.PROP_ID, null, data).open();
 	}
@@ -109,7 +109,7 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 		} else if (firstElement instanceof PackageFragmentRootContainer) {
 			return true;
 		} else if (firstElement instanceof IAdaptable) {
-			IResource res= (IResource) ((IAdaptable) firstElement).getAdapter(IResource.class);
+			IResource res= ((IAdaptable) firstElement).getAdapter(IResource.class);
 			if (res == null)
 				return false;
 

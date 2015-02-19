@@ -88,7 +88,7 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 					buf.append(JavaElementLabels.getElementLabel(jarEntryResource.getPackageFragmentRoot(), JavaElementLabels.ROOT_POST_QUALIFIED));
 					return buf.toString();
 				} else if (elem instanceof IAdaptable) {
-					IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)elem).getAdapter(IWorkbenchAdapter.class);
+					IWorkbenchAdapter wbadapter= ((IAdaptable)elem).getAdapter(IWorkbenchAdapter.class);
 					if (wbadapter != null) {
 						return wbadapter.getLabel(elem);
 					}

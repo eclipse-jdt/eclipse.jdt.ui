@@ -49,7 +49,7 @@ class ClassFileMarkerRulerAction extends MarkerRulerAction {
 		IEditorInput input= getTextEditor().getEditorInput();
 		if (input instanceof IClassFileEditorInput) {
 			IClassFile c= ((IClassFileEditorInput) input).getClassFile();
-			IResourceLocator locator= (IResourceLocator) c.getAdapter(IResourceLocator.class);
+			IResourceLocator locator= c.getAdapter(IResourceLocator.class);
 			if (locator != null) {
 				try {
 					resource= locator.getContainingResource(c);

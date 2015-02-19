@@ -176,7 +176,7 @@ public class RenameTypeTests extends RefactoringTest {
 
 	private void checkMappedSimilarElementsExist(Refactoring ref) {
 		RenameTypeProcessor rtp= (RenameTypeProcessor) ((RenameRefactoring) ref).getProcessor();
-		IJavaElementMapper mapper= (IJavaElementMapper) rtp.getAdapter(IJavaElementMapper.class);
+		IJavaElementMapper mapper= rtp.getAdapter(IJavaElementMapper.class);
 		IJavaElement[] similarElements= rtp.getSimilarElements();
 		if (similarElements == null)
 			return;

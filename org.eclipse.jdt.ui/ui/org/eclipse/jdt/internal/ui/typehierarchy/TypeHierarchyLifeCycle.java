@@ -237,7 +237,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 						}
 					};
 					fRefreshHierarchyJob.setUser(true);
-					IWorkbenchSiteProgressService progressService= (IWorkbenchSiteProgressService)fTypeHierarchyViewPart.getSite()
+					IWorkbenchSiteProgressService progressService= fTypeHierarchyViewPart.getSite()
 														.getAdapter(IWorkbenchSiteProgressService.class);
 					progressService.schedule(fRefreshHierarchyJob, 0);
 				}

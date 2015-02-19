@@ -410,7 +410,7 @@ public class JavaElementLabels {
 			return BasicElementLabels.getResourceName(((IStorage) obj).getName());
 
 		} else if (obj instanceof IAdaptable) {
-			IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
+			IWorkbenchAdapter wbadapter= ((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
 			if (wbadapter != null) {
 				return Strings.markLTR(wbadapter.getLabel(obj));
 			}
@@ -444,7 +444,7 @@ public class JavaElementLabels {
 			return getStyledStorageLabel((IStorage) obj);
 
 		} else if (obj instanceof IAdaptable) {
-			IWorkbenchAdapter wbadapter= (IWorkbenchAdapter) ((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
+			IWorkbenchAdapter wbadapter= ((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
 			if (wbadapter != null) {
 				return Strings.markLTR(new StyledString(wbadapter.getLabel(obj)));
 			}

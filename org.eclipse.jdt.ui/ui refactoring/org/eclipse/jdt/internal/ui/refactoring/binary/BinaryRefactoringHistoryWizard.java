@@ -707,7 +707,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 			final Object element= change.getModifiedElement();
 			if (element instanceof IAdaptable) {
 				final IAdaptable adaptable= (IAdaptable) element;
-				final IResource resource= (IResource) adaptable.getAdapter(IResource.class);
+				final IResource resource= adaptable.getAdapter(IResource.class);
 				if (resource != null && source.isPrefixOf(resource.getFullPath()))
 					return false;
 			}

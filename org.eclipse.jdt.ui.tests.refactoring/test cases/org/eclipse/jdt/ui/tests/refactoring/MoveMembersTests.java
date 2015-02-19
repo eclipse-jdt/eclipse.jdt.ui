@@ -98,7 +98,7 @@ public class MoveMembersTests extends RefactoringTest {
 		}
 		MoveRefactoring ref= createRefactoring(members, destinationType);
 
-		IDelegateUpdating delUp= (IDelegateUpdating) ref.getProcessor().getAdapter(IDelegateUpdating.class);
+		IDelegateUpdating delUp= ref.getProcessor().getAdapter(IDelegateUpdating.class);
 		delUp.setDelegateUpdating(addDelegate);
 
 		RefactoringStatus result= performRefactoringWithStatus(ref);

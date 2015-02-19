@@ -23,7 +23,7 @@ public class Mementos {
     public static final String TAG_ITEM = "item"; //$NON-NLS-1$
 
     public static void saveItem(IMemento memento, IAdaptable element) {
-        IPersistableElement persistable= (IPersistableElement)element.getAdapter(IPersistableElement.class);
+        IPersistableElement persistable= element.getAdapter(IPersistableElement.class);
         if (persistable != null) {
             memento.putString(
             	TAG_FACTORY_ID,

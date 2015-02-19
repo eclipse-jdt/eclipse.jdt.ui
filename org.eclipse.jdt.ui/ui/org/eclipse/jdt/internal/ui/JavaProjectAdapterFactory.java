@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,14 +27,15 @@ public class JavaProjectAdapterFactory implements IAdapterFactory {
 		IProject.class,
 	};
 
-	public Class[] getAdapterList() {
+	public Class<?>[] getAdapterList() {
 		return PROPERTIES;
 	}
 
-	public Object getAdapter(Object element, Class key) {
+	@SuppressWarnings("unchecked")
+	public <T> T getAdapter(Object element, Class<T> key) {
 		if (IProject.class.equals(key)) {
 			IJavaProject javaProject= (IJavaProject)element;
-			return javaProject.getProject();
+			return (T) javaProject.getProject();
 		}
 		return null;
 	}

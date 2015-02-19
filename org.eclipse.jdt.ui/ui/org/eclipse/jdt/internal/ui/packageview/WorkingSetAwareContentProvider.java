@@ -113,7 +113,7 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 					result.add(elem);
 				}
 			} else {
-				IProject project= (IProject) element.getAdapter(IProject.class);
+				IProject project= element.getAdapter(IProject.class);
 				if (project != null) {
 					processResource(project, result);
 				}

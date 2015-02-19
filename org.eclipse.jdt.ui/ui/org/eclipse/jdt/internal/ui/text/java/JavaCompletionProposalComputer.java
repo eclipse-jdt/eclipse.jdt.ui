@@ -243,7 +243,7 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 				collector.setReplacementLength(selection.y);
 			unit.codeComplete(offset, collector, fTimeoutProgressMonitor);
 		} catch (OperationCanceledException x) {
-			IBindingService bindingSvc= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+			IBindingService bindingSvc= PlatformUI.getWorkbench().getAdapter(IBindingService.class);
 			String keyBinding= bindingSvc.getBestActiveBindingFormattedFor(IWorkbenchCommandConstants.EDIT_CONTENT_ASSIST);
 			fErrorMessage= Messages.format(JavaTextMessages.CompletionProcessor_error_javaCompletion_took_too_long_message, keyBinding);
 		} catch (JavaModelException x) {

@@ -225,7 +225,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		IResource resource= null;
 		IClassFile classFile= classFileEditorInput.getClassFile();
 
-		IResourceLocator locator= (IResourceLocator) classFile.getAdapter(IResourceLocator.class);
+		IResourceLocator locator= classFile.getAdapter(IResourceLocator.class);
 		if (locator != null)
 			resource= locator.getContainingResource(classFile);
 

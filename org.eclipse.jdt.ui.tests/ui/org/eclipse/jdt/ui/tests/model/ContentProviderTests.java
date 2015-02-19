@@ -201,7 +201,7 @@ public class ContentProviderTests extends TestCase {
 		
 		IPackageFragment packageFragment3= (IPackageFragment)JavaCore.create(f3);
 		LogicalPackage logicalPackage3= new LogicalPackage(packageFragment3);
-		ResourceMapping resourceMapping= (ResourceMapping)logicalPackage3.getAdapter(ResourceMapping.class);
+		ResourceMapping resourceMapping= logicalPackage3.getAdapter(ResourceMapping.class);
 		ResourceTraversal[] traversals= resourceMapping.getTraversals(ResourceMappingContext.LOCAL_CONTEXT, null);
 		assertEquals(1, traversals.length);
 		assertEqualSets("", new IResource[] { f3 }, traversals[0].getResources());
