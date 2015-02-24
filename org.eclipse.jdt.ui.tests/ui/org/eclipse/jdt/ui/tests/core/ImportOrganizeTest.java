@@ -14,9 +14,6 @@ package org.eclipse.jdt.ui.tests.core;
 import java.io.File;
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -42,6 +39,9 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 public class ImportOrganizeTest extends CoreTests {
@@ -3253,6 +3253,184 @@ public class ImportOrganizeTest extends CoreTests {
 		op.run(null);
 
 		assertImports(cu, new String[] {});
+	}
+
+	private void expectUnresolvableImportsArePreserved(
+			CharSequence classContents, CharSequence resultantImports) throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment packageFragment= sourceFolder.createPackageFragment("pack", false, null);
+
+		StringBuilder cuContents= new StringBuilder();
+		cuContents.append("package pack;\n");
+		cuContents.append("\n");
+		cuContents.append("import static com.notfound.namesoftypes.NotFound1;\n");
+		cuContents.append("import static com.notfound.namesoftypes.NotFound2;\n");
+		cuContents.append("import static com.notfound.Type.*;\n");
+		cuContents.append("import static com.notfound.Type.FIELD1;\n");
+		cuContents.append("import static com.notfound.Type.FIELD2;\n");
+		cuContents.append("import static com.notfound.Type.method1;\n");
+		cuContents.append("import static com.notfound.Type.method2;\n");
+		cuContents.append("\n");
+		cuContents.append("import com.notfound.*;\n");
+		cuContents.append("import com.notfound.NamesOfStatics.FIELD1;\n");
+		cuContents.append("import com.notfound.NamesOfStatics.FIELD1;\n");
+		cuContents.append("import com.notfound.NamesOfStatics.method1;\n");
+		cuContents.append("import com.notfound.NamesOfStatics.method2;\n");
+		cuContents.append("import com.notfound.NotFound1;\n");
+		cuContents.append("import com.notfound.NotFound2;\n");
+		cuContents.append("import com.notfound.OuterClass.*;\n");
+		cuContents.append("import com.notfound.OuterClass.Inner1;\n");
+		cuContents.append("import com.notfound.OuterClass.Inner2;\n");
+		cuContents.append("\n");
+		cuContents.append("public class Cu {\n");
+		cuContents.append(classContents);
+		cuContents.append("}\n");
+		ICompilationUnit cu= packageFragment.createCompilationUnit("Cu.java", cuContents.toString(), false, null);
+
+		createOperation(cu, new String[] {}, 99, true, true, true, null).run(null);
+
+		StringBuilder expected= new StringBuilder();
+		expected.append("package pack;\n");
+		expected.append("\n");
+		if (resultantImports.length() > 0) {
+			expected.append(resultantImports);
+			expected.append("\n");
+		}
+		expected.append("public class Cu {\n");
+		expected.append(classContents);
+		expected.append("}\n");
+		assertEqualString(cu.getSource(), expected.toString());
+	}
+
+	public void testPreserveUnresolvableTypeSingleImports() throws Exception {
+		StringBuilder classContents= new StringBuilder();
+		classContents.append("NotFound1 nf1;");
+		classContents.append("Inner1 i1;");
+
+		StringBuilder resultantImports= new StringBuilder();
+		resultantImports.append("import com.notfound.NotFound1;\n");
+		resultantImports.append("import com.notfound.OuterClass.Inner1;\n");
+
+		expectUnresolvableImportsArePreserved(classContents, resultantImports);
+	}
+
+	public void testPreserveUnresolvableTypeOnDemandImports() throws Exception {
+		StringBuilder classContents= new StringBuilder();
+		classContents.append("NotFound3 nf3;");
+
+		StringBuilder resultantImports= new StringBuilder();
+		resultantImports.append("import com.notfound.*;\n");
+		resultantImports.append("import com.notfound.OuterClass.*;\n");
+
+		expectUnresolvableImportsArePreserved(classContents, resultantImports);
+	}
+
+	public void testPreserveUnresolvableStaticSingleImports() throws Exception {
+		StringBuilder classContents= new StringBuilder();
+		classContents.append("{\n");
+		classContents.append("    int a= FIELD1;\n");
+		classContents.append("    method1();\n");
+		classContents.append("}\n");
+
+		StringBuilder resultantImports= new StringBuilder();
+		resultantImports.append("import static com.notfound.Type.FIELD1;\n");
+		resultantImports.append("import static com.notfound.Type.method1;\n");
+
+		expectUnresolvableImportsArePreserved(classContents, resultantImports);
+	}
+
+	public void testPreserveUnresolvableStaticOnDemandImportDueToFieldReference() throws Exception {
+		StringBuilder classContents= new StringBuilder();
+		classContents.append("{\n");
+		classContents.append("    int a= FIELD3;\n");
+		classContents.append("}\n");
+
+		StringBuilder resultantImports= new StringBuilder();
+		resultantImports.append("import static com.notfound.Type.*;\n");
+
+		expectUnresolvableImportsArePreserved(classContents, resultantImports);
+	}
+
+	public void testPreserveUnresolvableStaticOnDemandImportDueToMethodReference() throws Exception {
+		StringBuilder classContents= new StringBuilder();
+		classContents.append("{\n");
+		classContents.append("    method3();\n");
+		classContents.append("}\n");
+
+		StringBuilder resultantImports= new StringBuilder();
+		resultantImports.append("import static com.notfound.Type.*;\n");
+
+		expectUnresolvableImportsArePreserved(classContents, resultantImports);
+	}
+
+	public void testPreserveUnresolvableImportRatherThanAddNewImport() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment notImportedPackage= sourceFolder.createPackageFragment("com.notimported", false, null);
+		String fromEitherPackageContents= "pack com.notimported; public class FromEitherPackage {}";
+		notImportedPackage.createCompilationUnit("FromEitherPackage.java", fromEitherPackageContents, false, null);
+		String fromNotImportedOnlyContents= "pack com.notimported; public class FromNotImportedOnly {}";
+		notImportedPackage.createCompilationUnit("FromNotImportedOnly.java", fromNotImportedOnlyContents, false, null);
+
+		IPackageFragment packageFragment= sourceFolder.createPackageFragment("pack", false, null);
+
+		StringBuilder cuContents= new StringBuilder();
+		cuContents.append("package pack;\n");
+		cuContents.append("\n");
+		cuContents.append("import com.notfound.FromEitherPackage;\n");
+		cuContents.append("\n");
+		cuContents.append("public class Cu {\n");
+		cuContents.append("    FromEitherPackage fep;\n");
+		cuContents.append("    FromNotImportedOnly fnipo;\n");
+		cuContents.append("}\n");
+		ICompilationUnit cu= packageFragment.createCompilationUnit("Cu.java", cuContents.toString(), false, null);
+
+		createOperation(cu, new String[] {}, 99, true, true, true, null).run(null);
+
+		// FromEitherPackage could be imported from com.notimported, but the existing
+		// (though unresolvable) import from com.notfound is preserved instead.
+		StringBuilder expected= new StringBuilder();
+		expected.append("package pack;\n");
+		expected.append("\n");
+		expected.append("import com.notfound.FromEitherPackage;\n");
+		expected.append("import com.notimported.FromNotImportedOnly;\n");
+		expected.append("\n");
+		expected.append("public class Cu {\n");
+		expected.append("    FromEitherPackage fep;\n");
+		expected.append("    FromNotImportedOnly fnipo;\n");
+		expected.append("}\n");
+		assertEqualString(cu.getSource(), expected.toString());
+	}
+
+	public void testDealWithBrokenStaticImport() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import static Broken;\n");
+		buf.append("\n");
+		buf.append("public class C{\n");
+		buf.append("    int i = Broken;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class C{\n");
+		buf.append("    int i = Broken;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
 	}
 
 	protected OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) {

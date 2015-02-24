@@ -150,11 +150,12 @@ public class ImportReferencesCollector extends GenericVisitor {
 
 		IBinding binding= name.resolveBinding();
 		SimpleName simpleName= (SimpleName)name;
-		if (binding == null || binding instanceof ITypeBinding || !Modifier.isStatic(binding.getModifiers()) || simpleName.isDeclaration()) {
+		if (binding == null) {
+			// This may be a currently unresolvable reference to a static member.
+			fStaticImports.add(simpleName);
+		} else if (binding instanceof ITypeBinding || !Modifier.isStatic(binding.getModifiers()) || simpleName.isDeclaration()) {
 			return;
-		}
-
-		if (binding instanceof IVariableBinding) {
+		} else if (binding instanceof IVariableBinding) {
 			IVariableBinding varBinding= (IVariableBinding) binding;
 			if (varBinding.isField()) {
 				varBinding= varBinding.getVariableDeclaration();
