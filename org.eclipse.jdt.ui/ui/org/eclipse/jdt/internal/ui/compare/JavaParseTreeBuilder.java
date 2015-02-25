@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,10 +25,13 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+
+import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 
 
 class JavaParseTreeBuilder extends ASTVisitor {
@@ -251,11 +254,16 @@ class JavaParseTreeBuilder extends ASTVisitor {
         return buffer.toString();
     }
 
-    private String getType(Type type) {
-        String name= type.toString();
-        int pos= name.lastIndexOf('.');
-        if (pos >= 0)
-            name= name.substring(pos + 1);
-        return name;
-    }
+	private String getType(Type type) {
+		ASTFlattener flattener= new ASTFlattener() {
+			@Override
+			public boolean visit(QualifiedName node) {
+				// [skip qualifier]
+				node.getName().accept(this);
+				return false;
+			}
+		};
+		type.accept(flattener);
+		return flattener.getResult();
+	}
 }
