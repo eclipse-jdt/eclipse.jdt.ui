@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance;
 
+import org.eclipse.jdt.text.tests.performance.TextPerformanceTestCase.DebugSetup;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.eclipse.jdt.text.tests.performance.TextPerformanceTestCase.DebugSetup;
 
 
 /**
@@ -30,12 +30,12 @@ public class EventDrivenTestSuite extends TestSuite {
 	}
 
 	public EventDrivenTestSuite() {
+		addTest(new DebugSetup(JavaNonInitialTypingTest.suite()));
+		addTest(new DebugSetup(TextNonInitialTypingTest.suite()));
 		addTest(new DebugSetup(ScrollJavaEditorTest.suite()));
 		addTest(new DebugSetup(ScrollTextEditorTest.suite()));
 		addTest(new DebugSetup(WhitespaceCharacterPainterTest.suite()));
 		addTest(JavaIndenterTest.suite());
-		addTest(JavaNonInitialTypingTest.suite());
-		addTest(TextNonInitialTypingTest.suite());
 		addTest(OpenPreferencePageTest.suite());
 		addTest(ScrollAnnotatedJavaEditorTest.suite());
 		addTest(ScrollVerticalRulerTest.suite());
