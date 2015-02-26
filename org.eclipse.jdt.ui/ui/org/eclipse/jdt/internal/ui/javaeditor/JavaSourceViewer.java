@@ -83,6 +83,11 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 */
 	public static final int SHOW_HIERARCHY= 53;
 
+	/**
+	 * Operation code for the annotate class file action.
+	 */
+	public static final int ANNOTATE_CLASS_FILE= 54;
+
 	private IInformationPresenter fOutlinePresenter;
 	private IInformationPresenter fStructurePresenter;
 	private IInformationPresenter fHierarchyPresenter;

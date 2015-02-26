@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for Bug 458201 - Offer new command "Annotate" on ClassFileEditor
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
@@ -54,6 +55,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.IWidgetTokenKeeper;
+import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 
@@ -64,6 +66,7 @@ import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.navigator.ICommonMenuConstants;
 
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -89,6 +92,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
@@ -547,6 +551,10 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		fActionGroups.addGroup(group);
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {group});
 
+		Action action= new AnnotateClassFileAction(this);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.ANNOTATE_CLASS_FILE);
+		setAction(IJavaEditorActionDefinitionIds.ANNOTATE_CLASS_FILE, action);
+
 		/*
 		 * 1GF82PL: ITPJUI:ALL - Need to be able to add bookmark to class file
 		 *
@@ -566,10 +574,21 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
 		super.editorContextMenuAboutToShow(menu);
 
+		IAction action = getAction(IJavaEditorActionDefinitionIds.ANNOTATE_CLASS_FILE);
+		menu.appendToGroup(ICommonMenuConstants.GROUP_EDIT, action);
+
 		ActionContext context= new ActionContext(getSelectionProvider().getSelection());
 		fContextMenuGroup.setContext(context);
 		fContextMenuGroup.fillContextMenu(menu);
 		fContextMenuGroup.setContext(null);
+	}
+
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#initializeKeyBindingScopes()
+	 */
+	@Override
+	protected void initializeKeyBindingScopes() {
+		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope", "org.eclipse.jdt.ui.classFileEditorScope" });  //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/*
@@ -882,8 +901,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	/*
 	 * @see JavaEditor#createJavaSourceViewer(Composite, IVerticalRuler, int)
 	 */
-	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles, IPreferenceStore store) {
-		return new JavaSourceViewer(parent, ruler, null, false, styles, store) {
+	@Override
+	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles, IPreferenceStore store) {
+		return new JavaSourceViewer(parent, ruler, overviewRuler, isOverviewRulerVisible, styles, store) {
 
 			@Override
 			public boolean requestWidgetToken(IWidgetTokenKeeper requester) {
@@ -897,6 +917,25 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				if (PlatformUI.getWorkbench().getHelpSystem().isContextHelpDisplayed())
 					return false;
 				return super.requestWidgetToken(requester, priority);
+			}
+			
+			@Override
+			public boolean canDoOperation(int operation) {
+				if (operation == JavaSourceViewer.ANNOTATE_CLASS_FILE)
+					return true;
+				return super.canDoOperation(operation);
+			}
+
+			@Override
+			public void doOperation(int operation) {
+				if (operation == JavaSourceViewer.ANNOTATE_CLASS_FILE) {
+					fQuickAssistAssistant.setStatusLineVisible(true);
+					fQuickAssistAssistant.setStatusMessage(JavaEditorMessages.ClassFileEditor_changeExternalAnnotations_caption + ' ');
+					String msg= fQuickAssistAssistant.showPossibleQuickAssists();
+					setStatusLineErrorMessage(msg);
+					return;
+				}
+				super.doOperation(operation);
 			}
 		};
 	}

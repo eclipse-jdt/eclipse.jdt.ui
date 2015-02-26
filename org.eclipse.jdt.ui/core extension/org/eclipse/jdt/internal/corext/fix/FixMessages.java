@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *     Stephan Herrmann - Contributions for
  *								[quick fix] Add quick fixes for null annotations - https://bugs.eclipse.org/337977
  *								[quick fix] The fix change parameter type to @Nonnull generated a null change - https://bugs.eclipse.org/400668
+ *								[null] "Annotate" proposals for adding external null annotations to library classes - https://bugs.eclipse.org/458200
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -129,6 +130,10 @@ public final class FixMessages extends NLS {
 	public static String NullAnnotationsRewriteOperations_change_overridden_parameter_nullness;
 	public static String NullAnnotationsRewriteOperations_change_overridden_return_nullness;
 	public static String NullAnnotationsRewriteOperations_remove_redundant_nullness_annotation;
+
+	public static String ExternalNullAnnotationChangeProposals_add_nullness_annotation;
+	public static String ExternalNullAnnotationChangeProposals_add_nullness_array_annotation;
+	public static String ExternalNullAnnotationChangeProposals_remove_nullness_annotation;
 
 	public static String ExtractToNullCheckedLocalProposal_extractCheckedLocal_editName;
 	public static String ExtractToNullCheckedLocalProposal_extractToCheckedLocal_proposalName;

@@ -759,4 +759,11 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * @since 3.2
 	 */
 	public static final String CLEAN_UP= "org.eclipse.jdt.ui.edit.text.java.clean.up"; //$NON-NLS-1$
+
+	/**
+	 * Action definition id of the annotate class file action
+	 * (value: <code>"org.eclipse.jdt.ui.edit.text.java.annotate.classFile"</code>).
+	 * @since 3.11
+	 */
+	public static final String ANNOTATE_CLASS_FILE= "org.eclipse.jdt.ui.edit.text.java.annotate.classFile"; //$NON-NLS-1$
 }

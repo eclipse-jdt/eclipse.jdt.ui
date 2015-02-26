@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Offer new command "Annotate" on ClassFileEditor - https://bugs.eclipse.org/458201
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -30,6 +31,7 @@ import org.eclipse.jface.text.contentassist.ContentAssistEvent;
 import org.eclipse.jface.text.contentassist.ICompletionListener;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
+import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 import org.eclipse.jface.text.quickassist.QuickAssistAssistant;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
@@ -49,6 +51,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor;
 
 
 public class JavaCorrectionAssistant extends QuickAssistAssistant {
@@ -72,7 +75,11 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 		Assert.isNotNull(editor);
 		fEditor= editor;
 
-		JavaCorrectionProcessor processor= new JavaCorrectionProcessor(this);
+		IQuickAssistProcessor processor;
+		if (editor instanceof ClassFileEditor)
+			processor= new ExternalNullAnnotationQuickAssistProcessor(this);
+		else
+			processor= new JavaCorrectionProcessor(this);
 
 		setQuickAssistProcessor(processor);
 		enableColoredLabels(PlatformUI.getPreferenceStore().getBoolean(IWorkbenchPreferenceConstants.USE_COLORED_LABELS));

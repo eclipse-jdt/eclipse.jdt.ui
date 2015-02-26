@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *     Andre Soereng <andreis@fast.no> - [syntax highlighting] highlight numbers - https://bugs.eclipse.org/bugs/show_bug.cgi?id=63573
  *     Björn Michael <b.michael@gmx.de> - [syntax highlighting] Syntax coloring for abstract classes - https://bugs.eclipse.org/331311
  *     Björn Michael <b.michael@gmx.de> - [syntax highlighting] Add highlight for inherited fields - https://bugs.eclipse.org/348368
+ *     Stephan Herrmann - Offer new command "Annotate" on ClassFileEditor - https://bugs.eclipse.org/458201
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
@@ -48,6 +49,7 @@ final class JavaEditorMessages extends NLS {
 	public static String AddImportOnSelection_error_title;
 	public static String AddImportOnSelection_dialog_title;
 	public static String AddImportOnSelection_dialog_message;
+	public static String ClassFileEditor_changeExternalAnnotations_caption;
 	public static String ClassFileEditor_error_classfile_not_on_classpath;
 	public static String ClassFileEditor_error_invalid_input_message;
 	public static String ClassFileEditor_error_title;
@@ -165,6 +167,7 @@ final class JavaEditorMessages extends NLS {
 	public static String JavaElementReturnTypeHyperlink_error_msg;
 	public static String JavaElementSuperImplementationHyperlink_hyperlinkText;
 	public static String JavaElementSuperImplementationHyperlink_hyperlinkText_qualified;
+	public static String AnnotateClassFile_label;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaEditorMessages.class);

@@ -3360,6 +3360,12 @@
             id="org.eclipse.jdt.ui.javaEditorScope">
       </context>
       <context
+            name="%context.browsingJavaSource.name"
+            description="%context.browsingJavaSource.description"
+            parentId="org.eclipse.ui.textEditorScope"
+            id="org.eclipse.jdt.ui.classFileEditorScope">
+      </context>
+      <context
             name="%context.editingPropertiesSource.name"
             description="%context.editingPropertiesSource.description"
             parentId="org.eclipse.ui.textEditorScope"
@@ -4186,6 +4192,13 @@
             categoryId="org.eclipse.search.ui.category.search"
             id="org.eclipse.jdt.ui.edit.text.java.search.implement.occurrences">
       </command>
+<!-- annotate class file: -->
+	  <command
+	        name="%annotateClassFile.label"
+	        description="%annotateClassFile.description"
+	        categoryId="org.eclipse.jdt.ui.category.source"
+	        id="org.eclipse.jdt.ui.edit.text.java.annotate.classFile">
+	  </command>
    </extension>
    
    <extension
@@ -4792,6 +4805,12 @@
 			id="org.eclipse.ui.views.showView.viewId"
 			value="org.eclipse.jdt.ui.JavadocView">
 		</parameter>
+	</key>
+	<key
+       commandId="org.eclipse.jdt.ui.edit.text.java.annotate.classFile"
+       contextId="org.eclipse.jdt.ui.classFileEditorScope"
+       schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+       sequence="M1+1">
 	</key>
 	</extension>
    
