@@ -51,7 +51,6 @@
     <module>org.eclipse.jdt.ui.tests.refactoring</module>
     <module>org.eclipse.jdt.core.manipulation</module>
     <module>org.eclipse.jdt.ui</module>
-    <module>org.eclipse.jdt.ui.examples.projects</module>
     <module>org.eclipse.jdt.junit</module>
     <module>org.eclipse.jdt.junit.core</module>
     <module>org.eclipse.jdt.junit.runtime</module>
