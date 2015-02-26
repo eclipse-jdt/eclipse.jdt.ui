@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import java.net.URL;
 import org.osgi.framework.Bundle;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Drawable;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -38,6 +39,7 @@ import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.internal.text.html.BrowserInformationControlInput;
 import org.eclipse.jface.internal.text.html.BrowserInput;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
+import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -49,6 +51,7 @@ import org.eclipse.jface.text.IInformationControlExtension4;
 import org.eclipse.jface.text.IInputChangedListener;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.TextPresentation;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ISharedImages;
@@ -122,6 +125,21 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
  */
 public class JavadocHover extends AbstractJavaEditorTextHover {
 
+	public static class FallbackInformationPresenter extends HTMLTextPresenter {
+		public FallbackInformationPresenter() {
+			super(false);
+		}
+		
+		@Override
+		public String updatePresentation(Drawable drawable, String hoverInfo, TextPresentation presentation, int maxWidth, int maxHeight) {
+			String warningInfo= JavaHoverMessages.JavadocHover_fallback_warning;
+			String warning= super.updatePresentation(drawable, warningInfo, presentation, maxWidth, maxHeight);
+			presentation.clear();
+			
+			String content= super.updatePresentation(drawable, hoverInfo, presentation, maxWidth, maxHeight);
+			return content + "\n\n" + warning; //$NON-NLS-1$
+		}
+	}
 	/**
 	 * Action to go back to the previous input in the hover control.
 	 *
@@ -403,7 +421,16 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				addLinkListener(iControl);
 				return iControl;
 			} else {
-				return new DefaultInformationControl(parent, tooltipAffordanceString);
+				return new DefaultInformationControl(parent, tooltipAffordanceString) {
+					@Override
+					public IInformationControlCreator getInformationPresenterControlCreator() {
+						return new IInformationControlCreator() {
+							public IInformationControl createInformationControl(Shell parent) {
+								return new DefaultInformationControl(parent, (ToolBarManager) null, new FallbackInformationPresenter());
+							}
+						};
+					}
+				};
 			}
 		}
 
