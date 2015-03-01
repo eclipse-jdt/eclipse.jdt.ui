@@ -237,4 +237,36 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		assertEqualString(lab, "() -> {...} IntConsumer - org.test.C.c");
 	}
 
+	public void testTypeLabelLambda2() throws Exception {
+
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("import java.util.function.Consumer;\n");
+		buf.append("public class C {\n");
+		buf.append("    Consumer<String> c = (s) -> { };\n");
+		buf.append("}\n");
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", content, false, null);
+
+		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("s"), 1);
+		IJavaElement i= elems[0];
+		String lab= JavaElementLabels.getTextLabel(i, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED);
+		assertEqualString(lab, "org.test.C.c.() -> {...} Consumer.accept(String).s");
+
+		lab= JavaElementLabels.getTextLabel(i, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.USE_RESOLVED);
+		assertEqualString(lab, "org.test.C.c.() -> {...} Consumer.accept(String).s");
+
+		IJavaElement lambdaMethod= i.getParent();
+		lab= JavaElementLabels.getTextLabel(lambdaMethod, JavaElementLabels.T_FULLY_QUALIFIED
+				| JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES);
+		assertEqualString(lab, "accept(String s) - org.test.C.c.() -> {...} Consumer");
+		
+		IJavaElement lambdaType= lambdaMethod.getParent();
+		lab= JavaElementLabels.getTextLabel(lambdaType, JavaElementLabels.T_POST_QUALIFIED);
+		assertEqualString(lab, "() -> {...} Consumer - org.test.C.c");
+	}
+
 }

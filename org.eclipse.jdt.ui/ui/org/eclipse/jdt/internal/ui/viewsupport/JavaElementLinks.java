@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2014 IBM Corporation and others.
+ * Copyright (c) 2008, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for Bug 403917 - [1.8] Render TYPE_USE annotations in Javadoc hover/view
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
@@ -39,6 +40,7 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.IBinding;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -102,7 +104,7 @@ public class JavaElementLinks {
 		void handleTextSet();
 	}
 
-	private static final class JavaElementLinkedLabelComposer extends JavaElementLabelComposer {
+	static class JavaElementLinkedLabelComposer extends JavaElementLabelComposer {
 		private final IJavaElement fElement;
 
 		public JavaElementLinkedLabelComposer(IJavaElement member, StringBuffer buf) {
@@ -665,7 +667,7 @@ public class JavaElementLinks {
 	 * @return the HTML link
 	 * @since 3.10
 	 */
-	private static String createHeaderLink(String uri, String label, String title) {
+	public static String createHeaderLink(String uri, String label, String title) {
 		if (title.length() > 0) {
 			title= " title='" + title + "'";  //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -702,6 +704,29 @@ public class JavaElementLinks {
 
 		if (!Strings.USE_TEXT_PROCESSOR) {
 			new JavaElementLinkedLabelComposer(linkAllNames ? null : element, buf).appendElementLabel(element, flags);
+			return Strings.markJavaElementLabelLTR(buf.toString());
+		} else {
+			String label= JavaElementLabels.getElementLabel(element, flags);
+			return label.replaceAll("<", "&lt;").replaceAll(">", "&gt;"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		}
+	}
+
+	/**
+	 * Returns the label for a binding with the flags as defined by {@link JavaElementLabels}.
+	 * Referenced element names in the label are rendered as header links.
+	 *
+	 * @param binding the binding to render
+	 * @param element the corresponding Java element, used for javadoc hyperlinks
+	 * @param flags the rendering flags
+	 * @param haveSource true when looking at an ICompilationUnit which enables the use of short type names
+	 * @return the label of the binding
+	 * @since 3.11
+	 */
+	public static String getBindingLabel(IBinding binding, IJavaElement element, long flags, boolean haveSource) {
+		StringBuffer buf= new StringBuffer();
+
+		if (!Strings.USE_TEXT_PROCESSOR) {
+			new BindingLinkedLabelComposer(element, buf, haveSource).appendBindingLabel(binding, flags);
 			return Strings.markJavaElementLabelLTR(buf.toString());
 		} else {
 			String label= JavaElementLabels.getElementLabel(element, flags);

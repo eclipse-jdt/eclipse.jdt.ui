@@ -196,7 +196,7 @@ public class JavaElementLabelComposer {
 	}
 
 
-	private final static long QUALIFIER_FLAGS= JavaElementLabels.P_COMPRESSED | JavaElementLabels.USE_RESOLVED;
+	final static long QUALIFIER_FLAGS= JavaElementLabels.P_COMPRESSED | JavaElementLabels.USE_RESOLVED;
 
 	private static final Styler QUALIFIER_STYLE= StyledString.QUALIFIER_STYLER;
 	private static final Styler COUNTER_STYLE= StyledString.COUNTER_STYLER;
@@ -219,7 +219,7 @@ public class JavaElementLabelComposer {
 
 	protected final FlexibleBuffer fBuffer;
 
-	private static final boolean getFlag(long flags, long flag) {
+	protected static final boolean getFlag(long flags, long flag) {
 		return (flags & flag) != 0;
 	}
 

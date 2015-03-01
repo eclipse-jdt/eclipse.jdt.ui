@@ -47,6 +47,8 @@ public class CoreTests extends TestCase {
 		suite.addTest(ImportOrganizeTest18.suite());
 		suite.addTest(JavaElementLabelsTest.suite());
 		suite.addTest(JavaElementLabelsTest18.suite());
+		suite.addTest(BindingLabelsTest.suite());
+		suite.addTest(BindingLabels18Test.suite());
 		suite.addTest(JavaElementPropertyTesterTest.suite());
 		suite.addTest(JavaModelUtilTest.suite());
 		suite.addTest(MethodOverrideTest.suite());

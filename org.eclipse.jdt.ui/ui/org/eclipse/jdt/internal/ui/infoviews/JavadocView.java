@@ -10,6 +10,7 @@
  *     Genady Beryozkin <eclipse@genady.org> - [misc] Display values for constant fields in the Javadoc view - https://bugs.eclipse.org/bugs/show_bug.cgi?id=204914
  *     Brock Janiczak <brockj@tpg.com.au> - [implementation] Streams not being closed in Javadoc views - https://bugs.eclipse.org/bugs/show_bug.cgi?id=214854
  *     Benjamin Muskalla <bmuskalla@innoopract.com> - [javadoc view] NPE on enumerations - https://bugs.eclipse.org/bugs/show_bug.cgi?id=223586
+ *     Stephan Herrmann - Contribution for Bug 403917 - [1.8] Render TYPE_USE annotations in Javadoc hover/view
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.infoviews;
 
@@ -150,6 +151,7 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover.FallbackInformationPresenter;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLinkedLabelComposer;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 
@@ -1155,7 +1157,18 @@ public class JavadocView extends AbstractInfoView {
 	 * @return a string containing the member's label
 	 */
 	private String getInfoText(IJavaElement member, String constantValue, boolean allowImage) {
-		StringBuffer label= new StringBuffer(JavaElementLinks.getElementLabel(member, JavadocHover.getHeaderFlags(member)));
+		long flags= JavadocHover.getHeaderFlags(member);
+		IBinding binding= JavadocHover.getHoverBinding(member, null);
+		StringBuffer label;
+		if (binding != null) {
+			label= new StringBuffer();
+			// setting haveSource to false lets the JavadocView *always* show qualified type names,
+			// would need to track the source of our input to distinguish classfile/compilationUnit:
+			boolean haveSource= false;
+			new BindingLinkedLabelComposer(member, label, haveSource).appendBindingLabel(binding, flags);
+		} else {
+			label= new StringBuffer(JavaElementLinks.getElementLabel(member, flags));
+		}
 		if (member.getElementType() == IJavaElement.FIELD && constantValue != null) {
 			label.append(constantValue);
 		}

@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Genady Beryozkin <eclipse@genady.org> - [hovering] tooltip for constant string does not show constant value - https://bugs.eclipse.org/bugs/show_bug.cgi?id=85382
+ *     Stephan Herrmann - Contribution for Bug 403917 - [1.8] Render TYPE_USE annotations in Javadoc hover/view
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
@@ -73,6 +74,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -88,6 +90,7 @@ import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -759,8 +762,18 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 
 	private static String getInfoText(IJavaElement element, ITypeRoot editorInputElement, IRegion hoverRegion, boolean allowImage) {
 		long flags= getHeaderFlags(element);
-		StringBuffer label= new StringBuffer(JavaElementLinks.getElementLabel(element, flags));
 		
+		boolean haveSource= editorInputElement instanceof ICompilationUnit;
+		ASTNode node= haveSource ? getHoveredASTNode(editorInputElement, hoverRegion) : null;
+		IBinding binding= getHoverBinding(element, node);
+
+		StringBuffer label;
+		if (binding != null) {
+			label= new StringBuffer(JavaElementLinks.getBindingLabel(binding, element, flags, haveSource));
+		} else {
+			label= new StringBuffer(JavaElementLinks.getElementLabel(element, flags));
+		}
+
 		if (element.getElementType() == IJavaElement.FIELD) {
 			String constantValue= getConstantValue((IField) element, editorInputElement, hoverRegion);
 			if (constantValue != null) {
@@ -777,6 +790,37 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 //		}
 
 		return getImageAndLabel(element, allowImage, label.toString());
+	}
+
+	/**
+	 * Try to acquire a binding corresponding to the given element 
+	 * for more precise information about (type) annotations.
+	 *
+	 * Currently this lookup is only enabled when null-annotations are enabled for the project.
+	 *
+	 * @param element the element being rendered
+	 * @param node the AST node corresponding to the given element, or null, if no AST node is available.
+	 * @return either a binding corresponding to the given element or null.
+	 */
+	public static IBinding getHoverBinding(IJavaElement element, ASTNode node) {
+
+		if (element.getJavaProject().getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED)) {
+			if (node == null) {
+				if (element instanceof ISourceReference) {
+					ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+					p.setProject(element.getJavaProject());
+					p.setBindingsRecovery(true);
+					try {
+						return p.createBindings(new IJavaElement[] { element }, null)[0];
+					} catch (OperationCanceledException e) {
+						return null;
+					}
+				}
+			} else {
+				return resolveBinding(node);
+			}
+		}
+		return null;
 	}
 	
 	private static String getImageURL(IJavaElement element) {
@@ -1080,6 +1124,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			return ((SuperConstructorInvocation) node).resolveConstructorBinding();
 		} else if (node instanceof ConstructorInvocation) {
 			return ((ConstructorInvocation) node).resolveConstructorBinding();
+		} else if (node instanceof LambdaExpression) {
+			return ((LambdaExpression) node).resolveMethodBinding();
 		} else {
 			return null;
 		}
