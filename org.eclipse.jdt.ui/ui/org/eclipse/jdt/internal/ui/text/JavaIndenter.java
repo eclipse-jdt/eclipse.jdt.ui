@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -185,7 +185,7 @@ public final class JavaIndenter {
 				// ignore and return default
 			}
 
-			return prefContinuationIndent(); // default
+			return prefContinuationIndentForArrayInitializer(); // default
 		}
 
 		private boolean prefArrayDeepIndent() {
@@ -345,6 +345,15 @@ public final class JavaIndenter {
 		private int prefContinuationIndent() {
 			try {
 				return Integer.parseInt(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION));
+			} catch (NumberFormatException e) {
+				// ignore and return default
+			}
+
+			return 2; // sensible default
+		}
+		private int prefContinuationIndentForArrayInitializer() {
+			try {
+				return Integer.parseInt(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION_FOR_ARRAY_INITIALIZER));
 			} catch (NumberFormatException e) {
 				// ignore and return default
 			}
@@ -1081,6 +1090,7 @@ public final class JavaIndenter {
 					return fPosition;
 				}
 				int line= fLine;
+				int rParen= fPosition;
 				if (skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN)) {
 					int scope= fPosition;
 					nextToken();
@@ -1093,12 +1103,16 @@ public final class JavaIndenter {
 						return skipToStatementStart(danglingElse, false);
 					}
 					fPosition= scope;
-					if (looksLikeAnonymousTypeDecl()) {
+					if (looksLikeAnonymousTypeDecl(rParen)) {
 						return skipToStatementStart(danglingElse, false);
 					}
 					fPosition= scope;
 					if (looksLikeAnnotation()) {
 						return skipToStatementStart(danglingElse, false);
+					}
+					fPosition= scope;
+					if (looksLikeStringContinuation()) {
+						return fPosition;
 					}
 				}
 				// restore
@@ -1890,6 +1904,37 @@ public final class JavaIndenter {
 	}
 
 	/**
+	 * Checks whether the current position represents a method call in string continuation. The
+	 * current token should represent the left parenthesis of method call.
+	 * 
+	 * @return <code>true</code> if the current position looks like a method call in string
+	 *         continuation, <code>false</code> otherwise
+	 * @since 3.11
+	 */
+	private boolean looksLikeStringContinuation() {
+		nextToken();
+		if (fToken == Symbols.TokenIDENT) { // method name
+			nextToken();
+			if (fToken == Symbols.TokenGREATERTHAN) { // type arguments
+				skipScope(Symbols.TokenLESSTHAN, Symbols.TokenGREATERTHAN);
+				nextToken();
+			}
+			while (fToken == Symbols.TokenOTHER) { // dot of qualification
+				nextToken();
+				if (fToken != Symbols.TokenIDENT) // qualifying name
+					return false;
+				nextToken();
+			}
+			if (fToken == Symbols.TokenRPAREN) { // cast
+				skipScope(Symbols.TokenLPAREN, Symbols.TokenRPAREN);
+				nextToken();
+			}
+			return fToken == Symbols.TokenPLUS;
+		}
+		return false;
+	}
+
+	/**
 	 * Returns <code>true</code> if the current tokens look like a method
 	 * declaration header (i.e. only the return type and method name). The
 	 * heuristic calls <code>nextToken</code> and expects an identifier
@@ -1912,7 +1957,13 @@ public final class JavaIndenter {
 		if (fToken == Symbols.TokenIDENT) { // method name
 			do nextToken();
 			while (skipBrackets()); // optional brackets for array valued return types
-
+			if (fToken == Symbols.TokenGREATERTHAN) {
+				if (skipScope(Symbols.TokenLESSTHAN, Symbols.TokenGREATERTHAN)) { // parameterized return type
+					nextToken();
+				} else {
+					return false;
+				}
+			}
 			return fToken == Symbols.TokenIDENT; // return type name
 
 		}
@@ -1948,12 +1999,28 @@ public final class JavaIndenter {
 	 * <code>nextToken</code> and expects a possibly qualified identifier (type name) and a new
 	 * keyword
 	 *
+	 * @param rParen offset of the right parenthesis
+	 *
 	 * @return <code>true</code> if the current position looks like a anonymous type declaration
 	 *         header.
 	 */
-	private boolean looksLikeAnonymousTypeDecl() {
-
+	private boolean looksLikeAnonymousTypeDecl(int rParen) {
+		try {
+			int nonWsFwd= fScanner.findNonWhitespaceForwardInAnyPartition(rParen + 1, JavaHeuristicScanner.UNBOUND);
+			if (nonWsFwd == JavaHeuristicScanner.NOT_FOUND || fDocument.getChar(nonWsFwd) != '{') {
+				return false;
+			}
+		} catch (BadLocationException e) {
+			return false;
+		}
 		nextToken();
+		if (fToken == Symbols.TokenGREATERTHAN) {
+			if (skipScope(Symbols.TokenLESSTHAN, Symbols.TokenGREATERTHAN)) { // parameterized type
+				nextToken();
+			} else {
+				return false;
+			}
+		}
 		if (fToken == Symbols.TokenIDENT) { // type name
 			nextToken();
 			while (fToken == Symbols.TokenOTHER) { // dot of qualification

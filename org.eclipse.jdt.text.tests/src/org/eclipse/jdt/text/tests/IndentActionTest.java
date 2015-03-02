@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -172,6 +172,38 @@ public class IndentActionTest extends TestCase {
 	}
 
 	public void testBug428384() throws Exception {
+		selectAll();
+		assertIndentResult();
+	}
+
+	public void testBug439582_1() throws Exception {
+		IJavaProject project= IndentTestSetup.getProject();
+		String value= project.getOption(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION_FOR_ARRAY_INITIALIZER, true);
+		project.setOption(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION_FOR_ARRAY_INITIALIZER, "1");
+		try {
+			selectAll();
+			assertIndentResult();
+		} finally {
+			project.setOption(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION_FOR_ARRAY_INITIALIZER, value);
+		}
+	}
+
+	public void testBug439582_2() throws Exception {
+		selectAll();
+		assertIndentResult();
+	}
+
+	public void testBug439582_3() throws Exception {
+		selectAll();
+		assertIndentResult();
+	}
+
+	public void testBug439582_4() throws Exception {
+		selectAll();
+		assertIndentResult();
+	}
+
+	public void testBug439582_5() throws Exception {
 		selectAll();
 		assertIndentResult();
 	}
