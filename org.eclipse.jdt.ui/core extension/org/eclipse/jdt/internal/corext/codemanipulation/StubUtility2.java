@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,8 +86,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
  */
 public final class StubUtility2 {
 
-	public static void addOverrideAnnotation(IJavaProject project, ASTRewrite rewrite, MethodDeclaration decl, IMethodBinding binding) {
-		if (binding.getDeclaringClass().isInterface()) {
+	public static void addOverrideAnnotation(IJavaProject project, ASTRewrite rewrite, MethodDeclaration decl, IMethodBinding overriddenMethod) {
+		if (overriddenMethod.getDeclaringClass().isInterface()) {
 			String version= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
 			if (JavaModelUtil.isVersionLessThan(version, JavaCore.VERSION_1_6))
 				return; // not allowed in 1.5
@@ -350,7 +350,9 @@ public final class StubUtility2 {
 
 		String delimiter= unit.findRecommendedLineSeparator();
 		int modifiers= binding.getModifiers();
-		if (!(inInterface && Modifier.isAbstract(modifiers))) {
+		ITypeBinding declaringType= binding.getDeclaringClass();
+		ITypeBinding typeObject= ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+		if (!inInterface || (declaringType != typeObject && JavaModelUtil.is18OrHigher(javaProject))) {
 			// generate a method body
 
 			Map<String, String> options= javaProject.getOptions(true);
@@ -368,7 +370,6 @@ public final class StubUtility2 {
 				}
 			} else {
 				SuperMethodInvocation invocation= ast.newSuperMethodInvocation();
-				ITypeBinding declaringType= binding.getDeclaringClass();
 				if (declaringType.isInterface()) {
 					String qualifier= imports.addImport(declaringType.getErasure(), context);
 					Name name= ASTNodeFactory.newName(ast, qualifier);
@@ -405,7 +406,13 @@ public final class StubUtility2 {
 				decl.setJavadoc(javadoc);
 			}
 		}
-		if (settings != null && settings.overrideAnnotation && JavaModelUtil.is50OrHigher(javaProject)) {
+		boolean overrideAnnotationRequired= settings != null && settings.overrideAnnotation && JavaModelUtil.is50OrHigher(javaProject);
+		if (inInterface && declaringType == typeObject && !Modifier.isPublic(modifiers)) {
+			// According to JLS8 9.2, an interface doesn't implicitly declare non-public members of Object,
+			// and JLS8 9.6.4.4 doesn't allow @Override for these methods (clone and finalize).
+			overrideAnnotationRequired= false;
+		}
+		if (overrideAnnotationRequired) {
 			addOverrideAnnotation(javaProject, rewrite, decl, binding);
 		}
 
@@ -661,15 +668,16 @@ public final class StubUtility2 {
 
 	private static List<IExtendedModifier> getImplementationModifiers(AST ast, IMethodBinding method, boolean inInterface, ImportRewrite importRewrite, ImportRewriteContext context) throws JavaModelException {
 		IJavaProject javaProject= importRewrite.getCompilationUnit().getJavaProject();
-		int modifiers= method.getModifiers() & ~Modifier.ABSTRACT & ~Modifier.NATIVE & ~Modifier.PRIVATE;
+		int modifiers= method.getModifiers();
 		if (inInterface) {
-			modifiers= modifiers & ~Modifier.PROTECTED;
-			if (!method.getDeclaringClass().isInterface() ) {
-				modifiers= modifiers | Modifier.PUBLIC;
+			modifiers= modifiers & ~Modifier.PROTECTED & ~Modifier.PUBLIC;
+			if (Modifier.isAbstract(modifiers) && JavaModelUtil.is18OrHigher(javaProject)) {
+				modifiers= modifiers | Modifier.DEFAULT;
 			}
 		} else {
 			modifiers= modifiers & ~Modifier.DEFAULT;
 		}
+		modifiers= modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE & ~Modifier.PRIVATE;
 		IAnnotationBinding[] annotations= method.getAnnotations();
 		
 		if (modifiers != Modifier.NONE && annotations.length > 0) {
@@ -729,7 +737,7 @@ public final class StubUtility2 {
 		IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
 		for (int index= 0; index < typeMethods.length; index++) {
 			final int modifiers= typeMethods[index].getModifiers();
-			if (!typeMethods[index].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers))
+			if (!typeMethods[index].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers) && !Modifier.isFinal(modifiers))
 				allMethods.add(typeMethods[index]);
 		}
 		ITypeBinding clazz= typeBinding.getSuperclass();
@@ -737,7 +745,7 @@ public final class StubUtility2 {
 			IMethodBinding[] methods= clazz.getDeclaredMethods();
 			for (int offset= 0; offset < methods.length; offset++) {
 				final int modifiers= methods[offset].getModifiers();
-				if (!methods[offset].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
+				if (!methods[offset].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers) && !Modifier.isFinal(modifiers)) {
 					if (findOverridingMethod(methods[offset], allMethods) == null)
 						allMethods.add(methods[offset]);
 				}
@@ -756,15 +764,6 @@ public final class StubUtility2 {
 			getOverridableMethods(ast, ast.resolveWellKnownType("java.lang.Object"), allMethods); //$NON-NLS-1$
 		if (!isSubType)
 			allMethods.removeAll(Arrays.asList(typeMethods));
-		int modifiers= 0;
-		if (!typeBinding.isInterface()) {
-			for (int index= allMethods.size() - 1; index >= 0; index--) {
-				IMethodBinding method= allMethods.get(index);
-				modifiers= method.getModifiers();
-				if (Modifier.isFinal(modifiers))
-					allMethods.remove(index);
-			}
-		}
 		return allMethods.toArray(new IMethodBinding[allMethods.size()]);
 	}
 
@@ -772,8 +771,8 @@ public final class StubUtility2 {
 		IMethodBinding[] methods= superBinding.getDeclaredMethods();
 		for (int offset= 0; offset < methods.length; offset++) {
 			final int modifiers= methods[offset].getModifiers();
-			if (!methods[offset].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
-				if (findOverridingMethod(methods[offset], allMethods) == null && !Modifier.isStatic(modifiers))
+			if (!methods[offset].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers) && !Modifier.isFinal(modifiers)) {
+				if (findOverridingMethod(methods[offset], allMethods) == null)
 					allMethods.add(methods[offset]);
 			}
 		}

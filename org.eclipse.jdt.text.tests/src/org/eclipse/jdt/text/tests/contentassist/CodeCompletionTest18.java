@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 GK Software AG, IBM Corporation and others.
+ * Copyright (c) 2014, 2015 GK Software AG, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,6 @@
 package org.eclipse.jdt.text.tests.contentassist;
 
 import java.util.Hashtable;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -56,6 +53,9 @@ import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class CodeCompletionTest18 extends AbstractCompletionTest {
 
@@ -280,7 +280,7 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 		buf.append("         * @see test1.Main.Foo#hello()\n");
 		buf.append("         */\n");
 		buf.append("        @Override\n");
-		buf.append("        public default void hello() {\n");
+		buf.append("        default void hello() {\n");
 		buf.append("            //TODO\n");
 		buf.append("            Foo.super.hello();\n");
 		buf.append("        }\n");
@@ -334,7 +334,7 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 		buf.append("     * @see test1.I#getSize(java.lang.String)\n");
 		buf.append("     */\n");
 		buf.append("    @Override\n");
-		buf.append("    public default int getSize(String name) {\n");
+		buf.append("    default int getSize(String name) {\n");
 		buf.append("        //TODO\n");
 		buf.append("        return I.super.getSize(name);\n");
 		buf.append("    }\n");
@@ -379,6 +379,237 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 		buf.append("        //TODO\n");
 		buf.append("        return Collection.super.parallelStream();\n");
 		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testOverride5() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface I1 {\n");
+		buf.append("    equals\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("I1.java", buf.toString(), false, null);
+
+		String str= "equals";
+		int offset= buf.toString().indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+		assertEquals(1, proposals.length);
+		IEditorPart part= JavaUI.openInEditor(cu);
+		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface I1 {\n");
+		buf.append("    /* (non-Javadoc)\n");
+		buf.append("     * @see java.lang.Object#equals(java.lang.Object)\n");
+		buf.append("     */\n");
+		buf.append("    @Override\n");
+		buf.append("    boolean equals(Object arg0);\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testOverride6() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface I2 {\n");
+		buf.append("    hashCode\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("I2.java", buf.toString(), false, null);
+
+		String str= "hashCode";
+		int offset= buf.toString().indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+		assertEquals(1, proposals.length);
+		IEditorPart part= JavaUI.openInEditor(cu);
+		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface I2 {\n");
+		buf.append("    /* (non-Javadoc)\n");
+		buf.append("     * @see java.lang.Object#hashCode()\n");
+		buf.append("     */\n");
+		buf.append("    @Override\n");
+		buf.append("    int hashCode();\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testOverride7() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface I3 {\n");
+		buf.append("    toString\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("I3.java", buf.toString(), false, null);
+
+		String str= "toString";
+		int offset= buf.toString().indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+		assertEquals(1, proposals.length);
+		IEditorPart part= JavaUI.openInEditor(cu);
+		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface I3 {\n");
+		buf.append("    /* (non-Javadoc)\n");
+		buf.append("     * @see java.lang.Object#toString()\n");
+		buf.append("     */\n");
+		buf.append("    @Override\n");
+		buf.append("    String toString();\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testOverride8() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface I4 {\n");
+		buf.append("    clone\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("I4.java", buf.toString(), false, null);
+
+		String str= "clone";
+		int offset= buf.toString().indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+		assertEquals(3, proposals.length);
+		IEditorPart part= JavaUI.openInEditor(cu);
+		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+		proposals[2].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface I4 {\n");
+		buf.append("    /* (non-Javadoc)\n");
+		buf.append("     * @see java.lang.Object#clone()\n");
+		buf.append("     */\n");
+		buf.append("    Object clone() throws CloneNotSupportedException;\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testOverride9() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface I5 {\n");
+		buf.append("    finalize\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("I5.java", buf.toString(), false, null);
+
+		String str= "finalize";
+		int offset= buf.toString().indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+		assertEquals(2, proposals.length);
+		IEditorPart part= JavaUI.openInEditor(cu);
+		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+		proposals[1].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface I5 {\n");
+		buf.append("    /* (non-Javadoc)\n");
+		buf.append("     * @see java.lang.Object#finalize()\n");
+		buf.append("     */\n");
+		buf.append("    void finalize() throws Throwable;\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testOverride10() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface I6 extends A {\n");
+		buf.append("    myAbs\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("interface A {\n");
+		buf.append("    void myAbstractM();\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("I6.java", buf.toString(), false, null);
+
+		String str= "myAbs";
+		int offset= buf.toString().indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+		assertEquals(2, proposals.length);
+		IEditorPart part= JavaUI.openInEditor(cu);
+		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface I6 extends A {\n");
+		buf.append("    /* (non-Javadoc)\n");
+		buf.append("     * @see test1.A#myAbstractM()\n");
+		buf.append("     */\n");
+		buf.append("    @Override\n");
+		buf.append("    default void myAbstractM() {\n");
+		buf.append("        //TODO\n");
+		buf.append("        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("interface A {\n");
+		buf.append("    void myAbstractM();\n");
 		buf.append("}\n");
 		assertEquals(buf.toString(), doc.get());
 	}
