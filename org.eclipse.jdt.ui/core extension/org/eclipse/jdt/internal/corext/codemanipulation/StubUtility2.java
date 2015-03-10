@@ -311,16 +311,17 @@ public final class StubUtility2 {
 	}
 	
 	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports,
-			ImportRewriteContext context, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean inInterface) throws CoreException {
-		return createImplementationStub(unit, rewrite, imports, context, binding, null, type, settings, inInterface);
+			ImportRewriteContext context, IMethodBinding binding, ITypeBinding targetType, CodeGenerationSettings settings, boolean inInterface) throws CoreException {
+		return createImplementationStub(unit, rewrite, imports, context, binding, null, targetType, settings, inInterface);
 	}
 	
 	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports,
-			ImportRewriteContext context, IMethodBinding binding, String[] parameterNames, String type, CodeGenerationSettings settings, boolean inInterface) throws CoreException {
+			ImportRewriteContext context, IMethodBinding binding, String[] parameterNames, ITypeBinding targetType, CodeGenerationSettings settings, boolean inInterface) throws CoreException {
 		Assert.isNotNull(imports);
 		Assert.isNotNull(rewrite);
 
 		AST ast= rewrite.getAST();
+		String type= Bindings.getTypeQualifiedName(targetType);
 
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(getImplementationModifiers(ast, binding, inInterface, imports, context));
@@ -371,7 +372,11 @@ public final class StubUtility2 {
 			} else {
 				SuperMethodInvocation invocation= ast.newSuperMethodInvocation();
 				if (declaringType.isInterface()) {
-					String qualifier= imports.addImport(declaringType.getErasure(), context);
+					ITypeBinding supertype= Bindings.findImmediateSuperTypeInHierarchy(targetType, declaringType.getTypeDeclaration().getQualifiedName());
+					if (supertype == null) { // should not happen, but better use the type we have rather than failing
+						supertype= declaringType;
+					}
+					String qualifier= imports.addImport(supertype.getTypeDeclaration(), context);
 					Name name= ASTNodeFactory.newName(ast, qualifier);
 					invocation.setQualifier(name);
 				}

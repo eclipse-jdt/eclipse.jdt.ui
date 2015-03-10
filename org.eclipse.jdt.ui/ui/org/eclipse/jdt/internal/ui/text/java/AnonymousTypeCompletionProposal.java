@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -231,7 +231,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			ListRewrite rewriter= rewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
 			for (int i= 0; i < methodsToOverride.length; i++) {
 				IMethodBinding curr= methodsToOverride[i];
-				MethodDeclaration stub= StubUtility2.createImplementationStub(workingCopy, rewrite, importRewrite, null, curr, dummyTypeBinding.getName(), settings, dummyTypeBinding.isInterface());
+				MethodDeclaration stub= StubUtility2.createImplementationStub(workingCopy, rewrite, importRewrite, null, curr, dummyTypeBinding, settings, dummyTypeBinding.isInterface());
 				rewriter.insertFirst(stub, null);
 			}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -300,7 +300,7 @@ public class Bindings {
 
 	/**
 	 * Finds the field specified by <code>fieldName</code> in
-	 * the given <code>type</code>. Returns <code>null</code> if no such field exits.
+	 * the given <code>type</code>. Returns <code>null</code> if no such field exists.
 	 * @param type the type to search the field in
 	 * @param fieldName the field name
 	 * @return the binding representing the field or <code>null</code>
@@ -347,7 +347,7 @@ public class Bindings {
 
 	/**
 	 * Finds the method specified by <code>methodName</code> and <code>parameters</code> in
-	 * the given <code>type</code>. Returns <code>null</code> if no such method exits.
+	 * the given <code>type</code>. Returns <code>null</code> if no such method exists.
 	 * @param type The type to search the method in
 	 * @param methodName The name of the method to find
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only
@@ -402,7 +402,7 @@ public class Bindings {
 
 	/**
 	 * Finds the method specified by <code>methodName</code> and <code>parameters</code> in
-	 * the given <code>type</code>. Returns <code>null</code> if no such method exits.
+	 * the given <code>type</code>. Returns <code>null</code> if no such method exists.
 	 * @param type The type to search the method in
 	 * @param methodName The name of the method to find
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
@@ -424,6 +424,36 @@ public class Bindings {
 		return null;
 	}
 
+	/**
+	 * Finds the method specified by <code>methodName</code> and <code>parameters</code> in
+	 * the given <code>type</code>. Returns <code>null</code> if no such method exists.
+	 * <p>
+	 * This variant of {@link #findMethodInType(ITypeBinding, String, String[])} looks for a method
+	 * whose {@link IMethodBinding#getMethodDeclaration() declaration}'s parameters matches the
+	 * given parameters.
+	 * </p>
+	 * 
+	 * @param type The type to search the method in
+	 * @param methodName The name of the method to find
+	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
+	 * @return the method binding representing the method
+	 */
+	public static IMethodBinding findMethodWithDeclaredParameterTypesInType(ITypeBinding type, String methodName, String[] parameters) {
+		if (type.isPrimitive())
+			return null;
+		IMethodBinding[] methods= type.getDeclaredMethods();
+		for (int i= 0; i < methods.length; i++) {
+			if (parameters == null) {
+				if (methodName.equals(methods[i].getName()))
+					return methods[i];
+			} else {
+				if (isEqualMethod(methods[i].getMethodDeclaration(), methodName, parameters))
+					return methods[i];
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Finds the method specified by <code>methodName</code> and <code>parameters</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
@@ -455,7 +485,7 @@ public class Bindings {
 
 	/**
 	 * Finds the method in the given <code>type</code> that is overridden by the specified <code>method</code>.
-	 * Returns <code>null</code> if no such method exits.
+	 * Returns <code>null</code> if no such method exists.
 	 * @param type The type to search the method in
 	 * @param method The specified method that would override the result
 	 * @return the method binding of the method that is overridden by the specified <code>method</code>, or <code>null</code>
@@ -879,6 +909,34 @@ public class Bindings {
 		return null;
 	}
 
+	/**
+	 * Searches for a type binding for a given fully qualified type in the hierarchy of a type.
+	 * Returns the immediate super type in whose supertype hierarchy the given type appears, or <code>null</code> if no type binding is found.
+	 * @param hierarchyType the binding representing the hierarchy
+	 * @param fullyQualifiedTypeName the fully qualified name to search for
+	 * @return the type binding
+	 */
+	public static ITypeBinding findImmediateSuperTypeInHierarchy(ITypeBinding hierarchyType, String fullyQualifiedTypeName) {
+		if (hierarchyType.isArray() || hierarchyType.isPrimitive()) {
+			return null;
+		}
+		ITypeBinding superClass= hierarchyType.getSuperclass();
+		if (superClass != null) {
+			ITypeBinding res= findTypeInHierarchy(superClass, fullyQualifiedTypeName);
+			if (res != null) {
+				return superClass;
+			}
+		}
+		ITypeBinding[] superInterfaces= hierarchyType.getInterfaces();
+		for (int i= 0; i < superInterfaces.length; i++) {
+			ITypeBinding res= findTypeInHierarchy(superInterfaces[i], fullyQualifiedTypeName);
+			if (res != null) {
+				return superInterfaces[i];
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Returns the binding of the variable written in an Assignment.
 	 * @param assignment The assignment

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1872,12 +1872,11 @@ public class LocalCorrectionsSubProcessor {
 		LinkedCorrectionProposal proposal2= new LinkedCorrectionProposal(label, cu, rewrite, IProposalRelevance.OVERRIDE_HASHCODE, image);
 		ImportRewrite importRewrite= proposal2.createImportRewrite(astRoot);
 		
-		String typeQualifiedName= type.getTypeQualifiedName('.');
 		final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
 		
 		try {
 			ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(astRoot, problem.getOffset(), importRewrite);
-			MethodDeclaration hashCode= StubUtility2.createImplementationStub(cu, rewrite, importRewrite, importContext, superHashCode, typeQualifiedName, settings, false);
+			MethodDeclaration hashCode= StubUtility2.createImplementationStub(cu, rewrite, importRewrite, importContext, superHashCode, binding, settings, false);
 			BodyDeclarationRewrite.create(rewrite, typeDeclaration).insert(hashCode, null);
 			
 			proposal2.setEndPosition(rewrite.track(hashCode));
@@ -1937,27 +1936,34 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 
-		String parametersString= args[1];
-		String[] parameters= null;
-		if (parametersString != null) {
-			parameters= parametersString.split(", "); //$NON-NLS-1$			
+		String[] parameters1= { };
+		if (args[1] != null && args[1].length() != 0) {
+			parameters1= args[1].split(", "); //$NON-NLS-1$
+		}
+		String[] parameters2= { };
+		if (args[2] != null && args[2].length() != 0) {
+			parameters2= args[2].split(", "); //$NON-NLS-1$
 		}
 
-		addOverrideProposal(typeNode, typeBinding, methodName, parameters, args[3], context, proposals);
-		addOverrideProposal(typeNode, typeBinding, methodName, parameters, args[4], context, proposals);
+		addOverrideProposal(typeNode, typeBinding, methodName, parameters1, args[3], context, proposals);
+		addOverrideProposal(typeNode, typeBinding, methodName, parameters2, args[4], context, proposals);
 	}
 
 	private static void addOverrideProposal(ASTNode typeNode, ITypeBinding typeBinding, String methodName, String[] parameters, String superType,
 			IInvocationContext context, Collection<ICommandAccess> proposals) {
 		ITypeBinding superTypeBinding= null;
 		if (superType != null) {
+			int i= superType.indexOf('<');
+			if (i > 0) {
+				superType= superType.substring(0, i);
+			}
 			superTypeBinding= Bindings.findTypeInHierarchy(typeBinding, superType);
 		}
 		if (superTypeBinding == null) {
 			return;
 		}
 
-		IMethodBinding methodToOverride= Bindings.findMethodInType(superTypeBinding, methodName, parameters);
+		IMethodBinding methodToOverride= Bindings.findMethodWithDeclaredParameterTypesInType(superTypeBinding, methodName, parameters);
 		if (methodToOverride == null) {
 			return;
 		}
@@ -1974,7 +1980,7 @@ public class LocalCorrectionsSubProcessor {
 		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(astRoot, typeNode.getStartPosition(), importRewrite);
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
 		try {
-			MethodDeclaration stub= StubUtility2.createImplementationStub(cu, rewrite, importRewrite, importRewriteContext, methodToOverride, typeBinding.getName(), settings,
+			MethodDeclaration stub= StubUtility2.createImplementationStub(cu, rewrite, importRewrite, importRewriteContext, methodToOverride, typeBinding, settings,
 					typeBinding.isInterface());
 			BodyDeclarationRewrite.create(rewrite, typeNode).insert(stub, null);
 

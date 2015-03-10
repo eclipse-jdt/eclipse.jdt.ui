@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,8 +30,8 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -104,7 +104,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 
 		for (int i= 0; i < unimplementedMethods.length; i++) {
 			IMethodBinding curr= unimplementedMethods[i];
-			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(unit, rewrite, imports, context, curr, curr.getDeclaringClass().getName(), settings, false);
+			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(unit, rewrite, imports, context, curr, curr.getDeclaringClass(), settings, false);
 			listRewrite.insertLast(newMethodDecl, createTextEditGroup(CorrectionMessages.AddUnimplementedMethodsOperation_AddMissingMethod_group, cuRewrite));
 		}
 	}

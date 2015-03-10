@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -36,6 +33,9 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 
@@ -248,7 +248,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		buf.append("public interface E1 extends FI1, FI2 {\n");
 		buf.append("\n");
 		buf.append("    @Override\n");
-		buf.append("    public default void foo(int j, String s) {\n");
+		buf.append("    default void foo(int j, String s) {\n");
 		buf.append("        FI2.super.foo(j, s);\n");
 		buf.append("    }\n");
 		buf.append("    \n");
@@ -267,7 +267,7 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		buf.append("public interface E1 extends FI1, FI2 {\n");
 		buf.append("\n");
 		buf.append("    @Override\n");
-		buf.append("    public default void foo(int i, String s) {\n");
+		buf.append("    default void foo(int i, String s) {\n");
 		buf.append("        FI1.super.foo(i, s);\n");
 		buf.append("    }\n");
 		buf.append("    \n");
@@ -337,6 +337,140 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		buf.append("        FI1.super.foo(i, s);\n");
 		buf.append("    }\n");
 		buf.append("    \n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testOverrideDefaultMethod_multiLevel() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("interface I1<T1> {\n");
+		buf.append("    default void def(T1 t1) { }\n");
+		buf.append("}\n");
+		buf.append("interface I2<T2> {\n");
+		buf.append("    default void def(T2 t2) { }\n");
+		buf.append("}\n");
+		buf.append("interface I22<T22> extends I2<T22> { }\n");
+		buf.append("interface Both extends I1<List<String>>, I22<List<String>> {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("I1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("interface I1<T1> {\n");
+		buf.append("    default void def(T1 t1) { }\n");
+		buf.append("}\n");
+		buf.append("interface I2<T2> {\n");
+		buf.append("    default void def(T2 t2) { }\n");
+		buf.append("}\n");
+		buf.append("interface I22<T22> extends I2<T22> { }\n");
+		buf.append("interface Both extends I1<List<String>>, I22<List<String>> {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    default void def(List<String> t2) {\n");
+		buf.append("        I22.super.def(t2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("interface I1<T1> {\n");
+		buf.append("    default void def(T1 t1) { }\n");
+		buf.append("}\n");
+		buf.append("interface I2<T2> {\n");
+		buf.append("    default void def(T2 t2) { }\n");
+		buf.append("}\n");
+		buf.append("interface I22<T22> extends I2<T22> { }\n");
+		buf.append("interface Both extends I1<List<String>>, I22<List<String>> {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    default void def(List<String> t1) {\n");
+		buf.append("        I1.super.def(t1);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testOverrideDefaultMethod_noParam() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface I1 {\n");
+		buf.append("    default void def() { }\n");
+		buf.append("}\n");
+		buf.append("interface I2<T2> {\n");
+		buf.append("    default void def() { }\n");
+		buf.append("}\n");
+		buf.append("interface I22 extends I2<String> { }\n");
+		buf.append("interface Both extends I1, I22 {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("I1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface I1 {\n");
+		buf.append("    default void def() { }\n");
+		buf.append("}\n");
+		buf.append("interface I2<T2> {\n");
+		buf.append("    default void def() { }\n");
+		buf.append("}\n");
+		buf.append("interface I22 extends I2<String> { }\n");
+		buf.append("interface Both extends I1, I22 {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    default void def() {\n");
+		buf.append("        I22.super.def();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface I1 {\n");
+		buf.append("    default void def() { }\n");
+		buf.append("}\n");
+		buf.append("interface I2<T2> {\n");
+		buf.append("    default void def() { }\n");
+		buf.append("}\n");
+		buf.append("interface I22 extends I2<String> { }\n");
+		buf.append("interface Both extends I1, I22 {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    default void def() {\n");
+		buf.append("        I1.super.def();\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		expected[1]= buf.toString();
 

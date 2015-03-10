@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -637,8 +637,8 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fFactoryCU, decl.getStartPosition(), fImportRewriter);
 			for (int i= 0; i < unimplementedMethods.length; i++) {
 				IMethodBinding unImplementedMethod= unimplementedMethods[i];
-				MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(fCUHandle, unitRewriter, fImportRewriter, context, unImplementedMethod, unImplementedMethod.getDeclaringClass()
-						.getName(), settings, false);
+				MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(fCUHandle, unitRewriter, fImportRewriter, context,
+						unImplementedMethod, unImplementedMethod.getDeclaringClass(), settings, false);
 				decl.bodyDeclarations().add(newMethodDecl);
 			}
 			newCtorCall.setAnonymousClassDeclaration(decl);
