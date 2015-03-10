@@ -275,6 +275,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ConstructorReferenceNotBelow18:
 			case IProblem.IntersectionCastNotBelow18:
 			case IProblem.InvalidUsageOfTypeAnnotations:
+			case IProblem.DuplicateInheritedDefaultMethods:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId);
@@ -766,6 +767,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.IllegalQualifiedEnumConstantLabel:
 				LocalCorrectionsSubProcessor.addIllegalQualifiedEnumConstantLabelProposal(context, problem, proposals);
+				break;
+			case IProblem.DuplicateInheritedDefaultMethods:
+				LocalCorrectionsSubProcessor.addOverrideDefaultMethodProposal(context, problem, proposals);
 				break;
 			default:
 		}

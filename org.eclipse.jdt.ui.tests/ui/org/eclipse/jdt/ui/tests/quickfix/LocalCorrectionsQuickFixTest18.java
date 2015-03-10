@@ -148,4 +148,199 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
+
+	public void testOverrideDefaultMethod1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface FI1 {\n");
+		buf.append("    default void foo(int i, String s) {}\n");
+		buf.append("}\n");
+		buf.append("interface FI2 {\n");
+		buf.append("    default void foo(int j, String s) {}\n");
+		buf.append("}\n");
+		buf.append("public class E1 implements FI1, FI2 {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface FI1 {\n");
+		buf.append("    default void foo(int i, String s) {}\n");
+		buf.append("}\n");
+		buf.append("interface FI2 {\n");
+		buf.append("    default void foo(int j, String s) {}\n");
+		buf.append("}\n");
+		buf.append("public class E1 implements FI1, FI2 {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    public void foo(int j, String s) {\n");
+		buf.append("        FI2.super.foo(j, s);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface FI1 {\n");
+		buf.append("    default void foo(int i, String s) {}\n");
+		buf.append("}\n");
+		buf.append("interface FI2 {\n");
+		buf.append("    default void foo(int j, String s) {}\n");
+		buf.append("}\n");
+		buf.append("public class E1 implements FI1, FI2 {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    public void foo(int i, String s) {\n");
+		buf.append("        FI1.super.foo(i, s);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testOverrideDefaultMethod2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface FI1 {\n");
+		buf.append("    default void foo(int i, String s) {}\n");
+		buf.append("}\n");
+		buf.append("interface FI2 {\n");
+		buf.append("    default void foo(int j, String s) {}\n");
+		buf.append("}\n");
+		buf.append("public interface E1 extends FI1, FI2 {\n");
+		buf.append("    \n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface FI1 {\n");
+		buf.append("    default void foo(int i, String s) {}\n");
+		buf.append("}\n");
+		buf.append("interface FI2 {\n");
+		buf.append("    default void foo(int j, String s) {}\n");
+		buf.append("}\n");
+		buf.append("public interface E1 extends FI1, FI2 {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    public default void foo(int j, String s) {\n");
+		buf.append("        FI2.super.foo(j, s);\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface FI1 {\n");
+		buf.append("    default void foo(int i, String s) {}\n");
+		buf.append("}\n");
+		buf.append("interface FI2 {\n");
+		buf.append("    default void foo(int j, String s) {}\n");
+		buf.append("}\n");
+		buf.append("public interface E1 extends FI1, FI2 {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    public default void foo(int i, String s) {\n");
+		buf.append("        FI1.super.foo(i, s);\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testOverrideDefaultMethod3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface FI1 {\n");
+		buf.append("    default void foo(int i, String s) {}\n");
+		buf.append("}\n");
+		buf.append("interface FI2 {\n");
+		buf.append("    default void foo(int j, String s) {}\n");
+		buf.append("}\n");
+		buf.append("public enum E1 implements FI1, FI2 {\n");
+		buf.append("    \n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface FI1 {\n");
+		buf.append("    default void foo(int i, String s) {}\n");
+		buf.append("}\n");
+		buf.append("interface FI2 {\n");
+		buf.append("    default void foo(int j, String s) {}\n");
+		buf.append("}\n");
+		buf.append("public enum E1 implements FI1, FI2 {\n");
+		buf.append("    ;\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    public void foo(int j, String s) {\n");
+		buf.append("        FI2.super.foo(j, s);\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface FI1 {\n");
+		buf.append("    default void foo(int i, String s) {}\n");
+		buf.append("}\n");
+		buf.append("interface FI2 {\n");
+		buf.append("    default void foo(int j, String s) {}\n");
+		buf.append("}\n");
+		buf.append("public enum E1 implements FI1, FI2 {\n");
+		buf.append("    ;\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    public void foo(int i, String s) {\n");
+		buf.append("        FI1.super.foo(i, s);\n");
+		buf.append("    }\n");
+		buf.append("    \n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 }

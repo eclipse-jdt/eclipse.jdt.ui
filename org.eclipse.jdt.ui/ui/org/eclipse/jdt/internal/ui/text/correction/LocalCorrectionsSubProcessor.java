@@ -1903,4 +1903,86 @@ public class LocalCorrectionsSubProcessor {
 			QuickAssistProcessor.getConvertLambdaToAnonymousClassCreationsProposals(context, coveringNode, proposals);
 		}
 	}
+
+	public static void addOverrideDefaultMethodProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		CompilationUnit astRoot= context.getASTRoot();
+
+		ASTNode selectedNode= problem.getCoveringNode(astRoot);
+		if (selectedNode == null) {
+			return;
+		}
+
+		StructuralPropertyDescriptor locationInParent= selectedNode.getLocationInParent();
+		if (locationInParent != TypeDeclaration.NAME_PROPERTY && locationInParent != EnumDeclaration.NAME_PROPERTY) {
+			return;
+		}
+
+		ASTNode typeNode= selectedNode.getParent();
+		if (typeNode == null) {
+			return;
+		}
+
+		ITypeBinding typeBinding= ((AbstractTypeDeclaration) typeNode).resolveBinding();
+		if (typeBinding == null) {
+			return;
+		}
+
+		String[] args= problem.getProblemArguments();
+		if (args.length < 5) {
+			return;
+		}
+
+		String methodName= args[0];
+		if (methodName == null) {
+			return;
+		}
+
+		String parametersString= args[1];
+		String[] parameters= null;
+		if (parametersString != null) {
+			parameters= parametersString.split(", "); //$NON-NLS-1$			
+		}
+
+		addOverrideProposal(typeNode, typeBinding, methodName, parameters, args[3], context, proposals);
+		addOverrideProposal(typeNode, typeBinding, methodName, parameters, args[4], context, proposals);
+	}
+
+	private static void addOverrideProposal(ASTNode typeNode, ITypeBinding typeBinding, String methodName, String[] parameters, String superType,
+			IInvocationContext context, Collection<ICommandAccess> proposals) {
+		ITypeBinding superTypeBinding= null;
+		if (superType != null) {
+			superTypeBinding= Bindings.findTypeInHierarchy(typeBinding, superType);
+		}
+		if (superTypeBinding == null) {
+			return;
+		}
+
+		IMethodBinding methodToOverride= Bindings.findMethodInType(superTypeBinding, methodName, parameters);
+		if (methodToOverride == null) {
+			return;
+		}
+
+		String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_override_default_method_description, superTypeBinding.getName());
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
+		ICompilationUnit cu= context.getCompilationUnit();
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, IProposalRelevance.OVERRIDE_DEFAULT_METHOD, image);
+
+		ImportRewrite importRewrite= proposal.createImportRewrite(astRoot);
+		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(astRoot, typeNode.getStartPosition(), importRewrite);
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
+		try {
+			MethodDeclaration stub= StubUtility2.createImplementationStub(cu, rewrite, importRewrite, importRewriteContext, methodToOverride, typeBinding.getName(), settings,
+					typeBinding.isInterface());
+			BodyDeclarationRewrite.create(rewrite, typeNode).insert(stub, null);
+
+			proposal.setEndPosition(rewrite.track(stub));
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}
+
+		proposals.add(proposal);
+	}
 }
