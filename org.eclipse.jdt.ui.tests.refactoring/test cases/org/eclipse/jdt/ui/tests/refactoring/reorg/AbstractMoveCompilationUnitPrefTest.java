@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolic
 import org.eclipse.jdt.ui.tests.refactoring.ccp.MockReorgQueries;
 
 
-public class AbstractMoveCompilationUnitPrefTest extends RepeatingRefactoringPerformanceTestCase {
+public abstract class AbstractMoveCompilationUnitPrefTest extends RepeatingRefactoringPerformanceTestCase {
 
 	public AbstractMoveCompilationUnitPrefTest(String name) {
 		super(name);

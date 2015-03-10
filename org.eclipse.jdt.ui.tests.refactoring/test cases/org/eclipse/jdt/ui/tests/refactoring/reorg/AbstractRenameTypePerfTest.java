@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 
 
-public class AbstractRenameTypePerfTest extends RepeatingRefactoringPerformanceTestCase {
+public abstract class AbstractRenameTypePerfTest extends RepeatingRefactoringPerformanceTestCase {
 
 	public AbstractRenameTypePerfTest(String name) {
 		super(name);

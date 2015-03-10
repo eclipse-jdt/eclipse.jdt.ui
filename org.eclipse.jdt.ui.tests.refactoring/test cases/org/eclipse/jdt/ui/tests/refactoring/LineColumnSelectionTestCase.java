@@ -37,7 +37,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
  * - testSimple_A() -> package 'simple', file 'A.java'; result in package 'simple.out'<br>
  * - testSuch_ALongName17() -> package 'such', file 'ALongName17.java'
  */
-public class LineColumnSelectionTestCase extends AbstractCUTestCase {
+public abstract class LineColumnSelectionTestCase extends AbstractCUTestCase {
 
 	public LineColumnSelectionTestCase(String name) {
 		super(name);

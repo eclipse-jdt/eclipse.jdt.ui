@@ -43,16 +43,6 @@
           <dependencies>
             <dependency>
               <type>eclipse-plugin</type>
-              <artifactId>org.eclipse.jdt.annotation</artifactId>
-              <version>0.0.0</version>
-            </dependency>
-            <dependency>
-              <type>eclipse-plugin</type>
-              <artifactId>org.eclipse.jdt.junit4.runtime</artifactId>
-              <version>0.0.0</version>
-            </dependency>
-            <dependency>
-              <type>eclipse-plugin</type>
               <artifactId>org.eclipse.equinox.event</artifactId>
               <version>0.0.0</version>
             </dependency>

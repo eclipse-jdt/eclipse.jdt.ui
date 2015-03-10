@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 
-public class AbstractRenamePackagePerfTest extends RepeatingRefactoringPerformanceTestCase {
+public abstract class AbstractRenamePackagePerfTest extends RepeatingRefactoringPerformanceTestCase {
 
 	public AbstractRenamePackagePerfTest(String name) {
 		super(name);

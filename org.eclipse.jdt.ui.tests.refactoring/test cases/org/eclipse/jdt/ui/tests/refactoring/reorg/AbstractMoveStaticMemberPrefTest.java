@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersPr
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
-public class AbstractMoveStaticMemberPrefTest extends RepeatingRefactoringPerformanceTestCase {
+public abstract class AbstractMoveStaticMemberPrefTest extends RepeatingRefactoringPerformanceTestCase {
 
 	public AbstractMoveStaticMemberPrefTest(String name) {
 		super(name);

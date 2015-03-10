@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
 
-public class AbstractRenameMethodPerfTest extends RepeatingRefactoringPerformanceTestCase {
+public abstract class AbstractRenameMethodPerfTest extends RepeatingRefactoringPerformanceTestCase {
 
 	public AbstractRenameMethodPerfTest(String name) {
 		super(name);

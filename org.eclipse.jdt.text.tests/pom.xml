@@ -37,6 +37,7 @@
         <configuration>
           <useUIHarness>true</useUIHarness>
           <useUIThread>true</useUIThread>
+          <product>org.eclipse.sdk.ide</product>
           <dependencies>
             <dependency>
               <type>eclipse-plugin</type>
