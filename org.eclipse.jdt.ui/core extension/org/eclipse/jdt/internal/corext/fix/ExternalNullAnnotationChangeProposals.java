@@ -13,9 +13,11 @@ package org.eclipse.jdt.internal.corext.fix;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.NONNULL;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.NO_ANNOTATION;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.NULLABLE;
+import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.annotateMember;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.annotateMethodParameterType;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.annotateMethodReturnType;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.extractGenericSignature;
+import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.extractGenericTypeSignature;
 import static org.eclipse.jdt.core.util.ExternalAnnotationUtil.getAnnotationFile;
 import static org.eclipse.jdt.internal.ui.text.spelling.WordCorrectionProposal.getHtmlRepresentation;
 
@@ -51,8 +53,10 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Dimension;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
@@ -61,6 +65,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.util.ExternalAnnotationUtil;
 import org.eclipse.jdt.core.util.ExternalAnnotationUtil.MergeStrategy;
@@ -259,6 +264,19 @@ public class ExternalNullAnnotationChangeProposals {
 		}
 	}
 
+	static class FieldAnnotationRewriteProposal extends SignatureAnnotationChangeProposal {
+
+		@Override
+		protected void dryRun() {
+			fDryRun= ExternalAnnotationUtil.annotateType(fCurrentAnnotated, fAnnotatedSignature, fMergeStrategy);
+		}
+
+		@Override
+		protected void doAnnotateMember(IProgressMonitor monitor) throws CoreException, UnsupportedEncodingException, IOException {
+			annotateMember(fAffectedTypeName, fAnnotationFile, fSelector, fSignature, fAnnotatedSignature, fMergeStrategy, monitor);
+		}
+	}
+
 	/* Quick assist on class file, propose changes an any type detail. */
 	public static void collectExternalAnnotationProposals(ICompilationUnit cu, ASTNode coveringNode, int offset, ArrayList<IJavaCompletionProposal> resultingCollection) {
 
@@ -293,8 +311,10 @@ public class ExternalNullAnnotationChangeProposals {
 				outer= next;
 		}
 		boolean useJava8= JavaModelUtil.is18OrHigher(javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
-		if (!useJava8 && outer != inner) {
-			return; // below 1.8 we can only annotate the top type (not type parameter)
+		if (!useJava8 && outer != inner) { // below 1.8 we can only annotate the top type (not type parameter)
+			// still need to handle ParameterizedType (outer) with SimpleType (inner)
+			if (!(outer.getNodeType() == ASTNode.PARAMETERIZED_TYPE && inner.getParent() == outer))
+				return;
 		}
 		if (outer instanceof Type) {
 			ITypeBinding typeBinding= ((Type) outer).resolveBinding();
@@ -322,6 +342,12 @@ public class ExternalNullAnnotationChangeProposals {
 				int paramIdx= method.parameters().indexOf(param);
 				if (paramIdx != -1)
 					creator= new ParameterProposalCreator(cu, method.resolveBinding(), paramIdx);
+			}
+		} else if (locationInParent == FieldDeclaration.TYPE_PROPERTY) {
+			FieldDeclaration field= (FieldDeclaration) ASTNodes.getParent(coveringNode, FieldDeclaration.class);
+			if (field.fragments().size() > 0) {
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment) field.fragments().get(0);
+				creator= new FieldProposalCreator(cu, fragment.resolveBinding());
 			}
 		}
 		if (creator != null) {
@@ -403,6 +429,18 @@ public class ExternalNullAnnotationChangeProposals {
 		@Override
 		SignatureAnnotationChangeProposal doCreate(String annotatedSignature, String label) {
 			return new ParameterAnnotationRewriteProposal(fParamIdx);
+		}
+	}
+
+	private static class FieldProposalCreator extends ProposalCreator {
+
+		FieldProposalCreator(ICompilationUnit cu, IVariableBinding fieldBinding) {
+			super(cu, fieldBinding.getDeclaringClass(), fieldBinding.getName(), extractGenericTypeSignature(fieldBinding.getType()));
+		}
+
+		@Override
+		SignatureAnnotationChangeProposal doCreate(String annotatedSignature, String label) {
+			return new FieldAnnotationRewriteProposal();
 		}
 	}
 

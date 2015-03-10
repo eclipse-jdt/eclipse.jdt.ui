@@ -340,8 +340,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	 * Apply the second proposal and check the effect.
 	 * @throws Exception
 	 */
-	// FIXME(stephan): enable once implemented
-	public void _testAnnotateField1() throws Exception {
+	public void testAnnotateField1() throws Exception {
 		
 		String NODE_PATH= "pack/age/Node";
 		String[] pathAndContents= new String[] { 
@@ -390,6 +389,66 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 					"value\n" +
 					" TV;\n" +
 					" T0V;\n";
+			checkContentOfFile("annotation file content", annotationFile, expectedContent);
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+	}
+
+	/**
+	 * Assert two proposals ("@NonNull" and "@Nullable") on a parameterized field type.
+	 * Apply the second proposal and check the effect.
+	 * @throws Exception
+	 */
+	public void testAnnotateField2() throws Exception {
+		
+		String NODE_PATH= "pack/age/Node";
+		String[] pathAndContents= new String[] { 
+					NODE_PATH+".java",
+					"package pack.age;\n" +
+					"public class Node<V> {\n" +
+					"    Node<String> next;\n" +
+					"}\n"
+				};
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5);
+		IType type= fJProject1.findType(NODE_PATH.replace('/', '.'));
+		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+
+		try {
+			int offset= pathAndContents[1].indexOf("Node<String> next");
+
+			List<ICompletionProposal> list= collectAnnotateProposals(javaEditor, offset);
+			
+			assertCorrectLabels(list);
+			assertNumberOfProposals(list, 2);
+			
+			ICompletionProposal proposal= findProposalByName("Annotate as '@NonNull Node'", list);
+			String expectedInfo=
+					"<dl><dt>next</dt>" +
+					"<dd>Lpack/age/Node&lt;Ljava/lang/String;&gt;;</dd>" +
+					"<dd>L<b>1</b>pack/age/Node&lt;Ljava/lang/String;&gt;;</dd>" + // <= 1
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			proposal= findProposalByName("Annotate as '@Nullable Node'", list);
+			expectedInfo=
+					"<dl><dt>next</dt>" +
+					"<dd>Lpack/age/Node&lt;Ljava/lang/String;&gt;;</dd>" +
+					"<dd>L<b>0</b>pack/age/Node&lt;Ljava/lang/String;&gt;;</dd>" + // <= 0
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
+			proposal.apply(document);
+			
+			IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(NODE_PATH+".eea"));
+			assertTrue("Annotation file should have been created", annotationFile.exists());
+
+			String expectedContent=
+					"class pack/age/Node\n" +
+					"next\n" +
+					" Lpack/age/Node<Ljava/lang/String;>;\n" +
+					" L0pack/age/Node<Ljava/lang/String;>;\n";
 			checkContentOfFile("annotation file content", annotationFile, expectedContent);
 		} finally {
 			JavaPlugin.getActivePage().closeAllEditors(false);

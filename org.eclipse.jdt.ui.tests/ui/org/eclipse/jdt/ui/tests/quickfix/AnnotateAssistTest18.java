@@ -446,8 +446,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Apply the second proposal and check the effect.
 	 * @throws Exception
 	 */
-	// FIXME(stephan): enable once implemented
-	public void _testAnnotateField2() throws Exception {
+	public void testAnnotateField1() throws Exception {
 		
 		String NODE_PATH= "pack/age/Node";
 		String[] pathAndContents= new String[] { 
