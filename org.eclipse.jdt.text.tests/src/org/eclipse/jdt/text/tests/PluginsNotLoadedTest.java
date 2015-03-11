@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,10 +13,6 @@ package org.eclipse.jdt.text.tests;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.osgi.framework.Bundle;
 
@@ -36,6 +32,10 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 
 /**
@@ -131,8 +131,9 @@ public class PluginsNotLoadedTest extends TestCase {
 			"org.eclipse.ui.examples.rcp.texteditor",
 			"org.eclipse.ui.examples.recipeeditor",
 			"org.eclipse.ui.externaltools",
-			"org.eclipse.ui.navigator",
-			"org.eclipse.ui.navigator.resources",
+// Bug 416915: Allow to run tests with tycho-surefire-plugin
+//			"org.eclipse.ui.navigator",
+//			"org.eclipse.ui.navigator.resources",
 			"org.eclipse.ui.views.properties.tabbed",
 			"org.eclipse.ui.win32",
 			"org.eclipse.ui.workbench.compatibility",
