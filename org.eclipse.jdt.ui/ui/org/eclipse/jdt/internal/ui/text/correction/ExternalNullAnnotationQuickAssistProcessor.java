@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
-import org.eclipse.jdt.internal.corext.fix.ExternalNullAnnoatationChangeProposals;
+import org.eclipse.jdt.internal.corext.fix.ExternalNullAnnotationChangeProposals;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
@@ -88,7 +88,7 @@ public class ExternalNullAnnotationQuickAssistProcessor implements IQuickAssistP
 			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<IJavaCompletionProposal>();
 
 			// shortcut (we only have one processor):
-			ExternalNullAnnoatationChangeProposals.collectExternalAnnotationProposals(context.getCompilationUnit(),
+			ExternalNullAnnotationChangeProposals.collectExternalAnnotationProposals(context.getCompilationUnit(),
 					context.getCoveringNode(), documentOffset, proposals);
 
 			return proposals.toArray(new IJavaCompletionProposal[proposals.size()]);

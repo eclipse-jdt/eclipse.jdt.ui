@@ -84,7 +84,7 @@ import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
  *      null annotations to library classes</a>
  * @since 3.11
  */
-public class ExternalNullAnnoatationChangeProposals {
+public class ExternalNullAnnotationChangeProposals {
 
 	static abstract class SignatureAnnotationChangeProposal implements IJavaCompletionProposal, ICommandAccess {
 
