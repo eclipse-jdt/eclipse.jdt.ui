@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 IBM Corporation and others.
+ * Copyright (c) 2008, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,6 +80,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.filters.EmptyLibraryContainerFilter;
+import org.eclipse.jdt.internal.ui.filters.SyntheticMembersFilter;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.BreadcrumbViewer;
 import org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.EditorBreadcrumb;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
@@ -199,6 +200,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			viewer.setContentProvider(createDropDownContentProvider());
 			viewer.setLabelProvider(createDropDownLabelProvider());
 			viewer.setComparator(new JavaElementComparator());
+			viewer.addFilter(new SyntheticMembersFilter());
 			viewer.addFilter(new ViewerFilter() {
 				@Override
 				public boolean select(Viewer viewer1, Object parentElement, Object element) {
