@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Frits Jalvingh - Contribution for Bug 459831 - [launching] Support attaching external annotations to a JRE container
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
@@ -292,6 +293,12 @@ public interface ISharedImages {
 	 * @since 3.2
 	 */
 	public static final String IMG_OBJS_JAVADOCTAG= JavaPluginImages.IMG_OBJS_JAVADOCTAG;
+
+	/**
+	 * Key to access the shared image or image descriptor for external annotations.
+	 * @since 3.11
+	 */
+	public static final String IMG_OBJS_EXTERNAL_ANNOTATIONS = JavaPluginImages.IMG_OBJS_EXTERNAL_ANNOTATIONS;
 
 	/**
 	 * Returns the shared image managed under the given key.

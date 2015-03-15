@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids <sdavids@gmx.de> bug 38692
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
+ *     Frits Jalvingh <jal@etc.to> - Contribution for Bug 459831 - [launching] Support attaching external annotations to a JRE container
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
@@ -246,6 +247,7 @@ public interface IJavaHelpContextIds {
 	public static final String TYPE_SELECTION_DIALOG2= PREFIX + "type_selection_dialog2_context"; //$NON-NLS-1$
 	public static final String OPEN_PACKAGE_DIALOG= PREFIX + "open_package_dialog_context"; //$NON-NLS-1$
 	public static final String SOURCE_ATTACHMENT_DIALOG= PREFIX + "source_attachment_dialog_context"; //$NON-NLS-1$
+	public static final String EXTERNAL_ANNOTATIONS_ATTACHMENT_DIALOG= PREFIX + "annotations_attachment_dialog_context"; //$NON-NLS-1$
 	public static final String LIBRARIES_WORKBOOK_PAGE_ADVANCED_DIALOG= PREFIX + "advanced_dialog_context"; //$NON-NLS-1$
 	public static final String CONFIRM_SAVE_MODIFIED_RESOURCES_DIALOG= PREFIX + "confirm_save_modified_resources_dialog_context"; //$NON-NLS-1$
 	public static final String NEW_VARIABLE_ENTRY_DIALOG= PREFIX + "new_variable_dialog_context"; //$NON-NLS-1$

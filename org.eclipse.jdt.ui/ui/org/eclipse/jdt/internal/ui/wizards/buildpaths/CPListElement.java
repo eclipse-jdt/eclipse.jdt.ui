@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Frits Jalvingh <jal@etc.to> - Contribution for Bug 459831 - [launching] Support attaching external annotations to a JRE container
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
@@ -121,6 +122,7 @@ public class CPListElement {
 			case IClasspathEntry.CPE_VARIABLE:
 				createAttributeElement(SOURCEATTACHMENT, null, true);
 				createAttributeElement(JAVADOC, null, false);
+				createAttributeElement(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH, null, false);
 				createAttributeElement(SOURCE_ATTACHMENT_ENCODING, null, false);
 				createAttributeElement(NATIVE_LIB_PATH, null, false);
 				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Philippe Marschall <philippe.marschall@netcetera.ch> - [type wizards] Allow the creation of a compilation unit called package-info.java - https://bugs.eclipse.org/86168
  *     Michael Pellaton <michael.pellaton@netcetera.ch> - [type wizards] Allow the creation of a compilation unit called package-info.java - https://bugs.eclipse.org/86168
+ *     Frits Jalvingh <jal@etc.to> - Contribution for Bug 459831 - [launching] Support attaching external annotations to a JRE container
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
@@ -402,6 +403,27 @@ public final class NewWizardMessages extends NLS {
 	public static String BuildPathSupport_putoncpdialog_message;
 
 	public static String SourceAttachmentDialog_title;
+
+	public static String ExternalAnnotationsDialog_title;
+
+	public static String AnnotationsAttachmentBlock_message;
+	public static String AnnotationsAttachmentBlock_filename_externalfile_button;
+	public static String AnnotationsAttachmentBlock_filename_externalfolder_button;
+	public static String AnnotationsAttachmentBlock_filename_external_label;
+	public static String AnnotationsAttachmentBlock_filename_error_notvalid;
+	public static String AnnotationsAttachmentBlock_filename_error_notabsolute;
+	public static String AnnotationsAttachmentBlock_filename_error_filenotexists;
+	public static String AnnotationsAttachmentBlock_filename_workspace_browse;
+	public static String AnnotationsAttachmentBlock_filename_workspace_label;
+	public static String AnnotationsAttachmentBlock_intjardialog_title;
+	public static String AnnotationsAttachmentBlock_intjardialog_message;
+	public static String AnnotationsAttachmentBlock_external_radiolabel;
+	public static String AnnotationsAttachmentBlock_extjardialog_text;
+	public static String AnnotationsAttachmentBlock_extfolderdialog_text;
+	public static String AnnotationsAttachmentBlock_extfolderdialog_message;
+	public static String AnnotationsAttachmentBlock_workspace_radiolabel;
+
+
 	public static String EditVariableEntryDialog_title;
 	public static String EditVariableEntryDialog_filename_varlabel;
 	public static String EditVariableEntryDialog_filename_variable_button;
@@ -725,6 +747,9 @@ public final class NewWizardMessages extends NLS {
 	public static String ClasspathModifierQueries_delete_linked_folder;
 	public static String ClasspathModifierQueries_do_not_delete_linked_folder;
 	public static String EditVariableEntryDialog_filename_empty;
+
+	public static String CPListLabelProvider_external_annotations_location_label;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, NewWizardMessages.class);
 	}

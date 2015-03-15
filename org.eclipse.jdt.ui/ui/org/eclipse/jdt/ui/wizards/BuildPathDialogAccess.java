@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Frits Jalvingh <jal@etc.to> - Contribution for Bug 459831 - [launching] Support attaching external annotations to a JRE container
  *******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
@@ -55,6 +56,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathContainerWizard;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.EditVariableEntryDialog;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ExternalAnnotationsAttachmentDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.JavadocLocationDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.MultipleFolderSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.NewVariableEntryDialog;
@@ -137,6 +139,23 @@ public final class BuildPathDialogAccess {
 		return null;
 	}
 	
+	/**
+	 * Shows the UI for configuring an external annotations attachment. <code>null</code> is
+	 * returned when the user cancels the dialog. The dialog does not apply any changes.
+	 *
+	 * @param shell The parent shell for the dialog
+	 * @param initialEntry The entry to edit.
+	 * @return Returns the selected path, possibly different from the initialEntry.
+	 * @since 3.11
+	 */
+	public static IPath configureExternalAnnotationsAttachment(Shell shell, IPath initialEntry) {
+		ExternalAnnotationsAttachmentDialog dialog= new ExternalAnnotationsAttachmentDialog(shell, initialEntry);
+		if (dialog.open() == Window.OK) {
+			return dialog.getResult();
+		}
+		return null;
+	}
+
 	/**
 	 * Shows the UI for configuring a javadoc location. <code>null</code> is returned
 	 * if the user cancels the dialog. If OK is pressed, an array of length 1 containing the configured URL is

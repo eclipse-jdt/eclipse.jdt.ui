@@ -12,6 +12,7 @@
 <!--     Francis Upton IV, Oakland Software <francisu@ieee.org> - Add support for Go Into with the ProjectExplorer - https://bugs.eclipse.org/bugs/show_bug.cgi?id=262091 -->
 <!--     Troy Bishop <tjbishop@ca.ibm.com> - Add support for importing/exporting Java Code Style preferences - https://bugs.eclipse.org/bugs/show_bug.cgi?id=304395 -->
 <!--     Eugene Lucash <e.lucash@gmail.com> - [quick assist] Add key binding for Extract method Quick Assist - https://bugs.eclipse.org/424166 -->
+<!--     Frits Jalvingh <jal@etc.to> - Contribution for Bug 459831 - [launching] Support attaching external annotations to a JRE container -->
 <!-- ====================================================================== -->
 <plugin>
 
@@ -170,6 +171,10 @@
       <classpathAttributeConfiguration
       		attributeName="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY"
             class="org.eclipse.jdt.internal.ui.wizards.buildpaths.NativeLibAttributeConfiguration">
+      </classpathAttributeConfiguration>
+      <classpathAttributeConfiguration
+            attributeName="annotationpath"
+            class="org.eclipse.jdt.internal.ui.wizards.buildpaths.ExternalAnnotationsAttributeConfiguration">
       </classpathAttributeConfiguration>      
    </extension>
 
