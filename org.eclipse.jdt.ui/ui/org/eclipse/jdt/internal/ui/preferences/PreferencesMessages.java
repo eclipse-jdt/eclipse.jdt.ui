@@ -12,9 +12,7 @@
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [preferences] Add preference for new compiler warning: MissingSynchronizedModifierInInheritedMethod - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245240
  *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
  *     Thomas Reinhardt <thomas@reinhardt.com> - [build path] user library dialog should allow to select JAR from workspace - http://bugs.eclipse.org/300542
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for
- *     				[compiler][null] inheritance of null annotations as an option - https://bugs.eclipse.org/388281
- *     				Warning option for bug 410218 - https://bugs.eclipse.org/461999
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - [compiler][null] inheritance of null annotations as an option - https://bugs.eclipse.org/388281
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -396,8 +394,6 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_raw_type_reference;
 	public static String ProblemSeveritiesConfigurationBlock_pb_final_param_bound_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_inexact_vararg_label;
-	public static String ProblemSeveritiesConfigurationBlock_pb_discouraged_invocation_unlikely_argument_type_label;
-	public static String ProblemSeveritiesConfigurationBlock_pb_discouraged_invocation_accept_castable_argument_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_accidential_assignement_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_local_variable_hiding_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_field_hiding_label;
