@@ -50,7 +50,6 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -179,7 +178,7 @@ public class ExternalAnnotationsAttachmentBlock {
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
-		layout.numColumns= 4;
+		layout.numColumns= 3;
 		composite.setLayout(layout);
 
 
@@ -192,25 +191,24 @@ public class ExternalAnnotationsAttachmentBlock {
 		message.setLayoutData(gd);
 		message.setText(NewWizardMessages.AnnotationsAttachmentBlock_message);
 
-		fWorkspaceRadio.doFillIntoGrid(composite, 4);
+		fWorkspaceRadio.doFillIntoGrid(composite, 3);
 
-		fWorkspaceFileNameField.doFillIntoGrid(composite, 4);
+		fWorkspaceFileNameField.doFillIntoGrid(composite, 3);
+		LayoutUtil.setHorizontalIndent(fWorkspaceFileNameField.getLabelControl(null));
 		LayoutUtil.setWidthHint(fWorkspaceFileNameField.getTextControl(null), widthHint);
 		LayoutUtil.setHorizontalGrabbing(fWorkspaceFileNameField.getTextControl(null));
 
-		DialogField.createEmptySpace(composite, 4);
+		DialogField.createEmptySpace(composite, 3);
 
-		fExternalRadio.doFillIntoGrid(composite, 4);
-		fExternalFileNameField.doFillIntoGrid(composite, 4);
+		fExternalRadio.doFillIntoGrid(composite, 3);
+		fExternalFileNameField.doFillIntoGrid(composite, 3);
+		LayoutUtil.setHorizontalIndent(fExternalFileNameField.getLabelControl(null));
 		LayoutUtil.setWidthHint(fExternalFileNameField.getTextControl(null), widthHint);
 		LayoutUtil.setHorizontalGrabbing(fExternalFileNameField.getTextControl(null));
 
-		DialogField.createEmptySpace(composite, 1);
+		DialogField.createEmptySpace(composite, 2);
 
 		fExternalFolderButton.doFillIntoGrid(composite, 1);
-
-		LayoutUtil.setHorizontalIndent(fWorkspaceFileNameField.getLabelControl(null));
-		LayoutUtil.setHorizontalIndent(fExternalFileNameField.getLabelControl(null));
 
 		fWorkspaceRadio.attachDialogField(fWorkspaceFileNameField);
 		fExternalRadio.attachDialogFields(new DialogField[] { fExternalFileNameField, fExternalFolderButton });
@@ -296,7 +294,6 @@ public class ExternalAnnotationsAttachmentBlock {
 				return status;
 			}
 			IPath filePath= Path.fromOSString(fileName);
-			IPath resolvedPath;
 			File file= filePath.toFile();
 			IResource res= fWorkspaceRoot.findMember(filePath);
 			boolean exists;
@@ -412,35 +409,6 @@ public class ExternalAnnotationsAttachmentBlock {
 		}
 		return JavaPlugin.getActiveWorkbenchShell();
 	}
-
-	/**
-	 * Takes a path and replaces the beginning with a variable name
-	 * (if the beginning matches with the variables value)
-	 * @param path the path
-	 * @param varName the variable
-	 * @return the modified path
-	 */
-	private IPath modifyPath(IPath path, String varName) {
-		if (varName == null || path == null) {
-			return null;
-		}
-		if (path.isEmpty()) {
-			return new Path(varName);
-		}
-
-		IPath varPath= JavaCore.getClasspathVariable(varName);
-		if (varPath != null) {
-			if (varPath.isPrefixOf(path)) {
-				path= path.removeFirstSegments(varPath.segmentCount());
-			} else {
-				path= new Path(path.lastSegment());
-			}
-		} else {
-			path= new Path(path.lastSegment());
-		}
-		return new Path(varName).append(path);
-	}
-
 
 	/**
 	 * Creates a runnable that sets the annotations attachment by modifying the project's classpath.
