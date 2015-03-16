@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 IBM Corporation and others.
+ * Copyright (c) 2008, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,13 +11,11 @@
 package org.eclipse.jdt.ui.tests.preferences;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import java.util.HashSet;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -28,6 +26,10 @@ import org.eclipse.jdt.internal.ui.preferences.NameConventionConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key;
 import org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.TodoTaskConfigurationBlock;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class OptionsConfigurationBlockTest extends TestCase {
 
@@ -111,20 +113,38 @@ public class OptionsConfigurationBlockTest extends TestCase {
 		}));
 	}
 
-	private void checkConfigurationBlock(Class configurationBlock, HashMap coreFieldLookup) throws IllegalAccessException {
+	private void checkConfigurationBlock(Class configurationBlock, HashMap coreFieldLookup) throws Exception {
+		Method keysMethod;
+		try {
+			keysMethod= configurationBlock.getDeclaredMethod("getKeys");
+		} catch (NoSuchMethodException e) {
+			try {
+				keysMethod= configurationBlock.getDeclaredMethod("getAllKeys");
+			} catch (NoSuchMethodException e1) {
+				keysMethod= configurationBlock.getDeclaredMethod("getKeys", boolean.class);
+			}
+		}
+		keysMethod.setAccessible(true);
+		Key[] keys= (Key[]) (keysMethod.getParameterTypes().length > 0 ? keysMethod.invoke(null, Boolean.FALSE) : keysMethod.invoke(null));
+		HashSet<Key> keySet= new HashSet<Key>(Arrays.asList(keys));
+		
 		Field[] prefFields= configurationBlock.getDeclaredFields();
 		for (int i= 0; i < prefFields.length; i++) {
 			Field field= prefFields[i];
 			field.setAccessible(true);
 			if (field.getType() == Key.class) {
 				Key key= (Key)field.get(null);
+				boolean keyWasInKeySet= keySet.remove(key);
 				if (JavaCore.PLUGIN_ID.equals(key.getQualifier())) {
 					Object fieldName= coreFieldLookup.remove(key.getName());
 					assertTrue(
 							"No core constant for key " + key.getName() + " in class " + configurationBlock.getName(),
 							fieldName != null);
+					assertTrue(configurationBlock.getName() + "#getKeys() is missing key '" + key.getName() + "'", keyWasInKeySet);
 				}
 			}
 		}
+		
+		assertEquals(configurationBlock.getName() + "#getKeys() includes keys that are not declared in the class", Collections.emptySet(), keySet);
 	}
 }
