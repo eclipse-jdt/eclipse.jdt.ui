@@ -210,7 +210,7 @@ public class ReorgCorrectionsSubProcessor {
 		IProposableFix fix= UnusedCodeFix.createRemoveUnusedImportFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);
-			Map<String, String> options= new Hashtable<String, String>();
+			Map<String, String> options= new Hashtable<>();
 			options.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new UnusedCodeCleanUp(options), IProposalRelevance.REMOVE_UNUSED_IMPORT, image, context);
 			proposals.add(proposal);
@@ -341,7 +341,7 @@ public class ReorgCorrectionsSubProcessor {
 						try {
 							IClasspathEntry entry= root.getRawClasspathEntry();
 							if (entry != null) {
-								data= new HashMap<Object, Object>(1);
+								data= new HashMap<>(1);
 								data.put(BuildPathsPropertyPage.DATA_REVEAL_ENTRY, entry);
 								if (entry.getEntryKind() != IClasspathEntry.CPE_CONTAINER) {
 									data.put(BuildPathsPropertyPage.DATA_REVEAL_ATTRIBUTE_KEY, CPListElement.ACCESSRULES);
@@ -426,6 +426,7 @@ public class ReorgCorrectionsSubProcessor {
 			return null;
 		}
 
+		@Override
 		public void run(IProgressMonitor monitor) throws CoreException {
 			boolean needsBuild= updateJRE(monitor);
 			if (needsBuild) {
@@ -531,9 +532,6 @@ public class ReorgCorrectionsSubProcessor {
 			return updated;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
-		 */
 		@Override
 		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 			StringBuffer message= new StringBuffer();
@@ -580,9 +578,6 @@ public class ReorgCorrectionsSubProcessor {
 			return false;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(IDocument)
-		 */
 		@Override
 		public void apply(IDocument document) {
 			if (fChangeOnWorkspace) {

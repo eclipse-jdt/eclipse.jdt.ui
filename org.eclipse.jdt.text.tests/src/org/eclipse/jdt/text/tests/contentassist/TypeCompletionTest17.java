@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  */
 public class TypeCompletionTest17 extends TypeCompletionTest {
 
-	private static final Class THIS= TypeCompletionTest17.class;
+	private static final Class<TypeCompletionTest17> THIS= TypeCompletionTest17.class;
 
 	public static Test setUpTest(Test test) {
 		return new Java17CompletionTestSetup(test);
@@ -39,16 +39,19 @@ public class TypeCompletionTest17 extends TypeCompletionTest {
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
 	}
 
+	@Override
 	protected IPackageFragment getAnonymousTestPackage() throws CoreException {
 		return Java17CompletionTestSetup.getAnonymousTestPackage();
 	}
 
+	@Override
 	public void testGenericParameterGuessingUnambiguos() throws Exception {
 		addImport("java.util.List");
 		expectImport("java.util.ArrayList");
@@ -56,6 +59,7 @@ public class TypeCompletionTest17 extends TypeCompletionTest {
 		assertMethodBodyProposal("List<String> list= new A|", "ArrayList()", "List<String> list= new ArrayList<>()|");
 	}
 
+	@Override
 	public void testGenericParameterGuessingExtends() throws Exception {
 		addImport("java.util.List");
 		expectImport("java.util.ArrayList");
@@ -63,6 +67,7 @@ public class TypeCompletionTest17 extends TypeCompletionTest {
 		assertMethodBodyProposal("List<? extends Number> list= new A|", "ArrayList()", "List<? extends Number> list= new ArrayList<>()|");
 	}
 
+	@Override
 	public void testGenericParameterGuessingSuper() throws Exception {
 		addImport("java.util.List");
 		expectImport("java.util.ArrayList");
@@ -70,6 +75,7 @@ public class TypeCompletionTest17 extends TypeCompletionTest {
 		assertMethodBodyProposal("List<? super Number> list= new A|", "ArrayList()", "List<? super Number> list= new ArrayList<>()|");
 	}
 
+	@Override
 	public void testGenericParameterGuessingMixed() throws Exception {
 		addImport("java.util.Map");
 		expectImport("java.util.HashMap");
@@ -77,6 +83,7 @@ public class TypeCompletionTest17 extends TypeCompletionTest {
 		assertMethodBodyProposal("Map<String, ? extends Number> list= new H|", "HashMap()", "Map<String, ? extends Number> list= new HashMap<>()|");
 	}
 
+	@Override
 	public void testBug182468() throws Exception {
 		IPackageFragmentRoot src= (IPackageFragmentRoot)Java17CompletionTestSetup.getTestPackage().getParent();
 

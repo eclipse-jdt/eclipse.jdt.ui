@@ -103,6 +103,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 * @see IPartListener2
 	 */
 	private IPartListener2 fPartListener= new IPartListener2() {
+		@Override
 		public void partVisible(IWorkbenchPartReference ref) {
 			if (ref.getId().equals(getSite().getId())) {
 				IWorkbenchPart activePart= ref.getPage().getActivePart();
@@ -111,22 +112,29 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 				startListeningForSelectionChanges();
 			}
 		}
+		@Override
 		public void partHidden(IWorkbenchPartReference ref) {
 			if (ref.getId().equals(getSite().getId()))
 				stopListeningForSelectionChanges();
 		}
+		@Override
 		public void partInputChanged(IWorkbenchPartReference ref) {
 			if (!ref.getId().equals(getSite().getId()))
 				computeAndSetInput(ref.getPart(false));
 		}
+		@Override
 		public void partActivated(IWorkbenchPartReference ref) {
 		}
+		@Override
 		public void partBroughtToTop(IWorkbenchPartReference ref) {
 		}
+		@Override
 		public void partClosed(IWorkbenchPartReference ref) {
 		}
+		@Override
 		public void partDeactivated(IWorkbenchPartReference ref) {
 		}
+		@Override
 		public void partOpened(IWorkbenchPartReference ref) {
 		}
 	};
@@ -279,6 +287,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	/*
 	 * @see IMenuListener#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
 	 */
+	@Override
 	public void menuAboutToShow(IMenuManager menu) {
 		menu.add(new Separator(IContextMenuConstants.GROUP_GOTO));
 		menu.add(new Separator(IContextMenuConstants.GROUP_OPEN));
@@ -395,6 +404,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 */
 	abstract protected String getBackgroundColorKey();
 
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (getBackgroundColorKey().equals(event.getProperty()))
 			inititalizeColors();
@@ -441,6 +451,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	/*
 	 * @see ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
 	 */
+	@Override
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (part.equals(this))
 			return;
@@ -741,6 +752,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 					/*
 					 * @see java.lang.Runnable#run()
 					 */
+					@Override
 					public void run() {
 
 						if (fComputeCount != currentCount || getViewSite().getShell().isDisposed())
@@ -768,6 +780,7 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 					/*
 					 * @see java.lang.Runnable#run()
 					 */
+					@Override
 					public void run() {
 						fToggleLinkAction.updateLinkImage(isBroken);
 					}
@@ -852,9 +865,6 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 			setChecked(fLinking);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.action.Action#run()
-		 */
 		@Override
 		public void run() {
 			setLinkingEnabled(!fLinking);

@@ -157,9 +157,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fNameField.setText(name);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
-		 */
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			fireEvent();
 		}
@@ -218,9 +216,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			return path.toOSString();
 		}
 
-		/* (non-Javadoc)
-		 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-		 */
+		@Override
 		public void update(Observable o, Object arg) {
 			if (isUseDefaultSelected()) {
 				fLocation.setText(getDefaultPath(fNameGroup.getName()));
@@ -249,9 +245,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fireEvent();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter#changeControlPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
-		 */
+		@Override
 		public void changeControlPressed(DialogField field) {
 			final DirectoryDialog dialog= new DirectoryDialog(getShell());
 			dialog.setMessage(NewWizardMessages.NewJavaProjectWizardPageOne_directory_message);
@@ -280,9 +274,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
-		 */
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			if (field == fUseDefaults) {
 				final boolean checked= fUseDefaults.isSelected();
@@ -342,9 +334,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 
 
-		/* (non-Javadoc)
-		 * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-		 */
+		@Override
 		public void update(Observable o, Object arg) {
 			updateEnableState();
 		}
@@ -373,16 +363,12 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			return fSrcBinRadio.isSelected();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-		 */
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 			widgetDefaultSelected(e);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-		 */
+		@Override
 		public void widgetDefaultSelected(SelectionEvent e) {
 			String id= NewJavaProjectPreferencePage.ID;
 			PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, null).open();
@@ -490,6 +476,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fInstalledJVMs= getWorkspaceJREs();
 			Arrays.sort(fInstalledJVMs, new Comparator<IVMInstall>() {
 
+				@Override
 				public int compare(IVMInstall i0, IVMInstall i1) {
 					if (i1 instanceof IVMInstall2 && i0 instanceof IVMInstall2) {
 						String cc0= JavaModelUtil.getCompilerCompliance((IVMInstall2) i0, JavaCore.VERSION_1_4);
@@ -536,6 +523,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 			fInstalledEEs= JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments();
 			Arrays.sort(fInstalledEEs, new Comparator<IExecutionEnvironment>() {
+				@Override
 				public int compare(IExecutionEnvironment arg0, IExecutionEnvironment arg1) {
 					return Policy.getComparator().compare(arg0.getId(), arg1.getId());
 				}
@@ -559,7 +547,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 
 		private IVMInstall[] getWorkspaceJREs() {
-			List<VMStandin> standins = new ArrayList<VMStandin>();
+			List<VMStandin> standins = new ArrayList<>();
 			IVMInstallType[] types = JavaRuntime.getVMInstallTypes();
 			for (int i = 0; i < types.length; i++) {
 				IVMInstallType type = types[i];
@@ -610,6 +598,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			return Messages.format(NewWizardMessages.NewJavaProjectWizardPageOne_JREGroup_default_compliance, getDefaultJVMName());
 		}
 
+		@Override
 		public void update(Observable o, Object arg) {
 			updateEnableState();
 		}
@@ -629,21 +618,17 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-		 */
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 			widgetDefaultSelected(e);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-		 */
+		@Override
 		public void widgetDefaultSelected(SelectionEvent e) {
 			String jreID= BuildPathSupport.JRE_PREF_PAGE_ID;
 			String eeID= BuildPathSupport.EE_PREF_PAGE_ID;
 			String complianceId= CompliancePreferencePage.PREF_ID;
-			Map<String, Boolean> data= new HashMap<String, Boolean>();
+			Map<String, Boolean> data= new HashMap<>();
 			data.put(PropertyAndPreferencePage.DATA_NO_LINK, Boolean.TRUE);
 			PreferencesUtil.createPreferenceDialogOn(getShell(), jreID, new String[] { jreID, complianceId , eeID }, data).open();
 
@@ -657,9 +642,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fillExecutionEnvironments(fEECombo);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
-		 */
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			updateEnableState();
 			fDetectGroup.handlePossibleJVMChange();
@@ -892,6 +875,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			}
 		}
 
+		@Override
 		public void update(Observable o, Object arg) {
 			if (o instanceof LocationGroup) {
 				boolean oldDetectState= fDetect;
@@ -917,21 +901,17 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			return fDetect;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-		 */
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 			widgetDefaultSelected(e);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
-		 */
+		@Override
 		public void widgetDefaultSelected(SelectionEvent e) {
 			String jreID= BuildPathSupport.JRE_PREF_PAGE_ID;
 			String eeID= BuildPathSupport.EE_PREF_PAGE_ID;
 			String complianceId= CompliancePreferencePage.PREF_ID;
-			Map<String, Boolean> data= new HashMap<String, Boolean>();
+			Map<String, Boolean> data= new HashMap<>();
 			data.put(PropertyAndPreferencePage.DATA_NO_LINK, Boolean.TRUE);
 			String id= "JRE".equals(e.text) ? jreID : complianceId; //$NON-NLS-1$
 			PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { jreID, complianceId, eeID  }, data).open();
@@ -946,6 +926,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	 */
 	private final class Validator implements Observer {
 
+		@Override
 		public void update(Observable o, Object arg) {
 
 			final IWorkspace workspace= JavaPlugin.getWorkspace();
@@ -1113,9 +1094,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		JavaRuntime.getDefaultVMInstall();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -1342,9 +1321,6 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		fWorkingSetGroup.setWorkingSets(workingSets);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.DialogPage#setVisible(boolean)
-	 */
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
@@ -1436,7 +1412,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			return EMPTY_WORKING_SET_ARRAY;
 		}
 
-		ArrayList<IWorkingSet> result= new ArrayList<IWorkingSet>();
+		ArrayList<IWorkingSet> result= new ArrayList<>();
 		for (Iterator<?> iterator= elements.iterator(); iterator.hasNext();) {
 			Object element= iterator.next();
 			if (element instanceof IWorkingSet && isValidWorkingSet((IWorkingSet) element)) {

@@ -48,9 +48,10 @@ public class JavaHeuristicScannerTest extends TestCase {
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() {
 		if (JavaCore.getPlugin() != null) {
-			Hashtable options= JavaCore.getDefaultOptions();
+			Hashtable<String, String> options= JavaCore.getDefaultOptions();
 			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
 			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 
@@ -81,6 +82,7 @@ public class JavaHeuristicScannerTest extends TestCase {
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		fDocument.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, null);
 		fPartitioner.disconnect();

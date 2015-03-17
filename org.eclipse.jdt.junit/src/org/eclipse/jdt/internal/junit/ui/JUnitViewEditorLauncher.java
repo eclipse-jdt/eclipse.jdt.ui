@@ -21,6 +21,7 @@ import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 
 public class JUnitViewEditorLauncher implements IEditorLauncher {
 
+	@Override
 	public void open(IPath file) {
 		try {
 			JUnitPlugin.getActivePage().showView(TestRunnerViewPart.NAME);

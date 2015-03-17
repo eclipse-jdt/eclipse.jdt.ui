@@ -90,7 +90,7 @@ public final class MoveStaticMembersDescriptor extends JavaRefactoringDescriptor
 	 *
 	 * @since 1.2
 	 */
-	public MoveStaticMembersDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public MoveStaticMembersDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.MOVE_STATIC_MEMBERS, project, description, comment, arguments, flags);
 		fType= (IType) JavaRefactoringDescriptorUtil.getJavaElement(fArguments, ATTRIBUTE_INPUT, project);
 		fDelegate= JavaRefactoringDescriptorUtil.getBoolean(fArguments, ATTRIBUTE_DELEGATE, fDelegate);
@@ -98,9 +98,7 @@ public final class MoveStaticMembersDescriptor extends JavaRefactoringDescriptor
 		fMembers= (IMember[]) JavaRefactoringDescriptorUtil.getJavaElementArray(fArguments, null, ATTRIBUTE_ELEMENT, 1, project, IMember.class);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
 		String project= getProject();
@@ -156,9 +154,7 @@ public final class MoveStaticMembersDescriptor extends JavaRefactoringDescriptor
 		fMembers= members;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public RefactoringStatus validateDescriptor() {
 		final RefactoringStatus status= super.validateDescriptor();
 		if (fType == null)

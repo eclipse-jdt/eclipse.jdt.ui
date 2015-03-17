@@ -581,7 +581,7 @@ public class JavaPluginImages {
 		ImageDescriptor result= create(prefix, name, true);
 
 		if (fgAvoidSWTErrorMap == null) {
-			fgAvoidSWTErrorMap= new HashMap<String, ImageDescriptor>();
+			fgAvoidSWTErrorMap= new HashMap<>();
 		}
 		fgAvoidSWTErrorMap.put(key, result);
 		if (fgImageRegistry != null) {

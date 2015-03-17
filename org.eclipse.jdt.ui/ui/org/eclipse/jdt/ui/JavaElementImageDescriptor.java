@@ -181,17 +181,11 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		return new Point(fSize.x, fSize.y);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in CompositeImageDescriptor
-	 */
 	@Override
 	protected Point getSize() {
 		return fSize;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on Object.
-	 */
 	@Override
 	public boolean equals(Object object) {
 		if (object == null || !JavaElementImageDescriptor.class.equals(object.getClass()))
@@ -201,17 +195,11 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		return (fBaseImage.equals(other.fBaseImage) && fFlags == other.fFlags && fSize.equals(other.fSize));
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on Object.
-	 */
 	@Override
 	public int hashCode() {
 		return fBaseImage.hashCode() | fFlags | fSize.hashCode();
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in CompositeImageDescriptor
-	 */
 	@Override
 	protected void drawCompositeImage(int width, int height) {
 		ImageData bg= getImageData(fBaseImage);

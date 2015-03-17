@@ -243,7 +243,7 @@ public class ParameterObjectFactory {
 		Block block= ast.newBlock();
 		methodDeclaration.setBody(block);
 		List<Statement> statements= block.statements();
-		List<ParameterInfo> validParameter= new ArrayList<ParameterInfo>();
+		List<ParameterInfo> validParameter= new ArrayList<>();
 		for (Iterator<ParameterInfo> iter= fVariables.iterator(); iter.hasNext();) {
 			ParameterInfo pi= iter.next();
 			if (isValidField(pi) && listener.isUseInConstructor(pi)) {
@@ -251,7 +251,7 @@ public class ParameterObjectFactory {
 			}
 		}
 
-		ArrayList<String> usedParameter= new ArrayList<String>();
+		ArrayList<String> usedParameter= new ArrayList<>();
 		for (Iterator<ParameterInfo> iter= validParameter.iterator(); iter.hasNext();) {
 			ParameterInfo pi= iter.next();
 			SingleVariableDeclaration svd= ast.newSingleVariableDeclaration();
@@ -325,7 +325,7 @@ public class ParameterObjectFactory {
 				declaration.setJavadoc(doc);
 			}
 		}
-		List<Modifier> modifiers= new ArrayList<Modifier>();
+		List<Modifier> modifiers= new ArrayList<>();
 		if (fCreateGetter) {
 			modifiers.add(ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD));
 		} else {
@@ -623,7 +623,7 @@ public class ParameterObjectFactory {
 
 
 	public List<ResourceChange> createTopLevelParameterObject(IPackageFragmentRoot packageFragmentRoot, CreationListener listener) throws CoreException {
-		List<ResourceChange> changes= new ArrayList<ResourceChange>();
+		List<ResourceChange> changes= new ArrayList<>();
 		IPackageFragment packageFragment= packageFragmentRoot.getPackageFragment(getPackage());
 		if (!packageFragment.exists()) {
 			changes.add(new CreatePackageChange(packageFragment));

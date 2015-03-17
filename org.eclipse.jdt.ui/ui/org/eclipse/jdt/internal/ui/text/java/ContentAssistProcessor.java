@@ -105,6 +105,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		/*
 		 * @see org.eclipse.jface.text.contentassist.ICompletionListener#assistSessionStarted(org.eclipse.jface.text.contentassist.ContentAssistEvent)
 		 */
+		@Override
 		public void assistSessionStarted(ContentAssistEvent event) {
 			if (event.processor != ContentAssistProcessor.this)
 				return;
@@ -146,7 +147,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		 * @since 3.8.1
 		 */
 		private Set<CompletionProposalCategory> getCategoriesToNotify() {
-			Set<CompletionProposalCategory> currentCategories= new HashSet<CompletionProposalCategory>(fCategories.size());
+			Set<CompletionProposalCategory> currentCategories= new HashSet<>(fCategories.size());
 
 			// Currently enabled categories for this session
 			if (fCategoryIteration != null) {
@@ -167,6 +168,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		/*
 		 * @see org.eclipse.jface.text.contentassist.ICompletionListener#assistSessionEnded(org.eclipse.jface.text.contentassist.ContentAssistEvent)
 		 */
+		@Override
 		public void assistSessionEnded(ContentAssistEvent event) {
 			if (event.processor != ContentAssistProcessor.this)
 				return;
@@ -193,6 +195,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		/*
 		 * @see org.eclipse.jface.text.contentassist.ICompletionListener#selectionChanged(org.eclipse.jface.text.contentassist.ICompletionProposal, boolean)
 		 */
+		@Override
 		public void selectionChanged(ICompletionProposal proposal, boolean smartToggle) {
 		}
 
@@ -200,6 +203,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		 * @see org.eclipse.jface.text.contentassist.ICompletionListenerExtension#assistSessionRestarted(org.eclipse.jface.text.contentassist.ContentAssistEvent)
 		 * @since 3.4
 		 */
+		@Override
 		public void assistSessionRestarted(ContentAssistEvent event) {
 			fRepetition= 0;
 		}
@@ -215,6 +219,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 	private static final Comparator<CompletionProposalCategory> ORDER_COMPARATOR= new Comparator<CompletionProposalCategory>() {
 
+		@Override
 		public int compare(CompletionProposalCategory d1, CompletionProposalCategory d2) {
 			return d1.getSortOrder() - d2.getSortOrder();
 		}
@@ -264,6 +269,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeCompletionProposals(org.eclipse.jface.text.ITextViewer, int)
 	 */
+	@Override
 	public final ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
 		long start= JavaPlugin.DEBUG_RESULT_COLLECTOR ? System.currentTimeMillis() : 0;
 
@@ -316,7 +322,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 */
 	private List<ICompletionProposal> collectProposals(ITextViewer viewer, int offset, IProgressMonitor monitor, ContentAssistInvocationContext context) {
 		boolean needsSortingAfterFiltering= false;
-		List<ICompletionProposal> proposals= new ArrayList<ICompletionProposal>();
+		List<ICompletionProposal> proposals= new ArrayList<>();
 		List<CompletionProposalCategory> providers= getCategories();
 		for (CompletionProposalCategory cat : providers) {
 			List<ICompletionProposal> computed= cat.computeCompletionProposals(context, fPartition, new SubProgressMonitor(monitor, 1));
@@ -349,6 +355,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
 	 */
+	@Override
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int offset) {
 		clearState();
 
@@ -368,7 +375,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	}
 
 	private List<IContextInformation> collectContextInformation(ITextViewer viewer, int offset, IProgressMonitor monitor) {
-		List<IContextInformation> proposals= new ArrayList<IContextInformation>();
+		List<IContextInformation> proposals= new ArrayList<>();
 		ContentAssistInvocationContext context= createContext(viewer, offset);
 
 		List<CompletionProposalCategory> providers= getCategories();
@@ -411,6 +418,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
 	 */
+	@Override
 	public final char[] getCompletionProposalAutoActivationCharacters() {
 		return fCompletionAutoActivationCharacters;
 	}
@@ -418,6 +426,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationAutoActivationCharacters()
 	 */
+	@Override
 	public char[] getContextInformationAutoActivationCharacters() {
 		return null;
 	}
@@ -425,6 +434,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
 	 */
+	@Override
 	public String getErrorMessage() {
 		if (fErrorMessage != null)
 			return fErrorMessage;
@@ -436,6 +446,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationValidator()
 	 */
+	@Override
 	public IContextInformationValidator getContextInformationValidator() {
 		return null;
 	}
@@ -485,7 +496,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	}
 
 	private List<List<CompletionProposalCategory>> getCategoryIteration() {
-		List<List<CompletionProposalCategory>> sequence= new ArrayList<List<CompletionProposalCategory>>();
+		List<List<CompletionProposalCategory>> sequence= new ArrayList<>();
 		sequence.add(getDefaultCategories());
 		for (CompletionProposalCategory cat : getSeparateCategories()) {
 			sequence.add(Collections.singletonList(cat));
@@ -508,7 +519,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	}
 
 	private List<CompletionProposalCategory> getDefaultCategoriesUnchecked() {
-		List<CompletionProposalCategory> included= new ArrayList<CompletionProposalCategory>();
+		List<CompletionProposalCategory> included= new ArrayList<>();
 		for (CompletionProposalCategory category : fCategories) {
 			if (checkDefaultEnablement(category)) 
 				included.add(category);
@@ -613,7 +624,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	}
 
 	private List<CompletionProposalCategory> getSeparateCategories() {
-		ArrayList<CompletionProposalCategory> sorted= new ArrayList<CompletionProposalCategory>();
+		ArrayList<CompletionProposalCategory> sorted= new ArrayList<>();
 		for (CompletionProposalCategory category : fCategories) {
 			if (checkSeparateEnablement(category))
 				sorted.add(category);

@@ -104,17 +104,20 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 		private static final String CREATE_GETTERS_SETTING= "CreateGetters"; //$NON-NLS-1$
 
 		private final class ParameterObjectCreatorContentProvider implements IStructuredContentProvider {
+			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			}
 
+			@Override
 			public void dispose() {
 			}
 
+			@Override
 			public Object[] getElements(Object inputElement) {
 				if (inputElement instanceof IntroduceParameterObjectProcessor) {
 					IntroduceParameterObjectProcessor refactoring= (IntroduceParameterObjectProcessor) inputElement;
 					List<ParameterInfo> parameterInfos= refactoring.getParameterInfos();
-					List<ParameterInfo> result= new ArrayList<ParameterInfo>(parameterInfos.size());
+					List<ParameterInfo> result= new ArrayList<>(parameterInfos.size());
 					for (Iterator<ParameterInfo> iter= parameterInfos.iterator(); iter.hasNext();) {
 						ParameterInfo pi= iter.next();
 						if (!pi.isAdded())
@@ -195,6 +198,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			setDescription(RefactoringMessages.IntroduceParameterObjectWizard_wizardpage_description);
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			initializeDialogUnits(parent);
 			Composite result= new Composite(parent, SWT.NONE);
@@ -225,6 +229,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			text.setText(fProcessor.getParameterName());
 			text.addModifyListener(new ModifyListener() {
 
+				@Override
 				public void modifyText(ModifyEvent e) {
 					fProcessor.setParameterName(text.getText());
 					updateSignaturePreview();
@@ -236,7 +241,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 		}
 
 		protected void validateRefactoring() {
-			List<String> names= new ArrayList<String>();
+			List<String> names= new ArrayList<>();
 			boolean oneChecked= false;
 			setMessage(null);
 			setErrorMessage(null);
@@ -481,6 +486,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 						String title= RefactoringMessages.IntroduceParameterObjectWizard_fieldname_title;
 						InputDialog inputDialog= new InputDialog(getShell(), title, message, selected.getNewName(), new IInputValidator() {
 
+							@Override
 							public String isValid(String newText) {
 								IStatus status= JavaConventionsUtil.validateIdentifier(newText, fProcessor.getCompilationUnit());
 								if (!status.isOK())
@@ -530,7 +536,8 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			});
 			tv.addCheckStateListener(new ICheckStateListener() {
-				Map<ParameterInfo, String> fLastNames=new HashMap<ParameterInfo, String>();
+				Map<ParameterInfo, String> fLastNames=new HashMap<>();
+				@Override
 				public void checkStateChanged(CheckStateChangedEvent event) {
 					ParameterInfo element= (ParameterInfo) event.getElement();
 					element.setCreateField(event.getChecked());
@@ -551,6 +558,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 
 			});
 			tv.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
 					updateButtons(tv, upButton, downButton, editButton);
 				}
@@ -658,6 +666,7 @@ public class IntroduceParameterObjectWizard extends RefactoringWizard {
 			text.setFocus();
 			text.addModifyListener(new ModifyListener() {
 
+				@Override
 				public void modifyText(ModifyEvent e) {
 					fProcessor.setClassName(text.getText());
 					updateSignaturePreview();

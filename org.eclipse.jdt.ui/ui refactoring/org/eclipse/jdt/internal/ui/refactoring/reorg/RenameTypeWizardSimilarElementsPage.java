@@ -141,11 +141,6 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 			return true;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
-		 */
 		@Override
 		protected Control createDialogArea(Composite parent) {
 			final Composite composite= (Composite) super.createDialogArea(parent);
@@ -161,11 +156,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 			return composite;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
-		 */
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			if (field == fNameField)
 				updateStatus(validateSettings());
@@ -214,6 +205,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		/*
 		 * @see ITreeContentProvider#getChildren(Object)
 		 */
+		@Override
 		public Object[] getChildren(Object parentElement) {
 			final Set<IJavaElement> children= fTreeElementMap.get(parentElement);
 			if (children != null)
@@ -225,6 +217,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		/*
 		 * @see ITreeContentProvider#getParent(Object)
 		 */
+		@Override
 		public Object getParent(Object element) {
 			if (element instanceof IMember || element instanceof ILocalVariable) {
 				return ((IJavaElement) element).getParent();
@@ -238,6 +231,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		/*
 		 * @see ITreeContentProvider#hasChildren(Object)
 		 */
+		@Override
 		public boolean hasChildren(Object element) {
 			return fTreeElementMap.containsKey(element);
 		}
@@ -245,6 +239,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		/*
 		 * @see IStructuredContentProvider#getElements(Object)
 		 */
+		@Override
 		public Object[] getElements(Object inputElement) {
 			Assert.isTrue(inputElement == null || inputElement instanceof Map);
 			return fTopLevelElements.toArray();
@@ -253,6 +248,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		/*
 		 * @see IContentProvider#dispose()
 		 */
+		@Override
 		public void dispose() {
 			fTreeElementMap.clear();
 			fTreeElementMap= null;
@@ -262,6 +258,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		/*
 		 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 		 */
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			Assert.isTrue(newInput == null || newInput instanceof Map);
 			if (newInput == null)
@@ -269,8 +266,8 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 			@SuppressWarnings("unchecked")
 			final Map<IJavaElement, String> similarElementsMap= (Map<IJavaElement, String>) newInput;
 			final IJavaElement[] similarElements= similarElementsMap.keySet().toArray(new IJavaElement[0]);
-			fTreeElementMap= new HashMap<IJavaElement, Set<IJavaElement>>();
-			fTopLevelElements= new HashSet<ICompilationUnit>();
+			fTreeElementMap= new HashMap<>();
+			fTopLevelElements= new HashSet<>();
 			for (int i= 0; i < similarElements.length; i++) {
 				final IType declaring= (IType) similarElements[i].getAncestor(IJavaElement.TYPE);
 				if (similarElements[i] instanceof IMember) {
@@ -304,7 +301,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		private void addToMap(final IJavaElement key, final IJavaElement element) {
 			Set<IJavaElement> elements= fTreeElementMap.get(key);
 			if (elements == null) {
-				elements= new HashSet<IJavaElement>();
+				elements= new HashSet<>();
 				fTreeElementMap.put(key, elements);
 			}
 			elements.add(element);
@@ -314,7 +311,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 
 	private static class SimilarLabelProvider extends JavaElementLabelProvider {
 
-		private Map<ImageDescriptor, Image> fDescriptorImageMap= new HashMap<ImageDescriptor, Image>();
+		private Map<ImageDescriptor, Image> fDescriptorImageMap= new HashMap<>();
 		private Map<IJavaElement, String> fElementToNewName;
 
 		public SimilarLabelProvider() {
@@ -370,10 +367,6 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 
 	private static class SimilarElementComparator extends JavaElementComparator {
 
-		/*
-		 * (non-Javadoc)
-		 * @see org.eclipse.jdt.ui.JavaElementSorter#category(java.lang.Object)
-		 */
 		@Override
 		public int category(Object element) {
 
@@ -425,6 +418,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 
 	// --- UI creation
 
+	@Override
 	public void createControl(Composite parent) {
 
 		ViewForm viewForm= new ViewForm(parent, SWT.BORDER | SWT.FLAT);
@@ -492,12 +486,14 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 		fTreeViewer.setLabelProvider(fTreeViewerLabelProvider);
 		fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				RenameTypeWizardSimilarElementsPage.this.treeViewerSelectionChanged(event);
 			}
 		});
 		fTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
 
+			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				RenameTypeWizardSimilarElementsPage.this.editCurrentElement();
 			}
@@ -784,7 +780,7 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 
 	private IJavaElement[] getCheckedSimilarElements() {
 		Object[] checked= fTreeViewer.getCheckedElements();
-		List<IJavaElement> elements= new ArrayList<IJavaElement>(checked.length);
+		List<IJavaElement> elements= new ArrayList<>(checked.length);
 		for (int i= 0; i < checked.length; i++) {
 			if (isSimilarElement(checked[i]))
 				elements.add((IJavaElement) checked[i]);

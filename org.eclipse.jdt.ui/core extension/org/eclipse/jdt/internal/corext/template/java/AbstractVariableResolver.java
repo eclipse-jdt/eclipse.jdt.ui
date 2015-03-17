@@ -53,9 +53,6 @@ public abstract class AbstractVariableResolver extends TemplateVariableResolver 
 	 */
 	protected abstract Variable[] getVisibleVariables(String type, JavaContext context);
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
-	 */
 	@Override
 	public void resolve(TemplateVariable variable, TemplateContext context) {
 
@@ -72,7 +69,7 @@ public abstract class AbstractVariableResolver extends TemplateVariableResolver 
 				fVariables= getVisibleVariables(type, jc);
 				jv.setParamType(type);
 			} else {
-				ArrayList<Variable> variables= new ArrayList<Variable>();
+				ArrayList<Variable> variables= new ArrayList<>();
 				for (Iterator<String> iterator= params.iterator(); iterator.hasNext();) {
 					variables.addAll(Arrays.asList(getVisibleVariables(iterator.next(), jc)));
 				}
@@ -98,9 +95,6 @@ public abstract class AbstractVariableResolver extends TemplateVariableResolver 
 			super.resolve(variable, context);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolveAll(org.eclipse.jface.text.templates.TemplateContext)
-	 */
 	@Override
 	protected String[] resolveAll(TemplateContext context) {
 

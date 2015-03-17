@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.RenameSourceFolderCha
 
 public class RenameSourceFolderChangeTests extends RefactoringTest {
 
-	private static final Class clazz= RenameSourceFolderChangeTests.class;
+	private static final Class<RenameSourceFolderChangeTests> clazz= RenameSourceFolderChangeTests.class;
 
 	public RenameSourceFolderChangeTests(String name){
 		super(name);

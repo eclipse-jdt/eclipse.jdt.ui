@@ -40,8 +40,8 @@ public class RenameSelectionState {
 
 	public RenameSelectionState(Object element) {
 		fElement= element;
-		fParts= new ArrayList<IWorkbenchPart>();
-		fSelections= new ArrayList<IStructuredSelection>();
+		fParts= new ArrayList<>();
+		fSelections= new ArrayList<>();
 
 		IWorkbenchWindow dw = JavaPlugin.getActiveWorkbenchWindow();
 		if (dw ==  null) {
@@ -122,6 +122,7 @@ public class RenameSelectionState {
 			}
 			if (changed) {
 				fDisplay.asyncExec(new Runnable() {
+					@Override
 					public void run() {
 						target.selectReveal(newSelection[0]);
 					}

@@ -28,7 +28,7 @@ public class LRUWorkingSetsList {
 
 	public LRUWorkingSetsList(int size) {
 		fSize= size;
-		fLRUList= new ArrayList<IWorkingSet[]>(size);
+		fLRUList= new ArrayList<>(size);
 	}
 
 	public void add(IWorkingSet[] workingSets) {
@@ -49,13 +49,13 @@ public class LRUWorkingSetsList {
 
 	public Iterator<IWorkingSet[]> sortedIterator() {
 		removeDeletedWorkingSets();
-		ArrayList<IWorkingSet[]> sortedList= new ArrayList<IWorkingSet[]>(fLRUList);
+		ArrayList<IWorkingSet[]> sortedList= new ArrayList<>(fLRUList);
 		Collections.sort(sortedList, fComparator);
 		return sortedList.iterator();
 	}
 
 	private void removeDeletedWorkingSets() {
-		Iterator<IWorkingSet[]> iter= new ArrayList<IWorkingSet[]>(fLRUList).iterator();
+		Iterator<IWorkingSet[]> iter= new ArrayList<>(fLRUList).iterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= iter.next();
 			for (int i= 0; i < workingSets.length; i++) {
@@ -68,11 +68,11 @@ public class LRUWorkingSetsList {
 	}
 
 	private IWorkingSet[] find(ArrayList<IWorkingSet[]> list, IWorkingSet[] workingSets) {
-		Set<IWorkingSet> workingSetList= new HashSet<IWorkingSet>(Arrays.asList(workingSets));
+		Set<IWorkingSet> workingSetList= new HashSet<>(Arrays.asList(workingSets));
 		Iterator<IWorkingSet[]> iter= list.iterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] lruWorkingSets= iter.next();
-			Set<IWorkingSet> lruWorkingSetList= new HashSet<IWorkingSet>(Arrays.asList(lruWorkingSets));
+			Set<IWorkingSet> lruWorkingSetList= new HashSet<>(Arrays.asList(lruWorkingSets));
 			if (lruWorkingSetList.equals(workingSetList))
 				return lruWorkingSets;
 		}

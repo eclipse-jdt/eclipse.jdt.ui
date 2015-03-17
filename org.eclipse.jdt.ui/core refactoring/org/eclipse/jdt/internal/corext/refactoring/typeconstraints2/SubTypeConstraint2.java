@@ -38,10 +38,12 @@ public final class SubTypeConstraint2 implements ITypeConstraint2 {
 		return fDescendant == otherTC.getLeft() && fAncestor == otherTC.getRight();
 	}
 
+	@Override
 	public final ConstraintVariable2 getLeft() {
 		return fDescendant;
 	}
 
+	@Override
 	public final ConstraintVariable2 getRight() {
 		return fAncestor;
 	}

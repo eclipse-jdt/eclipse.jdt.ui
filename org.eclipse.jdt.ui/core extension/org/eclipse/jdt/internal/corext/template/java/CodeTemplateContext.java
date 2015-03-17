@@ -95,9 +95,6 @@ public class CodeTemplateContext extends TemplateContext {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.template.TemplateContext#canEvaluate(org.eclipse.jdt.internal.corext.template.Template)
-	 */
 	@Override
 	public boolean canEvaluate(Template template) {
 		return true;

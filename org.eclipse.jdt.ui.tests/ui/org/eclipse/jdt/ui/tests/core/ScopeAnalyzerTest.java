@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
   */
 public class ScopeAnalyzerTest extends CoreTests {
 
-	private static final Class THIS= ScopeAnalyzerTest.class;
+	private static final Class<ScopeAnalyzerTest> THIS= ScopeAnalyzerTest.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -53,18 +53,20 @@ public class ScopeAnalyzerTest extends CoreTests {
 		return setUpTest(new TestSuite(THIS));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 
 		fJProject1= ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(JavaCore.COMPILER_PB_HIDDEN_CATCH_BLOCK, JavaCore.IGNORE);
 		options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.IGNORE);
 
 		JavaCore.setOptions(options);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}

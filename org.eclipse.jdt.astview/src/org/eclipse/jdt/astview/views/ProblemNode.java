@@ -32,19 +32,15 @@ public class ProblemNode extends ASTAttribute {
 		fProblem= problem;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getParent()
-	 */
+	@Override
 	public Object getParent() {
 		return fParent;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getChildren()
-	 */
+	@Override
 	public Object[] getChildren() {
 		String[] arguments= fProblem.getArguments();
-		ArrayList children= new ArrayList();
+		ArrayList<GeneralAttribute> children= new ArrayList<>();
 		
 		children.add(new GeneralAttribute(this, "CONSTANT NAME", getConstantName()));
 		children.add(new GeneralAttribute(this, "ID", getErrorLabel()));
@@ -59,9 +55,7 @@ public class ProblemNode extends ASTAttribute {
 		return children.toArray();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getLabel()
-	 */
+	@Override
 	public String getLabel() {
 		StringBuffer buf= new StringBuffer();
 		int offset= fProblem.getSourceStart();
@@ -193,9 +187,7 @@ public class ProblemNode extends ASTAttribute {
 		return buf.toString();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getImage()
-	 */
+	@Override
 	public Image getImage() {
 		return null;
 	}
@@ -217,6 +209,7 @@ public class ProblemNode extends ASTAttribute {
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -245,6 +238,7 @@ public class ProblemNode extends ASTAttribute {
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return (fParent != null ? fParent.hashCode() : 0) + (fProblem != null ? fProblem.hashCode() : 0);
 	}

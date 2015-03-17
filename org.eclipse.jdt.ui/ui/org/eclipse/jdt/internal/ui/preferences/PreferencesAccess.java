@@ -89,9 +89,6 @@ public class PreferencesAccess {
 			return getWorkingCopyScopeContext(super.getProjectScope(project));
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.preferences.PreferencesAccess#applyChanges()
-		 */
 		@Override
 		public void applyChanges() throws BackingStoreException {
 			fWorkingCopyManager.applyChanges();
@@ -109,23 +106,17 @@ public class PreferencesAccess {
 			fOriginal= original;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.runtime.preferences.IScopeContext#getName()
-		 */
+		@Override
 		public String getName() {
 			return fOriginal.getName();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.runtime.preferences.IScopeContext#getNode(java.lang.String)
-		 */
+		@Override
 		public IEclipsePreferences getNode(String qualifier) {
 			return fWorkingCopyManager.getWorkingCopy(fOriginal.getNode(qualifier));
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.runtime.preferences.IScopeContext#getLocation()
-		 */
+		@Override
 		public IPath getLocation() {
 			return fOriginal.getLocation();
 		}

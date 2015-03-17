@@ -59,7 +59,7 @@ import junit.framework.TestSuite;
 
 public class CodeCompletionTest18 extends AbstractCompletionTest {
 
-	private static final Class THIS= CodeCompletionTest18.class;
+	private static final Class<CodeCompletionTest18> THIS= CodeCompletionTest18.class;
 	
 	public static Test suite() {
 		return new Java18ProjectTestSetup(new TestSuite(THIS));
@@ -72,10 +72,11 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 	private IJavaProject fJProject1;
 
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= Java18ProjectTestSetup.getProject();
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "1");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -97,6 +98,7 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.SETTERCOMMENT_ID, "/**\n * @param ${param} the ${bare_field_name} to set\n */", fJProject1);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setToDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS);

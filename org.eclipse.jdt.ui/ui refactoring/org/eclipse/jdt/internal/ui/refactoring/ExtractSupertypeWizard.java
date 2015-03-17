@@ -45,9 +45,6 @@ public final class ExtractSupertypeWizard extends RefactoringWizard {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_EXTRACT_SUPERTYPE);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void addUserInputPages() {
 		final ExtractSupertypeMethodPage page= new ExtractSupertypeMethodPage(fProcessor);

@@ -45,9 +45,6 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 		super();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public CleanUpRequirements getRequirements() {
 		boolean requireAST= requireAST();
@@ -66,9 +63,6 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 				isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		boolean removeUnuseMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
@@ -83,9 +77,6 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 				false);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		boolean removeMembers= isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS);
@@ -101,7 +92,7 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 	}
 
 	public Map<String, String> getRequiredOptions() {
-		Map<String, String> result= new Hashtable<String, String>();
+		Map<String, String> result= new Hashtable<>();
 
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS) && !isEnabled(CleanUpConstants.ORGANIZE_IMPORTS))
 			result.put(JavaCore.COMPILER_PB_UNUSED_IMPORT, JavaCore.WARNING);
@@ -120,12 +111,9 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 		return result;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String[] getStepDescriptions() {
-		List<String> result= new ArrayList<String>();
+		List<String> result= new ArrayList<>();
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS))
 			result.add(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedImport_description);
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS) && isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_METHODS))
@@ -141,9 +129,6 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 		return result.toArray(new String[result.size()]);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
@@ -181,9 +166,7 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 		return buf.toString();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		if (UnusedCodeFix.isUnusedImport(problem))
 			return isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS);
@@ -198,9 +181,6 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 		return false;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;

@@ -58,9 +58,6 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 		fSecondPage= pageTwo;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.Wizard#addPages()
-	 */
 	@Override
 	public void addPages() {
 		if (fFirstPage == null)
@@ -74,17 +71,11 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 		fFirstPage.init(getSelection(), getActivePart());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		fSecondPage.performFinish(monitor); // use the full progress monitor
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
-	 */
 	@Override
 	public boolean performFinish() {
 		boolean res= super.performFinish();
@@ -100,6 +91,7 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 			selectAndReveal(fSecondPage.getJavaProject().getProject());
 
 			Display.getDefault().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					IWorkbenchPart activePart= getActivePart();
 					if (activePart instanceof IPackagesViewPart) {
@@ -134,22 +126,17 @@ public class JavaProjectWizard extends NewElementWizard implements IExecutableEx
 	 * Stores the configuration element for the wizard.  The config element will be used
 	 * in <code>performFinish</code> to set the result perspective.
 	 */
+	@Override
 	public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
 		fConfigElement= cfig;
 	}
 
-	/* (non-Javadoc)
-	 * @see IWizard#performCancel()
-	 */
 	@Override
 	public boolean performCancel() {
 		fSecondPage.performCancel();
 		return super.performCancel();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getCreatedElement()
-	 */
 	@Override
 	public IJavaElement getCreatedElement() {
 		return fSecondPage.getJavaProject();

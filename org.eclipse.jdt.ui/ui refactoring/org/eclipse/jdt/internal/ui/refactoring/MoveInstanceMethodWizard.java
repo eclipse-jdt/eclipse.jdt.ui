@@ -107,6 +107,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 		 */
+		@Override
 		public void createControl(final Composite parent) {
 			Assert.isNotNull(parent);
 			final Composite control= new Composite(parent, SWT.NONE);
@@ -153,6 +154,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 
 			viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
+				@Override
 				public final void selectionChanged(final SelectionChangedEvent event) {
 					final Object element= ((IStructuredSelection) event.getSelection()).getFirstElement();
 					if (element instanceof IVariableBinding) {
@@ -192,6 +194,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			fMethodNameField.setFocus();
 			fMethodNameField.addModifyListener(new ModifyListener() {
 
+				@Override
 				public final void modifyText(final ModifyEvent event) {
 					fMethodNameStatus= fProcessor.setMethodName(fMethodNameField.getText());
 					handleStatusChanged();
@@ -214,6 +217,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			fTargetNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fTargetNameField.addModifyListener(new ModifyListener() {
 
+				@Override
 				public final void modifyText(final ModifyEvent event) {
 					fTargetNameStatus= fProcessor.setTargetName(fTargetNameField.getText());
 					handleStatusChanged();
@@ -304,6 +308,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
 		 */
+		@Override
 		public Image getColumnImage(final Object element, final int column) {
 			final IVariableBinding binding= (IVariableBinding) element;
 			switch (column) {
@@ -319,6 +324,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
 		 */
+		@Override
 		public String getColumnText(final Object element, final int column) {
 			final IVariableBinding binding= (IVariableBinding) element;
 			switch (column) {

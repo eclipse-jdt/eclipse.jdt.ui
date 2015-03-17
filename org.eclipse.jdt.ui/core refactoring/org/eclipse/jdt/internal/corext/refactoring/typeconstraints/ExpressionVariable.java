@@ -41,9 +41,6 @@ public final class ExpressionVariable extends ConstraintVariable {
 		fExpressionType= expression.getNodeType();
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		return "[" + fSource + "]"; //$NON-NLS-1$ //$NON-NLS-2$

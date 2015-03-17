@@ -145,6 +145,7 @@ public class AccessRuleEntryDialog extends StatusDialog {
 
 	private class TypeRulesAdapter implements IDialogFieldListener {
 
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			doStatusLineUpdate();
 		}

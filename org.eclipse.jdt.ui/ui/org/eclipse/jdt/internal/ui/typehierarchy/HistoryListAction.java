@@ -60,13 +60,16 @@ public class HistoryListAction extends Action {
 			};
 
 			IListAdapter<IJavaElement[]> adapter= new IListAdapter<IJavaElement[]>() {
+				@Override
 				public void customButtonPressed(ListDialogField<IJavaElement[]> field, int index) {
 					doCustomButtonPressed();
 				}
+				@Override
 				public void selectionChanged(ListDialogField<IJavaElement[]> field) {
 					doSelectionChanged();
 				}
 
+				@Override
 				public void doubleClicked(ListDialogField<IJavaElement[]> field) {
 					doDoubleClicked();
 				}
@@ -108,7 +111,7 @@ public class HistoryListAction extends Action {
 				}
 			};
 
-			fHistoryList= new ListDialogField<IJavaElement[]>(adapter, buttonLabels, labelProvider);
+			fHistoryList= new ListDialogField<>(adapter, buttonLabels, labelProvider);
 			fHistoryList.setLabelText(TypeHierarchyMessages.HistoryListDialog_label);
 			fHistoryList.setElements(Arrays.asList(elements));
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,6 +73,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		fireLabelProviderChanged(new LabelProviderChangedEvent(this));
 	}
 
+	@Override
 	public String getText(Object obj) {
 		StringBuffer buf= new StringBuffer();
 		if (obj instanceof ASTNode) {
@@ -99,6 +100,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	}
 	
 	
+	@Override
 	public Image getImage(Object obj) {
 		if (obj instanceof ASTNode) {
 			return null;
@@ -114,9 +116,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 //		return PlatformUI.getWorkbench().getSharedImages().getImage(imageKey);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
-	 */
+	@Override
 	public Color getForeground(Object element) {
 		if ((element instanceof Error))
 			return fRed;
@@ -151,9 +151,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		return fDarkRed; // all extra properties
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
-	 */
+	@Override
 	public Color getBackground(Object element) {
 		if (isNotProperlyNested(element)) {
 			return fLightRed;
@@ -201,7 +199,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			if (object instanceof ASTNode) {
 				return isInsideNode((ASTNode) object);
 			} else if (object instanceof List) {
-				for (Iterator iter= ((List) object).iterator(); iter.hasNext(); ) {
+				for (Iterator<?> iter= ((List<?>) object).iterator(); iter.hasNext(); ) {
 					Object child= iter.next();
 					if (isInside(child)) {
 						return true;
@@ -212,9 +210,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IFontProvider#getFont(java.lang.Object)
-	 */
+	@Override
 	public Font getFont(Object element) {
 		if (element instanceof ASTNode) {
 			ASTNode node= (ASTNode) element;
@@ -226,6 +222,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		return null;
 	}
 	
+	@Override
 	public void dispose() {
 		super.dispose();
 		fLightBlue.dispose();

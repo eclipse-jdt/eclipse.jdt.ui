@@ -61,11 +61,6 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.dialogs.IconAndMessageDialog#createMessageArea(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected Control createMessageArea(Composite parent) {
 		initializeDialogUnits(parent);
@@ -129,6 +124,7 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 
 		fExactStrategyRadio.setDialogFieldListener(new IDialogFieldListener() {
 
+			@Override
 			public void dialogFieldChanged(DialogField field) {
 				updateLabel();
 				fSelectedStrategy= RenamingNameSuggestor.STRATEGY_EXACT;
@@ -137,6 +133,7 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 
 		fEmbeddedStrategyRadio.setDialogFieldListener(new IDialogFieldListener() {
 
+			@Override
 			public void dialogFieldChanged(DialogField field) {
 				updateLabel();
 				fSelectedStrategy= RenamingNameSuggestor.STRATEGY_EMBEDDED;
@@ -145,6 +142,7 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 
 		fSuffixStrategyRadio.setDialogFieldListener(new IDialogFieldListener() {
 
+			@Override
 			public void dialogFieldChanged(DialogField field) {
 				updateLabel();
 				fSelectedStrategy= RenamingNameSuggestor.STRATEGY_SUFFIX;

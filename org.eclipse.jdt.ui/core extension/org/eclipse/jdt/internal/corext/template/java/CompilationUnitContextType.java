@@ -241,9 +241,6 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 	public abstract CompilationUnitContext createContext(IDocument document, int completionPosition, int length, ICompilationUnit compilationUnit);
 	public abstract CompilationUnitContext createContext(IDocument document, Position completionPosition, ICompilationUnit compilationUnit);
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.template.ContextType#validateVariables(org.eclipse.jdt.internal.corext.template.TemplateVariable[])
-	 */
 	@Override
 	protected void validateVariables(TemplateVariable[] variables) throws TemplateException {
 		// check for multiple cursor variables

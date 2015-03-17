@@ -48,6 +48,7 @@ public class EnableMemberFilterAction extends Action {
 	@Override
 	public void run() {
 		BusyIndicator.showWhile(fView.getSite().getShell().getDisplay(), new Runnable() {
+			@Override
 			public void run() {
 				fView.showMembersInHierarchy(isChecked());
 			}

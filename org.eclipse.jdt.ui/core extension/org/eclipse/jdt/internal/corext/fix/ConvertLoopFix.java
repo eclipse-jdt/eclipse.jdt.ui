@@ -43,12 +43,9 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 			fConvertIterableForLoops= convertIterableForLoops;
 			fMakeFinal= makeFinal;
 			fResult= resultingCollection;
-			fUsedNames= new Hashtable<ForStatement, String>();
+			fUsedNames= new Hashtable<>();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.ForStatement)
-		 */
 		@Override
 		public boolean visit(ForStatement node) {
 			if (fFindForLoopsToConvert || fConvertIterableForLoops) {
@@ -98,9 +95,6 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 			return null;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#endVisit(org.eclipse.jdt.core.dom.ForStatement)
-		 */
 		@Override
 		public void endVisit(ForStatement node) {
 			if (fFindForLoopsToConvert || fConvertIterableForLoops) {
@@ -118,7 +112,7 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 		if (!convertForLoops && !convertIterableForLoops)
 			return null;
 
-		List<ConvertLoopOperation> operations= new ArrayList<ConvertLoopOperation>();
+		List<ConvertLoopOperation> operations= new ArrayList<>();
 		ControlStatementFinder finder= new ControlStatementFinder(convertForLoops, convertIterableForLoops, makeFinal, operations);
 		compilationUnit.accept(finder);
 
@@ -153,9 +147,6 @@ public class ConvertLoopFix extends CompilationUnitRewriteOperationsFix {
 		fStatus= status;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public IStatus getStatus() {
 		return fStatus;

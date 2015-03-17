@@ -42,14 +42,17 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 		super(true);
 	}
 
+	@Override
 	protected String getDocumentPartitioning() {
 		return IJavaPartitions.JAVA_PARTITIONING;
 	}
 
+	@Override
 	protected ICharacterPairMatcher createMatcher(String chars) {
 		return new JavaPairMatcher(chars.toCharArray());
 	}
 
+	@Override
 	protected void setUp() {
 		Document document= new Document("xx(yy(xx)yy)xx()/*  */");
 		String[] types= new String[] {
@@ -72,6 +75,7 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 		return new TestSuite(JavaPairMatcherTest.class);
 	}
 
+	@Override
 	protected void tearDown () {
 		fDocument= null;
 		fPairMatcher= null;

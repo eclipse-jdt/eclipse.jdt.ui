@@ -42,7 +42,7 @@ public class SearchParticipantsExtensionPoint {
 		if (fActiveParticipants != null)
 			return fActiveParticipants;
 		IConfigurationElement[] allParticipants= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaSearchPage.PARTICIPANT_EXTENSION_POINT);
-		fActiveParticipants= new HashSet<SearchParticipantDescriptor>(allParticipants.length);
+		fActiveParticipants= new HashSet<>(allParticipants.length);
 		for (int i= 0; i < allParticipants.length; i++) {
 			SearchParticipantDescriptor descriptor= new SearchParticipantDescriptor(allParticipants[i]);
 			IStatus status= descriptor.checkSyntax();
@@ -57,7 +57,7 @@ public class SearchParticipantsExtensionPoint {
 
 	private void collectParticipants(Set<SearchParticipantRecord> participants, IProject[] projects) {
 		Iterator<SearchParticipantDescriptor> activeParticipants= getAllParticipants().iterator();
-		Set<String> seenParticipants= new HashSet<String>();
+		Set<String> seenParticipants= new HashSet<>();
 		while (activeParticipants.hasNext()) {
 			SearchParticipantDescriptor participant= activeParticipants.next();
 			String id= participant.getID();
@@ -81,7 +81,7 @@ public class SearchParticipantsExtensionPoint {
 
 
 	public SearchParticipantRecord[] getSearchParticipants(IProject[] concernedProjects) {
-		Set<SearchParticipantRecord> participantSet= new HashSet<SearchParticipantRecord>();
+		Set<SearchParticipantRecord> participantSet= new HashSet<>();
 		collectParticipants(participantSet, concernedProjects);
 		SearchParticipantRecord[] participants= new SearchParticipantRecord[participantSet.size()];
 		return participantSet.toArray(participants);

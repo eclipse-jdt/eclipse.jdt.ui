@@ -169,10 +169,10 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	protected CodeGenerationSettings fSettings;
 
 	/** The static bindings to import */
-	protected final Set<IBinding> fStaticBindings= new HashSet<IBinding>();
+	protected final Set<IBinding> fStaticBindings= new HashSet<>();
 
 	/** The type bindings to import */
-	protected final Set<ITypeBinding> fTypeBindings= new HashSet<ITypeBinding>();
+	protected final Set<ITypeBinding> fTypeBindings= new HashSet<>();
 
 	/**
 	 * The type occurrences (element type:
@@ -495,9 +495,6 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		return StubUtility.getCompilationUnitContent(unit, buffer.toString(), fileComment, comment, content, delimiter);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void finalize() throws Throwable {
 		resetWorkingCopies();
@@ -552,7 +549,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					field= fields.get(offset);
 					Set<ICompilationUnit> set= units.get(project);
 					if (set == null) {
-						set= new HashSet<ICompilationUnit>();
+						set= new HashSet<>();
 						units.put(project, set);
 					}
 					final ICompilationUnit unit= field.getCompilationUnit();
@@ -587,7 +584,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				if (method != null) {
 					Set<ICompilationUnit> set= units.get(project);
 					if (set == null) {
-						set= new HashSet<ICompilationUnit>();
+						set= new HashSet<>();
 						units.put(project, set);
 					}
 					final ICompilationUnit unit= method.getCompilationUnit();
@@ -648,7 +645,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			final BodyDeclaration parent= (BodyDeclaration) ASTNodes.getParent(node, BodyDeclaration.class);
 			if (parent instanceof FieldDeclaration) {
 				final List<VariableDeclarationFragment> fragments= ((FieldDeclaration) parent).fragments();
-				result= new ArrayList<IField>(fragments.size());
+				result= new ArrayList<>(fragments.size());
 				VariableDeclarationFragment fragment= null;
 				for (final Iterator<VariableDeclarationFragment> iterator= fragments.iterator(); iterator.hasNext();) {
 					fragment= iterator.next();
@@ -1005,10 +1002,10 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			monitor.beginTask("", 300); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
 			if (fTypeOccurrences != null) {
-				final Set<ICompilationUnit> units= new HashSet<ICompilationUnit>(fTypeOccurrences.keySet());
+				final Set<ICompilationUnit> units= new HashSet<>(fTypeOccurrences.keySet());
 				if (subUnit != null)
 					units.remove(subUnit);
-				final Map<IJavaProject, Collection<ICompilationUnit>> projects= new HashMap<IJavaProject, Collection<ICompilationUnit>>();
+				final Map<IJavaProject, Collection<ICompilationUnit>> projects= new HashMap<>();
 				Collection<ICompilationUnit> collection= null;
 				IJavaProject project= null;
 				ICompilationUnit current= null;
@@ -1017,7 +1014,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					project= current.getJavaProject();
 					collection= projects.get(project);
 					if (collection == null) {
-						collection= new ArrayList<ICompilationUnit>();
+						collection= new ArrayList<>();
 						projects.put(project, collection);
 					}
 					collection.add(current);
@@ -1137,7 +1134,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			monitor.beginTask("", 300); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
 			final Map<IJavaProject, Set<SearchResultGroup>> firstPass= getReferencingCompilationUnits(subType, new SubProgressMonitor(monitor, 100), status);
-			final Map<IJavaProject, Set<ICompilationUnit>> secondPass= new HashMap<IJavaProject, Set<ICompilationUnit>>();
+			final Map<IJavaProject, Set<ICompilationUnit>> secondPass= new HashMap<>();
 			IJavaProject project= null;
 			Collection<SearchResultGroup> collection= null;
 			try {
@@ -1146,7 +1143,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 				ICompilationUnit current= null;
 				SearchResultGroup group= null;
 				SearchMatch[] matches= null;
-				final Map<ICompilationUnit, SearchResultGroup> groups= new HashMap<ICompilationUnit, SearchResultGroup>();
+				final Map<ICompilationUnit, SearchResultGroup> groups= new HashMap<>();
 				for (final Iterator<IJavaProject> outer= firstPass.keySet().iterator(); outer.hasNext();) {
 					project= outer.next();
 					if (level == 3 && !JavaModelUtil.is50OrHigher(project))
@@ -1168,7 +1165,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					}
 				}
 				Set<ICompilationUnit> units= null;
-				final Set<ICompilationUnit> processed= new HashSet<ICompilationUnit>();
+				final Set<ICompilationUnit> processed= new HashSet<>();
 				if (subUnit != null)
 					processed.add(subUnit);
 				model.beginCreation();
@@ -1181,7 +1178,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 						project= outer.next();
 						collection= firstPass.get(project);
 						if (collection != null) {
-							units= new HashSet<ICompilationUnit>(collection.size());
+							units= new HashSet<>(collection.size());
 							for (final Iterator<SearchResultGroup> inner= collection.iterator(); inner.hasNext();) {
 								group= inner.next();
 								matches= group.getSearchResults();
@@ -1194,7 +1191,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 									}
 								}
 							}
-							final List<ICompilationUnit> batches= new ArrayList<ICompilationUnit>(units);
+							final List<ICompilationUnit> batches= new ArrayList<>(units);
 							final int size= batches.size();
 							final int iterations= (size - 1) / SIZE_BATCH + 1;
 							final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 100);

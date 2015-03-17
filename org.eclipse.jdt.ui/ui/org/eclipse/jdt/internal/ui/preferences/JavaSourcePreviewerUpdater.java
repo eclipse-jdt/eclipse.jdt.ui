@@ -49,6 +49,7 @@ public class JavaSourcePreviewerUpdater {
 			/*
 			 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 			 */
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (event.getProperty().equals(PreferenceConstants.EDITOR_TEXT_FONT)) {
 					Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
@@ -60,6 +61,7 @@ public class JavaSourcePreviewerUpdater {
 			/*
 			 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 			 */
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (configuration.affectsTextPresentation(event)) {
 					configuration.handlePropertyChangeEvent(event);
@@ -71,6 +73,7 @@ public class JavaSourcePreviewerUpdater {
 			/*
 			 * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
 			 */
+			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				preferenceStore.removePropertyChangeListener(propertyChangeListener);
 				JFaceResources.getFontRegistry().removeListener(fontChangeListener);

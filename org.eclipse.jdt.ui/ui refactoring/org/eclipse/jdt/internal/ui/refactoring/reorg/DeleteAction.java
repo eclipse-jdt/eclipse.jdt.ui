@@ -170,7 +170,7 @@ public class DeleteAction extends SelectionDispatchAction {
 			if (activePart instanceof PackageExplorerPart) {
 				PackageExplorerPart packagePart= (PackageExplorerPart) activePart;
 				WorkingSetModel model= packagePart.getWorkingSetModel();
-				List<IWorkingSet> activeWorkingSets= new ArrayList<IWorkingSet>(Arrays.asList(model.getActiveWorkingSets()));
+				List<IWorkingSet> activeWorkingSets= new ArrayList<>(Arrays.asList(model.getActiveWorkingSets()));
 				activeWorkingSets.removeAll(selection);
 				model.setActiveWorkingSets(activeWorkingSets.toArray(new IWorkingSet[activeWorkingSets.size()]));
 			}
@@ -188,9 +188,6 @@ public class DeleteAction extends SelectionDispatchAction {
 		return IWorkingSetIDs.OTHERS.equals(workingSetID);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		if (ReorgUtils.containsOnlyProjects(selection.toList())) {

@@ -47,6 +47,7 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
        fReceiver = receiver;
     }
 
+	@Override
 	public void changeControlPressed(DialogField field) {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(
 			Display.getCurrent().getActiveShell(), new JavaElementLabelProvider());
@@ -65,8 +66,8 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
 		try{
 			IJavaProject project= cu.getJavaProject();
 			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-			List<IPackageFragment> result= new ArrayList<IPackageFragment>();
-			HashMap<String, Object> entered =new HashMap<String, Object>();
+			List<IPackageFragment> result= new ArrayList<>();
+			HashMap<String, Object> entered =new HashMap<>();
 			for (int i= 0; i < roots.length; i++){
 				if (canAddPackageRoot(roots[i])){
 					getValidPackages(roots[i], result, entered, elementNameMatch);
@@ -134,7 +135,7 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
     public static List<IPackageFragment> searchAllPackages(IJavaProject project, String matcher) {
 		try{
 			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-			List<IPackageFragment> result= new ArrayList<IPackageFragment>();
+			List<IPackageFragment> result= new ArrayList<>();
 			for (int i= 0; i < roots.length; i++){
 				if (canAddPackageRoot(roots[i])){
 					getValidPackages(roots[i], result, null, matcher);
@@ -143,7 +144,7 @@ public class PackageBrowseAdapter implements IStringButtonAdapter {
 			return result;
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-			return new ArrayList<IPackageFragment>(0);
+			return new ArrayList<>(0);
 		}
     }
 }

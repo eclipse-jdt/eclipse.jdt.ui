@@ -85,25 +85,16 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 		return fConfigurationBlock.hasProjectSpecificOptions(project);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPreferencePageID()
-	 */
 	@Override
 	protected String getPreferencePageID() {
 		return PREF_ID;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPropertyPageID()
-	 */
 	@Override
 	protected String getPropertyPageID() {
 		return PROP_ID;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
-	 */
 	@Override
 	public void dispose() {
 		if (fConfigurationBlock != null) {
@@ -112,9 +103,6 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 		super.dispose();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enableProjectSpecificSettings(boolean)
-	 */
 	@Override
 	protected void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
 		super.enableProjectSpecificSettings(useProjectSpecificSettings);
@@ -155,9 +143,6 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
-	 */
 	@Override
 	public void applyData(Object data) {
 		super.applyData(data);
@@ -179,9 +164,6 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#setElement(org.eclipse.core.runtime.IAdaptable)
-	 */
 	@Override
 	public void setElement(IAdaptable element) {
 		super.setElement(element);

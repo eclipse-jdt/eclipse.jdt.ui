@@ -19,15 +19,13 @@ import junit.framework.TestSuite;
  */
 public class ScrollVerticalRuler100Test extends ScrollVerticalRulerTest {
 
-	private static final Class THIS= ScrollVerticalRuler100Test.class;
+	private static final Class<ScrollVerticalRuler100Test> THIS= ScrollVerticalRuler100Test.class;
 
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.text.tests.performance.ScrollVerticalRulerTest#getNumberOfAnnotations()
-	 */
+	@Override
 	protected int getNumberOfAnnotations() {
 		return 100;
 	}

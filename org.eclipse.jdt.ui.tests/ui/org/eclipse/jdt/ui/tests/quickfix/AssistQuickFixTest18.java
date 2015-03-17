@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
@@ -43,7 +44,7 @@ import junit.framework.TestSuite;
 
 public class AssistQuickFixTest18 extends QuickFixTest {
 
-	private static final Class THIS= AssistQuickFixTest18.class;
+	private static final Class<AssistQuickFixTest18> THIS= AssistQuickFixTest18.class;
 
 	private IJavaProject fJProject1;
 
@@ -72,8 +73,9 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		};
 	}
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);
@@ -87,6 +89,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
@@ -105,7 +108,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("x");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 0);
 	}
@@ -124,7 +127,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("x");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 0);
 	}
@@ -153,7 +156,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("I()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -202,7 +205,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("I()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -254,7 +257,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("I()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
@@ -285,7 +288,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("I()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
@@ -317,7 +320,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 			int offset= buf.toString().indexOf("I()");
 			AssistContext context= getCorrectionContext(cu, offset, 0);
 			assertNoErrors(context);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 1);
 			assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
@@ -349,7 +352,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("I()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
@@ -378,7 +381,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("C()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
@@ -407,7 +410,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("I()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -452,7 +455,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("I()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -505,7 +508,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("I()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -566,7 +569,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("I()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -628,7 +631,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("I()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -679,7 +682,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("J()"); // generic lambda not allowed
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, FixMessages.LambdaExpressionsFix_convert_to_lambda_expression);
@@ -711,7 +714,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("FI()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -761,7 +764,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("FI()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -812,7 +815,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("FI()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -861,7 +864,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("X()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -914,7 +917,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("FIOther()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -965,7 +968,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("public boolean test(");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1006,7 +1009,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -1056,7 +1059,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -1103,7 +1106,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 6);
 		assertCorrectLabels(proposals);
@@ -1149,7 +1152,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
@@ -1203,7 +1206,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -1252,7 +1255,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
@@ -1292,7 +1295,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -1348,7 +1351,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -1425,7 +1428,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -1486,7 +1489,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 	
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -1524,7 +1527,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -1564,7 +1567,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -1605,7 +1608,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -1645,7 +1648,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -1686,7 +1689,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -1728,7 +1731,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -1769,7 +1772,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -1809,7 +1812,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("class E {\n");
@@ -1847,7 +1850,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("class E {\n");
@@ -1883,7 +1886,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression);
@@ -1908,7 +1911,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression);
@@ -1933,7 +1936,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression);
@@ -1955,7 +1958,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("str");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -1990,7 +1993,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
@@ -2020,7 +2023,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.util.function.Function;\n");
@@ -2050,7 +2053,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -2089,7 +2092,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("import java.lang.annotation.ElementType;\n");
@@ -2131,7 +2134,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("::") + 1;
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2170,7 +2173,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("::") + 1;
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_lambda_expression);
 	}
@@ -2198,7 +2201,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf1.toString().indexOf("::/*[1]*/") + 1;
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2319,7 +2322,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("::") + 1;
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2361,7 +2364,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf1.toString().indexOf("::/*[1]*/") + 1;
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -2471,7 +2474,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf1.toString().indexOf("::/*[1]*/") + 1;
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -2652,7 +2655,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf1.toString().indexOf("::/*[1]*/") + 1;
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -2733,7 +2736,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("::") + 1;
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -2768,7 +2771,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("::") + 1;
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
@@ -2808,7 +2811,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("::") + 1;
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		
@@ -2879,7 +2882,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf1.toString().indexOf("::/*[1]*/") + 1;
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -3292,7 +3295,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->/*[1]*/");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
@@ -3389,7 +3392,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf1.toString().indexOf("->/*[1]*/");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		StringBuffer buf= new StringBuffer();
@@ -3481,7 +3484,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf1.toString().indexOf("-> /*[1]*/");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		StringBuffer buf= new StringBuffer();
@@ -3835,7 +3838,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf1.toString().indexOf("->/*[1]*/");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
@@ -3956,7 +3959,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf1.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
 		StringBuffer buf= new StringBuffer();
@@ -3986,7 +3989,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf1.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
 		StringBuffer buf= new StringBuffer();
@@ -4015,7 +4018,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_removeParenthesesInLambda);
@@ -4036,7 +4039,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_removeParenthesesInLambda);
@@ -4057,7 +4060,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		int offset= buf1.toString().indexOf("->");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_removeParenthesesInLambda);

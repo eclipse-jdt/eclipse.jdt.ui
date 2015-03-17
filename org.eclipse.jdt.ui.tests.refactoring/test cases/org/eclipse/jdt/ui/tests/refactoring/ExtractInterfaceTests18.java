@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 
-	private static final Class clazz= ExtractInterfaceTests18.class;
+	private static final Class<ExtractInterfaceTests18> clazz= ExtractInterfaceTests18.class;
 
 	private static final String REFACTORING_PATH= "ExtractInterface18/";
 
@@ -83,7 +83,7 @@ public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 
 		IMember[] extractableMembers= processor.getExtractableMembers();
 		final IMember[] members= new IMember[extractableMembers.length - 1];
-		List<IMember> list= new ArrayList<IMember>();
+		List<IMember> list= new ArrayList<>();
 		for (IMember iMember : extractableMembers) {
 			if (!(iMember instanceof IField)) {
 				list.add(iMember);

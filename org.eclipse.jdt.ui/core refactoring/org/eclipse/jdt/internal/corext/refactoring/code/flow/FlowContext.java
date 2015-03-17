@@ -40,12 +40,12 @@ public class FlowContext {
 	private IVariableBinding[] fLocals;
 	private List<List<CatchClause>> fExceptionStack;
 
-	private static final List<CatchClause> EMPTY_CATCH_CLAUSE= new ArrayList<CatchClause>(0);
+	private static final List<CatchClause> EMPTY_CATCH_CLAUSE= new ArrayList<>(0);
 
 	public FlowContext(int start, int length) {
 		fStart= start;
 		fLength= length;
-		fExceptionStack= new ArrayList<List<CatchClause>>(3);
+		fExceptionStack= new ArrayList<>(3);
 	}
 
 	public void setConsiderAccessMode(boolean b) {

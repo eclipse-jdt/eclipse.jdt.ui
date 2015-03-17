@@ -128,7 +128,7 @@ class MemberCheckUtil {
 	}
 
 	private static IType[] getAllEnclosedTypes(IType type) throws JavaModelException {
-		List<IType> result= new ArrayList<IType>(2);
+		List<IType> result= new ArrayList<>(2);
 		IType[] directlyEnclosed= type.getTypes();
 		result.addAll(Arrays.asList(directlyEnclosed));
 		for (int i= 0; i < directlyEnclosed.length; i++) {

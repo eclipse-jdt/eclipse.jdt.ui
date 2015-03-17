@@ -82,7 +82,7 @@ public class PropertiesQuickAssistProcessor {
 	}
 
 	public static ICompletionProposal[] collectAssists(PropertiesAssistContext invocationContext) throws BadLocationException, BadPartitioningException {
-		ArrayList<ICompletionProposal> resultingCollections= new ArrayList<ICompletionProposal>();
+		ArrayList<ICompletionProposal> resultingCollections= new ArrayList<>();
 
 		getEscapeUnescapeBackslashProposals(invocationContext, resultingCollections);
 		getCreateFieldsInAccessorClassProposals(invocationContext, resultingCollections);
@@ -159,7 +159,7 @@ public class PropertiesQuickAssistProcessor {
 		IDocument document= invocationContext.getDocument();
 		int selectionOffset= invocationContext.getOffset();
 		int selectionLength= invocationContext.getLength();
-		List<String> fields= new ArrayList<String>();
+		List<String> fields= new ArrayList<>();
 
 		IType accessorClass= invocationContext.getAccessorType();
 		if (accessorClass == null || !isEclipseNLSUsed(accessorClass))
@@ -212,7 +212,7 @@ public class PropertiesQuickAssistProcessor {
 		IDocument document= invocationContext.getDocument();
 		int selectionOffset= invocationContext.getOffset();
 		int selectionLength= invocationContext.getLength();
-		List<String> fields= new ArrayList<String>();
+		List<String> fields= new ArrayList<>();
 
 		IFile file= invocationContext.getFile();
 		if (file == null)
@@ -302,7 +302,7 @@ public class PropertiesQuickAssistProcessor {
 
 	private static List<String> getKeysFromSelection(IDocument document, int selectionOffset, int selectionLength) throws BadLocationException,
 			BadPartitioningException {
-		List<String> keys= new ArrayList<String>();
+		List<String> keys= new ArrayList<>();
 		String selection= document.get(selectionOffset, (selectionLength == 0) ? 1 : selectionLength).trim();
 		if (selection.length() == 0)
 			return null;

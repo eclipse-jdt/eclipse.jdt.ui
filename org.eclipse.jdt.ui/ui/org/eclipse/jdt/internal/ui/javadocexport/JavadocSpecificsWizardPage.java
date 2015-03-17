@@ -79,6 +79,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	/*
 	 * @see IDialogPage#createControl(Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -158,6 +159,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		});
 
 		fOverViewText.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				doValidation(OVERVIEWSTATUS);
 			}
@@ -202,6 +204,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		});
 
 		fAntText.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				doValidation(ANTSTATUS);
 			}

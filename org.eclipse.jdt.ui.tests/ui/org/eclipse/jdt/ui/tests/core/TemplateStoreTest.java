@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
 
 public class TemplateStoreTest extends CoreTests {
 
-	private static final Class THIS= TemplateStoreTest.class;
+	private static final Class<TemplateStoreTest> THIS= TemplateStoreTest.class;
 
 	private IJavaProject fJProject1;
 
@@ -43,10 +43,12 @@ public class TemplateStoreTest extends CoreTests {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 	}
 

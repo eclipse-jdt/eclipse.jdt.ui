@@ -76,8 +76,8 @@ public class LineWrappingTabPage extends FormatterTabPage {
 			this.key= _key;
 			this.name= _name;
 			this.previewText= _previewText != null ? createPreviewHeader(_name) + _previewText : null;
-			children= new ArrayList<Category>();
-			preferences= new ArrayList<Preference>();
+			children= new ArrayList<>();
+			preferences= new ArrayList<>();
 		}
 
 		/**
@@ -117,7 +117,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		private int fIndex= 0;
 
 		public CategoryListener(List<Category> categoriesTree) {
-			fCategoriesList= new ArrayList<Category>();
+			fCategoriesList= new ArrayList<>();
 			flatten(fCategoriesList, categoriesTree);
 		}
 
@@ -130,6 +130,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 			}
 		}
 
+		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 		    if (event != null)
 		        fSelection= (IStructuredSelection)event.getSelection();
@@ -185,7 +186,8 @@ public class LineWrappingTabPage extends FormatterTabPage {
 			fCategoriesViewer.setSelection(new StructuredSelection(new Category[] {category}));
 		}
 
-        public void doubleClick(DoubleClickEvent event) {
+        @Override
+		public void doubleClick(DoubleClickEvent event) {
             final ISelection selection= event.getSelection();
             if (selection instanceof IStructuredSelection) {
                 final Category node= (Category)((IStructuredSelection)selection).getFirstElement();
@@ -195,13 +197,13 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	}
 
 	private class SelectionState {
-	    private List<Category> fElements= new ArrayList<Category>();
+	    private List<Category> fElements= new ArrayList<>();
 	    private boolean fRequiresRelayout;
 
 	    public void refreshState(IStructuredSelection selection) {
-	        Map<Object, Integer> wrappingStyleMap= new HashMap<Object, Integer>();
-		    Map<Object, Integer> indentStyleMap= new HashMap<Object, Integer>();
-		    Map<Object, Integer> forceWrappingMap= new HashMap<Object, Integer>();
+	        Map<Object, Integer> wrappingStyleMap= new HashMap<>();
+		    Map<Object, Integer> indentStyleMap= new HashMap<>();
+		    Map<Object, Integer> forceWrappingMap= new HashMap<>();
 		    fRequiresRelayout= false;
 		    showSpecificControls(false);
 	        fElements.clear();
@@ -643,7 +645,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 		final String previewLineWidth= fDialogSettings.get(PREF_PREVIEW_LINE_WIDTH);
 
-		fPreviewPreferences= new HashMap<String, String>();
+		fPreviewPreferences= new HashMap<>();
 		fPreviewPreferences.put(LINE_SPLIT, previewLineWidth != null ? previewLineWidth : Integer.toString(DEFAULT_PREVIEW_WINDOW_LINE_WIDTH));
 
 		fCategories= createCategories();
@@ -694,7 +696,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		statements.children.add(fTryCategory);
 		statements.children.add(fCatchCategory);
 
-		final List<Category> root= new ArrayList<Category>();
+		final List<Category> root= new ArrayList<>();
 		root.add(annotations);
 		root.add(classDeclarations);
 		root.add(constructorDeclarations);
@@ -722,17 +724,23 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 		fCategoriesViewer= new TreeViewer(composite /*categoryGroup*/, SWT.MULTI | SWT.BORDER | SWT.READ_ONLY | SWT.V_SCROLL );
 		fCategoriesViewer.setContentProvider(new ITreeContentProvider() {
+			@Override
 			public Object[] getElements(Object inputElement) {
 				return ((Collection<?>)inputElement).toArray();
 			}
+			@Override
 			public Object[] getChildren(Object parentElement) {
 				return ((Category)parentElement).children.toArray();
 			}
+			@Override
 			public Object getParent(Object element) { return null; }
+			@Override
 			public boolean hasChildren(Object element) {
 				return !((Category)element).children.isEmpty();
 			}
+			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {}
+			@Override
 			public void dispose() {}
 		});
 		fCategoriesViewer.setLabelProvider(new LabelProvider());
@@ -811,6 +819,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		fDefaultFocusManager.add(previewLineWidth);
 		previewLineWidth.addObserver(fUpdater);
 		previewLineWidth.addObserver(new Observer() {
+			@Override
 			public void update(Observable o, Object arg) {
 				fDialogSettings.put(PREF_PREVIEW_LINE_WIDTH, fPreviewPreferences.get(LINE_SPLIT));
 			}
@@ -819,9 +828,6 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		return composite;
 	}
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
-     */
     @Override
 	protected JavaPreview doCreateJavaPreview(Composite parent) {
         fPreview= new CompilationUnitPreview(fWorkingValues, parent);

@@ -64,9 +64,6 @@ public class ResetAllAction extends BuildpathModifierAction {
 		setEnabled(false);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getDetailedDescription() {
 		return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_ResetAll;
@@ -86,6 +83,7 @@ public class ResetAllAction extends BuildpathModifierAction {
 		} else {
 			JavaCore.addElementChangedListener(new IElementChangedListener() {
 
+				@Override
 				public void elementChanged(ElementChangedEvent event) {
 					if (fJavaProject.exists()) {
 						try {
@@ -105,15 +103,13 @@ public class ResetAllAction extends BuildpathModifierAction {
 		}
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
 
 		try {
 	        final IRunnableWithProgress runnable= new IRunnableWithProgress() {
-	        	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+	        	@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 
         			monitor.beginTask("", 3); //$NON-NLS-1$
 	        		try {
@@ -160,9 +156,6 @@ public class ResetAllAction extends BuildpathModifierAction {
 	}
 
 
-	/**
-     * {@inheritDoc}
-     */
     @Override
 	protected boolean canHandle(IStructuredSelection elements) {
     	if (fJavaProject == null)

@@ -101,6 +101,7 @@ public class NewInterfaceWizardPage extends NewTypeWizardPage {
 	/*
 	 * @see WizardPage#createControl
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 

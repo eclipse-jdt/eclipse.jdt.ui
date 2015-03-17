@@ -59,7 +59,7 @@ public class PasteActionTest extends RefactoringTest{
 
 	private static final boolean BUG_NOT_IMPLEMENTED_YET= true;
 	private Clipboard fClipboard;
-	private static final Class clazz= PasteActionTest.class;
+	private static final Class<PasteActionTest> clazz= PasteActionTest.class;
 	private static final String REFACTORING_PATH= "Paste/";
 
 	public PasteActionTest(String name) {
@@ -70,21 +70,24 @@ public class PasteActionTest extends RefactoringTest{
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fClipboard= new MockClipboard(Display.getDefault());
 	}
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		fClipboard.dispose();
 	}
 
 	private static Object[] merge(Object[] array1, Object[] array2) {
-		Set elements= new HashSet(array1.length + array2.length);
+		Set<Object> elements= new HashSet<>(array1.length + array2.length);
 		elements.addAll(Arrays.asList(array1));
 		elements.addAll(Arrays.asList(array2));
 		return elements.toArray();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,13 +45,13 @@ public class TestKindRegistry {
 	private static TestKindRegistry fgRegistry;
 
 	private final IExtensionPoint fPoint;
-	private ArrayList/*<TestKind>*/ fTestKinds;
+	private ArrayList<TestKind> fTestKinds;
 
 	private TestKindRegistry(IExtensionPoint point) {
 		fPoint = point;
 	}
 
-	public ArrayList/*<TestKind>*/ getAllKinds() {
+	public ArrayList<TestKind> getAllKinds() {
 		loadKinds();
 		return fTestKinds;
 	}
@@ -60,17 +60,15 @@ public class TestKindRegistry {
 		if (fTestKinds != null)
 			return;
 
-		ArrayList items= new ArrayList();
-		for (Iterator iter= getConfigurationElements().iterator(); iter.hasNext();) {
-			IConfigurationElement element= (IConfigurationElement) iter.next();
+		ArrayList<TestKind> items= new ArrayList<>();
+		for (Iterator<IConfigurationElement> iter= getConfigurationElements().iterator(); iter.hasNext();) {
+			IConfigurationElement element= iter.next();
 			items.add(new TestKind(element));
 		}
 
-		Collections.sort(items, new Comparator() {
-			public int compare(Object arg0, Object arg1) {
-				TestKind kind0 = (TestKind) arg0;
-				TestKind kind1 = (TestKind) arg1;
-
+		Collections.sort(items, new Comparator<TestKind>() {
+			@Override
+			public int compare(TestKind kind0, TestKind kind1) {
 				if (kind0.precedes(kind1))
 					return -1;
 				if (kind1.precedes(kind0))
@@ -81,11 +79,11 @@ public class TestKindRegistry {
 		fTestKinds= items;
 	}
 
-	public ArrayList/*<String>*/ getDisplayNames() {
-		ArrayList result = new ArrayList();
-		ArrayList testTypes = getAllKinds();
-		for (Iterator iter = testTypes.iterator(); iter.hasNext();) {
-			ITestKind type = (ITestKind) iter.next();
+	public ArrayList<String> getDisplayNames() {
+		ArrayList<String> result = new ArrayList<>();
+		ArrayList<TestKind> testTypes = getAllKinds();
+		for (Iterator<TestKind> iter = testTypes.iterator(); iter.hasNext();) {
+			ITestKind type = iter.next();
 			result.add(type.getDisplayName());
 		}
 		return result;
@@ -97,8 +95,8 @@ public class TestKindRegistry {
 	 */
 	public ITestKind getKind(String testKindId) {
 		if (testKindId != null) {
-			for (Iterator iter= getAllKinds().iterator(); iter.hasNext();) {
-				TestKind kind= (TestKind) iter.next();
+			for (Iterator<TestKind> iter= getAllKinds().iterator(); iter.hasNext();) {
+				TestKind kind= iter.next();
 				if (testKindId.equals(kind.getId()))
 					return kind;
 			}
@@ -120,8 +118,8 @@ public class TestKindRegistry {
 		return getDefault().getKind(getContainerTestKindId(element));
 	}
 
-	private ArrayList getConfigurationElements() {
-		ArrayList items= new ArrayList();
+	private ArrayList<IConfigurationElement> getConfigurationElements() {
+		ArrayList<IConfigurationElement> items= new ArrayList<>();
 		IExtension[] extensions= fPoint.getExtensions();
 		for (int i= 0; i < extensions.length; i++) {
 			IExtension extension= extensions[i];
@@ -135,10 +133,10 @@ public class TestKindRegistry {
 	}
 
 	public String getAllKindIds() {
-		ArrayList allKinds= getAllKinds();
+		ArrayList<TestKind> allKinds= getAllKinds();
 		String returnThis= ""; //$NON-NLS-1$
-		for (Iterator iter= allKinds.iterator(); iter.hasNext();) {
-			ITestKind kind= (ITestKind) iter.next();
+		for (Iterator<TestKind> iter= allKinds.iterator(); iter.hasNext();) {
+			ITestKind kind= iter.next();
 			returnThis+= "(" + kind.getId() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return returnThis;

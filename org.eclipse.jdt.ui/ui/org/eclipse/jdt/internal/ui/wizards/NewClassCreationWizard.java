@@ -55,25 +55,16 @@ public class NewClassCreationWizard extends NewElementWizard {
 		addPage(fPage);
 	}
 
-	/*(non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#canRunForked()
-	 */
 	@Override
 	protected boolean canRunForked() {
 		return !fPage.isEnclosingTypeSelected();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		fPage.createType(monitor); // use the full progress monitor
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
-	 */
 	@Override
 	public boolean performFinish() {
 		warnAboutTypeCommentDeprecation();
@@ -90,9 +81,6 @@ public class NewClassCreationWizard extends NewElementWizard {
 		return res;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getCreatedElement()
-	 */
 	@Override
 	public IJavaElement getCreatedElement() {
 		return fPage.getCreatedType();

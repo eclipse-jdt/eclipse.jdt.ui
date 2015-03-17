@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
  *
  * @noextend This class is not intended to be subclassed by clients.
  */
+@Deprecated
 public class JavaElementSorter extends ViewerSorter {
 
 	private final JavaElementComparator fComparator;
@@ -47,6 +48,7 @@ public class JavaElementSorter extends ViewerSorter {
      * @param property the property
      * @return always <code>true</code>
 	 */
+	@Deprecated
 	public boolean isSorterProperty(Object element, Object property) {
 		return true;
 	}
@@ -71,6 +73,7 @@ public class JavaElementSorter extends ViewerSorter {
 	 * Overrides {@link org.eclipse.jface.viewers.ViewerSorter#getCollator()}.
 	 * @deprecated The method is not intended to be used by clients.
 	 */
+	@Deprecated
 	@Override
 	public final java.text.Collator getCollator() {
 		// kept in for API compatibility

@@ -50,6 +50,7 @@ public class EscapeBackslashCompletionProposal implements ICompletionProposal {
 		fDisplayString= displayString;
 	}
 
+	@Override
 	public void apply(IDocument document) {
 		try {
 			document.replace(fOffset, fLength, fProposalText);
@@ -58,23 +59,28 @@ public class EscapeBackslashCompletionProposal implements ICompletionProposal {
 		}
 	}
 
+	@Override
 	public Point getSelection(IDocument document) {
 		return null;
 	}
 
+	@Override
 	public String getAdditionalProposalInfo() {
 		//the proposal info is not HTML
 		return "<pre>" + fProposalText + "</pre>"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	@Override
 	public String getDisplayString() {
 		return fDisplayString;
 	}
 
+	@Override
 	public Image getImage() {
 		return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 	}
 
+	@Override
 	public IContextInformation getContextInformation() {
 		return null;
 	}

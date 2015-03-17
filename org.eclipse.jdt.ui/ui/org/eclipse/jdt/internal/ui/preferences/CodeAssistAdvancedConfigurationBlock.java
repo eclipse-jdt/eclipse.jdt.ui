@@ -103,6 +103,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		/*
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
 		 */
+		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			if (columnIndex == 0)
 				return ((ModelElement) element).getImage();
@@ -112,6 +113,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		/*
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
 		 */
+		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			switch (columnIndex) {
 	            case 0:
@@ -138,6 +140,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		/*
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
 		 */
+		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			if (columnIndex == 0)
 				return ((ModelElement) element).getImage();
@@ -147,6 +150,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		/*
 		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
 		 */
+		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			switch (columnIndex) {
 				case 0:
@@ -163,6 +167,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 			return o.getRank();
 		}
 
+		@Override
 		public int compare(ModelElement o1, ModelElement o2) {
 			return getRank(o1) - getRank(o2);
 		}
@@ -181,7 +186,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 
 		public PreferenceModel(CompletionProposalComputerRegistry registry) {
 			List<CompletionProposalCategory> categories= registry.getProposalCategories();
-			fElements= new ArrayList<ModelElement>();
+			fElements= new ArrayList<>();
 			for (Iterator<CompletionProposalCategory> it= categories.iterator(); it.hasNext();) {
 				CompletionProposalCategory category= it.next();
 				if (category.hasComputers()) {
@@ -340,7 +345,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 
 	/** element type: {@link ModelElement}. */
 	private final PreferenceModel fModel;
-	private final Map<ImageDescriptor, Image> fImages= new HashMap<ImageDescriptor, Image>();
+	private final Map<ImageDescriptor, Image> fImages= new HashMap<>();
 
 	private CheckboxTableViewer fDefaultViewer;
 	private CheckboxTableViewer fSeparateViewer;
@@ -437,6 +442,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		keyColumn.setResizable(false);
 
 		fDefaultViewer.addCheckStateListener(new ICheckStateListener() {
+			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				boolean checked= event.getChecked();
 				ModelElement element= (ModelElement) event.getElement();
@@ -532,6 +538,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 		nameColumn.setWidth(minNameWidth);
 
 		fSeparateViewer.addCheckStateListener(new ICheckStateListener() {
+			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				boolean checked= event.getChecked();
 				ModelElement element= (ModelElement) event.getElement();
@@ -641,8 +648,8 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 
 	private void updateCheckedState() {
 		final int size= fModel.elements.size();
-		List<ModelElement> defaultChecked= new ArrayList<ModelElement>(size);
-		List<ModelElement> separateChecked= new ArrayList<ModelElement>(size);
+		List<ModelElement> defaultChecked= new ArrayList<>(size);
+		List<ModelElement> separateChecked= new ArrayList<>(size);
 
 		for (Iterator<ModelElement> it= fModel.elements.iterator(); it.hasNext();) {
 			ModelElement element= it.next();

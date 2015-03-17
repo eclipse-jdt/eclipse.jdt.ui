@@ -73,9 +73,6 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
         fPart= part;
     }
 
-    /* (non-Javadoc)
-     * Method declared on ActionGroup.
-     */
     @Override
 	public void fillActionBars(IActionBars actionBars) {
         fillViewMenu(actionBars.getMenuManager());
@@ -87,9 +84,6 @@ public class CallHierarchyFiltersActionGroup extends ActionGroup {
         viewMenu.add(new ShowExpandWithConstructorsDialogAction());
     }
 
-    /* (non-Javadoc)
-     * Method declared on ActionGroup.
-     */
     @Override
 	public void dispose() {
         super.dispose();

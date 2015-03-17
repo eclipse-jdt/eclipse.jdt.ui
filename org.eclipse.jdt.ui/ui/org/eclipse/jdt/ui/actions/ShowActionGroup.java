@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
  * @noextend This class is not intended to be subclassed by clients.
  * @deprecated As of 3.5, got replaced by generic Navigate &gt; Show In &gt;
  */
+@Deprecated
 public class ShowActionGroup extends ActionGroup {
 
 	private boolean fIsPackageExplorer;
@@ -99,18 +100,12 @@ public class ShowActionGroup extends ActionGroup {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillActionBars(IActionBars actionBar) {
 		super.fillActionBars(actionBar);
 		setGlobalActionHandlers(actionBar);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);

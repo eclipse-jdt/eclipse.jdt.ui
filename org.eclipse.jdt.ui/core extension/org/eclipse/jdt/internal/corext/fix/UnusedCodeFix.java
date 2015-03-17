@@ -139,9 +139,6 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			fImportDeclaration= importDeclaration;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ImportDeclaration node= fImportDeclaration;
@@ -193,9 +190,6 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			fForceRemove= removeAllAsignements;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			for (int i= 0; i < fUnusedNames.length; i++) {
@@ -312,7 +306,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 					fragments= ((VariableDeclarationStatement) varDecl).fragments();
 				}
 				Expression initializer = frag.getInitializer();
-				ArrayList<Expression> sideEffects= new ArrayList<Expression>();
+				ArrayList<Expression> sideEffects= new ArrayList<>();
 				if (initializer != null) {
 					initializer.accept(new SideEffectFinder(sideEffects));
 				}
@@ -412,7 +406,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 		private void removeVariableWithInitializer(ASTRewrite rewrite, ASTNode initializerNode, ASTNode statementNode, TextEditGroup group) {
 			boolean performRemove= fForceRemove;
 			if (!performRemove) {
-				ArrayList<Expression> sideEffectNodes= new ArrayList<Expression>();
+				ArrayList<Expression> sideEffectNodes= new ArrayList<>();
 				initializerNode.accept(new SideEffectFinder(sideEffectNodes));
 				performRemove= sideEffectNodes.isEmpty();
 			}
@@ -463,9 +457,6 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			fCast= cast;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 
@@ -494,9 +485,6 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			fUnnecessaryCasts= unnecessaryCasts;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -550,7 +538,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			if (node != null) {
 				String label= FixMessages.UnusedCodeFix_RemoveImport_description;
 				RemoveImportOperation operation= new RemoveImportOperation(node);
-				Map<String, String> options= new Hashtable<String, String>();
+				Map<String, String> options= new Hashtable<>();
 				options.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
 				return new UnusedCodeFix(label, compilationUnit, new CompilationUnitRewriteOperation[] {operation}, options);
 			}
@@ -653,9 +641,9 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			boolean removeUnusedImports,
 			boolean removeUnusedCast) {
 
-		List<CompilationUnitRewriteOperation> result= new ArrayList<CompilationUnitRewriteOperation>();
-		Hashtable<ASTNode, List<SimpleName>> variableDeclarations= new Hashtable<ASTNode, List<SimpleName>>();
-		LinkedHashSet<CastExpression> unnecessaryCasts= new LinkedHashSet<CastExpression>();
+		List<CompilationUnitRewriteOperation> result= new ArrayList<>();
+		Hashtable<ASTNode, List<SimpleName>> variableDeclarations= new Hashtable<>();
+		LinkedHashSet<CastExpression> unnecessaryCasts= new LinkedHashSet<>();
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= problems[i];
 			int id= problem.getProblemId();
@@ -766,7 +754,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 			return false;
 		}
 
-		ArrayList<Expression> sideEffects= new ArrayList<Expression>();
+		ArrayList<Expression> sideEffects= new ArrayList<>();
 		node.accept(new SideEffectFinder(sideEffects));
 		return sideEffects.size() > 0;
 	}
@@ -806,7 +794,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 	}
 
 	private static Map<String, String> getCleanUpOptions(IBinding binding, boolean removeAll) {
-		Map<String, String> result= new Hashtable<String, String>();
+		Map<String, String> result= new Hashtable<>();
 
 		result.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, CleanUpOptions.TRUE);
 		switch (binding.getKind()) {

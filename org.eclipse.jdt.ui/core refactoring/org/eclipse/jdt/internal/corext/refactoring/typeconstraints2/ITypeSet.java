@@ -18,6 +18,7 @@ public interface ITypeSet {
 
 	public ITypeSet restrictedTo(ITypeSet restrictionSet);
 
+	@Override
 	public String toString();
 
 	public boolean isEmpty();

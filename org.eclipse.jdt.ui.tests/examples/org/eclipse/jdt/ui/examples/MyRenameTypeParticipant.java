@@ -69,34 +69,26 @@ public class MyRenameTypeParticipant extends RenameParticipant {
 
 	private IType fType;
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant#initialize(java.lang.Object)
-	 */
+	@Override
 	protected boolean initialize(Object element) {
 		fType= (IType) element;
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant#getName()
-	 */
+	@Override
 	public String getName() {
 		return "My special file participant";  //$NON-NLS-1$
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant#checkConditions(org.eclipse.core.runtime.IProgressMonitor, org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext)
-	 */
+	@Override
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) {
 		return new RefactoringStatus();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant#createChange(org.eclipse.core.runtime.IProgressMonitor)
-	 */
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 
-		final HashMap changes= new HashMap();
+		final HashMap<IFile, TextFileChange> changes= new HashMap<>();
 		final String newName= getArguments().getNewName();
 
 		// use the text search engine to find matches in my special files
@@ -108,9 +100,10 @@ public class MyRenameTypeParticipant extends RenameParticipant {
 		Pattern pattern= Pattern.compile(fType.getElementName()); // only find the simple name of the type
 
 		TextSearchRequestor collector= new TextSearchRequestor() {
+			@Override
 			public boolean acceptPatternMatch(TextSearchMatchAccess matchAccess) throws CoreException {
 				IFile file= matchAccess.getFile();
-				TextFileChange change= (TextFileChange) changes.get(file);
+				TextFileChange change= changes.get(file);
 				if (change == null) {
 					TextChange textChange= getTextChange(file); // an other participant already modified that file?
 					if (textChange != null) {
@@ -132,8 +125,8 @@ public class MyRenameTypeParticipant extends RenameParticipant {
 			return null;
 
 		CompositeChange result= new CompositeChange("My special file updates"); //$NON-NLS-1$
-		for (Iterator iter= changes.values().iterator(); iter.hasNext();) {
-			result.add((Change) iter.next());
+		for (Iterator<TextFileChange> iter= changes.values().iterator(); iter.hasNext();) {
+			result.add(iter.next());
 		}
 		return result;
 	}

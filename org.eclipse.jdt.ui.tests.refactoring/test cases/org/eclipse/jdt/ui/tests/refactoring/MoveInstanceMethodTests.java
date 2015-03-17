@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class MoveInstanceMethodTests extends RefactoringTest {
 
-	private static final Class clazz= MoveInstanceMethodTests.class;
+	private static final Class<MoveInstanceMethodTests> clazz= MoveInstanceMethodTests.class;
 
 	public static final int FIELD= 1;
 
@@ -156,6 +156,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		return qualifiedName.substring(0, dot != -1 ? dot : 0);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH + successPath();
 	}

@@ -93,7 +93,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 	private static List<Expression> findSubGroupForSourceRange(List<Expression> group, ISourceRange range) {
 		Assert.isTrue(!group.isEmpty());
 
-		List<Expression> subGroup= new ArrayList<Expression>();
+		List<Expression> subGroup= new ArrayList<>();
 
 		boolean entered= false, exited= false;
 		if(range.getOffset() == group.get(0).getStartPosition())
@@ -121,7 +121,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 		}
 
 		if(!exited)
-			return new ArrayList<Expression>(0);
+			return new ArrayList<>(0);
 		return subGroup;
 	}
 
@@ -169,7 +169,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 	private static List<List<Expression>> getMatchingContiguousNodeSubsequences(List<Expression> source, List<Expression> toMatch) {
 		//naive implementation:
 
-		List<List<Expression>> subsequences= new ArrayList<List<Expression>>();
+		List<List<Expression>> subsequences= new ArrayList<>();
 
 		for(int i= 0; i < source.size();) {
 			if(matchesAt(i, source, toMatch)) {
@@ -228,6 +228,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 		fOperands= Collections.unmodifiableList(operands);
 	}
 
+	@Override
 	public boolean matches(IASTFragment other) {
 		if (! other.getClass().equals(getClass()))
 			return false;
@@ -255,6 +256,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 		return true;
 	}
 
+	@Override
 	public IASTFragment[] getSubFragmentsMatching(IASTFragment toMatch) {
 		return union(
 		               getSubFragmentsWithMyNodeMatching(toMatch),
@@ -321,6 +323,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 	 * a part of it.
 	 * @return returns the associated expression.
 	 */
+	@Override
 	public Expression getAssociatedExpression() {
 		return fGroupRoot;
 	}
@@ -331,6 +334,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 	 * part of its subtree.
 	 * @return returns the associated node.
 	 */
+	@Override
 	public ASTNode getAssociatedNode() {
 		return fGroupRoot;
 	}
@@ -339,6 +343,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 		return fGroupRoot;
 	}
 
+	@Override
 	public int getLength() {
 		return getEndPositionExclusive() - getStartPosition();
 	}
@@ -349,6 +354,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 		return lastNode.getStartPosition() + lastNode.getLength();
 	}
 
+	@Override
 	public int getStartPosition() {
 		return getOperands().get(0).getStartPosition();
 	}
@@ -361,6 +367,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 		return fGroupRoot.getOperator();
 	}
 
+	@Override
 	public Expression createCopyTarget(ASTRewrite rewrite, boolean removeSurroundingParenthesis) throws JavaModelException {
 		List<Expression> allOperands= findGroupMembersInOrderFor(fGroupRoot);
 		if (allOperands.size() == fOperands.size()) {
@@ -387,6 +394,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 //		return result;
 	}
 
+	@Override
 	public void replace(ASTRewrite rewrite, ASTNode replacement, TextEditGroup textEditGroup) {
 		ASTNode groupNode= getGroupRoot();
 
@@ -414,7 +422,7 @@ class AssociativeInfixExpressionFragment extends ASTFragment implements IExpress
 	}
 
 	private static class GroupMemberFinder extends GenericVisitor {
-		private ArrayList<Expression> fMembersInOrder= new ArrayList<Expression>();
+		private ArrayList<Expression> fMembersInOrder= new ArrayList<>();
 		private InfixExpression fGroupRoot;
 
 		public GroupMemberFinder(InfixExpression groupRoot) {

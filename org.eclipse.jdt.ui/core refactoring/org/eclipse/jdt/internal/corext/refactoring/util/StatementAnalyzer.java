@@ -110,9 +110,6 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		return fScanner;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ASTVisitor
-	 */
 	@Override
 	public void endVisit(CompilationUnit node) {
 		if (!hasSelectedNodes()) {
@@ -130,9 +127,6 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		super.endVisit(node);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ASTVisitor
-	 */
 	@Override
 	public void endVisit(DoStatement node) {
 		ASTNode[] selectedNodes= getSelectedNodes();
@@ -144,9 +138,6 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		super.endVisit(node);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ASTVisitor
-	 */
 	@Override
 	public void endVisit(ForStatement node) {
 		ASTNode[] selectedNodes= getSelectedNodes();
@@ -164,9 +155,6 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		super.endVisit(node);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ASTVisitor
-	 */
 	@Override
 	public void endVisit(SwitchStatement node) {
 		ASTNode[] selectedNodes= getSelectedNodes();
@@ -183,9 +171,6 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		super.endVisit(node);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ASTVisitor
-	 */
 	@Override
 	public void endVisit(SynchronizedStatement node) {
 		ASTNode firstSelectedNode= getFirstSelectedNode();
@@ -197,9 +182,6 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		super.endVisit(node);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ASTVisitor
-	 */
 	@Override
 	public void endVisit(TryStatement node) {
 		ASTNode firstSelectedNode= getFirstSelectedNode();
@@ -221,9 +203,6 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		super.endVisit(node);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ASTVisitor
-	 */
 	@Override
 	public void endVisit(WhileStatement node) {
 		ASTNode[] selectedNodes= getSelectedNodes();
@@ -250,7 +229,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 	}
 
 	private static List<SwitchCase> getSwitchCases(SwitchStatement node) {
-		List<SwitchCase> result= new ArrayList<SwitchCase>();
+		List<SwitchCase> result= new ArrayList<>();
 		for (Iterator<Statement> iter= node.statements().iterator(); iter.hasNext(); ) {
 			Object element= iter.next();
 			if (element instanceof SwitchCase)

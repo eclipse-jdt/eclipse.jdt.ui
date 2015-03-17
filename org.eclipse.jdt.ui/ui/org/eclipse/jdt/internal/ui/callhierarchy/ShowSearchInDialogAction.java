@@ -48,9 +48,6 @@ public class ShowSearchInDialogAction extends Action {
 		return fSearchInDialog;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run() {
 		SearchInDialog dialog= getSearchInDialog();

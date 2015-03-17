@@ -481,7 +481,7 @@ public class JavadocOptionsManager {
 		}
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 
-		ArrayList<IContainer> res= new ArrayList<IContainer>();
+		ArrayList<IContainer> res= new ArrayList<>();
 
 		String[] strings= sourcePaths.split(File.pathSeparator);
 		for (int i= 0; i < strings.length; i++) {
@@ -498,7 +498,7 @@ public class JavadocOptionsManager {
 	}
 
 	private IJavaElement[] getSelectedElementsFromAnt(Element element) {
-		List<IJavaElement> res= new ArrayList<IJavaElement>();
+		List<IJavaElement> res= new ArrayList<>();
 
 		// get all the packages listed in the ANT file
 		String packagenames= element.getAttribute(PACKAGENAMES);
@@ -1038,7 +1038,7 @@ public class JavadocOptionsManager {
 	}
 
 	private IJavaElement[] getInitialElementsFromSelection(List<?> candidates) {
-		ArrayList<IJavaElement> res= new ArrayList<IJavaElement>();
+		ArrayList<IJavaElement> res= new ArrayList<>();
 		for (int i= 0; i < candidates.size(); i++) {
 			try {
 				IJavaElement elem= getSelectableJavaElement(candidates.get(i));

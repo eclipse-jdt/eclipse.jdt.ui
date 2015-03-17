@@ -90,9 +90,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		setDescription(WizardMessages.NewTestCaseWizardPageTwo_description);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		Composite container= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -170,6 +168,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		fMethodsTree.setLabelProvider(new JavaElementLabelProvider());
 		fMethodsTree.setAutoExpandLevel(2);
 		fMethodsTree.addCheckStateListener(new ICheckStateListener() {
+			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				doCheckedStateChanged();
 			}
@@ -254,9 +253,6 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
-	 */
 	@Override
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
@@ -275,14 +271,14 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 					superTypes= hierarchy.getAllSuperInterfaces(fClassToTest);
 				else
 					superTypes= new IType[0];
-				types= new ArrayList<IType>(superTypes.length+1);
+				types= new ArrayList<>(superTypes.length+1);
 				types.add(fClassToTest);
 				types.addAll(Arrays.asList(superTypes));
 			} catch(JavaModelException e) {
 				JUnitPlugin.log(e);
 			}
 			if (types == null)
-				types= new ArrayList<IType>();
+				types= new ArrayList<>();
 			fMethodsTree.setContentProvider(new MethodsTreeContentProvider(types.toArray()));
 			fMethodsTree.setInput(types.toArray());
 			fMethodsTree.setSelection(new StructuredSelection(fClassToTest), true);
@@ -321,7 +317,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 
 		public MethodsTreeContentProvider(Object[] types) {
 			fTypes= types;
-			Vector<IMethod> methods= new Vector<IMethod>();
+			Vector<IMethod> methods= new Vector<>();
 			for (int i = types.length-1; i > -1; i--) {
 				Object object = types[i];
 				if (object instanceof IType) {
@@ -356,10 +352,11 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		/*
 		 * @see ITreeContentProvider#getChildren(Object)
 		 */
+		@Override
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof IType) {
 				IType parentType= (IType)parentElement;
-				ArrayList<IMethod> result= new ArrayList<IMethod>(fMethods.length);
+				ArrayList<IMethod> result= new ArrayList<>(fMethods.length);
 				for (int i= 0; i < fMethods.length; i++) {
 					if (fMethods[i].getDeclaringType().equals(parentType)) {
 						result.add(fMethods[i]);
@@ -373,6 +370,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		/*
 		 * @see ITreeContentProvider#getParent(Object)
 		 */
+		@Override
 		public Object getParent(Object element) {
 			if (element instanceof IMethod)
 				return ((IMethod)element).getDeclaringType();
@@ -382,6 +380,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		/*
 		 * @see ITreeContentProvider#hasChildren(Object)
 		 */
+		@Override
 		public boolean hasChildren(Object element) {
 			return getChildren(element).length > 0;
 		}
@@ -389,6 +388,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		/*
 		 * @see IStructuredContentProvider#getElements(Object)
 		 */
+		@Override
 		public Object[] getElements(Object inputElement) {
 			return fTypes;
 		}
@@ -396,12 +396,14 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		/*
 		 * @see IContentProvider#dispose()
 		 */
+		@Override
 		public void dispose() {
 		}
 
 		/*
 		 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 		 */
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 

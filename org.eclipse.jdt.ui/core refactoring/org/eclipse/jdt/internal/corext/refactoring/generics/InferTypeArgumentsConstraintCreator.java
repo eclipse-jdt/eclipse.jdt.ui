@@ -509,7 +509,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		if (methodTypeParameters.length == 0) {
 			methodTypeVariables= Collections.emptyMap();
 		} else {
-			methodTypeVariables= new HashMap<String, IndependentTypeVariable2>();
+			methodTypeVariables= new HashMap<>();
 			for (int i= 0; i < methodTypeParameters.length; i++) {
 				ITypeBinding methodTypeParameter= methodTypeParameters[i];
 				//TODO: typeVariable does not need a type binding - only used in equality constraints

@@ -29,6 +29,7 @@ public class CreateJavadocActionDelegate implements IObjectActionDelegate {
 	/*
 	 * @see IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
 	 */
+	@Override
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 		fCurrentShell= targetPart.getSite().getShell();
 	}
@@ -36,6 +37,7 @@ public class CreateJavadocActionDelegate implements IObjectActionDelegate {
 	/*
 	 * @see IActionDelegate#run(IAction)
 	 */
+	@Override
 	public void run(IAction action) {
 		if (fCurrentSelection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) fCurrentSelection;
@@ -50,6 +52,7 @@ public class CreateJavadocActionDelegate implements IObjectActionDelegate {
 	/*
 	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
 	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		fCurrentSelection= selection;
 	}

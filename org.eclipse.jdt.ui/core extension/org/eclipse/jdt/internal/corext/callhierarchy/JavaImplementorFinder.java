@@ -24,9 +24,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JavaImplementorFinder implements IImplementorFinder {
-    /* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.callhierarchy.IImplementorFinder#findImplementingTypes(org.eclipse.jdt.core.IType, org.eclipse.core.runtime.IProgressMonitor)
-	 */
+	@Override
 	public Collection<IType> findImplementingTypes(IType type, IProgressMonitor progressMonitor) {
         ITypeHierarchy typeHierarchy;
 
@@ -34,7 +32,7 @@ public class JavaImplementorFinder implements IImplementorFinder {
             typeHierarchy = type.newTypeHierarchy(progressMonitor);
 
             IType[] implementingTypes = typeHierarchy.getAllClasses();
-            HashSet<IType> result = new HashSet<IType>(Arrays.asList(implementingTypes));
+            HashSet<IType> result = new HashSet<>(Arrays.asList(implementingTypes));
 
             return result;
         } catch (JavaModelException e) {
@@ -44,17 +42,15 @@ public class JavaImplementorFinder implements IImplementorFinder {
         return null;
     }
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.callhierarchy.IImplementorFinder#findInterfaces(org.eclipse.jdt.core.IType, org.eclipse.core.runtime.IProgressMonitor)
-     */
-    public Collection<IType> findInterfaces(IType type, IProgressMonitor progressMonitor) {
+    @Override
+	public Collection<IType> findInterfaces(IType type, IProgressMonitor progressMonitor) {
         ITypeHierarchy typeHierarchy;
 
         try {
             typeHierarchy = type.newSupertypeHierarchy(progressMonitor);
 
             IType[] interfaces = typeHierarchy.getAllSuperInterfaces(type);
-            HashSet<IType> result = new HashSet<IType>(Arrays.asList(interfaces));
+            HashSet<IType> result = new HashSet<>(Arrays.asList(interfaces));
 
             return result;
         } catch (JavaModelException e) {

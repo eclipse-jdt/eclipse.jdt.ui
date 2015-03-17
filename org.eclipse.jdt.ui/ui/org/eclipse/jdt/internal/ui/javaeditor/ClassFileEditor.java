@@ -120,8 +120,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		private Color fBackgroundColor;
 		private Color fForegroundColor;
 		private Color fSeparatorColor;
-		private List<Label> fBannerLabels= new ArrayList<Label>();
-		private List<Label> fHeaderLabels= new ArrayList<Label>();
+		private List<Label> fBannerLabels= new ArrayList<>();
+		private List<Label> fHeaderLabels= new ArrayList<>();
 		private Font fFont;
 
 		/**
@@ -166,6 +166,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			fComposite= createComposite(parent);
 			fComposite.setLayout(new GridLayout());
 			fComposite.addDisposeListener(new DisposeListener() {
+				@Override
 				public void widgetDisposed(DisposeEvent e) {
 					JFaceResources.getFontRegistry().removeListener(SourceAttachmentForm.this);
 					fComposite= null;
@@ -284,6 +285,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 		private SelectionListener getButtonListener(final IClasspathEntry entry, final IPath containerPath, final IJavaProject jproject, final boolean canEditEncoding) {
 			return new SelectionListener() {
+				@Override
 				public void widgetSelected(SelectionEvent event) {
 					Shell shell= getSite().getShell();
 					try {
@@ -299,6 +301,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					}
 				}
 
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {}
 			};
 		}
@@ -321,6 +324,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		/*
 		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 		 */
+		@Override
 		public void propertyChange(PropertyChangeEvent event) {
 
 			for (Iterator<Label> iterator = fBannerLabels.iterator(); iterator.hasNext();) {
@@ -438,6 +442,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		/*
 		 * @see Runnable#run()
 		 */
+		@Override
 		public void run() {
 
 			IClassFileEditorInput input;
@@ -833,9 +838,11 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				setAction(ITextEditorActionConstants.COPY, copyAction);
 				copyAction.setEnabled(fNoSourceTextWidget.getSelectionText().length() > 0);
 				fNoSourceTextWidget.addSelectionListener(new SelectionListener() {
+					@Override
 					public void widgetSelected(SelectionEvent e) {
 						copyAction.setEnabled(fNoSourceTextWidget.getSelectionText().length() > 0);
 					}
+					@Override
 					public void widgetDefaultSelected(SelectionEvent e) {
 					}
 				});
@@ -904,6 +911,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	/*
 	 * @see ClassFileDocumentProvider.InputChangeListener#inputChanged(IClassFileEditorInput)
 	 */
+	@Override
 	public void inputChanged(IClassFileEditorInput input) {
 		fInputUpdater.post(input);
 	}

@@ -54,9 +54,6 @@ public class CopyResourceChange extends ResourceChange {
 		setValidationMethod(SAVE_IF_DIRTY);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ltk.core.refactoring.Change#getName()
-	 */
 	@Override
 	public String getName() {
 		return Messages.format(RefactoringCoreMessages.CopyResourceString_copy, new String[] { BasicElementLabels.getPathLabel(getResource().getFullPath(), false), BasicElementLabels.getResourceName(getDestination()) });
@@ -149,7 +146,7 @@ public class CopyResourceChange extends ResourceChange {
 	}
 
 	private void markAsExecuted(IResource resource) {
-		ReorgExecutionLog log= (ReorgExecutionLog)getAdapter(ReorgExecutionLog.class);
+		ReorgExecutionLog log= getAdapter(ReorgExecutionLog.class);
 		if (log != null) {
 			log.markAsProcessed(resource);
 		}

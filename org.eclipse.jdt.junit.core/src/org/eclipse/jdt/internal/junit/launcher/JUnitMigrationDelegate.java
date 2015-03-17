@@ -36,11 +36,7 @@ public class JUnitMigrationDelegate implements ILaunchConfigurationMigrationDele
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.debug.core.ILaunchConfigurationMigrationDelegate#isCandidate()
-	 */
+	@Override
 	public boolean isCandidate(ILaunchConfiguration candidate) throws CoreException {
 		IResource[] mapped = candidate.getMappedResources();
 		IResource target = getResource(candidate);
@@ -59,11 +55,7 @@ public class JUnitMigrationDelegate implements ILaunchConfigurationMigrationDele
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.debug.core.ILaunchConfigurationMigrationDelegate#migrate(org.eclipse.debug.core.ILaunchConfiguration)
-	 */
+	@Override
 	public void migrate(ILaunchConfiguration candidate) throws CoreException {
 		ILaunchConfigurationWorkingCopy wc= candidate.getWorkingCopy();
 		mapResources(wc);

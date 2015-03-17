@@ -67,14 +67,17 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		status.merge(initializeStatus);
 	}
 
+	@Override
 	public boolean canChildrenBeDestinations(IReorgDestination destination) {
 		return fMovePolicy.canChildrenBeDestinations(destination);
 	}
 
+	@Override
 	public boolean canElementBeDestination(IReorgDestination destination) {
 		return fMovePolicy.canElementBeDestination(destination);
 	}
 
+	@Override
 	public boolean canEnableQualifiedNameUpdating() {
 		return fMovePolicy.canEnableQualifiedNameUpdating();
 	}
@@ -100,6 +103,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 	 * @return <code>true</code> iff <b>Java</b> references to the moved element can be updated
 	 * @deprecated since 3.5, replaced by {@link #canUpdateJavaReferences()}
 	 */
+	@Deprecated
 	public boolean canUpdateReferences() {
 		return canUpdateJavaReferences();
 	}
@@ -182,7 +186,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 	private String[] getAffectedProjectNatures() throws CoreException {
 		String[] jNatures= JavaProcessors.computeAffectedNaturs(fMovePolicy.getJavaElements());
 		String[] rNatures= ResourceProcessors.computeAffectedNatures(fMovePolicy.getResources());
-		Set<String> result= new HashSet<String>();
+		Set<String> result= new HashSet<>();
 		result.addAll(Arrays.asList(jNatures));
 		result.addAll(Arrays.asList(rNatures));
 		return result.toArray(new String[result.size()]);
@@ -205,12 +209,13 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 
 	@Override
 	public Object[] getElements() {
-		List<IAdaptable> result= new ArrayList<IAdaptable>();
+		List<IAdaptable> result= new ArrayList<>();
 		result.addAll(Arrays.asList(fMovePolicy.getJavaElements()));
 		result.addAll(Arrays.asList(fMovePolicy.getResources()));
 		return result.toArray();
 	}
 
+	@Override
 	public String getFilePatterns() {
 		return fMovePolicy.getFilePatterns();
 	}
@@ -233,6 +238,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		return fMovePolicy.getResources();
 	}
 
+	@Override
 	public boolean getUpdateQualifiedNames() {
 		return fMovePolicy.getUpdateQualifiedNames();
 	}
@@ -293,6 +299,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		return fMovePolicy.verifyDestination(destination);
 	}
 
+	@Override
 	public void setFilePatterns(String patterns) {
 		fMovePolicy.setFilePatterns(patterns);
 	}
@@ -302,6 +309,7 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		fReorgQueries= queries;
 	}
 
+	@Override
 	public void setUpdateQualifiedNames(boolean update) {
 		fMovePolicy.setUpdateQualifiedNames(update);
 	}

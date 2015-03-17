@@ -222,7 +222,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 			if (javaElement != null)
 				project= javaElement.getJavaProject();
 
-			List<SimpleName> imports= new ArrayList<SimpleName>();
+			List<SimpleName> imports= new ArrayList<>();
 			ImportReferencesCollector.collect(fCompilationUnit, project, null, imports, null);
 			fImportedNames= imports.toArray(new Name[imports.size()]);
 		}

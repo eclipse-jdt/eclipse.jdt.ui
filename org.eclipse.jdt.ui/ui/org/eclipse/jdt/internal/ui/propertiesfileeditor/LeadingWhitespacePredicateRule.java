@@ -29,6 +29,7 @@ public final class LeadingWhitespacePredicateRule extends WordPatternRule {
 		/*
 		 * @see IWordDetector#isWordStart
 		 */
+		@Override
 		public boolean isWordStart(char c) {
 			return false;
 		}
@@ -36,6 +37,7 @@ public final class LeadingWhitespacePredicateRule extends WordPatternRule {
 		/*
 		 * @see IWordDetector#isWordPart
 		 */
+		@Override
 		public boolean isWordPart(char c) {
 			return false;
 		}

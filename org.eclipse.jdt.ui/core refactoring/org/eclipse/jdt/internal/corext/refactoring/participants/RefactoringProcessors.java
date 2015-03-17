@@ -20,7 +20,7 @@ import org.eclipse.core.resources.IProject;
 public class RefactoringProcessors {
 
 	public static String[] getNatures(IProject[] projects) throws CoreException {
-		Set<String> result= new HashSet<String>();
+		Set<String> result= new HashSet<>();
 		for (int i= 0; i < projects.length; i++) {
 			String[] pns= projects[i].getDescription().getNatureIds();
 			for (int p = 0; p < pns.length; p++) {

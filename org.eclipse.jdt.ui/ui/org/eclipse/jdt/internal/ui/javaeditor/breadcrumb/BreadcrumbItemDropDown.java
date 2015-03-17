@@ -344,6 +344,7 @@ class BreadcrumbItemDropDown {
 		});
 
 		fDropDownViewer.addOpenListener(new IOpenListener() {
+			@Override
 			public void open(OpenEvent event) {
 				if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN)
 					System.out.println("BreadcrumbItemDropDown.showMenu()$treeViewer>open"); //$NON-NLS-1$
@@ -361,6 +362,7 @@ class BreadcrumbItemDropDown {
 		});
 
 		tree.addMouseListener(new MouseListener() {
+			@Override
 			public void mouseUp(MouseEvent e) {
 				if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN)
 					System.out.println("BreadcrumbItemDropDown.showMenu()$treeViewer>mouseUp"); //$NON-NLS-1$
@@ -378,9 +380,11 @@ class BreadcrumbItemDropDown {
 				openElement(item.getData());
 			}
 
+			@Override
 			public void mouseDown(MouseEvent e) {
 			}
 
+			@Override
 			public void mouseDoubleClick(MouseEvent e) {
 			}
 		});
@@ -388,6 +392,7 @@ class BreadcrumbItemDropDown {
 		tree.addMouseMoveListener(new MouseMoveListener() {
 			TreeItem fLastItem= null;
 
+			@Override
 			public void mouseMove(MouseEvent e) {
 				if (tree.equals(e.getSource())) {
 					Object o= tree.getItem(new Point(e.x, e.y));
@@ -457,6 +462,7 @@ class BreadcrumbItemDropDown {
 		});
 
 		tree.addKeyListener(new KeyListener() {
+			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == SWT.ARROW_UP) {
 					TreeItem[] selection= tree.getSelection();
@@ -471,17 +477,21 @@ class BreadcrumbItemDropDown {
 				}
 			}
 
+			@Override
 			public void keyReleased(KeyEvent e) {
 			}
 		});
 
 		fDropDownViewer.addTreeListener(new ITreeViewerListener() {
+			@Override
 			public void treeCollapsed(TreeExpansionEvent event) {
 			}
 
+			@Override
 			public void treeExpanded(TreeExpansionEvent event) {
 				tree.setRedraw(false);
 				fShell.getDisplay().asyncExec(new Runnable() {
+					@Override
 					public void run() {
 						if (fShell.isDisposed())
 							return;
@@ -561,6 +571,7 @@ class BreadcrumbItemDropDown {
 	 */
 	private void installCloser(final Shell shell) {
 		final Listener focusListener= new Listener() {
+			@Override
 			public void handleEvent(Event event) {
 				Widget focusElement= event.widget;
 				boolean isFocusBreadcrumbTreeFocusWidget= focusElement == shell || focusElement instanceof Tree && ((Tree)focusElement).getShell() == shell;
@@ -600,10 +611,12 @@ class BreadcrumbItemDropDown {
 		display.addFilter(SWT.FocusOut, focusListener);
 
 		final ControlListener controlListener= new ControlListener() {
+			@Override
 			public void controlMoved(ControlEvent e) {
 				shell.close();
 			}
 
+			@Override
 			public void controlResized(ControlEvent e) {
 				shell.close();
 			}
@@ -611,6 +624,7 @@ class BreadcrumbItemDropDown {
 		fToolBar.getShell().addControlListener(controlListener);
 
 		shell.addDisposeListener(new DisposeListener() {
+			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN)
 					System.out.println("==> shell disposed"); //$NON-NLS-1$
@@ -624,9 +638,11 @@ class BreadcrumbItemDropDown {
 			}
 		});
 		shell.addShellListener(new ShellListener() {
+			@Override
 			public void shellActivated(ShellEvent e) {
 			}
 
+			@Override
 			public void shellClosed(ShellEvent e) {
 				if (JavaPlugin.DEBUG_BREADCRUMB_ITEM_DROP_DOWN)
 					System.out.println("==> shellClosed"); //$NON-NLS-1$
@@ -638,12 +654,15 @@ class BreadcrumbItemDropDown {
 				fDropDownViewer= null;
 			}
 
+			@Override
 			public void shellDeactivated(ShellEvent e) {
 			}
 
+			@Override
 			public void shellDeiconified(ShellEvent e) {
 			}
 
+			@Override
 			public void shellIconified(ShellEvent e) {
 			}
 		});

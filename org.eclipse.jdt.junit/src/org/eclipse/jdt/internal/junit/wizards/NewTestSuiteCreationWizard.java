@@ -142,6 +142,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 
 	public IRunnableWithProgress getRunnableSave(final IEditorPart cu_ep) {
 		return new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					if (monitor == null) {
 						monitor= new NullProgressMonitor();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,29 +27,23 @@ public class NodeProperty extends ASTAttribute {
 		fProperty= property;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getParent()
-	 */
+	@Override
 	public Object getParent() {
 		return fParent;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getChildren()
-	 */
+	@Override
 	public Object[] getChildren() {
 		Object child= getNode();
 		if (child instanceof List) {
-			return ((List) child).toArray();
+			return ((List<?>) child).toArray();
 		} else if (child instanceof ASTNode) {
 			return new Object[] { child };
 		}
 		return EMPTY;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getLabel()
-	 */
+	@Override
 	public String getLabel() {
 		StringBuffer buf= new StringBuffer();
 		buf.append(getPropertyName());
@@ -65,7 +59,7 @@ public class NodeProperty extends ASTAttribute {
 				buf.append("null"); //$NON-NLS-1$
 			}
 		} else if (fProperty.isChildListProperty()) {
-			List node= (List) getNode();
+			List<?> node= (List<?>) getNode();
 			buf.append(" (").append(node.size()).append(')'); //$NON-NLS-1$
 		} else { // child property
 			if (getNode() == null) {
@@ -75,9 +69,7 @@ public class NodeProperty extends ASTAttribute {
 		return buf.toString();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getImage()
-	 */
+	@Override
 	public Image getImage() {
 		return null;
 	}
@@ -102,6 +94,7 @@ public class NodeProperty extends ASTAttribute {
 		return buf.toString();
 	}
 	
+	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
 			return true;
@@ -113,13 +106,12 @@ public class NodeProperty extends ASTAttribute {
 		return  fParent.equals(castedObj.fParent) && (fProperty == castedObj.fProperty);
 	}
 
+	@Override
 	public int hashCode() {
 		return fParent.hashCode() * 31 + fProperty.hashCode();
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
+	@Override
 	public String toString() {
 		return getLabel();
 

@@ -174,6 +174,7 @@ public class GetterSetterCorrectionSubProcessor {
 						}
 					} else {
 						Display.getDefault().syncExec(new Runnable() {
+							@Override
 							public void run() {
 								try {
 									helper.perform(false, false);

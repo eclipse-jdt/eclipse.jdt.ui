@@ -181,17 +181,11 @@ public class JavadocView extends AbstractInfoView {
 			fInput= inputElement;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.infoviews.JavadocView.IBrowserInput#getInputElement()
-		 */
 		@Override
 		public Object getInputElement() {
 			return fInput;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.infoviews.JavadocView.IBrowserInput#getInputName()
-		 */
 		@Override
 		public String getInputName() {
 			return fInput.getElementName();
@@ -214,17 +208,11 @@ public class JavadocView extends AbstractInfoView {
 			fURL= url;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.infoviews.JavadocView.IBrowserInput#getInputElement()
-		 */
 		@Override
 		public Object getInputElement() {
 			return fURL;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.infoviews.JavadocView.IBrowserInput#getInputName()
-		 */
 		@Override
 		public String getInputName() {
 			return fURL.toExternalForm();
@@ -258,9 +246,6 @@ public class JavadocView extends AbstractInfoView {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.action.Action#run()
-		 */
 		@Override
 		public void run() {
 			setInput(fCurrent.getNext());
@@ -295,9 +280,6 @@ public class JavadocView extends AbstractInfoView {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.action.Action#run()
-		 */
 		@Override
 		public void run() {
 			setInput(fCurrent.getPrevious());
@@ -323,9 +305,6 @@ public class JavadocView extends AbstractInfoView {
 			super(site);
 		}
 
-		/* (non-Javadoc)
-		 * Method declared on SelectionDispatchAction.
-		 */
 		@Override
 		public void selectionChanged(IStructuredSelection structuredSelection) {
 			super.selectionChanged(structuredSelection);
@@ -339,9 +318,6 @@ public class JavadocView extends AbstractInfoView {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * Method declared on SelectionDispatchAction.
-		 */
 		@Override
 		public void run(IStructuredSelection selection) {
 			if (!canEnableFor(selection))
@@ -544,6 +520,7 @@ public class JavadocView extends AbstractInfoView {
 		/*
 		 * @see org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
 		 */
+		@Override
 		public void addSelectionChangedListener(ISelectionChangedListener listener) {
 			fListeners.add(listener);
 		}
@@ -551,6 +528,7 @@ public class JavadocView extends AbstractInfoView {
 		/*
 		 * @see org.eclipse.jface.viewers.ISelectionProvider#getSelection()
 		 */
+		@Override
 		public ISelection getSelection() {
 			if (fControl instanceof StyledText) {
 				IDocument document= new Document(((StyledText)fControl).getSelectionText());
@@ -564,6 +542,7 @@ public class JavadocView extends AbstractInfoView {
 		/*
 		 * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
 		 */
+		@Override
 		public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 			fListeners.remove(listener);
 		}
@@ -571,6 +550,7 @@ public class JavadocView extends AbstractInfoView {
 		/*
 		 * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
 		 */
+		@Override
 		public void setSelection(ISelection selection) {
 			// not supported
 		}
@@ -587,6 +567,7 @@ public class JavadocView extends AbstractInfoView {
 			fIsUsingBrowserWidget= true;
 			addLinkListener(fBrowser);
 			fBrowser.addOpenWindowListener(new OpenWindowListener() {
+				@Override
 				public void open(WindowEvent event) {
 					event.required= true; // Cancel opening of new windows
 				}
@@ -646,6 +627,7 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	private void listenForFontChanges() {
 		fFontListener= new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (PreferenceConstants.APPEARANCE_JAVADOC_FONT.equals(event.getProperty())) {
 					fgStyleSheetLoaded= false;
@@ -654,6 +636,7 @@ public class JavadocView extends AbstractInfoView {
 					final Display display= getSite().getPage().getWorkbenchWindow().getWorkbench().getDisplay();
 					if (!display.isDisposed()) {
 						display.asyncExec(new Runnable() {
+							@Override
 							public void run() {
 								if (!display.isDisposed()) {
 									initStyleSheet();
@@ -707,10 +690,6 @@ public class JavadocView extends AbstractInfoView {
 		fInputSelectionProvider.setSelection(selection);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#fillActionBars(org.eclipse.ui.IActionBars)
-	 * @since 3.4
-	 */
 	@Override
 	protected void fillActionBars(final IActionBars actionBars) {
 		super.fillActionBars(actionBars);
@@ -719,6 +698,7 @@ public class JavadocView extends AbstractInfoView {
 		actionBars.setGlobalActionHandler(ActionFactory.FORWARD.getId(), fForthAction);
 
 		fInputSelectionProvider.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_ATTACHED_JAVA_DOC, fOpenBrowserAction);
 			}
@@ -726,10 +706,6 @@ public class JavadocView extends AbstractInfoView {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#fillToolBar(org.eclipse.jface.action.IToolBarManager)
-	 * @since 3.4
-	 */
 	@Override
 	protected void fillToolBar(IToolBarManager tbm) {
 		tbm.add(fBackAction);
@@ -740,10 +716,6 @@ public class JavadocView extends AbstractInfoView {
 		tbm.add(fOpenBrowserAction);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
-	 * @since 3.4
-	 */
 	@Override
 	public void menuAboutToShow(IMenuManager menu) {
 		super.menuAboutToShow(menu);
@@ -873,10 +845,6 @@ public class JavadocView extends AbstractInfoView {
 		return computeInput(part, selection, (IJavaElement) input, new NullProgressMonitor());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#computeInput(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection, org.eclipse.jdt.core.IJavaElement, org.eclipse.core.runtime.IProgressMonitor)
-	 * @since 3.4
-	 */
 	@Override
 	protected Object computeInput(IWorkbenchPart part, ISelection selection, IJavaElement input, IProgressMonitor monitor) {
 		if (getControl() == null || input == null)
@@ -1440,9 +1408,7 @@ public class JavadocView extends AbstractInfoView {
 	private void addLinkListener(Browser browser) {
 		browser.addLocationListener(JavaElementLinks.createLocationListener(new JavaElementLinks.ILinkHandler() {
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleDeclarationLink(org.eclipse.jdt.core.IJavaElement)
-			 */
+			@Override
 			public void handleDeclarationLink(IJavaElement target) {
 				try {
 					JavadocHover.openDeclaration(target);
@@ -1453,9 +1419,7 @@ public class JavadocView extends AbstractInfoView {
 				}
 			}
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleExternalLink(java.net.URL, org.eclipse.swt.widgets.Display)
-			 */
+			@Override
 			public boolean handleExternalLink(final URL url, Display display) {
 				if (fCurrent == null ||
 						!(fCurrent.getInputElement() instanceof URL
@@ -1474,24 +1438,18 @@ public class JavadocView extends AbstractInfoView {
 				return false;
 			}
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleInlineJavadocLink(org.eclipse.jdt.core.IJavaElement)
-			 */
+			@Override
 			public void handleInlineJavadocLink(IJavaElement target) {
 				JavaElementBrowserInput newInput= new JavaElementBrowserInput(fCurrent, target);
 				JavadocView.this.setInput(newInput);
 			}
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleJavadocViewLink(org.eclipse.jdt.core.IJavaElement)
-			 */
+			@Override
 			public void handleJavadocViewLink(IJavaElement target) {
 				handleInlineJavadocLink(target);
 			}
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleTextSet()
-			 */
+			@Override
 			public void handleTextSet() {
 				IJavaElement input= getOrignalInput();
 				if (input == null)

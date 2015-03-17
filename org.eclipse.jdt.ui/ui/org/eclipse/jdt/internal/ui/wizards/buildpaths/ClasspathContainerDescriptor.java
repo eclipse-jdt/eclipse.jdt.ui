@@ -105,7 +105,7 @@ public class ClasspathContainerDescriptor {
 	}
 
 	public static ClasspathContainerDescriptor[] getDescriptors() {
-		ArrayList<ClasspathContainerDescriptor> containers= new ArrayList<ClasspathContainerDescriptor>();
+		ArrayList<ClasspathContainerDescriptor> containers= new ArrayList<>();
 
 		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(JavaUI.ID_PLUGIN, ATT_EXTENSION);
 		if (extensionPoint != null) {

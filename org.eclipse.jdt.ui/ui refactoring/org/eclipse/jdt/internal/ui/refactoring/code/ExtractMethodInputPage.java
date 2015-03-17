@@ -86,6 +86,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		fFirstTime= true;
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		fRefactoring= (ExtractMethodRefactoring)getRefactoring();
 		loadSettings();
@@ -169,12 +170,15 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			ChangeParametersControl cp= new ChangeParametersControl(result, SWT.NONE,
 				RefactoringMessages.ExtractMethodInputPage_parameters,
 				new IParameterListChangeListener() {
+				@Override
 				public void parameterChanged(ParameterInfo parameter) {
 					parameterModified();
 				}
+				@Override
 				public void parameterListChanged() {
 					parameterModified();
 				}
+				@Override
 				public void parameterAdded(ParameterInfo parameter) {
 					updatePreview(getText());
 				}
@@ -289,6 +293,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 	private Text createTextInputField(Composite parent, int style) {
 		Text result= new Text(parent, style);
 		result.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				textModified(getText());
 			}

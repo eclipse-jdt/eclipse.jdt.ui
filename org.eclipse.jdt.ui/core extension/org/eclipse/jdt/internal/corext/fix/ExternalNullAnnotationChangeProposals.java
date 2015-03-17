@@ -155,22 +155,27 @@ public class ExternalNullAnnotationChangeProposals {
 		 */
 		protected abstract void dryRun();
 
+		@Override
 		public Point getSelection(IDocument document) {
 			return null; // nothing to reveal in the current editor.
 		}
 
+		@Override
 		public String getDisplayString() {
 			return fLabel;
 		}
 
+		@Override
 		public Image getImage() {
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ANNOTATION);
 		}
 
+		@Override
 		public IContextInformation getContextInformation() {
 			return null;
 		}
 
+		@Override
 		public void apply(IDocument document) {
 			try {
 				doAnnotateMember(new NullProgressMonitor());
@@ -181,14 +186,17 @@ public class ExternalNullAnnotationChangeProposals {
 			}
 		}
 
+		@Override
 		public int getRelevance() {
 			return IProposalRelevance.CHANGE_METHOD;
 		}
 
+		@Override
 		public String getCommandId() {
 			return ExternalNullAnnotationQuickAssistProcessor.ANNOTATE_MEMBER_ID;
 		}
 
+		@Override
 		public String getAdditionalProposalInfo() {
 			StringBuffer buffer= new StringBuffer();
 			buffer.append("<dl>"); //$NON-NLS-1$

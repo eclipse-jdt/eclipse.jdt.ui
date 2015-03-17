@@ -115,7 +115,7 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 		if (size == 0)
 			return new IJavaElement[0];
 
-		ArrayList<IJavaElement> result= new ArrayList<IJavaElement>(size);
+		ArrayList<IJavaElement> result= new ArrayList<>(size);
 
 		for (int i= 0; i < size; i++) {
 			Object e= elements.get(i);
@@ -139,6 +139,7 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 		return result.toArray(new IJavaElement[result.size()]);
 	}
 
+	@Override
 	public void run(IAction action) {
 		if (fSelection instanceof IStructuredSelection)
 			run((IStructuredSelection)fSelection);
@@ -148,6 +149,7 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 
 	}
 
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		fSelection= selection;
 		action.setEnabled(getActiveEditor() != null);
@@ -159,9 +161,11 @@ public class GotoReferencedTestAction implements IWorkbenchWindowActionDelegate 
 		return JUnitPlugin.getActiveWorkbenchShell();
 	}
 
+	@Override
 	public void dispose() {
 	}
 
+	@Override
 	public void init(IWorkbenchWindow window) {
 		fWorkbench= window;
 	}

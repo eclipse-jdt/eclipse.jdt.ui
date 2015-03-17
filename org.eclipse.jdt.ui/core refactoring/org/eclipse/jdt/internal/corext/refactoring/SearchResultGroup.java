@@ -34,7 +34,7 @@ public class SearchResultGroup {
 	public SearchResultGroup(IResource res, SearchMatch[] matches){
 		Assert.isNotNull(matches);
 		fResouce= res;
-		fSearchMatches= new ArrayList<SearchMatch>(Arrays.asList(matches));
+		fSearchMatches= new ArrayList<>(Arrays.asList(matches));
 	}
 
 	public void add(SearchMatch match) {
@@ -51,7 +51,7 @@ public class SearchResultGroup {
 	}
 
 	public static IResource[] getResources(SearchResultGroup[] searchResultGroups){
-		Set<IResource> resourceSet= new HashSet<IResource>(searchResultGroups.length);
+		Set<IResource> resourceSet= new HashSet<>(searchResultGroups.length);
 		for (int i= 0; i < searchResultGroups.length; i++) {
 			resourceSet.add(searchResultGroups[i].getResource());
 		}

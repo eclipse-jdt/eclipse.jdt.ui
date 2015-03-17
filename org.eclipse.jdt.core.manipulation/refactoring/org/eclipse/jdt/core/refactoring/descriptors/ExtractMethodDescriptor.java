@@ -64,7 +64,7 @@ public final class ExtractMethodDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
-	public ExtractMethodDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public ExtractMethodDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.EXTRACT_METHOD, project, description, comment, arguments, flags);
 	}
 

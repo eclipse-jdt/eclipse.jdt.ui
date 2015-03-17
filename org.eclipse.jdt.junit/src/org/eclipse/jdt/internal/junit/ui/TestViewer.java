@@ -79,6 +79,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
 
 public class TestViewer {
 	private final class TestSelectionListener implements ISelectionChangedListener {
+		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			handleSelected();
 		}
@@ -247,6 +248,7 @@ public class TestViewer {
 		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(new IMenuListener() {
+			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				handleMenuAboutToShow(manager);
 			}
@@ -540,7 +542,7 @@ public class TestViewer {
 					for (Object element : toUpdate)
 						updateElementInTree((TestElement) element);
 				else {
-					HashSet<Object> toUpdateWithParents= new HashSet<Object>();
+					HashSet<Object> toUpdateWithParents= new HashSet<>();
 					toUpdateWithParents.addAll(Arrays.asList(toUpdate));
 					for (Object element : toUpdate) {
 						TestElement parent= ((TestElement) element).getParent();
@@ -702,7 +704,7 @@ public class TestViewer {
 
 		List<ITestElement> siblings= Arrays.asList(parent.getChildren());
 		if (! showNext)
-			siblings= new ReverseList<ITestElement>(siblings);
+			siblings= new ReverseList<>(siblings);
 
 		int nextIndex= siblings.indexOf(current) + 1;
 		for (int i= nextIndex; i < siblings.size(); i++) {
@@ -721,7 +723,7 @@ public class TestViewer {
 	private TestCaseElement getNextChildFailure(TestSuiteElement root, boolean showNext) {
 		List<ITestElement> children= Arrays.asList(root.getChildren());
 		if (! showNext)
-			children= new ReverseList<ITestElement>(children);
+			children= new ReverseList<>(children);
 		for (int i= 0; i < children.size(); i++) {
 			TestElement child= (TestElement) children.get(i);
 			if (child.getStatus().isErrorOrFailure()) {
@@ -742,9 +744,9 @@ public class TestViewer {
 	}
 
 	private void clearUpdateAndExpansion() {
-		fNeedUpdate= new LinkedHashSet<TestElement>();
-		fAutoClose= new LinkedList<TestSuiteElement>();
-		fAutoExpand= new HashSet<TestSuiteElement>();
+		fNeedUpdate= new LinkedHashSet<>();
+		fAutoClose= new LinkedList<>();
+		fAutoExpand= new HashSet<>();
 	}
 
 	/**

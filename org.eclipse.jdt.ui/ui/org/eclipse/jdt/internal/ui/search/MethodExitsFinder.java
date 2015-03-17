@@ -64,6 +64,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 	private String fExitDescription;
 	private CompilationUnit fASTRoot;
 
+	@Override
 	public String initialize(CompilationUnit root, int offset, int length) {
 		return initialize(root, NodeFinder.perform(root, offset, length));
 	}
@@ -73,6 +74,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 	 * @param node the selected node
 	 * @return returns a message if there is a problem
 	 */
+	@Override
 	public String initialize(CompilationUnit root, ASTNode node) {
 		fASTRoot= root;
 
@@ -96,7 +98,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 	}
 
 	private void performSearch() {
-		fResult= new ArrayList<OccurrenceLocation>();
+		fResult= new ArrayList<>();
 		markReferences();
 		if (!fResult.isEmpty()) {
 			Type returnType= fMethodDeclaration.getReturnType2();
@@ -107,6 +109,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 	}
 
+	@Override
 	public OccurrenceLocation[] getOccurrences() {
 		performSearch();
 		if (fResult.isEmpty())
@@ -117,7 +120,7 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 
 
 	private void markReferences() {
-		fCaughtExceptions= new ArrayList<ITypeBinding>();
+		fCaughtExceptions= new ArrayList<>();
 		boolean isVoid= true;
 		Type returnType= fMethodDeclaration.getReturnType2();
 		if (returnType != null) {
@@ -338,30 +341,37 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		return false;
 	}
 
+	@Override
 	public CompilationUnit getASTRoot() {
 		return fASTRoot;
 	}
 
+	@Override
 	public String getElementName() {
 		return fMethodDeclaration.getName().getIdentifier();
 	}
 
+	@Override
 	public String getID() {
 		return ID;
 	}
 
+	@Override
 	public String getJobLabel() {
 		return SearchMessages.MethodExitsFinder_job_label;
 	}
 
+	@Override
 	public int getSearchKind() {
 		return IOccurrencesFinder.K_BREAK_TARGET_OCCURRENCE;
 	}
 
+	@Override
 	public String getUnformattedPluralLabel() {
 		return SearchMessages.MethodExitsFinder_label_plural;
 	}
 
+	@Override
 	public String getUnformattedSingularLabel() {
 		return SearchMessages.MethodExitsFinder_label_singular;
 	}

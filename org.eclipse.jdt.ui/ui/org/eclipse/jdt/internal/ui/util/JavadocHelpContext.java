@@ -71,10 +71,12 @@ public class JavadocHelpContext implements IContext2 {
 			fUrl= url;
 		}
 
+		@Override
 		public String getHref() {
 			return fUrl;
 		}
 
+		@Override
 		public String getLabel() {
 			String label= JavaElementLabels.getTextLabel(fElement, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED);
 			return Messages.format(JavaUIMessages.JavaUIHelp_link_label, label);
@@ -95,7 +97,7 @@ public class JavadocHelpContext implements IContext2 {
 		if (context instanceof IContext2)
 			fTitle= ((IContext2)context).getTitle();
 
-		List<IHelpResource> helpResources= new ArrayList<IHelpResource>();
+		List<IHelpResource> helpResources= new ArrayList<>();
 
 		String javadocSummary= null;
 		for (int i= 0; i < elements.length; i++) {
@@ -222,18 +224,22 @@ public class JavadocHelpContext implements IContext2 {
 		return buf.toString();
 	}
 
+	@Override
 	public IHelpResource[] getRelatedTopics() {
 		return fHelpResources;
 	}
 
+	@Override
 	public String getText() {
 		return fText;
 	}
 
+	@Override
 	public String getStyledText() {
 		return fText;
 	}
 
+	@Override
 	public String getCategory(IHelpResource topic) {
 		if (topic instanceof JavaUIHelpResource)
 			return JavaUIMessages.JavaUIHelpContext_javaHelpCategory_label;
@@ -245,6 +251,7 @@ public class JavadocHelpContext implements IContext2 {
 	 * @see org.eclipse.help.IContext2#getTitle()
 	 * @since 3.1
 	 */
+	@Override
 	public String getTitle() {
 		return fTitle;
 	}

@@ -104,9 +104,6 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jface.text.IDocument)
-	 */
 	@Override
 	protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
 		super.addEdits(document, editRoot);

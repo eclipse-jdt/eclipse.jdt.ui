@@ -45,9 +45,6 @@ class FiltersDialog extends StatusDialog {
         super(parentShell);
     }
 
-    /* (non-Javadoc)
-     * Method declared on Window.
-     */
     @Override
 	protected void configureShell(Shell newShell) {
         super.configureShell(newShell);
@@ -55,17 +52,11 @@ class FiltersDialog extends StatusDialog {
         PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.CALL_HIERARCHY_FILTERS_DIALOG);
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
 	protected boolean isResizable() {
     	return true;
     }
 
-    /* (non-Javadoc)
-     * Method declared on Dialog.
-     */
     @Override
 	protected Control createDialogArea(Composite parent) {
     	Composite composite= (Composite) super.createDialogArea(parent);
@@ -94,7 +85,8 @@ class FiltersDialog extends StatusDialog {
         fMaxCallDepth.setFont(composite.getFont());
         fMaxCallDepth.setTextLimit(6);
         fMaxCallDepth.addModifyListener(new ModifyListener() {
-                public void modifyText(ModifyEvent e) {
+                @Override
+				public void modifyText(ModifyEvent e) {
                     validateInput();
                 }
             });
@@ -111,7 +103,8 @@ class FiltersDialog extends StatusDialog {
         fNames= new Text(parent, SWT.SINGLE | SWT.BORDER);
         fNames.setFont(parent.getFont());
         fNames.addModifyListener(new ModifyListener() {
-                public void modifyText(ModifyEvent e) {
+                @Override
+				public void modifyText(ModifyEvent e) {
                     validateInput();
                 }
             });

@@ -23,9 +23,6 @@ import org.eclipse.jdt.debug.ui.launchConfigurations.JavaJRETab;
  */
 public class TomcatTabGroup extends AbstractLaunchConfigurationTabGroup {
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTabGroup#createTabs(org.eclipse.debug.ui.ILaunchConfigurationDialog, java.lang.String)
-	 */
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		ILaunchConfigurationTab[] tabs = new ILaunchConfigurationTab[] {
 			new TomcatTab(),

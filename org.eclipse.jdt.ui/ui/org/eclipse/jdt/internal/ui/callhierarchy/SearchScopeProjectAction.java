@@ -38,9 +38,6 @@ class SearchScopeProjectAction extends SearchScopeAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getSearchScope(int)
-	 */
 	@Override
 	public IJavaSearchScope getSearchScope(int includeMask) {
 		IMember[] members= fGroup.getView().getInputElements();
@@ -48,7 +45,7 @@ class SearchScopeProjectAction extends SearchScopeAction {
 			return null;
 		}
 
-		HashSet<IJavaProject> projects= new HashSet<IJavaProject>();
+		HashSet<IJavaProject> projects= new HashSet<>();
 		for (int i= 0; i < members.length; i++) {
 			projects.add(members[i].getJavaProject());
 		}
@@ -57,22 +54,16 @@ class SearchScopeProjectAction extends SearchScopeAction {
 				includeMask);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeActionGroup.SearchScopeAction#getSearchScopeType()
-	 */
 	@Override
 	public int getSearchScopeType() {
 		return SearchScopeActionGroup.SEARCH_SCOPE_TYPE_PROJECT;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
-	 */
 	@Override
 	public String getFullDescription(int includeMask) {
 		IMember[] members= fGroup.getView().getInputElements();
 		if (members != null) {
-			HashSet<String> projectNames= new HashSet<String>();
+			HashSet<String> projectNames= new HashSet<>();
 			for (int i= 0; i < members.length; i++) {
 				projectNames.add(members[i].getJavaProject().getElementName());
 			}

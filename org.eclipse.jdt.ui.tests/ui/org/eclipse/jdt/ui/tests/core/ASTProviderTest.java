@@ -57,14 +57,17 @@ public class ASTProviderTest extends CoreTests {
 			fFieldNumber= fieldNumber;
 		}
 
+		@Override
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 			return new RefactoringStatus();
 		}
 
+		@Override
 		public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 			return new RefactoringStatus();
 		}
 
+		@Override
 		public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 			CompilationUnitChange result= new CompilationUnitChange("", fCu);
 
@@ -75,6 +78,7 @@ public class ASTProviderTest extends CoreTests {
 			return result;
 		}
 
+		@Override
 		public String getName() {
 			return "Add field";
 		}
@@ -85,7 +89,7 @@ public class ASTProviderTest extends CoreTests {
 
 	}
 
-	private static final Class THIS= ASTProviderTest.class;
+	private static final Class<ASTProviderTest> THIS= ASTProviderTest.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -103,12 +107,14 @@ public class ASTProviderTest extends CoreTests {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}

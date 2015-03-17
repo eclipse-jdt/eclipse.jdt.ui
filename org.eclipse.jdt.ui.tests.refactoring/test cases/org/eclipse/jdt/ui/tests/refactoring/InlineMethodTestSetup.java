@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
-
-import junit.framework.Test;
 
 import org.osgi.framework.Bundle;
 
@@ -32,6 +30,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
+
+import junit.framework.Test;
 
 public class InlineMethodTestSetup extends RefactoringTestSetup {
 
@@ -55,6 +55,7 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 		super(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -157,9 +158,9 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 		}
 
 		Bundle bundle= RefactoringTestPlugin.getDefault().getBundle();
-		Enumeration/*URL*/ classUrls= bundle.findEntries("/resources/InlineMethodWorkspace/TestCases/" + pathInRoot, filePattern, false);
+		Enumeration<URL> classUrls= bundle.findEntries("/resources/InlineMethodWorkspace/TestCases/" + pathInRoot, filePattern, false);
 		while (classUrls.hasMoreElements()) {
-			URL classUrl= (URL) classUrls.nextElement();
+			URL classUrl= classUrls.nextElement();
 			String urlFile= classUrl.getFile();
 			String fileName= urlFile.substring(urlFile.lastIndexOf('/') + 1);
 

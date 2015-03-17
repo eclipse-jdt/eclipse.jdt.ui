@@ -31,12 +31,9 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 public class RenameMethodUserInterfaceStarter extends RenameUserInterfaceStarter {
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter#activate(org.eclipse.jdt.internal.corext.refactoring.base.Refactoring, org.eclipse.swt.widgets.Shell)
-	 */
 	@Override
 	public boolean activate(Refactoring refactoring, Shell parent, int saveMode) throws CoreException {
-		RenameVirtualMethodProcessor processor= (RenameVirtualMethodProcessor)refactoring.getAdapter(RenameVirtualMethodProcessor.class);
+		RenameVirtualMethodProcessor processor= refactoring.getAdapter(RenameVirtualMethodProcessor.class);
 		if (processor != null) {
 			RefactoringStatus status= processor.checkInitialConditions(new NullProgressMonitor());
 			if (!status.hasFatalError()) {

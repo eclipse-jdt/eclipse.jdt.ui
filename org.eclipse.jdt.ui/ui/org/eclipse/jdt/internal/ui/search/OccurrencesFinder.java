@@ -73,10 +73,12 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		super(true);
 	}
 
+	@Override
 	public String initialize(CompilationUnit root, int offset, int length) {
 		return initialize(root, NodeFinder.perform(root, offset, length));
 	}
 
+	@Override
 	public String initialize(CompilationUnit root, ASTNode node) {
 		if (!(node instanceof Name))
 			return SearchMessages.OccurrencesFinder_no_element;
@@ -95,12 +97,13 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 
 	private void performSearch() {
 		if (fResult == null) {
-			fResult= new ArrayList<OccurrenceLocation>();
-			fWriteUsages= new HashSet<Name>();
+			fResult= new ArrayList<>();
+			fWriteUsages= new HashSet<>();
 			fRoot.accept(this);
 		}
 	}
 
+	@Override
 	public OccurrenceLocation[] getOccurrences() {
 		performSearch();
 		if (fResult.isEmpty())
@@ -108,6 +111,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		return fResult.toArray(new OccurrenceLocation[fResult.size()]);
 	}
 
+	@Override
 	public CompilationUnit getASTRoot() {
 		return fRoot;
 	}
@@ -115,10 +119,12 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.search.IOccurrencesFinder#getJobLabel()
 	 */
+	@Override
 	public String getJobLabel() {
 		return SearchMessages.OccurrencesFinder_searchfor ;
 	}
 
+	@Override
 	public String getElementName() {
 		if (fSelectedNode != null) {
 			return ASTNodes.asString(fSelectedNode);
@@ -126,10 +132,12 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		return null;
 	}
 
+	@Override
 	public String getUnformattedPluralLabel() {
 		return SearchMessages.OccurrencesFinder_label_plural;
 	}
 
+	@Override
 	public String getUnformattedSingularLabel() {
 		return SearchMessages.OccurrencesFinder_label_singular;
 	}
@@ -259,6 +267,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		return false;
 	}
 
+	@Override
 	public int getSearchKind() {
 		return K_OCCURRENCE;
 	}
@@ -302,6 +311,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 	}
 
+	@Override
 	public String getID() {
 		return ID;
 	}

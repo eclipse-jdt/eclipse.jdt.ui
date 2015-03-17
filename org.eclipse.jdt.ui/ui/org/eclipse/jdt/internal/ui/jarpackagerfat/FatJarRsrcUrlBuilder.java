@@ -55,9 +55,7 @@ public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 	private Set<String> jarNames;
 	private JarPackageData fJarPackage;
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getId() {
 		return BUILDER_ID;
 	}
@@ -80,29 +78,21 @@ public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 		return false;
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getManifestClasspath() {
 		return "."; //$NON-NLS-1$
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public IManifestProvider getManifestProvider() {
 		return new FatJarRsrcUrlManifestProvider(this);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void open(JarPackageData jarPackage, Shell displayShell, MultiStatus status) throws CoreException {
 		super.open(jarPackage, displayShell, status);
 		fJarPackage= jarPackage;
-		jarNames= new HashSet<String>();
+		jarNames= new HashSet<>();
 		try {
 			writeRsrcUrlClasses();
 		} catch (IOException e) {
@@ -110,9 +100,7 @@ public class FatJarRsrcUrlBuilder extends FatJarBuilder {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void writeArchive(ZipFile jarFile, IProgressMonitor progressMonitor) {
 		File jarPathFile= new File(jarFile.getName());
 		String jarName = jarPathFile.getName();

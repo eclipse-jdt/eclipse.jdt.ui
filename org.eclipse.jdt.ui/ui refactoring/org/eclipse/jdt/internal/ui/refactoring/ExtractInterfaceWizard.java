@@ -95,6 +95,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			fProcessor= processor;
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			initializeDialogUnits(parent);
 			Composite result= new Composite(parent, SWT.NONE);
@@ -206,6 +207,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 				fTableViewer.setInput(new IMember[0]);
 			}
 			fTableViewer.addCheckStateListener(new ICheckStateListener(){
+				@Override
 				public void checkStateChanged(CheckStateChangedEvent event) {
 					ExtractInterfaceInputPage.this.updateUIElementEnablement();
 				}

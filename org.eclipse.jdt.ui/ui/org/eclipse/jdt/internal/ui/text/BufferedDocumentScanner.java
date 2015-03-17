@@ -104,6 +104,7 @@ public final class BufferedDocumentScanner implements ICharacterScanner {
 	/*
 	 * @see ICharacterScanner#read()
 	 */
+	@Override
 	public final int read() {
 
 		if (fOffset == fBufferLength) {
@@ -139,6 +140,7 @@ public final class BufferedDocumentScanner implements ICharacterScanner {
 	/*
 	 * @see ICharacterScanner#unread
 	 */
+	@Override
 	public final void unread() {
 
 		if (fOffset == 0) {
@@ -156,6 +158,7 @@ public final class BufferedDocumentScanner implements ICharacterScanner {
 	/*
 	 * @see ICharacterScanner#getColumn()
 	 */
+	@Override
 	public final int getColumn() {
 
 		try {
@@ -172,6 +175,7 @@ public final class BufferedDocumentScanner implements ICharacterScanner {
 	/*
 	 * @see ICharacterScanner#getLegalLineDelimiters()
 	 */
+	@Override
 	public final char[][] getLegalLineDelimiters() {
 		return fDelimiters;
 	}

@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * @noextend This class is not intended to be subclassed by clients.
  * @deprecated As of 3.5, got replaced by generic Navigate &gt; Show In &gt;
  */
+@Deprecated
 public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 
 	private JavaEditor fEditor;
@@ -82,24 +83,15 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(getResource(selection) != null);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		IJavaElement input= SelectionConverter.getInput(fEditor);
@@ -126,9 +118,6 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		run(getResource(selection));

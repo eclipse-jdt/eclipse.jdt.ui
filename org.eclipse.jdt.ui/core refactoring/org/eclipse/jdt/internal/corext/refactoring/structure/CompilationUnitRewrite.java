@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 public class CompilationUnitRewrite {
 	//TODO: add RefactoringStatus fStatus;?
 	private ICompilationUnit fCu;
-	private List<TextEditGroup> fTextEditGroups= new ArrayList<TextEditGroup>();
+	private List<TextEditGroup> fTextEditGroups= new ArrayList<>();
 
 	private CompilationUnit fRoot; // lazily initialized
 	private ASTRewrite fRewrite; // lazily initialized
@@ -153,7 +153,7 @@ public class CompilationUnitRewrite {
 
 	public void clearASTRewrite() {
 		fRewrite= null;
-		fTextEditGroups= new ArrayList<TextEditGroup>();
+		fTextEditGroups= new ArrayList<>();
 	}
 
 	public void clearImportRewrites() {
@@ -203,6 +203,7 @@ public class CompilationUnitRewrite {
 	 * @throws IllegalArgumentException when the AST rewrite encounters problems
 	 * @deprecated since 3.5, replaced by {@link #createChange(boolean)}
 	 */
+	@Deprecated
 	public org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange createChange() throws CoreException {
 		CompilationUnitChange change= createChange(true);
 		if (change == null)

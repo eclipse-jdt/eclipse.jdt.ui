@@ -251,7 +251,7 @@ public class JavadocTagsSubProcessor {
 		 		if (typeRoot != null && !StubUtility.shouldGenerateMethodTypeParameterTags(typeRoot.getJavaProject()))
 		 			typeParams= Collections.emptyList();
 		 	}
-		 	List<String> typeParamNames= new ArrayList<String>();
+		 	List<String> typeParamNames= new ArrayList<>();
 		 	for (int i= typeParams.size() - 1; i >= 0 ; i--) {
 		 		TypeParameter decl= typeParams.get(i);
 		 		String name= '<' + decl.getName().getIdentifier() + '>';
@@ -492,7 +492,7 @@ public class JavadocTagsSubProcessor {
 	}
 
 	public static Set<String> getPreviousTypeParamNames(List<TypeParameter> typeParams, ASTNode missingNode) {
-		Set<String> previousNames=  new HashSet<String>();
+		Set<String> previousNames=  new HashSet<>();
 		for (int i = 0; i < typeParams.size(); i++) {
 			TypeParameter curr= typeParams.get(i);
 			if (curr == missingNode) {
@@ -504,7 +504,7 @@ public class JavadocTagsSubProcessor {
 	}
 
 	private static Set<String> getPreviousParamNames(List<SingleVariableDeclaration> params, ASTNode missingNode) {
-		Set<String> previousNames=  new HashSet<String>();
+		Set<String> previousNames=  new HashSet<>();
 		for (int i = 0; i < params.size(); i++) {
 			SingleVariableDeclaration curr= params.get(i);
 			if (curr == missingNode) {
@@ -516,7 +516,7 @@ public class JavadocTagsSubProcessor {
 	}
 
 	private static Set<String> getPreviousExceptionNames(List<Type> list, ASTNode missingNode) {
-		Set<String> previousNames=  new HashSet<String>();
+		Set<String> previousNames=  new HashSet<>();
 		for (int i= 0; i < list.size() && missingNode != list.get(i); i++) {
 			Type curr= list.get(i);
 			previousNames.add(ASTNodes.getTypeName(curr));

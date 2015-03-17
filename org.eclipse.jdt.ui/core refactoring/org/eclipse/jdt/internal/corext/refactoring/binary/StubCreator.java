@@ -50,7 +50,7 @@ public class StubCreator {
 
 	protected void appendEnumConstants(final IType type) throws JavaModelException {
 		final IField[] fields= type.getFields();
-		final List<IField> list= new ArrayList<IField>(fields.length);
+		final List<IField> list= new ArrayList<>(fields.length);
 		for (int index= 0; index < fields.length; index++) {
 			final IField field= fields[index];
 			if (Flags.isEnum(field.getFlags()))
@@ -237,7 +237,7 @@ public class StubCreator {
 					final IMethod[] superMethods= superclass.getMethods();
 					
 					// collect super constructors by parameter count
-					Map<Integer, List<IMethod>> superConstructorsByParamCount= new TreeMap<Integer, List<IMethod>>();
+					Map<Integer, List<IMethod>> superConstructorsByParamCount= new TreeMap<>();
 					boolean multi= false;
 					IMethod superConstructor= null;
 					for (int i= 0; i < superMethods.length; i++) {
@@ -253,7 +253,7 @@ public class StubCreator {
 							}
 							List<IMethod> constructors= superConstructorsByParamCount.get(paramCount);
 							if (constructors == null) {
-								constructors= new ArrayList<IMethod>();
+								constructors= new ArrayList<>();
 								superConstructorsByParamCount.put(paramCount, constructors);
 							}
 							constructors.add(superMethod);

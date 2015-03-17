@@ -329,12 +329,12 @@ public class TypeContextChecker {
 		private static List<TypeNameMatch> findTypeInfos(String typeName, IType contextType, IProgressMonitor pm) throws JavaModelException {
 			IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaProject[]{contextType.getJavaProject()}, true);
 			IPackageFragment currPackage= contextType.getPackageFragment();
-			ArrayList<TypeNameMatch> collectedInfos= new ArrayList<TypeNameMatch>();
+			ArrayList<TypeNameMatch> collectedInfos= new ArrayList<>();
 			TypeNameMatchCollector requestor= new TypeNameMatchCollector(collectedInfos);
 			int matchMode= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
 			new SearchEngine().searchAllTypeNames(null, matchMode, typeName.toCharArray(), matchMode, IJavaSearchConstants.TYPE, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, pm);
 
-			List<TypeNameMatch> result= new ArrayList<TypeNameMatch>();
+			List<TypeNameMatch> result= new ArrayList<>();
 			for (Iterator<TypeNameMatch> iter= collectedInfos.iterator(); iter.hasNext();) {
 				TypeNameMatch curr= iter.next();
 				IType type= curr.getType();
@@ -391,7 +391,7 @@ public class TypeContextChecker {
 				String msg= RefactoringCoreMessages.TypeContextChecker_return_type_not_empty;
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
-			List<String> problemsCollector= new ArrayList<String>(0);
+			List<String> problemsCollector= new ArrayList<>(0);
 			Type parsedType= parseType(newTypeName, fMethod.getJavaProject(), problemsCollector);
 			if (parsedType == null) {
 				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_return_type, BasicElementLabels.getJavaElementName(newTypeName));
@@ -492,7 +492,7 @@ public class TypeContextChecker {
 			return RefactoringStatus.createFatalErrorStatus(msg);
 		}
 
-		List<String> problemsCollector= new ArrayList<String>(0);
+		List<String> problemsCollector= new ArrayList<>(0);
 		Type parsedType= parseType(newTypeName, project, problemsCollector);
 		boolean valid= parsedType != null;
 		if (valid && parsedType instanceof PrimitiveType)
@@ -722,7 +722,7 @@ public class TypeContextChecker {
 
 		ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		p.setSource(cuBuff.toString().toCharArray());
-		Map<String, String> options= new HashMap<String, String>();
+		Map<String, String> options= new HashMap<>();
 		JavaModelUtil.setComplianceOptions(options, JavaModelUtil.VERSION_LATEST);
 		p.setCompilerOptions(options);
 		CompilationUnit cu= (CompilationUnit) p.createAST(null);

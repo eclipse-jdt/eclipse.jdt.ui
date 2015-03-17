@@ -80,6 +80,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		}
 	}
 
+	@Override
 	public boolean finish() {
 		try {
 			IJavaProject[] javaProjects= new IJavaProject[] { getPlaceholderProject() };
@@ -92,14 +93,17 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		return true;
 	}
 
+	@Override
 	public IClasspathEntry getSelection() {
 		return fContainerEntryResult;
 	}
 
+	@Override
 	public void setSelection(IClasspathEntry containerEntry) {
 		fContainerEntryResult= containerEntry;
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		PixelConverter converter= new PixelConverter(parent);
 
@@ -130,6 +134,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 			fVersionCombo.select(1);
 		}
 		fVersionCombo.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				doSelectionChanged();
 			}
@@ -221,9 +226,7 @@ public class JUnitContainerWizardPage extends NewElementWizardPage implements IC
 		return buf.toString();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension#initialize(org.eclipse.jdt.core.IJavaProject, org.eclipse.jdt.core.IClasspathEntry[])
-	 */
+	@Override
 	public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
 		fProject= project;
 	}

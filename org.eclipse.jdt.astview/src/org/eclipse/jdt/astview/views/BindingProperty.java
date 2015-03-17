@@ -93,16 +93,12 @@ public class BindingProperty extends ASTAttribute {
 		return res;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getParent()
-	 */
+	@Override
 	public Object getParent() {
 		return fParent;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getChildren()
-	 */
+	@Override
 	public Object[] getChildren() {
 		if (fValues != null) {
 			return fValues;
@@ -110,23 +106,17 @@ public class BindingProperty extends ASTAttribute {
 		return EMPTY;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getLabel()
-	 */
+	@Override
 	public String getLabel() {
 		return fName;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getImage()
-	 */
+	@Override
 	public Image getImage() {
 		return null;
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
+	@Override
 	public String toString() {
 		return getLabel();
 	}
@@ -138,6 +128,7 @@ public class BindingProperty extends ASTAttribute {
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -166,6 +157,7 @@ public class BindingProperty extends ASTAttribute {
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return (fParent != null ? fParent.hashCode() : 0)
 				+ (fName != null ? fName.hashCode() : 0);

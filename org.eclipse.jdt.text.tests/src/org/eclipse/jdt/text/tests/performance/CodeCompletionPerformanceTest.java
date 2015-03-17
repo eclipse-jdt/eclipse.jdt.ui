@@ -58,7 +58,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 	private static final String CU_NAME= "Completion.java";
 
 
-	private static final Class THIS= CodeCompletionPerformanceTest.class;
+	private static final Class<CodeCompletionPerformanceTest> THIS= CodeCompletionPerformanceTest.class;
 
 	public static Test suite() {
 		return setUpTest(new TestSuite(THIS));
@@ -87,6 +87,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -94,7 +95,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		JavaProjectHelper.addRTJar(fJProject1);
 		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "1");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -150,6 +151,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		return proposals;
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		EditorTestHelper.closeAllEditors();
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();

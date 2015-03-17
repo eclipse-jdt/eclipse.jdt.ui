@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,18 +14,18 @@ import java.text.Collator;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.w3c.dom.Element;
 
 import org.eclipse.jdt.internal.corext.util.History;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 
 public class SelectionHistoryTest extends TestCase {
 
-	private static final Class THIS= SelectionHistoryTest.class;
+	private static final Class<SelectionHistoryTest> THIS= SelectionHistoryTest.class;
 
 	public SelectionHistoryTest(String name) {
 		super(name);
@@ -92,15 +92,16 @@ public class SelectionHistoryTest extends TestCase {
 		buf.append('}');
 	}
 
-	private static final class TestHistoryComparator implements Comparator {
+	private static final class TestHistoryComparator implements Comparator<String> {
 
-		private final History fHistory;
+		private final History<String, String> fHistory;
 
-		public TestHistoryComparator(History history) {
+		public TestHistoryComparator(History<String, String> history) {
 			fHistory= history;
 		}
 
-		public int compare(Object o1, Object o2) {
+		@Override
+		public int compare(String o1, String o2) {
 			int pos1= fHistory.getPosition(o1);
 			int pos2= fHistory.getPosition(o2);
 
@@ -116,20 +117,23 @@ public class SelectionHistoryTest extends TestCase {
 
 	}
 
-	private static final class TestHistory extends History {
+	private static final class TestHistory extends History<String, String> {
 
 		public TestHistory() {
 			super("");
 		}
+		@Override
 		protected void setAttributes(Object object, Element element) {}
-		protected Object createFromElement(Element type) {return null;}
-		protected Object getKey(Object object) {return object;}
+		@Override
+		protected String createFromElement(Element type) {return null;}
+		@Override
+		protected String getKey(String object) {return object;}
 
 	}
 
 	public void testOrganizeImportHistory01() throws Exception {
-		History history= new TestHistory();
-		Comparator comparator= new TestHistoryComparator(history);
+		History<String, String> history= new TestHistory();
+		Comparator<String> comparator= new TestHistoryComparator(history);
 
 		String[] strings= {"d", "c", "b", "a"};
 		String[] expected= {"a", "b", "c", "d"};
@@ -139,8 +143,8 @@ public class SelectionHistoryTest extends TestCase {
 	}
 
 	public void testOrganizeImportHistory02() throws Exception {
-		History history= new TestHistory();
-		Comparator comparator= new TestHistoryComparator(history);
+		History<String, String> history= new TestHistory();
+		Comparator<String> comparator= new TestHistoryComparator(history);
 
 		String[] strings= {"a", "b", "c", "d"};
 		history.accessed("a");
@@ -151,8 +155,8 @@ public class SelectionHistoryTest extends TestCase {
 	}
 
 	public void testOrganizeImportHistory03() throws Exception {
-		History history= new TestHistory();
-		Comparator comparator= new TestHistoryComparator(history);
+		History<String, String> history= new TestHistory();
+		Comparator<String> comparator= new TestHistoryComparator(history);
 
 		String[] strings= {"a", "b", "c", "d"};
 		history.accessed("b");
@@ -163,8 +167,8 @@ public class SelectionHistoryTest extends TestCase {
 	}
 
 	public void testOrganizeImportHistory04() throws Exception {
-		History history= new TestHistory();
-		Comparator comparator= new TestHistoryComparator(history);
+		History<String, String> history= new TestHistory();
+		Comparator<String> comparator= new TestHistoryComparator(history);
 
 		String[] strings= {"a", "b", "c", "d"};
 		history.accessed("b");
@@ -176,8 +180,8 @@ public class SelectionHistoryTest extends TestCase {
 	}
 
 	public void testOrganizeImportHistory05() throws Exception {
-		History history= new TestHistory();
-		Comparator comparator= new TestHistoryComparator(history);
+		History<String, String> history= new TestHistory();
+		Comparator<String> comparator= new TestHistoryComparator(history);
 
 		String[] strings= {"a", "b", "c", "d"};
 		history.accessed("b");

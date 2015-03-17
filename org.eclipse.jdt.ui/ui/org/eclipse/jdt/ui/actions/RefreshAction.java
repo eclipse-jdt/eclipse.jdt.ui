@@ -86,7 +86,7 @@ public class RefreshAction extends SelectionDispatchAction {
 				selectedResources= Collections.emptyList(); // Refresh action refreshes root when it can't find any resources in selection
 			}
 
-			ArrayList<IResource> allResources= new ArrayList<IResource>(selectedResources);
+			ArrayList<IResource> allResources= new ArrayList<>(selectedResources);
 			addWorkingSetResources(allResources);
 			return allResources;
 		}
@@ -140,9 +140,6 @@ public class RefreshAction extends SelectionDispatchAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.REFRESH_ACTION);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
@@ -174,12 +171,10 @@ public class RefreshAction extends SelectionDispatchAction {
 		return okToRefresh;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in SelectionDispatchAction
-	 */
 	@Override
 	public void run(final IStructuredSelection selection) {
 		IWorkspaceRunnable operation= new IWorkspaceRunnable() {
+			@Override
 			public void run(IProgressMonitor monitor) throws CoreException {
 				performRefresh(selection, monitor);
 			}
@@ -198,7 +193,7 @@ public class RefreshAction extends SelectionDispatchAction {
 
 	private void refreshJavaElements(IStructuredSelection selection, IProgressMonitor monitor) throws JavaModelException {
 		Object[] selectedElements= selection.toArray();
-		ArrayList<IJavaElement> javaElements= new ArrayList<IJavaElement>();
+		ArrayList<IJavaElement> javaElements= new ArrayList<>();
 		for (int i= 0; i < selectedElements.length; i++) {
 			Object curr= selectedElements[i];
 			if (curr instanceof IPackageFragmentRoot) {

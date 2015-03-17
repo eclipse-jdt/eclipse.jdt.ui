@@ -54,7 +54,7 @@ public class SourceTestCase extends TestCase {
 	}
 
 	private void initCodeTemplates() {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "999");
@@ -89,6 +89,7 @@ public class SourceTestCase extends TestCase {
 		fSettings.createComments= true;
 	}
 
+	@Override
 	protected void setUp() throws CoreException {
 
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
@@ -102,6 +103,7 @@ public class SourceTestCase extends TestCase {
 		initCodeTemplates();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJavaProject);
 		fJavaProject= null;

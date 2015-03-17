@@ -58,25 +58,31 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 			this.fBindings= allFields;
 		}
 
+		@Override
 		public void dispose() {
 		}
 
+		@Override
 		public Object[] getChildren(Object parentElement) {
 			return new Object[0];
 		}
 
+		@Override
 		public Object[] getElements(Object inputElement) {
 			return fBindings;
 		}
 
+		@Override
 		public Object getParent(Object element) {
 			return null;
 		}
 
+		@Override
 		public boolean hasChildren(Object element) {
 			return false;
 		}
 
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 
@@ -96,6 +102,7 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 			fNumFields= entries;
 		}
 
+		@Override
 		public IStatus validate(Object[] selection) {
 			int count= 0;
 			for (int index= 0; index < selection.length; index++) {
@@ -131,9 +138,6 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 		fUseBlocks= asBoolean(getDialogSettings().get(SETTINGS_BLOCKS), false);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean close() {
 		getDialogSettings().put(SETTINGS_INSTANCEOF, fUseInstanceOf);
@@ -147,9 +151,6 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.GENERATE_HASHCODE_EQUALS_SELECTION_DIALOG);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Composite createCommentSelection(final Composite parent) {
 		final Composite composite= super.createCommentSelection(parent);

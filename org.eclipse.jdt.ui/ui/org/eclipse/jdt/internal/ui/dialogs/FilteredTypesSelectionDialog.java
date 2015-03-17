@@ -268,11 +268,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		fTypeItemsComparator= new TypeItemsComparator();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.ui.dialogs.SelectionDialog#setTitle(java.lang.String)
-	 */
 	@Override
 	public void setTitle(String title) {
 		super.setTitle(title);
@@ -293,11 +288,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.ui.dialogs.AbstractSearchDialog#getDialogSettings()
-	 */
 	@Override
 	protected IDialogSettings getDialogSettings() {
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS);
@@ -309,11 +299,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		return settings;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.ui.dialogs.AbstractSearchDialog#storeDialog(org.eclipse.jface.dialogs.IDialogSettings)
-	 */
 	@Override
 	protected void storeDialog(IDialogSettings settings) {
 		super.storeDialog(settings);
@@ -337,11 +322,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.ui.dialogs.AbstractSearchDialog#restoreDialog(org.eclipse.jface.dialogs.IDialogSettings)
-	 */
 	@Override
 	protected void restoreDialog(IDialogSettings settings) {
 		super.restoreDialog(settings);
@@ -383,11 +363,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		// }
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.ui.dialogs.AbstractSearchDialog#fillViewMenu(org.eclipse.jface.action.IMenuManager)
-	 */
 	@Override
 	protected void fillViewMenu(IMenuManager menuManager) {
 		super.fillViewMenu(menuManager);
@@ -398,6 +373,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 		if (fAllowScopeSwitching) {
 			fFilterActionGroup= new WorkingSetFilterActionGroup(getShell(), JavaPlugin.getActivePage(), new IPropertyChangeListener() {
+				@Override
 				public void propertyChange(PropertyChangeEvent event) {
 					IWorkingSet ws= (IWorkingSet) event.getNewValue();
 					if (ws == null || (ws.isAggregateWorkingSet() && ws.isEmpty())) {
@@ -418,11 +394,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		menuManager.add(new TypeFiltersPreferencesAction());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#createExtendedContentArea(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected Control createExtendedContentArea(Composite parent) {
 		Control addition= null;
@@ -443,15 +414,10 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		return addition;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.ui.dialogs.SelectionDialog#setResult(java.util.List)
-	 */
 	@Override
 	protected void setResult(List newResult) {
 
-		List<IType> resultToReturn= new ArrayList<IType>();
+		List<IType> resultToReturn= new ArrayList<>();
 
 		for (int i= 0; i < newResult.size(); i++) {
 			if (newResult.get(i) instanceof TypeNameMatch) {
@@ -487,11 +453,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.window.Window#open()
-	 */
 	@Override
 	public int open() {
 		if (getInitialPattern() == null) {
@@ -522,11 +483,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		fValidator= validator;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#createFilter()
-	 */
 	@Override
 	protected ItemsFilter createFilter() {
 		fFilter= new TypeItemsFilter(fSearchScope, fElementKinds, fFilterExtension);
@@ -542,13 +498,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.TYPE_SELECTION_DIALOG2);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#fillContentProvider(org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.AbstractContentProvider,
-	 *      org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter,
-	 *      org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	protected void fillContentProvider(AbstractContentProvider provider, ItemsFilter itemsFilter, IProgressMonitor progressMonitor) throws CoreException {
 		TypeItemsFilter typeSearchFilter= (TypeItemsFilter) itemsFilter;
@@ -583,32 +532,17 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#getItemsComparator()
-	 */
 	@Override
 	protected Comparator getItemsComparator() {
 		return fTypeItemsComparator;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#getElementName(java.lang.Object)
-	 */
 	@Override
 	public String getElementName(Object item) {
 		TypeNameMatch type= (TypeNameMatch) item;
 		return type.getSimpleTypeName();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#validateItem(java.lang.Object)
-	 */
 	@Override
 	protected IStatus validateItem(Object item) {
 
@@ -642,6 +576,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	 * takes care of working copies.
 	 */
 	private static class ConsistencyRunnable implements IRunnableWithProgress {
+		@Override
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 			if (fgFirstTime) {
 				// Join the initialize after load job.
@@ -717,6 +652,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	/*
 	 * @see org.eclipse.jdt.ui.dialogs.ITypeSelectionComponent#triggerSearch()
 	 */
+	@Override
 	public void triggerSearch() {
 		fTypeFilterVersion++;
 		applyFilter();
@@ -735,11 +671,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			super(JavaUIMessages.FilteredTypeSelectionDialog_showContainerForDuplicatesAction, IAction.AS_CHECK_BOX);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.jface.action.Action#run()
-		 */
 		@Override
 		public void run() {
 			fTypeInfoLabelProvider.setContainerInfo(isChecked());
@@ -752,11 +683,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			super(JavaUIMessages.FilteredTypesSelectionDialog_TypeFiltersPreferencesAction_label);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.jface.action.Action#run()
-		 */
 		@Override
 		public void run() {
 			String typeFilterID= TypeFilterPreferencePage.TYPE_FILTER_PREF_PAGE_ID;
@@ -803,11 +729,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			fireLabelProviderChanged(new LabelProviderChangedEvent(this));
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
-		 */
 		@Override
 		public Image getImage(Object element) {
 			if (!(element instanceof TypeNameMatch)) {
@@ -821,11 +742,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			}
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
-		 */
 		@Override
 		public String getText(Object element) {
 			if (!(element instanceof TypeNameMatch)) {
@@ -843,22 +759,12 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			return BasicElementLabels.getJavaElementName(typeMatch.getSimpleTypeName());
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.jface.viewers.ILabelDecorator#decorateImage(org.eclipse.swt.graphics.Image,
-		 *      java.lang.Object)
-		 */
+		@Override
 		public Image decorateImage(Image image, Object element) {
 			return image;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.jface.viewers.ILabelDecorator#decorateText(java.lang.String,
-		 *      java.lang.Object)
-		 */
+		@Override
 		public String decorateText(String text, Object element) {
 			if (!(element instanceof TypeNameMatch)) {
 				return null;
@@ -871,9 +777,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			return BasicElementLabels.getJavaElementName(fTypeInfoUtil.getQualifiedText((TypeNameMatch) element));
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider#getStyledText(java.lang.Object)
-		 */
+		@Override
 		public StyledString getStyledText(Object element) {
 			String text= getText(element);
 			StyledString string= new StyledString(text);
@@ -975,11 +879,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			fTypeInfoUtil= typeInfoUtil;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
-		 */
 		@Override
 		public Image getImage(Object element) {
 			if (element instanceof TypeNameMatch) {
@@ -989,11 +888,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			return super.getImage(element);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
-		 */
 		@Override
 		public String getText(Object element) {
 			if (element instanceof TypeNameMatch) {
@@ -1010,7 +904,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		private final TypeInfoRequestorAdapter fAdapter= new TypeInfoRequestorAdapter();
 
-		private final Map<IPath, String> fLib2Name= new HashMap<IPath, String>();
+		private final Map<IPath, String> fLib2Name= new HashMap<>();
 
 		private final IPath[] fInstallLocations;
 
@@ -1018,8 +912,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		public TypeInfoUtil(ITypeInfoImageProvider extension) {
 			fProviderExtension= extension;
-			List<IPath> locations= new ArrayList<IPath>();
-			List<String> labels= new ArrayList<String>();
+			List<IPath> locations= new ArrayList<>();
+			List<String> labels= new ArrayList<>();
 			IVMInstallType[] installs= JavaRuntime.getVMInstallTypes();
 			for (int i= 0; i < installs.length; i++) {
 				processVMInstallType(installs[i], locations, labels);
@@ -1154,11 +1048,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			fTypeInfoFilter= new TypeInfoFilter(pattern, scope, elementKind, extension);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#isSubFilter(org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter)
-		 */
 		@Override
 		public boolean isSubFilter(ItemsFilter filter) {
 			if (! (filter instanceof TypeItemsFilter))
@@ -1228,21 +1117,11 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			fMatchEverything= matchEverything;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#isConsistentItem(java.lang.Object)
-		 */
 		@Override
 		public boolean isConsistentItem(Object item) {
 			return true;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#matchItem(java.lang.Object)
-		 */
 		@Override
 		public boolean matchItem(Object item) {
 			if (fMatchEverything)
@@ -1252,11 +1131,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			return fTypeInfoFilter.matchesHistoryElement(type);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter#matchesRawNamePattern(java.lang.Object)
-		 */
 		@Override
 		public boolean matchesRawNamePattern(Object item) {
 			TypeNameMatch type= (TypeNameMatch) item;
@@ -1291,6 +1165,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		 * 
 		 * @deprecated not used
 		 */
+		@Deprecated
 		@Override
 		protected boolean matches(String text) {
 			throw new UnsupportedOperationException();
@@ -1335,11 +1210,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			fTypeItemsFilter= typeItemsFilter;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.jdt.core.search.TypeNameMatchRequestor#acceptTypeNameMatch(org.eclipse.jdt.core.search.TypeNameMatch)
-		 */
 		@Override
 		public void acceptTypeNameMatch(TypeNameMatch match) {
 			if (fStop)
@@ -1357,7 +1227,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	 */
 	private static class TypeItemsComparator implements Comparator<TypeNameMatch> {
 
-		private final Map<String, String> fLib2Name= new HashMap<String, String>();
+		private final Map<String, String> fLib2Name= new HashMap<>();
 
 		private final String[] fInstallLocations;
 
@@ -1367,8 +1237,8 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		 * Creates new instance of TypeItemsComparator
 		 */
 		public TypeItemsComparator() {
-			List<String> locations= new ArrayList<String>();
-			List<String> labels= new ArrayList<String>();
+			List<String> locations= new ArrayList<>();
+			List<String> labels= new ArrayList<>();
 			IVMInstallType[] installs= JavaRuntime.getVMInstallTypes();
 			for (int i= 0; i < installs.length; i++) {
 				processVMInstallType(installs[i], locations, labels);
@@ -1411,11 +1281,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			return MessageFormat.format(JavaUIMessages.FilteredTypesSelectionDialog_library_name_format, new Object[] { name });
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-		 */
+		@Override
 		public int compare(TypeNameMatch leftInfo, TypeNameMatch rightInfo) {
 			int result= compareName(leftInfo.getSimpleTypeName(), rightInfo.getSimpleTypeName());
 			if (result != 0)
@@ -1517,32 +1383,17 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			super();
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#accessed(java.lang.Object)
-		 */
 		@Override
 		public synchronized void accessed(Object object) {
 			super.accessed(object);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#remove(java.lang.Object)
-		 */
 		@Override
 		public synchronized boolean remove(Object element) {
 			OpenTypeHistory.getInstance().remove((TypeNameMatch) element);
 			return super.remove(element);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#load(org.eclipse.ui.IMemento)
-		 */
 		@Override
 		public void load(IMemento memento) {
 			TypeNameMatch[] types= OpenTypeHistory.getInstance().getTypeInfos();
@@ -1553,11 +1404,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			}
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#save(org.eclipse.ui.IMemento)
-		 */
 		@Override
 		public void save(IMemento memento) {
 			persistHistory();
@@ -1581,12 +1427,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			return null;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 *
-		 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.SelectionHistory#storeItemToMemento(java.lang.Object,
-		 *      org.eclipse.ui.IMemento)
-		 */
 		@Override
 		protected void storeItemToMemento(Object item, IMemento element) {
 			// not used

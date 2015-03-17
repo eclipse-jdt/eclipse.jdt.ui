@@ -24,16 +24,12 @@ public class SharedImages implements ISharedImages {
 	public SharedImages() {
 	}
 
-	/* (Non-Javadoc)
-	 * Method declared in ISharedImages
-	 */
+	@Override
 	public Image getImage(String key) {
 		return JavaPluginImages.get(key);
 	}
 
-	/* (Non-Javadoc)
-	 * Method declared in ISharedImages
-	 */
+	@Override
 	public ImageDescriptor getImageDescriptor(String key) {
 		return JavaPluginImages.getDescriptor(key);
 	}

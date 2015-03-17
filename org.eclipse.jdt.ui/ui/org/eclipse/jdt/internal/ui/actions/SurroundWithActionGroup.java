@@ -75,6 +75,7 @@ public class SurroundWithActionGroup extends ActionGroup {
 		menu.appendToGroup(fGroup, subMenu);
 		subMenu.add(new Action() {});
 		subMenu.addMenuListener(new IMenuListener() {
+			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				manager.removeAll();
 				SurroundWithTemplateMenuAction.fillMenu(manager, fEditor, fSurroundWithTryCatchAction, fSurroundWithTryMultiCatchAction);

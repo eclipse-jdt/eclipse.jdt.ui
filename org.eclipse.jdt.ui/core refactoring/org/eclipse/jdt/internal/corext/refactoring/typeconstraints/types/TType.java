@@ -465,9 +465,6 @@ public abstract class TType {
 		return binding.getKey().equals(fBindingKey);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public final boolean equals(Object other) {
 		if (this == other)
@@ -599,9 +596,6 @@ public abstract class TType {
 	 */
 	protected abstract String getPlainPrettySignature();
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String toString() {
 		return getPrettySignature();

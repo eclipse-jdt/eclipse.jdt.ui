@@ -122,9 +122,7 @@ public class TypeFilter implements IPropertyChangeListener {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
-	 */
+	@Override
 	public synchronized void propertyChange(PropertyChangeEvent event) {
 		if (PreferenceConstants.TYPEFILTER_ENABLED.equals(event.getProperty())) {
 			fStringMatchers= null;

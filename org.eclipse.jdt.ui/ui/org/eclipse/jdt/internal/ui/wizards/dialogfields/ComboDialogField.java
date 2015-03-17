@@ -99,15 +99,18 @@ public class ComboDialogField extends DialogField {
 		if (fComboControl == null) {
 			assertCompositeNotNull(parent);
 			fModifyListener= new ModifyListener() {
+				@Override
 				public void modifyText(ModifyEvent e) {
 					doModifyText(e);
 				}
 			};
 			SelectionListener selectionListener= new SelectionListener() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					doSelectionChanged(e);
 				}
 
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {	}
 			};
 
@@ -248,9 +251,6 @@ public class ComboDialogField extends DialogField {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#refresh()
-	 */
 	@Override
 	public void refresh() {
 		super.refresh();

@@ -21,7 +21,7 @@ import org.eclipse.ltk.internal.core.refactoring.UndoManager2;
 
 public class UndoManagerTests extends RefactoringTest {
 
-	private static final Class clazz= UndoManagerTests.class;
+	private static final Class<UndoManagerTests> clazz= UndoManagerTests.class;
 	public UndoManagerTests(String name) {
 		super(name);
 	}
@@ -38,10 +38,12 @@ public class UndoManagerTests extends RefactoringTest {
 		checkState(0, undo, redo, undoCount, redoCount);
 	}
 
+	@Override
 	protected IUndoManager getUndoManager() {
 		return RefactoringCore.getUndoManager();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		RefactoringCore.getUndoManager().flush();

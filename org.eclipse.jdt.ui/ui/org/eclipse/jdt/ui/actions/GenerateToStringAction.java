@@ -188,8 +188,8 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 	@Override
 	boolean generateCandidates() throws JavaModelException {
 		IVariableBinding[] candidateFields= fTypeBinding.getDeclaredFields();
-		HashMap<IJavaElement, IVariableBinding> fieldsToBindings= new HashMap<IJavaElement, IVariableBinding>();
-		HashMap<IJavaElement, IVariableBinding> selectedFieldsToBindings= new HashMap<IJavaElement, IVariableBinding>();
+		HashMap<IJavaElement, IVariableBinding> fieldsToBindings= new HashMap<>();
+		HashMap<IJavaElement, IVariableBinding> selectedFieldsToBindings= new HashMap<>();
 		for (int i= 0; i < candidateFields.length; i++) {
 			if (!Modifier.isStatic(candidateFields[i].getModifiers())) {
 				fieldsToBindings.put(candidateFields[i].getJavaElement(), candidateFields[i]);
@@ -199,24 +199,24 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 		}
 		IType type= (IType)fTypeBinding.getJavaElement();
 		IField[] allFields= type.getFields();
-		fFields= new ArrayList<IVariableBinding>();
+		fFields= new ArrayList<>();
 		populateMembers(fFields, allFields, fieldsToBindings);
-		fSelectedFields= new ArrayList<IVariableBinding>();
+		fSelectedFields= new ArrayList<>();
 		populateMembers(fSelectedFields, allFields, selectedFieldsToBindings);
 
 		IMethodBinding[] candidateMethods= fTypeBinding.getDeclaredMethods();
-		HashMap<IJavaElement, IMethodBinding> methodsToBindings= new HashMap<IJavaElement, IMethodBinding>();
+		HashMap<IJavaElement, IMethodBinding> methodsToBindings= new HashMap<>();
 		for (int i= 0; i < candidateMethods.length; i++) {
 			if (!Modifier.isStatic(candidateMethods[i].getModifiers()) && candidateMethods[i].getParameterTypes().length == 0
 					&& !candidateMethods[i].getReturnType().getName().equals("void") && !candidateMethods[i].getName().equals("toString") && !candidateMethods[i].getName().equals("clone")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				methodsToBindings.put(candidateMethods[i].getJavaElement(), candidateMethods[i]);
 			}
 		}
-		fMethods= new ArrayList<IMethodBinding>();
+		fMethods= new ArrayList<>();
 		populateMembers(fMethods, type.getMethods(), methodsToBindings);
 
-		fInheritedFields= new ArrayList<IVariableBinding>();
-		fInheritedMethods= new ArrayList<IMethodBinding>();
+		fInheritedFields= new ArrayList<>();
+		fInheritedMethods= new ArrayList<>();
 		ITypeBinding typeBinding= fTypeBinding;
 		while ((typeBinding= typeBinding.getSuperclass()) != null) {
 			type = (IType)typeBinding.getJavaElement();

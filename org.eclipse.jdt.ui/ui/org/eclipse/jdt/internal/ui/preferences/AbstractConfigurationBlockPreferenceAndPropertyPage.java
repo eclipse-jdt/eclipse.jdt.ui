@@ -53,18 +53,12 @@ public abstract class AbstractConfigurationBlockPreferenceAndPropertyPage extend
 
 	protected abstract String getHelpId();
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), getHelpId());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Control createPreferenceContent(Composite parent) {
 
@@ -94,9 +88,6 @@ public abstract class AbstractConfigurationBlockPreferenceAndPropertyPage extend
 		return content;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean performOk() {
 		fConfigurationBlock.performOk();
@@ -110,27 +101,18 @@ public abstract class AbstractConfigurationBlockPreferenceAndPropertyPage extend
 		return true;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void performDefaults() {
 		fConfigurationBlock.performDefaults();
 		super.performDefaults();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void dispose() {
 		fConfigurationBlock.dispose();
 		super.dispose();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
 		super.enableProjectSpecificSettings(useProjectSpecificSettings);

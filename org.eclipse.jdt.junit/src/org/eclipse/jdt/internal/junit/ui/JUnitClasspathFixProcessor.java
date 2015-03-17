@@ -68,7 +68,7 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 					entry= BuildPathSupport.getJUnit3ClasspathEntry();
 				}
 				IClasspathEntry[] oldEntries= fProject.getRawClasspath();
-				ArrayList<IClasspathEntry> newEntries= new ArrayList<IClasspathEntry>(oldEntries.length + 1);
+				ArrayList<IClasspathEntry> newEntries= new ArrayList<>(oldEntries.length + 1);
 				boolean added= false;
 				for (int i= 0; i < oldEntries.length; i++) {
 					IClasspathEntry curr= oldEntries[i];
@@ -151,7 +151,7 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 			res= JUNIT4;
 		}
 		if (res != 0) {
-			ArrayList<JUnitClasspathFixProposal> proposals= new ArrayList<JUnitClasspathFixProposal>();
+			ArrayList<JUnitClasspathFixProposal> proposals= new ArrayList<>();
 			if ((res & JUNIT4) != 0 && JUnitStubUtility.is50OrHigher(project)) {
 				proposals.add(new JUnitClasspathFixProposal(project, true, 15));
 			}

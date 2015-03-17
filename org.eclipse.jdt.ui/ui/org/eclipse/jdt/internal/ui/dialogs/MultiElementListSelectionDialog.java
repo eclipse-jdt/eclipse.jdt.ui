@@ -311,7 +311,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	}
 
 	private void initializeResult(int length) {
-		List<Object> result= new ArrayList<Object>(length);
+		List<Object> result= new ArrayList<>(length);
 		for (int i= 0; i != length; i++)
 			result.add(null);
 
@@ -338,9 +338,6 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 			fFilteredList.setComparator(fComparator);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected FilteredList createFilteredList(Composite parent) {
 		FilteredList filteredList= super.createFilteredList(parent);

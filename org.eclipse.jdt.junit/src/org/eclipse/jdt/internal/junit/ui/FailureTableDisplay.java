@@ -30,12 +30,14 @@ public class FailureTableDisplay implements ITraceDisplay {
 	public FailureTableDisplay(Table table) {
 		fTable = table;
 		fTable.getParent().addDisposeListener(new DisposeListener() {
+			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				disposeIcons();
 			}
 		});
 	}
 
+	@Override
 	public void addTraceLine(int lineType, String label) {
 		TableItem tableItem = newTableItem();
 		switch (lineType) {

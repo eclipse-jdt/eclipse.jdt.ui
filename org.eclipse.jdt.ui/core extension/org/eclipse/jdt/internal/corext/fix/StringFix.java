@@ -107,9 +107,9 @@ public class StringFix implements IProposableFix {
 		if (!cu.isStructureKnown())
 			return null; //[clean up] 'Remove unnecessary $NLS-TAGS$' removes necessary ones in case of syntax errors: https://bugs.eclipse.org/bugs/show_bug.cgi?id=285814 : 
 		
-		List<CategorizedTextEditGroup> result= new ArrayList<CategorizedTextEditGroup>();
+		List<CategorizedTextEditGroup> result= new ArrayList<>();
 
-		List<IProblemLocation> missingNLSProblems= new ArrayList<IProblemLocation>();
+		List<IProblemLocation> missingNLSProblems= new ArrayList<>();
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= problems[i];
 			if (addNLSTag && problem.getProblemId() == IProblem.NonExternalizedStringLiteral) {
@@ -197,9 +197,7 @@ public class StringFix implements IProposableFix {
 		fEditGroups= groups;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
 		if (fEditGroups == null || fEditGroups.length == 0)
 			return null;
@@ -215,23 +213,17 @@ public class StringFix implements IProposableFix {
 		return result;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getAdditionalProposalInfo() {
 		return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getDisplayString() {
 		return fName;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public IStatus getStatus() {
 		return null;
 	}

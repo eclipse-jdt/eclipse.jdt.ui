@@ -117,7 +117,7 @@ class SearchScopeActionGroup extends ActionGroup {
 		if (workingSetNames == null) {
 			return null;
 		}
-		Set<IWorkingSet> workingSets= new HashSet<IWorkingSet>(2);
+		Set<IWorkingSet> workingSets= new HashSet<>(2);
 		for (int j= 0; j < workingSetNames.length; j++) {
 			IWorkingSet workingSet= getWorkingSetManager().getWorkingSet(workingSetNames[j]);
 			if (workingSet != null) {
@@ -185,9 +185,7 @@ class SearchScopeActionGroup extends ActionGroup {
 		javaSearchMM.setRemoveAllWhenShown(true);
 
 		javaSearchMM.addMenuListener(new IMenuListener() {
-			/* (non-Javadoc)
-			 * @see org.eclipse.jface.action.IMenuListener#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
-			 */
+			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				fillSearchActions(manager);
 			}
@@ -198,7 +196,7 @@ class SearchScopeActionGroup extends ActionGroup {
 	}
 
 	private Action[] getActions() {
-		List<Action> actions = new ArrayList<Action>(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 4);
+		List<Action> actions = new ArrayList<>(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 4);
 		addAction(actions, fSearchScopeWorkspaceAction);
 		addAction(actions, fSearchScopeProjectAction);
 		addAction(actions, fSelectWorkingSetAction);
@@ -338,7 +336,7 @@ class SearchScopeActionGroup extends ActionGroup {
 	 */
 	private boolean isSelectedWorkingSet(IWorkingSet[] workingSets) {
 		if (fSelectedWorkingSetNames != null && fSelectedWorkingSetNames.length == workingSets.length) {
-			Set<String> workingSetNames= new HashSet<String>(workingSets.length);
+			Set<String> workingSetNames= new HashSet<>(workingSets.length);
 			for (int i = 0; i < workingSets.length; i++) {
 				workingSetNames.add(workingSets[i].getName());
 			}

@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class MoveMembersTests extends RefactoringTest {
 
-	private static final Class clazz= MoveMembersTests.class;
+	private static final Class<MoveMembersTests> clazz= MoveMembersTests.class;
 
 	private static final String REFACTORING_PATH= "MoveMembers/";
 
@@ -52,6 +52,7 @@ public class MoveMembersTests extends RefactoringTest {
 		return new RefactoringTestSetup(someTest);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -72,6 +73,7 @@ public class MoveMembersTests extends RefactoringTest {
 		return new MoveRefactoring(processor);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		if (fIsVerbose)
 			DebugUtils.dump("--------- " + getName() + " ---------------");

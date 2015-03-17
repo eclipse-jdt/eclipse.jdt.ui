@@ -84,23 +84,17 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 		fQualify= qualify;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.hyperlink.IHyperlink#getHyperlinkRegion()
-	 */
+	@Override
 	public IRegion getHyperlinkRegion() {
 		return fRegion;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.hyperlink.IHyperlink#getTypeLabel()
-	 */
+	@Override
 	public String getTypeLabel() {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.hyperlink.IHyperlink#getHyperlinkText()
-	 */
+	@Override
 	public String getHyperlinkText() {
 		if (fQualify) {
 			if (fTypeSig == null) {
@@ -115,9 +109,7 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.hyperlink.IHyperlink#open()
-	 */
+	@Override
 	public void open() {
 		String typeSignature= fTypeSig;
 		if (typeSignature == null) {

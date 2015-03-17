@@ -87,6 +87,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		/*
 		 * @see org.eclipse.jface.text.rules.IRule#evaluate(org.eclipse.jface.text.rules.ICharacterScanner)
 		 */
+		@Override
 		public IToken evaluate(ICharacterScanner scanner) {
 
 			int character= scanner.read();
@@ -141,6 +142,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		/*
 		 * @see org.eclipse.jface.text.rules.IRule#evaluate(org.eclipse.jface.text.rules.ICharacterScanner)
 		 */
+		@Override
 		public IToken evaluate(ICharacterScanner scanner) {
 
 			int character= scanner.read();
@@ -173,6 +175,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
 		 */
+		@Override
 		public void setSourceVersion(String version) {
 			fIsVersionMatch= fVersion.compareTo(version) <= 0;
 		}
@@ -224,6 +227,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			/*
 			 * @see org.eclipse.jface.text.rules.ICharacterScanner#getColumn()
 			 */
+			@Override
 			public int getColumn() {
 				return fDelegate.getColumn();
 			}
@@ -231,6 +235,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			/*
 			 * @see org.eclipse.jface.text.rules.ICharacterScanner#getLegalLineDelimiters()
 			 */
+			@Override
 			public char[][] getLegalLineDelimiters() {
 				return fDelegate.getLegalLineDelimiters();
 			}
@@ -238,6 +243,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			/*
 			 * @see org.eclipse.jface.text.rules.ICharacterScanner#read()
 			 */
+			@Override
 			public int read() {
 				int ch= fDelegate.read();
 				if (ch != ICharacterScanner.EOF)
@@ -248,6 +254,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			/*
 			 * @see org.eclipse.jface.text.rules.ICharacterScanner#unread()
 			 */
+			@Override
 			public void unread() {
 				if (fReadCount > 0)
 					fReadCount--;
@@ -302,6 +309,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		/*
 		 * @see org.eclipse.jface.text.rules.IRule#evaluate(org.eclipse.jface.text.rules.ICharacterScanner)
 		 */
+		@Override
 		public IToken evaluate(ICharacterScanner scanner) {
 			if (!fIsVersionMatch)
 				return Token.UNDEFINED;
@@ -356,6 +364,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
 		 */
+		@Override
 		public void setSourceVersion(String version) {
 			fIsVersionMatch= fVersion.compareTo(version) <= 0;
 		}
@@ -403,7 +412,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		ANNOTATION_COLOR_KEY,
 	};
 
-	private List<ISourceVersionDependent> fVersionDependentRules= new ArrayList<ISourceVersionDependent>(3);
+	private List<ISourceVersionDependent> fVersionDependentRules= new ArrayList<>(3);
 
 	/**
 	 * Creates a Java code scanner
@@ -430,7 +439,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	@Override
 	protected List<IRule> createRules() {
 
-		List<IRule> rules= new ArrayList<IRule>();
+		List<IRule> rules= new ArrayList<>();
 
 		// Add rule for character constants.
 		Token token= getToken(IJavaColorConstants.JAVA_STRING);

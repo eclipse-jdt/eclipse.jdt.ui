@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,7 +59,7 @@ public class TreeListDialogFieldExample {
 			/* 6 */ "Remove"
 		};
 
-		TreeListDialogField list= new TreeListDialogField(adapter, addButtons, new LabelProvider());
+		TreeListDialogField<String> list= new TreeListDialogField<>(adapter, addButtons, new LabelProvider());
 		list.setUpButtonIndex(3);
 		list.setDownButtonIndex(4);
 		list.setRemoveButtonIndex(6);
@@ -80,16 +80,19 @@ public class TreeListDialogFieldExample {
 
 	private static Random fgRandom= new Random();
 
-	private class Adapter implements ITreeListAdapter {
+	private class Adapter implements ITreeListAdapter<String> {
 
 		// -------- ITreeListAdapter
-		public void customButtonPressed(TreeListDialogField field, int index) {
+		@Override
+		public void customButtonPressed(TreeListDialogField<String> field, int index) {
 			field.addElement("elementxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-" + fgRandom.nextInt());
 		}
 
-		public void selectionChanged(TreeListDialogField field) {}
+		@Override
+		public void selectionChanged(TreeListDialogField<String> field) {}
 
-		public Object[] getChildren(TreeListDialogField field, Object element) {
+		@Override
+		public Object[] getChildren(TreeListDialogField<String> field, Object element) {
 			if (field.getElements().contains(element)) {
 				return new String[] {
 					"Source Attachment: c:/hello/z.zip",
@@ -99,18 +102,22 @@ public class TreeListDialogFieldExample {
 			return new String[0];
 		}
 
-		public Object getParent(TreeListDialogField field, Object element) {
+		@Override
+		public Object getParent(TreeListDialogField<String> field, Object element) {
 			return null;
 		}
 
-		public boolean hasChildren(TreeListDialogField field, Object element) {
+		@Override
+		public boolean hasChildren(TreeListDialogField<String> field, Object element) {
 			return field.getElements().contains(element);
 		}
 
-		public void doubleClicked(TreeListDialogField field) {
+		@Override
+		public void doubleClicked(TreeListDialogField<String> field) {
 		}
 
-		public void keyPressed(TreeListDialogField field, KeyEvent event) {
+		@Override
+		public void keyPressed(TreeListDialogField<String> field, KeyEvent event) {
 		}
 
 	}

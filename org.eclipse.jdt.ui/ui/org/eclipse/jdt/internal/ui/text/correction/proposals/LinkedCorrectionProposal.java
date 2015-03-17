@@ -128,6 +128,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	 * no image is desired.
 	 * @deprecated use {@link #addLinkedPositionProposal(String, String, Image)} instead
 	 */
+	@Deprecated
 	public void addLinkedPositionProposal(String groupID, String displayString, String proposal, Image image) {
 		addLinkedPositionProposal(groupID, proposal, image);
 	}
@@ -141,9 +142,6 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		getLinkedProposalModel().getPositionGroup(groupID, true).addProposal(type, getCompilationUnit(), 10);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.jface.text.IDocument, org.eclipse.ui.IEditorPart)
-	 */
 	@Override
 	protected void performChange(IEditorPart part, IDocument document) throws CoreException {
 		try {

@@ -57,9 +57,6 @@ public class ProjectsView extends JavaBrowsingPart {
 	private CollapseAllAction fCollapseAllAction;
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createViewer(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected StructuredViewer createViewer(Composite parent) {
 		ProblemTreeViewer result= new ProblemTreeViewer(parent, SWT.MULTI);
@@ -68,9 +65,6 @@ public class ProjectsView extends JavaBrowsingPart {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#dispose()
-	 */
 	@Override
 	public void dispose() {
 		if (fFilterUpdater != null)
@@ -78,14 +72,12 @@ public class ProjectsView extends JavaBrowsingPart {
 		super.dispose();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getAdapter(java.lang.Class)
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> key) {
 		if (key == IShowInTargetList.class) {
 			return (T) new IShowInTargetList() {
+				@Override
 				public String[] getShowInTargetIds() {
 					return new String[] { JavaUI.ID_PACKAGES, JavaPlugin.ID_RES_NAV  };
 				}
@@ -96,9 +88,6 @@ public class ProjectsView extends JavaBrowsingPart {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createContentProvider()
-	 */
 	@Override
 	protected IContentProvider createContentProvider() {
 		return new ProjectAndSourceFolderContentProvider(this);
@@ -127,6 +116,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	protected void hookViewerListeners() {
 		super.hookViewerListeners();
 		getViewer().addDoubleClickListener(new IDoubleClickListener() {
+			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				TreeViewer viewer= (TreeViewer)getViewer();
 				Object element= ((IStructuredSelection)event.getSelection()).getFirstElement();

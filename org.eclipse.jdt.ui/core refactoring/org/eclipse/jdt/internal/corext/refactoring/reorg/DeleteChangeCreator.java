@@ -149,7 +149,7 @@ class DeleteChangeCreator {
 
 	//List<IJavaElement>
 	private static List<IJavaElement> getElementsSmallerThanCu(IJavaElement[] javaElements){
-		List<IJavaElement> result= new ArrayList<IJavaElement>();
+		List<IJavaElement> result= new ArrayList<>();
 		for (int i= 0; i < javaElements.length; i++) {
 			IJavaElement element= javaElements[i];
 			if (ReorgUtils.isInsideCompilationUnit(element))

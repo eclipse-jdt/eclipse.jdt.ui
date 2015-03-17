@@ -110,7 +110,7 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 		String packageName= destination.getElementName();
 		String[] split= packageName.split("\\."); //$NON-NLS-1$
 
-		ArrayList<IPackageFragment> created= new ArrayList<IPackageFragment>();
+		ArrayList<IPackageFragment> created= new ArrayList<>();
 
 		StringBuffer name= new StringBuffer();
 		name.append(split[0]);

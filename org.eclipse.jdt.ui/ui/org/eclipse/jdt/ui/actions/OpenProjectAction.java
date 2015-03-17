@@ -89,6 +89,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 	/*
 	 * @see IResourceChangeListener#resourceChanged(IResourceChangeEvent)
 	 */
+	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
 		IResourceDelta delta = event.getDelta();
 		if (delta != null) {
@@ -105,16 +106,10 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 
 	//---- normal selection -------------------------------------
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.ISelection)
-	 */
 	@Override
 	public void selectionChanged(ISelection selection) {
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.ISelection)
-	 */
 	@Override
 	public void run(ISelection selection) {
 		internalRun(null);
@@ -161,12 +156,9 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 
 	//---- structured selection ---------------------------------------
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
-		List<Object> allClosedProjects= new ArrayList<Object>();
+		List<Object> allClosedProjects= new ArrayList<>();
 		int selectionStatus= evaluateSelection(selection, allClosedProjects);
 		if ((selectionStatus & CLOSED_PROJECTS_SELECTED) != 0) { // selection contains closed projects
 			fWorkbenchAction.selectionChanged(new StructuredSelection(allClosedProjects));
@@ -198,6 +190,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 
 	private IWorkspaceRunnable createRunnable(final Object[] projects) {
 		return new IWorkspaceRunnable() {
+			@Override
 			public void run(IProgressMonitor monitor) throws CoreException {
 				monitor.beginTask("", projects.length); //$NON-NLS-1$
 				MultiStatus errorStatus= null;
@@ -220,7 +213,7 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 
 	private Object[] getClosedProjectsInWorkspace() {
 		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		List<IProject> result= new ArrayList<IProject>(5);
+		List<IProject> result= new ArrayList<>(5);
 		for (int i = 0; i < projects.length; i++) {
 			IProject project= projects[i];
 			if (!project.isOpen())

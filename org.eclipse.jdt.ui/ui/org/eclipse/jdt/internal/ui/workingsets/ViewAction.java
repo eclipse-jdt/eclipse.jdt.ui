@@ -26,9 +26,6 @@ public class ViewAction extends Action {
 		fMode= mode;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
 		if (isChecked())

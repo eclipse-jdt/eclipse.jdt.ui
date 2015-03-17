@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.Hashtable;
 import java.util.List;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -35,14 +32,18 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.Java17ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class AdvancedQuickAssistTest17 extends QuickFixTest {
 
-	private static final Class THIS= AdvancedQuickAssistTest17.class;
+	private static final Class<AdvancedQuickAssistTest17> THIS= AdvancedQuickAssistTest17.class;
 
 	private IJavaProject fJProject1;
 
@@ -61,8 +62,9 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 
@@ -86,6 +88,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java17ProjectTestSetup.getDefaultClasspath());
 	}
@@ -114,7 +117,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		int offset= buf.toString().indexOf("switch");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -172,7 +175,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		int offset= buf.toString().indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -220,7 +223,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		int offset= buf.toString().indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -248,7 +251,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		int offset= buf.toString().indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
@@ -318,7 +321,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		int offset= buf.toString().indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
@@ -386,7 +389,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		int offset= buf.toString().indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
@@ -445,7 +448,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("?");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 
@@ -486,7 +489,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		int offset= buf.toString().indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 
@@ -525,7 +528,7 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		int offset= buf.toString().indexOf("if");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		
 		assertCorrectLabels(proposals);
 		

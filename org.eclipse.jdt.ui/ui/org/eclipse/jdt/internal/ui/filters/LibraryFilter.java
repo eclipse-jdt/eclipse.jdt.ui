@@ -27,9 +27,6 @@ import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
  */
 public class LibraryFilter extends ViewerFilter {
 
-	/* (non-Javadoc)
-	 * Method declared on ViewerFilter.
-	 */
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if (element instanceof IPackageFragmentRoot) {

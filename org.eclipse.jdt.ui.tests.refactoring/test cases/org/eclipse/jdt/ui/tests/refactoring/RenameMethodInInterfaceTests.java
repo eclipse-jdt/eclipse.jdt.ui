@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodPro
 
 public class RenameMethodInInterfaceTests extends RefactoringTest {
 
-	private static final Class clazz= RenameMethodInInterfaceTests.class;
+	private static final Class<RenameMethodInInterfaceTests> clazz= RenameMethodInInterfaceTests.class;
 	private static final String REFACTORING_PATH= "RenameMethodInInterface/";
 	private static final String[] NO_ARGUMENTS= new String[0];
 
@@ -48,6 +48,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		return new RefactoringTestSetup(test);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}

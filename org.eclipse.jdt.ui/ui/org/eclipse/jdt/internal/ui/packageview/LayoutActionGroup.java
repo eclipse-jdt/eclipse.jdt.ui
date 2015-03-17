@@ -42,9 +42,6 @@ class LayoutActionGroup extends ActionGroup {
 		fShowLibrariesNode= new ShowLibrariesNodeAction(packageExplorer);
 	}
 
-	/* (non-Javadoc)
-	 * @see ActionGroup#fillActionBars(IActionBars)
-	 */
 	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);

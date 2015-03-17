@@ -109,6 +109,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	/*
 	 * @see ICompletionProposal#apply(IDocument)
 	 */
+	@Override
 	public void apply(IDocument document) {
 		try {
 			performChange(JavaPlugin.getActivePage().getActiveEditor(), document);
@@ -159,6 +160,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 						if (disabledStyledText.getEditable()) {
 							disabledStyledText.setEditable(false);
 							traverseBlocker= new TraverseListener() {
+								@Override
 								public void keyTraversed(TraverseEvent e) {
 									e.doit= true;
 									e.detail= SWT.TRAVERSE_NONE;
@@ -216,6 +218,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	/*
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
+	@Override
 	public String getAdditionalProposalInfo() {
 		Object info= getAdditionalProposalInfo(new NullProgressMonitor());
 		return info == null ? null : info.toString();
@@ -224,6 +227,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 		StringBuffer buf= new StringBuffer();
 		buf.append("<p>"); //$NON-NLS-1$
@@ -250,6 +254,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	/*
 	 * @see ICompletionProposal#getContextInformation()
 	 */
+	@Override
 	public IContextInformation getContextInformation() {
 		return null;
 	}
@@ -257,6 +262,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	/*
 	 * @see ICompletionProposal#getDisplayString()
 	 */
+	@Override
 	public String getDisplayString() {
 		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
 		if (shortCutString != null) {
@@ -265,9 +271,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 		return getName();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension6#getStyledDisplayString()
-	 */
+	@Override
 	public StyledString getStyledDisplayString() {
 		StyledString str= new StyledString(getName());
 
@@ -291,6 +295,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	/*
 	 * @see ICompletionProposal#getImage()
 	 */
+	@Override
 	public Image getImage() {
 		return fImage;
 	}
@@ -298,6 +303,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	/*
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
+	@Override
 	public Point getSelection(IDocument document) {
 		return null;
 	}
@@ -407,9 +413,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 		fName= name;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
-	 */
+	@Override
 	public int getRelevance() {
 		return fRelevance;
 	}
@@ -425,11 +429,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 		fRelevance= relevance;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.text.java.correction.ICommandAccess#getCommandId()
-
-
-	 */
+	@Override
 	public String getCommandId() {
 		return fCommandId;
 	}

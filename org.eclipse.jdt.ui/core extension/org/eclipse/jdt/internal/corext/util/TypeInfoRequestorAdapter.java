@@ -24,30 +24,22 @@ public class TypeInfoRequestorAdapter implements ITypeInfoRequestor {
 		fMatch= type;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.dialogs.ITypeInfoRequestor#getEnclosingName()
-	 */
+	@Override
 	public String getEnclosingName() {
 		return Signature.getQualifier(fMatch.getTypeQualifiedName());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.dialogs.ITypeInfoRequestor#getModifiers()
-	 */
+	@Override
 	public int getModifiers() {
 		return fMatch.getModifiers();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.dialogs.ITypeInfoRequestor#getPackageName()
-	 */
+	@Override
 	public String getPackageName() {
 		return fMatch.getPackageName();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.dialogs.ITypeInfoRequestor#getTypeName()
-	 */
+	@Override
 	public String getTypeName() {
 		return fMatch.getSimpleTypeName();
 	}

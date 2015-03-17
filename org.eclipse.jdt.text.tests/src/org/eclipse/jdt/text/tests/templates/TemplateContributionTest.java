@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,10 +11,6 @@
 package org.eclipse.jdt.text.tests.templates;
 
 import java.util.Iterator;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.Template;
@@ -31,6 +27,10 @@ import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.corext.template.java.SWTContextType;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 
 /**
@@ -86,8 +86,8 @@ public class TemplateContributionTest extends TestCase {
 	}
 
 	private boolean canHandle(TemplateContextType context, TemplateVariable variable) {
-		for (Iterator iterator= context.resolvers(); iterator.hasNext();) {
-			TemplateVariableResolver resolver= (TemplateVariableResolver) iterator.next();
+		for (Iterator<TemplateVariableResolver> iterator= context.resolvers(); iterator.hasNext();) {
+			TemplateVariableResolver resolver= iterator.next();
 			if (variable.getType().equals(resolver.getType()))
 				return true;
 		}

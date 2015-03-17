@@ -50,7 +50,7 @@ public class RecentSettingsStore {
 	 * @param settings the settings to load from
 	 */
 	public RecentSettingsStore(IDialogSettings settings) {
-		fPerProjectSettings= new HashMap<IJavaProject, ProjectData>();
+		fPerProjectSettings= new HashMap<>();
 		if (settings != null) {
 			load(settings);
 		}

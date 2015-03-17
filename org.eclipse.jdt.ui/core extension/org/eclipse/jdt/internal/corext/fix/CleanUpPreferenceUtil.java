@@ -96,7 +96,7 @@ public class CleanUpPreferenceUtil {
     }
 
 	private static Map<String, String> loadFromProject(IScopeContext context) {
-		final Map<String, String> profileOptions= new HashMap<String, String>();
+		final Map<String, String> profileOptions= new HashMap<>();
 		IEclipsePreferences uiPrefs= context.getNode(JavaUI.ID_PLUGIN);
 
     	CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
@@ -145,7 +145,7 @@ public class CleanUpPreferenceUtil {
 			}
 		}
 
-		Map<String, String> result= new HashMap<String, String>();
+		Map<String, String> result= new HashMap<>();
 		Set<String> keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS).getKeys();
 		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
 	        String key= iterator.next();
@@ -209,7 +209,7 @@ public class CleanUpPreferenceUtil {
 	 * @since 3.3
 	 */
 	public static List<Profile> getBuiltInProfiles() {
-    	ArrayList<Profile> result= new ArrayList<Profile>();
+    	ArrayList<Profile> result= new ArrayList<>();
 
     	Map<String, String> settings= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getMap();
     	final Profile eclipseProfile= new BuiltInProfile(CleanUpConstants.ECLIPSE_PROFILE, CleanUpMessages.CleanUpProfileManager_ProfileName_EclipseBuildIn, settings, 2, CleanUpProfileVersioner.CURRENT_VERSION, CleanUpProfileVersioner.PROFILE_KIND);

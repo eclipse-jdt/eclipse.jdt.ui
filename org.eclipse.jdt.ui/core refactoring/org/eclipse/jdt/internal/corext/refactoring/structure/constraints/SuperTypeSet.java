@@ -27,6 +27,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet#chooseSingleType()
 		 */
+		@Override
 		public final TType chooseSingleType() {
 			return null;
 		}
@@ -34,6 +35,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet#isEmpty()
 		 */
+		@Override
 		public final boolean isEmpty() {
 			return true;
 		}
@@ -41,6 +43,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet#restrictedTo(org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet)
 		 */
+		@Override
 		public final ITypeSet restrictedTo(final ITypeSet set) {
 			return this;
 		}
@@ -72,6 +75,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet#chooseSingleType()
 		 */
+		@Override
 		public final TType chooseSingleType() {
 			return fType;
 		}
@@ -79,6 +83,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet#isEmpty()
 		 */
+		@Override
 		public final boolean isEmpty() {
 			return false;
 		}
@@ -86,6 +91,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet#restrictedTo(org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet)
 		 */
+		@Override
 		public final ITypeSet restrictedTo(final ITypeSet set) {
 			final TType leftErasure= fType.getErasure();
 			if (set instanceof SuperTypeUniverse) {
@@ -163,6 +169,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet#chooseSingleType()
 		 */
+		@Override
 		public final TType chooseSingleType() {
 			return fSuperType;
 		}
@@ -170,6 +177,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet#isEmpty()
 		 */
+		@Override
 		public final boolean isEmpty() {
 			return false;
 		}
@@ -177,6 +185,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet#restrictedTo(org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet)
 		 */
+		@Override
 		public final ITypeSet restrictedTo(final ITypeSet set) {
 			if (set instanceof SuperTypeUniverse) {
 				return this;
@@ -221,6 +230,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet#chooseSingleType()
 		 */
+		@Override
 		public final TType chooseSingleType() {
 			return null;
 		}
@@ -228,6 +238,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet#isEmpty()
 		 */
+		@Override
 		public final boolean isEmpty() {
 			return false;
 		}
@@ -235,6 +246,7 @@ public abstract class SuperTypeSet implements ITypeSet {
 		/*
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet#restrictedTo(org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet)
 		 */
+		@Override
 		public final ITypeSet restrictedTo(final ITypeSet set) {
 			return set;
 		}

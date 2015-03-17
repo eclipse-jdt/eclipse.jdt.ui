@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class GenerateToStringTest extends SourceTestCase {
 
-	static final Class THIS= GenerateToStringTest.class;
+	static final Class<GenerateToStringTest> THIS= GenerateToStringTest.class;
 
 	protected ToStringGenerationSettings fSettings2;
 
@@ -76,6 +76,7 @@ public class GenerateToStringTest extends SourceTestCase {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws CoreException {
 		super.setUp();
 		fSettings2= new ToStringGenerationSettings();
@@ -117,14 +118,14 @@ public class GenerateToStringTest extends SourceTestCase {
 		IJavaProject jp= fRoot.getJavaProject();
 		if (is60orHigher || ! is50orHigher) {
 			IClasspathEntry[] cp= jp.getRawClasspath();
-			ArrayList newCP= new ArrayList();
+			ArrayList<IClasspathEntry> newCP= new ArrayList<>();
 			for (int i= 0; i < cp.length; i++) {
 				IClasspathEntry cpe= cp[i];
 				if (cpe.getEntryKind() != IClasspathEntry.CPE_LIBRARY) {
 					newCP.add(cpe);
 				}
 			}
-			jp.setRawClasspath((IClasspathEntry[]) newCP.toArray(new IClasspathEntry[newCP.size()]), null);
+			jp.setRawClasspath(newCP.toArray(new IClasspathEntry[newCP.size()]), null);
 		}
 		if (is60orHigher) {
 			JavaProjectHelper.addRTJar16(jp);

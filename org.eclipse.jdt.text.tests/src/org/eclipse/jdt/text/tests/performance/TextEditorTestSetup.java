@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,12 +13,12 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.util.Enumeration;
 
+import org.eclipse.ui.texteditor.AbstractTextEditor;
+
 import junit.extensions.TestDecorator;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
-import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 /**
  * @since 3.1
@@ -33,6 +33,7 @@ public abstract class TextEditorTestSetup extends TestSetup {
 		super(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		if (getEditorId() == DEFAULT_EDITOR_ID)
@@ -43,6 +44,7 @@ public abstract class TextEditorTestSetup extends TestSetup {
 		setEditor(getTest(), fEditor);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();
@@ -65,7 +67,7 @@ public abstract class TextEditorTestSetup extends TestSetup {
 		else if (test instanceof TestDecorator)
 			setEditor(((TestDecorator) test).getTest(), editor);
 		else if (test instanceof TestSuite)
-			for (Enumeration iter= ((TestSuite) test).tests(); iter.hasMoreElements();)
-				setEditor((Test) iter.nextElement(), editor);
+			for (Enumeration<Test> iter= ((TestSuite) test).tests(); iter.hasMoreElements();)
+				setEditor(iter.nextElement(), editor);
 	}
 }

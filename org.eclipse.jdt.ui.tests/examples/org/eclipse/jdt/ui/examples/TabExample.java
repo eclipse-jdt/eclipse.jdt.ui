@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,7 +71,7 @@ public class TabExample {
 			/* 2 */ null,
 			/* 3 */ "Remove"
 		};
-		ListDialogField list= new ListDialogField(new Adapter(), addButtons, new LabelProvider());
+		ListDialogField<String> list= new ListDialogField<>(new Adapter(), addButtons, new LabelProvider());
 		list.setRemoveButtonIndex(3);
 		list.setLabelText("List: ");
 
@@ -105,26 +105,28 @@ public class TabExample {
 	}
 
 
-	private class Adapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter {
+	private class Adapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter<String> {
 
 		// -------- IStringButtonAdapter
+		@Override
 		public void changeControlPressed(DialogField field) {
 		}
 
 		// -------- IListAdapter
-		public void customButtonPressed(ListDialogField field, int index) {
+		@Override
+		public void customButtonPressed(ListDialogField<String> field, int index) {
 		}
 
-		public void selectionChanged(ListDialogField field) {
+		@Override
+		public void selectionChanged(ListDialogField<String> field) {
 		}
 
 		// -------- IDialogFieldListener
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 		}
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#doubleClicked(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
-		 */
-		public void doubleClicked(ListDialogField field) {
+		@Override
+		public void doubleClicked(ListDialogField<String> field) {
 		}
 	}
 

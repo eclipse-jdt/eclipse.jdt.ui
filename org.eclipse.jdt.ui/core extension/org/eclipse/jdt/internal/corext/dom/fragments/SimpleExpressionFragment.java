@@ -19,10 +19,12 @@ class SimpleExpressionFragment extends SimpleFragment implements IExpressionFrag
 		super(node);
 	}
 
+	@Override
 	public Expression getAssociatedExpression() {
 		return (Expression) getAssociatedNode();
 	}
 
+	@Override
 	public Expression createCopyTarget(ASTRewrite rewrite, boolean removeSurroundingParenthesis) {
 		Expression node= getAssociatedExpression();
 		if (removeSurroundingParenthesis && node instanceof ParenthesizedExpression) {

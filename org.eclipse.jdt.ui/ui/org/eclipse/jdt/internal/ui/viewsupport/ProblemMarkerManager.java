@@ -61,6 +61,7 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 			fChangedElements= changedElements;
 		}
 
+		@Override
 		public boolean visit(IResourceDelta delta) throws CoreException {
 			IResource res= delta.getResource();
 			if (res instanceof IProject && delta.getKind() == IResourceDelta.CHANGED) {
@@ -112,15 +113,16 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 
 	public ProblemMarkerManager() {
 		fListeners= new ListenerList();
-		fResourcesWithMarkerChanges= new HashSet<IResource>();
-		fResourcesWithAnnotationChanges= new HashSet<IResource>();
+		fResourcesWithMarkerChanges= new HashSet<>();
+		fResourcesWithAnnotationChanges= new HashSet<>();
 	}
 
 	/*
 	 * @see IResourceChangeListener#resourceChanged
 	 */
+	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
-		HashSet<IResource> changedElements= new HashSet<IResource>();
+		HashSet<IResource> changedElements= new HashSet<>();
 
 		try {
 			IResourceDelta delta= event.getDelta();
@@ -146,16 +148,12 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see IAnnotationModelListener#modelChanged(IAnnotationModel)
-	 */
+	@Override
 	public void modelChanged(IAnnotationModel model) {
 		// no action
 	}
 
-	/* (non-Javadoc)
-	 * @see IAnnotationModelListenerExtension#modelChanged(AnnotationModelEvent)
-	 */
+	@Override
 	public void modelChanged(AnnotationModelEvent event) {
 		if (event instanceof CompilationUnitAnnotationModelEvent) {
 			CompilationUnitAnnotationModelEvent cuEvent= (CompilationUnitAnnotationModelEvent) event;

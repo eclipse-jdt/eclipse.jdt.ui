@@ -69,9 +69,7 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 		//Default has no specific controls
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Control createControl(Composite parent, IPreferencePageContainer container) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -90,14 +88,13 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 		return composite;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void initialize(final IScopeContext context, IAdaptable element) {
 		boolean enabled= isEnabled(context);
 		fEnableField.setSelection(enabled);
 
 		fEnableField.setDialogFieldListener(new IDialogFieldListener() {
+			@Override
 			public void dialogFieldChanged(DialogField field) {
 				fContext.getNode(JavaUI.ID_PLUGIN).putBoolean(getPreferenceKey(), fEnableField.isSelected());
 				enabled(fEnableField.isSelected());
@@ -110,14 +107,10 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 		enabled(enabled);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void dispose() {}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void performDefaults() {
 		String key= getPreferenceKey();
 		boolean defaultEnabled;
@@ -132,35 +125,25 @@ public abstract class AbstractSaveParticipantPreferenceConfiguration implements 
 		enabled(defaultEnabled);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void performOk() {}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void enableProjectSettings() {
 		fContext.getNode(JavaUI.ID_PLUGIN).putBoolean(getPreferenceKey(), fEnableField.isSelected());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void disableProjectSettings() {
 		fContext.getNode(JavaUI.ID_PLUGIN).remove(getPreferenceKey());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean hasSettingsInScope(IScopeContext context) {
     	return context.getNode(JavaUI.ID_PLUGIN).get(getPreferenceKey(), null) != null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean isEnabled(IScopeContext context) {
 		IEclipsePreferences node;
 		if (hasSettingsInScope(context)) {

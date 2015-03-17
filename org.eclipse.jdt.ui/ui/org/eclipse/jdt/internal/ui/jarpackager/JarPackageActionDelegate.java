@@ -48,9 +48,7 @@ abstract class JarPackageActionDelegate implements IObjectActionDelegate {
 		return JavaPlugin.getActiveWorkbenchShell();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IObjectActionDelegate#setActivePart(org.eclipse.jface.action.IAction, org.eclipse.ui.IWorkbenchPart)
-	 */
+	@Override
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 		IWorkbenchPartSite site= targetPart.getSite();
 		fShell= site != null ? site.getShell() : null;
@@ -59,6 +57,7 @@ abstract class JarPackageActionDelegate implements IObjectActionDelegate {
 	/*
 	 * @see IActionDelegate
 	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		if (selection instanceof IStructuredSelection)
 			fSelection= (IStructuredSelection)selection;

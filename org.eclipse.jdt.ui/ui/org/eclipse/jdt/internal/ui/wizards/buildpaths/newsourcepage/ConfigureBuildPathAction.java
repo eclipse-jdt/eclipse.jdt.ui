@@ -52,9 +52,6 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getDetailedDescription() {
 	    return null;
@@ -64,7 +61,7 @@ public class ConfigureBuildPathAction extends BuildpathModifierAction {
 	public void run() {
 		IProject project= null;
 		Object firstElement= getSelectedElements().get(0);
-		HashMap<Object, IClasspathEntry> data= new HashMap<Object, IClasspathEntry>();
+		HashMap<Object, IClasspathEntry> data= new HashMap<>();
 
 		if (firstElement instanceof IJavaElement) {
 			IJavaElement element= (IJavaElement) firstElement;

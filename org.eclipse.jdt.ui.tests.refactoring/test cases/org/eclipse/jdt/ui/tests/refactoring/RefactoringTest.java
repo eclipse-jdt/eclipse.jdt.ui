@@ -89,13 +89,14 @@ public abstract class RefactoringTest extends TestCase {
 	protected static final String TEST_OUTPUT_INFIX= "/out/";
 	protected static final String CONTAINER= "src";
 
-	protected static final List/*<String>*/ PROJECT_RESOURCE_CHILDREN= Arrays.asList(new String[] {
+	protected static final List<String> PROJECT_RESOURCE_CHILDREN= Arrays.asList(new String[] {
 			".project", ".classpath", ".settings" });
 
 	public RefactoringTest(String name) {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fRoot= RefactoringTestSetup.getDefaultSourceFolder();
 		fPackageP= RefactoringTestSetup.getPackageP();
@@ -122,6 +123,7 @@ public abstract class RefactoringTest extends TestCase {
 	 * 
 	 * @throws Exception in case of errors
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		refreshFromLocal();
 		performDummySearch();
@@ -158,7 +160,7 @@ public abstract class RefactoringTest extends TestCase {
 			IClasspathEntry srcEntry= getRoot().getRawClasspathEntry();
 			IClasspathEntry jreEntry= RefactoringTestSetup.getJRELibrary().getRawClasspathEntry();
 			IClasspathEntry[] cpes= javaProject.getRawClasspath();
-			ArrayList newCPEs= new ArrayList();
+			ArrayList<IClasspathEntry> newCPEs= new ArrayList<>();
 			boolean cpChanged= false;
 			for (int i= 0; i < cpes.length; i++) {
 				IClasspathEntry cpe= cpes[i];
@@ -169,7 +171,7 @@ public abstract class RefactoringTest extends TestCase {
 				}
 			}
 			if (cpChanged) {
-				IClasspathEntry[] newCPEsArray= (IClasspathEntry[]) newCPEs.toArray(new IClasspathEntry[newCPEs.size()]);
+				IClasspathEntry[] newCPEsArray= newCPEs.toArray(new IClasspathEntry[newCPEs.size()]);
 				javaProject.setRawClasspath(newCPEsArray, null);
 			}
 
@@ -274,7 +276,7 @@ public abstract class RefactoringTest extends TestCase {
 					if (!validation.isOK())
 						return validation;
 					RefactoringStatus refactoringStatus= new RefactoringStatus();
-					Class expected= jrd.getClass();
+					Class<? extends JavaRefactoringDescriptor> expected= jrd.getClass();
 					RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(jrd.getID());
 					jrd= (JavaRefactoringDescriptor) contribution.createDescriptor(jrd.getID(), jrd.getProject(), jrd.getDescription(), jrd.getComment(), contribution.retrieveArgumentMap(jrd), jrd.getFlags());
 					assertEquals(expected, jrd.getClass());
@@ -296,6 +298,7 @@ public abstract class RefactoringTest extends TestCase {
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		if (fIsPreDeltaTest) {
 			IResourceChangeListener listener= new IResourceChangeListener() {
+				@Override
 				public void resourceChanged(IResourceChangeEvent event) {
 					if (create.getConditionCheckingStatus().isOK() &&  perform.changeExecuted()) {
 						TestModelProvider.assertTrue(event.getDelta());
@@ -501,19 +504,19 @@ public abstract class RefactoringTest extends TestCase {
 	public static IField[] getFields(IType type, String[] names) {
 		if (names == null )
 			return new IField[0];
-		Set fields= new HashSet();
+		Set<IField> fields= new HashSet<>();
 		for (int i = 0; i < names.length; i++) {
 			IField field= type.getField(names[i]);
 			assertTrue("field " + field.getElementName() + " does not exist", field.exists());
 			fields.add(field);
 		}
-		return (IField[]) fields.toArray(new IField[fields.size()]);
+		return fields.toArray(new IField[fields.size()]);
 	}
 
 	public static IType[] getMemberTypes(IType type, String[] names) {
 		if (names == null )
 			return new IType[0];
-		Set memberTypes= new HashSet();
+		Set<IType> memberTypes= new HashSet<>();
 		for (int i = 0; i < names.length; i++) {
 			IType memberType;
 			if (names[i].indexOf('.') != -1) {
@@ -527,24 +530,24 @@ public abstract class RefactoringTest extends TestCase {
 			assertTrue("member type " + memberType.getElementName() + " does not exist", memberType.exists());
 			memberTypes.add(memberType);
 		}
-		return (IType[]) memberTypes.toArray(new IType[memberTypes.size()]);
+		return memberTypes.toArray(new IType[memberTypes.size()]);
 	}
 
 	public static IMethod[] getMethods(IType type, String[] names, String[][] signatures) {
 		if (names == null || signatures == null)
 			return new IMethod[0];
-		List methods= new ArrayList(names.length);
+		List<IMethod> methods= new ArrayList<>(names.length);
 		for (int i = 0; i < names.length; i++) {
 			IMethod method= type.getMethod(names[i], signatures[i]);
 			assertTrue("method " + method.getElementName() + " does not exist", method.exists());
 			if (!methods.contains(method))
 				methods.add(method);
 		}
-		return (IMethod[]) methods.toArray(new IMethod[methods.size()]);
+		return methods.toArray(new IMethod[methods.size()]);
 	}
 
 	public static IType[] findTypes(IType[] types, String[] namesOfTypesToPullUp) {
-		List found= new ArrayList(types.length);
+		List<IType> found= new ArrayList<>(types.length);
 		for (int i= 0; i < types.length; i++) {
 			IType type= types[i];
 			for (int j= 0; j < namesOfTypesToPullUp.length; j++) {
@@ -553,11 +556,11 @@ public abstract class RefactoringTest extends TestCase {
 					found.add(type);
 			}
 		}
-		return (IType[]) found.toArray(new IType[found.size()]);
+		return found.toArray(new IType[found.size()]);
 	}
 
 	public static IField[] findFields(IField[] fields, String[] namesOfFieldsToPullUp) {
-		List found= new ArrayList(fields.length);
+		List<IField> found= new ArrayList<>(fields.length);
 		for (int i= 0; i < fields.length; i++) {
 			IField field= fields[i];
 			for (int j= 0; j < namesOfFieldsToPullUp.length; j++) {
@@ -566,11 +569,11 @@ public abstract class RefactoringTest extends TestCase {
 					found.add(field);
 			}
 		}
-		return (IField[]) found.toArray(new IField[found.size()]);
+		return found.toArray(new IField[found.size()]);
 	}
 
 	public static IMethod[] findMethods(IMethod[] selectedMethods, String[] namesOfMethods, String[][] signaturesOfMethods){
-		List found= new ArrayList(selectedMethods.length);
+		List<IMethod> found= new ArrayList<>(selectedMethods.length);
 		for (int i= 0; i < selectedMethods.length; i++) {
 			IMethod method= selectedMethods[i];
 			String[] paramTypes= method.getParameterTypes();
@@ -584,7 +587,7 @@ public abstract class RefactoringTest extends TestCase {
 				found.add(method);
 			}
 		}
-		return (IMethod[]) found.toArray(new IMethod[found.size()]);
+		return found.toArray(new IMethod[found.size()]);
 	}
 
 	private static boolean areSameSignatures(String[] s1, String[] s2){

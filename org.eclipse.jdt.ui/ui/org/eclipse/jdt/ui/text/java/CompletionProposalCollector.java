@@ -103,9 +103,9 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	private final CompletionProposalLabelProvider fLabelProvider= new CompletionProposalLabelProvider();
 	private final ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
 
-	private final List<IJavaCompletionProposal> fJavaProposals= new ArrayList<IJavaCompletionProposal>();
-	private final List<IJavaCompletionProposal> fKeywords= new ArrayList<IJavaCompletionProposal>();
-	private final Set<String> fSuggestedMethodNames= new HashSet<String>();
+	private final List<IJavaCompletionProposal> fJavaProposals= new ArrayList<>();
+	private final List<IJavaCompletionProposal> fKeywords= new ArrayList<>();
+	private final Set<String> fSuggestedMethodNames= new HashSet<>();
 
 	private final ICompilationUnit fCompilationUnit;
 	private final IJavaProject fJavaProject;
@@ -184,9 +184,6 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		this(cu.getJavaProject(), cu, ignoreAll);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.CompletionRequestor#setIgnored(int, boolean)
-	 */
 	@Override
 	public void setIgnored(int completionProposalKind, boolean ignore) {
 		super.setIgnored(completionProposalKind, ignore);

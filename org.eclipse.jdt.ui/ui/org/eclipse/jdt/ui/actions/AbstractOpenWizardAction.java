@@ -65,9 +65,6 @@ public abstract class AbstractOpenWizardAction extends Action {
 		fCreatedElement= null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run() {
 		Shell shell= getShell();

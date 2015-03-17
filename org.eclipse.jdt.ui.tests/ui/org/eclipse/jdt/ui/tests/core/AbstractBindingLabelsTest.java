@@ -36,6 +36,7 @@ public abstract class AbstractBindingLabelsTest extends CoreTests {
 	protected IJavaProject fJProject1;
 	protected boolean fHaveSource= true;
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
 
@@ -44,6 +45,7 @@ public abstract class AbstractBindingLabelsTest extends CoreTests {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}

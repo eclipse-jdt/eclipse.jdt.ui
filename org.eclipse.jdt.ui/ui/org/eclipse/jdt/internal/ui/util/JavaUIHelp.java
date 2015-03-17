@@ -86,6 +86,7 @@ public class JavaUIHelp {
 		 * @see HelpListener#helpRequested(HelpEvent)
 		 *
 		 */
+		@Override
 		public void helpRequested(HelpEvent e) {
 			try {
 				Object[] selected= null;
@@ -114,9 +115,11 @@ public class JavaUIHelp {
 			fId= id;
 			fSelected= selected;
 		}
+		@Override
 		public int getContextChangeMask() {
 			return SELECTION;
 		}
+		@Override
 		public IContext getContext(Object target) {
 			IContext context= HelpSystem.getContext(fId);
 			if (fSelected != null && fSelected.length > 0) {
@@ -132,6 +135,7 @@ public class JavaUIHelp {
 			}
 			return context;
 		}
+		@Override
 		public String getSearchExpression(Object target) {
 			return null;
 		}

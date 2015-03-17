@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,9 +18,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
@@ -38,18 +35,22 @@ import org.eclipse.jdt.core.SourceRange;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 /**
  * @author rfuhrer@watson.ibm.com
  */
 public class IntroduceFactoryTests extends RefactoringTest {
 
-	private static final Class clazz= IntroduceFactoryTests.class;
+	private static final Class<IntroduceFactoryTests> clazz= IntroduceFactoryTests.class;
 	private static final String REFACTORING_PATH= "IntroduceFactory/";
 
 	public IntroduceFactoryTests(String name) {
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -416,9 +417,9 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	}
 
 	void multiProjectBugHelper(String[] inputFileBaseNames, String[] dependencies) throws Exception {
-		Map/*<String,Set<String>>*/ projName2PkgNames= collectProjectPackages(inputFileBaseNames);
-		Map/*<String,IJavaProject>*/ projName2Project= new HashMap();
-		Map/*<IJavaProject,IPackageFragmentRoot>*/ proj2PkgRoot= new HashMap();
+		Map<String, Set<String>> projName2PkgNames= collectProjectPackages(inputFileBaseNames);
+		Map<String, IJavaProject> projName2Project= new HashMap<>();
+		Map<IJavaProject, IPackageFragmentRoot> proj2PkgRoot= new HashMap<>();
 
 		try {
 			createProjectPackageStructure(projName2PkgNames, projName2Project, proj2PkgRoot);
@@ -434,8 +435,8 @@ public class IntroduceFactoryTests extends RefactoringTest {
 			doMultiUnitTest(CUs, testPath, inputFileBaseNames, null);
 
 		} finally {
-			for (Iterator iter= proj2PkgRoot.keySet().iterator(); iter.hasNext();) {
-				IJavaProject project= (IJavaProject) iter.next();
+			for (Iterator<IJavaProject> iter= proj2PkgRoot.keySet().iterator(); iter.hasNext();) {
+				IJavaProject project= iter.next();
 				if (project.exists()) {
 					try {
 						project.getProject().delete(true, null);
@@ -448,7 +449,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		}
 	}
 
-	private ICompilationUnit[] createCUs(String[] inputFileBaseNames, Map projName2Project, Map proj2PkgRoot) throws Exception {
+	private ICompilationUnit[] createCUs(String[] inputFileBaseNames, Map<String, IJavaProject> projName2Project, Map<IJavaProject, IPackageFragmentRoot> proj2PkgRoot) throws Exception {
 		ICompilationUnit CUs[]= new ICompilationUnit[inputFileBaseNames.length];
 
 		for(int i= 0; i < inputFileBaseNames.length; i++) {
@@ -461,8 +462,8 @@ public class IntroduceFactoryTests extends RefactoringTest {
 			String projName= filePath.substring(0, projEnd);
 			String pkgName= filePath.substring(projEnd+1, pkgEnd).replace('/', '.');
 
-			IJavaProject project= (IJavaProject) projName2Project.get(projName);
-			IPackageFragmentRoot root= (IPackageFragmentRoot) proj2PkgRoot.get(project);
+			IJavaProject project= projName2Project.get(projName);
+			IPackageFragmentRoot root= proj2PkgRoot.get(project);
 			IPackageFragment pkg= root.getPackageFragment(pkgName);
 
 			CUs[i]= createCUForBugTestCase(project, pkg, filePath.substring(fileBegin), true);
@@ -470,7 +471,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		return CUs;
 	}
 
-	private void addProjectDependencies(String[] dependencies, Map projName2Project) throws JavaModelException {
+	private void addProjectDependencies(String[] dependencies, Map<String, IJavaProject> projName2Project) throws JavaModelException {
 		for(int i= 0; i < dependencies.length; i++) {
 			// dependent:provider
 			String dependency= dependencies[i];
@@ -478,37 +479,37 @@ public class IntroduceFactoryTests extends RefactoringTest {
 			String depName= dependency.substring(0, colonIdx);
 			String provName= dependency.substring(colonIdx+1);
 
-			IJavaProject depProj= (IJavaProject) projName2Project.get(depName);
-			IJavaProject provProj= (IJavaProject) projName2Project.get(provName);
+			IJavaProject depProj= projName2Project.get(depName);
+			IJavaProject provProj= projName2Project.get(provName);
 
 			JavaProjectHelper.addRequiredProject(depProj, provProj);
 		}
 	}
 
-	private void createProjectPackageStructure(Map projName2PkgNames, Map projName2Project, Map proj2PkgRoot) throws CoreException, JavaModelException {
-		for(Iterator iter= projName2PkgNames.keySet().iterator(); iter.hasNext(); ) {
-			String projName= (String) iter.next();
-			Set/*<String>*/ projPkgNames= (Set) projName2PkgNames.get(projName);
+	private void createProjectPackageStructure(Map<String, Set<String>> projName2PkgNames, Map<String, IJavaProject> projName2Project, Map<IJavaProject, IPackageFragmentRoot> proj2PkgRoot) throws CoreException, JavaModelException {
+		for(Iterator<String> iter= projName2PkgNames.keySet().iterator(); iter.hasNext(); ) {
+			String projName= iter.next();
+			Set<String> projPkgNames= projName2PkgNames.get(projName);
 
 			IJavaProject project= JavaProjectHelper.createJavaProject(projName, "bin");
 			IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(project, CONTAINER);
 
 			JavaProjectHelper.addRTJar(project);
 
-			Set/*<IPackageFragment>*/ pkgs= new HashSet();
+			Set<IPackageFragment> pkgs= new HashSet<>();
 
 			projName2Project.put(projName, project);
 			proj2PkgRoot.put(project, root);
-			for(Iterator pkgIter= projPkgNames.iterator(); pkgIter.hasNext(); ) {
-				String pkgName= (String) pkgIter.next();
+			for(Iterator<String> pkgIter= projPkgNames.iterator(); pkgIter.hasNext(); ) {
+				String pkgName= pkgIter.next();
 
 				pkgs.add(root.createPackageFragment(pkgName, true, null));
 			}
 		}
 	}
 
-	private Map/*<String,Set<String>>*/ collectProjectPackages(String[] inputFileBaseNames) {
-		Map/*<String,Set<String>>*/ proj2Pkgs= new HashMap();
+	private Map<String, Set<String>> collectProjectPackages(String[] inputFileBaseNames) {
+		Map<String, Set<String>> proj2Pkgs= new HashMap<>();
 
 		for(int i= 0; i < inputFileBaseNames.length; i++) {
 			String filePath= inputFileBaseNames[i];
@@ -516,10 +517,10 @@ public class IntroduceFactoryTests extends RefactoringTest {
 			String projName= filePath.substring(0, projEnd);
 			String pkgName= filePath.substring(projEnd+1, filePath.lastIndexOf('/'));
 
-			Set/*<String>*/ projPkgs= (Set) proj2Pkgs.get(projName);
+			Set<String> projPkgs= proj2Pkgs.get(projName);
 
 			if (projPkgs == null)
-				proj2Pkgs.put(projName, projPkgs= new HashSet());
+				proj2Pkgs.put(projName, projPkgs= new HashSet<>());
 			projPkgs.add(pkgName);
 		}
 		return proj2Pkgs;

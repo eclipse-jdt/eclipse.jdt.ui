@@ -42,6 +42,7 @@ public class IndentActionTest extends TestCase {
 	private static final String PROJECT= "IndentTests";
 
 	private static final class EmptyBundle extends ListResourceBundle {
+		@Override
 		protected Object[][] getContents() {
 			return new Object[0][];
 		}
@@ -55,6 +56,7 @@ public class IndentActionTest extends TestCase {
 			super(test);
 		}
 
+		@Override
 		protected void setUp() throws Exception {
 			super.setUp();
 
@@ -65,6 +67,7 @@ public class IndentActionTest extends TestCase {
 			fJavaProject.setOption(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.TRUE);
 		}
 
+		@Override
 		protected void tearDown () throws Exception {
 			if (fJavaProject != null)
 				JavaProjectHelper.delete(fJavaProject);
@@ -78,7 +81,7 @@ public class IndentActionTest extends TestCase {
 		}
 	}
 
-	private static final Class THIS= IndentActionTest.class;
+	private static final Class<IndentActionTest> THIS= IndentActionTest.class;
 	public static Test suite() {
 		return new IndentTestSetup(new TestSuite(THIS));
 	}
@@ -90,6 +93,7 @@ public class IndentActionTest extends TestCase {
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		String filename= createFileName("Before");
 		fEditor= (JavaEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(filename), true);
@@ -100,6 +104,7 @@ public class IndentActionTest extends TestCase {
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		EditorTestHelper.closeEditor(fEditor);
 		fEditor= null;

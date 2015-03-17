@@ -45,9 +45,6 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 		super();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setWorkingValues(Map<String, String> workingValues) {
 		super.setWorkingValues(workingValues);
@@ -81,6 +78,7 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 			final CheckboxPreference format= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatSourceCode, CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpModifyDialog.FALSE_TRUE);
 			registerPreference(format);
 			format.addObserver(new Observer() {
+				@Override
 				public void update(Observable o, Object arg) {
 					fPreview.setFormat(format.getChecked());
 					fPreview.update();
@@ -97,6 +95,7 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 		final CheckboxPreference correctIndentation= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_correctIndentation_checkbox_text, CleanUpConstants.FORMAT_CORRECT_INDENTATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(correctIndentation);
 		correctIndentation.addObserver(new Observer() {
+			@Override
 			public void update(Observable o, Object arg) {
 				fPreview.setCorrectIndentation(correctIndentation.getChecked());
 				fPreview.update();
@@ -130,6 +129,7 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 
 		registerSlavePreference(sortMembersPref, new RadioPreference[] {sortAllPref});
 		sortMembersPref.addObserver(new Observer() {
+			@Override
 			public void update(Observable o, Object arg) {
 				nullRadio.setEnabled(sortMembersPref.getChecked());
 
@@ -139,6 +139,7 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 			}
 		});
 		sortAllPref.addObserver(new Observer() {
+			@Override
 			public void update(Observable o, Object arg) {
 				boolean warningEnabled= sortMembersPref.getChecked() && sortAllPref.getChecked();
 				warningImage.setEnabled(warningEnabled);

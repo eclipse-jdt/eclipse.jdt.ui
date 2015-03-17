@@ -59,10 +59,12 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 
 	private class HistoryMenuCreator implements IMenuCreator {
 
+		@Override
 		public Menu getMenu(Menu parent) {
 			return null;
 		}
 
+		@Override
 		public Menu getMenu(Control parent) {
 			if (fMenu != null) {
 				fMenu.dispose();
@@ -70,13 +72,14 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 			final MenuManager manager= new MenuManager();
 			manager.setRemoveAllWhenShown(true);
 			manager.addMenuListener(new IMenuListener() {
+				@Override
 				public void menuAboutToShow(IMenuManager manager2) {
 					List<E> entries= fHistory.getHistoryEntries();
 					boolean checkOthers= addEntryMenuItems(manager2, entries);
 
 					manager2.add(new Separator());
 
-					Action others= new HistoryListAction<E>(fHistory);
+					Action others= new HistoryListAction<>(fHistory);
 					others.setChecked(checkOthers);
 					manager2.add(others);
 
@@ -118,6 +121,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 				@Override
 				public void menuHidden(final MenuEvent e) {
 					display.asyncExec(new Runnable() {
+						@Override
 						public void run() {
 							manager.removeAll();
 							if (fMenu != null) {
@@ -131,6 +135,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 			return fMenu;
 		}
 
+		@Override
 		public void dispose() {
 			fHistory= null;
 
@@ -155,6 +160,6 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 
 	@Override
 	public void run() {
-		new HistoryListAction<E>(fHistory).run();
+		new HistoryListAction<>(fHistory).run();
 	}
 }

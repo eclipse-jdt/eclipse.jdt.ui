@@ -41,10 +41,12 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 		return fgTestSetup.getRoot();
 	}
 
+	@Override
 	protected String getResourceLocation() {
 		return "SurroundWithWorkSpace/SurroundWithTests/";
 	}
 
+	@Override
 	protected String adaptName(String name) {
 		return Character.toUpperCase(name.charAt(0)) + name.substring(1) + ".java";
 	}

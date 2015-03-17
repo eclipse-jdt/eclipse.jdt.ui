@@ -53,6 +53,7 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 	private WorkingSetModel fWorkingSetModel;
 
 	private class ResourceChangeListener implements IResourceChangeListener {
+		@Override
 		public void resourceChanged(IResourceChangeEvent event) {
 			if (fWorkingSet == null)
 				return;		// not yet initialized
@@ -76,6 +77,7 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 	private IResourceChangeListener fResourceChangeListener;
 
 	private class WorkingSetListener implements IPropertyChangeListener {
+		@Override
 		public void propertyChange(PropertyChangeEvent event) {
 			if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(event.getProperty())) {
 				IWorkingSet changedWorkingSet= (IWorkingSet) event.getNewValue();
@@ -88,11 +90,12 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 	private IPropertyChangeListener fWorkingSetListener;
 
 	private class JavaElementChangeListener implements IElementChangedListener {
+		@Override
 		public void elementChanged(ElementChangedEvent event) {
 			if (fWorkingSet == null)
 				return; // not yet initialized
 
-			processJavaDelta(new ArrayList<IAdaptable>(Arrays.asList(fWorkingSet.getElements())), event.getDelta());
+			processJavaDelta(new ArrayList<>(Arrays.asList(fWorkingSet.getElements())), event.getDelta());
 		}
 		private void processJavaDelta(List<IAdaptable> elements, IJavaElementDelta delta) {
 			IJavaElement jElement= delta.getElement();
@@ -124,26 +127,20 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 	}
 	private IElementChangedListener fJavaElementChangeListener;
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void add(IWorkingSet workingSet) {
 		Assert.isTrue(fWorkingSet == null && fWorkingSetModel != null);
 		fWorkingSet= workingSet;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean remove(IWorkingSet workingSet) {
 		Assert.isTrue(fWorkingSet == workingSet);
 		fWorkingSet= null;
 		return true;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean contains(IWorkingSet workingSet) {
 		return fWorkingSet == workingSet;
 	}
@@ -158,6 +155,7 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 		JavaCore.addElementChangedListener(fJavaElementChangeListener, ElementChangedEvent.POST_CHANGE);
 	}
 
+	@Override
 	public void dispose() {
 		if (fResourceChangeListener != null) {
 			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fResourceChangeListener);
@@ -177,8 +175,8 @@ public class OthersWorkingSetUpdater implements IWorkingSetUpdater {
 
 		IWorkingSet[] activeWorkingSets= fWorkingSetModel.getActiveWorkingSets();
 
-		List<IAdaptable> result= new ArrayList<IAdaptable>();
-		Set<IResource> projects= new HashSet<IResource>();
+		List<IAdaptable> result= new ArrayList<>();
+		Set<IResource> projects= new HashSet<>();
 		for (int i= 0; i < activeWorkingSets.length; i++) {
 			if (activeWorkingSets[i] == fWorkingSet) continue;
 			IAdaptable[] elements= activeWorkingSets[i].getElements();

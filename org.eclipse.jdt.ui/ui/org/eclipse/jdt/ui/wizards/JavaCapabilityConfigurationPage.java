@@ -88,7 +88,8 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
     private BuildPathsBlock getBuildPathsBlock() {
         if (fBuildPathsBlock == null) {
             IStatusChangeListener listener= new IStatusChangeListener() {
-                public void statusChanged(IStatus status) {
+                @Override
+				public void statusChanged(IStatus status) {
                     updateStatus(status);
                 }
             };
@@ -152,9 +153,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 		fJavaProject= jproject;
 	}
 
-	/* (non-Javadoc)
-	 * @see WizardPage#createControl
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
@@ -208,6 +207,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	public IRunnableWithProgress getRunnable() {
 		if (getJavaProject() != null) {
 			return new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						configureJavaProject(monitor);
@@ -232,6 +232,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * @since 2.1
 	 * @deprecated use {@link #createProject(IProject, URI, IProgressMonitor)} instead.
 	 */
+	@Deprecated
 	public static void createProject(IProject project, IPath locationPath, IProgressMonitor monitor) throws CoreException {
 		createProject(project, locationPath != null ? URIUtil.toURI(locationPath) : null, monitor);
 	}

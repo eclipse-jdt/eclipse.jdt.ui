@@ -83,6 +83,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 	/*
 	 * @see org.eclipse.jface.text.IAutoEditStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.DocumentCommand)
 	 */
+	@Override
 	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
 		// 0: early pruning
 		// also customize if <code>doit</code> is false (so it works in code completion situations)

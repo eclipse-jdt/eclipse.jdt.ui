@@ -32,13 +32,14 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPr
 
 public class StructureSelectionActionTests extends RefactoringTest{
 
-	private static final Class clazz= StructureSelectionActionTests.class;
+	private static final Class<StructureSelectionActionTests> clazz= StructureSelectionActionTests.class;
 	private static final String REFACTORING_PATH= "StructureSelectionAction/";
 
 	public StructureSelectionActionTests(String name){
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}

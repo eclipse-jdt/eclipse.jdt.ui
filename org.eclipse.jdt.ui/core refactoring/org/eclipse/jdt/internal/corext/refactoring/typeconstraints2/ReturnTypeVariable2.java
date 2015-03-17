@@ -56,10 +56,12 @@ public final class ReturnTypeVariable2 extends ConstraintVariable2 implements IS
 		return getKey().equals(other2.getKey());
 	}
 
+	@Override
 	public void setCompilationUnit(ICompilationUnit unit) {
 		fCompilationUnit= unit;
 	}
 
+	@Override
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}

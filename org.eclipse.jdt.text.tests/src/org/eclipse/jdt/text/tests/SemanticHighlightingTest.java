@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 
 public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 
-	private static final Class THIS= SemanticHighlightingTest.class;
+	private static final Class<SemanticHighlightingTest> THIS= SemanticHighlightingTest.class;
 
 	public static Test suite() {
 		return new SemanticHighlightingTestSetup(new TestSuite(THIS), "/SHTest/src/SHTest.java");

@@ -22,18 +22,20 @@ public class TextNonInitialTypingTest extends NonInitialTypingTest {
 
 	private static final String SHORT_NAME_TYPING= "Text editor typing speed";
 
-	private static final Class THIS= TextNonInitialTypingTest.class;
+	private static final Class<TextNonInitialTypingTest> THIS= TextNonInitialTypingTest.class;
 
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected String getSummaryName() {
 		if ("testTypeAMethod".equals(getName()))
 			return SHORT_NAME_TYPING;
 		return null;
 	}
 
+	@Override
 	protected String getEditorId() {
 		return "org.eclipse.ui.DefaultTextEditor";
 	}

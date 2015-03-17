@@ -84,6 +84,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 	 * @param parent the parent composite
 	 * @return the control for the preference page
 	 */
+	@Override
 	public Control createControl(Composite parent) {
 		ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		scrolled.setExpandHorizontal(true);
@@ -245,6 +246,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		final IPreferenceStore combinedStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		final IPropertyChangeListener propertyChangeListener= new IPropertyChangeListener() {
 			private boolean fHasRun= false;
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (fHasRun)
 					return;
@@ -264,6 +266,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		};
 		combinedStore.addPropertyChangeListener(propertyChangeListener);
 		link.addDisposeListener(new DisposeListener() {
+				@Override
 				public void widgetDisposed(org.eclipse.swt.events.DisposeEvent e) {
 					combinedStore.removePropertyChangeListener(propertyChangeListener);
 				}

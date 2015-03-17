@@ -101,7 +101,7 @@ public class ParametricStructureComputer {
 	}
 
 
-	private Stack<ConstraintVariable2> fWorkList2= new Stack<ConstraintVariable2>();
+	private Stack<ConstraintVariable2> fWorkList2= new Stack<>();
 
 
 	private void setStructureAndPush(ConstraintVariable2 v, ParametricStructure structure) {
@@ -479,7 +479,7 @@ public class ParametricStructureComputer {
 	}
 
 	public Collection<CollectionElementVariable2> createElemConstraintVariables() {
-		Collection<CollectionElementVariable2> newVars= new HashSet<CollectionElementVariable2>();
+		Collection<CollectionElementVariable2> newVars= new HashSet<>();
 
 		computeContainerStructure();
 
@@ -553,7 +553,7 @@ public class ParametricStructureComputer {
 					setElemStructure(childVar, ParametricStructure.NONE);
 			}
 		}
-		List<CollectionElementVariable2> result= new ArrayList<CollectionElementVariable2>(cvs.size() * 2);//roughly
+		List<CollectionElementVariable2> result= new ArrayList<>(cvs.size() * 2);//roughly
 		for (Iterator<CollectionElementVariable2> iter= cvs.iterator(); iter.hasNext(); ) {
 			CollectionElementVariable2 childVar= iter.next();
 			int declarationTypeVariableIndex= childVar.getDeclarationTypeVariableIndex();

@@ -68,6 +68,7 @@ public final class ConditionalTypeConstraint implements ITypeConstraint2 {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2#getLeft()
 	 */
+	@Override
 	public final ConstraintVariable2 getLeft() {
 		return fThenVariable;
 	}
@@ -75,6 +76,7 @@ public final class ConditionalTypeConstraint implements ITypeConstraint2 {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2#getRight()
 	 */
+	@Override
 	public final ConstraintVariable2 getRight() {
 		return fElseVariable;
 	}

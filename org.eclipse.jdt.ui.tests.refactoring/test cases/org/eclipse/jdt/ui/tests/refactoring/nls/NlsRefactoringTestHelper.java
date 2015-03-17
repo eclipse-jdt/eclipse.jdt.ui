@@ -17,6 +17,7 @@ import java.util.HashMap;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -41,13 +42,13 @@ public class NlsRefactoringTestHelper {
 
     NullProgressMonitor fNpm;
 
-    private HashMap fWorkSpaceElements = new HashMap();
+    private HashMap<String, IAdaptable> fWorkSpaceElements = new HashMap<>();
     private IJavaProject fJavaProject;
 
     public NlsRefactoringTestHelper(IJavaProject javaProject) throws Exception {
         fJavaProject = javaProject;
         fNpm = new NullProgressMonitor();
-        fWorkSpaceElements = new HashMap();
+        fWorkSpaceElements = new HashMap<>();
         setupTestSpace();
     }
 

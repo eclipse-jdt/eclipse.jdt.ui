@@ -173,9 +173,6 @@ public class WorkingSetFilter extends JavaViewerFilter {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.filters.JavaViewerFilter#initFilter()
-	 */
 	@Override
 	protected void initFilter() {
 		notifyWorkingSetContentChange();
@@ -196,9 +193,6 @@ public class WorkingSetFilter extends JavaViewerFilter {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.filters.JavaViewerFilter#freeFilter()
-	 */
 	@Override
 	protected void freeFilter() {
 		fCachedCompareEntries= null;

@@ -184,7 +184,7 @@ public class ModifierRewrite {
 		int newModifiers= modifiers & consideredFlags;
 
 		ITrackedNodePosition trackedFallback= null;
-		List<ITrackedNodePosition> trackedNodes= new ArrayList<ITrackedNodePosition>();
+		List<ITrackedNodePosition> trackedNodes= new ArrayList<>();
 
 		// remove modifiers
 		List<IExtendedModifier> originalList= fModifierRewrite.getOriginalList();

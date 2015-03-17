@@ -108,6 +108,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			uninstallOnActiveEditor();
 		}
 
+		@Override
 		public void partActivated(IWorkbenchPartReference partRef) {
 			if (fIsVisible && partRef instanceof IEditorReference) {
 				editorActive(((IEditorReference) partRef).getEditor(true));
@@ -124,13 +125,16 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			}
 		}
 
+		@Override
 		public void partDeactivated(IWorkbenchPartReference partRef) {
 		}
 
+		@Override
 		public void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot) {
 			preformEditorSelectionChanged(selection, astRoot);
 		}
 
+		@Override
 		public void partVisible(IWorkbenchPartReference partRef) {
 			if (NewSearchUI.SEARCH_VIEW_ID.equals(partRef.getId()) && partRef.getPart(true) == getViewPart()) {
 				if (fActiveEditor == null) {
@@ -139,6 +143,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			}
 		}
 
+		@Override
 		public void partHidden(IWorkbenchPartReference partRef) {
 			if (NewSearchUI.SEARCH_VIEW_ID.equals(partRef.getId()) && partRef.getPart(true) == getViewPart()) {
 				fIsVisible= false;
@@ -148,18 +153,22 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			}
 		}
 
+		@Override
 		public void partBroughtToTop(IWorkbenchPartReference partRef) {
 		}
 
+		@Override
 		public void partClosed(IWorkbenchPartReference partRef) {
 			if (partRef instanceof IEditorReference && partRef.getPart(true) == fActiveEditor) {
 				uninstallOnActiveEditor();
 			}
 		}
 
+		@Override
 		public void partInputChanged(IWorkbenchPartReference partRef) {
 		}
 
+		@Override
 		public void partOpened(IWorkbenchPartReference partRef) {
 		}
 	}
@@ -332,6 +341,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 			final JavaElementLine line= getMatchingLine(result, offset, length);
 
 			getSite().getShell().getDisplay().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					setInput(query.getSearchResult(), line == null ? null : new StructuredSelection(line));
 				}

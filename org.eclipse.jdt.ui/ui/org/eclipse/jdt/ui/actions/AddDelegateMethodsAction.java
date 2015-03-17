@@ -122,12 +122,13 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			fEntries= entries;
 		}
 
+		@Override
 		public IStatus validate(Object[] selection) {
 			int selectedCount= 0;
 			int duplicateCount= 0;
 			if (selection != null && selection.length > 0) {
 
-				HashSet<String> signatures= new HashSet<String>(selection.length);
+				HashSet<String> signatures= new HashSet<>(selection.length);
 				for (int index= 0; index < selection.length; index++) {
 					if (selection[index] instanceof DelegateEntry) {
 						DelegateEntry delegateEntry= (DelegateEntry) selection[index];
@@ -168,7 +169,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			if (binding != null) {
 				fDelegateEntries= StubUtility2.getDelegatableMethods(binding);
 
-				List<IVariableBinding> expanded= new ArrayList<IVariableBinding>();
+				List<IVariableBinding> expanded= new ArrayList<>();
 				for (int index= 0; index < fields.length; index++) {
 					VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(fields[index], astRoot);
 					if (fragment != null) {
@@ -181,12 +182,14 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			}
 		}
 
+		@Override
 		public void dispose() {
 		}
 
+		@Override
 		public Object[] getChildren(Object element) {
 			if (element instanceof IVariableBinding) {
-				List<DelegateEntry> result= new ArrayList<DelegateEntry>();
+				List<DelegateEntry> result= new ArrayList<>();
 				for (int i= 0; i < fDelegateEntries.length; i++) {
 					if (element == fDelegateEntries[i].field) {
 						result.add(fDelegateEntries[i]);
@@ -201,8 +204,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			return fDelegateEntries.length;
 		}
 
+		@Override
 		public Object[] getElements(Object inputElement) {
-			HashSet<IVariableBinding> result= new HashSet<IVariableBinding>();
+			HashSet<IVariableBinding> result= new HashSet<>();
 			for (int i= 0; i < fDelegateEntries.length; i++) {
 				DelegateEntry curr= fDelegateEntries[i];
 				result.add(curr.field);
@@ -218,16 +222,19 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			return fExpanded;
 		}
 
+		@Override
 		public Object getParent(Object element) {
 			if (element instanceof DelegateEntry)
 				return ((DelegateEntry) element).field;
 			return null;
 		}
 
+		@Override
 		public boolean hasChildren(Object element) {
 			return element instanceof IVariableBinding;
 		}
 
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 	}
@@ -438,9 +445,6 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		try {
@@ -462,9 +466,6 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		try {
@@ -509,9 +510,6 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 	// ---- Structured Viewer -----------------------------------------------------------
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
@@ -526,9 +524,6 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 	// ---- Java Editor --------------------------------------------------------------
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
@@ -566,7 +561,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					notifyResult(false);
 					return;
 				}
-				List<DelegateEntry> tuples= new ArrayList<DelegateEntry>(object.length);
+				List<DelegateEntry> tuples= new ArrayList<>(object.length);
 				for (int index= 0; index < object.length; index++) {
 					if (object[index] instanceof DelegateEntry)
 						tuples.add((DelegateEntry) object[index]);

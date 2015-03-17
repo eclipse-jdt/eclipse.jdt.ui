@@ -37,23 +37,19 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult 
 	public AbstractJavaSearchResult() {
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.text.IEditorMatchAdapter#computeContainedMatches(org.eclipse.search.ui.text.AbstractTextSearchResult, org.eclipse.ui.IEditorPart)
-	 */
+	@Override
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
 		return computeContainedMatches(editor.getEditorInput());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.text.IEditorMatchAdapter#computeContainedMatches(org.eclipse.search.ui.text.AbstractTextSearchResult, org.eclipse.ui.IEditorPart)
-	 */
+	@Override
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IFile file) {
 		return computeContainedMatches(file);
 	}
 
 	private Match[] computeContainedMatches(IAdaptable adaptable) {
 		IJavaElement javaElement= adaptable.getAdapter(IJavaElement.class);
-		Set<Match> matches= new HashSet<Match>();
+		Set<Match> matches= new HashSet<>();
 		if (javaElement != null) {
 			collectMatches(matches, javaElement);
 		}
@@ -95,9 +91,7 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult 
 			}
 		}
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.ISearchResultCategory#getFile(java.lang.Object)
-	 */
+	@Override
 	public IFile getFile(Object element) {
 		if (element instanceof IJavaElement) {
 			IJavaElement javaElement= (IJavaElement) element;
@@ -116,9 +110,7 @@ public abstract class AbstractJavaSearchResult extends AbstractTextSearchResult 
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.text.IEditorMatchAdapter#isShownInEditor(org.eclipse.search.ui.text.Match, org.eclipse.ui.IEditorPart)
-	 */
+	@Override
 	public boolean isShownInEditor(Match match, IEditorPart editor) {
 		Object element= match.getElement();
 		if (element instanceof IJavaElement) {

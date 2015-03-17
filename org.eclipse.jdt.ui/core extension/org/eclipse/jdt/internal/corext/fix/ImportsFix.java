@@ -40,6 +40,7 @@ public class ImportsFix extends TextEditFix {
 
 		final boolean hasAmbiguity[]= new boolean[] { false };
 		IChooseImportQuery query= new IChooseImportQuery() {
+			@Override
 			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
 				hasAmbiguity[0]= true;
 				return new TypeNameMatch[0];

@@ -24,11 +24,13 @@ import org.eclipse.jdt.core.IOpenable;
  * Creates <code>IBuffer</code>s based on documents.
  * @deprecated since 3.0 no longer used
  */
+@Deprecated
 public class CustomBufferFactory implements IBufferFactory {
 
 	/*
 	 * @see org.eclipse.jdt.core.IBufferFactory#createBuffer(org.eclipse.jdt.core.IOpenable)
 	 */
+	@Override
 	public IBuffer createBuffer(IOpenable owner) {
 		if (owner instanceof ICompilationUnit) {
 			ICompilationUnit unit= (ICompilationUnit) owner;

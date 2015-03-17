@@ -276,12 +276,14 @@ public final class ActionMessages extends NLS {
 	 * DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/296836 .
 	 * @deprecated As of 3.6, replaced by {@link #OrganizeImportsAction_summary_added_singular} and {@link #OrganizeImportsAction_summary_added_plural} 
 	 */
+	@Deprecated
 	public static String OrganizeImportsAction_summary_added;
 
 	/**
 	 * DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/296836 .
 	 * @deprecated As of 3.6, replaced by {@link #OrganizeImportsAction_summary_removed_singular} and {@link #OrganizeImportsAction_summary_removed_plural}
 	 */
+	@Deprecated
 	public static String OrganizeImportsAction_summary_removed;
 
 	public static String OrganizeImportsAction_summary_added_singular;

@@ -336,7 +336,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 				if (type.isClass() && (fTypeKind == K_CLASS)) {
 					page.setSuperClass(type.getQualifiedName(), true);
 				} else if (type.isInterface()) {
-					List<String> superInterfaces= new ArrayList<String>();
+					List<String> superInterfaces= new ArrayList<>();
 					superInterfaces.add(type.getQualifiedName());
 					page.setSuperInterfaces(superInterfaces, true);
 				}

@@ -38,9 +38,6 @@ public class JspTypeQuery implements IIndexQuery {
 		fType= type;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.search.ISearch#computePathsKeyingIndexFiles(java.util.ArrayList)
-	 */
 	public void computePathsKeyingIndexFiles(ArrayList requiredIndexKeys) {
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		IProject[] projects= workspace.getRoot().getProjects();
@@ -59,9 +56,6 @@ public class JspTypeQuery implements IIndexQuery {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.search.ISearch#findIndexMatches(org.eclipse.jdt.internal.core.index.IIndex, org.eclipse.jdt.internal.core.search.PathCollector, org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	public void findIndexMatches(IIndex index, HashSet pathCollector, IProgressMonitor progressMonitor) throws IOException {
 
 		String typeName= fType.getFullyQualifiedName();
@@ -69,9 +63,6 @@ public class JspTypeQuery implements IIndexQuery {
 		index.queryPrefix(pathCollector, s);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.search.ISearch#locateMatches(org.eclipse.core.resources.IFile, org.eclipse.jsp.IJspSearchResultCollector)
-	 */
 	public void locateMatches(IFile candidate, ISearchResultCollector resultCollector) {
 		if (fParser== null)
 			fParser= new JspMatchLocatorParser();

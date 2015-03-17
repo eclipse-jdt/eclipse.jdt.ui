@@ -109,9 +109,6 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 		setEnabled(getCompilationUnit(editor) != null);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		ISelectionProvider selectionProvider= fEditor.getSelectionProvider();
@@ -121,9 +118,6 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 		run(new StructuredSelection(selectionProvider.getSelection()));
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		if (selection.size() == 1) {
@@ -157,8 +151,8 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 	}
 
 	private void run(SearchPatternData[] data, String scope) {
-		List<IType> wrappers= new ArrayList<IType>();
-		List<IFile> properties= new ArrayList<IFile>();
+		List<IType> wrappers= new ArrayList<>();
+		List<IFile> properties= new ArrayList<>();
 		for (int i= 0; i < data.length; i++) {
 			SearchPatternData current= data[i];
 			if (current.getWrapperClass() != null || current.getPropertyFile() != null) {
@@ -171,9 +165,6 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 		SearchBrokenNLSKeysUtil.search(scope, accessorClasses, propertieFiles);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 		ISelectionProvider selectionProvider= fEditor.getSelectionProvider();
@@ -184,9 +175,6 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canEnable(selection));
@@ -194,7 +182,7 @@ public class FindBrokenNLSKeysAction extends SelectionDispatchAction {
 
 	private SearchPatternData[] getNLSFiles(IStructuredSelection selection) {
 		Object[] selectedElements= selection.toArray();
-		HashMap<IType, SearchPatternData> result= new HashMap<IType, SearchPatternData>();
+		HashMap<IType, SearchPatternData> result= new HashMap<>();
 
 		collectNLSFilesFromResources(selectedElements, result);
 		collectNLSFilesFromJavaElements(selectedElements, result);

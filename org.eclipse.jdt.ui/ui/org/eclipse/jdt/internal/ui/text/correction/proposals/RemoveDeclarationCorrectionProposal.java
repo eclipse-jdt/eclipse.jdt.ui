@@ -138,9 +138,6 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 		}
 	}
 
-	/*(non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
-	 */
 	@Override
 	protected ASTRewrite getRewrite() {
 		IBinding binding= fName.resolveBinding();
@@ -238,7 +235,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 	}
 
 	private void removeVariableWithInitializer(ASTRewrite rewrite, ASTNode initializerNode, ASTNode statementNode) {
-		ArrayList<Expression> sideEffectNodes= new ArrayList<Expression>();
+		ArrayList<Expression> sideEffectNodes= new ArrayList<>();
 		initializerNode.accept(new SideEffectFinder(sideEffectNodes));
 		int nSideEffects= sideEffectNodes.size();
 		if (nSideEffects == 0) {

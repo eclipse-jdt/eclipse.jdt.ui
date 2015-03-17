@@ -52,6 +52,7 @@ public final class FatJarPackagerUtil {
 
 		final boolean[] returnValue= new boolean[1];
 		Runnable runnable= new Runnable() {
+			@Override
 			public void run() {
 				returnValue[0]= MessageDialog.openQuestion(parent, title, message);
 			}

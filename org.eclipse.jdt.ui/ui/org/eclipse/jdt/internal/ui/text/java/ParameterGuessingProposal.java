@@ -383,11 +383,14 @@ public class ParameterGuessingProposal extends JavaMethodCompletionProposal {
 				/*
 				 * @see org.eclipse.jface.text.link.ILinkedModeListener#left(org.eclipse.jface.text.link.LinkedModeModel, int)
 				 */
+				@Override
 				public void left(LinkedModeModel environment, int flags) {
 					ensurePositionCategoryRemoved(document);
 				}
 
+				@Override
 				public void suspend(LinkedModeModel environment) {}
+				@Override
 				public void resume(LinkedModeModel environment, int flags) {}
 			});
 		}

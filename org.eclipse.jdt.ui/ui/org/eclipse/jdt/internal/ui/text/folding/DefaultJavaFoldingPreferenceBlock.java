@@ -45,10 +45,12 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 	private IPreferenceStore fStore;
 	private OverlayPreferenceStore fOverlayStore;
 	private OverlayKey[] fKeys;
-	private Map<Button, String> fCheckBoxes= new HashMap<Button, String>();
+	private Map<Button, String> fCheckBoxes= new HashMap<>();
 	private SelectionListener fCheckBoxListener= new SelectionListener() {
+		@Override
 		public void widgetDefaultSelected(SelectionEvent e) {
 		}
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 			Button button= (Button) e.widget;
 			fOverlayStore.setValue(fCheckBoxes.get(button), button.getSelection());
@@ -63,7 +65,7 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 	}
 
 	private OverlayKey[] createKeys() {
-		ArrayList<OverlayKey> overlayKeys= new ArrayList<OverlayKey>();
+		ArrayList<OverlayKey> overlayKeys= new ArrayList<>();
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOLDING_JAVADOC));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOLDING_INNERTYPES));
@@ -77,6 +79,7 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.folding.IJavaFoldingPreferences#createControl(org.eclipse.swt.widgets.Group)
 	 */
+	@Override
 	public Control createControl(Composite composite) {
 		fOverlayStore.load();
 		fOverlayStore.start();
@@ -127,6 +130,7 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.folding.AbstractJavaFoldingPreferences#performOk()
 	 */
+	@Override
 	public void performOk() {
 		fOverlayStore.propagate();
 	}
@@ -135,6 +139,7 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.folding.AbstractJavaFoldingPreferences#initialize()
 	 */
+	@Override
 	public void initialize() {
 		initializeFields();
 	}
@@ -142,6 +147,7 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.folding.AbstractJavaFoldingPreferences#performDefaults()
 	 */
+	@Override
 	public void performDefaults() {
 		fOverlayStore.loadDefaults();
 		initializeFields();
@@ -150,6 +156,7 @@ public class DefaultJavaFoldingPreferenceBlock implements IJavaFoldingPreference
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.folding.AbstractJavaFoldingPreferences#dispose()
 	 */
+	@Override
 	public void dispose() {
 		fOverlayStore.stop();
 	}

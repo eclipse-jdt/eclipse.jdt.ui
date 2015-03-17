@@ -30,9 +30,6 @@ public final class JavaRefactoringDescriptorResourceMapping extends AbstractRefa
 		super(descriptor);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getModelProviderId() {
 		return JavaModelProvider.JAVA_MODEL_PROVIDER_ID;

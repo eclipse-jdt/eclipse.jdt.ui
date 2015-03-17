@@ -24,7 +24,7 @@ import junit.framework.TestSuite;
  */
 public class TreeContentProviderTestWrapper extends TestCase {
 
-	private static final Class THIS= TreeContentProviderTestWrapper.class;
+	private static final Class<TreeContentProviderTestWrapper> THIS= TreeContentProviderTestWrapper.class;
 
 	TreeContentProviderTest fTest;
 	private String fName;
@@ -42,6 +42,7 @@ public class TreeContentProviderTestWrapper extends TestCase {
 		fName= name;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fTest= new TreeContentProviderTest(fName);
 		fTest.setUp();
@@ -52,6 +53,7 @@ public class TreeContentProviderTestWrapper extends TestCase {
 	 * @see junit.framework.TestCase#tearDown()
 	 * @since 3.1
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		fTest.tearDown();
 		fTest= null;

@@ -232,7 +232,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	}
 
 	private void createTryCatchStatement(org.eclipse.jdt.core.IBuffer buffer, String lineDelimiter) throws CoreException {
-		List<Statement> result= new ArrayList<Statement>(1);
+		List<Statement> result= new ArrayList<>(1);
 		TryStatement tryStatement= getAST().newTryStatement();
 		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fAnalyzer.getEnclosingBodyDeclaration(), fImportRewrite);
@@ -321,7 +321,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				// convert the fragments into expression statements
 				fragments= statement.fragments();
 				if (!fragments.isEmpty()) {
-					List<ExpressionStatement> newExpressionStatements= new ArrayList<ExpressionStatement>();
+					List<ExpressionStatement> newExpressionStatements= new ArrayList<>();
 					for (Iterator<VariableDeclarationFragment> iter= fragments.iterator(); iter.hasNext();) {
 						VariableDeclarationFragment fragment= iter.next();
 						Expression initializer= fragment.getInitializer();
@@ -378,7 +378,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	}
 
 	private List<ITypeBinding> filterSubtypeExceptions(ITypeBinding[] exceptions) {
-		List<ITypeBinding> filteredExceptions= new ArrayList<ITypeBinding>();
+		List<ITypeBinding> filteredExceptions= new ArrayList<>();
 		filteredExceptions.addAll(Arrays.asList(exceptions));
 
 		for (Iterator<ITypeBinding> subtypeIterator= filteredExceptions.iterator(); subtypeIterator.hasNext();) {
@@ -395,7 +395,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	}
 
 	private List<ASTNode> getSpecialVariableDeclarationStatements() {
-		List<ASTNode> result= new ArrayList<ASTNode>(3);
+		List<ASTNode> result= new ArrayList<>(3);
 		VariableDeclaration[] locals= fAnalyzer.getAffectedLocals();
 		for (int i= 0; i < locals.length; i++) {
 			ASTNode parent= locals[i].getParent();

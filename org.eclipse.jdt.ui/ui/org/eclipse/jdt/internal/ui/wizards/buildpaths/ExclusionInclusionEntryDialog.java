@@ -160,10 +160,12 @@ public class ExclusionInclusionEntryDialog extends StatusDialog {
 
 		// -------- IDialogFieldListener
 
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			doStatusLineUpdate();
 		}
 
+		@Override
 		public void changeControlPressed(DialogField field) {
 			doChangeControlPressed();
 		}

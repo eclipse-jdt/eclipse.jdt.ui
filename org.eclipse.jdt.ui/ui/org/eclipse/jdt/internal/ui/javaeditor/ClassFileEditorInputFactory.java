@@ -38,6 +38,7 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 	/*
 	 * @see org.eclipse.ui.IElementFactory#createElement(org.eclipse.ui.IMemento)
 	 */
+	@Override
 	public IAdaptable createElement(IMemento memento) {
 		String identifier= memento.getString(KEY);
 		if (identifier == null)

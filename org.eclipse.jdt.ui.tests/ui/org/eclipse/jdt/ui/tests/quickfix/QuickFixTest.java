@@ -16,10 +16,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
 
@@ -42,6 +38,7 @@ import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -50,6 +47,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
@@ -64,6 +62,10 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistPr
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.SurroundWithTemplateProposal;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 /**
  */
@@ -115,9 +117,9 @@ public class QuickFixTest extends TestCase {
 		super(name);
 	}
 
-	public static void assertCorrectLabels(List proposals) {
+	public static void assertCorrectLabels(List<? extends ICompletionProposal> proposals) {
 		for (int i= 0; i < proposals.size(); i++) {
-			ICompletionProposal proposal= (ICompletionProposal) proposals.get(i);
+			ICompletionProposal proposal= proposals.get(i);
 			String name= proposal.getDisplayString();
 			if (name == null || name.length() == 0 || name.charAt(0) == '!' || name.indexOf("{0}") != -1 || name.indexOf("{1}") != -1) {
 				assertTrue("wrong proposal label: " + name, false);
@@ -154,27 +156,27 @@ public class QuickFixTest extends TestCase {
 		StringAsserts.assertEqualStringsIgnoreOrder(actuals, expecteds);
 	}
 
-	public static void assertEqualStringsIgnoreOrder(Collection actuals, Collection expecteds) {
-		String[] act= (String[]) actuals.toArray(new String[actuals.size()]);
-		String[] exp= (String[]) expecteds.toArray(new String[actuals.size()]);
+	public static void assertEqualStringsIgnoreOrder(Collection<String> actuals, Collection<String> expecteds) {
+		String[] act= actuals.toArray(new String[actuals.size()]);
+		String[] exp= expecteds.toArray(new String[actuals.size()]);
 		StringAsserts.assertEqualStringsIgnoreOrder(act, exp);
 	}
 
-	public static void assertExpectedExistInProposals(List actualProposals, String[] expecteds) throws CoreException, BadLocationException {
+	public static void assertExpectedExistInProposals(List<IJavaCompletionProposal> actualProposals, String[] expecteds) throws CoreException, BadLocationException {
 		StringAsserts.assertExpectedExistInProposals(getPreviewContents(actualProposals), expecteds);
 	}
 
 
-	public static void assertCommandIdDoesNotExist(List actualProposals, String commandId) {
+	public static void assertCommandIdDoesNotExist(List<? extends ICompletionProposal> actualProposals, String commandId) {
 		assertTrue(findProposalByCommandId(commandId, actualProposals) == null);
 	}
 
-	public static void assertProposalDoesNotExist(List actualProposals, String proposalName) {
+	public static void assertProposalDoesNotExist(List<? extends ICompletionProposal> actualProposals, String proposalName) {
 		assertTrue(findProposalByName(proposalName, actualProposals) == null);
 	}
 
 	public static TypeDeclaration findTypeDeclaration(CompilationUnit astRoot, String simpleTypeName) {
-		List types= astRoot.types();
+		List<AbstractTypeDeclaration> types= astRoot.types();
 		for (int i= 0; i < types.size(); i++) {
 			TypeDeclaration elem= (TypeDeclaration) types.get(i);
 			if (simpleTypeName.equals(elem.getName().getIdentifier())) {
@@ -197,9 +199,9 @@ public class QuickFixTest extends TestCase {
 	public static VariableDeclarationFragment findFieldDeclaration(TypeDeclaration typeDecl, String fieldName) {
 		FieldDeclaration[] fields= typeDecl.getFields();
 		for (int i= 0; i < fields.length; i++) {
-			List list= fields[i].fragments();
+			List<VariableDeclarationFragment> list= fields[i].fragments();
 			for (int k= 0; k < list.size(); k++) {
-				VariableDeclarationFragment fragment= (VariableDeclarationFragment) list.get(k);
+				VariableDeclarationFragment fragment= list.get(k);
 				if (fieldName.equals(fragment.getName().getIdentifier())) {
 					return fragment;
 				}
@@ -214,7 +216,7 @@ public class QuickFixTest extends TestCase {
 	}
 
 
-	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot) throws CoreException {
+	protected static final ArrayList<IJavaCompletionProposal> collectCorrections(ICompilationUnit cu, CompilationUnit astRoot) throws CoreException {
 		return collectCorrections(cu, astRoot, 1, null);
 	}
 
@@ -226,11 +228,11 @@ public class QuickFixTest extends TestCase {
 	 * @return
 	 * @throws CoreException
 	 */
-	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) throws CoreException {
+	protected static final ArrayList<IJavaCompletionProposal> collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) throws CoreException {
 		return collectCorrections(cu, astRoot, nProblems, null);
 	}
 
-	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, int problem) throws CoreException {
+	protected static final ArrayList<IJavaCompletionProposal> collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, int problem) throws CoreException {
 		return collectCorrections(cu, astRoot, nProblems, problem, null);
 	}
 
@@ -243,22 +245,22 @@ public class QuickFixTest extends TestCase {
 	 * @return
 	 * @throws CoreException
 	 */
-	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, AssistContext context) throws CoreException {
+	protected static final ArrayList<IJavaCompletionProposal> collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, AssistContext context) throws CoreException {
 		return collectCorrections(cu, astRoot, nProblems, 0, context);
 	}
 
-	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, int problem, AssistContext context) throws CoreException {
+	protected static final ArrayList<IJavaCompletionProposal> collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, int problem, AssistContext context) throws CoreException {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOfProblems(nProblems, problems);
 
 		return collectCorrections(cu, problems[problem], context);
 	}
 
-	protected static final ArrayList collectAllCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) throws CoreException {
+	protected static final ArrayList<ICompletionProposal> collectAllCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems) throws CoreException {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOfProblems(nProblems, problems);
 		
-		ArrayList<IProblem> corrections= new ArrayList<IProblem>();
+		ArrayList<ICompletionProposal> corrections= new ArrayList<>();
 		for (int i= 0; i < nProblems; i++) {
 			corrections.addAll(collectCorrections(cu, problems[i], null));
 		}
@@ -286,21 +288,26 @@ public class QuickFixTest extends TestCase {
 	 * @return
 	 * @throws CoreException
 	 */
-	protected static final ArrayList collectCorrections2(ICompilationUnit cu, int nProblems) throws CoreException {
+	protected static final ArrayList<IJavaCompletionProposal> collectCorrections2(ICompilationUnit cu, int nProblems) throws CoreException {
 
-		final ArrayList problemsList= new ArrayList();
+		final ArrayList<IProblem> problemsList= new ArrayList<>();
 		final IProblemRequestor requestor= new IProblemRequestor() {
+			@Override
 			public void acceptProblem(IProblem problem) {
 				problemsList.add(problem);
 			}
+			@Override
 			public void beginReporting() {
 				problemsList.clear();
 			}
+			@Override
 			public void endReporting() {}
+			@Override
 			public boolean isActive() {	return true;}
 		};
 
 		WorkingCopyOwner workingCopyOwner= new WorkingCopyOwner() {
+			@Override
 			public IProblemRequestor getProblemRequestor(ICompilationUnit workingCopy) {
 				return requestor;
 			}
@@ -312,13 +319,13 @@ public class QuickFixTest extends TestCase {
 			wc.discardWorkingCopy();
 		}
 
-		IProblem[] problems= (IProblem[]) problemsList.toArray(new IProblem[problemsList.size()]);
+		IProblem[] problems= problemsList.toArray(new IProblem[problemsList.size()]);
 		assertNumberOfProblems(nProblems, problems);
 
 		return collectCorrections(cu, problems[0], null);
 	}
 
-	protected static final ArrayList collectCorrections(ICompilationUnit cu, IProblem curr, IInvocationContext context) throws CoreException {
+	protected static final ArrayList<IJavaCompletionProposal> collectCorrections(ICompilationUnit cu, IProblem curr, IInvocationContext context) throws CoreException {
 		int offset= curr.getSourceStart();
 		int length= curr.getSourceEnd() + 1 - offset;
 		if (context == null) {
@@ -326,7 +333,7 @@ public class QuickFixTest extends TestCase {
 		}
 
 		ProblemLocation problem= new ProblemLocation(curr);
-		ArrayList proposals= collectCorrections(context, problem);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(context, problem);
 		if (!proposals.isEmpty()) {
 			assertCorrectContext(context, problem);
 		}
@@ -334,8 +341,8 @@ public class QuickFixTest extends TestCase {
 		return proposals;
 	}
 
-	protected static ArrayList collectCorrections(IInvocationContext context, IProblemLocation problem) throws CoreException {
-		ArrayList proposals= new ArrayList();
+	protected static ArrayList<IJavaCompletionProposal> collectCorrections(IInvocationContext context, IProblemLocation problem) throws CoreException {
+		ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
 		IStatus status= JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { problem }, proposals);
 		assertStatusOk(status);
 		return proposals;
@@ -356,8 +363,8 @@ public class QuickFixTest extends TestCase {
 	}
 
 
-	protected static final ArrayList collectAssists(IInvocationContext context, Class[] filteredTypes) throws CoreException {
-		ArrayList proposals= new ArrayList();
+	protected static final ArrayList<IJavaCompletionProposal> collectAssists(IInvocationContext context, Class<?>[] filteredTypes) throws CoreException {
+		ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
 		IStatus status= JavaCorrectionProcessor.collectAssists(context, new IProblemLocation[0], proposals);
 		assertStatusOk(status);
 
@@ -367,7 +374,7 @@ public class QuickFixTest extends TestCase {
 
 
 		if (filteredTypes != null && filteredTypes.length > 0) {
-			for (Iterator iter= proposals.iterator(); iter.hasNext(); ) {
+			for (Iterator<IJavaCompletionProposal> iter= proposals.iterator(); iter.hasNext(); ) {
 				if (isFiltered(iter.next(), filteredTypes)) {
 					iter.remove();
 				}
@@ -376,7 +383,7 @@ public class QuickFixTest extends TestCase {
 		return proposals;
 	}
 
-	private static boolean isFiltered(Object curr, Class[] filteredTypes) {
+	private static boolean isFiltered(Object curr, Class<?>[] filteredTypes) {
 		for (int k = 0; k < filteredTypes.length; k++) {
 			if (filteredTypes[k].isInstance(curr)) {
 				return true;
@@ -385,8 +392,8 @@ public class QuickFixTest extends TestCase {
 		return false;
 	}
 
-	protected static final ArrayList collectAssists(IInvocationContext context, boolean includeLinkedRename) throws CoreException {
-		Class[] filteredTypes= includeLinkedRename ? null : new Class[] { LinkedNamesAssistProposal.class, RenameRefactoringProposal.class };
+	protected static final ArrayList<IJavaCompletionProposal> collectAssists(IInvocationContext context, boolean includeLinkedRename) throws CoreException {
+		Class<?>[] filteredTypes= includeLinkedRename ? null : new Class[] { LinkedNamesAssistProposal.class, RenameRefactoringProposal.class };
 		return collectAssists(context, filteredTypes);
 	}
 
@@ -394,14 +401,14 @@ public class QuickFixTest extends TestCase {
 		return ASTResolving.createQuickFixAST(cu, null);
 	}
 
-	public static void addPreviewAndExpected(List proposals, StringBuffer expected, ArrayList expecteds, ArrayList previews) throws CoreException {
+	public static void addPreviewAndExpected(List<IJavaCompletionProposal> proposals, StringBuffer expected, ArrayList<String> expecteds, ArrayList<String> previews) throws CoreException {
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(expecteds.size());
 		previews.add(getPreviewContent(proposal));
 		expecteds.add(expected.toString());
 	}
 
 
-	protected static String[] getPreviewContents(List proposals) throws CoreException, BadLocationException {
+	protected static String[] getPreviewContents(List<IJavaCompletionProposal> proposals) throws CoreException, BadLocationException {
 		String[] res= new String[proposals.size()];
 		for (int i= 0; i < proposals.size(); i++) {
 			Object curr= proposals.get(i);
@@ -465,12 +472,12 @@ public class QuickFixTest extends TestCase {
 		return res.toString();
 	}
 
-	protected static void assertNumberOfProposals(List proposals, int expectedProposals) {
+	protected static void assertNumberOfProposals(List<? extends ICompletionProposal> proposals, int expectedProposals) {
 		if (proposals.size() != expectedProposals) {
 			StringBuffer buf= new StringBuffer();
 			buf.append("Wrong number of proposals, is: ").append(proposals.size()). append(", expected: ").append(expectedProposals).append('\n');
 			for (int i= 0; i < proposals.size(); i++) {
-				ICompletionProposal curr= (ICompletionProposal) proposals.get(i);
+				ICompletionProposal curr= proposals.get(i);
 				buf.append(" - ").append(curr.getDisplayString()).append('\n');
 				if (curr instanceof CUCorrectionProposal) {
 					appendSource(((CUCorrectionProposal) curr), buf);
@@ -480,7 +487,7 @@ public class QuickFixTest extends TestCase {
 		}
 	}
 
-	protected static ICommandAccess findProposalByCommandId(String commandId, List proposals) {
+	protected static ICommandAccess findProposalByCommandId(String commandId, List<? extends ICompletionProposal> proposals) {
 		for (int i= 0; i < proposals.size(); i++) {
 			Object curr= proposals.get(i);
 			if (curr instanceof ICommandAccess) {
@@ -492,7 +499,7 @@ public class QuickFixTest extends TestCase {
 		return null;
 	}
 
-	protected static ICompletionProposal findProposalByName(String name, List proposals) {
+	protected static ICompletionProposal findProposalByName(String name, List<? extends ICompletionProposal> proposals) {
 		for (int i= 0; i < proposals.size(); i++) {
 			Object curr= proposals.get(i);
 			if (curr instanceof ICompletionProposal && name.equals(((ICompletionProposal)curr).getDisplayString()))
@@ -521,7 +528,7 @@ public class QuickFixTest extends TestCase {
 
 	public static String getPreviewsInBufAppend(ICompilationUnit cu) throws CoreException, BadLocationException {
 		CompilationUnit astRoot= getASTRoot(cu);
-		List proposals= collectCorrections(cu, astRoot);
+		List<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		if (proposals.isEmpty()) {
 			return null;
 		}
@@ -529,7 +536,7 @@ public class QuickFixTest extends TestCase {
 	}
 
 
-	protected static String getPreviewsInBufAppend(ICompilationUnit cu, List proposals) throws CoreException, BadLocationException {
+	protected static String getPreviewsInBufAppend(ICompilationUnit cu, List<IJavaCompletionProposal> proposals) throws CoreException, BadLocationException {
 		StringBuffer buf= new StringBuffer();
 		String[] previewContents= getPreviewContents(proposals);
 
@@ -539,7 +546,7 @@ public class QuickFixTest extends TestCase {
 		wrapInBufAppend(cu.getBuffer().getContents(), buf);
 		buf.append("ICompilationUnit cu= pack1.createCompilationUnit(\"").append(cu.getElementName()).append("\", buf.toString(), false, null);\n\n");
 		buf.append("CompilationUnit astRoot= getASTRoot(cu);\n");
-		buf.append("ArrayList proposals= collectCorrections(cu, astRoot);\n\n");
+		buf.append("ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);\n\n");
 		buf.append("assertCorrectLabels(proposals);\n");
 
 		buf.append("assertNumberOfProposals(proposals, ").append(previewContents.length).append(");\n\n");

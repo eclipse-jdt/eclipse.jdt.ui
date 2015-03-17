@@ -606,8 +606,8 @@ public class EditorUtility {
 	 * @since 3.4
 	 */
 	public static IEditorPart[] getDirtyEditors(boolean skipNonResourceEditors) {
-		Set<IEditorInput> inputs= new HashSet<IEditorInput>();
-		List<IEditorPart> result= new ArrayList<IEditorPart>(0);
+		Set<IEditorInput> inputs= new HashSet<>();
+		List<IEditorPart> result= new ArrayList<>(0);
 		IWorkbench workbench= PlatformUI.getWorkbench();
 		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
 		for (int i= 0; i < windows.length; i++) {
@@ -668,8 +668,8 @@ public class EditorUtility {
 	 * @since 3.3
 	 */
 	public static IEditorPart[] getDirtyEditorsToSave(boolean saveUnknownEditors) {
-		Set<IEditorInput> inputs= new HashSet<IEditorInput>();
-		List<IEditorPart> result= new ArrayList<IEditorPart>(0);
+		Set<IEditorInput> inputs= new HashSet<>();
+		List<IEditorPart> result= new ArrayList<>(0);
 		IWorkbench workbench= PlatformUI.getWorkbench();
 		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
 		for (int i= 0; i < windows.length; i++) {
@@ -749,6 +749,7 @@ public class EditorUtility {
 				/*
 				 * @see org.eclipse.core.runtime.ISafeRunnable#handleException(java.lang.Throwable)
 				 */
+				@Override
 				public void handleException(Throwable exception) {
 					JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_CHANGED_REGION_CALCULATION, exception.getLocalizedMessage(), exception));
 					String msg= JavaEditorMessages.CompilationUnitDocumentProvider_error_calculatingChangedRegions;
@@ -759,6 +760,7 @@ public class EditorUtility {
 				/*
 				 * @see org.eclipse.core.runtime.ISafeRunnable#run()
 				 */
+				@Override
 				public void run() throws Exception {
 					monitor.beginTask(JavaEditorMessages.CompilationUnitDocumentProvider_calculatingChangedRegions_message, 20);
 					IFileStore fileStore= buffer.getFileStore();
@@ -803,7 +805,7 @@ public class EditorUtility {
 					//2. Successive changed lines are merged into on RangeDifference
 					//     forAll r1,r2 element differences: r1.rightStart()<r2.rightStart() -> r1.rightEnd()<r2.rightStart
 
-					ArrayList<IRegion> regions= new ArrayList<IRegion>();
+					ArrayList<IRegion> regions= new ArrayList<>();
 					for (int i= 0; i < differences.length; i++) {
 						RangeDifference curr= differences[i];
 						if (curr.kind() == RangeDifference.CHANGE && curr.rightLength() > 0) {

@@ -35,17 +35,11 @@ public abstract class LaunchConfigChange extends Change {
 		fShouldFlagWarning= shouldFlagWarning;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Object getModifiedElement() {
 		return fConfig;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void initializeValidationData(IProgressMonitor pm) {
 		// must be implemented to decide correct value of isValid

@@ -32,9 +32,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcess
  */
 public final class UseSupertypeRefactoringContribution extends JavaUIRefactoringContribution {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
@@ -48,7 +45,7 @@ public final class UseSupertypeRefactoringContribution extends JavaUIRefactoring
 	}
 
 	@Override
-	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
+	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createUseSupertypeDescriptor(project, description, comment, arguments, flags);
 	}
 }

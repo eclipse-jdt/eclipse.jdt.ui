@@ -34,18 +34,23 @@ public class MyClasspathContainerInitializer extends ClasspathContainerInitializ
 			fPath= path;
 		}
 
+		@Override
 		public IClasspathEntry[] getClasspathEntries() {
 			return new IClasspathEntry[] { JavaCore.newLibraryEntry(MY_ARCHIVE, null, null) };
 		}
 
+		@Override
 		public String getDescription() { return "My example"; }
 
+		@Override
 		public int getKind() { return IClasspathContainer.K_APPLICATION; }
 
+		@Override
 		public IPath getPath() { return fPath; }
 
 	}
 
+	@Override
 	public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
 		IClasspathContainer[] containers= { new MyClasspathContainer(containerPath) };
 		JavaCore.setClasspathContainer(containerPath, new IJavaProject[] { project }, containers, null);

@@ -90,6 +90,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 	/*
 	 * @see JavaElementHover
 	 */
+	@Override
 	@Deprecated
 	public String getHoverInfo(ITextViewer textViewer, IRegion region) {
 		IJavaElement[] result= getJavaElementsAt(textViewer, region);
@@ -211,6 +212,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			}
 
 			display.syncExec(new Runnable() {
+				@Override
 				public void run() {
 					topIndex[0]= textViewer.getTopIndex();
 				}
@@ -460,6 +462,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 	 */
 	private IInformationControlCreator createInformationControlCreator(final boolean isResizable, final String statusFieldText, final boolean doShiftUp) {
 		return new IInformationControlCreator() {
+			@Override
 			public IInformationControl createInformationControl(final Shell parent) {
 				final IEditorPart editor= getEditor();
 				int orientation= SWT.NONE;

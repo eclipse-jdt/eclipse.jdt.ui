@@ -103,6 +103,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	/**
 	 * @deprecated Replaced by {@link org.eclipse.ltk.core.refactoring.resource.RenameResourceDescriptor#ID}
 	 */
+	@Deprecated
 	private static final String RENAME_RESOURCE= IJavaRefactorings.RENAME_RESOURCE;
 
 
@@ -186,7 +187,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 *
 	 * @since 1.2
 	 */
-	public RenameJavaElementDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
+	public RenameJavaElementDescriptor(String id, String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(id, project, description, comment, arguments, flags);
 		Assert.isLegal(checkId(id), "Refactoring id is not a rename refactoring id"); //$NON-NLS-1$
 		fName= JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_NAME);
@@ -286,9 +287,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 		return false;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
 		JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_NAME, fName);
@@ -475,6 +474,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 	 *
 	 * @see #getProject()
 	 */
+	@Override
 	public void setProject(final String project) {
 		super.setProject(project);
 	}
@@ -602,9 +602,7 @@ public final class RenameJavaElementDescriptor extends JavaRefactoringDescriptor
 		fTextual= update;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public RefactoringStatus validateDescriptor() {
 		RefactoringStatus status= super.validateDescriptor();
 		if (fName == null || "".equals(fName)) //$NON-NLS-1$

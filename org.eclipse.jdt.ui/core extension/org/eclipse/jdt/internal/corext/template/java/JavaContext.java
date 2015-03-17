@@ -101,8 +101,8 @@ public class JavaContext extends CompilationUnitContext {
 	 * The list of used local names.
 	 * @since 3.3
 	 */
-	private Set<String> fUsedNames= new HashSet<String>();
-	private Map<String, MultiVariable> fVariables= new HashMap<String, MultiVariable>();
+	private Set<String> fUsedNames= new HashSet<>();
+	private Map<String, MultiVariable> fVariables= new HashMap<>();
 	private ImportRewrite fImportRewrite;
 
 	private Set<String> fCompatibleContextTypeIds;
@@ -140,7 +140,7 @@ public class JavaContext extends CompilationUnitContext {
 	 */
 	public void addCompatibleContextType(String contextTypeId) {
 		if (fCompatibleContextTypeIds == null)
-			fCompatibleContextTypeIds= new HashSet<String>();
+			fCompatibleContextTypeIds= new HashSet<>();
 		fCompatibleContextTypeIds.add(contextTypeId);
 	}
 
@@ -398,6 +398,7 @@ public class JavaContext extends CompilationUnitContext {
 	 */
 	private void arrange(Variable[] variables) {
 		Arrays.sort(variables, new Comparator<Variable>() {
+			@Override
 			public int compare(Variable o1, Variable o2) {
 				return rank(o1) - rank(o2);
 			}
@@ -671,11 +672,11 @@ public class JavaContext extends CompilationUnitContext {
 			typeKinds= ASTResolving.getPossibleTypeKinds(nameNode, is50OrHigher);
 		}
 
-		ArrayList<TypeNameMatch> typeInfos= new ArrayList<TypeNameMatch>();
+		ArrayList<TypeNameMatch> typeInfos= new ArrayList<>();
 		TypeNameMatchCollector requestor= new TypeNameMatchCollector(typeInfos);
 		new SearchEngine().searchAllTypeNames(null, 0, simpleTypeName.toCharArray(), SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, getSearchForConstant(typeKinds), searchScope, requestor, IJavaSearchConstants.FORCE_IMMEDIATE_SEARCH, monitor);
 
-		ArrayList<TypeNameMatch> typeRefsFound= new ArrayList<TypeNameMatch>(typeInfos.size());
+		ArrayList<TypeNameMatch> typeRefsFound= new ArrayList<>(typeInfos.size());
 		for (int i= 0, len= typeInfos.size(); i < len; i++) {
 			TypeNameMatch curr= typeInfos.get(i);
 			if (curr.getPackageName().length() > 0) { // do not suggest imports from the default package

@@ -54,9 +54,6 @@ public class CleanUpModifyDialog extends ModifyDialog {
 	    super(parentShell, profile, profileManager, profileStore, newProfile, dialogPreferencesKey, lastSavePathKey);
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void addPages(final Map<String, String> values) {
 		CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);

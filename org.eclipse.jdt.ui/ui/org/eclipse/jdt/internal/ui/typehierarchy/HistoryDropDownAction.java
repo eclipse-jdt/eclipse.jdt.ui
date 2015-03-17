@@ -61,6 +61,7 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 		setMenuCreator(this);
 	}
 
+	@Override
 	public void dispose() {
 		// action is reused, can be called several times.
 		if (fMenu != null) {
@@ -69,10 +70,12 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 		}
 	}
 
+	@Override
 	public Menu getMenu(Menu parent) {
 		return null;
 	}
 
+	@Override
 	public Menu getMenu(Control parent) {
 		if (fMenu != null) {
 			fMenu.dispose();

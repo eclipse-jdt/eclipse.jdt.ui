@@ -39,6 +39,7 @@ public class PropertiesFilePartitionScanner extends RuleBasedPartitionScanner im
 		/*
 		 * @see IWordDetector#isWordStart
 		 */
+		@Override
 		public boolean isWordStart(char c) {
 			return (c == '#');
 		}
@@ -46,6 +47,7 @@ public class PropertiesFilePartitionScanner extends RuleBasedPartitionScanner im
 		/*
 		 * @see IWordDetector#isWordPart
 		 */
+		@Override
 		public boolean isWordPart(char c) {
 			return (c == '#');
 		}
@@ -71,6 +73,7 @@ public class PropertiesFilePartitionScanner extends RuleBasedPartitionScanner im
 		/*
 		 * @see IPredicateRule#evaluate(ICharacterScanner, boolean)
 		 */
+		@Override
 		public IToken evaluate(ICharacterScanner scanner, boolean resume) {
 			return evaluate(scanner);
 		}
@@ -78,6 +81,7 @@ public class PropertiesFilePartitionScanner extends RuleBasedPartitionScanner im
 		/*
 		 * @see IPredicateRule#getSuccessToken()
 		 */
+		@Override
 		public IToken getSuccessToken() {
 			return fSuccessToken;
 		}
@@ -94,7 +98,7 @@ public class PropertiesFilePartitionScanner extends RuleBasedPartitionScanner im
 		IToken propertyValue= new Token(PROPERTY_VALUE);
 		IToken key= new Token(IDocument.DEFAULT_CONTENT_TYPE);
 
-		List<IPredicateRule> rules= new ArrayList<IPredicateRule>();
+		List<IPredicateRule> rules= new ArrayList<>();
 
 		// Add rule for leading white space.
 		rules.add(new LeadingWhitespacePredicateRule(key, "\t")); //$NON-NLS-1$

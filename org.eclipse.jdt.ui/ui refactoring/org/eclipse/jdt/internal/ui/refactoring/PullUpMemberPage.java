@@ -97,12 +97,14 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	private class MemberActionCellModifier implements ICellModifier {
 
+		@Override
 		public boolean canModify(final Object element, final String property) {
 			if (!ACTION_PROPERTY.equals(property))
 				return false;
 			return ((MemberActionInfo) element).isEditable();
 		}
 
+		@Override
 		public Object getValue(final Object element, final String property) {
 			if (!ACTION_PROPERTY.equals(property))
 				return null;
@@ -110,6 +112,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 			return new Integer(info.getAction());
 		}
 
+		@Override
 		public void modify(final Object element, final String property, final Object value) {
 			if (!ACTION_PROPERTY.equals(property))
 				return;
@@ -190,6 +193,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 			return fMember;
 		}
 
+		@Override
 		public boolean isActive() {
 			return getAction() != NO_ACTION;
 		}
@@ -236,6 +240,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 			fLabelProvider.dispose();
 		}
 
+		@Override
 		public Image getColumnImage(final Object element, final int columnIndex) {
 			final MemberActionInfo info= (MemberActionInfo) element;
 			switch (columnIndex) {
@@ -249,6 +254,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 			}
 		}
 
+		@Override
 		public String getColumnText(final Object element, final int columnIndex) {
 			final MemberActionInfo info= (MemberActionInfo) element;
 			switch (columnIndex) {
@@ -381,6 +387,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 			class GetRequiredMembersRunnable implements IRunnableWithProgress {
 				public IMember[] result;
+				@Override
 				public void run(final IProgressMonitor pm) throws InvocationTargetException {
 					try {
 						this.result= fProcessor.getAdditionalRequiredMembersToPullUp(pm);
@@ -486,6 +493,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		});
 	}
 
+	@Override
 	public void createControl(final Composite parent) {
 		final Composite composite= new Composite(parent, SWT.NONE);
 		final GridLayout layout= new GridLayout();
@@ -563,12 +571,14 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		fTableViewer.setLabelProvider(new MemberActionInfoLabelProvider());
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
+			@Override
 			public void selectionChanged(final SelectionChangedEvent event) {
 				updateButtonEnablement(event.getSelection());
 			}
 		});
 		fTableViewer.addCheckStateListener(new ICheckStateListener() {
 
+			@Override
 			public void checkStateChanged(final CheckStateChangedEvent event) {
 				final boolean checked= event.getChecked();
 				final MemberActionInfo info= (MemberActionInfo) event.getElement();
@@ -581,6 +591,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		});
 		fTableViewer.addDoubleClickListener(new IDoubleClickListener() {
 
+			@Override
 			public void doubleClick(final DoubleClickEvent event) {
 				editSelectedMembers();
 			}
@@ -632,7 +643,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	// String -> Integer
 	private Map<String, Integer> createStringMappingForSelectedMembers() {
-		final Map<String, Integer> result= new HashMap<String, Integer>();
+		final Map<String, Integer> result= new HashMap<>();
 		putToStringMapping(result, METHOD_LABELS, PULL_UP_ACTION);
 		putToStringMapping(result, METHOD_LABELS, DECLARE_ABSTRACT_ACTION);
 		return result;
@@ -678,6 +689,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	protected void createSuperTypeControl(final Composite parent) {
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, false, new IRunnableWithProgress() {
+				@Override
 				public void run(final IProgressMonitor monitor) throws InvocationTargetException {
 					try {
 						fCandidateTypes= fProcessor.getCandidateTypes(new RefactoringStatus(), monitor);
@@ -739,7 +751,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	private MemberActionInfo[] getActiveInfos() {
 		final MemberActionInfo[] infos= getTableInput();
-		final List<MemberActionInfo> result= new ArrayList<MemberActionInfo>(infos.length);
+		final List<MemberActionInfo> result= new ArrayList<>(infos.length);
 		for (int i= 0; i < infos.length; i++) {
 			final MemberActionInfo info= infos[i];
 			if (info.isActive())
@@ -800,7 +812,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 
 	private IMember[] getMembers() {
 		final MemberActionInfo[] infos= getTableInput();
-		final List<IMember> result= new ArrayList<IMember>(infos.length);
+		final List<IMember> result= new ArrayList<>(infos.length);
 		for (int index= 0; index < infos.length; index++) {
 			result.add(infos[index].getMember());
 		}
@@ -808,13 +820,13 @@ public class PullUpMemberPage extends UserInputWizardPage {
 	}
 
 	private IMember[] getMembersForAction(final int action) {
-		List<IMember> result= new ArrayList<IMember>();
+		List<IMember> result= new ArrayList<>();
 		getMembersForAction(action, false, result);
 		return result.toArray(new IMember[result.size()]);
 	}
 
 	private IMethod[] getMethodsForAction(final int action) {
-		List<IMember> result= new ArrayList<IMember>();
+		List<IMember> result= new ArrayList<>();
 		getMembersForAction(action, true, result);
 		return result.toArray(new IMethod[result.size()]);
 	}
@@ -950,6 +962,7 @@ public class PullUpMemberPage extends UserInputWizardPage {
 		fTableViewer.setCellEditors(new CellEditor[] { null, editor});
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
+			@Override
 			public void selectionChanged(final SelectionChangedEvent event) {
 				if (editor.getControl() == null & !table.isDisposed())
 					editor.create(table);

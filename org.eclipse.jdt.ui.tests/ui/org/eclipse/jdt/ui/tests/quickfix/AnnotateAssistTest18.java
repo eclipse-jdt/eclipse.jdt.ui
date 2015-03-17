@@ -13,9 +13,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFile;
@@ -31,6 +28,9 @@ import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 
@@ -49,6 +49,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= Java18ProjectTestSetup.getProject();
 		fJProject1.getProject().getFolder(ANNOTATION_PATH).create(true, true, null);

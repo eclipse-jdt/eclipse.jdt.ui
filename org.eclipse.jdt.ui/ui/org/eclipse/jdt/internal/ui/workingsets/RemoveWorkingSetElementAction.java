@@ -71,7 +71,7 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 		IWorkingSet ws= getWorkingSet(selection);
 		if (ws == null)
 			return;
-		HashSet<IAdaptable> elements= new HashSet<IAdaptable>(Arrays.asList(ws.getElements()));
+		HashSet<IAdaptable> elements= new HashSet<>(Arrays.asList(ws.getElements()));
 		List<?> selectedElements= selection.toList();
 		for (Iterator<?> iter= selectedElements.iterator(); iter.hasNext();) {
 			Object object= iter.next();

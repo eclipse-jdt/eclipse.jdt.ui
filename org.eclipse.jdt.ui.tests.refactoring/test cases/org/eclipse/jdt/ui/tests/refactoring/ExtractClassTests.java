@@ -67,6 +67,7 @@ public class ExtractClassTests extends RefactoringTest {
 		return type;
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -158,6 +159,7 @@ public class ExtractClassTests extends RefactoringTest {
 		return status;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -167,6 +169,7 @@ public class ExtractClassTests extends RefactoringTest {
 		fPack= getPackageP();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		fDescriptor= null;
@@ -287,9 +290,9 @@ public class ExtractClassTests extends RefactoringTest {
 
 	public void testControlBodyUpdates() throws Exception {
 		IJavaProject javaProject= getRoot().getJavaProject();
-		Map originalOptions= javaProject.getOptions(true);
+		Map<String, String> originalOptions= javaProject.getOptions(true);
 		try {
-			HashMap newOptions= new HashMap(originalOptions);
+			HashMap<String, String> newOptions= new HashMap<>(originalOptions);
 			newOptions.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
 			javaProject.setOptions(newOptions);
 			fDescriptor.setType(setupType());
@@ -357,9 +360,9 @@ public class ExtractClassTests extends RefactoringTest {
 
 	public void testDuplicateParamName() throws Exception {
 		IJavaProject javaProject= getRoot().getJavaProject();
-		Map originalOptions= javaProject.getOptions(true);
+		Map<String, String> originalOptions= javaProject.getOptions(true);
 		try {
-			HashMap newOptions= new HashMap(originalOptions);
+			HashMap<String, String> newOptions= new HashMap<>(originalOptions);
 			newOptions.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
 			javaProject.setOptions(newOptions);
 			fDescriptor.setType(setupType());

@@ -67,7 +67,7 @@ public class RefactoringScanner {
 
 	public void scan(ICompilationUnit cu)	throws JavaModelException {
 		char[] chars= cu.getBuffer().getCharacters();
-		fMatches= new HashSet<TextMatch>();
+		fMatches= new HashSet<>();
 		fScanner= ToolFactory.createScanner(true, true, false, true);
 		fScanner.setSource(chars);
 
@@ -91,7 +91,7 @@ public class RefactoringScanner {
 	 */
 	public void scan(String text) {
 		char[] chars= text.toCharArray();
-		fMatches= new HashSet<TextMatch>();
+		fMatches= new HashSet<>();
 		fScanner= ToolFactory.createScanner(true, true, false, true);
 		fScanner.setSource(chars);
 		doScan();

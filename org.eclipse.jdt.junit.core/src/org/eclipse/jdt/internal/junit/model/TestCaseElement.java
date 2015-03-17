@@ -32,6 +32,7 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 	 * @see org.eclipse.jdt.internal.junit.runner.MessageIds#TEST_IDENTIFIER_MESSAGE_FORMAT
 	 * @see org.eclipse.jdt.internal.junit.runner.MessageIds#IGNORED_TEST_PREFIX
 	 */
+	@Override
 	public String getTestMethodName() {
 		String testName= getTestName();
 		int index= testName.lastIndexOf('(');
@@ -47,6 +48,7 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 	 * {@inheritDoc}
 	 * @see org.eclipse.jdt.junit.model.ITestCaseElement#getTestClassName()
 	 */
+	@Override
 	public String getTestClassName() {
 		return getClassName();
 	}
@@ -55,6 +57,7 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 	 * @see org.eclipse.jdt.internal.junit.model.TestElement#getTestResult(boolean)
 	 * @since 3.6
 	 */
+	@Override
 	public Result getTestResult(boolean includeChildren) {
 		if (fIgnored)
 			return Result.IGNORED;
@@ -70,6 +73,7 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 		return fIgnored;
 	}
 
+	@Override
 	public String toString() {
 		return "TestCase: " + getTestClassName() + "." + getTestMethodName() + " : " + super.toString(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}

@@ -36,7 +36,7 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
  */
 public class JavaFormatterProjectTest extends TextPerformanceTestCase {
 
-	private static final Class THIS= JavaFormatterProjectTest.class;
+	private static final Class<JavaFormatterProjectTest> THIS= JavaFormatterProjectTest.class;
 
 	private static final int WARM_UP_RUNS= 5;
 
@@ -50,6 +50,7 @@ public class JavaFormatterProjectTest extends TextPerformanceTestCase {
 		return new DisableAutoBuildTestSetup(new TextPluginTestSetup(new TestSuite(THIS), EditorTestHelper.JAVA_PERSPECTIVE_ID));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		setWarmUpRuns(WARM_UP_RUNS);

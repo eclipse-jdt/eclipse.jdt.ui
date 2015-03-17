@@ -93,6 +93,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistPr
 public class RenameLinkedMode {
 
 	private class FocusEditingSupport implements IEditingSupport {
+		@Override
 		public boolean ownsFocusShell() {
 			if (fInfoPopup == null)
 				return false;
@@ -107,12 +108,14 @@ public class RenameLinkedMode {
 			return false;
 		}
 
+		@Override
 		public boolean isOriginator(DocumentEvent event, IRegion subjectRegion) {
 			return false; //leave on external modification outside positions
 		}
 	}
 
 	private class EditorSynchronizer implements ILinkedModeListener {
+		@Override
 		public void left(LinkedModeModel model, int flags) {
 			linkedModeLeft();
 			if ( (flags & ILinkedModeListener.UPDATE_CARET) != 0) {
@@ -120,9 +123,11 @@ public class RenameLinkedMode {
 			}
 		}
 
+		@Override
 		public void resume(LinkedModeModel model, int flags) {
 		}
 
+		@Override
 		public void suspend(LinkedModeModel model) {
 		}
 	}
@@ -228,6 +233,7 @@ public class RenameLinkedMode {
 			//TODO: copied from LinkedNamesAssistProposal#apply(..):
 			// sort for iteration order, starting with the node @ offset
 			Arrays.sort(sameNodes, new Comparator<ASTNode>() {
+				@Override
 				public int compare(ASTNode o1, ASTNode o2) {
 					return rank(o1) - rank(o2);
 				}
@@ -411,6 +417,7 @@ public class RenameLinkedMode {
 		try {
 			if (! fOriginalName.equals(newName)) {
 				fEditor.getSite().getWorkbenchWindow().run(false, true, new IRunnableWithProgress() {
+					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						if (viewer instanceof ITextViewerExtension6) {
 							IUndoManager undoManager= ((ITextViewerExtension6)viewer).getUndoManager();

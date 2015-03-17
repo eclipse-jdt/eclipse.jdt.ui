@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
  */
 public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 
-	/** {@inheritDoc} */
+	@Override
 	public void initializeDefaultPreferences() {
 		IEclipsePreferences prefs= DefaultScope.INSTANCE.getNode(JUnitCorePlugin.CORE_PLUGIN_ID);
 
@@ -35,8 +35,8 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 		prefs.putBoolean(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY, false);
 		prefs.putBoolean(JUnitPreferencesConstants.ENABLE_ASSERTIONS, false);
 
-		List defaults= JUnitPreferencesConstants.createDefaultStackFiltersList();
-		String[] filters= (String[]) defaults.toArray(new String[defaults.size()]);
+		List<String> defaults= JUnitPreferencesConstants.createDefaultStackFiltersList();
+		String[] filters= defaults.toArray(new String[defaults.size()]);
 		String active= JUnitPreferencesConstants.serializeList(filters);
 		prefs.put(JUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST, active);
 		prefs.put(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST, ""); //$NON-NLS-1$

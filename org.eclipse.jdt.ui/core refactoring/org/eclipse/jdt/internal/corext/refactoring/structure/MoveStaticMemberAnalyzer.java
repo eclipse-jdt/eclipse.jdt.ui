@@ -62,7 +62,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 		fMembers= members;
 		fSource= source;
 		fTarget= target;
-		fProcessed= new HashSet<SimpleName>();
+		fProcessed= new HashSet<>();
 	}
 
 	public RefactoringStatus getStatus() {

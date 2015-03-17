@@ -170,9 +170,6 @@ public class StringButtonStatusDialogField extends StringButtonDialogField {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#refresh()
-	 */
 	@Override
 	public void refresh() {
 		super.refresh();

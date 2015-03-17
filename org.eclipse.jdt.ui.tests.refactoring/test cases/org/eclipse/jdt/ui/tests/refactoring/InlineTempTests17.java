@@ -14,7 +14,7 @@ import junit.framework.Test;
 
 public class InlineTempTests17 extends InlineTempTests {
 
-	private static final Class clazz= InlineTempTests17.class;
+	private static final Class<InlineTempTests17> clazz= InlineTempTests17.class;
 
 	public InlineTempTests17(String name) {
 		super(name);
@@ -37,6 +37,7 @@ public class InlineTempTests17 extends InlineTempTests {
 
 	//--- tests
 
+	@Override
 	public void test0() throws Exception{
 		helper1(8, 19, 8, 23);
 	}

@@ -37,9 +37,6 @@ abstract class SearchScopeAction extends Action {
 
 	public abstract int getSearchScopeType();
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run() {
 		this.fGroup.setSelected(this, true);

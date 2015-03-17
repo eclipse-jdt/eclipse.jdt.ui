@@ -132,6 +132,7 @@ public class EditTemplateDialog extends StatusDialog {
 		 *
 		 * @see Action#firePropertyChange(String, Object, Object)
 		 */
+		@Override
 		public void update() {
 			// XXX: workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=206111
 			if (fOperationCode == ITextOperationTarget.UNDO || fOperationCode == ITextOperationTarget.REDO)
@@ -169,8 +170,8 @@ public class EditTemplateDialog extends StatusDialog {
 
 	private StatusInfo fValidationStatus;
 	private boolean fSuppressError= true; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=4354
-	private Map<String, TextViewerAction> fGlobalActions= new HashMap<String, TextViewerAction>(10);
-	private List<String> fSelectionActions = new ArrayList<String>(3);
+	private Map<String, TextViewerAction> fGlobalActions= new HashMap<>(10);
+	private List<String> fSelectionActions = new ArrayList<>(3);
 	private String[][] fContextTypes;
 
 	private ContextTypeRegistry fContextTypeRegistry;
@@ -199,7 +200,7 @@ public class EditTemplateDialog extends StatusDialog {
 
 		String delim= new Document().getLegalLineDelimiters()[0];
 
-		List<String[]> contexts= new ArrayList<String[]>();
+		List<String[]> contexts= new ArrayList<>();
 		for (Iterator<TemplateContextType> it= registry.contextTypes(); it.hasNext();) {
 			TemplateContextType type= it.next();
 			if (type.getId().equals("javadoc")) //$NON-NLS-1$
@@ -209,6 +210,7 @@ public class EditTemplateDialog extends StatusDialog {
 		}
 		Collections.sort(contexts, new Comparator<String[]>() {
 			Collator fCollator= Collator.getInstance();
+			@Override
 			public int compare(String[] o1, String[] o2) {
 				return fCollator.compare(o1[1], o2[1]);
 			}
@@ -259,6 +261,7 @@ public class EditTemplateDialog extends StatusDialog {
 		parent.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		ModifyListener listener= new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				doTextWidgetChanged(e.widget);
 			}
@@ -278,9 +281,11 @@ public class EditTemplateDialog extends StatusDialog {
 			fNameText= createText(composite);
 			fNameText.addFocusListener(new FocusListener() {
 
+				@Override
 				public void focusGained(FocusEvent e) {
 				}
 
+				@Override
 				public void focusLost(FocusEvent e) {
 					if (fSuppressError) {
 						fSuppressError= false;
@@ -331,11 +336,13 @@ public class EditTemplateDialog extends StatusDialog {
 		fInsertVariableButton.setLayoutData(getButtonGridData());
 		fInsertVariableButton.setText(PreferencesMessages.EditTemplateDialog_insert_variable);
 		fInsertVariableButton.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fPatternEditor.getTextWidget().setFocus();
 				fPatternEditor.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		});
 
@@ -457,6 +464,7 @@ public class EditTemplateDialog extends StatusDialog {
 		control.setLayoutData(data);
 
 		viewer.addTextListener(new ITextListener() {
+			@Override
 			public void textChanged(TextEvent event) {
 				if (event .getDocumentEvent() != null)
 					doSourceChanged(event.getDocumentEvent().getDocument());
@@ -464,6 +472,7 @@ public class EditTemplateDialog extends StatusDialog {
 		});
 
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateSelectionDependentActions();
 			}
@@ -482,20 +491,23 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 
 	private void initializeActions() {
-		final ArrayList<IHandlerActivation> handlerActivations= new ArrayList<IHandlerActivation>(3);
+		final ArrayList<IHandlerActivation> handlerActivations= new ArrayList<>(3);
 		final IHandlerService handlerService= PlatformUI.getWorkbench().getAdapter(IHandlerService.class);
 		final Expression expression= new ActiveShellExpression(fPatternEditor.getControl().getShell());
 
 		getShell().addDisposeListener(new DisposeListener() {
+			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				handlerService.deactivateHandlers(handlerActivations);
 				}
 						});
 
 		fPatternEditor.getTextWidget().addFocusListener(new FocusListener() {
+			@Override
 			public void focusLost(FocusEvent e) {
 				handlerService.deactivateHandlers(handlerActivations);
 			}
+			@Override
 			public void focusGained(FocusEvent e) {
 				IAction action= fGlobalActions.get(ITextEditorActionConstants.REDO);
 				handlerActivations.add(handlerService.activateHandler(IWorkbenchCommandConstants.EDIT_REDO, new ActionHandler(action), expression));
@@ -543,6 +555,7 @@ public class EditTemplateDialog extends StatusDialog {
 		MenuManager manager= new MenuManager(null, null);
 		manager.setRemoveAllWhenShown(true);
 		manager.addMenuListener(new IMenuListener() {
+			@Override
 			public void menuAboutToShow(IMenuManager mgr) {
 				fillContextMenu(mgr);
 			}

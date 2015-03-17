@@ -108,6 +108,7 @@ public class StringDialogField extends DialogField {
 		if (fTextControl == null) {
 			assertCompositeNotNull(parent);
 			fModifyListener= new ModifyListener() {
+				@Override
 				public void modifyText(ModifyEvent e) {
 					doModifyText();
 				}
@@ -193,9 +194,6 @@ public class StringDialogField extends DialogField {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#refresh()
-	 */
 	@Override
 	public void refresh() {
 		super.refresh();

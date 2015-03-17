@@ -32,45 +32,32 @@ public class MethodWrapperWorkbenchAdapter implements IWorkbenchAdapter {
 		return fMethodWrapper;
 	}
 
+	@Override
 	public Object[] getChildren(Object o) { //should not be called
 		return new Object[0];
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.model.IWorkbenchAdapter#getImageDescriptor(java.lang.Object)
-	 */
+	@Override
 	public ImageDescriptor getImageDescriptor(Object object) {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.model.IWorkbenchAdapter#getLabel(java.lang.Object)
-	 */
+	@Override
 	public String getLabel(Object o) {
         return fMethodWrapper.getMember().getElementName();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.model.IWorkbenchAdapter#getParent(java.lang.Object)
-	 */
+	@Override
 	public Object getParent(Object o) {
 		return fMethodWrapper.getParent();
 	}
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
 	public boolean equals(Object obj) {
         //Note: A MethodWrapperWorkbenchAdapter is equal to its MethodWrapper and vice versa (bug 101677).
         return fMethodWrapper.equals(obj);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
 	public int hashCode() {
         //Note: A MethodWrapperWorkbenchAdapter is equal to its MethodWrapper and vice versa (bug 101677).

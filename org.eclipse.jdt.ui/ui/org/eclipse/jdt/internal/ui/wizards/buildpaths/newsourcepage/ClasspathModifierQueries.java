@@ -374,6 +374,7 @@ public class ClasspathModifierQueries {
                 fRemoveProject= false;
                 fOutputLocation= project.getOutputLocation();
 				Display.getDefault().syncExec(new Runnable() {
+					@Override
 					public void run() {
 						Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
 
@@ -447,9 +448,11 @@ public class ClasspathModifierQueries {
 			protected IPath[] fInclusionPattern;
 			protected IPath[] fExclusionPattern;
 
+			@Override
 			public boolean doQuery(final CPListElement element, final boolean focusOnExcluded) {
 				final boolean[] result= { false };
 				Display.getDefault().syncExec(new Runnable() {
+					@Override
 					public void run() {
 						Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
 						ExclusionInclusionDialog dialog= new ExclusionInclusionDialog(sh, element, focusOnExcluded);
@@ -461,10 +464,12 @@ public class ClasspathModifierQueries {
 				return result[0];
 			}
 
+			@Override
 			public IPath[] getInclusionPattern() {
 				return fInclusionPattern;
 			}
 
+			@Override
 			public IPath[] getExclusionPattern() {
 				return fExclusionPattern;
 			}
@@ -484,10 +489,12 @@ public class ClasspathModifierQueries {
     public static IAddArchivesQuery getDefaultArchivesQuery(final Shell shell) {
         return new IAddArchivesQuery() {
 
-            public IPath[] doQuery() {
+            @Override
+			public IPath[] doQuery() {
                 final IPath[][] selected= {null};
                 Display.getDefault().syncExec(new Runnable() {
-                    public void run() {
+                    @Override
+					public void run() {
                         Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
                         selected[0]= BuildPathDialogAccess.chooseExternalJAREntries(sh);
                     }
@@ -510,10 +517,12 @@ public class ClasspathModifierQueries {
 	public static IRemoveLinkedFolderQuery getDefaultRemoveLinkedFolderQuery(final Shell shell) {
 		return new IRemoveLinkedFolderQuery() {
 
+			@Override
 			public final int doQuery(final IFolder folder) {
 				final int[] result= { IRemoveLinkedFolderQuery.REMOVE_BUILD_PATH};
 				Display.getDefault().syncExec(new Runnable() {
 
+					@Override
 					public final void run() {
 						final RemoveLinkedFolderDialog dialog= new RemoveLinkedFolderDialog((shell != null ? shell : JavaPlugin.getActiveWorkbenchShell()), folder);
 						final int status= dialog.open();
@@ -541,10 +550,12 @@ public class ClasspathModifierQueries {
     public static IAddLibrariesQuery getDefaultLibrariesQuery(final Shell shell) {
         return new IAddLibrariesQuery() {
 
-            public IClasspathEntry[] doQuery(final IJavaProject project, final IClasspathEntry[] entries) {
+            @Override
+			public IClasspathEntry[] doQuery(final IJavaProject project, final IClasspathEntry[] entries) {
                 final IClasspathEntry[][] selected= {null};
                 Display.getDefault().syncExec(new Runnable() {
-                    public void run() {
+                    @Override
+					public void run() {
                         Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
                         selected[0]= BuildPathDialogAccess.chooseContainerEntries(sh, project, entries);
                     }
@@ -568,10 +579,12 @@ public class ClasspathModifierQueries {
 
 			private IFolder fNewFolder;
 
+			@Override
 			public boolean doQuery() {
 				final boolean[] isOK= {false};
                 Display.getDefault().syncExec(new Runnable() {
-                    public void run() {
+                    @Override
+					public void run() {
                         Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
 
                         NewFolderDialog dialog= new NewFolderDialog(sh, project.getProject());
@@ -590,10 +603,12 @@ public class ClasspathModifierQueries {
 			}
 
 
+			@Override
 			public boolean isSourceFolder() {
 				return true;
 			}
 
+			@Override
 			public IFolder getCreatedFolder() {
 				return fNewFolder;
 			}

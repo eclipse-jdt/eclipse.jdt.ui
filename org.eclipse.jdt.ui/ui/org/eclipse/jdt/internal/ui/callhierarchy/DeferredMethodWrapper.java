@@ -41,7 +41,8 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
         /*
          * @see org.eclipse.core.runtime.jobs.ISchedulingRule#isConflicting(org.eclipse.core.runtime.jobs.ISchedulingRule)
          */
-        public boolean isConflicting(ISchedulingRule rule) {
+        @Override
+		public boolean isConflicting(ISchedulingRule rule) {
             if (rule instanceof BatchSimilarSchedulingRule) {
                 return ((BatchSimilarSchedulingRule) rule).id.equals(id);
             }
@@ -51,7 +52,8 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
         /*
          * @see org.eclipse.core.runtime.jobs.ISchedulingRule#contains(org.eclipse.core.runtime.jobs.ISchedulingRule)
          */
-        public boolean contains(ISchedulingRule rule) {
+        @Override
+		public boolean contains(ISchedulingRule rule) {
             return this == rule;
         }
     }
@@ -65,14 +67,8 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
         return getMethodWrapper().getCalls(monitor);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.ui.progress.IDeferredWorkbenchAdapter#fetchDeferredChildren(java.lang.Object,
-     *      org.eclipse.jface.progress.IElementCollector,
-     *      org.eclipse.core.runtime.IProgressMonitor)
-     */
-    public void fetchDeferredChildren(Object object, IElementCollector collector, IProgressMonitor monitor) {
+    @Override
+	public void fetchDeferredChildren(Object object, IElementCollector collector, IProgressMonitor monitor) {
     	final DeferredMethodWrapper deferredMethodWrapper= (DeferredMethodWrapper)object;
     	try {
             fProvider.startFetching();
@@ -82,7 +78,8 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
         	final MethodWrapper methodWrapper= deferredMethodWrapper.getMethodWrapper();
 			if (!CallHierarchyContentProvider.isExpandWithConstructors(methodWrapper)) {
 	        	Display.getDefault().asyncExec(new Runnable(){
-	        		public void run(){
+	        		@Override
+					public void run(){
 						CallHierarchyViewPart viewPart= fProvider.getViewPart();
 						if (viewPart != null && !viewPart.getViewer().getControl().isDisposed())
 							fProvider.collapseAndRefresh(methodWrapper);
@@ -96,29 +93,16 @@ public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter impleme
         }
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.ui.progress.IDeferredWorkbenchAdapter#isContainer()
-     */
-    public boolean isContainer() {
+    @Override
+	public boolean isContainer() {
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.ui.progress.IDeferredWorkbenchAdapter#getRule()
-     */
-    public ISchedulingRule getRule(Object o) {
+    @Override
+	public ISchedulingRule getRule(Object o) {
         return new BatchSimilarSchedulingRule("org.eclipse.jdt.ui.callhierarchy.methodwrapper"); //$NON-NLS-1$
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.eclipse.ui.model.IWorkbenchAdapter#getChildren(java.lang.Object)
-     */
     @Override
 	public Object[] getChildren(Object o) {
         return this.fProvider.fetchChildren(((DeferredMethodWrapper) o).getMethodWrapper());

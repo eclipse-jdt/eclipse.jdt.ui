@@ -341,6 +341,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				}
 
 				IInputChangedListener inputChangeListener= new IInputChangedListener() {
+					@Override
 					public void inputChanged(Object newInput) {
 						backAction.update();
 						forwardAction.update();
@@ -428,6 +429,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					@Override
 					public IInformationControlCreator getInformationPresenterControlCreator() {
 						return new IInformationControlCreator() {
+							@Override
 							public IInformationControl createInformationControl(Shell parentShell) {
 								return new DefaultInformationControl(parentShell, (ToolBarManager) null, new FallbackInformationPresenter());
 							}
@@ -554,9 +556,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	
 	private static void addLinkListener(final BrowserInformationControl control) {
 		control.addLocationListener(JavaElementLinks.createLocationListener(new JavaElementLinks.ILinkHandler() {
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleJavadocViewLink(org.eclipse.jdt.core.IJavaElement)
-			 */
+			@Override
 			public void handleJavadocViewLink(IJavaElement linkTarget) {
 				control.notifyDelayedInputChange(null);
 				control.setVisible(false);
@@ -569,9 +569,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				}
 			}
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleInlineJavadocLink(org.eclipse.jdt.core.IJavaElement)
-			 */
+			@Override
 			public void handleInlineJavadocLink(IJavaElement linkTarget) {
 				JavadocBrowserInformationControlInput hoverInfo= getHoverInfo(new IJavaElement[] { linkTarget }, null, null, (JavadocBrowserInformationControlInput) control.getInput());
 				if (control.hasDelayedInputChangeListener())
@@ -580,9 +578,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					control.setInput(hoverInfo);
 			}
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleDeclarationLink(org.eclipse.jdt.core.IJavaElement)
-			 */
+			@Override
 			public void handleDeclarationLink(IJavaElement linkTarget) {
 				control.notifyDelayedInputChange(null);
 				control.dispose(); //FIXME: should have protocol to hide, rather than dispose
@@ -596,9 +592,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				}
 			}
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleExternalLink(java.net.URL, org.eclipse.swt.widgets.Display)
-			 */
+			@Override
 			public boolean handleExternalLink(URL url, Display display) {
 				control.notifyDelayedInputChange(null);
 				control.dispose(); //FIXME: should have protocol to hide, rather than dispose
@@ -609,6 +603,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				return true;
 			}
 
+			@Override
 			public void handleTextSet() {
 			}
 		}));
@@ -617,6 +612,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	/**
 	 * @deprecated see {@link org.eclipse.jface.text.ITextHover#getHoverInfo(ITextViewer, IRegion)}
 	 */
+	@Override
 	@Deprecated
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		JavadocBrowserInformationControlInput info= (JavadocBrowserInformationControlInput) getHoverInfo2(textViewer, hoverRegion);

@@ -213,16 +213,19 @@ public class RenameSupport {
      * Flag indicating that Javadoc comments are to be updated as well.
 	 * @deprecated use UPDATE_REFERENCES or UPDATE_TEXTUAL_MATCHES or both.
      */
+	@Deprecated
 	public static final int UPDATE_JAVADOC_COMMENTS= 1 << 1;
 	/**
      * Flag indicating that regular comments are to be updated as well.
 	 * @deprecated use UPDATE_TEXTUAL_MATCHES
      */
+	@Deprecated
 	public static final int UPDATE_REGULAR_COMMENTS= 1 << 2;
 	/**
      * Flag indicating that string literals are to be updated as well.
 	 * @deprecated use UPDATE_TEXTUAL_MATCHES
      */
+	@Deprecated
 	public static final int UPDATE_STRING_LITERALS= 1 << 3;
 
 	/**
@@ -506,7 +509,7 @@ public class RenameSupport {
 	}
 
 	private void restoreSelectionState(RenameSelectionState state) throws CoreException {
-		INameUpdating nameUpdating= (INameUpdating) fRefactoring.getAdapter(INameUpdating.class);
+		INameUpdating nameUpdating= fRefactoring.getAdapter(INameUpdating.class);
 		if (nameUpdating != null && state != null) {
 			Object newElement= nameUpdating.getNewElement();
 			if (newElement != null) {

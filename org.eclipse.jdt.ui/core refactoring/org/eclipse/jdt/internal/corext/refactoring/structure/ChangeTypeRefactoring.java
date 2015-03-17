@@ -219,7 +219,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	/**
 	 * Organizes SearchResults by CompilationUnit
 	 */
-	private Map<ICompilationUnit, SearchResultGroup> fCuToSearchResultGroup= new HashMap<ICompilationUnit, SearchResultGroup>();
+	private Map<ICompilationUnit, SearchResultGroup> fCuToSearchResultGroup= new HashMap<>();
 
 
 	/**
@@ -267,8 +267,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 		if (selectedType != null)
 			fSelectedTypeName= selectedType;
 
-		fConstraintCache= new HashMap<ICompilationUnit, List<ITypeConstraint>>();
-		fValidTypes= new HashSet<ITypeBinding>();
+		fConstraintCache= new HashMap<>();
+		fValidTypes= new HashSet<>();
 	}
 
     public ChangeTypeRefactoring(JavaRefactoringArguments arguments, RefactoringStatus status) {
@@ -420,7 +420,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	// copied from FullConstraintCreator
 	private static Set<ITypeBinding> getDeclaringSuperTypes(IMethodBinding methodBinding) {
 		ITypeBinding[] allSuperTypes= Bindings.getAllSuperTypes(methodBinding.getDeclaringClass());
-		Set<ITypeBinding> result= new HashSet<ITypeBinding>();
+		Set<ITypeBinding> result= new HashSet<>();
 		for (int i= 0; i < allSuperTypes.length; i++) {
 			ITypeBinding type= allSuperTypes[i];
 			if (findMethod(methodBinding, type) != null)
@@ -495,9 +495,9 @@ public class ChangeTypeRefactoring extends Refactoring {
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.ChangeTypeMessages_CreateChangesForChangeType, 1);
 		try {
-			Map<ICompilationUnit, Set<ConstraintVariable>> relevantVarsByUnit= new HashMap<ICompilationUnit, Set<ConstraintVariable>>();
+			Map<ICompilationUnit, Set<ConstraintVariable>> relevantVarsByUnit= new HashMap<>();
 			groupChangesByCompilationUnit(relevantVarsByUnit);
-			final Map<String, String> arguments= new HashMap<String, String>();
+			final Map<String, String> arguments= new HashMap<>();
 			String project= null;
 			IJavaProject javaProject= fCu.getJavaProject();
 			if (javaProject != null)
@@ -1035,12 +1035,12 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	private Collection<ConstraintVariable> findRelevantConstraintVars(ConstraintVariable cv, IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, 150);
-		Collection<ConstraintVariable> result= new HashSet<ConstraintVariable>();
+		Collection<ConstraintVariable> result= new HashSet<>();
 		result.add(cv);
 		ICompilationUnit[] cus= collectAffectedUnits(new SubProgressMonitor(pm, 50));
 		Collection<ITypeConstraint> allConstraints= getConstraints(cus, new SubProgressMonitor(pm, 50));
 
-		List<ConstraintVariable> workList= new ArrayList<ConstraintVariable>(result);
+		List<ConstraintVariable> workList= new ArrayList<>(result);
 		while(! workList.isEmpty()){
 
 			pm.worked(10);
@@ -1096,7 +1096,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 
 
 		if (DEBUG) printCollection("type constraints: ", fAllConstraints); //$NON-NLS-1$
-		Collection<ITypeConstraint> result= new ArrayList<ITypeConstraint>();
+		Collection<ITypeConstraint> result= new ArrayList<>();
 		for (Iterator<ITypeConstraint> it= fAllConstraints.iterator(); it.hasNext(); ) {
 			ITypeConstraint tc= it.next();
 			if (tc.isSimpleTypeConstraint()) {
@@ -1173,9 +1173,9 @@ public class ChangeTypeRefactoring extends Refactoring {
 													Collection<ITypeConstraint> relevantConstraints,
 													IProgressMonitor pm) throws JavaModelException {
 
-		Collection<ITypeBinding> result= new HashSet<ITypeBinding>();
+		Collection<ITypeBinding> result= new HashSet<>();
 
-		Collection<ITypeBinding> allTypes = new HashSet<ITypeBinding>();
+		Collection<ITypeBinding> allTypes = new HashSet<>();
 		allTypes.addAll(getAllSuperTypes(originalType));
 
 		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, allTypes.size());
@@ -1276,7 +1276,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	private Collection<ITypeConstraint> getConstraints(ICompilationUnit[] referringCus, IProgressMonitor pm) {
 		pm.beginTask(RefactoringCoreMessages.ChangeTypeRefactoring_analyzingMessage, referringCus.length);
-		Collection<ITypeConstraint> result= new ArrayList<ITypeConstraint>();
+		Collection<ITypeConstraint> result= new ArrayList<>();
 		for (int i= 0; i < referringCus.length; i++) {
 			result.addAll(getConstraints(referringCus[i]));
 			pm.worked(1);
@@ -1376,7 +1376,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * @return Collection<String> of names of types that can be given to the selected declaration
 	 */
 	public Collection<String> getValidTypeNames() {
-		Collection<String> typeNames= new ArrayList<String>();
+		Collection<String> typeNames= new ArrayList<>();
 		for (Iterator<ITypeBinding> it= fValidTypes.iterator(); it.hasNext();) {
 			ITypeBinding type= it.next();
 			typeNames.add(type.getQualifiedName());
@@ -1524,7 +1524,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 * @return the CUs
 	 */
 	private ICompilationUnit[] getCus(SearchResultGroup[] groups) {
-		List<ICompilationUnit> result= new ArrayList<ICompilationUnit>(groups.length);
+		List<ICompilationUnit> result= new ArrayList<>(groups.length);
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
 			ICompilationUnit cu= group.getCompilationUnit();
@@ -1543,7 +1543,7 @@ public class ChangeTypeRefactoring extends Refactoring {
      * @return the super types
 	 */
 	public Set<ITypeBinding> getAllSuperTypes(ITypeBinding type){
-		Set<ITypeBinding> result= new HashSet<ITypeBinding>();
+		Set<ITypeBinding> result= new HashSet<>();
 		result.add(type);
 		if (type.getSuperclass() != null){
 			result.addAll(getAllSuperTypes(type.getSuperclass()));

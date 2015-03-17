@@ -25,6 +25,7 @@ public abstract class JavaSearchContentProvider implements IStructuredContentPro
 		fPage= page;
 	}
 
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		initialize((AbstractTextSearchResult) newInput);
 
@@ -37,6 +38,7 @@ public abstract class JavaSearchContentProvider implements IStructuredContentPro
 	public abstract void elementsChanged(Object[] updatedElements);
 	public abstract void clear();
 
+	@Override
 	public void dispose() {
 		// nothing to do
 	}

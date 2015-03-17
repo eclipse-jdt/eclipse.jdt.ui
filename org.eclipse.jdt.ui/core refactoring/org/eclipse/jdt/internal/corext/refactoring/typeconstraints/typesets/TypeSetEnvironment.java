@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,10 +25,10 @@ public class TypeSetEnvironment {
 	private final TypeUniverseSet fUniverse;
 	private final EmptyTypeSet fEmptyTypeSet;
 
-	private final Map<TType, SubTypesOfSingleton> fSubtypesOfSingletons= new LinkedHashMap<TType, SubTypesOfSingleton>();//@perf
-	private final Map<TypeSet, SubTypesSet> fSubTypesSets= new LinkedHashMap<TypeSet, SubTypesSet>();//@perf
-	private final Map<TType, SuperTypesOfSingleton> fSuperTypesOfSingletons= new LinkedHashMap<TType, SuperTypesOfSingleton>();//@perf
-	private final Map<Object, SuperTypesSet> fSuperTypesSets= new LinkedHashMap<Object, SuperTypesSet>();//@perf
+	private final Map<TType, SubTypesOfSingleton> fSubtypesOfSingletons= new LinkedHashMap<>();//@perf
+	private final Map<TypeSet, SubTypesSet> fSubTypesSets= new LinkedHashMap<>();//@perf
+	private final Map<TType, SuperTypesOfSingleton> fSuperTypesOfSingletons= new LinkedHashMap<>();//@perf
+	private final Map<Object, SuperTypesSet> fSuperTypesSets= new LinkedHashMap<>();//@perf
 
 	private int fgCommonExprHits= 0;
 	private int fgCommonExprMisses= 0;

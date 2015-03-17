@@ -75,6 +75,7 @@ class BreadcrumbItemDetails {
 		layout.marginWidth= 2;
 		fImageComposite.setLayout(layout);
 		fImageComposite.addPaintListener(new PaintListener() {
+			@Override
 			public void paintControl(PaintEvent e) {
 				if (fHasFocus && !isTextVisible()) {
 					e.gc.drawFocus(e.x, e.y, e.width, e.height);
@@ -97,6 +98,7 @@ class BreadcrumbItemDetails {
 		fTextComposite.setLayout(layout);
 		addElementListener(fTextComposite);
 		fTextComposite.addPaintListener(new PaintListener() {
+			@Override
 			public void paintControl(PaintEvent e) {
 				if (fHasFocus && isTextVisible()) {
 					e.gc.drawFocus(e.x, e.y, e.width, e.height);
@@ -308,6 +310,7 @@ class BreadcrumbItemDetails {
 	 */
 	private void installFocusComposite(Composite composite) {
 		composite.addTraverseListener(new TraverseListener() {
+			@Override
 			public void keyTraversed(TraverseEvent e) {
 				if (e.detail == SWT.TRAVERSE_TAB_NEXT || e.detail == SWT.TRAVERSE_TAB_PREVIOUS) {
 					int index= fParent.getViewer().getIndexOfItem(fParent);
@@ -326,6 +329,7 @@ class BreadcrumbItemDetails {
 			}
 		});
 		composite.addKeyListener(new KeyListener() {
+			@Override
 			public void keyPressed(KeyEvent e) {
 				BreadcrumbViewer viewer= fParent.getViewer();
 
@@ -392,11 +396,13 @@ class BreadcrumbItemDetails {
 				shell.setFocus();
 			}
 
+			@Override
 			public void keyReleased(KeyEvent e) {
 			}
 		});
 
 		composite.addFocusListener(new FocusListener() {
+			@Override
 			public void focusGained(FocusEvent e) {
 				if (!fHasFocus) {
 					fHasFocus= true;
@@ -404,6 +410,7 @@ class BreadcrumbItemDetails {
 				}
 			}
 
+			@Override
 			public void focusLost(FocusEvent e) {
 				if (fHasFocus) {
 					fHasFocus= false;
@@ -420,9 +427,11 @@ class BreadcrumbItemDetails {
 	 */
 	private void addElementListener(Control control) {
 		control.addMouseListener(new MouseListener() {
+			@Override
 			public void mouseDoubleClick(MouseEvent e) {
 			}
 
+			@Override
 			public void mouseDown(MouseEvent e) {
 				BreadcrumbViewer viewer= fParent.getViewer();
 
@@ -439,10 +448,12 @@ class BreadcrumbItemDetails {
 				}
 			}
 
+			@Override
 			public void mouseUp(MouseEvent e) {
 			}
 		});
 		control.addMenuDetectListener(new MenuDetectListener() {
+			@Override
 			public void menuDetected(MenuDetectEvent e) {
 				BreadcrumbViewer viewer= fParent.getViewer();
 				viewer.selectItem(fParent);

@@ -19,7 +19,7 @@ import junit.framework.TestSuite;
  */
 public class ActivateTextEditorTest extends ActivateEditorTest {
 
-	private static final Class THIS= ActivateTextEditorTest.class;
+	private static final Class<ActivateTextEditorTest> THIS= ActivateTextEditorTest.class;
 
 	private static final String SHORT_NAME= "Activate " + ActivateEditorTest.getNumberOfEditors() + " text editors";
 
@@ -27,10 +27,12 @@ public class ActivateTextEditorTest extends ActivateEditorTest {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected String getEditorId() {
 		return EditorTestHelper.TEXT_EDITOR_ID;
 	}
 
+	@Override
 	public void testActivateEditor() {
 		setShortName(SHORT_NAME);
 		super.testActivateEditor();

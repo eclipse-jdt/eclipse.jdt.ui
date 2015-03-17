@@ -13,9 +13,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -36,8 +33,12 @@ import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  *
@@ -50,7 +51,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 
 	private static final String FIELD_DECLARATION= "private static final long serialVersionUID = ";
 
-	private static final Class THIS= SerialVersionQuickFixTest.class;
+	private static final Class<SerialVersionQuickFixTest> THIS= SerialVersionQuickFixTest.class;
 
 	public static Test suite() {
 		return setUpTest(new TestSuite(THIS));
@@ -78,11 +79,12 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		JavaRuntime.getDefaultVMInstall();
 		fProject= ProjectTestSetup.getProject();
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "1"); //$NON-NLS-1$
@@ -104,6 +106,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fProject, "src"); //$NON-NLS-1$
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fProject, ProjectTestSetup.getDefaultClasspath());
 	}
@@ -129,7 +132,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Test5.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 
@@ -195,7 +198,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Test3.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 
@@ -252,7 +255,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Test2.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 
@@ -305,7 +308,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Test1.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 
@@ -358,7 +361,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Test4.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 
@@ -424,7 +427,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Test1.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 

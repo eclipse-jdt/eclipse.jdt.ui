@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 public class UseSupertypeWherePossibleTests extends RefactoringTest {
 
-	private static final Class clazz= UseSupertypeWherePossibleTests.class;
+	private static final Class<UseSupertypeWherePossibleTests> clazz= UseSupertypeWherePossibleTests.class;
 	private static final String REFACTORING_PATH= "UseSupertypeWherePossible/";
 
 	public UseSupertypeWherePossibleTests(String name) {
@@ -44,10 +44,12 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 		return new RefactoringTestSetup(test);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID,

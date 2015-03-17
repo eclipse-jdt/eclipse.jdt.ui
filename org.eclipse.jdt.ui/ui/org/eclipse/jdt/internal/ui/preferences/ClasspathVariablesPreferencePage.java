@@ -56,10 +56,6 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		noDefaultAndApplyButton();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
@@ -79,6 +75,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	/*
 	 * @see IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 
@@ -101,9 +98,6 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		return fVariableBlock.performOk();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
-	 */
 	@Override
 	public void setVisible(boolean visible) {
 		// check if the stored settings have changed
@@ -140,9 +134,6 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		return buf.toString();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
-	 */
 	@Override
 	public void applyData(Object data) {
 		if (data instanceof Map && fVariableBlock != null) {

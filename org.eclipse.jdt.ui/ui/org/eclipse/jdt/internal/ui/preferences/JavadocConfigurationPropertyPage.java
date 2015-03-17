@@ -269,6 +269,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 
 	private static IRunnableWithProgress getRunnable(final Shell shell, final IJavaElement elem, final URL javadocLocation, final IClasspathEntry entry, final IPath containerPath) {
 		return new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
 					IJavaProject project= elem.getJavaProject();
@@ -293,6 +294,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	/**
 	 * @see IStatusChangeListener#statusChanged(IStatus)
 	 */
+	@Override
 	public void statusChanged(IStatus status) {
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);

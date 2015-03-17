@@ -126,9 +126,7 @@ public final class JarImportWizardPage extends WizardPage {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void createControl(final Composite parent) {
 		initializeDialogUnits(parent);
 		final Composite composite= new Composite(parent, SWT.NONE);
@@ -186,7 +184,7 @@ public final class JarImportWizardPage extends WizardPage {
 
 			@Override
 			protected Object[] getJavaProjects(final IJavaModel model) throws JavaModelException {
-				final Set<IJavaProject> set= new HashSet<IJavaProject>();
+				final Set<IJavaProject> set= new HashSet<>();
 				final IJavaProject[] projects= model.getJavaProjects();
 				for (int index= 0; index < projects.length; index++) {
 					if (JarImportWizard.isValidJavaProject(projects[index])) {
@@ -200,7 +198,7 @@ public final class JarImportWizardPage extends WizardPage {
 
 			@Override
 			protected Object[] getPackageFragmentRoots(final IJavaProject project) throws JavaModelException {
-				final Set<IPackageFragmentRoot> set= new HashSet<IPackageFragmentRoot>();
+				final Set<IPackageFragmentRoot> set= new HashSet<>();
 				final IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 				for (int offset= 0; offset < roots.length; offset++) {
 					IPackageFragmentRoot root= roots[offset];
@@ -234,6 +232,7 @@ public final class JarImportWizardPage extends WizardPage {
 		}
 		fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
+			@Override
 			public void selectionChanged(final SelectionChangedEvent event) {
 				handleInputChanged();
 			}
@@ -264,6 +263,7 @@ public final class JarImportWizardPage extends WizardPage {
 		fLocationControl.loadHistory();
 		fLocationControl.getControl().addModifyListener(new ModifyListener() {
 
+			@Override
 			public final void modifyText(final ModifyEvent event) {
 				handleInputChanged();
 			}
@@ -494,9 +494,6 @@ public final class JarImportWizardPage extends WizardPage {
 		fLocationControl.saveHistory();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setErrorMessage(final String message) {
 		if (!fFirstTime)
@@ -505,9 +502,6 @@ public final class JarImportWizardPage extends WizardPage {
 			setMessage(message, NONE);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setVisible(final boolean visible) {
 		super.setVisible(visible);

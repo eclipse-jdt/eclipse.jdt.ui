@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.Iterator;
 import java.util.List;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -29,15 +26,19 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class RenameParametersTests extends RefactoringTest{
 
-	private static final Class clazz= RenameParametersTests.class;
+	private static final Class<RenameParametersTests> clazz= RenameParametersTests.class;
 	private static final String REFACTORING_PATH= "RenameParameters/";
 
 	public RenameParametersTests(String name){
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -100,10 +101,10 @@ public class RenameParametersTests extends RefactoringTest{
 		assertNotNull("precondition was supposed to fail", result);
 	}
 
-	private void modifyInfos(List list, String[] newNames) {
+	private void modifyInfos(List<ParameterInfo> list, String[] newNames) {
 		int i= 0;
-		for (Iterator iter= list.iterator(); iter.hasNext(); i++) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+		for (Iterator<ParameterInfo> iter= list.iterator(); iter.hasNext(); i++) {
+			ParameterInfo info= iter.next();
 			info.setNewName(newNames[i]);
 		}
 	}

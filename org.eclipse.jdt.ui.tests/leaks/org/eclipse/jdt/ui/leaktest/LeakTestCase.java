@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,8 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.leaktest;
-
-import junit.framework.TestCase;
 
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
 
@@ -22,6 +20,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.ui.leaktest.reftracker.ReferenceTracker;
 import org.eclipse.jdt.ui.leaktest.reftracker.ReferenceVisitor;
 import org.eclipse.jdt.ui.leaktest.reftracker.ReferencedObject;
+
+import junit.framework.TestCase;
 
 
 /**
@@ -36,7 +36,8 @@ public class LeakTestCase extends TestCase {
 			fVisitors= visitors;
 		}
 
-		public boolean visit(ReferencedObject object, Class clazz, boolean firstVisit) {
+		@Override
+		public boolean visit(ReferencedObject object, Class<?> clazz, boolean firstVisit) {
 			boolean visitChildren= false;
 			for (int i= 0; i < fVisitors.length; i++) {
 				boolean res= fVisitors[i].visit(object, clazz, firstVisit);
@@ -65,7 +66,8 @@ public class LeakTestCase extends TestCase {
 		}
 		calmDown();
 		ReferenceVisitor visitor= new ReferenceVisitor() {
-			public boolean visit(ReferencedObject object, Class clazz, boolean firstVisit) {
+			@Override
+			public boolean visit(ReferencedObject object, Class<?> clazz, boolean firstVisit) {
 				for (int i= 0; i < requestors.length; i++) {
 					requestors[i].visit(object, clazz, firstVisit);
 				}
@@ -81,6 +83,7 @@ public class LeakTestCase extends TestCase {
 	 * @see junit.framework.TestCase#setUp()
 	 * @since 3.4
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		// Ensure active page to allow test being run
@@ -94,6 +97,7 @@ public class LeakTestCase extends TestCase {
 		// Make sure we wait > 500, to allow e.g. TextViewer.queuePostSelectionChanged(boolean)
 		// and OpenStrategy to time out and release references in delayed runnables.
 		new DisplayHelper() {
+			@Override
 			protected boolean condition() {
 				return false;
 			}
@@ -114,7 +118,7 @@ public class LeakTestCase extends TestCase {
 	 * @param clazz the class of the instances to count
   	 * @param expected the expected instance count
 	 */
-  	public void assertInstanceCount(final Class clazz, final int expected) {
+  	public void assertInstanceCount(final Class<?> clazz, final int expected) {
   		int numTries= 2;
   		while (true) {
 	  		InstancesOfTypeCollector requestor= collect(clazz.getName());
@@ -170,7 +174,7 @@ public class LeakTestCase extends TestCase {
 	 * @return Returns the current number of instances of the given class or <code>-1</code> if
 	 * no connection is established.
 	 */
-	protected int getInstanceCount(Class clazz) {
+	protected int getInstanceCount(Class<?> clazz) {
   		InstancesOfTypeCollector requestor= collect(clazz.getName());
 		return requestor.getNumberOfResults();
 	}

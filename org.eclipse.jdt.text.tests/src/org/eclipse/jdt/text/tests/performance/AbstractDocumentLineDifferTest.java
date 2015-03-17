@@ -33,24 +33,30 @@ public abstract class AbstractDocumentLineDifferTest extends TextPerformanceTest
 			fDocument= reference;
 		}
 
+		@Override
 		public IDocument getReference(IProgressMonitor monitor) throws CoreException {
 			return fDocument;
 		}
 
+		@Override
 		public void dispose() {
 		}
 
+		@Override
 		public String getId() {
 			return "testProvider";
 		}
 
+		@Override
 		public void setActiveEditor(ITextEditor editor) {
 		}
 
+		@Override
 		public boolean isEnabled() {
 			return true;
 		}
 
+		@Override
 		public void setId(String id) {
 		}
 
@@ -101,6 +107,7 @@ public abstract class AbstractDocumentLineDifferTest extends TextPerformanceTest
 		fReferenceProvider= new TestReferenceProvider(reference);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		if (fFirstException != null)
 			throw fFirstException;

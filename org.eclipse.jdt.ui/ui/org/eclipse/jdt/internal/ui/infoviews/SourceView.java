@@ -89,6 +89,7 @@ public class SourceView extends AbstractInfoView {
 		/*
 		 * @see IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 		 */
+		@Override
 		public void propertyChange(PropertyChangeEvent event) {
 			if (fViewer == null)
 				return;
@@ -107,6 +108,7 @@ public class SourceView extends AbstractInfoView {
 		/*
 		 * @see IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 		 */
+		@Override
 		public void propertyChange(PropertyChangeEvent event) {
 			if (fViewer == null)
 				return;

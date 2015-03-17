@@ -47,9 +47,9 @@ public class CopyModifications extends RefactoringModifications {
 	private List<IParticipantDescriptorFilter> fParticipantDescriptorFilter;
 
 	public CopyModifications() {
-		fCopies= new ArrayList<Object>();
-		fCopyArguments= new ArrayList<RefactoringArguments>();
-		fParticipantDescriptorFilter= new ArrayList<IParticipantDescriptorFilter>();
+		fCopies= new ArrayList<>();
+		fCopyArguments= new ArrayList<>();
+		fParticipantDescriptorFilter= new ArrayList<>();
 	}
 
 	public void copy(IResource resource, CopyArguments args) {
@@ -143,7 +143,7 @@ public class CopyModifications extends RefactoringModifications {
 
 	@Override
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {
-		List<RefactoringParticipant> result= new ArrayList<RefactoringParticipant>();
+		List<RefactoringParticipant> result= new ArrayList<>();
 		for (int i= 0; i < fCopies.size(); i++) {
 			result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(status,
 				owner, fCopies.get(i),

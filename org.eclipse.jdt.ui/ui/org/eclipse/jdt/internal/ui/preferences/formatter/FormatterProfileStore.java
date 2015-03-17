@@ -49,9 +49,6 @@ public class FormatterProfileStore extends ProfileStore {
 		fProfileVersioner= profileVersioner;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public List<Profile> readProfiles(IScopeContext scope) throws CoreException {
 	    List<Profile> profiles= super.readProfiles(scope);
@@ -113,7 +110,7 @@ public class FormatterProfileStore extends ProfileStore {
 		try {
 			List<Profile> profiles= (new FormatterProfileStore(profileVersioner)).readProfiles(instanceScope);
 			if (profiles == null) {
-				profiles= new ArrayList<Profile>();
+				profiles= new ArrayList<>();
 			}
 			ProfileManager manager= new FormatterProfileManager(profiles, instanceScope, access, profileVersioner);
 			if (manager.getSelected() instanceof CustomProfile) {

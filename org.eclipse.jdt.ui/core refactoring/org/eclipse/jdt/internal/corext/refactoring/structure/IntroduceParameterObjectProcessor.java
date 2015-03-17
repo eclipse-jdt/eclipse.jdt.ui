@@ -95,6 +95,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor {
 
 	private final class ParameterObjectCreator implements IDefaultValueAdvisor {
+		@Override
 		public Expression createDefaultExpression(List<Expression> invocationArguments, ParameterInfo addedInfo, List<ParameterInfo> parameterInfos, MethodDeclaration enclosingMethod, boolean isRecursive, CompilationUnitRewrite cuRewrite) {
 			final AST ast= cuRewrite.getAST();
 			final ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -123,6 +124,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 			return classCreation;
 		}
 
+		@Override
 		public Type createType(String newTypeName, int startPosition, CompilationUnitRewrite cuRewrite) {
 			return fParameterObjectFactory.createType(fCreateAsTopLevel, cuRewrite, startPosition);
 		}
@@ -149,7 +151,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			AST ast= cuRewrite.getAST();
 			ASTNode lastNode= isEmptyVarArg ? null : invocationArguments.get(varArgPI.getOldIndex());
-			List<Expression> constructorArguments= new ArrayList<Expression>();
+			List<Expression> constructorArguments= new ArrayList<>();
 			if (lastNode instanceof ArrayCreation) {
 				ArrayCreation creation= (ArrayCreation) lastNode;
 				ITypeBinding arrayType= creation.resolveTypeBinding();
@@ -197,6 +199,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 
 		private void importNodeTypes(ASTNode node, final CompilationUnitRewrite cuRewrite, final ImportRewriteContext context) {
 			ASTResolving.visitAllBindings(node, new TypeBindingVisitor() {
+				@Override
 				public boolean visit(ITypeBinding nodeBinding) {
 					importBinding(nodeBinding, cuRewrite, context);
 					return false;
@@ -350,7 +353,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 		Parameter[] parameters= parameter.getParameters();
 		if (parameters == null)
 			parameters= IntroduceParameterObjectDescriptor.createParameters(getMethod());
-		Map<Integer, ParameterInfo> paramIndex= new HashMap<Integer, ParameterInfo>();
+		Map<Integer, ParameterInfo> paramIndex= new HashMap<>();
 		for (Iterator<ParameterInfo> iter= pis.iterator(); iter.hasNext();) {
 			ParameterInfo pi= iter.next();
 			paramIndex.put(new Integer(pi.getOldIndex()), pi);
@@ -447,7 +450,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 		if (!parameterInfos.contains(fParameterObjectReference)) {
 			parameterInfos.add(0, fParameterObjectReference);
 		}
-		Map<String, IVariableBinding> bindingMap= new HashMap<String, IVariableBinding>();
+		Map<String, IVariableBinding> bindingMap= new HashMap<>();
 		for (Iterator<SingleVariableDeclaration> iter= fMethodDeclaration.parameters().iterator(); iter.hasNext();) {
 			SingleVariableDeclaration sdv= iter.next();
 			bindingMap.put(sdv.getName().getIdentifier(), sdv.resolveBinding());
@@ -509,7 +512,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 
 	@Override
 	public Change[] getAllChanges() {
-		ArrayList<Change> changes= new ArrayList<Change>();
+		ArrayList<Change> changes= new ArrayList<>();
 		changes.addAll(Arrays.asList(super.getAllChanges()));
 		changes.addAll(fOtherChanges);
 		return changes.toArray(new Change[changes.size()]);
@@ -518,7 +521,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 	@Override
 	protected void clearManagers() {
 		super.clearManagers();
-		fOtherChanges= new ArrayList<ResourceChange>();
+		fOtherChanges= new ArrayList<>();
 		fParameterClassCreated= false;
 	}
 
@@ -545,7 +548,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 		ipod.setParameterName(getParameterName());
 		ipod.setTopLevel(isCreateAsTopLevel());
 
-		ArrayList<Parameter> parameters= new ArrayList<Parameter>();
+		ArrayList<Parameter> parameters= new ArrayList<>();
 		List<ParameterInfo> pis= getParameterInfos();
 		for (Iterator<ParameterInfo> iter= pis.iterator(); iter.hasNext();) {
 			ParameterInfo pi= iter.next();
@@ -583,8 +586,8 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 			comment.addSetting(Messages.format(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_descriptor_enclosing_type, BasicElementLabels.getJavaElementName(fParameterObjectFactory.getEnclosingType())));
 		}
 		List<ParameterInfo> infos= getParameterInfos();
-		List<String> kept= new ArrayList<String>();
-		List<String> fields= new ArrayList<String>();
+		List<String> kept= new ArrayList<>();
+		List<String> fields= new ArrayList<>();
 		for (Iterator<ParameterInfo> iter= infos.iterator(); iter.hasNext();) {
 			ParameterInfo pi= iter.next();
 			if (pi.isCreateField()) {

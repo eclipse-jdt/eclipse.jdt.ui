@@ -38,7 +38,7 @@ import org.eclipse.jface.text.IDocument;
  */
 public class ContentTypeTest extends TextPerformanceTestCase {
 
-	private static final Class THIS= ContentTypeTest.class;
+	private static final Class<ContentTypeTest> THIS= ContentTypeTest.class;
 
 
 	private static final IContentType TEXT_CONTENT_TYPE= Platform.getContentTypeManager().getContentType("org.eclipse.core.runtime.text"); //$NON-NLS-1$
@@ -78,6 +78,7 @@ public class ContentTypeTest extends TextPerformanceTestCase {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		EditorTestHelper.joinBackgroundActivities();

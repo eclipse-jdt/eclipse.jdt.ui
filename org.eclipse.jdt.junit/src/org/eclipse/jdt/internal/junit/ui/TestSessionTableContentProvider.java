@@ -25,11 +25,13 @@ import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 
 public class TestSessionTableContentProvider implements IStructuredContentProvider {
 
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 	}
 
+	@Override
 	public Object[] getElements(Object inputElement) {
-		ArrayList<ITestElement> all= new ArrayList<ITestElement>();
+		ArrayList<ITestElement> all= new ArrayList<>();
 		addAll(all, (TestRoot) inputElement);
 		return all.toArray();
 	}
@@ -47,6 +49,7 @@ public class TestSessionTableContentProvider implements IStructuredContentProvid
 		}
 	}
 
+	@Override
 	public void dispose() {
 	}
 }

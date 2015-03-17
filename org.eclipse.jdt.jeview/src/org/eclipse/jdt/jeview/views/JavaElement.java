@@ -138,7 +138,7 @@ public class JavaElement extends JEAttribute {
 		if (fJavaElement == null)
 			return EMPTY;
 		
-		ArrayList<JEAttribute> result= new ArrayList<JEAttribute>();
+		ArrayList<JEAttribute> result= new ArrayList<>();
 		
 		if (fJavaElement instanceof IParent) {
 			addParentChildren(result, (IParent) fJavaElement);
@@ -199,11 +199,13 @@ public class JavaElement extends JEAttribute {
 		result.add(new JavaElement(this, "JAVA PROJECT", javaElement.getJavaProject()));
 		result.add(JEResource.create(this, "RESOURCE", javaElement.getResource()));
 		result.add(JEResource.compute(this, "CORRESPONDING RESOURCE", new Callable<IResource>() {
+			@Override
 			public IResource call() throws JavaModelException {
 				return javaElement.getCorrespondingResource();
 			}
 		}));
 		result.add(JEResource.compute(this, "UNDERLYING RESOURCE", new Callable<IResource>() {
+			@Override
 			public IResource call() throws JavaModelException {
 				return javaElement.getUnderlyingResource();
 			}
@@ -297,11 +299,13 @@ public class JavaElement extends JEAttribute {
 			}
 		});
 		result.add(JEClasspathEntry.compute(this, "RAW CLASSPATH ENTRY", new Callable<IClasspathEntry>() {
+			@Override
 			public IClasspathEntry call() throws JavaModelException {
 				return packageFragmentRoot.getRawClasspathEntry();
 			}
 		}));
 		result.add(JEClasspathEntry.compute(this, "RESOLVED CLASSPATH ENTRY", new Callable<IClasspathEntry>() {
+			@Override
 			public IClasspathEntry call() throws JavaModelException {
 				return packageFragmentRoot.getResolvedClasspathEntry();
 			}
@@ -331,6 +335,7 @@ public class JavaElement extends JEAttribute {
 	
 	private void addTypeRootChildren(ArrayList<JEAttribute> result, final ITypeRoot typeRoot) {
 		result.add(JavaElement.compute(this, "FIND PRIMARY TYPE", new Callable<IJavaElement>() {
+			@Override
 			public IJavaElement call() {
 				return typeRoot.findPrimaryType();
 			}
@@ -339,6 +344,7 @@ public class JavaElement extends JEAttribute {
 	
 	private void addClassFileChildren(ArrayList<JEAttribute> result, final IClassFile classFile) {
 		result.add(JavaElement.compute(this, "TYPE", new Callable<IJavaElement>() {
+			@Override
 			public IJavaElement call() throws JavaModelException {
 				return classFile.getType();
 			}
@@ -592,8 +598,9 @@ public class JavaElement extends JEAttribute {
 	}
 
 	static JEAttribute[] createOptions(JEAttribute parent, Map<String, String> options) {
-		ArrayList<Entry<String, String>> entries= new ArrayList<Entry<String, String>>(options.entrySet());
+		ArrayList<Entry<String, String>> entries= new ArrayList<>(options.entrySet());
 		Collections.sort(entries, new Comparator<Entry<String, String>>() {
+			@Override
 			public int compare(Entry<String, String> o1, Entry<String, String> o2) {
 				return o1.getKey().compareTo(o2.getKey());
 			}

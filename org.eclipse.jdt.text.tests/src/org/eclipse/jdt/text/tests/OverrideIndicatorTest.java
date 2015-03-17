@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,10 +13,6 @@ package org.eclipse.jdt.text.tests;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 
@@ -37,6 +33,10 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.PartInitException;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 
 /**
@@ -64,6 +64,7 @@ public class OverrideIndicatorTest extends TestCase {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
 		fEditor= openJavaEditor(new Path("/" + JUnitProjectTestSetup.getProject().getElementName() + "/src/junit/framework/TestCase.java"));
 		assertNotNull(fEditor);
@@ -78,6 +79,7 @@ public class OverrideIndicatorTest extends TestCase {
 	 * @see junit.framework.TestCase#tearDown()
 	 * @since 3.1
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		EditorTestHelper.closeAllEditors();
 	}
@@ -138,13 +140,13 @@ public class OverrideIndicatorTest extends TestCase {
 	}
 
 	private void computeOverrideIndicators() {
-		ArrayList annotations= new ArrayList();
-		Iterator iter= fAnnotationModel.getAnnotationIterator();
+		ArrayList<Annotation> annotations= new ArrayList<>();
+		Iterator<Annotation> iter= fAnnotationModel.getAnnotationIterator();
 		while (iter.hasNext()) {
-			Annotation annotation= (Annotation)iter.next();
+			Annotation annotation= iter.next();
 			if (OVERRIDE_INDICATOR_ANNOTATION.equals(annotation.getType()))
 				annotations.add(annotation);
 		}
-		fOverrideAnnotations= (Annotation[])annotations.toArray(new Annotation[annotations.size()]);
+		fOverrideAnnotations= annotations.toArray(new Annotation[annotations.size()]);
 	}
 }

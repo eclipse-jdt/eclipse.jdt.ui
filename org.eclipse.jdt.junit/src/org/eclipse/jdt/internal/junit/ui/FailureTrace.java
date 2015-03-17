@@ -51,6 +51,7 @@ public class FailureTrace implements IMenuListener {
 		/*
 		 * @see IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 		 */
+		@Override
 		public void propertyChange(PropertyChangeEvent event) {
 			if (fTable == null)
 				return;
@@ -93,6 +94,7 @@ public class FailureTrace implements IMenuListener {
 
 		OpenStrategy handler = new OpenStrategy(fTable);
 		handler.addOpenListener(new IOpenEventListener() {
+			@Override
 			public void handleOpen(SelectionEvent e) {
 				if (fTable.getSelectionIndex() == 0 && fFailure.isComparisonFailure()) {
 					fCompareAction.run();
@@ -121,6 +123,7 @@ public class FailureTrace implements IMenuListener {
 		fTable.setMenu(menu);
 	}
 
+	@Override
 	public void menuAboutToShow(IMenuManager manager) {
 		if (fTable.getSelectionCount() > 0) {
 			Action a= createOpenEditorAction(getSelectedText());

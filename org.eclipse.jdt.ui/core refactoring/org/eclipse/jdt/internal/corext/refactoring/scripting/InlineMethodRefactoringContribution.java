@@ -48,9 +48,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
  */
 public final class InlineMethodRefactoringContribution extends JavaUIRefactoringContribution {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		int selectionStart= -1;
@@ -112,19 +109,13 @@ public final class InlineMethodRefactoringContribution extends JavaUIRefactoring
 		return InlineMethodRefactoring.create(unit, node, selectionStart, selectionLength);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return RefactoringSignatureDescriptorFactory.createInlineMethodDescriptor();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
-	public final RefactoringDescriptor createDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
+	public final RefactoringDescriptor createDescriptor(final String id, final String project, final String description, final String comment, final Map<String, String> arguments, final int flags) {
 		return RefactoringSignatureDescriptorFactory.createInlineMethodDescriptor(project, description, comment, arguments, flags);
 	}
 }

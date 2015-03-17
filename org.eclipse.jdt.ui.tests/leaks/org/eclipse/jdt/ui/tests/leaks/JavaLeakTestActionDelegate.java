@@ -27,23 +27,28 @@ public class JavaLeakTestActionDelegate implements IWorkbenchWindowActionDelegat
 
 	}
 
+	@Override
 	public void init(IWorkbenchWindow window) {
 		fWindow= window;
 	}
 
+	@Override
 	public void setActiveEditor(IAction action, IEditorPart targetEditor) {
 		fEditor= targetEditor;
 	}
 
+	@Override
 	public void run(IAction action) {
 		System.out.println("running JavaLeakTestActionDelegate");
 	}
 
+	@Override
 	public void dispose() {
 		fWindow= null;
 		fEditor= null;
 	}
 
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 	}
 }

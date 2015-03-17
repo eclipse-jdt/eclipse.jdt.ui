@@ -154,9 +154,9 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 		private final ITypeBinding fCurrentType;
 
-		private final List<MethodInvocation> fMethodAccesses= new ArrayList<MethodInvocation>(0);
+		private final List<MethodInvocation> fMethodAccesses= new ArrayList<>(0);
 
-		private final List<Name> fSimpleNames= new ArrayList<Name>(0);
+		private final List<Name> fSimpleNames= new ArrayList<>(0);
 
 		MemberAccessNodeCollector(ITypeBinding currType) {
 			Assert.isNotNull(currType);
@@ -370,6 +370,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	private static boolean containsStatusEntry(final RefactoringStatus status, final RefactoringStatusEntry other) {
 		return status.getEntries(new IRefactoringStatusEntryComparator() {
 
+			@Override
 			public final int compare(final RefactoringStatusEntry entry1, final RefactoringStatusEntry entry2) {
 				return entry1.getMessage().compareTo(entry2.getMessage());
 			}
@@ -422,7 +423,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	private static List<IType> getDeclaringTypes(IType type) {
 		IType declaringType= type.getDeclaringType();
 		if (declaringType == null)
-			return new ArrayList<IType>(0);
+			return new ArrayList<>(0);
 		List<IType> result= getDeclaringTypes(declaringType);
 		result.add(declaringType);
 		return result;
@@ -431,7 +432,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	private static String[] getFieldNames(IType type) {
 		try {
 			IField[] fields= type.getFields();
-			List<String> result= new ArrayList<String>(fields.length);
+			List<String> result= new ArrayList<>(fields.length);
 			for (int i= 0; i < fields.length; i++) {
 				result.add(fields[i].getElementName());
 			}
@@ -442,7 +443,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	private static Set<ICompilationUnit> getMergedSet(Set<ICompilationUnit> s1, Set<ICompilationUnit> s2) {
-		Set<ICompilationUnit> result= new HashSet<ICompilationUnit>();
+		Set<ICompilationUnit> result= new HashSet<>();
 		result.addAll(s1);
 		result.addAll(s2);
 		return result;
@@ -450,7 +451,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 	private static String[] getParameterNamesOfAllConstructors(IType type) throws JavaModelException {
 		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
-		Set<String> result= new HashSet<String>();
+		Set<String> result= new HashSet<>();
 		for (int i= 0; i < constructors.length; i++) {
 			result.addAll(Arrays.asList(constructors[i].getParameterNames()));
 		}
@@ -570,7 +571,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		if (declaration instanceof TypeDeclaration) {
 			final TypeDeclaration type= (TypeDeclaration) declaration;
 			final List<TypeParameter> existing= type.typeParameters();
-			final Set<String> names= new HashSet<String>();
+			final Set<String> names= new HashSet<>();
 			TypeParameter parameter= null;
 			for (final Iterator<TypeParameter> iterator= existing.iterator(); iterator.hasNext();) {
 				parameter= iterator.next();
@@ -771,7 +772,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	@Override
 	public Change createChange(final IProgressMonitor monitor) throws CoreException {
 		monitor.beginTask(RefactoringCoreMessages.MoveInnerToTopRefactoring_creating_change, 1);
-		final Map<String, String> arguments= new HashMap<String, String>();
+		final Map<String, String> arguments= new HashMap<>();
 		String project= null;
 		IJavaProject javaProject= fType.getJavaProject();
 		if (javaProject != null)
@@ -809,7 +810,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		final TextChangeManager manager= new TextChangeManager();
 		try {
 			monitor.beginTask(RefactoringCoreMessages.MoveInnerToTopRefactoring_creating_preview, 4);
-			final Map<ICompilationUnit, CompilationUnitRewrite> rewrites= new HashMap<ICompilationUnit, CompilationUnitRewrite>(2);
+			final Map<ICompilationUnit, CompilationUnitRewrite> rewrites= new HashMap<>(2);
 			fSourceRewrite.clearASTAndImportRewrites();
 			rewrites.put(fSourceRewrite.getCu(), fSourceRewrite);
 			final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fType.getPackageFragment(), fType);
@@ -818,14 +819,14 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			adjustor.setFailureSeverity(RefactoringStatus.WARNING);
 			adjustor.setStatus(status);
 			adjustor.adjustVisibility(new SubProgressMonitor(monitor, 1));
-			final Map<String, ITypeBinding> parameters= new LinkedHashMap<String, ITypeBinding>();
+			final Map<String, ITypeBinding> parameters= new LinkedHashMap<>();
 			addTypeParameters(fSourceRewrite.getRoot(), fType, parameters);
 			final ITypeBinding[] bindings= new ITypeBinding[parameters.values().size()];
 			parameters.values().toArray(bindings);
 			final Map<ICompilationUnit, SearchMatch[]> typeReferences= createTypeReferencesMapping(new SubProgressMonitor(monitor, 1), status);
 			Map<ICompilationUnit, SearchMatch[]> constructorReferences= null;
 			if (JdtFlags.isStatic(fType))
-				constructorReferences= new HashMap<ICompilationUnit, SearchMatch[]>(0);
+				constructorReferences= new HashMap<>(0);
 			else
 				constructorReferences= createConstructorReferencesMapping(new SubProgressMonitor(monitor, 1), status);
 			if (fCreateInstanceField) {
@@ -901,8 +902,8 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 					addInheritedTypeQualifications(declaration, targetRewrite, qualifierGroup);
 					addEnclosingInstanceDeclaration(declaration, rewrite);
 				}
-				fTypeImports= new HashSet<ITypeBinding>();
-				fStaticImports= new HashSet<IBinding>();
+				fTypeImports= new HashSet<>();
+				fStaticImports= new HashSet<>();
 				ImportRewriteUtil.collectImports(fType.getJavaProject(), declaration, fTypeImports, fStaticImports, false);
 				if (binding != null)
 					fTypeImports.remove(binding);
@@ -986,7 +987,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	// Map<ICompilationUnit, SearchMatch[]>
 	private Map<ICompilationUnit, SearchMatch[]> createConstructorReferencesMapping(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		SearchResultGroup[] groups= ConstructorReferenceFinder.getConstructorReferences(fType, pm, status);
-		Map<ICompilationUnit, SearchMatch[]> result= new HashMap<ICompilationUnit, SearchMatch[]>();
+		Map<ICompilationUnit, SearchMatch[]> result= new HashMap<>();
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
 			ICompilationUnit cu= group.getCompilationUnit();
@@ -1111,7 +1112,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		engine.setStatus(status);
 		engine.searchPattern(new SubProgressMonitor(pm, 1));
 		final SearchResultGroup[] groups= (SearchResultGroup[]) engine.getResults();
-		Map<ICompilationUnit, SearchMatch[]> result= new HashMap<ICompilationUnit, SearchMatch[]>();
+		Map<ICompilationUnit, SearchMatch[]> result= new HashMap<>();
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
 			ICompilationUnit cu= group.getCompilationUnit();
@@ -1139,7 +1140,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	private MethodDeclaration[] getConstructorDeclarationNodes(final AbstractTypeDeclaration declaration) {
 		if (declaration instanceof TypeDeclaration) {
 			final MethodDeclaration[] declarations= ((TypeDeclaration) declaration).getMethods();
-			final List<MethodDeclaration> result= new ArrayList<MethodDeclaration>(2);
+			final List<MethodDeclaration> result= new ArrayList<>(2);
 			for (int index= 0; index < declarations.length; index++) {
 				if (declarations[index].isConstructor())
 					result.add(declarations[index]);

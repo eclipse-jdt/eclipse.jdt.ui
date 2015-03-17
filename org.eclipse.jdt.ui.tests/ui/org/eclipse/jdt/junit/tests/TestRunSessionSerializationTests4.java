@@ -49,6 +49,7 @@ public class TestRunSessionSerializationTests4 extends AbstractTestRunSessionSer
 		}
 
 		return new TestCase("TestRunSessionSerializationTests4 disabled because VM < 5.0") {
+			@Override
 			public void run(TestResult result) {
 				result.startTest(this);
 				result.endTest(this);

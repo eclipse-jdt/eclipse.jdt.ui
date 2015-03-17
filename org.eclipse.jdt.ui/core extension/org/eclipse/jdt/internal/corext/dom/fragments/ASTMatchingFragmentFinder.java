@@ -25,7 +25,7 @@ class ASTMatchingFragmentFinder extends GenericVisitor {
 	}
 
 	private ASTFragment fFragmentToMatch;
-	private Set<IASTFragment> fMatches= new HashSet<IASTFragment>();
+	private Set<IASTFragment> fMatches= new HashSet<>();
 
 	private ASTMatchingFragmentFinder(ASTFragment toMatch) {
 		super(true);

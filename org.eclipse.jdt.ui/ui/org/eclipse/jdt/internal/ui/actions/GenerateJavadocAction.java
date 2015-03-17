@@ -27,13 +27,16 @@ public class GenerateJavadocAction implements IWorkbenchWindowActionDelegate {
 	private ISelection fSelection;
 	private Shell fCurrentShell;
 
+	@Override
 	public void dispose() {
 	}
 
+	@Override
 	public void init(IWorkbenchWindow window) {
 		fCurrentShell= window.getShell();
 	}
 
+	@Override
 	public void run(IAction action) {
 		JavadocWizard wizard= new JavadocWizard();
 		IStructuredSelection selection= null;
@@ -45,6 +48,7 @@ public class GenerateJavadocAction implements IWorkbenchWindowActionDelegate {
 		JavadocWizard.openJavadocWizard(wizard, fCurrentShell, selection);
 	}
 
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		fSelection= selection;
 	}

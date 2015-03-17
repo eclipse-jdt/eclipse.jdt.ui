@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 
 public class RenameJavaProjectTests extends RefactoringTest {
 
-	private static final Class clazz= RenameJavaProjectTests.class;
+	private static final Class<RenameJavaProjectTests> clazz= RenameJavaProjectTests.class;
 
 	public RenameJavaProjectTests(String name) {
 		super(name);
@@ -43,6 +43,7 @@ public class RenameJavaProjectTests extends RefactoringTest {
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fIsPreDeltaTest= true;

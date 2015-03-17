@@ -62,9 +62,6 @@ public class VarargsWarningsSubProcessor {
 			fMethodBinding= methodBinding;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
-		 */
 		@Override
 		protected ASTRewrite getRewrite() throws CoreException {
 			if (fMethodDeclaration == null) {

@@ -69,7 +69,7 @@ public abstract class RefactoringModifications {
 		if (source.getKind() == IPackageFragmentRoot.K_BINARY) {
 			childOfInterest = IJavaElement.CLASS_FILE;
 		}
-		ArrayList<IResource> result = new ArrayList<IResource>(children.length);
+		ArrayList<IResource> result = new ArrayList<>(children.length);
 		for (int i = 0; i < children.length; i++) {
 			IJavaElement child = children[i];
 			if (child.getElementType() == childOfInterest && child.getResource() != null) {

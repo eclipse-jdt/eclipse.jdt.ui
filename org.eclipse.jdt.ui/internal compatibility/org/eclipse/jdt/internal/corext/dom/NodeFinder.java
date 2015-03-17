@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
  * @since 2.1
  * @deprecated As of 3.6, replaced by {@link org.eclipse.jdt.core.dom.NodeFinder}
  */
+@Deprecated
 @SuppressWarnings("all")
 public class NodeFinder extends GenericVisitor {
 

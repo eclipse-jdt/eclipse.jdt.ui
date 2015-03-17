@@ -112,18 +112,12 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		fIsAutobuild= null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage#useNewSourcePage()
-	 */
 	@Override
 	protected final boolean useNewSourcePage() {
 		return true;
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
-	 */
 	@Override
 	public void setVisible(boolean visible) {
 		boolean isShownFirstTime= visible && fCurrProject == null;
@@ -153,6 +147,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		class UpdateRunnable implements IRunnableWithProgress {
 			public IStatus infoStatus= Status.OK_STATUS;
 
+			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
 					if (fIsAutobuild == null) {
@@ -288,7 +283,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 					monitor.worked(2);
 				}
 			} else {
-				List<IClasspathEntry> cpEntries= new ArrayList<IClasspathEntry>();
+				List<IClasspathEntry> cpEntries= new ArrayList<>();
 				IWorkspaceRoot root= project.getWorkspace().getRoot();
 
 				IClasspathEntry[] sourceClasspathEntries= fFirstPage.getSourceClasspathEntries();
@@ -332,7 +327,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 	}
 
 	private void rememberExisitingFolders(URI projectLocation) {
-		fOrginalFolders= new HashSet<IFileStore>();
+		fOrginalFolders= new HashSet<>();
 
 		try {
 			IFileStore[] children= EFS.getStore(projectLocation).childStores(EFS.NONE, null);
@@ -349,7 +344,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 	}
 
 	private void restoreExistingFolders(URI projectLocation) {
-		HashSet<IFileStore> foldersToKeep= new HashSet<IFileStore>(fOrginalFolders);
+		HashSet<IFileStore> foldersToKeep= new HashSet<>(fOrginalFolders);
 		// workaround for bug 319054: Eclipse deletes all files when I cancel a project creation (symlink in project location path)
 		for (IFileStore originalFileStore : fOrginalFolders) {
 			try {
@@ -521,6 +516,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 		}
 
 		IRunnableWithProgress op= new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				doRemoveProject(monitor);
 			}

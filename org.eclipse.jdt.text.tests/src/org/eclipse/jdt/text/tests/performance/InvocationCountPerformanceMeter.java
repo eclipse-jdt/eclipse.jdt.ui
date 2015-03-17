@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,7 @@ import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.DataPoint;
+import org.eclipse.test.internal.performance.data.Dim;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 
@@ -121,6 +122,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		 * Continuously reads and handles events that are coming from
 		 * the event queue.
 		 */
+		@Override
 		public void run() {
 			try {
 				synchronized (fThread) {
@@ -213,7 +215,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	public static class Results {
 
 		/** The result map */
-		private Map fResultsMap= new HashMap();
+		private Map<Object, Map<Object, Integer>> fResultsMap= new HashMap<>();
 
 		/**
 		 * Updates the results for the given pair of keys.
@@ -223,15 +225,15 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		 */
 		public void update(Object key1, Object key2) {
 			int value;
-			Map results;
+			Map<Object, Integer> results;
 			if (fResultsMap.containsKey(key1)) {
-				results= (Map) fResultsMap.get(key1);
+				results= fResultsMap.get(key1);
 				if (results.containsKey(key2))
-					value= ((Integer) results.get(key2)).intValue();
+					value= results.get(key2).intValue();
 				else
 					value= 0;
 			} else {
-				results= new HashMap();
+				results= new HashMap<>();
 				fResultsMap.put(key1, results);
 				value= 0;
 			}
@@ -249,7 +251,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		 * Prints the results.
 		 */
 		public void print() {
-			for (Iterator iter= fResultsMap.keySet().iterator(); iter.hasNext();)
+			for (Iterator<Object> iter= fResultsMap.keySet().iterator(); iter.hasNext();)
 				print(iter.next());
 		}
 
@@ -260,10 +262,10 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		 */
 		public void print(Object key1) {
 			System.out.println(key1.toString() + ":"); //$NON-NLS-1$
-			Map results= ((Map) fResultsMap.get(key1));
-			for (Iterator iter= results.keySet().iterator(); iter.hasNext();) {
+			Map<Object, Integer> results= fResultsMap.get(key1);
+			for (Iterator<Object> iter= results.keySet().iterator(); iter.hasNext();) {
 				Object key2= iter.next();
-				System.out.println("\t" + key2 + ": " + ((Integer) results.get(key2)).intValue()); //$NON-NLS-1$ //$NON-NLS-2$
+				System.out.println("\t" + key2 + ": " + results.get(key2).intValue()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}
@@ -290,7 +292,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	private static final java.lang.reflect.Method[] NO_METHODS= new java.lang.reflect.Method[0];
 
 	/** Empty array of constructors */
-	private static final Constructor[] NO_CONSTRUCTORS= new Constructor[0];
+	private static final Constructor<?>[] NO_CONSTRUCTORS= new Constructor[0];
 
 	/** Results */
 	private Results fResults= new Results();
@@ -305,7 +307,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	private java.lang.reflect.Method[] fMethods;
 
 	/** Constructors from which to count the invocations */
-	private Constructor[] fConstructors;
+	private Constructor<?>[] fConstructors;
 
 	/** Timestamp */
 	private long fStartTime;
@@ -333,7 +335,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * @param methods the methods
 	 * @param constructors the constructors
 	 */
-	public InvocationCountPerformanceMeter(String scenarioId, java.lang.reflect.Method[] methods, Constructor[] constructors) {
+	public InvocationCountPerformanceMeter(String scenarioId, java.lang.reflect.Method[] methods, Constructor<?>[] constructors) {
 		super(scenarioId);
 		Assert.assertNotNull("Could not create performance meter: check the command line arguments (see InvocationCountPerformanceMeter for details)", System.getProperty(DEBUG_PORT_PROPERTY));
 
@@ -361,7 +363,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * @param scenarioId the scenario id
 	 * @param constructors the constructors
 	 */
-	public InvocationCountPerformanceMeter(String scenarioId, Constructor[] constructors) {
+	public InvocationCountPerformanceMeter(String scenarioId, Constructor<?>[] constructors) {
 		this(scenarioId, NO_METHODS, constructors);
 		fCollectInstanceResults= false;
 	}
@@ -369,17 +371,18 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#start()
 	 */
+	@Override
 	public void start() {
 		try {
 			String localhost = InetAddress.getLocalHost().getCanonicalHostName();
 			attach(localhost, PORT);
 
-			List requests= new ArrayList();
+			List<BreakpointRequest> requests= new ArrayList<>();
 			for (int i= 0; i < fMethods.length; i++)
 				requests.add(createBreakpointRequest(fMethods[i]));
 			for (int i= 0; i < fConstructors.length; i++)
 				requests.add(createBreakpointRequest(fConstructors[i]));
-			fBreakpointRequests= (BreakpointRequest[]) requests.toArray(new BreakpointRequest[requests.size()]);
+			fBreakpointRequests= requests.toArray(new BreakpointRequest[requests.size()]);
 
 			fEventReader= new EventReader(fVM.eventQueue());
 			fEventReader.start();
@@ -395,6 +398,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#stop()
 	 */
+	@Override
 	public void stop() {
 		if (fEventReader != null) {
 			fEventReader.stop();
@@ -410,6 +414,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#commit()
 	 */
+	@Override
 	public void commit() {
 		super.commit();
 		if (fVerbose) {
@@ -424,6 +429,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#dispose()
 	 */
+	@Override
 	public void dispose() {
 		super.dispose();
 		if (fVM != null || fEventReader != null)
@@ -436,8 +442,9 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	/*
 	 * @see org.eclipse.test.internal.performance.InternalPerformanceMeter#getSample()
 	 */
+	@Override
 	public Sample getSample() {
-		Map map= new HashMap(1);
+		Map<Dim, Scalar> map= new HashMap<>(1);
 		map.put(InternalDimensions.INVOCATION_COUNT, new Scalar(InternalDimensions.INVOCATION_COUNT, fInvocationCount));
 		DataPoint[] dataPoints= new DataPoint[] { new DataPoint(AFTER, map) };
 		return new Sample(getScenarioName(), fStartTime, null, dataPoints);
@@ -445,12 +452,12 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 
 	private void attach(String host, int port) throws IOException, IllegalConnectorArgumentsException {
 		VirtualMachineManager manager= Bootstrap.virtualMachineManager();
-		List connectors= manager.attachingConnectors();
-		AttachingConnector connector= (AttachingConnector) connectors.get(0);
-		Map args= connector.defaultArguments();
+		List<AttachingConnector> connectors= manager.attachingConnectors();
+		AttachingConnector connector= connectors.get(0);
+		Map<String, Connector.Argument> args= connector.defaultArguments();
 
-		((Connector.Argument) args.get("port")).setValue(String.valueOf(port)); //$NON-NLS-1$
-		((Connector.Argument) args.get("hostname")).setValue(host); //$NON-NLS-1$
+		args.get("port").setValue(String.valueOf(port)); //$NON-NLS-1$
+		args.get("hostname").setValue(host); //$NON-NLS-1$
 		fVM= connector.attach(args);
 	}
 
@@ -478,7 +485,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * @param constructor the method
 	 * @return the breakpoint request
 	 */
-	private BreakpointRequest createBreakpointRequest(Constructor constructor) {
+	private BreakpointRequest createBreakpointRequest(Constructor<?> constructor) {
 		return createBreakpointRequest(getMethod(constructor.getDeclaringClass().getName(), "<init>", getJNISignature(constructor)));
 	}
 
@@ -543,7 +550,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * @param constructor the constructor
 	 * @return the JNI style signature
 	 */
-	private String getJNISignature(Constructor constructor) {
+	private String getJNISignature(Constructor<?> constructor) {
 		return getJNISignature(constructor.getParameterTypes()) + "V";
 	}
 
@@ -555,7 +562,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * @param paramTypes the parameter types
 	 * @return the JNI style signature
 	 */
-	private String getJNISignature(Class[] paramTypes) {
+	private String getJNISignature(Class<?>[] paramTypes) {
 		StringBuffer signature= new StringBuffer();
 		signature.append('(');
 		for (int i = 0; i < paramTypes.length; ++i)
@@ -572,7 +579,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * @param clazz the class
 	 * @return the JNI style signature
 	 */
-	private String getJNISignature(Class clazz) {
+	private String getJNISignature(Class<?> clazz) {
 		String qualifiedName= getName(clazz);
 		StringBuffer signature= new StringBuffer();
 
@@ -630,7 +637,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * @param clazz the class
 	 * @return the name
 	 */
-	private String getName(Class clazz) {
+	private String getName(Class<?> clazz) {
 		if (clazz.isArray())
 			return getName(clazz.getComponentType()) + "[]"; //$NON-NLS-1$
 		return clazz.getName();

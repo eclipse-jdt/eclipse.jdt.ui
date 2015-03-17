@@ -68,6 +68,7 @@ public class SpellEvent implements ISpellEvent {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent#getBegin()
 	 */
+	@Override
 	public final int getBegin() {
 		return fBegin;
 	}
@@ -75,6 +76,7 @@ public class SpellEvent implements ISpellEvent {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent#getEnd()
 	 */
+	@Override
 	public final int getEnd() {
 		return fEnd;
 	}
@@ -82,6 +84,7 @@ public class SpellEvent implements ISpellEvent {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent#getProposals()
 	 */
+	@Override
 	public final Set<RankedWordProposal> getProposals() {
 		return fChecker.getProposals(fWord, fSentence);
 	}
@@ -89,6 +92,7 @@ public class SpellEvent implements ISpellEvent {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent#getWord()
 	 */
+	@Override
 	public final String getWord() {
 		return fWord;
 	}
@@ -96,6 +100,7 @@ public class SpellEvent implements ISpellEvent {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent#isMatch()
 	 */
+	@Override
 	public final boolean isMatch() {
 		return fMatch;
 	}
@@ -103,6 +108,7 @@ public class SpellEvent implements ISpellEvent {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent#isStart()
 	 */
+	@Override
 	public final boolean isStart() {
 		return fSentence;
 	}

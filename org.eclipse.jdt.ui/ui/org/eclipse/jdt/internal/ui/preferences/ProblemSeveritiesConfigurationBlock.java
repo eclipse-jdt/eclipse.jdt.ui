@@ -75,10 +75,12 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private class NullAnnotationsConfigurationDialog extends StatusDialog {
 		
 		private class StringButtonAdapter implements IDialogFieldListener, IStringButtonAdapter {
+			@Override
 			public void dialogFieldChanged(DialogField field) {
 				doValidation((StringButtonDialogField) field);
 			}
 
+			@Override
 			public void changeControlPressed(DialogField field) {
 				doBrowseTypes((StringButtonDialogField) field);
 			}
@@ -903,6 +905,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 					int highlightPotNullRef= getHighlight(labelPotNullRef);
 					
 					getShell().getDisplay().asyncExec(new Runnable() {
+						@Override
 						public void run() {
 							highlight(comboBoxNullRef.getParent(), labelNullRef, comboBoxNullRef, HIGHLIGHT_FOCUS);
 							highlight(comboBoxPotNullRef.getParent(), labelPotNullRef, comboBoxPotNullRef, HIGHLIGHT_FOCUS);
@@ -1033,9 +1036,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		return new String[] { title, message };
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#dispose()
-	 */
 	@Override
 	public void dispose() {
 		IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().addNewSection(SETTINGS_SECTION_NAME);

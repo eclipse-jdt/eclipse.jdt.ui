@@ -30,10 +30,12 @@ public abstract class DynamicAttributeProperty extends ExceptionAttribute {
 		fName= name;
 	}
 
+	@Override
 	public Object getParent() {
 		return fParent;
 	}
 
+	@Override
 	public Object[] getChildren() {
 		return EMPTY;
 	}
@@ -87,10 +89,12 @@ public abstract class DynamicAttributeProperty extends ExceptionAttribute {
 	 */
 	protected abstract String executeQuery(Object viewerObject, Object trayObject);
 
+	@Override
 	public String getLabel() {
 		return fLabel;
 	}
 
+	@Override
 	public Image getImage() {
 		return null;
 	}

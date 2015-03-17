@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
  */
 public class TextEditBasedChangeManager {
 
-	private Map<ICompilationUnit, TextEditBasedChange> fMap= new HashMap<ICompilationUnit, TextEditBasedChange>(10);
+	private Map<ICompilationUnit, TextEditBasedChange> fMap= new HashMap<>(10);
 
 	private final boolean fKeepExecutedTextEdits;
 
@@ -89,6 +89,7 @@ public class TextEditBasedChangeManager {
 		ICompilationUnit[] cus= cuSet.toArray(new ICompilationUnit[cuSet.size()]);
 		// sort by cu name:
 		Arrays.sort(cus, new Comparator<ICompilationUnit>() {
+			@Override
 			public int compare(ICompilationUnit o1, ICompilationUnit o2) {
 				String name1= o1.getElementName();
 				String name2= o2.getElementName();

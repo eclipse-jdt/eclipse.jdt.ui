@@ -35,6 +35,7 @@ public class ExtensionPointTestSetup extends TestSetup {
 		return fRoot;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -47,6 +48,7 @@ public class ExtensionPointTestSetup extends TestSetup {
 		getRoot().createPackageFragment("test", true, null);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		JavaProjectHelper.delete(fJavaProject);

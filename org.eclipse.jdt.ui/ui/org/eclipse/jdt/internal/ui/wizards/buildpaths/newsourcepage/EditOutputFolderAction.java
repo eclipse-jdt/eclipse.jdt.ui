@@ -83,9 +83,6 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_OUTPUT_FOLDER);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getDetailedDescription() {
 	    return NewWizardMessages.PackageExplorerActionGroup_FormText_EditOutputFolder;
@@ -96,9 +93,6 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 		fShowOutputFolders= showOutputFolders;
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
 		try {
@@ -154,6 +148,7 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 
 			try {
 				final IRunnableWithProgress runnable= new IRunnableWithProgress() {
+					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						try {
                         	monitor.beginTask(NewWizardMessages.EditOutputFolderAction_ProgressMonitorDescription, 50 + (folderToDelete == null?0:10));
@@ -184,7 +179,7 @@ public class EditOutputFolderAction extends BuildpathModifierAction {
 
 	private IFolder getOldOutputFolder(final BuildpathDelta delta) {
 	    IResource[] deletedResources= delta.getDeletedResources();
-	    List<IResource> existingFolders= new ArrayList<IResource>();
+	    List<IResource> existingFolders= new ArrayList<>();
 	    for (int i= 0; i < deletedResources.length; i++) {
 	        if (deletedResources[i] instanceof IFolder && deletedResources[i].exists()) {
 	        	existingFolders.add(deletedResources[i]);

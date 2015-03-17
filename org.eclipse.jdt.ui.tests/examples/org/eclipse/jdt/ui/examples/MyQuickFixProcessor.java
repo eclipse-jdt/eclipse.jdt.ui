@@ -43,16 +43,12 @@ public class MyQuickFixProcessor implements IQuickFixProcessor {
 */
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ICorrectionProcessor#hasCorrections(org.eclipse.jdt.core.ICompilationUnit, int)
-	 */
+	@Override
 	public boolean hasCorrections(ICompilationUnit unit, int problemId) {
 		return (problemId == IProblem.NumericValueOutOfRange);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ICorrectionProcessor#getCorrections(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[])
-	 */
+	@Override
 	public IJavaCompletionProposal[] getCorrections(IInvocationContext context, IProblemLocation[] locations) throws CoreException {
 		for (int i= 0; i < locations.length; i++) {
 			if (locations[i].getProblemId() == IProblem.NumericValueOutOfRange) {

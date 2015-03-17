@@ -205,6 +205,7 @@ public class CallInliner {
 			fOriginal= original;
 			fTypes= types;
 		}
+		@Override
 		public boolean visit(ITypeBinding node) {
 			IMethodBinding[] methods= node.getDeclaredMethods();
 			for (int i= 0; i < methods.length; i++) {
@@ -246,7 +247,7 @@ public class CallInliner {
 		fBuffer= RefactoringFileBuffers.acquire(fCUnit);
 		fSourceProvider= provider;
 		fImportRewrite= StubUtility.createImportRewrite(targetAstRoot, true);
-		fLocals= new ArrayList<VariableDeclarationStatement>(3);
+		fLocals= new ArrayList<>(3);
 		fRewrite= ASTRewrite.create(targetAstRoot.getAST());
 		fRewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 		fTypeEnvironment= new TypeEnvironment();
@@ -284,7 +285,7 @@ public class CallInliner {
 	public RefactoringStatus initialize(ASTNode invocation, int severity) {
 		RefactoringStatus result= new RefactoringStatus();
 		fInvocation= invocation;
-		fLocals= new ArrayList<VariableDeclarationStatement>(3);
+		fLocals= new ArrayList<>(3);
 
 		checkMethodDeclaration(result, severity);
 		if (result.getSeverity() >= severity)
@@ -773,8 +774,8 @@ public class CallInliner {
      * @return all arguments that cannot be inlined
      */
 	private Set<Expression> crossCheckArguments(List<Expression> arguments) {
-		final Set<IBinding> assigned= new HashSet<IBinding>();
-		final Set<Expression> result= new HashSet<Expression>();
+		final Set<IBinding> assigned= new HashSet<>();
+		final Set<Expression> result= new HashSet<>();
 		for (Iterator<Expression> iter= arguments.iterator(); iter.hasNext();) {
 			final Expression expression= iter.next();
 			expression.accept(new ASTVisitor() {

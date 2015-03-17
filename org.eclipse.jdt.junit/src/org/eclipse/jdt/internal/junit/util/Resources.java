@@ -100,7 +100,7 @@ public class Resources {
 	 * @see org.eclipse.core.resources.IWorkspace#validateEdit(org.eclipse.core.resources.IFile[], java.lang.Object)
 	 */
 	public static IStatus makeCommittable(IResource[] resources, Object context) {
-		List<IFile> readOnlyFiles= new ArrayList<IFile>();
+		List<IFile> readOnlyFiles= new ArrayList<>();
 		for (IResource resource : resources) {
 			if (resource.getType() == IResource.FILE && resource.getResourceAttributes().isReadOnly())
 				readOnlyFiles.add((IFile) resource);
@@ -126,7 +126,7 @@ public class Resources {
 	}
 
 	private static Map<IFile, Long> createModificationStampMap(List<IFile> files){
-		Map<IFile, Long> map= new HashMap<IFile, Long>();
+		Map<IFile, Long> map= new HashMap<>();
 		for (IFile file : files) {
 			map.put(file, new Long(file.getModificationStamp()));
 		}

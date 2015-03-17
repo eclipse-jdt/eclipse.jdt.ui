@@ -52,6 +52,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		setDescription(DESCRIPTION);
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 		fRefactoring= (InlineMethodRefactoring)getRefactoring();

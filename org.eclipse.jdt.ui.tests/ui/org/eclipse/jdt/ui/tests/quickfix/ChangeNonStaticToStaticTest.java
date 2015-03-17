@@ -13,9 +13,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.Hashtable;
 import java.util.Map;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -49,9 +46,12 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class ChangeNonStaticToStaticTest extends QuickFixTest {
 
-	private static final Class THIS= ChangeNonStaticToStaticTest.class;
+	private static final Class<ChangeNonStaticToStaticTest> THIS= ChangeNonStaticToStaticTest.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -68,8 +68,9 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 
@@ -93,6 +94,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
@@ -110,7 +112,7 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 	}
 
 	private CodeStyleCleanUp createCleanUp() {
-		Map options= new Hashtable();
+		Map<String, String> options= new Hashtable<>();
 		options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpOptions.TRUE);
 	    return new CodeStyleCleanUp(options);

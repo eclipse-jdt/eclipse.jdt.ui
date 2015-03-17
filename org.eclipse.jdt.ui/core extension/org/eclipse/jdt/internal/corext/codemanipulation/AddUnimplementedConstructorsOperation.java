@@ -59,7 +59,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	private String[] fCreatedImports;
 
 	/** The method binding keys for which a constructor was generated */
-	private final List<String> fCreatedMethods= new ArrayList<String>();
+	private final List<String> fCreatedMethods= new ArrayList<>();
 
 	/** Should the import edits be applied? */
 	private final boolean fImports;
@@ -182,6 +182,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	/*
 	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public void run(IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();

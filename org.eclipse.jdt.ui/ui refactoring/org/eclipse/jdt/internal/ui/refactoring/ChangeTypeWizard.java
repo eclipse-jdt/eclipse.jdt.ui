@@ -107,7 +107,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 
 		public ChangeTypeLabelProvider(){
 			fGrayColor= Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW);
-			fGrayImages= new HashMap<Image, Image>();
+			fGrayImages= new HashMap<>();
 		}
 
 		private Collection<ITypeBinding> fInvalidTypes;
@@ -124,9 +124,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			fireLabelProviderChanged(new LabelProviderChangedEvent(this));
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
-		 */
+		@Override
 		public Color getForeground(Object element) {
 			if (isInvalid(element))
 				return fGrayColor;
@@ -141,9 +139,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 				return fInvalidTypes.contains(element);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
-		 */
+		@Override
 		public Color getBackground(Object element) {
 			return null;
 		}
@@ -193,12 +189,14 @@ public class ChangeTypeWizard extends RefactoringWizard {
 		private class ValidTypesTask implements Runnable {
 			private Collection<ITypeBinding> fInvalidTypes;
 			private Collection<ITypeBinding> fValidTypes;
+			@Override
 			public void run() {
 				IRunnableWithProgress runnable= new IRunnableWithProgress() {
+					@Override
 					public void run(IProgressMonitor pm) {
 						pm.beginTask(RefactoringMessages.ChangeTypeWizard_analyzing, 1000);
 						ChangeTypeRefactoring ct= (ChangeTypeRefactoring)ChangeTypeWizard.this.getRefactoring();
-						fInvalidTypes = new HashSet<ITypeBinding>();
+						fInvalidTypes = new HashSet<>();
 						fInvalidTypes.addAll(fCT.getAllSuperTypes(ct.getOriginalType()));
 						fValidTypes= ct.computeValidTypes(new SubProgressMonitor(pm, 950));
 						fInvalidTypes.add(ct.getOriginalType());
@@ -261,6 +259,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 		}
 
 
+		@Override
 		public void createControl(Composite parent) {
 			Composite composite= new Composite(parent, SWT.NONE);
 			setControl(composite);
@@ -297,6 +296,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			fLabelProvider= new ChangeTypeLabelProvider();
 			fTreeViewer.setLabelProvider(fLabelProvider);
 			ISelectionChangedListener listener= new ISelectionChangedListener(){
+				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
 					IStructuredSelection selection= (IStructuredSelection)event.getSelection();
 					typeSelected((ITypeBinding)selection.getFirstElement());
@@ -364,9 +364,6 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			super.dispose();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
-		 */
 		@Override
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);

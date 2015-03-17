@@ -51,17 +51,12 @@ public class JarImportWizardAction extends Action implements IObjectActionDelega
 	/** The active workbench part, or <code>null</code> */
 	private IWorkbenchPart fWorkbenchPart= null;
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
 		run(this);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void run(final IAction action) {
 		if (fWorkbenchPart == null || fSelection == null)
 			return;
@@ -75,9 +70,7 @@ public class JarImportWizardAction extends Action implements IObjectActionDelega
 		dialog.open();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void selectionChanged(final IAction action, final ISelection selection) {
 		fSelection= null;
 		if (selection instanceof IStructuredSelection) {
@@ -101,16 +94,12 @@ public class JarImportWizardAction extends Action implements IObjectActionDelega
 		action.setEnabled(fSelection != null);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void selectionChanged(final SelectionChangedEvent event) {
 		selectionChanged(this, event.getSelection());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setActivePart(final IAction action, final IWorkbenchPart part) {
 		fWorkbenchPart= part;
 	}

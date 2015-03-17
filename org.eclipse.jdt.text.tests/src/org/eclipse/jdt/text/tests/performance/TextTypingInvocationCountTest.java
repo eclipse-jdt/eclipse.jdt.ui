@@ -24,6 +24,7 @@ import org.eclipse.jface.text.source.AnnotationPainter;
  * @since 3.1
  * @deprecated since INVOCATION_COUNT dimension is no longer supported.
  */
+@Deprecated
 public class TextTypingInvocationCountTest extends TypingInvocationCountTest {
 
 	private static class Setup extends TypingInvocationCountTest.Setup {
@@ -32,16 +33,18 @@ public class TextTypingInvocationCountTest extends TypingInvocationCountTest {
 			super(test);
 		}
 
+		@Override
 		protected String getEditorId() {
 			return EditorTestHelper.TEXT_EDITOR_ID;
 		}
 
+		@Override
 		protected String getPerspectiveId() {
 			return EditorTestHelper.RESOURCE_PERSPECTIVE_ID;
 		}
 	}
 
-	private static final Class THIS= TypingInvocationCountTest.class;
+	private static final Class<TypingInvocationCountTest> THIS= TypingInvocationCountTest.class;
 
 	public TextTypingInvocationCountTest() {
 		super();

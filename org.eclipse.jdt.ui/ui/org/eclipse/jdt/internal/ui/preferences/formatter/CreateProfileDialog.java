@@ -106,6 +106,7 @@ public class CreateProfileDialog extends StatusDialog {
 		fNameText= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fNameText.setLayoutData(gd);
 		fNameText.addModifyListener( new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				doValidation();
 			}
@@ -131,9 +132,11 @@ public class CreateProfileDialog extends StatusDialog {
 		fEditCheckbox= new Button(composite, SWT.CHECK);
 		fEditCheckbox.setText(FormatterMessages.CreateProfileDialog_open_edit_dialog_checkbox_text);
 		fEditCheckbox.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fOpenEditDialog= ((Button)e.widget).getSelection();
 			}
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
@@ -183,7 +186,7 @@ public class CreateProfileDialog extends StatusDialog {
 
 		JavaPlugin.getDefault().getDialogSettings().put(PREF_OPEN_EDIT_DIALOG, fOpenEditDialog);
 
-		final Map<String, String> baseSettings= new HashMap<String, String>(fSortedProfiles.get(fProfileCombo.getSelectionIndex()).getSettings());
+		final Map<String, String> baseSettings= new HashMap<>(fSortedProfiles.get(fProfileCombo.getSelectionIndex()).getSettings());
 		final String profileName= fNameText.getText();
 
 		fCreatedProfile= new CustomProfile(profileName, baseSettings, fProfileVersioner.getCurrentVersion(), fProfileVersioner.getProfileKind());

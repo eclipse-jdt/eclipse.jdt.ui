@@ -78,7 +78,7 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 
 					// compute minmimum relevance and already proposed list
 					int relevance= Integer.MAX_VALUE;
-					Set<String> proposed= new HashSet<String>();
+					Set<String> proposed= new HashSet<>();
 					for (Iterator<ICompletionProposal> it= types.iterator(); it.hasNext();) {
 						AbstractJavaCompletionProposal p= (AbstractJavaCompletionProposal) it.next();
 						IJavaElement element= p.getJavaElement();

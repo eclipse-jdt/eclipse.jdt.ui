@@ -26,6 +26,7 @@ public class JavaElementTypeComparator implements Comparator<IJavaElement> {
 	 *
 	 * @see Comparator#compare(Object, Object)
 	 */
+	@Override
 	public int compare(IJavaElement o1, IJavaElement o2) {
 		return getIdForJavaElement(o1) - getIdForJavaElement(o2);
 	}

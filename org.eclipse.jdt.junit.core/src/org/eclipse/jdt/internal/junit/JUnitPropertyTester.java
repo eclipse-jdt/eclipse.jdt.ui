@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,9 +39,7 @@ public class JUnitPropertyTester extends PropertyTester {
 
 	private static final String PROPERTY_CAN_LAUNCH_AS_JUNIT_TEST= "canLaunchAsJUnit"; //$NON-NLS-1$
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
-	 */
+	@Override
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
 		if (!(receiver instanceof IAdaptable)) {
 			throw new IllegalArgumentException("Element must be of type 'IAdaptable', is " + (receiver == null ? "null" : receiver.getClass().getName())); //$NON-NLS-1$ //$NON-NLS-2$
@@ -56,9 +54,9 @@ public class JUnitPropertyTester extends PropertyTester {
 				return false;
 			}
 		} else { // is IAdaptable
-			element= (IJavaElement) ((IAdaptable) receiver).getAdapter(IJavaElement.class);
+			element= ((IAdaptable) receiver).getAdapter(IJavaElement.class);
 			if (element == null) {
-				IResource resource= (IResource) ((IAdaptable) receiver).getAdapter(IResource.class);
+				IResource resource= ((IAdaptable) receiver).getAdapter(IResource.class);
 				element = JavaCore.create(resource);
 				if (element == null) {
 					return false;

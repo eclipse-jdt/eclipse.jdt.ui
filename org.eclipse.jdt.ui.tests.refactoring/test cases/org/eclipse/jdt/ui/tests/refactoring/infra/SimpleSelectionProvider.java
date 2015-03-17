@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 public class SimpleSelectionProvider implements ISelectionProvider {
 	private ISelection fSelection;
 
-	public SimpleSelectionProvider(Collection collection) {
+	public SimpleSelectionProvider(Collection<?> collection) {
 		this(collection.toArray());
 	}
 
@@ -31,16 +31,20 @@ public class SimpleSelectionProvider implements ISelectionProvider {
 		fSelection= new StructuredSelection(elements);
 	}
 
+	@Override
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 	}
 
+	@Override
 	public ISelection getSelection() {
 		return fSelection;
 	}
 
+	@Override
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 	}
 
+	@Override
 	public void setSelection(ISelection selection) {
 	}
 

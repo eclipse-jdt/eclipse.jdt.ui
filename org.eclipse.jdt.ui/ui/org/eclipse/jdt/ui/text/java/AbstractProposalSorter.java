@@ -66,6 +66,7 @@ public abstract class AbstractProposalSorter implements Comparator<ICompletionPr
 	 * 
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
+	@Override
 	public abstract int compare(ICompletionProposal p1, ICompletionProposal p2);
 
 	/**

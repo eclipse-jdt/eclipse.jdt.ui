@@ -125,7 +125,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 		fFilter= new MemberFilter();
 
 		String title, helpContext;
-		ArrayList<MemberFilterAction> actions= new ArrayList<MemberFilterAction>(4);
+		ArrayList<MemberFilterAction> actions= new ArrayList<>(4);
 
 		// fields
 		int filterProperty= FILTER_FIELDS;
@@ -245,6 +245,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 		if (refresh) {
 			fViewer.getControl().setRedraw(false);
 			BusyIndicator.showWhile(fViewer.getControl().getDisplay(), new Runnable() {
+				@Override
 				public void run() {
 					fViewer.refresh();
 				}
@@ -299,9 +300,6 @@ public class MemberFilterActionGroup extends ActionGroup {
 			}, false);
 	}
 
-	/* (non-Javadoc)
-	 * @see ActionGroup#fillActionBars(IActionBars)
-	 */
 	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		contributeToToolBar(actionBars.getToolBarManager());
@@ -341,9 +339,6 @@ public class MemberFilterActionGroup extends ActionGroup {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see ActionGroup#dispose()
-	 */
 	@Override
 	public void dispose() {
 		super.dispose();

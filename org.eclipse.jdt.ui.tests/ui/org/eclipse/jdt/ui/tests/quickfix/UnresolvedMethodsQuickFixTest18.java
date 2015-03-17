@@ -13,9 +13,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -35,12 +32,16 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
-	private static final Class THIS= UnresolvedMethodsQuickFixTest18.class;
+	private static final Class<UnresolvedMethodsQuickFixTest18> THIS= UnresolvedMethodsQuickFixTest18.class;
 
 	private IJavaProject fJProject1;
 
@@ -58,8 +59,9 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		return new Java18ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(JavaCore.COMPILER_PB_NO_EFFECT_ASSIGNMENT, JavaCore.IGNORE);
@@ -79,6 +81,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
@@ -99,7 +102,7 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Y.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);

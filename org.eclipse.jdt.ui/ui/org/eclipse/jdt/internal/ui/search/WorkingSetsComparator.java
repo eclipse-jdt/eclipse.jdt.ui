@@ -23,6 +23,7 @@ class WorkingSetsComparator implements Comparator<IWorkingSet[]> {
 	/*
 	 * @see Comparator#compare(Object, Object)
 	 */
+	@Override
 	public int compare(IWorkingSet[] w1, IWorkingSet[] w2) {
 		return fCollator.compare(w1[0].getLabel(), w2[0].getLabel());
 	}

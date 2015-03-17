@@ -210,6 +210,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		super();
 	}
 
+	@Override
 	public boolean hasAssists(IInvocationContext context) throws CoreException {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null) {
@@ -257,11 +258,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
+	@Override
 	public IJavaCompletionProposal[] getAssists(IInvocationContext context, IProblemLocation[] locations) throws CoreException {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null) {
 			ArrayList<ASTNode> coveredNodes= AdvancedQuickAssistProcessor.getFullyCoveredNodes(context, coveringNode);
-			ArrayList<ICommandAccess> resultingCollections= new ArrayList<ICommandAccess>();
+			ArrayList<ICommandAccess> resultingCollections= new ArrayList<>();
 			boolean noErrorsAtLocation= noErrorsAtLocation(locations);
 
 			// quick assists that show up also if there is an error/warning
@@ -576,7 +578,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		// add correction proposal
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		Map<String, String> options= new Hashtable<String, String>();
+		Map<String, String> options= new Hashtable<>();
 		options.put(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.USE_LAMBDA, CleanUpOptions.TRUE);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_LAMBDA_EXPRESSION, image, context);
@@ -603,7 +605,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		// add correction proposal
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		Map<String, String> options= new Hashtable<String, String>();
+		Map<String, String> options= new Hashtable<>();
 		options.put(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION, CleanUpOptions.TRUE);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new LambdaExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_ANONYMOUS_CLASS_CREATION, image, context);
@@ -789,13 +791,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static String[] getUniqueParameterNames(MethodReference methodReference, IMethodBinding functionalMethod) throws JavaModelException {
 		String[] parameterNames= ((IMethod) functionalMethod.getJavaElement()).getParameterNames();
-		List<String> oldNames= new ArrayList<String>(Arrays.asList(parameterNames));
+		List<String> oldNames= new ArrayList<>(Arrays.asList(parameterNames));
 		String[] newNames= new String[oldNames.size()];
-		List<String> excludedNames= new ArrayList<String>(ASTNodes.getVisibleLocalVariablesInScope(methodReference));
+		List<String> excludedNames= new ArrayList<>(ASTNodes.getVisibleLocalVariablesInScope(methodReference));
 
 		for (int i= 0; i < oldNames.size(); i++) {
 			String paramName= oldNames.get(i);
-			List<String> allNamesToExclude= new ArrayList<String>(excludedNames);
+			List<String> allNamesToExclude= new ArrayList<>(excludedNames);
 			allNamesToExclude.addAll(oldNames.subList(0, i));
 			allNamesToExclude.addAll(oldNames.subList(i + 1, oldNames.size()));
 			if (allNamesToExclude.contains(paramName)) {
@@ -834,7 +836,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static List<SimpleName> getInvocationArguments(AST ast, int begIndex, int noOfLambdaParameters, String[] lambdaParamNames) {
-		List<SimpleName> args= new ArrayList<SimpleName>();
+		List<SimpleName> args= new ArrayList<>();
 		for (int i= begIndex; i < noOfLambdaParameters; i++) {
 			args.add(ast.newSimpleName(lambdaParamNames[i]));
 		}
@@ -842,7 +844,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static List<Type> getCopiedTypeArguments(ASTRewrite rewrite, List<Type> typeArguments) {
-		List<Type> copiedTypeArgs= new ArrayList<Type>();
+		List<Type> copiedTypeArgs= new ArrayList<>();
 		for (Type typeArg : typeArguments) {
 			copiedTypeArgs.add((Type) rewrite.createCopyTarget(typeArg));
 		}
@@ -996,7 +998,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (exprBody == null || !isValidReferenceToMethod(exprBody))
 			return false;
 
-		List<Expression> lambdaParameters= new ArrayList<Expression>();
+		List<Expression> lambdaParameters= new ArrayList<>();
 		for (VariableDeclaration param : (List<VariableDeclaration>) lambda.parameters()) {
 			lambdaParameters.add(param.getName());
 		}
@@ -1300,7 +1302,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (fix != null && resultingCollections != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			int relevance= locations == null ? IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS : IProposalRelevance.INSERT_INFERRED_TYPE_ARGUMENTS_ERROR; // if error -> higher than ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals()
-			Map<String, String> options= new HashMap<String, String>();
+			Map<String, String> options= new HashMap<>();
 			options.put(CleanUpConstants.USE_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
 			options.put(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new TypeParametersCleanUp(options), relevance, image, context);
@@ -1633,7 +1635,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 
-		List<Expression> operands= new ArrayList<Expression>();
+		List<Expression> operands= new ArrayList<>();
 		collectInfixPlusOperands(oldInfixExpression, operands);
 		
 		Statement lastAppend= insertAfter;
@@ -1749,10 +1751,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ContextSensitiveImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(root, oldInfixExpression.getStartPosition(), importRewrite);
 
 		// collect operands
-		List<Expression> operands= new ArrayList<Expression>();
+		List<Expression> operands= new ArrayList<>();
 		collectInfixPlusOperands(oldInfixExpression, operands);
 
-		List<Expression> formatArguments= new ArrayList<Expression>();
+		List<Expression> formatArguments= new ArrayList<>();
 		String formatString= ""; //$NON-NLS-1$
 		int i= 0;
 		for (Iterator<Expression> iterator= operands.iterator(); iterator.hasNext();) {
@@ -2625,7 +2627,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (resultingCollections == null) {
 				return true;
 			}
-			Map<String, String> options= new Hashtable<String, String>();
+			Map<String, String> options= new Hashtable<>();
 			options.put(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpOptions.TRUE);
 			options.put(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_NEVER, CleanUpOptions.TRUE);
 			ICleanUp cleanUp= new ControlStatementsCleanUp(options);
@@ -3117,7 +3119,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				VariableDeclarationFragment varFragment= ast.newVariableDeclarationFragment();
 				String[] varNames= StubUtility.getVariableNameSuggestions(NamingConventions.VK_LOCAL, project, initializerTypeBinding, initializer, usedVarNames);
 				varName= varNames[0];
-				usedVarNames= new ArrayList<String>(usedVarNames);
+				usedVarNames= new ArrayList<>(usedVarNames);
 				usedVarNames.add(varName);
 				varNameGenerated= true;
 				SimpleName varNameNode= ast.newSimpleName(varName);
@@ -3269,7 +3271,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		Map<String, String> options= new HashMap<String, String>();
+		Map<String, String> options= new HashMap<>();
 		options.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
 		ICleanUp cleanUp= new ConvertLoopCleanUp(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.CONVERT_FOR_LOOP_TO_ENHANCED, image, context);
@@ -3292,7 +3294,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		Map<String, String> options= new HashMap<String, String>();
+		Map<String, String> options= new HashMap<>();
 		options.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
 		ICleanUp cleanUp= new ConvertLoopCleanUp(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.CONVERT_ITERABLE_LOOP_TO_ENHANCED, image, context);
@@ -3386,7 +3388,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		Map<String, String> options= new Hashtable<String, String>();
+		Map<String, String> options= new Hashtable<>();
 		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, CleanUpOptions.TRUE);
@@ -3440,7 +3442,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (expressionBinding == null || !expressionBinding.isEnum())
 			return false;
 
-		ArrayList<String> missingEnumCases= new ArrayList<String>();
+		ArrayList<String> missingEnumCases= new ArrayList<>();
 		boolean hasDefault= LocalCorrectionsSubProcessor.evaluateMissingSwitchCases(expressionBinding, switchStatement.statements(), missingEnumCases);
 		if (missingEnumCases.size() == 0 && hasDefault)
 			return false;

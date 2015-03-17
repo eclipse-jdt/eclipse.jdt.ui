@@ -43,21 +43,22 @@ public class ProfileVersioner implements IProfileVersioner {
 
 	private static final int CURRENT_VERSION= VERSION_12;
 
+	@Override
 	public int getFirstVersion() {
 	    return VERSION_1;
     }
 
+	@Override
 	public int getCurrentVersion() {
 	    return CURRENT_VERSION;
     }
 
-	/**
-     * {@inheritDoc}
-     */
-    public String getProfileKind() {
+    @Override
+	public String getProfileKind() {
 	    return CODE_FORMATTER_PROFILE_KIND;
     }
 
+	@Override
 	public void update(CustomProfile profile) {
 		final Map<String, String> oldSettings= profile.getSettings();
 		Map<String, String> newSettings= updateAndComplete(oldSettings, profile.getVersion());
@@ -699,6 +700,7 @@ public class ProfileVersioner implements IProfileVersioner {
 	 *             {@link DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT}
 	 *             and {@link DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_LINE_COMMENT}.
 	 */
+	@Deprecated
 	private static final String FORMATTER_COMMENT_FORMAT2= DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT;
 
 	/**
@@ -707,40 +709,53 @@ public class ProfileVersioner implements IProfileVersioner {
 	 *             and
 	 *             {@link DefaultCodeFormatterConstants#FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_JAVADOC_COMMENT}
 	 */
+	@Deprecated
 	private static final String FORMATTER_COMMENT_CLEAR_BLANK_LINES= DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES;
 
 	/**
 	 * @deprecated see https://bugs.eclipse.org/318010
 	 * @since 3.7
 	 */
+	@Deprecated
 	private static final String FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER= DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER;
 
 	/**
 	 * @deprecated see https://bugs.eclipse.org/318010
 	 * @since 3.7
 	 */
+	@Deprecated
 	private static final String FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION= DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION;
 
 	// Old comment formatter constants
 	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_SOURCE} */
+	@Deprecated
 	private static final String FORMATTER_COMMENT_FORMATSOURCE= PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE;
 	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION} */
+	@Deprecated
 	private static final String FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION= PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION;
 	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_HEADER} */
+	@Deprecated
 	private static final String FORMATTER_COMMENT_FORMATHEADER= PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER;
 	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INDENT_ROOT_TAGS} */
+	@Deprecated
 	private static final String FORMATTER_COMMENT_INDENTROOTTAGS= PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS;
 	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT} */
+	@Deprecated
 	private static final String FORMATTER_COMMENT_FORMAT= PreferenceConstants.FORMATTER_COMMENT_FORMAT;
 	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER} */
+	@Deprecated
 	private static final String FORMATTER_COMMENT_NEWLINEFORPARAMETER= PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER;
 	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS} */
+	@Deprecated
 	private static final String FORMATTER_COMMENT_SEPARATEROOTTAGS= PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS;
 	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_CLEAR_BLANK_LINES} */
+	@Deprecated
 	private static final String FORMATTER_COMMENT_CLEARBLANKLINES= PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES;
 	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_LINE_LENGTH} */
+	@Deprecated
 	private static final String FORMATTER_COMMENT_LINELENGTH= PreferenceConstants.FORMATTER_COMMENT_LINELENGTH;
 	/** @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_HTML} */
+	@Deprecated
 	private static final String FORMATTER_COMMENT_FORMATHTML= PreferenceConstants.FORMATTER_COMMENT_FORMATHTML;
 
  }

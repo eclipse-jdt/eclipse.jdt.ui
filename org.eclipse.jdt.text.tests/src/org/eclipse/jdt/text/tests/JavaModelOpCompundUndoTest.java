@@ -93,6 +93,7 @@ public class JavaModelOpCompundUndoTest extends TestCase {
 		fCompilationUnit= fragment.createCompilationUnit(CU_NAME, CU_CONTENTS, true, new NullProgressMonitor());
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		setUpProject(JavaCore.VERSION_1_5);
 		setUpEditor();
@@ -119,6 +120,7 @@ public class JavaModelOpCompundUndoTest extends TestCase {
 		}
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		EditorTestHelper.closeEditor(fEditor);
 		fEditor= null;

@@ -53,11 +53,13 @@ public class JUnitProgressBar extends Canvas {
 			}
 		});
 		addPaintListener(new PaintListener() {
+			@Override
 			public void paintControl(PaintEvent e) {
 				paint(e);
 			}
 		});
 		addDisposeListener(new DisposeListener() {
+			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				fFailureColor.dispose();
 				fOKColor.dispose();

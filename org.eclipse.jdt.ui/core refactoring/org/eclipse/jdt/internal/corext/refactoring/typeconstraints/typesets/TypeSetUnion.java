@@ -24,9 +24,6 @@ public class TypeSetUnion extends TypeSet {
 		fRHS= rhs;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isUniverse()
-	 */
 	@Override
 	public boolean isUniverse() {
 		if (fLHS.isUniverse() || fRHS.isUniverse())
@@ -36,49 +33,31 @@ public class TypeSetUnion extends TypeSet {
 		throw new IllegalStateException("unimplemented"); //$NON-NLS-1$
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
-	 */
 	@Override
 	public TypeSet makeClone() {
 		return new TypeSetUnion(fLHS.makeClone(), fRHS.makeClone());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isEmpty()
-	 */
 	@Override
 	public boolean isEmpty() {
 		return fLHS.isEmpty() && fRHS.isEmpty();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(TType)
-	 */
 	@Override
 	public boolean contains(TType t) {
 		return fLHS.contains(t) || fRHS.contains(t);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#containsAll(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
-	 */
 	@Override
 	public boolean containsAll(TypeSet s) {
 		return fLHS.containsAll(s) || fRHS.containsAll(s);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#anyMember()
-	 */
 	@Override
 	public TType anyMember() {
 		return fLHS.anyMember();
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof TypeSetUnion) {
@@ -93,72 +72,45 @@ public class TypeSetUnion extends TypeSet {
 		return fLHS.hashCode() * 37 + fRHS.hashCode();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#upperBound()
-	 */
 	@Override
 	public TypeSet upperBound() {
 		throw new IllegalStateException("unimplemented"); //$NON-NLS-1$
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#lowerBound()
-	 */
 	@Override
 	public TypeSet lowerBound() {
 		throw new IllegalStateException("unimplemented"); //$NON-NLS-1$
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#iterator()
-	 */
 	@Override
 	public Iterator<TType> iterator() {
 		throw new IllegalStateException("unimplemented"); //$NON-NLS-1$
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isSingleton()
-	 */
 	@Override
 	public boolean isSingleton() {
 		return fLHS.isSingleton() && fRHS.isSingleton() && fLHS.anyMember().equals(fRHS.anyMember());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueLowerBound()
-	 */
 	@Override
 	public boolean hasUniqueLowerBound() {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueUpperBound()
-	 */
 	@Override
 	public boolean hasUniqueUpperBound() {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueLowerBound()
-	 */
 	@Override
 	public TType uniqueLowerBound() {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueUpperBound()
-	 */
 	@Override
 	public TType uniqueUpperBound() {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#enumerate()
-	 */
 	@Override
 	public EnumeratedTypeSet enumerate() {
 		EnumeratedTypeSet result= fLHS.enumerate();

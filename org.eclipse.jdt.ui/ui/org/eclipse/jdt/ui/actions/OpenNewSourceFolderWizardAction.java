@@ -49,9 +49,6 @@ public class OpenNewSourceFolderWizardAction extends AbstractOpenWizardAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SOURCEFOLDER_WIZARD_ACTION);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#createWizard()
-	 */
 	@Override
 	protected final INewWizard createWizard() throws CoreException {
 		return new NewSourceFolderCreationWizard();

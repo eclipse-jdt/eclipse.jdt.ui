@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,10 +27,12 @@ import org.eclipse.jdt.core.IType;
  */
 public interface ITestFinder {
 	ITestFinder NULL= new ITestFinder() {
-		public void findTestsInContainer(IJavaElement element, Set result, IProgressMonitor pm) {
+		@Override
+		public void findTestsInContainer(IJavaElement element, Set<IType> result, IProgressMonitor pm) {
 			// do nothing
 		}
 
+		@Override
 		public boolean isTest(IType type) {
 			return false;
 		}
@@ -42,7 +44,7 @@ public interface ITestFinder {
 	 * @param pm the progress monitor
 	 * @throws CoreException thrown when tests can not be found
 	 */
-	public abstract void findTestsInContainer(IJavaElement element, Set/*<IType>*/ result, IProgressMonitor pm) throws CoreException;
+	public abstract void findTestsInContainer(IJavaElement element, Set<IType> result, IProgressMonitor pm) throws CoreException;
 
 	public abstract boolean isTest(IType type) throws CoreException;
 }

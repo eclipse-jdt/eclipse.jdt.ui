@@ -64,7 +64,7 @@ public final class MoveMethodDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
-	public MoveMethodDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public MoveMethodDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.MOVE_METHOD, project, description, comment, arguments, flags);
 	}
 

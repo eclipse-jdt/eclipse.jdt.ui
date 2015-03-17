@@ -67,6 +67,7 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 	/*
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */
+	@Override
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		if (ensureHoverCreated())
 			return fHover.getHoverInfo(textViewer, hoverRegion);

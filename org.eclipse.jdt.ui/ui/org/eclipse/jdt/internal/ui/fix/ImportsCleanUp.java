@@ -44,18 +44,12 @@ public class ImportsCleanUp extends AbstractCleanUp {
 		super();
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public CleanUpRequirements getRequirements() {
 		boolean isOrganizeImports= isEnabled(CleanUpConstants.ORGANIZE_IMPORTS);
 		return new CleanUpRequirements(isOrganizeImports, isOrganizeImports, false, null);
 	}
 
-	/**
-     * {@inheritDoc}
-     */
     @Override
 	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
     	CompilationUnit compilationUnit= context.getAST();
@@ -66,9 +60,6 @@ public class ImportsCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.ORGANIZE_IMPORTS), fStatus);
 	}
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
 	public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 
@@ -80,9 +71,6 @@ public class ImportsCleanUp extends AbstractCleanUp {
 		return super.checkPreConditions(project, compilationUnits, monitor);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
 	public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
     	fCodeGeneratorSettings= null;
@@ -97,9 +85,6 @@ public class ImportsCleanUp extends AbstractCleanUp {
     	}
     }
 
-	/**
-     * {@inheritDoc}
-     */
     @Override
 	public String[] getStepDescriptions() {
     	if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS))
@@ -108,9 +93,6 @@ public class ImportsCleanUp extends AbstractCleanUp {
 	    return null;
     }
 
-	/**
-     * {@inheritDoc}
-     */
     @Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();

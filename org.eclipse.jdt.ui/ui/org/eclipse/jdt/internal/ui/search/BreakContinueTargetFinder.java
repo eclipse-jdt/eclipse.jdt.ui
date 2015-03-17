@@ -66,6 +66,7 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 	/*
 	 * Initializes the finder. Returns error message or <code>null</code> if everything is OK.
 	 */
+	@Override
 	public String initialize(CompilationUnit root, int offset, int length) {
 		return initialize(root, NodeFinder.perform(root, offset, length));
 	}
@@ -73,6 +74,7 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 	/*
 	 * Initializes the finder. Returns error message or <code>null</code> if everything is OK.
 	 */
+	@Override
 	public String initialize(CompilationUnit root, ASTNode node) {
 		ASTNode controlNode= getBreakOrContinueNode(node);
 		if (controlNode != null) {
@@ -124,12 +126,13 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 	 *
 	 * @return the locations of all occurrences or <code>null</code> if no matches are found
 	 */
+	@Override
 	public OccurrenceLocation[] getOccurrences() {
 		ASTNode targetNode= findTargetNode(fSelected);
 		if (!isEnclosingStatement(targetNode))
 			return null;
 
-		List<OccurrenceLocation> list= new ArrayList<OccurrenceLocation>();
+		List<OccurrenceLocation> list= new ArrayList<>();
 		OccurrenceLocation location= getLocationForFirstToken(targetNode);
 		if (location != null) {
 			list.add(location);
@@ -204,26 +207,32 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 		return false;
 	}
 
+	@Override
 	public CompilationUnit getASTRoot() {
 		return fASTRoot;
 	}
 
+	@Override
 	public String getElementName() {
 		return ASTNodes.asString(fSelected);
 	}
 
+	@Override
 	public String getID() {
 		return ID;
 	}
 
+	@Override
 	public String getJobLabel() {
 		return SearchMessages.BreakContinueTargetFinder_job_label;
 	}
 
+	@Override
 	public int getSearchKind() {
 		return IOccurrencesFinder.K_BREAK_TARGET_OCCURRENCE;
 	}
 
+	@Override
 	public String getUnformattedPluralLabel() {
 		if (fIsBreak) {
 			return SearchMessages.BreakContinueTargetFinder_break_label_plural;
@@ -232,6 +241,7 @@ public class BreakContinueTargetFinder extends ASTVisitor implements IOccurrence
 		}
 	}
 
+	@Override
 	public String getUnformattedSingularLabel() {
 		if (fIsBreak) {
 			return SearchMessages.BreakContinueTargetFinder_break_label_singular;

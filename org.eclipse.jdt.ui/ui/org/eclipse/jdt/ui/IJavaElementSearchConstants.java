@@ -42,6 +42,7 @@ public interface IJavaElementSearchConstants {
 	 *
 	 * @deprecated use CONSIDER_ALL_TYPES or CONSIDER_CLASSES_AND_INTERFACES instead
 	 */
+	@Deprecated
 	public static final int CONSIDER_TYPES= CONSIDER_CLASSES | CONSIDER_INTERFACES;
 
 	/**

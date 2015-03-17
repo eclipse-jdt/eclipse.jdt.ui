@@ -55,13 +55,14 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 
 		fContext= context;
 		fPreferencePage= preferencePage;
-		fConfigurations= new ArrayList<ISaveParticipantPreferenceConfiguration>();
+		fConfigurations= new ArrayList<>();
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#createControl(org.eclipse.swt.widgets.Composite)
 	 * @since 3.3
 	 */
+	@Override
 	public Control createControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
@@ -77,6 +78,7 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 			return composite;
 
 		Arrays.sort(descriptors, new Comparator<SaveParticipantDescriptor>() {
+			@Override
 			public int compare(SaveParticipantDescriptor d1, SaveParticipantDescriptor d2) {
 				return Collator.getInstance().compare(d1.getPostSaveListener().getName(), d2.getPostSaveListener().getName());
 			}
@@ -96,8 +98,10 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#dispose()
 	 */
+	@Override
 	public void dispose() {
 		delegateToPreferenceConfiguration(new IDelegateOperation() {
+			@Override
 			public void run(ISaveParticipantPreferenceConfiguration block) {
 				block.dispose();
 			}
@@ -107,8 +111,10 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#initialize()
 	 */
+	@Override
 	public void initialize() {
 		delegateToPreferenceConfiguration(new IDelegateOperation() {
+			@Override
 			public void run(ISaveParticipantPreferenceConfiguration block) {
 				IAdaptable element= null;
 				if (fPreferencePage instanceof PropertyAndPreferencePage) {
@@ -122,8 +128,10 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#performDefaults()
 	 */
+	@Override
 	public void performDefaults() {
 		delegateToPreferenceConfiguration(new IDelegateOperation() {
+			@Override
 			public void run(ISaveParticipantPreferenceConfiguration block) {
 				block.performDefaults();
 			}
@@ -133,30 +141,30 @@ class SaveParticipantConfigurationBlock implements IPreferenceAndPropertyConfigu
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#performOk()
 	 */
+	@Override
 	public void performOk() {
 		delegateToPreferenceConfiguration(new IDelegateOperation() {
+			@Override
 			public void run(ISaveParticipantPreferenceConfiguration block) {
 				block.performOk();
 			}
 		});
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void enableProjectSettings() {
 		delegateToPreferenceConfiguration(new IDelegateOperation() {
+			@Override
 			public void run(ISaveParticipantPreferenceConfiguration block) {
 				block.enableProjectSettings();
 			}
 		});
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void disableProjectSettings() {
 		delegateToPreferenceConfiguration(new IDelegateOperation() {
+			@Override
 			public void run(ISaveParticipantPreferenceConfiguration block) {
 				block.disableProjectSettings();
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,11 +18,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Vector;
 
+import org.eclipse.test.performance.PerformanceMeter;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import org.eclipse.test.performance.PerformanceMeter;
 
 
 /**
@@ -33,7 +33,7 @@ public class PerfTestSuite extends TestSuite {
 		super();
 	}
 
-	public PerfTestSuite(Class theClass, String name) {
+	public PerfTestSuite(Class<?> theClass, String name) {
 		super(name);
 		try {
 			getTestConstructor(theClass); // Avoid generating multiple error messages
@@ -47,8 +47,8 @@ public class PerfTestSuite extends TestSuite {
 			return;
 		}
 
-		Class superClass= theClass;
-		Vector names= new Vector();
+		Class<?> superClass= theClass;
+		Vector<String> names= new Vector<>();
 		while (Test.class.isAssignableFrom(superClass)) {
 			Method[] methods= superClass.getDeclaredMethods();
 			for (int i= 0; i < methods.length; i++) {
@@ -58,7 +58,7 @@ public class PerfTestSuite extends TestSuite {
 		}
 	}
 
-	private void addPerformanceTestMethod(Method m, Vector names, Class theClass) {
+	private void addPerformanceTestMethod(Method m, Vector<String> names, Class<?> theClass) {
 		String name= m.getName();
 		if (names.contains(name))
 			return;
@@ -77,12 +77,12 @@ public class PerfTestSuite extends TestSuite {
 
 	private boolean isMeasureMethod(Method m) {
 		String name= m.getName();
-		Class[] parameters= m.getParameterTypes();
-		Class returnType= m.getReturnType();
+		Class<?>[] parameters= m.getParameterTypes();
+		Class<?> returnType= m.getReturnType();
 		return parameters.length == 1 && name.startsWith("measure") && returnType.equals(Void.TYPE) && PerformanceMeter.class.isAssignableFrom(parameters[0]); //$NON-NLS-1$
 	 }
 
-	public PerfTestSuite(Class theClass) {
+	public PerfTestSuite(Class<?> theClass) {
 		this(theClass, theClass.getName());
 	}
 
@@ -97,8 +97,8 @@ public class PerfTestSuite extends TestSuite {
 	 * @param name hte name of the test
 	 * @return a new performance test
 	 */
-	static public Test createPerformanceTest(Class theClass, String name) {
-		Constructor constructor;
+	static public Test createPerformanceTest(Class<?> theClass, String name) {
+		Constructor<?> constructor;
 		try {
 			constructor= getTestConstructor(theClass);
 		} catch (NoSuchMethodException e) {
@@ -133,6 +133,7 @@ public class PerfTestSuite extends TestSuite {
 
 	public static Test warning(final String message) {
 		return new TestCase("warning") { //$NON-NLS-1$
+			@Override
 			protected void runTest() {
 				fail(message);
 			}

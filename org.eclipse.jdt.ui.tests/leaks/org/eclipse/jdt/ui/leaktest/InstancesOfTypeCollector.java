@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,25 +23,25 @@ import org.eclipse.jdt.ui.leaktest.reftracker.ReferencedObject;
  */
 public class InstancesOfTypeCollector extends ReferenceVisitor {
 
-	private final ArrayList fResults;
+	private final ArrayList<ReferenceInfo> fResults;
 	private final boolean fIncludeSubtypes;
 	private final String fRequestedTypeName;
 
 	public InstancesOfTypeCollector(String requestedTypeName, boolean includeSubtypes) {
 		fIncludeSubtypes= includeSubtypes;
-		fResults= new ArrayList();
+		fResults= new ArrayList<>();
 		fRequestedTypeName= requestedTypeName;
 	}
 
 	public ReferenceInfo[] getResults() {
-		return (ReferenceInfo[]) fResults.toArray(new ReferenceInfo[fResults.size()]);
+		return fResults.toArray(new ReferenceInfo[fResults.size()]);
 	}
 
 	public String getResultString() {
 		int i= 0;
 		StringBuffer buf= new StringBuffer();
-		for (Iterator iterator= fResults.iterator(); iterator.hasNext();) {
-			ReferenceInfo element= (ReferenceInfo) iterator.next();
+		for (Iterator<ReferenceInfo> iterator= fResults.iterator(); iterator.hasNext();) {
+			ReferenceInfo element= iterator.next();
 			buf.append("Element ").append(i++).append('\n');
 			buf.append(element.toString()).append('\n');
 		}
@@ -52,7 +52,8 @@ public class InstancesOfTypeCollector extends ReferenceVisitor {
 		return fResults.size();
 	}
 
-	public boolean visit(ReferencedObject reference, Class clazz, boolean firstVisit) {
+	@Override
+	public boolean visit(ReferencedObject reference, Class<?> clazz, boolean firstVisit) {
 		if (firstVisit) {
 			if (isMatchingType(clazz)) {
 				fResults.add(new ReferenceInfo(reference));
@@ -61,16 +62,16 @@ public class InstancesOfTypeCollector extends ReferenceVisitor {
 		return true;
 	}
 
-	private boolean isMatchingType(Class clazz) {
+	private boolean isMatchingType(Class<?> clazz) {
 		if (clazz.getName().equals(fRequestedTypeName)) {
 			return true;
 		}
 		if (fIncludeSubtypes) {
-			Class superclass= clazz.getSuperclass();
+			Class<?> superclass= clazz.getSuperclass();
 			if (superclass != null && isMatchingType(superclass)) {
 				return true;
 			}
-			Class[] interfaces= clazz.getInterfaces();
+			Class<?>[] interfaces= clazz.getInterfaces();
 			for (int i= 0; i < interfaces.length; i++) {
 				if (isMatchingType(interfaces[i])) {
 					return true;

@@ -35,17 +35,11 @@ public class ConvertLoopCleanUp extends AbstractCleanUp {
 		super();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED), false, false, null);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit compilationUnit= context.getAST();
@@ -59,12 +53,9 @@ public class ConvertLoopCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String[] getStepDescriptions() {
-		List<String> result= new ArrayList<String>();
+		List<String> result= new ArrayList<>();
 
 		if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED))
 			result.add(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description);
@@ -72,9 +63,6 @@ public class ConvertLoopCleanUp extends AbstractCleanUp {
 		return result.toArray(new String[result.size()]);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();

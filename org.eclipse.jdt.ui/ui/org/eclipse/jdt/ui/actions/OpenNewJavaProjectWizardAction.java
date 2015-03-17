@@ -76,17 +76,11 @@ public class OpenNewJavaProjectWizardAction extends AbstractOpenWizardAction {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#createWizard()
-	 */
 	@Override
 	protected final INewWizard createWizard() throws CoreException {
 		return new JavaProjectWizard(fPageOne, fPageTwo);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#doCreateProjectFirstOnEmptyWorkspace(Shell)
-	 */
 	@Override
 	protected boolean doCreateProjectFirstOnEmptyWorkspace(Shell shell) {
 		return true; // can work on an empty workspace

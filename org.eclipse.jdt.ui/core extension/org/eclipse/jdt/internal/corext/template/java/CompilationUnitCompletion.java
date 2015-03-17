@@ -220,7 +220,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 				} else {
 					ITypeHierarchy hierarchy= sub.newSupertypeHierarchy(null);
 					IType[] allTypes= hierarchy.getAllTypes();
-					List<IType> matches= new ArrayList<IType>();
+					List<IType> matches= new ArrayList<>();
 					for (int i= 0; i < allTypes.length; i++) {
 						IType type= allTypes[i];
 						if (type.getElementName().equals(supertype))
@@ -315,7 +315,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 * @since 3.3
 		 */
 		public String[] getTypeArgumentBoundSignatures(String type, int index) {
-			List<String> all= new ArrayList<String>();
+			List<String> all= new ArrayList<>();
 			IType[] supertypes= getSupertypes(type);
 			if (fUnit != null) {
 				for (int i= 0; i < supertypes.length; i++) {
@@ -368,7 +368,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		private final ITypeHierarchy fHierarchy;
 		private final Variable fVariable;
 		private final IType fType;
-		private final List<String> fBounds= new ArrayList<String>();
+		private final List<String> fBounds= new ArrayList<>();
 
 		/**
 		 * Creates a new type parameter resolver to compute the bindings of type
@@ -711,9 +711,9 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 
 	private ICompilationUnit fUnit;
 
-	private List<Variable> fLocalVariables= new ArrayList<Variable>();
-	private List<Variable> fFields= new ArrayList<Variable>();
-	private Map<String, String> fLocalTypes= new HashMap<String, String>();
+	private List<Variable> fLocalVariables= new ArrayList<>();
+	private List<Variable> fFields= new ArrayList<>();
+	private Map<String, String> fLocalTypes= new HashMap<>();
 
 	private boolean fError;
 
@@ -845,7 +845,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	 * @return all visible arrays
 	 */
 	public Variable[] findArraysInCurrentScope() {
-		List<Variable> arrays= new ArrayList<Variable>();
+		List<Variable> arrays= new ArrayList<>();
 
 		// local variables
 		for (ListIterator<Variable> iterator= fLocalVariables.listIterator(fLocalVariables.size()); iterator.hasPrevious();) {
@@ -874,7 +874,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	 * @return all local variables matching <code>clazz</code>
 	 */
 	public Variable[] findLocalVariables(String clazz) {
-		List<Variable> matches= new ArrayList<Variable>();
+		List<Variable> matches= new ArrayList<>();
 
 		for (ListIterator<Variable> iterator= fLocalVariables.listIterator(fLocalVariables.size()); iterator.hasPrevious();) {
 			Variable localVariable= iterator.previous();
@@ -894,7 +894,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	 * @return all local variables matching <code>clazz</code>
 	 */
 	public Variable[] findFieldVariables(String clazz) {
-		List<Variable> matches= new ArrayList<Variable>();
+		List<Variable> matches= new ArrayList<>();
 
 		for (ListIterator<Variable> iterator= fFields.listIterator(fFields.size()); iterator.hasPrevious();) {
 			Variable localVariable= iterator.previous();
@@ -914,7 +914,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 	 * @return all visible <code>Iterable</code>s and arrays
 	 */
 	public Variable[] findIterablesInCurrentScope() {
-		List<Variable> iterables= new ArrayList<Variable>();
+		List<Variable> iterables= new ArrayList<>();
 
 		// local variables
 		for (ListIterator<Variable> iterator= fLocalVariables.listIterator(fLocalVariables.size()); iterator.hasPrevious();) {

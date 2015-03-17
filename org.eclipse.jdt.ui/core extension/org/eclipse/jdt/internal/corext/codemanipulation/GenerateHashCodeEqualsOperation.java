@@ -202,7 +202,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private int fDoubleCount;
 
 	/** The primitive types to generate custom hashCode() methods for */
-	private List<ITypeBinding> fCustomHashCodeTypes= new ArrayList<ITypeBinding>();
+	private List<ITypeBinding> fCustomHashCodeTypes= new ArrayList<>();
 
 	/** <code>true</code> to use 'instanceof' to compare types, <code>false</code> otherwise */
 	private final boolean fUseInstanceOf;
@@ -282,6 +282,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	/*
 	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public final void run(IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
@@ -429,6 +430,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			if (fFields[i].getType().isPrimitive()) {
 				Statement[] sts= createAddSimpleHashCode(fFields[i].getType(), new IHashCodeAccessProvider() {
 
+					@Override
 					public Expression getThisAccess(String name) {
 						return getThisAccessForHashCode(name);
 					}
@@ -474,7 +476,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 	private Statement[] createAddSimpleHashCode(ITypeBinding type, IHashCodeAccessProvider provider, String name, boolean singleTemp) {
 
-		List<Statement> statements= new ArrayList<Statement>();
+		List<Statement> statements= new ArrayList<>();
 
 		if (!type.isPrimitive()) {
 			// (element == null ? 0 : element.hashCode())
@@ -667,6 +669,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		Block forBody= fAst.newBlock();
 		Statement[] statements= createAddSimpleHashCode(binding, new IHashCodeAccessProvider() {
 
+			@Override
 			public Expression getThisAccess(String name) {
 				ArrayAccess a= fAst.newArrayAccess();
 				a.setArray(fAst.newSimpleName(VARIABLE_NAME_HASHCODE_PARAM));

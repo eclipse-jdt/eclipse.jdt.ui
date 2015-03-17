@@ -25,6 +25,7 @@ public class JavaElementContainmentAdapter implements IContainmentAdapter {
 
 	private IJavaModel fJavaModel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 
+	@Override
 	public boolean contains(Object workingSetElement, Object element, int flags) {
 		if (!(workingSetElement instanceof IJavaElement) || element == null)
 			return false;

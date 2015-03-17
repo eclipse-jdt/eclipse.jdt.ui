@@ -106,7 +106,7 @@ public class SuperTypeConstraintsSolver {
 	 * @param variables the cast variables (element type: <code>CastVariable2</code>)
 	 */
 	private void computeObsoleteCasts(final Collection<CastVariable2> variables) {
-		fObsoleteCasts= new HashMap<ICompilationUnit, Collection<CastVariable2>>();
+		fObsoleteCasts= new HashMap<>();
 		CastVariable2 variable= null;
 		for (final Iterator<CastVariable2> iterator= variables.iterator(); iterator.hasNext();) {
 			variable= iterator.next();
@@ -117,7 +117,7 @@ public class SuperTypeConstraintsSolver {
 				if (casts != null)
 					casts.add(variable);
 				else {
-					casts= new ArrayList<CastVariable2>(1);
+					casts= new ArrayList<>(1);
 					casts.add(variable);
 					fObsoleteCasts.put(unit, casts);
 				}
@@ -171,7 +171,7 @@ public class SuperTypeConstraintsSolver {
 	 * @param variables the constraint variables (element type: <code>ConstraintVariable2</code>)
 	 */
 	private void computeTypeOccurrences(final Collection<ConstraintVariable2> variables) {
-		fTypeOccurrences= new HashMap<ICompilationUnit, Collection<ITypeConstraintVariable>>();
+		fTypeOccurrences= new HashMap<>();
 		final TType superErasure= fModel.getSuperType().getErasure();
 		TType estimatedType= null;
 		ITypeSet set= null;
@@ -197,7 +197,7 @@ public class SuperTypeConstraintsSolver {
 								if (matches != null)
 									matches.add(declaration);
 								else {
-									matches= new ArrayList<ITypeConstraintVariable>(1);
+									matches= new ArrayList<>(1);
 									matches.add(declaration);
 									fTypeOccurrences.put(unit, matches);
 								}
@@ -254,7 +254,7 @@ public class SuperTypeConstraintsSolver {
 	 * Solves the constraints of the associated model.
 	 */
 	public final void solveConstraints() {
-		fProcessable= new LinkedList<ConstraintVariable2>();
+		fProcessable= new LinkedList<>();
 		final Collection<ConstraintVariable2> variables= fModel.getConstraintVariables();
 		final Collection<ITypeConstraint2> constraints= fModel.getTypeConstraints();
 		final int level= fModel.getCompliance();

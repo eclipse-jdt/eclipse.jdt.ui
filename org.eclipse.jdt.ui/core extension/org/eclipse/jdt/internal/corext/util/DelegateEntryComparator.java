@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperat
  */
 public class DelegateEntryComparator implements Comparator<DelegateEntry> {
 
+	@Override
 	public int compare(DelegateEntry firstEntry, DelegateEntry secondEntry) {
 		IVariableBinding firstVariable= firstEntry.field;
 		IVariableBinding secondVariable= secondEntry.field;

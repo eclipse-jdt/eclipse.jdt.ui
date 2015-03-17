@@ -40,6 +40,7 @@ public abstract class MoveLineTest extends TextPerformanceTestCase {
 
 	private AbstractTextEditor fEditor;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), getEditorId(), true);
@@ -50,6 +51,7 @@ public abstract class MoveLineTest extends TextPerformanceTestCase {
 
 	protected abstract String getEditorId();
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();

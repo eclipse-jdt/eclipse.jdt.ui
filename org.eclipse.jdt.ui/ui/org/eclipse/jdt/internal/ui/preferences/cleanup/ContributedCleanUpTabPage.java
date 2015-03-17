@@ -58,10 +58,12 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 			}
 		};
 		SafeRunner.run(new ISafeRunnable() {
+			@Override
 			public void handleException(Throwable exception) {
 				ContributedCleanUpTabPage.this.handleException(exception);
 			}
 
+			@Override
 			public void run() throws Exception {
 				fContribution.setOptions(options);
 			}
@@ -71,6 +73,7 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage#setOptions(org.eclipse.jdt.internal.ui.fix.CleanUpOptions)
 	 */
+	@Override
 	public void setOptions(CleanUpOptions options) {
 	}
 
@@ -89,6 +92,7 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 		parent.setLayout(layout);
 
 		SafeRunner.run(new ISafeRunnable() {
+			@Override
 			public void handleException(Throwable exception) {
 				ContributedCleanUpTabPage.this.handleException(exception);
 
@@ -97,6 +101,7 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 				label.setText(CleanUpMessages.ContributedCleanUpTabPage_ErrorPage_message);
 			}
 
+			@Override
 			public void run() throws Exception {
 				fContribution.createContents(parent);
 			}
@@ -106,13 +111,16 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage#getPreview()
 	 */
+	@Override
 	public String getPreview() {
 		final String[] result= new String[] { "" }; //$NON-NLS-1$
 		SafeRunner.run(new ISafeRunnable() {
+			@Override
 			public void handleException(Throwable exception) {
 				ContributedCleanUpTabPage.this.handleException(exception);
 			}
 
+			@Override
 			public void run() throws Exception {
 				result[0]= fContribution.getPreview();
 			}
@@ -127,10 +135,12 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 	public int getSelectedCleanUpCount() {
 		final int[] result= new int[] { 0 };
 		SafeRunner.run(new ISafeRunnable() {
+			@Override
 			public void handleException(Throwable exception) {
 				ContributedCleanUpTabPage.this.handleException(exception);
 			}
 
+			@Override
 			public void run() throws Exception {
 				int count= fContribution.getSelectedCleanUpCount();
 				Assert.isTrue(count >= 0 && count <= getCleanUpCount());
@@ -147,10 +157,12 @@ public class ContributedCleanUpTabPage extends CleanUpTabPage {
 	public int getCleanUpCount() {
 		final int[] result= new int[] { 0 };
 		SafeRunner.run(new ISafeRunnable() {
+			@Override
 			public void handleException(Throwable exception) {
 				ContributedCleanUpTabPage.this.handleException(exception);
 			}
 
+			@Override
 			public void run() throws Exception {
 				result[0]= fContribution.getCleanUpCount();
 			}

@@ -108,6 +108,7 @@ public class BracketInserterTest extends TestCase {
 	private Accessor fAccessor;
 	private IJavaProject fProject;
 
+	@Override
 	protected void setUp() throws Exception {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
@@ -143,6 +144,7 @@ public class BracketInserterTest extends TestCase {
 		}
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		EditorTestHelper.closeEditor(fEditor);
 		fEditor= null;
@@ -520,11 +522,14 @@ public class BracketInserterTest extends TestCase {
 	private void linkedType(char character, boolean nested, int expectedExitFlags) {
 		final int[] exitFlags= { -1 };
 		assertModel(nested).addLinkingListener(new ILinkedModeListener() {
+			@Override
 			public void left(LinkedModeModel model, int flags) {
 				exitFlags[0]= flags;
 			}
+			@Override
 			public void resume(LinkedModeModel model, int flags) {
 			}
+			@Override
 			public void suspend(LinkedModeModel model) {
 			}
 		});
@@ -554,6 +559,7 @@ public class BracketInserterTest extends TestCase {
 		fAccessor.invoke("handleKeyDown", new Object[] {event});
 
 		new DisplayHelper() {
+			@Override
 			protected boolean condition() {
 				return false;
 			}

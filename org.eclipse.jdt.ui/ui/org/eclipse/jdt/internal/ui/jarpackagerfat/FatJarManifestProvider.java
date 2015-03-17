@@ -50,17 +50,15 @@ public class FatJarManifestProvider implements IManifestProvider {
 		fBuilder= builder;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Manifest create(JarPackageData jarPackage) throws CoreException {
 		Manifest result;
 		Manifest ownManifest= createOwn(jarPackage);
 		setManifestClasspath(ownManifest, fBuilder.getManifestClasspath());
 		if (fBuilder.isMergeManifests()) {
-			List<ZipFile> openZips= new ArrayList<ZipFile>();
+			List<ZipFile> openZips= new ArrayList<>();
 			try {
-				List<Manifest> otherManifests= new ArrayList<Manifest>();
+				List<Manifest> otherManifests= new ArrayList<>();
 				Object[] elements= jarPackage.getElements();
 				for (int i= 0; i < elements.length; i++) {
 					Object element= elements[i];
@@ -143,9 +141,7 @@ public class FatJarManifestProvider implements IManifestProvider {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Manifest createDefault(String manifestVersion) {
 		Manifest manifest= new Manifest();
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, manifestVersion);

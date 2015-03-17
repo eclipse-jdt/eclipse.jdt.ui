@@ -53,9 +53,6 @@ public final class CompilationUnitRange {
 		return finder.getCoveredNode();
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		return "(" + fSourceRange.toString() + " in " + fCompilationUnit.getElementName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

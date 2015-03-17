@@ -69,9 +69,6 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 		}
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void initializeValidationData(IProgressMonitor pm) {
 		super.initializeValidationData(pm);
@@ -91,9 +88,6 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 		super.dispose();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		if (fValidationState == null) {
@@ -102,13 +96,11 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 		return fValidationState;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		final Change[] result= new Change[1];
 		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+			@Override
 			public void run(IProgressMonitor monitor) throws CoreException {
 				result[0]= DynamicValidationStateChange.super.perform(monitor);
 			}
@@ -117,9 +109,6 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 		return result[0];
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Change createUndoChange(Change[] childUndos) {
 		DynamicValidationStateChange result= new DynamicValidationStateChange(getName(), true);
@@ -129,6 +118,7 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 		return result;
 	}
 
+	@Override
 	public void workspaceChanged() {
 		long currentTime= System.currentTimeMillis();
 		if (currentTime - fTimeStamp < LIFE_TIME)
@@ -142,9 +132,11 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 		for (int i= 0; i < children.length; i++) {
 			final Change change= children[i];
 			SafeRunner.run(new ISafeRunnable() {
+				@Override
 				public void run() throws Exception {
 					change.dispose();
 				}
+				@Override
 				public void handleException(Throwable exception) {
 					JavaPlugin.log(exception);
 				}

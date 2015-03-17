@@ -205,6 +205,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	private static char[][] getSortedInterfacesNames(IClassFileReader cfReader) {
 		char[][] interfaceNames= cfReader.getInterfaceNames();
 		Arrays.sort(interfaceNames, new Comparator<char[]>() {
+			@Override
 			public int compare(char[] o1, char[] o2) {
 				return CharOperation.compareTo(o1, o2);
 			}
@@ -215,6 +216,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	private static IFieldInfo[] getSortedFields(IClassFileReader cfReader) {
 		IFieldInfo[] allFields= cfReader.getFieldInfos();
 		Arrays.sort(allFields, new Comparator<IFieldInfo>() {
+			@Override
 			public int compare(IFieldInfo o1, IFieldInfo o2) {
 				return CharOperation.compareTo(o1.getName(), o2.getName());
 			}
@@ -235,6 +237,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 	private static IMethodInfo[] getSortedMethods(IClassFileReader cfReader) {
 		IMethodInfo[] allMethods= cfReader.getMethodInfos();
 		Arrays.sort(allMethods, new Comparator<IMethodInfo>() {
+			@Override
 			public int compare(IMethodInfo mi1, IMethodInfo mi2) {
 				if (mi1.isConstructor() != mi2.isConstructor()) {
 					return mi1.isConstructor() ? -1 : 1;
@@ -294,6 +297,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		if (display != null && !display.isDisposed()) {
 			display.asyncExec(new Runnable() {
 
+				@Override
 				public final void run() {
 					if (!display.isDisposed()) {
 						final Shell shell= display.getActiveShell();
@@ -330,6 +334,7 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		if (display != null && !display.isDisposed()) {
 			display.syncExec(new Runnable() {
 
+				@Override
 				public final void run() {
 					if (!display.isDisposed()) {
 						final Shell shell= display.getActiveShell();
@@ -349,15 +354,13 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		fCompilationUnit= unit;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) {
 		Assert.isNotNull(fragment);
 		try {
 			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
 
+				@Override
 				public final void run(final IProgressMonitor monitor) throws InterruptedException {
 					Assert.isNotNull(monitor);
 					String id= computeId(declarationNode, monitor);
@@ -372,9 +375,6 @@ public final class SerialVersionHashOperation extends AbstractSerialVersionOpera
 		return true;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void addLinkedPositions(ASTRewrite rewrite, VariableDeclarationFragment fragment, LinkedProposalModel positionGroups) {
 		//Do nothing

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,13 +17,13 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.internal.junit.runner.FailuresFirstPrioritizer;
+
 import junit.extensions.TestDecorator;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-
-import org.eclipse.jdt.internal.junit.runner.FailuresFirstPrioritizer;
 
 public class TestPriorization extends TestCase {
 
@@ -33,7 +33,7 @@ public class TestPriorization extends TestCase {
 				"testF(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)"
 		};
 		Test prioritized= prioritize(suite, priority);
-		List order= new ArrayList();
+		List<String> order= new ArrayList<>();
 		collectOrder(prioritized, order);
 		String[] expected= {
 				"testF", "testD", "testE"
@@ -56,7 +56,7 @@ public class TestPriorization extends TestCase {
 		};
 		Test prioritized= prioritize(suite, priority);
 
-		List order= new ArrayList();
+		List<String> order= new ArrayList<>();
 		collectOrder(prioritized, order);
 		String[] expected= {
 				"testF", "testD", "testE"
@@ -73,6 +73,7 @@ public class TestPriorization extends TestCase {
 		//			F
 
 		Test suite= new TestSetup(createSuiteDEF()) {
+			@Override
 			protected void setUp() throws Exception {}
 		};
 
@@ -80,7 +81,7 @@ public class TestPriorization extends TestCase {
 				"testF(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)"
 		};
 		Test reordered= prioritize(suite, priority);
-		List order= new ArrayList();
+		List<String> order= new ArrayList<>();
 		collectOrder(reordered, order);
 		String[] expected= {
 				"testF", "testD", "testE"
@@ -106,7 +107,7 @@ public class TestPriorization extends TestCase {
 				"testF(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)"
 		};
 		Test reordered= prioritize(suite, priority);
-		List order= new ArrayList();
+		List<String> order= new ArrayList<>();
 		collectOrder(reordered, order);
 
 		String[] expected= {
@@ -130,6 +131,7 @@ public class TestPriorization extends TestCase {
 		suite.addTest(createSuiteABC());
 		TestSuite suite2= createSuiteDEF();
 		suite.addTest(new TestSetup(suite2) {
+			@Override
 			protected void setUp() throws Exception {
 			}
 		});
@@ -138,7 +140,7 @@ public class TestPriorization extends TestCase {
 				"testF(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)"
 		};
 		Test reordered= prioritize(suite, priority);
-		List order= new ArrayList();
+		List<String> order= new ArrayList<>();
 		collectOrder(reordered, order);
 
 		String[] expected= {
@@ -173,7 +175,7 @@ public class TestPriorization extends TestCase {
 				"testF(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)"
 		};
 		Test reordered= prioritize(suite4, priority);
-		List order= new ArrayList();
+		List<String> order= new ArrayList<>();
 		collectOrder(reordered, order);
 
 		String[] expected= {
@@ -208,7 +210,7 @@ public class TestPriorization extends TestCase {
 				"testE(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)", "testF(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)"
 		};
 		Test reordered= prioritize(suite4, priority);
-		List order= new ArrayList();
+		List<String> order= new ArrayList<>();
 		collectOrder(reordered, order);
 
 		String[] expected= {
@@ -244,7 +246,7 @@ public class TestPriorization extends TestCase {
 				"testF(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)", "testZ(org.eclipse.jdt.junit.tests.TestPriorizationSuite)"
 		};
 		Test reordered= prioritize(suite4, priority);
-		List order= new ArrayList();
+		List<String> order= new ArrayList<>();
 		collectOrder(reordered, order);
 
 		String[] expected= {
@@ -278,26 +280,26 @@ public class TestPriorization extends TestCase {
 				"testF(org.eclipse.jdt.junit.tests.TestPriorizationSuite2)", "testZ(org.eclipse.jdt.junit.tests.TestPriorizationSuite)"
 		};
 		Test reordered= prioritize(suite, priority);
-		List order= new ArrayList();
+		List<String> order= new ArrayList<>();
 		collectOrder(reordered, order);
 
 		// can't check for exact order, since order of Class.getDeclaredMethods() is unspecified (bug 144503)
-		List suiteTests= new ArrayList(Arrays.asList(new String[] { "testX", "testY", "testZ" }));
-		List suite1Tests= new ArrayList(Arrays.asList(new String[] { "testA", "testB", "testC" }));
-		List suite2Tests= new ArrayList(Arrays.asList(new String[] { "testD", "testE", "testF" }));
+		List<String> suiteTests= new ArrayList<>(Arrays.asList(new String[] { "testX", "testY", "testZ" }));
+		List<String> suite1Tests= new ArrayList<>(Arrays.asList(new String[] { "testA", "testB", "testC" }));
+		List<String> suite2Tests= new ArrayList<>(Arrays.asList(new String[] { "testD", "testE", "testF" }));
 
-		assertEquals("testF", (String) order.get(0));
-		assertEquals("testZ", (String) order.get(6));
+		assertEquals("testF", order.get(0));
+		assertEquals("testZ", order.get(6));
 		for (int i= 0; i < 3; i++) {
-			String test= (String) order.get(i);
+			String test= order.get(i);
 			assertTrue(test, suite2Tests.remove(test));
 		}
 		for (int i= 3; i < 6; i++) {
-			String test= (String) order.get(i);
+			String test= order.get(i);
 			assertTrue(test, suite1Tests.remove(test));
 		}
 		for (int i= 6; i < 9; i++) {
-			String test= (String) order.get(i);
+			String test= order.get(i);
 			assertTrue(test, suiteTests.remove(test));
 		}
 	}
@@ -339,16 +341,16 @@ public class TestPriorization extends TestCase {
 	}
 
 
-	private void checkOrder(String[] expected, List order) {
+	private void checkOrder(String[] expected, List<String> order) {
 //		assertEquals(Arrays.asList(expected), order);
 
 		assertEquals(enumerate(Arrays.asList(expected)), enumerate(order));
 	}
 
-	private static String enumerate(List list) {
+	private static String enumerate(List<String> list) {
 		StringBuffer buf= new StringBuffer();
-		for (Iterator iter= list.iterator(); iter.hasNext();) {
-			String s= (String) iter.next();
+		for (Iterator<String> iter= list.iterator(); iter.hasNext();) {
+			String s= iter.next();
 			buf.append(s).append('\n');
 		}
 		return buf.toString();
@@ -363,15 +365,15 @@ public class TestPriorization extends TestCase {
 	}
 	*/
 
-	private void collectOrder(Test suite, List order) {
+	private void collectOrder(Test suite, List<String> order) {
 		if (suite instanceof TestCase) {
 			String s= suite.toString();
 			s= s.substring(0, s.indexOf('('));
 			order.add(s);
 		} else if (suite instanceof TestSuite) {
 			TestSuite aSuite= (TestSuite)suite;
-			for (Enumeration e= aSuite.tests(); e.hasMoreElements();) {
-				Test test= (Test)e.nextElement();
+			for (Enumeration<Test> e= aSuite.tests(); e.hasMoreElements();) {
+				Test test= e.nextElement();
 				collectOrder(test, order);
 			}
 		} else if (suite instanceof TestDecorator) {

@@ -77,6 +77,7 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public List<IContextInformation> computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
@@ -84,7 +85,7 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 			ICompilationUnit cu= javaContext.getCompilationUnit();
 			int offset= javaContext.getInvocationOffset();
 
-			ArrayList<IContextInformation> result= new ArrayList<IContextInformation>();
+			ArrayList<IContextInformation> result= new ArrayList<>();
 
 			IJavadocCompletionProcessor[] processors= getContributedProcessors();
 			String error= null;
@@ -108,6 +109,7 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (context instanceof JavadocContentAssistInvocationContext) {
 			JavadocContentAssistInvocationContext javaContext= (JavadocContentAssistInvocationContext) context;
@@ -121,7 +123,7 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 				length= selection.y;
 			}
 
-			ArrayList<ICompletionProposal> result= new ArrayList<ICompletionProposal>();
+			ArrayList<ICompletionProposal> result= new ArrayList<>();
 
 			IJavadocCompletionProcessor[] processors= getContributedProcessors();
 			for (int i= 0; i < processors.length; i++) {
@@ -142,6 +144,7 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#getErrorMessage()
 	 */
+	@Override
 	public String getErrorMessage() {
 		return fErrorMessage;
 	}
@@ -150,6 +153,7 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionStarted()
 	 */
+	@Override
 	public void sessionStarted() {
 	}
 
@@ -157,6 +161,7 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionEnded()
 	 */
+	@Override
 	public void sessionEnded() {
 		fErrorMessage= null;
 	}

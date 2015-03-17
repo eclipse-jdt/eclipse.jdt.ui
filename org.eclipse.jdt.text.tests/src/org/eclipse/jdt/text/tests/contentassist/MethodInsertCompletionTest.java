@@ -24,7 +24,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  * @since 3.2
  */
 public class MethodInsertCompletionTest extends AbstractCompletionTest {
-	private static final Class THIS= MethodInsertCompletionTest.class;
+	private static final Class<MethodInsertCompletionTest> THIS= MethodInsertCompletionTest.class;
 
 	public static Test setUpTest(Test test) {
 		return new CompletionTestSetup(test);
@@ -37,6 +37,7 @@ public class MethodInsertCompletionTest extends AbstractCompletionTest {
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}

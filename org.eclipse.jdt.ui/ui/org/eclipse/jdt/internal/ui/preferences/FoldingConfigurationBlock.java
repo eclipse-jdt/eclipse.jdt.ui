@@ -74,6 +74,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.folding.IJavaFoldingPreferences#createControl(org.eclipse.swt.widgets.Group)
 		 */
+		@Override
 		public Control createControl(Composite composite) {
 			Composite inner= new Composite(composite, SWT.NONE);
 			inner.setLayout(new FillLayout(SWT.VERTICAL));
@@ -84,15 +85,19 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 			return inner;
 		}
 
+		@Override
 		public void initialize() {
 		}
 
+		@Override
 		public void performOk() {
 		}
 
+		@Override
 		public void performDefaults() {
 		}
 
+		@Override
 		public void dispose() {
 		}
 
@@ -119,15 +124,15 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		fStore= store;
 		fStore.addKeys(createOverlayStoreKeys());
 		fProviderDescriptors= createListModel();
-		fProviderPreferences= new HashMap<String, IJavaFoldingPreferenceBlock>();
-		fProviderControls= new HashMap<String, Control>();
+		fProviderPreferences= new HashMap<>();
+		fProviderControls= new HashMap<>();
 	}
 
 	private Map<String, JavaFoldingStructureProviderDescriptor> createListModel() {
 		JavaFoldingStructureProviderRegistry reg= JavaPlugin.getDefault().getFoldingStructureProviderRegistry();
 		reg.reloadExtensions();
 		JavaFoldingStructureProviderDescriptor[] descs= reg.getFoldingProviderDescriptors();
-		Map<String, JavaFoldingStructureProviderDescriptor> map= new HashMap<String, JavaFoldingStructureProviderDescriptor>();
+		Map<String, JavaFoldingStructureProviderDescriptor> map= new HashMap<>();
 		for (int i= 0; i < descs.length; i++) {
 			map.put(descs[i].getId(), descs[i]);
 		}
@@ -136,7 +141,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 
-		ArrayList<OverlayKey> overlayKeys= new ArrayList<OverlayKey>();
+		ArrayList<OverlayKey> overlayKeys= new ArrayList<>();
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_FOLDING_ENABLED));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FOLDING_PROVIDER));
@@ -152,6 +157,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 	 * @param parent the parent composite
 	 * @return the control for the preference page
 	 */
+	@Override
 	public Control createControl(Composite parent) {
 
 		Composite composite= new Composite(parent, SWT.NULL);
@@ -173,12 +179,14 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING);
 		fFoldingCheckbox.setLayoutData(gd);
 		fFoldingCheckbox.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean enabled= fFoldingCheckbox.getSelection();
 				fStore.setValue(PreferenceConstants.EDITOR_FOLDING_ENABLED, enabled);
 				updateCheckboxDependencies();
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
@@ -238,18 +246,21 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 			/*
 			 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 			 */
+			@Override
 			public void dispose() {
 			}
 
 			/*
 			 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 			 */
+			@Override
 			public void inputChanged(Viewer v, Object oldInput, Object newInput) {
 			}
 
 			/*
 			 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 			 */
+			@Override
 			public Object[] getElements(Object inputElement) {
 				return fProviderDescriptors.values().toArray();
 			}
@@ -273,6 +284,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		});
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection sel= (IStructuredSelection) event.getSelection();
 				if (!sel.isEmpty()) {
@@ -332,10 +344,12 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		prefs.initialize();
 	}
 
+	@Override
 	public void initialize() {
 		restoreFromPreferences();
 	}
 
+	@Override
 	public void performOk() {
 		for (Iterator<IJavaFoldingPreferenceBlock> it= fProviderPreferences.values().iterator(); it.hasNext();) {
 			IJavaFoldingPreferenceBlock prefs= it.next();
@@ -343,6 +357,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		}
 	}
 
+	@Override
 	public void performDefaults() {
 		restoreFromPreferences();
 		for (Iterator<IJavaFoldingPreferenceBlock> it= fProviderPreferences.values().iterator(); it.hasNext();) {
@@ -351,6 +366,7 @@ class FoldingConfigurationBlock implements IPreferenceConfigurationBlock {
 		}
 	}
 
+	@Override
 	public void dispose() {
 		for (Iterator<IJavaFoldingPreferenceBlock> it= fProviderPreferences.values().iterator(); it.hasNext();) {
 			IJavaFoldingPreferenceBlock prefs= it.next();

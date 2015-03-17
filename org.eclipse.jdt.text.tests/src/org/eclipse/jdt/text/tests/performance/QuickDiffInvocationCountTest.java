@@ -36,9 +36,10 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
  * @since 3.1
  * @deprecated since INVOCATION_COUNT dimension is no longer supported.
  */
+@Deprecated
 public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 
-	private static final Class THIS= QuickDiffInvocationCountTest.class;
+	private static final Class<QuickDiffInvocationCountTest> THIS= QuickDiffInvocationCountTest.class;
 
 	private static final String FILE= "/" + PerformanceTestSetup.PROJECT + "/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/TableTree.java";
 
@@ -51,6 +52,7 @@ public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), EditorTestHelper.TEXT_EDITOR_ID, true);
@@ -95,6 +97,7 @@ public class QuickDiffInvocationCountTest extends TextPerformanceTestCase {
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();

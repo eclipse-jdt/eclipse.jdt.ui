@@ -391,7 +391,7 @@ public class LocalCorrectionsSubProcessor {
 					isApplicable= overriddenMethod.getDeclaringClass().isFromSource();
 					if (!isApplicable) { // bug 349051
 						ITypeBinding[] exceptionTypes= overriddenMethod.getExceptionTypes();
-						ArrayList<ITypeBinding> unhandledExceptions= new ArrayList<ITypeBinding>(uncaughtExceptions.length);
+						ArrayList<ITypeBinding> unhandledExceptions= new ArrayList<>(uncaughtExceptions.length);
 						for (int i= 0; i < uncaughtExceptions.length; i++) {
 							ITypeBinding curr= uncaughtExceptions[i];
 							if (isSubtype(curr, exceptionTypes)) {
@@ -405,7 +405,7 @@ public class LocalCorrectionsSubProcessor {
 			}
 			if (isApplicable) {
 				ITypeBinding[] methodExceptions= binding.getExceptionTypes();
-				ArrayList<ITypeBinding> unhandledExceptions= new ArrayList<ITypeBinding>(uncaughtExceptions.length);
+				ArrayList<ITypeBinding> unhandledExceptions= new ArrayList<>(uncaughtExceptions.length);
 				for (int i= 0; i < uncaughtExceptions.length; i++) {
 					ITypeBinding curr= uncaughtExceptions[i];
 					if (!isSubtype(curr, methodExceptions)) {
@@ -441,7 +441,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	private static List<ITypeBinding> filterSubtypeExceptions(ITypeBinding[] exceptions) {
-		List<ITypeBinding> filteredExceptions= new ArrayList<ITypeBinding>();
+		List<ITypeBinding> filteredExceptions= new ArrayList<>();
 		filteredExceptions.addAll(Arrays.asList(exceptions));
 
 		for (Iterator<ITypeBinding> subtypeIterator= filteredExceptions.iterator(); subtypeIterator.hasNext();) {
@@ -510,7 +510,7 @@ public class LocalCorrectionsSubProcessor {
 		IProposableFix fix= StringFix.createFix(context.getASTRoot(), problem, false, true);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
-			Map<String, String> options= new Hashtable<String, String>();
+			Map<String, String> options= new Hashtable<>();
 			options.put(CleanUpConstants.ADD_MISSING_NLS_TAGS, CleanUpOptions.TRUE);
 			FixCorrectionProposal addNLS= new FixCorrectionProposal(fix, new StringCleanUp(options), IProposalRelevance.ADD_MISSING_NLS_TAGS, image, context);
 			addNLS.setCommandId(ADD_NON_NLS_ID);
@@ -522,7 +522,7 @@ public class LocalCorrectionsSubProcessor {
 		IProposableFix fix= StringFix.createFix(context.getASTRoot(), problem, true, false);
 		if (fix != null) {
 			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-			Map<String, String> options= new Hashtable<String, String>();
+			Map<String, String> options= new Hashtable<>();
 			options.put(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new StringCleanUp(options), IProposalRelevance.UNNECESSARY_NLS_TAG, image, context);
 			proposal.setCommandId(REMOVE_UNNECESSARY_NLS_TAG_ID);
@@ -538,7 +538,7 @@ public class LocalCorrectionsSubProcessor {
 		IProposableFix fix= CodeStyleFix.createIndirectAccessToStaticFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			Map<String, String> options= new HashMap<String, String>();
+			Map<String, String> options= new HashMap<>();
 			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpOptions.TRUE);
 			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleCleanUp(options), IProposalRelevance.CREATE_INDIRECT_ACCESS_TO_STATIC, image, context);
@@ -551,7 +551,7 @@ public class LocalCorrectionsSubProcessor {
 		if (fixes != null) {
 			IProposableFix fix1= fixes[0];
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			Map<String, String> options= new HashMap<String, String>();
+			Map<String, String> options= new HashMap<>();
 			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpOptions.TRUE);
 			options.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix1, new CodeStyleCleanUp(options), IProposalRelevance.CREATE_NON_STATIC_ACCESS_USING_DECLARING_TYPE, image, context);
@@ -559,7 +559,7 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(proposal);
 
 			if (fixes.length > 1) {
-				Map<String, String> options1= new HashMap<String, String>();
+				Map<String, String> options1= new HashMap<>();
 				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS, CleanUpOptions.TRUE);
 				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_SUBTYPE_ACCESS, CleanUpOptions.TRUE);
 				options1.put(CleanUpConstants.MEMBER_ACCESSES_STATIC_QUALIFY_WITH_DECLARING_CLASS_INSTANCE_ACCESS, CleanUpOptions.TRUE);
@@ -576,7 +576,7 @@ public class LocalCorrectionsSubProcessor {
 		if (addMethodFix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 
-			Map<String, String> settings= new Hashtable<String, String>();
+			Map<String, String> settings= new Hashtable<>();
 			settings.put(CleanUpConstants.ADD_MISSING_METHODES, CleanUpOptions.TRUE);
 			ICleanUp cleanUp= new UnimplementedCodeCleanUp(settings);
 
@@ -587,7 +587,7 @@ public class LocalCorrectionsSubProcessor {
 		if (makeAbstractFix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 
-			Map<String, String> settings= new Hashtable<String, String>();
+			Map<String, String> settings= new Hashtable<>();
 			settings.put(UnimplementedCodeCleanUp.MAKE_TYPE_ABSTRACT, CleanUpOptions.TRUE);
 			ICleanUp cleanUp= new UnimplementedCodeCleanUp(settings);
 
@@ -731,7 +731,7 @@ public class LocalCorrectionsSubProcessor {
 		IProposableFix fix= UnusedCodeFix.createRemoveUnusedCastFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			Map<String, String> options= new Hashtable<String, String>();
+			Map<String, String> options= new Hashtable<>();
 			options.put(CleanUpConstants.REMOVE_UNNECESSARY_CASTS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new UnnecessaryCodeCleanUp(options), IProposalRelevance.REMOVE_UNUSED_CAST, image, context);
 			proposals.add(proposal);
@@ -821,7 +821,7 @@ public class LocalCorrectionsSubProcessor {
 		IProposableFix fix= CodeStyleFix.createAddFieldQualifierFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			Map<String, String> options= new HashMap<String, String>();
+			Map<String, String> options= new HashMap<>();
 			options.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, CleanUpOptions.TRUE);
 			options.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleCleanUp(options), IProposalRelevance.ADD_FIELD_QUALIFIER, image, context);
@@ -1422,7 +1422,7 @@ public class LocalCorrectionsSubProcessor {
 				}
 			}
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			Map<String, String> options= new Hashtable<String, String>();
+			Map<String, String> options= new Hashtable<>();
 			options.put(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(options), IProposalRelevance.RAW_TYPE_REFERENCE, image, context);
 			proposal.setCommandId(RAW_TYPE_REFERENCE_ID);
@@ -1459,9 +1459,6 @@ public class LocalCorrectionsSubProcessor {
 					action.run(new StructuredSelection(cu));
 				}
 	
-				/**
-				 * {@inheritDoc}
-				 */
 				@Override
 				public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 					return CorrectionMessages.LocalCorrectionsSubProcessor_InferGenericTypeArguments_description;
@@ -1542,7 +1539,7 @@ public class LocalCorrectionsSubProcessor {
 		IProposableFix fix= TypeParametersFix.createRemoveRedundantTypeArgumentsFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-			Map<String, String> options= new HashMap<String, String>();
+			Map<String, String> options= new HashMap<>();
 			options.put(CleanUpConstants.USE_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
 			options.put(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new TypeParametersCleanUp(options), IProposalRelevance.REMOVE_REDUNDANT_TYPE_ARGUMENTS, image, context);
@@ -1669,7 +1666,7 @@ public class LocalCorrectionsSubProcessor {
 	private static Map<String, String[]> resolveMap;
 	private static String[] getMethod(String fieldName) {
 		if (resolveMap==null){
-			resolveMap=new HashMap<String, String[]>();
+			resolveMap=new HashMap<>();
 			resolveMap.put("java.util.Collections.EMPTY_MAP", new String[]{"java.util.Collections","emptyMap"});   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 			resolveMap.put("java.util.Collections.EMPTY_SET", new String[]{"java.util.Collections","emptySet"});  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 			resolveMap.put("java.util.Collections.EMPTY_LIST", new String[]{"java.util.Collections","emptyList"});//$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
@@ -1695,7 +1692,7 @@ public class LocalCorrectionsSubProcessor {
 				return;
 			}
 
-			ArrayList<String> missingEnumCases= new ArrayList<String>();
+			ArrayList<String> missingEnumCases= new ArrayList<>();
 			boolean hasDefault= evaluateMissingSwitchCases(binding, statement.statements(), missingEnumCases);
 			if (missingEnumCases.size() == 0 && hasDefault)
 				return;

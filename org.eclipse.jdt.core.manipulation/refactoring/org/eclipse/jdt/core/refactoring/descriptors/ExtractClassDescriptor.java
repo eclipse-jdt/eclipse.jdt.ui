@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -111,6 +111,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 			this.fNewFieldName= newFieldName;
 		}
 
+		@Override
 		public int hashCode() {
 			final int prime= 31;
 			int result= 1;
@@ -118,6 +119,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 			return result;
 		}
 
+		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
@@ -134,6 +136,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			return "Field:" + fFieldName + " new name:" + fNewFieldName + " create field:" + fCreateField; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
@@ -188,7 +191,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 	 *            the flags of the refactoring descriptor
 	 * @throws IllegalArgumentException if the argument map contains invalid keys/values
 	 */
-	public ExtractClassDescriptor(String project, String description, String comment, Map arguments, int flags) throws IllegalArgumentException {
+	public ExtractClassDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) throws IllegalArgumentException {
 		super(IJavaRefactorings.EXTRACT_CLASS, project, description, comment, arguments, flags);
 		if (JavaRefactoringDescriptorUtil.getString(arguments, OLD_FIELD_COUNT, true) != null) {
 			String[] oldFieldNames= JavaRefactoringDescriptorUtil.getStringArray(arguments, OLD_FIELD_COUNT, OLD_FIELD_NAME, 0);
@@ -212,13 +215,13 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 	 */
 	public static Field[] getFields(IType type) throws JavaModelException {
 		IField[] fields= type.getFields();
-		ArrayList result= new ArrayList();
+		ArrayList<Field> result= new ArrayList<>();
 		for (int i= 0; i < fields.length; i++) {
 			IField field= fields[i];
 			if (!Flags.isStatic(field.getFlags()) && !field.isEnumConstant())
 				result.add(new Field(field.getElementName()));
 		}
-		return (Field[]) result.toArray(new Field[result.size()]);
+		return result.toArray(new Field[result.size()]);
 	}
 
 	/**
@@ -368,9 +371,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 		return JavaRefactoringDescriptorUtil.getBoolean(fArguments, CREATE_GETTER_SETTER, false);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor#populateArgumentMap()
-	 */
+	@Override
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
 		if (fFields != null) {
@@ -391,9 +392,7 @@ public class ExtractClassDescriptor extends JavaRefactoringDescriptor {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor#validateDescriptor()
-	 */
+	@Override
 	public RefactoringStatus validateDescriptor() {
 		RefactoringStatus status= super.validateDescriptor();
 		if (getType() == null)

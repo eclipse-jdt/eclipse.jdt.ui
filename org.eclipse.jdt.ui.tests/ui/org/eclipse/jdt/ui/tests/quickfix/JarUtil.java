@@ -14,9 +14,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
-import java.io.*;
-import java.util.*;
-import java.util.zip.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
@@ -164,6 +173,7 @@ private static class Requestor implements ICompilerRequestor {
 		} else {
 			// default: all without errors
 			this.classFileFilter = new ClassFileFilter() {
+				@Override
 				public boolean include(CompilationResult unitResult) {
 					return (unitResult != null) && !unitResult.hasErrors();
 				}
@@ -171,6 +181,7 @@ private static class Requestor implements ICompilerRequestor {
 		}
 	}
 
+	@Override
 	public void acceptResult(CompilationResult compilationResult) {
 		this.hasErrors |= compilationResult.hasErrors();
 		this.problemLog += compilationResult.toString();
@@ -195,7 +206,7 @@ private static class Requestor implements ICompilerRequestor {
 		}
 	}
 }
-public static void compile(String[] pathsAndContents, Map options, String[] classpath, String outputPath, ClassFileFilter classFileFilter) {
+public static void compile(String[] pathsAndContents, Map<String, String> options, String[] classpath, String outputPath, ClassFileFilter classFileFilter) {
         IProblemFactory problemFactory = new DefaultProblemFactory(Locale.getDefault());
         Requestor requestor = new Requestor(classFileFilter);
         requestor.outputPath = outputPath.endsWith(File.separator) ? outputPath : outputPath + File.separator;
@@ -213,12 +224,15 @@ public static void compile(String[] pathsAndContents, Map options, String[] clas
         INameEnvironment nameEnvironment = new FileSystem(classpath, new String[] {}, null);
         IErrorHandlingPolicy errorHandlingPolicy =
             new IErrorHandlingPolicy() {
-                public boolean proceedOnErrors() {
+                @Override
+				public boolean proceedOnErrors() {
                     return true;
                 }
-                public boolean stopOnFirstError() {
+                @Override
+				public boolean stopOnFirstError() {
                     return false;
                 }
+				@Override
 				public boolean ignoreAllErrors() {
 					return false;
 				}
@@ -248,7 +262,7 @@ public static void createFile(String path, String contents) throws IOException {
         output.close();
     }
 }
-public static void createJar(String[] pathsAndContents, String[] extraPathsAndContents, Map options, ClassFileFilter classFileFilter, String[] classpath, String jarPath) throws IOException {
+public static void createJar(String[] pathsAndContents, String[] extraPathsAndContents, Map<String, String> options, ClassFileFilter classFileFilter, String[] classpath, String jarPath) throws IOException {
     String classesPath = getOutputDirectory() + File.separator + "classes";
     File classesDir = new File(classesPath);
     flushDirectoryContent(classesDir);
@@ -264,8 +278,8 @@ public static void createJar(String[] pathsAndContents, String[] extraPathsAndCo
 	}
     zip(classesDir, jarPath);
 }
-public static void createJar(String[] javaPathsAndContents, String[] extraPathsAndContents, String jarPath, String[] classpath, String compliance, Map options, ClassFileFilter classFileFilter) throws IOException {
-	Map compileOptions = getCompileOptions(compliance);
+public static void createJar(String[] javaPathsAndContents, String[] extraPathsAndContents, String jarPath, String[] classpath, String compliance, Map<String, String> options, ClassFileFilter classFileFilter) throws IOException {
+	Map<String, String> compileOptions = getCompileOptions(compliance);
 	if (options != null) {
 		compileOptions.putAll(options);
 	}
@@ -316,8 +330,8 @@ public static void flushDirectoryContent(File dir) {
         delete(files[i]);
     }
 }
-private static Map getCompileOptions(String compliance) {
-    Map options = new HashMap();
+private static Map<String, String> getCompileOptions(String compliance) {
+    Map<String, String> options = new HashMap<>();
     options.put(CompilerOptions.OPTION_Compliance, compliance);
     options.put(CompilerOptions.OPTION_Source, compliance);
     options.put(CompilerOptions.OPTION_TargetPlatform, compliance);
@@ -373,9 +387,10 @@ public static String[] getJavaClassLibs() {
 			};
 		}
 		String[] jarsNames = null;
-		ArrayList paths = new ArrayList();
+		ArrayList<String> paths = new ArrayList<>();
 		if ("DRLVM".equals(vmName)) {
 			FilenameFilter jarFilter = new FilenameFilter() {
+				@Override
 				public boolean accept(File dir, String name) {
 					return name.endsWith(".jar") & !name.endsWith("-src.jar");
 				}
@@ -398,7 +413,7 @@ public static String[] getJavaClassLibs() {
 	}
 	return jars;
 }
-private static void addJarEntries(String jreDir, String[] jarNames, ArrayList paths) {
+private static void addJarEntries(String jreDir, String[] jarNames, ArrayList<String> paths) {
 	for (int i = 0, max = jarNames.length; i < max; i++) {
 		final String currentName = jreDir + jarNames[i];
 		File f = new File(currentName);

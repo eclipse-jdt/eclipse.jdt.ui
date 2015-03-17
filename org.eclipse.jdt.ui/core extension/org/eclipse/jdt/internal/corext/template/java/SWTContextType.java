@@ -40,9 +40,6 @@ public class SWTContextType extends AbstractJavaContextType {
 	public static final String ID_STATEMENTS= "swt-statements"; //$NON-NLS-1$
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType#initializeContext(org.eclipse.jdt.internal.corext.template.java.JavaContext)
-	 */
 	@Override
 	protected void initializeContext(JavaContext context) {
 		if (!getId().equals(SWTContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere

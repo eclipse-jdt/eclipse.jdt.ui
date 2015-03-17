@@ -25,7 +25,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 public abstract class ActivateEditorTest extends TextPerformanceTestCase {
 
-	private static final Class THIS= ActivateEditorTest.class;
+	private static final Class<ActivateEditorTest> THIS= ActivateEditorTest.class;
 
 	private static final int WARM_UP_RUNS= 10;
 
@@ -58,6 +58,7 @@ public abstract class ActivateEditorTest extends TextPerformanceTestCase {
 		return suite;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		setWarmUpRuns(WARM_UP_RUNS);
@@ -66,6 +67,7 @@ public abstract class ActivateEditorTest extends TextPerformanceTestCase {
 		fEditors= EditorTestHelper.openInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, 0, getNumberOfEditors()), getEditorId());
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();

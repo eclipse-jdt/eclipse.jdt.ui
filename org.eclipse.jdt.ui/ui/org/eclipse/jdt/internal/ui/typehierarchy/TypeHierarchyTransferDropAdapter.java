@@ -28,17 +28,11 @@ public class TypeHierarchyTransferDropAdapter extends ViewerInputDropAdapter {
 		fTypeHierarchyViewPart= viewPart;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void doInputView(Object inputElement) {
 		fTypeHierarchyViewPart.setInputElement((IJavaElement) inputElement);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Object getInputElement(ISelection selection) {
 		Object single= SelectionUtil.getSingleElement(selection);

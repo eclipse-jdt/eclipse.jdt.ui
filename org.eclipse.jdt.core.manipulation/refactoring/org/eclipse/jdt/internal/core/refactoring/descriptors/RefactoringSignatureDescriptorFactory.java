@@ -53,7 +53,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new ChangeMethodSignatureDescriptor();
 	}
 	
-	public static ChangeMethodSignatureDescriptor createChangeMethodSignatureDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static ChangeMethodSignatureDescriptor createChangeMethodSignatureDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new ChangeMethodSignatureDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -61,7 +61,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new ConvertAnonymousDescriptor();
 	}
 
-	public static ConvertAnonymousDescriptor createConvertAnonymousDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static ConvertAnonymousDescriptor createConvertAnonymousDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new ConvertAnonymousDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -69,7 +69,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new GeneralizeTypeDescriptor();
 	}
 
-	public static GeneralizeTypeDescriptor createGeneralizeTypeDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static GeneralizeTypeDescriptor createGeneralizeTypeDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new GeneralizeTypeDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -77,7 +77,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new CopyDescriptor();
 	}
 
-	public static CopyDescriptor createCopyDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static CopyDescriptor createCopyDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new CopyDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -85,11 +85,11 @@ public class RefactoringSignatureDescriptorFactory {
 		return new DeleteDescriptor();
 	}
 
-	public static DeleteDescriptor createDeleteDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static DeleteDescriptor createDeleteDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new DeleteDescriptor(project, description, comment, arguments, flags);
 	}
 
-	public static ExtractClassDescriptor createExtractClassDescriptor(String project, String description, String comment, Map arguments, int flags) throws IllegalArgumentException {
+	public static ExtractClassDescriptor createExtractClassDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) throws IllegalArgumentException {
 		return new ExtractClassDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -101,7 +101,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new ExtractConstantDescriptor();
 	}
 
-	public static ExtractConstantDescriptor createExtractConstantDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static ExtractConstantDescriptor createExtractConstantDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new ExtractConstantDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -109,7 +109,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new ExtractInterfaceDescriptor();
 	}
 
-	public static ExtractInterfaceDescriptor createExtractInterfaceDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static ExtractInterfaceDescriptor createExtractInterfaceDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new ExtractInterfaceDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -117,7 +117,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new ExtractMethodDescriptor();
 	}
 
-	public static ExtractMethodDescriptor createExtractMethodDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static ExtractMethodDescriptor createExtractMethodDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new ExtractMethodDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -125,7 +125,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new ExtractSuperclassDescriptor();
 	}
 
-	public static ExtractSuperclassDescriptor createExtractSuperclassDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static ExtractSuperclassDescriptor createExtractSuperclassDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new ExtractSuperclassDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -133,7 +133,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new ExtractLocalDescriptor();
 	}
 
-	public static ExtractLocalDescriptor createExtractLocalDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static ExtractLocalDescriptor createExtractLocalDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new ExtractLocalDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -141,7 +141,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new InferTypeArgumentsDescriptor();
 	}
 
-	public static InferTypeArgumentsDescriptor createInferTypeArgumentsDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static InferTypeArgumentsDescriptor createInferTypeArgumentsDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new InferTypeArgumentsDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -149,7 +149,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new InlineConstantDescriptor();
 	}
 
-	public static InlineConstantDescriptor createInlineConstantDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static InlineConstantDescriptor createInlineConstantDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new InlineConstantDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -157,7 +157,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new InlineMethodDescriptor();
 	}
 
-	public static InlineMethodDescriptor createInlineMethodDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static InlineMethodDescriptor createInlineMethodDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new InlineMethodDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -165,7 +165,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new InlineLocalVariableDescriptor();
 	}
 
-	public static InlineLocalVariableDescriptor createInlineLocalVariableDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static InlineLocalVariableDescriptor createInlineLocalVariableDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new InlineLocalVariableDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -173,7 +173,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new IntroduceFactoryDescriptor();
 	}
 
-	public static IntroduceFactoryDescriptor createIntroduceFactoryDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static IntroduceFactoryDescriptor createIntroduceFactoryDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new IntroduceFactoryDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -181,7 +181,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new IntroduceIndirectionDescriptor();
 	}
 
-	public static IntroduceIndirectionDescriptor createIntroduceIndirectionDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static IntroduceIndirectionDescriptor createIntroduceIndirectionDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new IntroduceIndirectionDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -189,7 +189,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new IntroduceParameterObjectDescriptor();
 	}
 
-	public static IntroduceParameterObjectDescriptor createIntroduceParameterObjectDescriptor(String project, String description, String comment, Map arguments, int flags)
+	public static IntroduceParameterObjectDescriptor createIntroduceParameterObjectDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags)
 			throws IllegalArgumentException {
 		return new IntroduceParameterObjectDescriptor(project, description, comment, arguments, flags);
 	}
@@ -198,7 +198,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new IntroduceParameterDescriptor();
 	}
 
-	public static IntroduceParameterDescriptor createIntroduceParameterDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static IntroduceParameterDescriptor createIntroduceParameterDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new IntroduceParameterDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -206,7 +206,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new ConvertMemberTypeDescriptor();
 	}
 
-	public static ConvertMemberTypeDescriptor createConvertMemberTypeDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static ConvertMemberTypeDescriptor createConvertMemberTypeDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new ConvertMemberTypeDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -214,7 +214,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new MoveMethodDescriptor();
 	}
 
-	public static MoveMethodDescriptor createMoveMethodDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static MoveMethodDescriptor createMoveMethodDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new MoveMethodDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -222,7 +222,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new MoveDescriptor();
 	}
 
-	public static MoveDescriptor createMoveDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static MoveDescriptor createMoveDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new MoveDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -230,7 +230,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new MoveStaticMembersDescriptor();
 	}
 
-	public static MoveStaticMembersDescriptor createMoveStaticMembersDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static MoveStaticMembersDescriptor createMoveStaticMembersDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new MoveStaticMembersDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -238,7 +238,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new ConvertLocalVariableDescriptor();
 	}
 
-	public static ConvertLocalVariableDescriptor createConvertLocalVariableDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static ConvertLocalVariableDescriptor createConvertLocalVariableDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new ConvertLocalVariableDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -246,7 +246,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new PullUpDescriptor();
 	}
 
-	public static PullUpDescriptor createPullUpDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static PullUpDescriptor createPullUpDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new PullUpDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -254,7 +254,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new PushDownDescriptor();
 	}
 
-	public static PushDownDescriptor createPushDownDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static PushDownDescriptor createPushDownDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new PushDownDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -262,7 +262,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new RenameJavaElementDescriptor(id);
 	}
 
-	public static RenameJavaElementDescriptor createRenameJavaElementDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
+	public static RenameJavaElementDescriptor createRenameJavaElementDescriptor(String id, String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new RenameJavaElementDescriptor(id, project, description, comment, arguments, flags);
 	}
 
@@ -270,7 +270,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new EncapsulateFieldDescriptor();
 	}
 
-	public static EncapsulateFieldDescriptor createEncapsulateFieldDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static EncapsulateFieldDescriptor createEncapsulateFieldDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new EncapsulateFieldDescriptor(project, description, comment, arguments, flags);
 	}
 
@@ -278,7 +278,7 @@ public class RefactoringSignatureDescriptorFactory {
 		return new UseSupertypeDescriptor();
 	}
 
-	public static UseSupertypeDescriptor createUseSupertypeDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public static UseSupertypeDescriptor createUseSupertypeDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new UseSupertypeDescriptor(project, description, comment, arguments, flags);
 	}
 

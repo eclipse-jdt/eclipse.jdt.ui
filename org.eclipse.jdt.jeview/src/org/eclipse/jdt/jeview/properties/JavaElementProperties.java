@@ -48,8 +48,8 @@ import org.eclipse.jdt.jeview.JEViewPlugin;
 
 public class JavaElementProperties implements IPropertySource {
 	
-	private static HashMap<String, Property> fgIdToProperty= new HashMap<String, Property>();
-	private static LinkedHashMap<Class<?>, List<Property>> fgTypeToProperty= new LinkedHashMap<Class<?>, List<Property>>();
+	private static HashMap<String, Property> fgIdToProperty= new HashMap<>();
+	private static LinkedHashMap<Class<?>, List<Property>> fgTypeToProperty= new LinkedHashMap<>();
 	
 	
 	private static abstract class Property {
@@ -522,7 +522,7 @@ public class JavaElementProperties implements IPropertySource {
 		fgIdToProperty.put(property.getId(), property);
 		List<Property> properties= fgTypeToProperty.get(property.getType());
 		if (properties == null) {
-			properties= new ArrayList<Property>();
+			properties= new ArrayList<>();
 			fgTypeToProperty.put(property.getType(), properties);
 		}
 		properties.add(property);
@@ -534,8 +534,9 @@ public class JavaElementProperties implements IPropertySource {
 		fJavaElement= javaElement;
 	}
 	
+	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		List<IPropertyDescriptor> result= new ArrayList<IPropertyDescriptor>();
+		List<IPropertyDescriptor> result= new ArrayList<>();
 		for (Entry<Class<?>, List<Property>> entry : fgTypeToProperty.entrySet()) {
 			if (entry.getKey().isAssignableFrom(fJavaElement.getClass())) {
 				for (Property property : entry.getValue()) {
@@ -546,6 +547,7 @@ public class JavaElementProperties implements IPropertySource {
 		return result.toArray(new IPropertyDescriptor[result.size()]);
 	}
 	
+	@Override
 	public Object getPropertyValue(Object id) {
 		Property property= fgIdToProperty.get(id);
 		if (property == null) {
@@ -701,18 +703,22 @@ public class JavaElementProperties implements IPropertySource {
 			return schedulingRule.getClass().getSimpleName() + ": " + schedulingRule.toString();
 	}
 	
+	@Override
 	public void setPropertyValue(Object name, Object value) {
 		// do nothing
 	}
 	
+	@Override
 	public Object getEditableValue() {
 		return this;
 	}
 	
+	@Override
 	public boolean isPropertySet(Object property) {
 		return false;
 	}
 	
+	@Override
 	public void resetPropertyValue(Object property) {
 		// do nothing
 	}

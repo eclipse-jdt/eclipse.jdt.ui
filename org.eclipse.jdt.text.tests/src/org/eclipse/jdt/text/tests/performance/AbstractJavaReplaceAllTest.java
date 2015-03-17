@@ -46,6 +46,7 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 	private String fShortName= null;
 
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
@@ -57,6 +58,7 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 
 	protected abstract boolean isQuickDiffEnabled();
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();
@@ -109,6 +111,7 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 
 			EditorTestHelper.runEventQueue();
 			DisplayHelper helper= new DisplayHelper() {
+				@Override
 				public boolean condition() {
 					return fEditor.isDirty() && display.getActiveShell() == fEditor.getEditorSite().getShell();
 				}

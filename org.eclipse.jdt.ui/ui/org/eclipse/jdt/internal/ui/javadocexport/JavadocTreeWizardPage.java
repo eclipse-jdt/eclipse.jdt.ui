@@ -134,6 +134,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	/*
 	 * @see IDialogPage#createControl(Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -167,6 +168,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fJavadocCommandText= createCombo(group, SWT.NONE, null, createGridData(GridData.FILL_HORIZONTAL, numColumns - 1, 0));
 
 		fJavadocCommandText.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				doValidation(JAVADOCSTATUS);
 			}
@@ -203,6 +205,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fInputGroup= new CheckboxTreeAndListGroup(c, this, treeContentProvider, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), listContentProvider, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), SWT.NONE, convertWidthInCharsToPixels(60), convertHeightInCharsToPixels(7));
 
 		fInputGroup.addCheckStateListener(new ICheckStateListener() {
+			@Override
 			public void checkStateChanged(CheckStateChangedEvent e) {
 				doValidation(TREESTATUS);
 			}
@@ -318,6 +321,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fDestinationText= createText(group, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, numColumns - 2, 0));
 		((GridData) fDestinationText.getLayoutData()).widthHint= 0;
 		fDestinationText.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				doValidation(STANDARDSTATUS);
 			}
@@ -337,6 +341,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 
 		fDocletTypeText.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				doValidation(CUSTOMSTATUS);
 			}
@@ -347,6 +352,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		((GridData) fDocletText.getLayoutData()).widthHint= 0;
 
 		fDocletText.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				doValidation(CUSTOMSTATUS);
 			}
@@ -435,7 +441,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	private IPath[] getSourcePath(IJavaProject[] projects) {
-		HashSet<IPath> res= new HashSet<IPath>();
+		HashSet<IPath> res= new HashSet<>();
 		//loops through all projects and gets a list if of their source paths
 		for (int k= 0; k < projects.length; k++) {
 			IJavaProject iJavaProject= projects[k];
@@ -464,7 +470,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	private IPath[] getClassPath(IJavaProject[] javaProjects) {
-		HashSet<IPath> res= new HashSet<IPath>();
+		HashSet<IPath> res= new HashSet<>();
 
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		for (int j= 0; j < javaProjects.length; j++) {
@@ -505,11 +511,11 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	 * @return an array with the source elements
 	 */
 	private IJavaElement[] getSourceElements(IJavaProject[] projects) {
-		ArrayList<IJavaElement> res= new ArrayList<IJavaElement>();
+		ArrayList<IJavaElement> res= new ArrayList<>();
 		try {
 			Set<Object> allChecked= fInputGroup.getAllCheckedTreeItems();
 
-			Set<String> incompletePackages= new HashSet<String>();
+			Set<String> incompletePackages= new HashSet<>();
 			for (int h= 0; h < projects.length; h++) {
 				IJavaProject iJavaProject= projects[h];
 
@@ -544,7 +550,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				}
 			}
 
-			Set<String> addedPackages= new HashSet<String>();
+			Set<String> addedPackages= new HashSet<>();
 
 			checkedElements= allChecked.iterator();
 			while (checkedElements.hasNext()) {
@@ -588,7 +594,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fStore.setAccess(fVisibilitySelection);
 		fStore.setSelectedElements(getSourceElements(checkedProjects));
 
-		ArrayList<String> commands= new ArrayList<String>();
+		ArrayList<String> commands= new ArrayList<>();
 		commands.add(fJavadocCommandText.getText()); // must be first
 		String[] items= fJavadocCommandText.getItems();
 		for (int i= 0; i < items.length; i++) {
@@ -601,7 +607,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	public IJavaProject[] getCheckedProjects() {
-		ArrayList<Object> res= new ArrayList<Object>();
+		ArrayList<Object> res= new ArrayList<>();
 		TreeItem[] treeItems= fInputGroup.getTree().getItems();
 		for (int i= 0; i < treeItems.length; i++) {
 			if (treeItems[i].getChecked()) {
@@ -695,7 +701,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		dialog.setFileName(dirName);
 		String selectedDirectory= dialog.open();
 		if (selectedDirectory != null) {
-			ArrayList<String> newItems= new ArrayList<String>();
+			ArrayList<String> newItems= new ArrayList<>();
 			String[] items= fJavadocCommandText.getItems();
 			newItems.add(selectedDirectory);
 			for (int i= 0; i < items.length && newItems.size() < 5; i++) { // only keep the last 5 entries

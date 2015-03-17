@@ -43,16 +43,19 @@ public class TestParticipant implements IQueryParticipant {
 		fUIParticipant= new TestUIParticipant();
 	}
 
+	@Override
 	public void search(ISearchRequestor requestor, QuerySpecification data, IProgressMonitor monitor) throws CoreException {
 		for (int i= 0; i < 20; i++) {
 			requestor.reportMatch(new Match(new Integer(fgRandom.nextInt()), -1, -1));
 		}
 	}
 
+	@Override
 	public int estimateTicks(QuerySpecification data) {
 		return 100;
 	}
 
+	@Override
 	public IMatchPresentation getUIParticipant() {
 		return fUIParticipant;
 	}
@@ -60,9 +63,11 @@ public class TestParticipant implements IQueryParticipant {
 }
 
 class TestLabelProvider extends LabelProvider {
+	@Override
 	public Image getImage(Object element) {
 		return JavaPluginImages.get(ISharedImages.IMG_OBJS_PROTECTED);
 	}
+	@Override
 	public String getText(Object element) {
 		return "Int: value= "+((Integer)element).toString();
 	}
@@ -70,11 +75,13 @@ class TestLabelProvider extends LabelProvider {
 
 class TestUIParticipant implements IMatchPresentation {
 
+	@Override
 	public void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
 		MessageDialog.openInformation(null, "Showing element", "Showning an integer of value: "+((Integer)match.getElement()).intValue());
 
 	}
 
+	@Override
 	public ILabelProvider createLabelProvider() {
 		return new TestLabelProvider();
 	}

@@ -82,6 +82,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	/*
 	 * @see org.eclipse.jdt.core.compiler.IProblem#getArguments()
 	 */
+	@Override
 	public String[] getArguments() {
 
 		String prefix= ""; //$NON-NLS-1$
@@ -103,6 +104,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	/*
 	 * @see org.eclipse.jdt.core.compiler.IProblem#getID()
 	 */
+	@Override
 	public int getID() {
 		return JavaSpellingReconcileStrategy.SPELLING_PROBLEM_ID;
 	}
@@ -110,6 +112,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	/*
 	 * @see org.eclipse.jdt.core.compiler.IProblem#getMessage()
 	 */
+	@Override
 	public String getMessage() {
 		return fMessage;
 	}
@@ -117,6 +120,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	/*
 	 * @see org.eclipse.jdt.core.compiler.IProblem#getOriginatingFileName()
 	 */
+	@Override
 	public char[] getOriginatingFileName() {
 		return fOrigin.toCharArray();
 	}
@@ -124,6 +128,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	/*
 	 * @see org.eclipse.jdt.core.compiler.IProblem#getSourceEnd()
 	 */
+	@Override
 	public int getSourceEnd() {
 		return fSourceEnd;
 	}
@@ -131,6 +136,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	/*
 	 * @see org.eclipse.jdt.core.compiler.IProblem#getSourceLineNumber()
 	 */
+	@Override
 	public int getSourceLineNumber() {
 		return fLineNumber;
 	}
@@ -138,6 +144,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	/*
 	 * @see org.eclipse.jdt.core.compiler.IProblem#getSourceStart()
 	 */
+	@Override
 	public int getSourceStart() {
 		return fSourceStart;
 	}
@@ -145,6 +152,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	/*
 	 * @see org.eclipse.jdt.core.compiler.IProblem#isError()
 	 */
+	@Override
 	public boolean isError() {
 		return false;
 	}
@@ -152,6 +160,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	/*
 	 * @see org.eclipse.jdt.core.compiler.IProblem#isWarning()
 	 */
+	@Override
 	public boolean isWarning() {
 		return true;
 	}
@@ -159,6 +168,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	/*
 	 * @see org.eclipse.jdt.core.compiler.IProblem#setSourceStart(int)
 	 */
+	@Override
 	public void setSourceStart(int sourceStart) {
 		fSourceStart= sourceStart;
 	}
@@ -166,6 +176,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	/*
 	 * @see org.eclipse.jdt.core.compiler.IProblem#setSourceEnd(int)
 	 */
+	@Override
 	public void setSourceEnd(int sourceEnd) {
 		fSourceEnd= sourceEnd;
 	}
@@ -173,6 +184,7 @@ public class CoreSpellingProblem extends CategorizedProblem {
 	/*
 	 * @see org.eclipse.jdt.core.compiler.IProblem#setSourceLineNumber(int)
 	 */
+	@Override
 	public void setSourceLineNumber(int lineNumber) {
 		fLineNumber= lineNumber;
 	}

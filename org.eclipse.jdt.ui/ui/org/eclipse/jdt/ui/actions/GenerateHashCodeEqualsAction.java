@@ -215,7 +215,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 	@Override
 	void initialize(IType type) throws JavaModelException {
 		super.initialize(type);
-		alreadyCheckedMemberTypes= new ArrayList<ITypeBinding>();
+		alreadyCheckedMemberTypes= new ArrayList<>();
 	}
 
 	@Override
@@ -227,8 +227,8 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 	boolean generateCandidates() {
 		IVariableBinding[] fCandidateFields= fTypeBinding.getDeclaredFields();
 
-		allFields= new ArrayList<IVariableBinding>();
-		selectedFields= new ArrayList<IVariableBinding>();
+		allFields= new ArrayList<>();
+		selectedFields= new ArrayList<>();
 		for (int i= 0; i < fCandidateFields.length; i++) {
 			if (!Modifier.isStatic(fCandidateFields[i].getModifiers())) {
 				allFields.add(fCandidateFields[i]);

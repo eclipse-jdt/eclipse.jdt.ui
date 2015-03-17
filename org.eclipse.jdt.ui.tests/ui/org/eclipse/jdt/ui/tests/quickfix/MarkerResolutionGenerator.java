@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.IMarkerResolution;
@@ -41,16 +42,12 @@ public class MarkerResolutionGenerator implements IMarkerResolutionGenerator {
 		public TestCorrectionMarkerResolution() {
 		}
 
-		/* (non-Javadoc)
-		 * @see IMarkerResolution#getLabel()
-		 */
+		@Override
 		public String getLabel() {
 			return "Change to Uppercase";
 		}
 
-		/* (non-Javadoc)
-		 * @see IMarkerResolution#run(IMarker)
-		 */
+		@Override
 		public void run(IMarker marker) {
 			FileEditorInput input= new FileEditorInput((IFile) marker.getResource());
 			IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(input);
@@ -79,7 +76,7 @@ public class MarkerResolutionGenerator implements IMarkerResolutionGenerator {
 		}
 
 		private Position findProblemPosition(IAnnotationModel model, IMarker marker) {
-			Iterator iter= model.getAnnotationIterator();
+			Iterator<Annotation> iter= model.getAnnotationIterator();
 			while (iter.hasNext()) {
 				Object curr= iter.next();
 				if (curr instanceof SimpleMarkerAnnotation) {
@@ -97,9 +94,7 @@ public class MarkerResolutionGenerator implements IMarkerResolutionGenerator {
 	public MarkerResolutionGenerator() {
 	}
 
-	/* (non-Javadoc)
-	 * @see IMarkerResolutionGenerator#getResolutions(IMarker)
-	 */
+	@Override
 	public IMarkerResolution[] getResolutions(IMarker marker) {
 		return new IMarkerResolution[] { new TestCorrectionMarkerResolution() };
 	}

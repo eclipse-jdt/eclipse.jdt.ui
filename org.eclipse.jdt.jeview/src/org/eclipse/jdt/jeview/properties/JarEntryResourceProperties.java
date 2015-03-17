@@ -30,7 +30,7 @@ public class JarEntryResourceProperties implements IPropertySource {
 	
 	protected IJarEntryResource fJarEntryResource;
 	
-	private static final ArrayList<IPropertyDescriptor> JAR_ENTRY_RESOURCE_PROPERTY_DESCRIPTORS= new ArrayList<IPropertyDescriptor>();
+	private static final ArrayList<IPropertyDescriptor> JAR_ENTRY_RESOURCE_PROPERTY_DESCRIPTORS= new ArrayList<>();
 	static {
 		addResourceDescriptor(new PropertyDescriptor(P_NAME, "name"));
 		addResourceDescriptor(new PropertyDescriptor(P_FULL_PATH, "fullPath"));
@@ -49,11 +49,13 @@ public class JarEntryResourceProperties implements IPropertySource {
 		fJarEntryResource= jarEntryResource;
 	}
 	
+	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		ArrayList<IPropertyDescriptor> result= new ArrayList<IPropertyDescriptor>(JAR_ENTRY_RESOURCE_PROPERTY_DESCRIPTORS);
+		ArrayList<IPropertyDescriptor> result= new ArrayList<>(JAR_ENTRY_RESOURCE_PROPERTY_DESCRIPTORS);
 		return result.toArray(new IPropertyDescriptor[result.size()]);
 	}
 	
+	@Override
 	public Object getPropertyValue(Object name) {
 		if (name.equals(P_NAME)) {
 			return fJarEntryResource.getName();
@@ -68,18 +70,22 @@ public class JarEntryResourceProperties implements IPropertySource {
 		return null;
 	}
 	
+	@Override
 	public void setPropertyValue(Object name, Object value) {
 		// do nothing
 	}
 	
+	@Override
 	public Object getEditableValue() {
 		return this;
 	}
 	
+	@Override
 	public boolean isPropertySet(Object property) {
 		return false;
 	}
 	
+	@Override
 	public void resetPropertyValue(Object property) {
 		// do nothing
 	}

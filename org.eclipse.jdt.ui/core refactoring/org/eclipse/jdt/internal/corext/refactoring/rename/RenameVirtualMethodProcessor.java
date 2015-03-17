@@ -194,7 +194,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 
 	private IMethod[] relatedTypeDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws CoreException {
 		try{
-			Set<IMethod> result= new HashSet<IMethod>();
+			Set<IMethod> result= new HashSet<>();
 			Set<IType> types= getRelatedTypes();
 			pm.beginTask("", types.size()); //$NON-NLS-1$
 			for (Iterator<IType> iter= types.iterator(); iter.hasNext(); ) {
@@ -234,7 +234,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 
 	private Set<IType> getRelatedTypes() {
 		Set<IMethod> methods= getMethodsToRename();
-		Set<IType> result= new HashSet<IType>(methods.size());
+		Set<IType> result= new HashSet<>(methods.size());
 		for (Iterator<IMethod> iter= methods.iterator(); iter.hasNext(); ){
 			result.add(iter.next().getDeclaringType());
 		}
@@ -256,6 +256,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		return false;
 	}
 
+	@Override
 	public String getDelegateUpdatingTitle(boolean plural) {
 		if (plural)
 			return RefactoringCoreMessages.DelegateMethodCreator_keep_original_renamed_plural;

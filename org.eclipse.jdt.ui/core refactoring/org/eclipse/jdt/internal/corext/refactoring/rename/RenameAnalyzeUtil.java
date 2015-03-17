@@ -97,8 +97,8 @@ class RenameAnalyzeUtil {
 				Assert.isNotNull(edits);
 				Assert.isNotNull(key);
 
-				fRanges= new HashSet<IRegion>(Arrays.asList(RefactoringAnalyzeUtil.getNewRanges(edits, change)));
-				fProblemNodes= new ArrayList<SimpleName>(0);
+				fRanges= new HashSet<>(Arrays.asList(RefactoringAnalyzeUtil.getNewRanges(edits, change)));
+				fProblemNodes= new ArrayList<>(0);
 				fKey= key;
 			}
 
@@ -260,7 +260,7 @@ class RenameAnalyzeUtil {
 			SearchResultGroup[] oldReferences, SearchResultGroup[] newReferences, String newElementName) {
 		RefactoringStatus result= new RefactoringStatus();
 
-		HashMap<ICompilationUnit, SearchMatch[]> cuToNewResults= new HashMap<ICompilationUnit, SearchMatch[]>(newReferences.length);
+		HashMap<ICompilationUnit, SearchMatch[]> cuToNewResults= new HashMap<>(newReferences.length);
 		for (int i1= 0; i1 < newReferences.length; i1++) {
 			ICompilationUnit cu= newReferences[i1].getCompilationUnit();
 			if (cu != null)
@@ -322,7 +322,7 @@ class RenameAnalyzeUtil {
 	 * @return Map &lt;Integer updatedOffset, SearchMatch oldMatch&gt;
 	 */
 	private static Map<Integer, SearchMatch> getUpdatedChangeOffsets(TextChange change, SearchMatch[] oldMatches) {
-		Map<Integer, SearchMatch> updatedOffsets= new HashMap<Integer, SearchMatch>();
+		Map<Integer, SearchMatch> updatedOffsets= new HashMap<>();
 		Map<Integer, Integer> oldToUpdatedOffsets= getEditChangeOffsetUpdates(change);
 		for (int i= 0; i < oldMatches.length; i++) {
 			SearchMatch oldMatch= oldMatches[i];
@@ -341,7 +341,7 @@ class RenameAnalyzeUtil {
 	 */
 	private static Map<Integer, Integer> getEditChangeOffsetUpdates(TextChange change) {
 		TextEditChangeGroup[] editChanges= change.getTextEditChangeGroups();
-		Map<Integer, Integer> offsetUpdates= new HashMap<Integer, Integer>(editChanges.length);
+		Map<Integer, Integer> offsetUpdates= new HashMap<>(editChanges.length);
 		for (int i= 0; i < editChanges.length; i++) {
 			TextEditChangeGroup editChange= editChanges[i];
 			IRegion oldRegion= editChange.getRegion();

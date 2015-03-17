@@ -187,7 +187,7 @@ public class JavadocContentAccess2 {
 		 * @throws JavaModelException unexpected problem
 		 */
 		public Object visitInheritDoc(IType currentType, ITypeHierarchy typeHierarchy) throws JavaModelException {
-			ArrayList<IType> visited= new ArrayList<IType>();
+			ArrayList<IType> visited= new ArrayList<>();
 			visited.add(currentType);
 			Object result= visitInheritDocInterfaces(visited, currentType, typeHierarchy);
 			if (result != InheritDocVisitor.CONTINUE)
@@ -228,7 +228,7 @@ public class JavadocContentAccess2 {
 		 * @throws JavaModelException unexpected problem
 		 */
 		private Object visitInheritDocInterfaces(ArrayList<IType> visited, IType currentType, ITypeHierarchy typeHierarchy) throws JavaModelException {
-			ArrayList<IType> toVisitChildren= new ArrayList<IType>();
+			ArrayList<IType> toVisitChildren= new ArrayList<>();
 			IType[] superInterfaces= typeHierarchy.getSuperInterfaces(currentType);
 			for (int i= 0; i < superInterfaces.length; i++) {
 				IType superInterface= superInterfaces[i];
@@ -294,7 +294,7 @@ public class JavadocContentAccess2 {
 
 		private JavadocLookup(IType startingType) {
 			fStartingType= startingType;
-			fContentAccesses= new HashMap<IMethod, JavadocContentAccess2>();
+			fContentAccesses= new HashMap<>();
 		}
 
 		/**
@@ -306,6 +306,7 @@ public class JavadocContentAccess2 {
 		 */
 		public CharSequence getInheritedMainDescription(IMethod method) {
 			return getInheritedDescription(method, new DescriptionGetter() {
+				@Override
 				public CharSequence getDescription(JavadocContentAccess2 contentAccess) {
 					return contentAccess.getMainDescription();
 				}
@@ -323,6 +324,7 @@ public class JavadocContentAccess2 {
 		 */
 		public CharSequence getInheritedTypeParamDescription(IMethod method, final int typeParamIndex) {
 			return getInheritedDescription(method, new DescriptionGetter() {
+				@Override
 				public CharSequence getDescription(JavadocContentAccess2 contentAccess) throws JavaModelException {
 					return contentAccess.getInheritedTypeParamDescription(typeParamIndex);
 				}
@@ -340,6 +342,7 @@ public class JavadocContentAccess2 {
 		 */
 		public CharSequence getInheritedParamDescription(IMethod method, final int paramIndex) {
 			return getInheritedDescription(method, new DescriptionGetter() {
+				@Override
 				public CharSequence getDescription(JavadocContentAccess2 contentAccess) throws JavaModelException {
 					return contentAccess.getInheritedParamDescription(paramIndex);
 				}
@@ -355,6 +358,7 @@ public class JavadocContentAccess2 {
 		 */
 		public CharSequence getInheritedReturnDescription(IMethod method) {
 			return getInheritedDescription(method, new DescriptionGetter() {
+				@Override
 				public CharSequence getDescription(JavadocContentAccess2 contentAccess) {
 					return contentAccess.getReturnDescription();
 				}
@@ -372,6 +376,7 @@ public class JavadocContentAccess2 {
 		 */
 		public CharSequence getInheritedExceptionDescription(IMethod method, final String simpleName) {
 			return getInheritedDescription(method, new DescriptionGetter() {
+				@Override
 				public CharSequence getDescription(JavadocContentAccess2 contentAccess) {
 					return contentAccess.getExceptionDescription(simpleName);
 				}
@@ -564,7 +569,7 @@ public class JavadocContentAccess2 {
 		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
 		final MethodOverrideTester tester= SuperTypeHierarchyCache.getMethodOverrideTester(type);
 
-		final ArrayList<IMethod> superInterfaceMethods= new ArrayList<IMethod>();
+		final ArrayList<IMethod> superInterfaceMethods= new ArrayList<>();
 		final IMethod[] superClassMethod= { null };
 		new InheritDocVisitor() {
 			@Override
@@ -926,15 +931,15 @@ public class JavadocContentAccess2 {
 
 		TagElement deprecatedTag= null;
 		TagElement start= null;
-		List<TagElement> typeParameters= new ArrayList<TagElement>();
-		List<TagElement> parameters= new ArrayList<TagElement>();
+		List<TagElement> typeParameters= new ArrayList<>();
+		List<TagElement> parameters= new ArrayList<>();
 		TagElement returnTag= null;
-		List<TagElement> exceptions= new ArrayList<TagElement>();
-		List<TagElement> versions= new ArrayList<TagElement>();
-		List<TagElement> authors= new ArrayList<TagElement>();
-		List<TagElement> sees= new ArrayList<TagElement>();
-		List<TagElement> since= new ArrayList<TagElement>();
-		List<TagElement> rest= new ArrayList<TagElement>();
+		List<TagElement> exceptions= new ArrayList<>();
+		List<TagElement> versions= new ArrayList<>();
+		List<TagElement> authors= new ArrayList<>();
+		List<TagElement> sees= new ArrayList<>();
+		List<TagElement> since= new ArrayList<>();
+		List<TagElement> rest= new ArrayList<>();
 
 		List<TagElement> tags= fJavadoc.tags();
 		for (Iterator<TagElement> iter= tags.iterator(); iter.hasNext(); ) {
@@ -1083,7 +1088,7 @@ public class JavadocContentAccess2 {
 	private List<String> initTypeParameterNames() {
 		if (fMethod != null) {
 			try {
-				ArrayList<String> typeParameterNames= new ArrayList<String>();
+				ArrayList<String> typeParameterNames= new ArrayList<>();
 				for (ITypeParameter typeParameter : fMethod.getTypeParameters()) {
 					typeParameterNames.add(typeParameter.getElementName());
 				}
@@ -1098,7 +1103,7 @@ public class JavadocContentAccess2 {
 	private List<String> initParameterNames() {
 		if (fMethod != null) {
 			try {
-				return new ArrayList<String>(Arrays.asList(fMethod.getParameterNames()));
+				return new ArrayList<>(Arrays.asList(fMethod.getParameterNames()));
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}
@@ -1110,7 +1115,7 @@ public class JavadocContentAccess2 {
 		if (fMethod != null) {
 			try {
 				String[] exceptionTypes= fMethod.getExceptionTypes();
-				ArrayList<String> exceptionNames= new ArrayList<String>();
+				ArrayList<String> exceptionNames= new ArrayList<>();
 				for (int i= 0; i < exceptionTypes.length; i++) {
 					exceptionNames.add(Signature.getSimpleName(Signature.toString(exceptionTypes[i])));
 				}
@@ -1309,7 +1314,7 @@ public class JavadocContentAccess2 {
 	CharSequence getExceptionDescription(String simpleName) {
 		if (fMethod != null) {
 			if (fExceptionDescriptions == null) {
-				fExceptionDescriptions= new HashMap<String, StringBuffer>();
+				fExceptionDescriptions= new HashMap<>();
 			} else {
 				StringBuffer description= fExceptionDescriptions.get(simpleName);
 				if (description != null) {

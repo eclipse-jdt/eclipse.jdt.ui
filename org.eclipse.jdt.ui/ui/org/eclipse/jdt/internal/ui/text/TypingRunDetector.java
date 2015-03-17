@@ -141,6 +141,7 @@ public class TypingRunDetector {
 		/*
 		 * @see org.eclipse.jface.text.ITextListener#textChanged(org.eclipse.jface.text.TextEvent)
 		 */
+		@Override
 		public void textChanged(TextEvent event) {
 			handleTextChanged(event);
 		}
@@ -157,6 +158,7 @@ public class TypingRunDetector {
 		/*
 		 * @see org.eclipse.swt.events.FocusListener#focusGained(org.eclipse.swt.events.FocusEvent)
 		 */
+		@Override
 		public void focusGained(FocusEvent e) {
 			handleSelectionChanged();
 		}
@@ -164,12 +166,14 @@ public class TypingRunDetector {
 		/*
 		 * @see org.eclipse.swt.events.FocusListener#focusLost(org.eclipse.swt.events.FocusEvent)
 		 */
+		@Override
 		public void focusLost(FocusEvent e) {
 		}
 
 		/*
 		 * @see MouseListener#mouseDoubleClick
 		 */
+		@Override
 		public void mouseDoubleClick(MouseEvent e) {
 		}
 
@@ -177,6 +181,7 @@ public class TypingRunDetector {
 		 * If the right mouse button is pressed, the current editing command is closed
 		 * @see MouseListener#mouseDown
 		 */
+		@Override
 		public void mouseDown(MouseEvent e) {
 			if (e.button == 1)
 				handleSelectionChanged();
@@ -185,12 +190,14 @@ public class TypingRunDetector {
 		/*
 		 * @see MouseListener#mouseUp
 		 */
+		@Override
 		public void mouseUp(MouseEvent e) {
 		}
 
 		/*
 		 * @see KeyListener#keyPressed
 		 */
+		@Override
 		public void keyReleased(KeyEvent e) {
 		}
 
@@ -198,6 +205,7 @@ public class TypingRunDetector {
 		 * On cursor keys, the current editing command is closed
 		 * @see KeyListener#keyPressed
 		 */
+		@Override
 		public void keyPressed(KeyEvent e) {
 			switch (e.keyCode) {
 				case SWT.ARROW_UP:
@@ -215,7 +223,7 @@ public class TypingRunDetector {
 	}
 
 	/** The listeners. */
-	private final Set<ITypingRunListener> fListeners= new HashSet<ITypingRunListener>();
+	private final Set<ITypingRunListener> fListeners= new HashSet<>();
 	/**
 	 * The viewer we work upon. Set to <code>null</code> in
 	 * <code>uninstall</code>.
@@ -450,7 +458,7 @@ public class TypingRunDetector {
 	 * @param run the new run
 	 */
 	private void fireRunBegun(TypingRun run) {
-		List<ITypingRunListener> listeners= new ArrayList<ITypingRunListener>(fListeners);
+		List<ITypingRunListener> listeners= new ArrayList<>(fListeners);
 		for (Iterator<ITypingRunListener> it= listeners.iterator(); it.hasNext();) {
 			ITypingRunListener listener= it.next();
 			listener.typingRunStarted(fRun);
@@ -464,7 +472,7 @@ public class TypingRunDetector {
 	 * @param reason the type of change that caused the run to be ended
 	 */
 	private void fireRunEnded(TypingRun run, ChangeType reason) {
-		List<ITypingRunListener> listeners= new ArrayList<ITypingRunListener>(fListeners);
+		List<ITypingRunListener> listeners= new ArrayList<>(fListeners);
 		for (Iterator<ITypingRunListener> it= listeners.iterator(); it.hasNext();) {
 			ITypingRunListener listener= it.next();
 			listener.typingRunEnded(fRun, reason);

@@ -71,7 +71,8 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
             fMethodWrapper= methodWrapper;
         }
 
-        public void run(IProgressMonitor pm) {
+        @Override
+		public void run(IProgressMonitor pm) {
         	fCalls= fMethodWrapper.getCalls(pm);
         }
 
@@ -91,6 +92,7 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
     /**
      * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
      */
+	@Override
 	public Object[] getChildren(Object parentElement) {
 		if (parentElement instanceof TreeRoot) {
 			TreeRoot dummyRoot= (TreeRoot)parentElement;
@@ -302,7 +304,8 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
         	final CallerMethodWrapper element= (CallerMethodWrapper)methodWrapper;
         	if (!isExpandWithConstructors(element)) {
         		Display.getDefault().asyncExec(new Runnable() {
-        			public void run() {
+        			@Override
+					public void run() {
     					collapseAndRefresh(element);
         			}
         		});
@@ -372,14 +375,16 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
     /**
      * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
      */
-    public Object[] getElements(Object inputElement) {
+    @Override
+	public Object[] getElements(Object inputElement) {
         return getChildren(inputElement);
     }
 
     /**
      * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
      */
-    public Object getParent(Object element) {
+    @Override
+	public Object getParent(Object element) {
         if (element instanceof MethodWrapper) {
             return ((MethodWrapper) element).getParent();
         }
@@ -390,13 +395,15 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
     /**
      * @see org.eclipse.jface.viewers.IContentProvider#dispose()
      */
-    public void dispose() {
+    @Override
+	public void dispose() {
         // Nothing to dispose
     }
 
     /**
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
 	 */
+	@Override
 	public boolean hasChildren(Object element) {
 		if (element == TreeRoot.EMPTY_ROOT || element == TreeTermination.SEARCH_CANCELED) {
 			return false;
@@ -428,7 +435,8 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
 	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer,
 	 *      java.lang.Object, java.lang.Object)
 	 */
-    public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+    @Override
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
     	if (oldInput instanceof TreeRoot) {
     		MethodWrapper[] roots = ((TreeRoot) oldInput).getRoots();
    			cancelJobs(roots);

@@ -127,6 +127,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 			doUpdateUI();
 		} else {
 			Display.getDefault().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					doUpdateUI();
 				}
@@ -216,7 +217,8 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 
 
         fUseFolderOutputs.setDialogFieldListener(new IDialogFieldListener() {
-            public void dialogFieldChanged(DialogField field) {
+            @Override
+			public void dialogFieldChanged(DialogField field) {
                 boolean isUseFolders= fUseFolderOutputs.isSelected();
                 if (!isUseFolders) {
                 	ResetAllOutputFoldersAction action= new ResetAllOutputFoldersAction(fContext, fJavaProject, fPackageExplorer) {
@@ -303,12 +305,9 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
        return null;
    }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#getSelection()
-     */
     @Override
 	public List<CPListElement> getSelection() {
-        List<CPListElement> selectedList= new ArrayList<CPListElement>();
+        List<CPListElement> selectedList= new ArrayList<>();
 
         IJavaProject project= fJavaProject;
         try {
@@ -331,14 +330,11 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
                 }
             }
         } catch (JavaModelException e) {
-            return new ArrayList<CPListElement>();
+            return new ArrayList<>();
         }
         return selectedList;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#setSelection(java.util.List)
-     */
     @Override
 	public void setSelection(List<?> selection, boolean expand) {
 		// page switch
@@ -346,7 +342,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         if (selection.size() == 0)
             return;
 
-		List<CPListElement> cpEntries= new ArrayList<CPListElement>();
+		List<CPListElement> cpEntries= new ArrayList<>();
 
 		for (int i= 0; i < selection.size(); i++) {
 			Object obj= selection.get(i);
@@ -380,9 +376,6 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         fPackageExplorer.setSelection(cpEntries);
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#isEntryKind(int)
-     */
     @Override
 	public boolean isEntryKind(int kind) {
         return kind == IClasspathEntry.CPE_SOURCE;
@@ -392,7 +385,8 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
      * Update <code>fClassPathList</code>.
      * @param delta describing the changes to the buildpath
      */
-    public void buildpathChanged(BuildpathDelta delta) {
+    @Override
+	public void buildpathChanged(BuildpathDelta delta) {
         fClassPathList.setElements(Arrays.asList(delta.getNewEntries()));
 
         try {
@@ -425,9 +419,6 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         }
     }
 
-	/**
-     * {@inheritDoc}
-     */
     @Override
 	public void setFocus() {
     	fPackageExplorer.getViewerControl().setFocus();

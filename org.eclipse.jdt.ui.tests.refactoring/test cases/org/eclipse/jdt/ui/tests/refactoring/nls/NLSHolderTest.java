@@ -30,7 +30,7 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class NLSHolderTest extends TestCase {
 
-	private static final Class THIS= NLSHolderTest.class;
+	private static final Class<NLSHolderTest> THIS= NLSHolderTest.class;
 
 	private IJavaProject javaProject;
 
@@ -50,11 +50,13 @@ public class NLSHolderTest extends TestCase {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		javaProject= ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(javaProject, "src");
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
 	}

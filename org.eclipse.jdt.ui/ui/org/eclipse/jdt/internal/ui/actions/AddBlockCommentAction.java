@@ -56,7 +56,7 @@ public class AddBlockCommentAction extends BlockCommentAction {
 	protected void runInternal(ITextSelection selection, IDocumentExtension3 docExtension, Edit.EditFactory factory) throws BadLocationException, BadPartitioningException {
 		int selectionOffset= selection.getOffset();
 		int selectionEndOffset= selectionOffset + selection.getLength();
-		List<Edit> edits= new LinkedList<Edit>();
+		List<Edit> edits= new LinkedList<>();
 		ITypedRegion partition= docExtension.getPartition(IJavaPartitions.JAVA_PARTITIONING, selectionOffset, false);
 
 		handleFirstPartition(partition, edits, factory, selectionOffset);

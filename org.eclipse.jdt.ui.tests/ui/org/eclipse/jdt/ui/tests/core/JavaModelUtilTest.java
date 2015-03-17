@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 public class JavaModelUtilTest extends TestCase {
 
-	private static final Class THIS= JavaModelUtilTest.class;
+	private static final Class<JavaModelUtilTest> THIS= JavaModelUtilTest.class;
 
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
@@ -65,6 +65,7 @@ public class JavaModelUtilTest extends TestCase {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
 		IWorkspace workspace= JavaTestPlugin.getWorkspace();
 		assertNotNull(workspace);
@@ -104,6 +105,7 @@ public class JavaModelUtilTest extends TestCase {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 		JavaProjectHelper.delete(fJProject2);

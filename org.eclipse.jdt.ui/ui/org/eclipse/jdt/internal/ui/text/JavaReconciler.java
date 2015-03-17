@@ -69,6 +69,7 @@ public class JavaReconciler extends MonoReconciler {
 		/*
 		 * @see org.eclipse.ui.IPartListener#partActivated(org.eclipse.ui.IWorkbenchPart)
 		 */
+		@Override
 		public void partActivated(IWorkbenchPart part) {
 			if (part == fTextEditor) {
 				if (hasJavaModelChanged())
@@ -80,18 +81,21 @@ public class JavaReconciler extends MonoReconciler {
 		/*
 		 * @see org.eclipse.ui.IPartListener#partBroughtToTop(org.eclipse.ui.IWorkbenchPart)
 		 */
+		@Override
 		public void partBroughtToTop(IWorkbenchPart part) {
 		}
 
 		/*
 		 * @see org.eclipse.ui.IPartListener#partClosed(org.eclipse.ui.IWorkbenchPart)
 		 */
+		@Override
 		public void partClosed(IWorkbenchPart part) {
 		}
 
 		/*
 		 * @see org.eclipse.ui.IPartListener#partDeactivated(org.eclipse.ui.IWorkbenchPart)
 		 */
+		@Override
 		public void partDeactivated(IWorkbenchPart part) {
 			if (part == fTextEditor) {
 				setJavaModelChanged(false);
@@ -102,6 +106,7 @@ public class JavaReconciler extends MonoReconciler {
 		/*
 		 * @see org.eclipse.ui.IPartListener#partOpened(org.eclipse.ui.IWorkbenchPart)
 		 */
+		@Override
 		public void partOpened(IWorkbenchPart part) {
 		}
 	}
@@ -151,6 +156,7 @@ public class JavaReconciler extends MonoReconciler {
 		/*
 		 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
 		 */
+		@Override
 		public void elementChanged(ElementChangedEvent event) {
 			if (isRunningInReconcilerThread())
 				return;
@@ -207,6 +213,7 @@ public class JavaReconciler extends MonoReconciler {
 		/*
 		 * @see IResourceChangeListener#resourceChanged(org.eclipse.core.resources.IResourceChangeEvent)
 		 */
+		@Override
 		public void resourceChanged(IResourceChangeEvent e) {
 			if (isRunningInReconcilerThread())
 				return;
@@ -325,6 +332,7 @@ public class JavaReconciler extends MonoReconciler {
 		workspace.addResourceChangeListener(fResourceChangeListener);
 
 		fPropertyChangeListener= new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (SpellingService.PREFERENCE_SPELLING_ENABLED.equals(event.getProperty()) || SpellingService.PREFERENCE_SPELLING_ENGINE.equals(event.getProperty()))
 					forceReconciling();

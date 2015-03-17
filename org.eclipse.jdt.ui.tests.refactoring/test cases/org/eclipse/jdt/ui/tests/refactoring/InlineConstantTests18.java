@@ -13,7 +13,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 
 public class InlineConstantTests18 extends InlineConstantTests {
-	private static final Class clazz= InlineConstantTests18.class;
+	private static final Class<InlineConstantTests18> clazz= InlineConstantTests18.class;
 
 	public InlineConstantTests18(String name) {
 		super(name);
@@ -34,26 +34,32 @@ public class InlineConstantTests18 extends InlineConstantTests {
 
 	//--- Test lambda expressions
 
+	@Override
 	public void test0() throws Exception {
 		helper1("p.TestInlineLambda", 5, 28, 5, 30, true, true);
 	}
 
+	@Override
 	public void test1() throws Exception {
 		helper1("p.TestInlineLambda_Cast", 5, 28, 5, 30, true, true);
 	}
 
+	@Override
 	public void test2() throws Exception {
 		helper1("p.TestInlineLambdaArray", 5, 30, 5, 35, true, true);
 	}
 
+	@Override
 	public void test3() throws Exception {
 		helper1("p.TestInlineLambda_Ambiguous", 5, 28, 5, 30, true, true);
 	}
 
+	@Override
 	public void test4() throws Exception {
 		helper1("p.TestInlineLambda_Ambiguous", 5, 28, 5, 30, true, true);
 	}
 
+	@Override
 	public void test5() throws Exception {
 		helper1("p.TestInlineLambda_Cast", 15, 30, 15, 36, true, true);
 	}

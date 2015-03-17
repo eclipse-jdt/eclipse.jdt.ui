@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeParameterPro
 
 public class RenameTypeParameterTests extends RefactoringTest {
 
-	private static final Class clazz= RenameTypeParameterTests.class;
+	private static final Class<RenameTypeParameterTests> clazz= RenameTypeParameterTests.class;
 
 	private static final String REFACTORING_PATH= "RenameTypeParameter/";
 
@@ -44,6 +44,7 @@ public class RenameTypeParameterTests extends RefactoringTest {
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}

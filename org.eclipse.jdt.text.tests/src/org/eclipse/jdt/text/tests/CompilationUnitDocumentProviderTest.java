@@ -67,6 +67,7 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 	 *
 	 * @throws CoreException if deletion fails
 	 */
+	@Override
 	protected void tearDown() throws CoreException {
 		if (fJavaProject != null)
 			JavaProjectHelper.delete(fJavaProject);

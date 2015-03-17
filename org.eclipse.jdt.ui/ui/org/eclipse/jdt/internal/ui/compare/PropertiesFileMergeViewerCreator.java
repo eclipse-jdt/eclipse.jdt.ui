@@ -27,6 +27,7 @@ import org.eclipse.compare.IViewerCreator;
  */
 public class PropertiesFileMergeViewerCreator implements IViewerCreator {
 
+	@Override
 	public Viewer createViewer(Composite parent, CompareConfiguration mp) {
 		return new PropertiesFileMergeViewer(parent, mp);
 	}

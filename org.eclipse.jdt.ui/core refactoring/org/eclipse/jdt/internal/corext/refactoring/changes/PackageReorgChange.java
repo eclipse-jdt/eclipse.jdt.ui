@@ -69,9 +69,6 @@ abstract class PackageReorgChange extends ResourceChange {
 		return getPackage();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
-	 */
 	@Override
 	protected IResource getModifiedResource() {
 		IPackageFragment pack= getPackage();
@@ -96,7 +93,7 @@ abstract class PackageReorgChange extends ResourceChange {
 	}
 
 	private void markAsExecuted(IPackageFragment pack, ResourceMapping mapping) {
-		ReorgExecutionLog log= (ReorgExecutionLog)getAdapter(ReorgExecutionLog.class);
+		ReorgExecutionLog log= getAdapter(ReorgExecutionLog.class);
 		if (log != null) {
 			log.markAsProcessed(pack);
 			log.markAsProcessed(mapping);

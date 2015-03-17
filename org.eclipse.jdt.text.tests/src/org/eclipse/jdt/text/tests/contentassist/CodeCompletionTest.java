@@ -21,9 +21,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.test.OrderedTestSuite;
@@ -75,12 +72,15 @@ import org.eclipse.jdt.internal.ui.text.java.FillArgumentNamesCompletionProposal
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
 import org.eclipse.jdt.internal.ui.text.java.JavaNoTypeCompletionProposalComputer;
 
+import junit.extensions.TestSetup;
+import junit.framework.Test;
+
 
 public class CodeCompletionTest extends AbstractCompletionTest {
 
 	private final static boolean BUG_80782= true;
 
-	private static final Class THIS= CodeCompletionTest.class;
+	private static final Class<CodeCompletionTest> THIS= CodeCompletionTest.class;
 
 	public static Test suite() {
 		OrderedTestSuite suite= new OrderedTestSuite(THIS); //predictable order for https://bugs.eclipse.org/bugs/show_bug.cgi?id=423416
@@ -152,12 +152,13 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		cu.codeComplete(offset, collector, new NullProgressMonitor());
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.addRTJar(fJProject1);
 		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "1");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -179,6 +180,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.SETTERCOMMENT_ID, "/**\n * @param ${param} the ${bare_field_name} to set\n */", fJProject1);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setToDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS);
@@ -519,7 +521,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 	}
 	
 	private void prepareNullAnnotations(IPackageFragmentRoot sourceFolder) throws JavaModelException {
-		Map options= fJProject1.getOptions(true);
+		Map<String, String> options= fJProject1.getOptions(true);
 		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
 		options.put(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, "annots.NonNull");
 		options.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "annots.Nullable");
@@ -2187,12 +2189,12 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			// make sure we get an import rewrite context
 			SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, null);
 
-			List proposals= computer.computeCompletionProposals(context, null);
+			List<ICompletionProposal> proposals= computer.computeCompletionProposals(context, null);
 
 			ICompletionProposal proposal= null;
 
 			for (int i= 0; i < proposals.size(); i++) {
-				ICompletionProposal curr= (ICompletionProposal) proposals.get(i);
+				ICompletionProposal curr= proposals.get(i);
 				if (curr.getDisplayString().startsWith("foo")) {
 					proposal= curr;
 				}
@@ -2265,12 +2267,12 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			// make sure we get an import rewrite context
 			SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, null);
 
-			List proposals= computer.computeCompletionProposals(context, null);
+			List<ICompletionProposal> proposals= computer.computeCompletionProposals(context, null);
 
 			ICompletionProposal proposal= null;
 
 			for (int i= 0; i < proposals.size(); i++) {
-				ICompletionProposal curr= (ICompletionProposal) proposals.get(i);
+				ICompletionProposal curr= proposals.get(i);
 				if (curr.getDisplayString().startsWith("foo()")) {
 					proposal= curr;
 				}

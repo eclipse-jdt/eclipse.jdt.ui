@@ -414,9 +414,6 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		Statement body= statement.getBody();
 		try {
 			body.accept(new GenericVisitor() {
-				/**
-				 * {@inheritDoc}
-				 */
 				@Override
 				protected boolean visitNode(ASTNode node) {
 					if (node instanceof Name) {
@@ -557,9 +554,6 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel positionGroups) throws CoreException {
 		TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, cuRewrite);

@@ -41,9 +41,6 @@ public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 		return fQualifierName + '.' + fTypeName;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.ui.IEditorPart, org.eclipse.jface.text.IDocument)
-	 */
 	@Override
 	protected void performChange(IEditorPart activeEditor, IDocument document) throws CoreException {
 		super.performChange(activeEditor, document);

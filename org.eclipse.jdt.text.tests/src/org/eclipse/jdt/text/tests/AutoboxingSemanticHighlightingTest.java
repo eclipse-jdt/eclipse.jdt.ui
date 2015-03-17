@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 
 public class AutoboxingSemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 
-	private static final Class THIS= AutoboxingSemanticHighlightingTest.class;
+	private static final Class<AutoboxingSemanticHighlightingTest> THIS= AutoboxingSemanticHighlightingTest.class;
 
 	public static Test suite() {
 		return new SemanticHighlightingTestSetup(new TestSuite(THIS), "/SHTest/src/Autoboxing.java");

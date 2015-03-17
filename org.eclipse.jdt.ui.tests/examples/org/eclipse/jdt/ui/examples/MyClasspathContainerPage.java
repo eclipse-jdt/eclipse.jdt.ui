@@ -32,6 +32,7 @@ public class MyClasspathContainerPage extends WizardPage implements IClasspathCo
 		setTitle("My Example Container");
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		Label label= new Label(parent, SWT.NONE);
 		if (fEntry == null) {
@@ -43,6 +44,7 @@ public class MyClasspathContainerPage extends WizardPage implements IClasspathCo
 		setControl(label);
 	}
 
+	@Override
 	public boolean finish() {
 		if (fEntry == null) { // new entry
 			fEntry= JavaCore.newContainerEntry(new Path("org.eclipse.jdt.EXAMPLE_CONTAINER"));
@@ -50,10 +52,12 @@ public class MyClasspathContainerPage extends WizardPage implements IClasspathCo
 		return true;
 	}
 
+	@Override
 	public IClasspathEntry getSelection() {
 		return fEntry;
 	}
 
+	@Override
 	public void setSelection(IClasspathEntry containerEntry) {
 		fEntry= containerEntry;
 	}

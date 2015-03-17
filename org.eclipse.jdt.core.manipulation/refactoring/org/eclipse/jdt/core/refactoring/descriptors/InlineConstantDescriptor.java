@@ -64,7 +64,7 @@ public final class InlineConstantDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
-	public InlineConstantDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public InlineConstantDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.INLINE_CONSTANT, project, description, comment, arguments, flags);
 	}
 

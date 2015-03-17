@@ -22,6 +22,7 @@ public abstract class AbstractRenamePackagePerfTest extends RepeatingRefactoring
 		super(name);
 	}
 
+	@Override
 	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
 		IPackageFragment pack= generateSources(numberOfCus, numberOfRefs);
 		RenamePackageProcessor processor= new RenamePackageProcessor(pack);

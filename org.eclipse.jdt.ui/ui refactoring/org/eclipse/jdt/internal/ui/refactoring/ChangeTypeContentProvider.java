@@ -33,12 +33,14 @@ class ChangeTypeContentProvider implements ITreeContentProvider {
 		fGeneralizeType= gt;
 	}
 
+	@Override
 	public Object[] getChildren(Object element) {
 		if (element instanceof RootType){
 			return ((RootType)element).getChildren();
 		}
 		ITypeBinding[] superTypes = CollectionsUtil.toArray(getDirectSuperTypes((ITypeBinding)element), ITypeBinding.class);
 		Arrays.sort(superTypes, new Comparator<ITypeBinding>(){
+			@Override
 			public int compare(ITypeBinding o1, ITypeBinding o2) {
 				String name1 = o1.getQualifiedName();
 				String name2 = o2.getQualifiedName();
@@ -55,7 +57,7 @@ class ChangeTypeContentProvider implements ITreeContentProvider {
 	 * interface.
 	 */
 	public Set<ITypeBinding> getDirectSuperTypes(ITypeBinding type){
-		Set<ITypeBinding> result= new HashSet<ITypeBinding>();
+		Set<ITypeBinding> result= new HashSet<>();
 		if (type.getSuperclass() != null){
 			result.add(type.getSuperclass());
 		}
@@ -69,22 +71,27 @@ class ChangeTypeContentProvider implements ITreeContentProvider {
 		return result;
 	}
 
+	@Override
 	public Object[] getElements(Object element) {
 		Assert.isTrue(element instanceof RootType);
 		return ((RootType)element).getChildren();
 	}
 
+	@Override
 	public boolean hasChildren(Object element) {
 		return getChildren(element).length > 0;
 	}
 
+	@Override
 	public Object getParent(Object element) {
 		return null;
 	}
 
+	@Override
 	public void dispose() {
 	}
 
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 	}
 

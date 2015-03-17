@@ -59,9 +59,6 @@ public final class JavaRefactoringArguments {
 		return fProject;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String toString() {
 		return getClass().getName() + fAttributes.toString();

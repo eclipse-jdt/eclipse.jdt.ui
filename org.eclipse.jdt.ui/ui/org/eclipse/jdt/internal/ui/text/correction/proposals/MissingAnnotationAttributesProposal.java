@@ -53,9 +53,6 @@ public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposa
 		Assert.isNotNull(fAnnotation.resolveTypeBinding());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
-	 */
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		AST ast= fAnnotation.getAST();
@@ -79,7 +76,7 @@ public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposa
 	}
 
 	private void addMissingAtributes(ITypeBinding binding, ListRewrite listRewriter) {
-		Set<String> implementedAttribs= new HashSet<String>();
+		Set<String> implementedAttribs= new HashSet<>();
 		if (fAnnotation instanceof NormalAnnotation) {
 			List<MemberValuePair> list= ((NormalAnnotation) fAnnotation).values();
 			for (int i= 0; i < list.size(); i++) {

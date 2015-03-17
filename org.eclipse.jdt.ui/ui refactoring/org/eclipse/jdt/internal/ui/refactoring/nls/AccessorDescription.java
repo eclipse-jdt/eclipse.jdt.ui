@@ -92,9 +92,6 @@ public class AccessorDescription {
 		return fResourceBundlePackage;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (obj != null && obj.getClass().equals(getClass())) {
@@ -108,9 +105,6 @@ public class AccessorDescription {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
 	@Override
 	public int hashCode() {
 		return fAccessorClassName.hashCode() + fAccessorClassPackage.hashCode() + fResourceBundleName.hashCode() + fResourceBundlePackage.hashCode();

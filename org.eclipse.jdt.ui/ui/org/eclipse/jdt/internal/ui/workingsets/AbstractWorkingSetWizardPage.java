@@ -64,9 +64,6 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 
 	private final class AddedElementsFilter extends ViewerFilter {
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-		 */
 		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			return !fSelectedElements.contains(element);
@@ -86,7 +83,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 	protected AbstractWorkingSetWizardPage(String pageName, String title, ImageDescriptor titleImage) {
 		super(pageName, title, titleImage);
 
-		fSelectedElements= new HashSet<Object>();
+		fSelectedElements= new HashSet<>();
 		fFirstCheck= true;
 	}
 
@@ -152,6 +149,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -169,6 +167,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		fWorkingSetName.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL));
 		fWorkingSetName.addModifyListener(
 			new ModifyListener() {
+				@Override
 				public void modifyText(ModifyEvent e) {
 					validateInput();
 				}
@@ -272,6 +271,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		removeAllButton.setEnabled(!fSelectedElements.isEmpty());
 
 		fTree.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				addButton.setEnabled(!event.getSelection().isEmpty());
 			}
@@ -288,6 +288,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		});
 
 		fTree.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				addTreeSelection();
 
@@ -297,6 +298,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		});
 
 		fTable.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				removeButton.setEnabled(!event.getSelection().isEmpty());
 			}
@@ -313,6 +315,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		});
 
 		fTable.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				removeTableSelection();
 
@@ -322,9 +325,6 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		});
 
 		addAllButton.addSelectionListener(new SelectionAdapter() {
-			/* (non-Javadoc)
-			 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-			 */
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				TreeItem[] items= fTree.getTree().getItems();
@@ -340,9 +340,6 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		});
 
 		removeAllButton.addSelectionListener(new SelectionAdapter() {
-			/* (non-Javadoc)
-			 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-			 */
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fSelectedElements.clear();
@@ -408,13 +405,16 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 
 		fTable.setContentProvider(new IStructuredContentProvider() {
 
+			@Override
 			public Object[] getElements(Object inputElement) {
 				return fSelectedElements.toArray();
 			}
 
+			@Override
 			public void dispose() {
 			}
 
+			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			}
 
@@ -424,6 +424,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 	/*
 	 * Implements method from IWorkingSetPage
 	 */
+	@Override
 	public IWorkingSet getSelection() {
 		return fWorkingSet;
 	}
@@ -431,6 +432,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 	/*
 	 * Implements method from IWorkingSetPage
 	 */
+	@Override
 	public void setSelection(IWorkingSet workingSet) {
 		Assert.isNotNull(workingSet, "Working set must not be null"); //$NON-NLS-1$
 		fWorkingSet= workingSet;
@@ -445,6 +447,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 	/*
 	 * Implements method from IWorkingSetPage
 	 */
+	@Override
 	public void finish() {
 		String workingSetName= fWorkingSetName.getText();
 		HashSet<Object> elements= fSelectedElements;
@@ -456,8 +459,8 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 		} else {
 			// Add inaccessible resources
 			IAdaptable[] oldItems= fWorkingSet.getElements();
-			HashSet<IProject> closedProjectsToRetain= new HashSet<IProject>(elements.size());
-			HashSet<IProject> closedProjectsToRemove= new HashSet<IProject>(elements.size());
+			HashSet<IProject> closedProjectsToRetain= new HashSet<>(elements.size());
+			HashSet<IProject> closedProjectsToRemove= new HashSet<>(elements.size());
 			for (int i= 0; i < oldItems.length; i++) {
 				IResource oldResource= null;
 				if (oldItems[i] instanceof IResource) {

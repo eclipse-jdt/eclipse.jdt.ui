@@ -43,6 +43,7 @@ public final class ReorgMessages extends NLS {
 	 * DO NOT REMOVE, used in a product.
 	 * @deprecated As of 3.6
 	 */
+	@Deprecated
 	public static String JdtMoveAction_update_references;
 
 	public static String ReorgQueries_enterNewNameQuestion;
@@ -57,18 +58,21 @@ public final class ReorgMessages extends NLS {
 	 * DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/297392.
 	 * @deprecated As of 3.6
 	 */
+	@Deprecated
 	public static String ReorgGroup_paste;
 
 	/**
 	 * DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/297392 .
 	 * @deprecated As of 3.6
 	 */
+	@Deprecated
 	public static String ReorgGroup_delete;
 
 	/**
 	 * DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/297392 .
 	 * @deprecated As of 3.6
 	 */
+	@Deprecated
 	public static String CutSourceReferencesToClipboardAction_cut;
 
 	public static String CopyToClipboardAction_text;

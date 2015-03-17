@@ -110,16 +110,10 @@ public class OpenAction extends SelectionDispatchAction {
 		setEnabled(EditorUtility.getEditorInputJavaElement(fEditor, false) != null);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
@@ -141,9 +135,6 @@ public class OpenAction extends SelectionDispatchAction {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		ITypeRoot input= EditorUtility.getEditorInputJavaElement(fEditor, false);
@@ -206,7 +197,7 @@ public class OpenAction extends SelectionDispatchAction {
 	 * @since 3.4
 	 */
 	private IJavaElement[] selectOpenableElements(IJavaElement[] elements) {
-		List<IJavaElement> result= new ArrayList<IJavaElement>(elements.length);
+		List<IJavaElement> result= new ArrayList<>(elements.length);
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement element= elements[i];
 			switch (element.getElementType()) {
@@ -223,9 +214,6 @@ public class OpenAction extends SelectionDispatchAction {
 		return result.toArray(new IJavaElement[result.size()]);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		if (!checkEnabled(selection))

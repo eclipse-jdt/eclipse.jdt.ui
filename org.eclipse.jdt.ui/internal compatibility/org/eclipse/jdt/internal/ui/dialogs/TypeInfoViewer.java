@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -96,6 +96,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  * DO NOT REMOVE, used in a product.
  * @deprecated As of 3.5, replaced by {@link org.eclipse.ui.dialogs.FilteredItemsSelectionDialog}
  */
+@Deprecated
 @SuppressWarnings("all")
 public class TypeInfoViewer {
 	
@@ -122,9 +123,6 @@ public class TypeInfoViewer {
 			fHistory= history;
 		}
 		
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.core.search.TypeNameMatchRequestor#acceptTypeNameMatch(org.eclipse.jdt.core.search.TypeNameMatch)
-		 */
 		@Override
 		public void acceptTypeNameMatch(TypeNameMatch match) {
 			if (fStop)
@@ -145,7 +143,8 @@ public class TypeInfoViewer {
 			fLabelProvider= labelProvider;
 			fFilter= filter;
 		}
-	    public int compare(Object left, Object right) {
+	    @Override
+		public int compare(Object left, Object right) {
 	    	TypeNameMatch leftInfo= (TypeNameMatch)left;
 	    	TypeNameMatch rightInfo= (TypeNameMatch)right;
 	     	int leftCategory= getCamelCaseCategory(leftInfo);
@@ -941,6 +940,7 @@ public class TypeInfoViewer {
 			}
 		});
 		fTable.addDisposeListener(new DisposeListener() {
+			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				stop(true, true);
 				fDashLineColor.dispose();
@@ -956,6 +956,7 @@ public class TypeInfoViewer {
 			fHistoryMatches= EMTPY_TYPE_INFO_ARRAY;
 			fSearchMatches= EMTPY_TYPE_INFO_ARRAY;
 			fTable.addListener(SWT.SetData, new Listener() {
+				@Override
 				public void handleEvent(Event event) {
 					TableItem item= (TableItem)event.item;
 					setData(item);
@@ -1197,7 +1198,7 @@ public class TypeInfoViewer {
 		Object element= item.getData();
 		if (!(element instanceof TypeNameMatch))
 			return;
-		if (fHistory.remove(element) != null) {
+		if (fHistory.remove((TypeNameMatch) element) != null) {
 			item.dispose();
 			fItems.remove(index);
 			int count= fTable.getItemCount();
@@ -1227,6 +1228,7 @@ public class TypeInfoViewer {
 	
 	private void clear(int ticket) {
 		syncExec(ticket, new Runnable() {
+			@Override
 			public void run() {
 				fNextElement= 0;
 				fDashLineIndex= -1;
@@ -1239,6 +1241,7 @@ public class TypeInfoViewer {
 	
 	private void rememberResult(int ticket, final TypeNameMatch[] result) {
 		syncExec(ticket, new Runnable() {
+			@Override
 			public void run() {
 				if (fLastCompletedResult == null) {
 					fLastCompletedFilter= fTypeInfoFilter;
@@ -1254,6 +1257,7 @@ public class TypeInfoViewer {
 	
 	private void addAll(int ticket, final List elements, final List imageDescriptors, final List labels) {
 		syncExec(ticket, new Runnable() {
+			@Override
 			public void run() {
 				int size= elements.size();
 				for(int i= 0; i < size; i++) {
@@ -1267,6 +1271,7 @@ public class TypeInfoViewer {
 	
 	private void addDashLineAndUpdateLastHistoryEntry(int ticket, final TypeNameMatch next) {
 		syncExec(ticket, new Runnable() {
+			@Override
 			public void run() {
 				if (fNextElement > 0) {
 					TableItem item= fTable.getItem(fNextElement - 1);
@@ -1356,6 +1361,7 @@ public class TypeInfoViewer {
 	
 	private void searchJobDone(int ticket) {
 		syncExec(ticket, new Runnable() {
+			@Override
 			public void run() {
 				shortenTable();
 				checkEmptyList();
@@ -1366,6 +1372,7 @@ public class TypeInfoViewer {
 	
 	private void searchJobCanceled(int ticket, final boolean removePendingItems) {
 		syncExec(ticket, new Runnable() {
+			@Override
 			public void run() {
 				if (removePendingItems) {
 					shortenTable();
@@ -1385,6 +1392,7 @@ public class TypeInfoViewer {
 	
 	private void setHistoryResult(int ticket, final TypeNameMatch[] types) {
 		syncExec(ticket, new Runnable() {
+			@Override
 			public void run() {
 				fExpectedItemCount= types.length;
 				int lastHistoryLength= fHistoryMatches.length;
@@ -1407,6 +1415,7 @@ public class TypeInfoViewer {
 	
 	private void setSearchResult(int ticket, final TypeNameMatch[] types) {
 		syncExec(ticket, new Runnable() {
+			@Override
 			public void run() {
 				fExpectedItemCount+= types.length;
 				fSearchMatches= types;
@@ -1469,6 +1478,7 @@ public class TypeInfoViewer {
 	
 	private void syncJobDone() {
 		syncExec(new Runnable() {
+			@Override
 			public void run() {
 				fSyncJob= null;
 				if (fTypeInfoFilter != null) {
@@ -1486,6 +1496,7 @@ public class TypeInfoViewer {
 	
 	private void scheduleProgressUpdateJob() {
 		syncExec(new Runnable() {
+			@Override
 			public void run() {
 				if (fProgressCounter == 0) {
 					clearProgressMessage();
@@ -1499,6 +1510,7 @@ public class TypeInfoViewer {
 	
 	private void stopProgressUpdateJob() {
 		syncExec(new Runnable() {
+			@Override
 			public void run() {
 				fProgressCounter--;
 				if (fProgressCounter == 0 && fProgressUpdateJob != null) {
@@ -1529,6 +1541,7 @@ public class TypeInfoViewer {
 		if (fDisplay.isDisposed())
 			return;
 		fDisplay.syncExec(new Runnable() {
+			@Override
 			public void run() {
 				if (fTable.isDisposed())
 					return;
@@ -1541,6 +1554,7 @@ public class TypeInfoViewer {
 		if (fDisplay.isDisposed())
 			return;
 		fDisplay.syncExec(new Runnable() {
+			@Override
 			public void run() {
 				if (fTable.isDisposed() || ticket != fSearchJobTicket)
 					return;

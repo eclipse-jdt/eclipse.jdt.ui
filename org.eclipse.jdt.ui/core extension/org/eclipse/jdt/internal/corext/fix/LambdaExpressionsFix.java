@@ -79,7 +79,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 	private static final class FunctionalAnonymousClassesFinder extends ASTVisitor {
 
-		private final ArrayList<ClassInstanceCreation> fNodes= new ArrayList<ClassInstanceCreation>();
+		private final ArrayList<ClassInstanceCreation> fNodes= new ArrayList<>();
 		
 		public static ArrayList<ClassInstanceCreation> perform(ASTNode node) {
 			FunctionalAnonymousClassesFinder finder= new FunctionalAnonymousClassesFinder();
@@ -98,7 +98,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 	
 	private static final class LambdaExpressionsFinder extends ASTVisitor {
 	
-		private final ArrayList<LambdaExpression> fNodes= new ArrayList<LambdaExpression>();
+		private final ArrayList<LambdaExpression> fNodes= new ArrayList<>();
 	
 		public static ArrayList<LambdaExpression> perform(ASTNode node) {
 			LambdaExpressionsFinder finder= new LambdaExpressionsFinder();
@@ -254,9 +254,6 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			fExpressions= expressions;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 
@@ -264,7 +261,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			ImportRemover importRemover= cuRewrite.getImportRemover();
 			AST ast= rewrite.getAST();
 
-			HashMap<ClassInstanceCreation, HashSet<String>> cicToNewNames= new HashMap<ClassInstanceCreation, HashSet<String>>();
+			HashMap<ClassInstanceCreation, HashSet<String>> cicToNewNames= new HashMap<>();
 			for (int i= 0; i < fExpressions.size(); i++) {
 				ClassInstanceCreation classInstanceCreation= fExpressions.get(i);
 				TextEditGroup group= createTextEditGroup(FixMessages.LambdaExpressionsFix_convert_to_lambda_expression, cuRewrite);
@@ -276,7 +273,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				if (!(object instanceof MethodDeclaration))
 					continue;
 				MethodDeclaration methodDeclaration= (MethodDeclaration) object;
-				HashSet<String> excludedNames= new HashSet<String>();
+				HashSet<String> excludedNames= new HashSet<>();
 				if (i != 0) {
 					for (ClassInstanceCreation convertedCic : fExpressions.subList(0, i)) {
 						if (ASTNodes.isParent(convertedCic, classInstanceCreation)) {
@@ -285,7 +282,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 					}
 				}
 				HashSet<String> newNames= makeNamesUnique(excludedNames, methodDeclaration, rewrite, group);
-				cicToNewNames.put(classInstanceCreation, new HashSet<String>(newNames));
+				cicToNewNames.put(classInstanceCreation, new HashSet<>(newNames));
 				List<SingleVariableDeclaration> methodParameters= methodDeclaration.parameters();
 
 				// use short form with inferred parameter types and without parentheses if possible
@@ -336,10 +333,10 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		private HashSet<String> makeNamesUnique(HashSet<String> excludedNames, MethodDeclaration methodDeclaration, ASTRewrite rewrite, TextEditGroup group) {
-			HashSet<String> newNames= new HashSet<String>();
+			HashSet<String> newNames= new HashSet<>();
 			excludedNames.addAll(ASTNodes.getVisibleLocalVariablesInScope(methodDeclaration));
 			List<SimpleName> simpleNamesInMethod= getNamesInMethod(methodDeclaration);
-			List<String> namesInMethod= new ArrayList<String>();
+			List<String> namesInMethod= new ArrayList<>();
 			for (SimpleName name : simpleNamesInMethod) {
 				namesInMethod.add(name.getIdentifier());
 			}
@@ -363,7 +360,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		private HashSet<String> getNamesToExclude(HashSet<String> excludedNames, List<String> namesInMethod, int i) {
-			HashSet<String> allNamesToExclude= new HashSet<String>(excludedNames);
+			HashSet<String> allNamesToExclude= new HashSet<>(excludedNames);
 			allNamesToExclude.addAll(namesInMethod.subList(0, i));
 			allNamesToExclude.addAll(namesInMethod.subList(i + 1, namesInMethod.size()));
 			return allNamesToExclude;
@@ -373,7 +370,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			class NamesCollector extends HierarchicalASTVisitor {
 				private int fTypeCounter;
 
-				private List<SimpleName> fNames= new ArrayList<SimpleName>();
+				private List<SimpleName> fNames= new ArrayList<>();
 
 				@Override
 				public boolean visit(AbstractTypeDeclaration node) {
@@ -430,9 +427,6 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			fExpressions= changedNodes;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 

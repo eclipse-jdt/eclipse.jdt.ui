@@ -169,7 +169,7 @@ public class ResourceModifications {
 	 */
 	public void addCreate(IResource create) {
 		if (fCreate == null)
-			fCreate= new ArrayList<IResource>(2);
+			fCreate= new ArrayList<>(2);
 		fCreate.add(create);
 		if (fIgnoreCount == 0) {
 			internalAdd(new CreateDescription(create));
@@ -184,7 +184,7 @@ public class ResourceModifications {
 	 */
 	public void addDelete(IResource delete) {
 		if (fDelete == null)
-			fDelete= new ArrayList<IResource>(2);
+			fDelete= new ArrayList<>(2);
 		fDelete.add(delete);
 		if (fIgnoreCount == 0) {
 			internalAdd(new DeleteDescription(delete));
@@ -200,8 +200,8 @@ public class ResourceModifications {
 	 */
 	public void addMove(IResource move, MoveArguments arguments) {
 		if (fMove == null) {
-			fMove= new ArrayList<IResource>(2);
-			fMoveArguments= new ArrayList<MoveArguments>(2);
+			fMove= new ArrayList<>(2);
+			fMoveArguments= new ArrayList<>(2);
 		}
 		fMove.add(move);
 		fMoveArguments.add(arguments);
@@ -220,8 +220,8 @@ public class ResourceModifications {
 	 */
 	public void addCopy(IResource copy, CopyArguments arguments) {
 		if (fCopy == null) {
-			fCopy= new ArrayList<IResource>(2);
-			fCopyArguments= new ArrayList<CopyArguments>(2);
+			fCopy= new ArrayList<>(2);
+			fCopyArguments= new ArrayList<>(2);
 		}
 		fCopy.add(copy);
 		fCopyArguments.add(arguments);
@@ -239,8 +239,8 @@ public class ResourceModifications {
 		Assert.isNotNull(rename);
 		Assert.isNotNull(arguments);
 		if (fRename == null) {
-			fRename= new ArrayList<IResource>(2);
-			fRenameArguments= new ArrayList<RenameArguments>(2);
+			fRename= new ArrayList<>(2);
+			fRenameArguments= new ArrayList<>(2);
 		}
 		fRename.add(rename);
 		fRenameArguments.add(arguments);
@@ -251,7 +251,7 @@ public class ResourceModifications {
 	}
 
 	public RefactoringParticipant[] getParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
-		List<RefactoringParticipant> result= new ArrayList<RefactoringParticipant>(5);
+		List<RefactoringParticipant> result= new ArrayList<>(5);
 		if (fDelete != null) {
 			DeleteArguments arguments= new DeleteArguments();
 			for (Iterator<IResource> iter= fDelete.iterator(); iter.hasNext();) {
@@ -369,7 +369,7 @@ public class ResourceModifications {
 
 	private void internalAdd(DeltaDescription description) {
 		if (fDeltaDescriptions == null)
-			fDeltaDescriptions= new ArrayList<DeltaDescription>();
+			fDeltaDescriptions= new ArrayList<>();
 		fDeltaDescriptions.add(description);
 	}
 }

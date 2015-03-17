@@ -21,6 +21,7 @@ public class AFileFilter extends ViewerFilter {
 		// TODO Auto-generated constructor stub
 	}
 
+	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if (element instanceof ICompilationUnit) {
 			return !((ICompilationUnit) element).getElementName().equals("A.java");

@@ -60,6 +60,7 @@ public interface IJavaColorConstants {
 	 * @since 3.0
 	 * @deprecated replaced as of 3.1 by an equivalent semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#METHOD}
 	 */
+	@Deprecated
 	String JAVA_METHOD_NAME= "java_method_name"; //$NON-NLS-1$
 
 	/** The color key for keyword 'return' in Java code
@@ -95,6 +96,7 @@ public interface IJavaColorConstants {
 	 *
 	 * @deprecated no longer used, replaced by <code>JAVA_KEYWORD</code>
 	 */
+	@Deprecated
 	String JAVA_TYPE= "java_type"; //$NON-NLS-1$
 
 	/**
@@ -104,6 +106,7 @@ public interface IJavaColorConstants {
 	 * @since 3.1
 	 * @deprecated replaced as of 3.2 by an equivalent semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#ANNOTATION}
 	 */
+	@Deprecated
 	String JAVA_ANNOTATION= "java_annotation"; //$NON-NLS-1$
 
 	/**

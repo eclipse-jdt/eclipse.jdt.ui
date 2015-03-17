@@ -92,6 +92,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkRegion()
 	 */
+	@Override
 	public IRegion getHyperlinkRegion() {
 		return fRegion;
 	}
@@ -99,6 +100,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#open()
 	 */
+	@Override
 	public void open() {
 		IStorage propertiesFile= null;
 		try {
@@ -221,6 +223,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 				/*
 				 * @see java.lang.Runnable#run()
 				 */
+				@Override
 				public void run() {
 					statusLine.setMessage(true, message, null);
 				}
@@ -241,6 +244,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 /*
  * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getTypeLabel()
  */
+	@Override
 	public String getTypeLabel() {
 		return null;
 	}
@@ -248,6 +252,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 /*
  * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkText()
  */
+	@Override
 	public String getHyperlinkText() {
 		String bundleName= fAccessorClassReference.getResourceBundleName();
 		String propertyFileName= BasicElementLabels.getResourceName((bundleName.substring(bundleName.lastIndexOf('.') + 1, bundleName.length()) + NLSRefactoring.PROPERTY_FILE_EXT));

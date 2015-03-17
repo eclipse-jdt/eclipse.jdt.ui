@@ -188,7 +188,7 @@ public class Bindings {
 	}
 
 	public static String getTypeQualifiedName(ITypeBinding type) {
-		List<String> result= new ArrayList<String>(5);
+		List<String> result= new ArrayList<>(5);
 		createName(type, false, result);
 
 		StringBuffer buffer= new StringBuffer();
@@ -266,13 +266,13 @@ public class Bindings {
 
 
 	public static String[] getNameComponents(ITypeBinding type) {
-		List<String> result= new ArrayList<String>(5);
+		List<String> result= new ArrayList<>(5);
 		createName(type, false, result);
 		return result.toArray(new String[result.size()]);
 	}
 
 	public static String[] getAllNameComponents(ITypeBinding type) {
-		List<String> result= new ArrayList<String>(5);
+		List<String> result= new ArrayList<>(5);
 		createName(type, true, result);
 		return result.toArray(new String[result.size()]);
 	}
@@ -557,7 +557,7 @@ public class Bindings {
 	 * @since 3.9
 	 */
 	public static List<IMethodBinding> findOverriddenMethods(IMethodBinding overriding, boolean testVisibility, boolean firstOnly) {
-		List<IMethodBinding> methodList= new ArrayList<IMethodBinding>();
+		List<IMethodBinding> methodList= new ArrayList<>();
 
 		int modifiers= overriding.getModifiers();
 		if (Modifier.isPrivate(modifiers) || Modifier.isStatic(modifiers) || overriding.isConstructor()) {
@@ -607,7 +607,7 @@ public class Bindings {
 	 * @return all super types (excluding <code>type</code>)
 	 */
 	public static ITypeBinding[] getAllSuperTypes(ITypeBinding type) {
-		Set<ITypeBinding> result= new HashSet<ITypeBinding>();
+		Set<ITypeBinding> result= new HashSet<>();
 		collectSuperTypes(type, result);
 		result.remove(type);
 		return result.toArray(new ITypeBinding[result.size()]);
@@ -702,6 +702,7 @@ public class Bindings {
 	 * @deprecated use {@link #isSubsignature(IMethodBinding, IMethodBinding)}
 	 */
 	//TODO: rename to isErasureEquivalentMethod and change to two IMethodBinding parameters
+	@Deprecated
 	public static boolean isEqualMethod(IMethodBinding method, String methodName, ITypeBinding[] parameters) {
 		if (!method.getName().equals(methodName))
 			return false;
@@ -824,7 +825,7 @@ public class Bindings {
 		if (count == 0)
 			return Collections.emptySet();
 
-		Set<ITypeBinding> result= new HashSet<ITypeBinding>(typeBounds.length);
+		Set<ITypeBinding> result= new HashSet<>(typeBounds.length);
 		for (int i= 0; i < typeBounds.length; i++) {
 			ITypeBinding bound= typeBounds[i];
 			if ("java.lang.Object".equals(typeBounds[0].getQualifiedName())) //$NON-NLS-1$
@@ -1042,6 +1043,7 @@ public class Bindings {
 	 * @throws JavaModelException if an error occurs in the Java model
 	 * @deprecated Use {@link #findMethodInHierarchy(ITypeBinding, String, String[])} or {@link JavaModelUtil}
 	 */
+	@Deprecated
 	public static IMethod findMethod(IMethodBinding method, IType type) throws JavaModelException {
 		method= method.getMethodDeclaration();
 
@@ -1322,6 +1324,7 @@ public class Bindings {
 	 * are in the same hierarchy (directly overrides each other), or {@link #findMethodInHierarchy(ITypeBinding, String, ITypeBinding[])}
 	 * else.
 	 */
+	@Deprecated
 	public static boolean containsSignatureEquivalentConstructor(IMethodBinding[] candidates, IMethodBinding overridable) {
 		for (int index= 0; index < candidates.length; index++) {
 			if (isSignatureEquivalentConstructor(candidates[index], overridable))
@@ -1349,6 +1352,7 @@ public class Bindings {
 	 * are in the same hierarchy (directly overrides each other), or {@link #findMethodInHierarchy(ITypeBinding, String, ITypeBinding[])}
 	 * else.
 	 */
+	@Deprecated
 	public static boolean areOverriddenMethods(IMethodBinding overridden, IMethodBinding overridable) {
 
 		if (!overridden.getName().equals(overridable.getName()))

@@ -46,16 +46,13 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
     public ClasspathModifierDropDownAction() {
         super(null, null, BuildpathModifierAction.DROP_DOWN_ACTION, IAction.AS_DROP_DOWN_MENU);
 
-        fActions= new ArrayList<BuildpathModifierAction>();
+        fActions= new ArrayList<>();
         fFirstValidAction= null;
 
         setText(""); //$NON-NLS-1$
         setToolTipText(""); //$NON-NLS-1$
     }
 
-	/**
-     * {@inheritDoc}
-     */
     @Override
 	public String getDetailedDescription() {
     	if (fFirstValidAction != null) {
@@ -80,7 +77,8 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
         return this;
     }
 
-    public Menu getMenu(Control parent) {
+    @Override
+	public Menu getMenu(Control parent) {
         if (fMenu != null) {
             fMenu.dispose();
         }
@@ -90,7 +88,8 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
 
     }
 
-    public Menu getMenu(Menu parent) {
+    @Override
+	public Menu getMenu(Menu parent) {
         return fMenu;
     }
 
@@ -137,16 +136,14 @@ public class ClasspathModifierDropDownAction extends BuildpathModifierAction imp
         }
     }
 
-    public void dispose() {
+    @Override
+	public void dispose() {
         if (fMenu != null) {
             fMenu.dispose();
             fMenu = null;
         }
     }
 
-	/**
-     * {@inheritDoc}
-     */
     @Override
 	protected boolean canHandle(IStructuredSelection elements) {
     	update();

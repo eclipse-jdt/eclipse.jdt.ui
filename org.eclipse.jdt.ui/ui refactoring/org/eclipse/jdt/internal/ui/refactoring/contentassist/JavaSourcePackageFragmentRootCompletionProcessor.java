@@ -63,32 +63,39 @@ public class JavaSourcePackageFragmentRootCompletionProcessor implements IConten
 		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS);
 	}
 
+	@Override
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
 		return null;
 	}
 
+	@Override
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
 		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
 		return null;
 	}
 
+	@Override
 	public char[] getCompletionProposalAutoActivationCharacters() {
 		return fProposalAutoActivationSet;
 	}
 
+	@Override
 	public char[] getContextInformationAutoActivationCharacters() {
 		return null;
 	}
 
+	@Override
 	public String getErrorMessage() {
 		return null;
 	}
 
+	@Override
 	public IContextInformationValidator getContextInformationValidator() {
 		return null;
 	}
 
+	@Override
 	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubject, int documentOffset) {
 		if (fRoot == null) {
 			return null;
@@ -108,7 +115,7 @@ public class JavaSourcePackageFragmentRootCompletionProcessor implements IConten
 	 * @return array with sourcepackagefragmentroots
 	 */
 	private ICompletionProposal[] createSourcePackageFragmentRootProposals(String prefix, int replacementLength) {
-		List<JavaCompletionProposal> proposals= new ArrayList<JavaCompletionProposal>();
+		List<JavaCompletionProposal> proposals= new ArrayList<>();
 		try {
 			IJavaProject[] projects= fRoot.getJavaProjects();
 			for (int i= 0; i < projects.length; i++) {
@@ -137,6 +144,7 @@ public class JavaSourcePackageFragmentRootCompletionProcessor implements IConten
 		return proposals.toArray(new ICompletionProposal[proposals.size()]);
 	}
 
+	@Override
 	public IContextInformation[] computeContextInformation(IContentAssistSubjectControl contentAssistSubject, int documentOffset) {
 		return null;
 	}

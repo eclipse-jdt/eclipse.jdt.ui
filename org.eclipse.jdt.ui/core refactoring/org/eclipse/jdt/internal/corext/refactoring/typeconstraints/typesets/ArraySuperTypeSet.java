@@ -29,17 +29,11 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 			fElemTypeSet= s;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#anyMember()
-	 */
 	@Override
 	public TType anyMember() {
 		return getJavaLangObject();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#contains(TType)
-	 */
 	@Override
 	public boolean contains(TType t) {
 		if (t.equals(getJavaLangObject())) return true;
@@ -61,9 +55,6 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#containsAll(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
-	 */
 	@Override
 	public boolean containsAll(TypeSet s) {
 		if (s instanceof ArraySuperTypeSet) {
@@ -78,9 +69,6 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 			return enumerate().containsAll(s);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#specialCasesIntersectedWith(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
-	 */
 	@Override
 	protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
 		if (s2 instanceof ArraySuperTypeSet) {
@@ -99,9 +87,6 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 
 	private EnumeratedTypeSet fEnumCache= null;
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#enumerate()
-	 */
 	@Override
 	public EnumeratedTypeSet enumerate() {
 		if (fEnumCache == null) {
@@ -120,73 +105,46 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 		return fEnumCache;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#hasUniqueUpperBound()
-	 */
 	@Override
 	public boolean hasUniqueUpperBound() {
 		return true; // Object is the unique upper bound of any set of array types
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#isSingleton()
-	 */
 	@Override
 	public boolean isSingleton() {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#isUniverse()
-	 */
 	@Override
 	public boolean isUniverse() {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#iterator()
-	 */
 	@Override
 	public Iterator<TType> iterator() {
 		return enumerate().iterator();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#makeClone()
-	 */
 	@Override
 	public TypeSet makeClone() {
 		return new ArraySuperTypeSet(fElemTypeSet);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#superTypes()
-	 */
 	@Override
 	public TypeSet superTypes() {
 		return makeClone();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#uniqueUpperBound()
-	 */
 	@Override
 	public TType uniqueUpperBound() {
 		return getJavaLangObject();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#upperBound()
-	 */
 	@Override
 	public TypeSet upperBound() {
 		return new SingletonTypeSet(getJavaLangObject(), getTypeSetEnvironment());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == this) return true;
@@ -198,9 +156,6 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#subTypes()
-	 */
 	@Override
 	public TypeSet subTypes() {
 		return getTypeSetEnvironment().getUniverseTypeSet();

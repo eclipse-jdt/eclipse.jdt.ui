@@ -219,7 +219,7 @@ public abstract class CleanUpAction extends SelectionDispatchAction {
 	}
 
 	public ICompilationUnit[] getCompilationUnits(IStructuredSelection selection) {
-		HashSet<IJavaElement> result= new HashSet<IJavaElement>();
+		HashSet<IJavaElement> result= new HashSet<>();
 		Object[] selected= selection.toArray();
 		for (int i= 0; i < selected.length; i++) {
 			Object element= selected[i];

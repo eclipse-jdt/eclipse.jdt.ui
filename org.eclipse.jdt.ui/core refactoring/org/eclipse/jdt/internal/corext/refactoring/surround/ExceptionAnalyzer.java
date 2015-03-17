@@ -41,6 +41,7 @@ public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 	private Selection fSelection;
 
 	private static class ExceptionComparator implements Comparator<ITypeBinding> {
+		@Override
 		public int compare(ITypeBinding o1, ITypeBinding o2) {
 			int d1= getDepth(o1);
 			int d2= getDepth(o2);

@@ -71,10 +71,12 @@ public class DocumentChangeTest extends RefactoringTest {
 
 	public static Test suiteWithoutRefactoringTestSetup() {
 		return new TestSetup(new TestSuite(DocumentChangeTest.class)) {
+			@Override
 			protected void setUp() throws Exception {
 				PlatformUI.getWorkbench().showPerspective(JavaUI.ID_PERSPECTIVE, JavaPlugin.getActiveWorkbenchWindow());
 			}
 			
+			@Override
 			protected void tearDown() throws Exception {
 				IWorkbenchPage activePage= JavaPlugin.getActivePage();
 				if (activePage != null) {
@@ -86,6 +88,7 @@ public class DocumentChangeTest extends RefactoringTest {
 	
 	public static Test setUpTest(Test test) {
 		return new RefactoringTestSetup(test) {
+			@Override
 			protected void setUp() throws Exception {
 				super.setUp(); // closes the perspective, need to reopen
 				PlatformUI.getWorkbench().showPerspective(JavaUI.ID_PERSPECTIVE, JavaPlugin.getActiveWorkbenchWindow());
@@ -110,26 +113,32 @@ public class DocumentChangeTest extends RefactoringTest {
 		final IDocument document= textFileBuffer.getDocument();
 		
 		final Refactoring ref= new Refactoring() {
+			@Override
 			public String getName() {
 				return getClass().getName();
 			}
 			
+			@Override
 			public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 				return new RefactoringStatus();
 			}
 			
+			@Override
 			public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 				return new RefactoringStatus();
 			}
 			
+			@Override
 			public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 				DocumentChange change= new DocumentChange("DocumentChangeTest change", document);
 				change.setEdit(new InsertEdit(prolog.length(), insertion));
 				
 				// need to provide a non-null affectedObjects from the undo change, otherwise the NonLocalUndoUserApprover shows a dialog.
 				CompositeChange compositeChange= new CompositeChange("DocumentChangeTest composite change") {
+					@Override
 					protected Change createUndoChange(Change[] childUndos) {
 						return new CompositeChange(getName(), childUndos) {
+							@Override
 							public Object[] getAffectedObjects() {
 								return new Object[0];
 							}
@@ -144,6 +153,7 @@ public class DocumentChangeTest extends RefactoringTest {
 		final MultiStatus statusCollector= new MultiStatus(JavaTestPlugin.getPluginId(), 0, "", null);
 		
 		ILogListener logListener= new ILogListener() {
+			@Override
 			public void logging(IStatus status, String plugin) {
 				statusCollector.add(status);
 			}
@@ -151,6 +161,7 @@ public class DocumentChangeTest extends RefactoringTest {
 		Platform.addLogListener(logListener);
 		try {
 			IRunnableWithProgress runnable= new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						performRefactoring(ref);
@@ -169,6 +180,7 @@ public class DocumentChangeTest extends RefactoringTest {
 			// undo:
 			
 			runnable= new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
@@ -190,6 +202,7 @@ public class DocumentChangeTest extends RefactoringTest {
 			JavaPlugin.getActivePage().closeEditor(editor, true);
 			
 			runnable= new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());

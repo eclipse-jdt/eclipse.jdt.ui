@@ -48,16 +48,10 @@ public class RenameTypeParticipant extends RenameParticipant {
 		return JspMessages.RenameTypeParticipant_name; 
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#checkInput(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) {
 		return new RefactoringStatus();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#createChange(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		final Map changes= new HashMap();
 		final String newName= computeNewName();

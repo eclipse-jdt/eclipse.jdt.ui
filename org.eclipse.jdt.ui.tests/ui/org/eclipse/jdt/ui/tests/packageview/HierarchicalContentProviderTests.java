@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,11 +16,6 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -40,6 +35,11 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
 
+import junit.extensions.TestSetup;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 
 public class HierarchicalContentProviderTests extends TestCase {
 
@@ -49,11 +49,12 @@ public class HierarchicalContentProviderTests extends TestCase {
 		public static IPackageFragmentRoot fJAR;
 		public static IPackageFragmentRoot fClassfolder;
 
-		public static List fExpectedInJAR, fExpectedInCF;
+		public static List<String> fExpectedInJAR, fExpectedInCF;
 
 		public MyTestSetup(Test test) {
 			super(test);
 		}
+		@Override
 		protected void setUp() throws Exception {
 			fJProject= JavaProjectHelper.createJavaProject("Testing", "bin");
 			JavaProjectHelper.addRTJar(fJProject);
@@ -68,8 +69,8 @@ public class HierarchicalContentProviderTests extends TestCase {
 			fExpectedInCF= getExpected(fClassfolder);
 		}
 
-		private static List getExpected(IPackageFragmentRoot root) throws JavaModelException {
-			ArrayList res= new ArrayList();
+		private static List<String> getExpected(IPackageFragmentRoot root) throws JavaModelException {
+			ArrayList<String> res= new ArrayList<>();
 			IJavaElement[] packages= root.getChildren();
 			for (int i= 0; i < packages.length; i++) {
 				IJavaElement[] files= ((IPackageFragment) packages[i]).getChildren();
@@ -80,6 +81,7 @@ public class HierarchicalContentProviderTests extends TestCase {
 			return res;
 		}
 
+		@Override
 		protected void tearDown() throws Exception {
 			JavaProjectHelper.delete(fJProject);
 			fExpectedInJAR= null;
@@ -88,7 +90,7 @@ public class HierarchicalContentProviderTests extends TestCase {
 	}
 
 
-	private static final Class THIS= HierarchicalContentProviderTests.class;
+	private static final Class<HierarchicalContentProviderTests> THIS= HierarchicalContentProviderTests.class;
 
 	public HierarchicalContentProviderTests(String name) {
 		super(name);
@@ -102,16 +104,18 @@ public class HierarchicalContentProviderTests extends TestCase {
 		return new MyTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
 
 
-	private static void testAndAdd(Object curr, List res) {
+	private static void testAndAdd(Object curr, List<String> res) {
 		if (curr instanceof ICompilationUnit || curr instanceof IClassFile) {
 			IJavaElement par= (IJavaElement) curr;
 			res.add(par.getParent().getElementName() + '/' + par.getElementName());
@@ -119,34 +123,34 @@ public class HierarchicalContentProviderTests extends TestCase {
 	}
 
 	public void testJARHierarchical() {
-		List res= collectChildren(MyTestSetup.fJAR, false, false);
+		List<String> res= collectChildren(MyTestSetup.fJAR, false, false);
 		assertEquals(MyTestSetup.fExpectedInJAR, res);
 	}
 
 	public void testJARFoldedHierarchical() {
-		List res= collectChildren(MyTestSetup.fJAR, true, false);
+		List<String> res= collectChildren(MyTestSetup.fJAR, true, false);
 		assertEquals(MyTestSetup.fExpectedInJAR, res);
 	}
 
 	public void testClassFolderHierarchical() {
-		List res= collectChildren(MyTestSetup.fClassfolder, false, false);
+		List<String> res= collectChildren(MyTestSetup.fClassfolder, false, false);
 		assertEquals(MyTestSetup.fExpectedInCF, res);
 	}
 
 	public void testClassFolderFoldedHierarchical() {
-		List res= collectChildren(MyTestSetup.fClassfolder, true, false);
+		List<String> res= collectChildren(MyTestSetup.fClassfolder, true, false);
 		assertEquals(MyTestSetup.fExpectedInCF, res);
 	}
 
 
 
 
-	private void assertEquals(List expected, List current) {
+	private void assertEquals(List<String> expected, List<String> current) {
 		assertEquals(getString(expected), getString(current));
 	}
 
 
-	private String getString(List list) {
+	private String getString(List<String> list) {
 		Collections.sort(list, Collator.getInstance());
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < list.size(); i++) {
@@ -156,10 +160,10 @@ public class HierarchicalContentProviderTests extends TestCase {
 	}
 
 
-	private List collectChildren(Object elem, boolean fold, boolean flatLayout) {
+	private List<String> collectChildren(Object elem, boolean fold, boolean flatLayout) {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fold);
 
-		ArrayList result= new ArrayList();
+		ArrayList<String> result= new ArrayList<>();
 
 		PackageExplorerContentProvider provider= new PackageExplorerContentProvider(false);
 		provider.setIsFlatLayout(flatLayout);
@@ -169,7 +173,7 @@ public class HierarchicalContentProviderTests extends TestCase {
 	}
 
 
-	private void collectChildren(PackageExplorerContentProvider provider, Object elem, List result) {
+	private void collectChildren(PackageExplorerContentProvider provider, Object elem, List<String> result) {
 		Object[] children= provider.getChildren(elem);
 		for (int i= 0; i < children.length; i++) {
 			Object curr= children[i];

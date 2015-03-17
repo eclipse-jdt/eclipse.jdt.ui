@@ -105,6 +105,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 			IDialogFieldListener listener= new IDialogFieldListener() {
+				@Override
 				public void dialogFieldChanged(DialogField field) {
 					boolean enabled= ((SelectionButtonDialogField) field).isSelected();
 					enableProjectSpecificSettings(enabled);
@@ -170,10 +171,12 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		link.setFont(composite.getFont());
 		link.setText("<A>" + text + "</A>");  //$NON-NLS-1$//$NON-NLS-2$
 		link.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				doLinkActivated((Link) e.widget);
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				doLinkActivated((Link) e.widget);
 			}
@@ -201,13 +204,13 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	final void doLinkActivated(Link link) {
 		Map<String, Object> data= getData();
 		if (data == null)
-			data= new HashMap<String, Object>();
+			data= new HashMap<>();
 		data.put(DATA_NO_LINK, Boolean.TRUE);
 
 		if (isProjectPreferencePage()) {
 			openWorkspacePreferences(data);
 		} else {
-			HashSet<IJavaProject> projectsWithSpecifics= new HashSet<IJavaProject>();
+			HashSet<IJavaProject> projectsWithSpecifics= new HashSet<>();
 			try {
 				IJavaProject[] projects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
 				for (int i= 0; i < projects.length; i++) {
@@ -270,6 +273,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	 */
 	protected IStatusChangeListener getNewStatusChangedListener() {
 		return new IStatusChangeListener() {
+			@Override
 			public void statusChanged(IStatus status) {
 				setPreferenceContentStatus(status);
 			}
@@ -317,30 +321,21 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 		StatusUtil.applyToStatusLine(this, status);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
-	 */
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchPropertyPage#getElement()
-	 */
+	@Override
 	public IAdaptable getElement() {
 		return fProject;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchPropertyPage#setElement(org.eclipse.core.runtime.IAdaptable)
-	 */
+	@Override
 	public void setElement(IAdaptable element) {
 		fProject= (IProject) element.getAdapter(IResource.class);
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public void applyData(Object data) {

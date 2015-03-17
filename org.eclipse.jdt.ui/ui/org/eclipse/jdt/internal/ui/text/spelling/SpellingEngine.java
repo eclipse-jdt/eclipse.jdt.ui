@@ -67,6 +67,7 @@ public abstract class SpellingEngine implements ISpellingEngine {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener#handle(org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent)
 		 */
+		@Override
 		public void handle(ISpellEvent event) {
 			if (isProblemsThresholdReached())
 				return;
@@ -82,6 +83,7 @@ public abstract class SpellingEngine implements ISpellingEngine {
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingEngine#check(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IRegion[], org.eclipse.ui.texteditor.spelling.SpellingContext, org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public void check(IDocument document, IRegion[] regions, SpellingContext context, ISpellingProblemCollector collector, IProgressMonitor monitor) {
 		if (collector != null) {
 			final ISpellCheckEngine spellingEngine= SpellCheckEngine.getInstance();

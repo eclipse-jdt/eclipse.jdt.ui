@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class JavaSmartPasteTest extends TextPerformanceTestCase {
 
-	private static final Class THIS= JavaSmartPasteTest.class;
+	private static final Class<JavaSmartPasteTest> THIS= JavaSmartPasteTest.class;
 
 	private static final String SRC_FILE= "org.eclipse.swt/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
 
@@ -61,6 +61,7 @@ public class JavaSmartPasteTest extends TextPerformanceTestCase {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(DEST_FILE), true);
@@ -71,6 +72,7 @@ public class JavaSmartPasteTest extends TextPerformanceTestCase {
 		store.setValue(PreferenceConstants.EDITOR_IMPORTS_ON_PASTE, true);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();

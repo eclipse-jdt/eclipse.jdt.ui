@@ -128,12 +128,14 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		/*
 		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getChildren(java.lang.Object)
 		 */
+		@Override
 		public Object[] getChildren(Object o) {
 			return null;
 		}
 		/*
 		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getImageDescriptor(java.lang.Object)
 		 */
+		@Override
 		public ImageDescriptor getImageDescriptor(Object object) {
 			IWorkbenchAdapter wbAdapter= resource.getAdapter(IWorkbenchAdapter.class);
 			if (wbAdapter != null)
@@ -143,6 +145,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		/*
 		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getLabel(java.lang.Object)
 		 */
+		@Override
 		public String getLabel(Object o) {
 
 			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
@@ -171,10 +174,12 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		/*
 		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getParent(java.lang.Object)
 		 */
+		@Override
 		public Object getParent(Object o) {
 			return null;
 		}
 
+		@Override
 		public int compareTo(KeyReference otherRef) {
 			String thisPath= resource.getFullPath().toString();
 			String otherPath= otherRef.resource.getFullPath().toString();
@@ -254,6 +259,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkRegion()
 	 */
+	@Override
 	public IRegion getHyperlinkRegion() {
 		return fRegion;
 	}
@@ -261,6 +267,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#open()
 	 */
+	@Override
 	public void open() {
 		// Search the key
 		KeyReference[] references= search(fPropertiesKey);
@@ -337,6 +344,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		TwoPaneElementSelector dialog= new TwoPaneElementSelector(fShell, labelProvider, new WorkbenchLabelProvider());
 		dialog.setLowerListLabel(PropertiesFileEditorMessages.OpenAction_SelectionDialog_details);
 		dialog.setLowerListComparator(new Comparator<Object>() {
+			@Override
 			public int compare(Object o1, Object o2) {
 				return 0; // don't sort
 			}
@@ -396,6 +404,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 				/*
 				 * @see java.lang.Runnable#run()
 				 */
+				@Override
 				public void run() {
 					statusLine.setMessage(true, message, null);
 				}
@@ -430,10 +439,11 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		if (key == null)
 			return new KeyReference[0];
 
-		final List<KeyReference> result= new ArrayList<KeyReference>(5);
+		final List<KeyReference> result= new ArrayList<>(5);
 		try {
 			fEditor.getEditorSite().getWorkbenchWindow().getWorkbench().getProgressService().busyCursorWhile(
 				new IRunnableWithProgress() {
+						@Override
 						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 							if (monitor == null)
 								monitor= new NullProgressMonitor();
@@ -502,7 +512,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 	}
 
 	private static TextSearchScope createScope(IResource scope) {
-		ArrayList<String> fileNamePatternStrings= new ArrayList<String>();
+		ArrayList<String> fileNamePatternStrings= new ArrayList<>();
 
 		// XXX: Should be configurable via preference, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81117
 		String[] javaExtensions= JavaCore.getJavaLikeExtensions();
@@ -520,6 +530,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getTypeLabel()
 	 */
+	@Override
 	public String getTypeLabel() {
 		return null;
 	}
@@ -527,6 +538,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkText()
 	 */
+	@Override
 	public String getHyperlinkText() {
 		return Messages.format(PropertiesFileEditorMessages.OpenAction_hyperlinkText, fPropertiesKey);
 	}

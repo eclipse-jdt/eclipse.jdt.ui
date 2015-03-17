@@ -43,6 +43,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	/**
 	 * @deprecated just for compatibility
 	 */
+	@Deprecated
 	private final static String JUNIT3_8_1= "3.8.1"; //$NON-NLS-1$
 	private final static String JUNIT3= "3"; //$NON-NLS-1$
 	private final static String JUNIT4= "4"; //$NON-NLS-1$
@@ -57,10 +58,12 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			fEntries= entries;
 		}
 
+		@Override
 		public IClasspathEntry[] getClasspathEntries() {
 			return fEntries;
 		}
 
+		@Override
 		public String getDescription() {
 			if (JUnitCore.JUNIT4_CONTAINER_PATH.equals(fPath)) {
 				return JUnitMessages.JUnitContainerInitializer_description_junit4;
@@ -68,10 +71,12 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			return JUnitMessages.JUnitContainerInitializer_description_junit3;
 		}
 
+		@Override
 		public int getKind() {
 			return IClasspathContainer.K_APPLICATION;
 		}
 
+		@Override
 		public IPath getPath() {
 			return fPath;
 		}
@@ -82,6 +87,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	public JUnitContainerInitializer() {
 	}
 
+	@Override
 	public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
 		if (isValidJUnitContainerPath(containerPath)) {
 			JUnitContainer container= getNewContainer(containerPath);
@@ -119,30 +125,22 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 		return path != null && path.segmentCount() == 2 && JUnitCore.JUNIT_CONTAINER_ID.equals(path.segment(0));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.ClasspathContainerInitializer#canUpdateClasspathContainer(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject)
-	 */
+	@Override
 	public boolean canUpdateClasspathContainer(IPath containerPath, IJavaProject project) {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.ClasspathContainerInitializer#getAccessRulesStatus(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject)
-	 */
+	@Override
 	public IStatus getAccessRulesStatus(IPath containerPath, IJavaProject project) {
 		return READ_ONLY;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.ClasspathContainerInitializer#getSourceAttachmentStatus(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject)
-	 */
+	@Override
 	public IStatus getSourceAttachmentStatus(IPath containerPath, IJavaProject project) {
 		return READ_ONLY;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.ClasspathContainerInitializer#getAttributeStatus(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject, java.lang.String)
-	 */
+	@Override
 	public IStatus getAttributeStatus(IPath containerPath, IJavaProject project, String attributeKey) {
 		if (attributeKey.equals(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME)) {
 			return Status.OK_STATUS;
@@ -151,9 +149,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.ClasspathContainerInitializer#requestClasspathContainerUpdate(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject, org.eclipse.jdt.core.IClasspathContainer)
-	 */
+	@Override
 	public void requestClasspathContainerUpdate(IPath containerPath, IJavaProject project, IClasspathContainer containerSuggestion) throws CoreException {
 		IEclipsePreferences preferences= InstanceScope.INSTANCE.getNode(JUnitCorePlugin.CORE_PLUGIN_ID);
 		
@@ -210,7 +206,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	}
 
 	private static void rebindClasspathEntries(IJavaModel model, IPath containerPath) throws JavaModelException {
-		ArrayList affectedProjects= new ArrayList();
+		ArrayList<IJavaProject> affectedProjects= new ArrayList<>();
 
 		IJavaProject[] projects= model.getJavaProjects();
 		for (int i= 0; i < projects.length; i++) {
@@ -224,7 +220,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			}
 		}
 		if (!affectedProjects.isEmpty()) {
-			IJavaProject[] affected= (IJavaProject[]) affectedProjects.toArray(new IJavaProject[affectedProjects.size()]);
+			IJavaProject[] affected= affectedProjects.toArray(new IJavaProject[affectedProjects.size()]);
 			IClasspathContainer[] containers= new IClasspathContainer[affected.length];
 			for (int i= 0; i < containers.length; i++) {
 				containers[i]= getNewContainer(containerPath);
@@ -236,6 +232,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	/**
 	 * @see org.eclipse.jdt.core.ClasspathContainerInitializer#getDescription(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject)
 	 */
+	@Override
 	public String getDescription(IPath containerPath, IJavaProject project) {
 		if (isValidJUnitContainerPath(containerPath)) {
 			String version= containerPath.segment(1);
@@ -248,9 +245,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 		return JUnitMessages.JUnitContainerInitializer_description_initializer_unresolved;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.ClasspathContainerInitializer#getComparisonID(org.eclipse.core.runtime.IPath, org.eclipse.jdt.core.IJavaProject)
-	 */
+	@Override
 	public Object getComparisonID(IPath containerPath, IJavaProject project) {
 		return containerPath;
 	}

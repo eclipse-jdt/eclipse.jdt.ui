@@ -82,6 +82,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 		/*
 		 * @see ISelectionValidator#validate(Object[])
 		 */
+		@Override
 		public IStatus validate(Object[] selection) {
 			int count= 0;
 			for (Object element : selection) {
@@ -131,12 +132,14 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	/*
 	 * @see IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
 	 */
+	@Override
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 	}
 
 	/*
 	 * @see IActionDelegate#run(IAction)
 	 */
+	@Override
 	public void run(IAction action) {
 		ILabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		SuiteClassesContentProvider cprovider= new SuiteClassesContentProvider(fIsJunit4);
@@ -198,6 +201,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 	/*
 	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
 	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		fShell= JUnitPlugin.getActiveWorkbenchShell();
 		if (selection instanceof IStructuredSelection) {
@@ -355,6 +359,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 
 	public IRunnableWithProgress getRunnable() {
 		return new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				if (monitor == null) {
 					monitor= new NullProgressMonitor();

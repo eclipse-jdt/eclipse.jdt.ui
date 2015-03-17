@@ -163,6 +163,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		restoreWidgetValues();
 		if (fInitialSelection != null)
 			BusyIndicator.showWhile(parent.getDisplay(), new Runnable() {
+				@Override
 				public void run() {
 					setupBasedOnInitialSelections();
 				}
@@ -399,7 +400,8 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		SWTUtil.setAccessibilityText(fInputGroup.getTable(), JarPackagerMessages.JarPackageWizardPage_table_accessibility_message);
 
 		ICheckStateListener listener = new ICheckStateListener() {
-            public void checkStateChanged(CheckStateChangedEvent event) {
+            @Override
+			public void checkStateChanged(CheckStateChangedEvent event) {
                 update();
             }
         };
@@ -474,7 +476,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		final IRefactoringHistoryService service= RefactoringCore.getHistoryService();
 		try {
 			service.connect();
-			final Set<IProject> set= new HashSet<IProject>();
+			final Set<IProject> set= new HashSet<>();
 			final Object[] elements= fJarPackage.getElements();
 			for (int index= 0; index < elements.length; index++) {
 				if (elements[index] instanceof IAdaptable) {
@@ -487,6 +489,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			try {
 				getContainer().run(false, true, new IRunnableWithProgress() {
 
+					@Override
 					public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						history[0]= service.getRefactoringHistory(set.toArray(new IProject[set.size()]), 0, Long.MAX_VALUE, JavaRefactoringDescriptor.JAR_MIGRATION, monitor);
 					}
@@ -678,7 +681,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	}
 
 	private Set<Object> removeContainedChildren(Set<Object> elements) {
-		Set<Object> newList= new HashSet<Object>(elements.size());
+		Set<Object> newList= new HashSet<>(elements.size());
 		Set<Object> javaElementResources= getCorrespondingContainers(elements);
 		Iterator<Object> iter= elements.iterator();
 		boolean removedOne= false;
@@ -717,7 +720,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 	private Set<Object> getExportedNonContainers() {
 		Set<Object> whiteCheckedTreeItems= fInputGroup.getWhiteCheckedTreeItems();
-		Set<Object> exportedNonContainers= new HashSet<Object>(whiteCheckedTreeItems.size());
+		Set<Object> exportedNonContainers= new HashSet<>(whiteCheckedTreeItems.size());
 		Set<Object> javaElementResources= getCorrespondingContainers(whiteCheckedTreeItems);
 		Iterator<Object> iter= fInputGroup.getAllCheckedListItems();
 		while (iter.hasNext()) {
@@ -738,7 +741,7 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 * to the Java elements (Java project, package, package root)
 	 */
 	private Set<Object> getCorrespondingContainers(Set<Object> elements) {
-		Set<Object> javaElementResources= new HashSet<Object>(elements.size());
+		Set<Object> javaElementResources= new HashSet<>(elements.size());
 		Iterator<Object> iter= elements.iterator();
 		while (iter.hasNext()) {
 			Object element= iter.next();

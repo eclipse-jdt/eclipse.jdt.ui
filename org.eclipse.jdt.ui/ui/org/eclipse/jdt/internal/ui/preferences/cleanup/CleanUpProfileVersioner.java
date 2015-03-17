@@ -31,23 +31,17 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
 
 	public static final int CURRENT_VERSION= VERSION_2;
 
-	/* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.preferences.cleanup.IProfileVersioner#getFirstVersion()
-     */
+	@Override
 	public int getFirstVersion() {
 	    return VERSION_1;
     }
 
-	/* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.preferences.cleanup.IProfileVersioner#getCurrentVersion()
-     */
+	@Override
 	public int getCurrentVersion() {
 	    return CURRENT_VERSION;
     }
 
-	/* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.preferences.cleanup.IProfileVersioner#updateAndComplete(org.eclipse.jdt.internal.ui.preferences.cleanup.ProfileManager.CustomProfile)
-     */
+	@Override
 	public void update(CustomProfile profile) {
 		final Map<String, String> oldSettings= profile.getSettings();
 		Map<String, String> newSettings= updateAndComplete(oldSettings, profile.getVersion());
@@ -78,10 +72,8 @@ public class CleanUpProfileVersioner implements IProfileVersioner {
 		return newSettings;
 	}
 
-	/**
-     * {@inheritDoc}
-     */
-    public String getProfileKind() {
+    @Override
+	public String getProfileKind() {
 	    return PROFILE_KIND;
     }
 

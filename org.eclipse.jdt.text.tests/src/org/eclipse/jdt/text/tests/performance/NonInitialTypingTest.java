@@ -46,6 +46,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 
 	protected PerformanceMeter fMeter;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		EditorTestHelper.runEventQueue();
@@ -87,6 +88,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 		sleep(1000);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		sleep(1000);

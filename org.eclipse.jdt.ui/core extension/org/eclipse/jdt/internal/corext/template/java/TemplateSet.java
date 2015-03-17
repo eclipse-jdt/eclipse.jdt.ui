@@ -57,13 +57,14 @@ import org.eclipse.jface.text.templates.TemplateException;
  * @deprecated use TemplateStore instead
  * @since 3.0
  */
+@Deprecated
 public class TemplateSet {
 
 	private static final String NAME_ATTRIBUTE= "name"; //$NON-NLS-1$
 	private static final String DESCRIPTION_ATTRIBUTE= "description"; //$NON-NLS-1$
 	private static final String CONTEXT_ATTRIBUTE= "context"; //$NON-NLS-1$
 
-	private List<Template> fTemplates= new ArrayList<Template>();
+	private List<Template> fTemplates= new ArrayList<>();
 	private String fTemplateTag;
 
 	private static final int TEMPLATE_PARSE_EXCEPTION= 10002;
@@ -351,7 +352,7 @@ public class TemplateSet {
 	 * @return the templates with the given name
 	 */
 	public Template[] getTemplates(String name) {
-		ArrayList<Template> res= new ArrayList<Template>();
+		ArrayList<Template> res= new ArrayList<>();
 		for (Iterator<Template> iterator= fTemplates.iterator(); iterator.hasNext();) {
 			Template curr= iterator.next();
 			if (curr.getName().equals(name)) {

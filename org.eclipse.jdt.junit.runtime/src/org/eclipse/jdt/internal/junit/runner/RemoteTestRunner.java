@@ -666,11 +666,6 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	    fWriter.flush();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jdt.internal.junit.runner.TestRunner#runTests(org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.TestExecution)
-	 */
 	public void runTests(TestExecution execution) {
 		runTests(fTestClassNames, fTestName, execution);
 		}

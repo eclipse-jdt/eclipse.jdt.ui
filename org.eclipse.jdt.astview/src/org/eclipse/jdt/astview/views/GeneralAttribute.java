@@ -56,18 +56,22 @@ public class GeneralAttribute extends ASTAttribute {
 		return res;
 	}
 
+	@Override
 	public Object getParent() {
 		return fParent;
 	}
 
+	@Override
 	public Object[] getChildren() {
 		return fChildren;
 	}
 
+	@Override
 	public String getLabel() {
 		return fLabel;
 	}
 	
+	@Override
 	public Image getImage() {
 		return null;
 	}
@@ -75,6 +79,7 @@ public class GeneralAttribute extends ASTAttribute {
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -103,6 +108,7 @@ public class GeneralAttribute extends ASTAttribute {
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return (fParent != null ? fParent.hashCode() : 0)
 				+ (fLabel != null ? fLabel.hashCode() : 0);

@@ -98,6 +98,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	 * Returns a name which is presented in the UI.
 	 * @see ITypedElement#getName()
 	 */
+	@Override
 	public String getName() {
 
 		switch (getTypeCode()) {
@@ -116,6 +117,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	/*
 	 * @see ITypedElement#getType()
 	 */
+	@Override
 	public String getType() {
 		return "java2"; //$NON-NLS-1$
 	}
@@ -125,6 +127,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	 *
 	 * see ITypedInput.getImage
 	 */
+	@Override
 	public Image getImage() {
 
 		ImageDescriptor id= null;

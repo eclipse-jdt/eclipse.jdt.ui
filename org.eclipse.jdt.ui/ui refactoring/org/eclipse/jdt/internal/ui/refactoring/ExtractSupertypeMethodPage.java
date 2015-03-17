@@ -46,18 +46,12 @@ public class ExtractSupertypeMethodPage extends PullUpMethodPage {
 		return (ExtractSupertypeProcessor) getPullUpRefactoringProcessor();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.EXTRACT_SUPERTYPE_WIZARD_PAGE);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setVisible(final boolean visible) {
 		if (visible) {
@@ -66,6 +60,7 @@ public class ExtractSupertypeMethodPage extends PullUpMethodPage {
 			try {
 				getWizard().getContainer().run(false, false, new IRunnableWithProgress() {
 
+					@Override
 					public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						processor.createWorkingCopyLayer(monitor);
 					}

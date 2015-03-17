@@ -87,9 +87,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 	private Composite fCleanUpOptionsComposite;
 	private ControlEnableState fControlEnableState;
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void createConfigControl(final Composite parent, IPreferencePageContainer container) {
 		fContainer= container;
@@ -108,9 +105,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		fFormatCodeButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_FormatSource_Checkbox);
 		fFormatCodeButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		fFormatCodeButton.addSelectionListener(new SelectionAdapter() {
-			/**
-			 * {@inheritDoc}
-			 */
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				changeSettingsValue(CleanUpConstants.FORMAT_SOURCE_CODE, fFormatCodeButton.getSelection());
@@ -131,9 +125,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
 		fFormatAllButton.setLayoutData(gridData);
 		fFormatAllButton.addSelectionListener(new SelectionAdapter() {
-			/**
-			 * {@inheritDoc}
-			 */
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				changeSettingsValue(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY, !fFormatAllButton.getSelection());
@@ -145,9 +136,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		gridData= new GridData(SWT.FILL, SWT.TOP, true, false);
 		fFormatChangedOnlyButton.setLayoutData(gridData);
 		fFormatChangedOnlyButton.addSelectionListener(new SelectionAdapter() {
-			/**
-			 * {@inheritDoc}
-			 */
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				changeSettingsValue(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY, fFormatChangedOnlyButton.getSelection());
@@ -168,9 +156,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		fOrganizeImportsButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_SaveActionPreferencePage_OrganizeImports_Checkbox);
 		fOrganizeImportsButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		fOrganizeImportsButton.addSelectionListener(new SelectionAdapter() {
-			/**
-			 * {@inheritDoc}
-			 */
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				changeSettingsValue(CleanUpConstants.ORGANIZE_IMPORTS, fOrganizeImportsButton.getSelection());
@@ -189,9 +174,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 
 		createAdvancedComposite(fCleanUpOptionsComposite);
 		fAdditionalActionButton.addSelectionListener(new SelectionAdapter() {
-			/**
-			 * {@inheritDoc}
-			 */
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				changeSettingsValue(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS, fAdditionalActionButton.getSelection());
@@ -218,12 +200,9 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		fConfigureButton.setText(SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_Configure_Button);
 		fConfigureButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		fConfigureButton.addSelectionListener(new SelectionAdapter() {
-			/**
-			 * {@inheritDoc}
-			 */
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Hashtable<String, String> workingValues= new Hashtable<String, String>(fSettings);
+				Hashtable<String, String> workingValues= new Hashtable<>(fSettings);
 				SaveActionSelectionDialog dialog= new SaveActionSelectionDialog(parent.getShell(), workingValues);
 				if (dialog.open() == Window.OK) {
 					fSettings= workingValues;
@@ -236,9 +215,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		return composite;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void initialize(final IScopeContext context, IAdaptable element) {
 		fContext= context;
@@ -263,9 +239,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		super.initialize(context, element);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void performDefaults() {
 		if (ProjectScope.SCOPE.equals(fContext.getName()) && !hasSettingsInScope(fContext))
@@ -283,9 +256,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		super.performDefaults();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void performOk() {
 		super.performOk();
@@ -294,9 +264,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 			CleanUpPreferenceUtil.saveSaveParticipantOptions(fContext, fSettings);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void enableProjectSettings() {
 		super.enableProjectSettings();
@@ -304,9 +271,6 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		CleanUpPreferenceUtil.saveSaveParticipantOptions(fContext, fSettings);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void disableProjectSettings() {
 		super.disableProjectSettings();
@@ -320,25 +284,16 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected String getPostSaveListenerId() {
 		return CleanUpPostSaveListener.POSTSAVELISTENER_ID;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected String getPostSaveListenerName() {
 		return SaveParticipantMessages.CleanUpSaveParticipantPreferenceConfiguration_CleanUpActionsTopNodeName_Checkbox;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void enabled(boolean isEnabled) {
 		if (isEnabled) {
@@ -375,7 +330,7 @@ public class CleanUpSaveParticipantPreferenceConfiguration extends AbstractSaveP
 		fSelectedActionsText.setEnabled(additionalEnabled);
 		fConfigureButton.setEnabled(additionalEnabled);
 
-		Map<String, String> settings= new HashMap<String, String>(fSettings);
+		Map<String, String> settings= new HashMap<>(fSettings);
 		settings.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpOptions.FALSE);
 		settings.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpOptions.FALSE);
 		CleanUpOptions options= new MapCleanUpOptions(settings);

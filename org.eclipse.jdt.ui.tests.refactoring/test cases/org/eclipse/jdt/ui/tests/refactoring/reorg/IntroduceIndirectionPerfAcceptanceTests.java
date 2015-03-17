@@ -49,6 +49,7 @@ public class IntroduceIndirectionPerfAcceptanceTests extends RefactoringPerforma
 		super(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProject= (IJavaProject)JavaCore.create(

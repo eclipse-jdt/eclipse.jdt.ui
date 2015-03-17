@@ -199,9 +199,6 @@ public class PackagesView extends JavaBrowsingPart{
 		memento.putInteger(this.getViewSite().getId()+TAG_VIEW_STATE,fCurrViewState);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createViewer(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected StructuredViewer createViewer(Composite parent) {
 		//Creates the viewer of this part dependent on the current layout.
@@ -215,14 +212,12 @@ public class PackagesView extends JavaBrowsingPart{
 		return fWrappedViewer;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getAdapter(java.lang.Class)
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> key) {
 		if (key == IShowInTargetList.class) {
 			return (T) new IShowInTargetList() {
+				@Override
 				public String[] getShowInTargetIds() {
 					return new String[] { JavaUI.ID_PACKAGES, JavaPlugin.ID_RES_NAV  };
 				}
@@ -321,9 +316,6 @@ public class PackagesView extends JavaBrowsingPart{
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#findElementToSelect(org.eclipse.jdt.core.IJavaElement)
-	 */
 	@Override
 	protected IJavaElement findElementToSelect(IJavaElement je) {
 		if (je == null)

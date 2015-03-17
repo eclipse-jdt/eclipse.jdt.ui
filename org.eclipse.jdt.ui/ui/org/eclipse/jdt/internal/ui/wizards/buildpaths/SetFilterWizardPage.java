@@ -116,9 +116,7 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 		fInclusionPatternList= createListContents(entryToEdit, CPListElement.INCLUSION, incLabel, incDescriptor, incButtonLabels);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		Composite inner= new Composite(parent, SWT.NONE);
 		inner.setFont(parent.getFont());
@@ -179,14 +177,14 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 	private ListDialogField<String> createListContents(CPListElement entryToEdit, String key, String label, ImageDescriptor descriptor, String[] buttonLabels) {
 		ExclusionPatternAdapter adapter= new ExclusionPatternAdapter();
 
-		ListDialogField<String> patternList= new ListDialogField<String>(adapter, buttonLabels, new ExclusionInclusionLabelProvider(descriptor));
+		ListDialogField<String> patternList= new ListDialogField<>(adapter, buttonLabels, new ExclusionInclusionLabelProvider(descriptor));
 		patternList.setDialogFieldListener(adapter);
 		patternList.setLabelText(label);
 		patternList.enableButton(IDX_EDIT, false);
 
 		IPath[] pattern= (IPath[]) entryToEdit.getAttribute(key);
 
-		ArrayList<String> elements= new ArrayList<String>(pattern.length);
+		ArrayList<String> elements= new ArrayList<>(pattern.length);
 		for (int i= 0; i < pattern.length; i++) {
 			String patternName= pattern[i].toString();
 			if (patternName.length() > 0)
@@ -273,6 +271,7 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#customButtonPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField, int)
 		 */
+		@Override
 		public void customButtonPressed(ListDialogField<String> field, int index) {
 			doCustomButtonPressed(field, index);
 		}
@@ -280,12 +279,14 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#selectionChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
+		@Override
 		public void selectionChanged(ListDialogField<String> field) {
 			doSelectionChanged(field);
 		}
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#doubleClicked(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
+		@Override
 		public void doubleClicked(ListDialogField<String> field) {
 			doDoubleClicked(field);
 		}
@@ -293,6 +294,7 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
 		 */
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 		}
 

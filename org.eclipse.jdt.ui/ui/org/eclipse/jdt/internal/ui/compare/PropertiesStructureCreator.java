@@ -58,6 +58,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 		/* (non Java doc)
 		 * see ITypedElement#getName
 		 */
+		@Override
 		public String getName() {
 			return getId();
 		}
@@ -65,6 +66,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 		/* (non Java doc)
 		 * see ITypedElement#getType
 		 */
+		@Override
 		public String getType() {
 			return "properties2"; //$NON-NLS-1$
 		}
@@ -72,6 +74,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 		/* (non Java doc)
 		 * see ITypedElement#getImage
 		 */
+		@Override
 		public Image getImage() {
 			return CompareUI.getImage(getType());
 		}
@@ -85,6 +88,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 	public PropertiesStructureCreator() {
 	}
 
+	@Override
 	public String getName() {
 		return CompareMessages.PropertyCompareViewer_title;
 	}
@@ -122,6 +126,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 		return null;
 	}
 
+	@Override
 	public String getContents(Object node, boolean ignoreWhitespace) {
 		if (node instanceof IStreamContentAccessor) {
 			IStreamContentAccessor sca= (IStreamContentAccessor) node;

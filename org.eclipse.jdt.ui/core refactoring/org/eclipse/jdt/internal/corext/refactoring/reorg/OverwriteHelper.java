@@ -106,7 +106,7 @@ class OverwriteHelper {
 	}
 
 	private void confirmPackageFragmentRootOverwritting(IConfirmQuery skipQuery, IConfirmQuery overwriteQuery) {
-		List<IPackageFragmentRoot> toNotOverwrite= new ArrayList<IPackageFragmentRoot>(1);
+		List<IPackageFragmentRoot> toNotOverwrite= new ArrayList<>(1);
 		for (int i= 0; i < fRoots.length; i++) {
 			IPackageFragmentRoot root= fRoots[i];
 			if (canOverwrite(root)) {
@@ -124,7 +124,7 @@ class OverwriteHelper {
 	}
 
 	private void confirmCuOverwritting(IConfirmQuery overwriteQuery) {
-		List<ICompilationUnit> cusToNotOverwrite= new ArrayList<ICompilationUnit>(1);
+		List<ICompilationUnit> cusToNotOverwrite= new ArrayList<>(1);
 		for (int i= 0; i < fCus.length; i++) {
 			ICompilationUnit cu= fCus[i];
 			if (canOverwrite(cu) && ! overwrite(cu, overwriteQuery))
@@ -135,7 +135,7 @@ class OverwriteHelper {
 	}
 
 	private void confirmFolderOverwritting(IConfirmQuery overwriteQuery) {
-		List<IFolder> foldersToNotOverwrite= new ArrayList<IFolder>(1);
+		List<IFolder> foldersToNotOverwrite= new ArrayList<>(1);
 		for (int i= 0; i < fFolders.length; i++) {
 			IFolder folder= fFolders[i];
 			if (willOverwrite(folder) && ! skip(BasicElementLabels.getResourceName(folder), overwriteQuery))
@@ -146,7 +146,7 @@ class OverwriteHelper {
 	}
 
 	private void confirmFileOverwritting(IConfirmQuery overwriteQuery, IConfirmQuery skipQuery) {
-		List<IFile> filesToNotOverwrite= new ArrayList<IFile>(1);
+		List<IFile> filesToNotOverwrite= new ArrayList<>(1);
 		for (int i= 0; i < fFiles.length; i++) {
 			IFile file= fFiles[i];
 			if (willOverwrite(file)) {
@@ -165,7 +165,7 @@ class OverwriteHelper {
 	}
 
 	private void confirmPackageOverwritting(IConfirmQuery overwriteQuery){
-		List<IPackageFragment> toNotOverwrite= new ArrayList<IPackageFragment>(1);
+		List<IPackageFragment> toNotOverwrite= new ArrayList<>(1);
 		for (int i= 0; i < fPackageFragments.length; i++) {
 			IPackageFragment pack= fPackageFragments[i];
 			if (canOverwrite(pack) && ! overwrite(pack, overwriteQuery))

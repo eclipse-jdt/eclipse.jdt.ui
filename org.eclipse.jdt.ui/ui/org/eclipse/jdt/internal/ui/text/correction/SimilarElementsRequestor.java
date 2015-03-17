@@ -130,7 +130,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 		fName= name;
 		fKind= kind;
 
-		fResult= new HashSet<SimilarElement>();
+		fResult= new HashSet<>();
 		// nArguments and preferredType not yet used
 	}
 
@@ -203,9 +203,6 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.CompletionRequestor#accept(org.eclipse.jdt.core.CompletionProposal)
-	 */
 	@Override
 	public void accept(CompletionProposal proposal) {
 		if (proposal.getKind() == CompletionProposal.TYPE_REF) {
@@ -233,7 +230,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 			newCU= cu.getWorkingCopy(null);
 			newCU.getBuffer().setContents(dummyCU.toString());
 			
-			final HashSet<String> result= new HashSet<String>();
+			final HashSet<String> result= new HashSet<>();
 			
 			CompletionRequestor requestor= new CompletionRequestor(true) {
 				@Override

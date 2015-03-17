@@ -48,6 +48,7 @@ class LocationCopyAction extends Action {
 		setEnabled(!fLocationViewer.getSelection().isEmpty());
 
 		locationViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				setEnabled(! event.getSelection().isEmpty());
 			}

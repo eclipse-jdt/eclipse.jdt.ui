@@ -108,6 +108,7 @@ public class ProjectActionGroup extends ActionGroup {
 		}
 
 		fSelectionChangedListener= new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection s= event.getSelection();
 				if (s instanceof IStructuredSelection) {
@@ -125,7 +126,7 @@ public class ProjectActionGroup extends ActionGroup {
 
 	protected void performSelectionChanged(IStructuredSelection structuredSelection) {
 		Object[] array= structuredSelection.toArray();
-		ArrayList<IProject> openProjects= new ArrayList<IProject>();
+		ArrayList<IProject> openProjects= new ArrayList<>();
 		int selectionStatus= evaluateSelection(array, openProjects);
 		StructuredSelection sel= new StructuredSelection(openProjects);
 
@@ -174,9 +175,6 @@ public class ProjectActionGroup extends ActionGroup {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
@@ -185,9 +183,6 @@ public class ProjectActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(IDEActionFactory.OPEN_PROJECT.getId(), fOpenAction);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);

@@ -79,7 +79,7 @@ public class SelectAllAction extends Action {
 	@Override
 	public void run() {
 		if (fViewer instanceof TreeViewer) {
-			ArrayList<TreeItem> allVisible= new ArrayList<TreeItem>();
+			ArrayList<TreeItem> allVisible= new ArrayList<>();
 			Tree tree= ((TreeViewer) fViewer).getTree();
 			collectExpandedAndVisible(tree.getItems(), allVisible);
 			tree.setSelection(allVisible.toArray(new TreeItem[allVisible.size()]));

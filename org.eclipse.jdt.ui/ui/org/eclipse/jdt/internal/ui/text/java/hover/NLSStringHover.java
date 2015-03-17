@@ -101,6 +101,8 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 	/**
 	 * @deprecated see {@link org.eclipse.jface.text.ITextHover#getHoverInfo(ITextViewer, IRegion)}
 	 */
+	@Deprecated
+	@Override
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		NLSHoverControlInput info= internalGetHoverInfo(textViewer, hoverRegion);
 		return info == null ? null : info.fInformation;
@@ -300,6 +302,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		/**
 		 * {@inheritDoc} This control can handle {@link NLSStringHover.NLSHoverControlInput}.
 		 */
+		@Override
 		public void setInput(Object input) {
 			Assert.isLegal(input instanceof NLSHoverControlInput);
 			

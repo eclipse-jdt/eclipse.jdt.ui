@@ -55,16 +55,12 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 		fRelevance= relevance;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
-	 */
+	@Override
 	public int getRelevance() {
 		return fRelevance;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
-	 */
+	@Override
 	public void apply(IDocument document) {
 		IJavaProject project= fContext.getCompilationUnit().getJavaProject();
 		Shell shell= JUnitPlugin.getActiveWorkbenchShell();
@@ -92,7 +88,7 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 
 	private static boolean addToClasspath(Shell shell, final IJavaProject project, IClasspathEntry entry, IRunnableContext context) throws JavaModelException {
 		IClasspathEntry[] oldEntries= project.getRawClasspath();
-		ArrayList<IClasspathEntry> newEntries= new ArrayList<IClasspathEntry>(oldEntries.length + 1);
+		ArrayList<IClasspathEntry> newEntries= new ArrayList<>(oldEntries.length + 1);
 		boolean added= false;
 		for (int i= 0; i < oldEntries.length; i++) {
 			IClasspathEntry curr= oldEntries[i];
@@ -131,6 +127,7 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 		// fix for 64974 OCE in New JUnit Test Case wizard while workspace is locked [JUnit]
 		try {
 			context.run(true, false, new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						project.setRawClasspath(newCPEntries, monitor);
@@ -152,16 +149,12 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
-	 */
+	@Override
 	public Point getSelection(IDocument document) {
 		return new Point(fContext.getSelectionOffset(), fContext.getSelectionLength());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
-	 */
+	@Override
 	public String getAdditionalProposalInfo() {
 		if (fIsJunit4) {
 			return JUnitMessages.JUnitAddLibraryProposal_junit4_info;
@@ -169,9 +162,7 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 		return JUnitMessages.JUnitAddLibraryProposal_info;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
-	 */
+	@Override
 	public String getDisplayString() {
 		if (fIsJunit4) {
 			return JUnitMessages.JUnitAddLibraryProposa_junit4_label;
@@ -179,16 +170,12 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 		return JUnitMessages.JUnitAddLibraryProposal_label;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
-	 */
+	@Override
 	public Image getImage() {
 		return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_LIBRARY);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
-	 */
+	@Override
 	public IContextInformation getContextInformation() {
 		return null;
 	}

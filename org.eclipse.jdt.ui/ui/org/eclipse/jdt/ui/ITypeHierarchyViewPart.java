@@ -80,6 +80,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 *  to clear any input element
 	 * @deprecated use setInputElement instead
 	 */
+	@Deprecated
 	public void setInput(IType type);
 
 	/**
@@ -101,6 +102,7 @@ public interface ITypeHierarchyViewPart extends IViewPart {
 	 * @see #setInput(IType)
 	 * @deprecated use getInputElement instead
 	 */
+	@Deprecated
 	public IType getInput();
 
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,11 +19,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
+
+import junit.framework.TestCase;
 
 
 /**
@@ -32,7 +32,7 @@ import org.eclipse.test.performance.PerformanceMeter;
 public class PerformanceTestCase2 extends TestCase {
 
 	private String fBaseScenarioId;
-	private List fPerformanceMeters;
+	private List<PerformanceMeter> fPerformanceMeters;
 
 
 	public PerformanceTestCase2() {
@@ -51,6 +51,7 @@ public class PerformanceTestCase2 extends TestCase {
 		return 20;
 	}
 
+	@Override
 	protected void runTest() throws Throwable {
 		assertNotNull(getName());
 		Method runMethod= null;
@@ -125,7 +126,7 @@ public class PerformanceTestCase2 extends TestCase {
 	 */
 	private void addPerformanceMeter(PerformanceMeter performanceMeter) {
 		if (fPerformanceMeters == null)
-			fPerformanceMeters= new ArrayList();
+			fPerformanceMeters= new ArrayList<>();
 		fPerformanceMeters.add(performanceMeter);
 	}
 
@@ -135,8 +136,8 @@ public class PerformanceTestCase2 extends TestCase {
 	 */
 	protected final void commitAllMeasurements() {
 		if (fPerformanceMeters != null)
-			for (Iterator iter= fPerformanceMeters.iterator(); iter.hasNext();)
-				((PerformanceMeter) iter.next()).commit();
+			for (Iterator<PerformanceMeter> iter= fPerformanceMeters.iterator(); iter.hasNext();)
+				iter.next().commit();
 	}
 
 	/**
@@ -159,8 +160,8 @@ public class PerformanceTestCase2 extends TestCase {
 	 */
 	protected final void assertAllPerformance() {
 		if (fPerformanceMeters != null)
-			for (Iterator iter= fPerformanceMeters.iterator(); iter.hasNext();)
-				assertPerformance((PerformanceMeter) iter.next());
+			for (Iterator<PerformanceMeter> iter= fPerformanceMeters.iterator(); iter.hasNext();)
+				assertPerformance(iter.next());
 	}
 
 	/**
@@ -171,11 +172,11 @@ public class PerformanceTestCase2 extends TestCase {
 	 */
 	protected final PerformanceMeter createPerformanceMeter() {
 		PerformanceMeter perfMeter= internalCreatePerformanceMeter(getBaseScenarioId());
-		String localFingerprintName= (String)getLocalFingerprints().get(getName());
+		String localFingerprintName= getLocalFingerprints().get(getName());
 		if (localFingerprintName != null)
 			Performance.getDefault().tagAsSummary(perfMeter, localFingerprintName, Dimension.ELAPSED_PROCESS);
 
-		String comment= (String)getDegradationComments().get(getName());
+		String comment= getDegradationComments().get(getName());
 		if (comment != null)
 			Performance.getDefault().setComment(perfMeter, Performance.EXPLAINS_DEGRADATION_COMMENT, comment);
 
@@ -187,7 +188,7 @@ public class PerformanceTestCase2 extends TestCase {
 	 *
 	 * @return the map with local fingerprints ( test name -> short name)
 	 */
-	protected Map getLocalFingerprints() {
+	protected Map<String, String> getLocalFingerprints() {
 		return Collections.EMPTY_MAP;
 	}
 
@@ -196,7 +197,7 @@ public class PerformanceTestCase2 extends TestCase {
 	 *
 	 * @return the map with degradation comments ( test name -> comment)
 	 */
-	protected Map getDegradationComments() {
+	protected Map<String, String> getDegradationComments() {
 		return Collections.EMPTY_MAP;
 	}
 

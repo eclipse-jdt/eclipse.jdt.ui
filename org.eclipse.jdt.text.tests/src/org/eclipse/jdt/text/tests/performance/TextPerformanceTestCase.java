@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,10 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestCase;
-
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
@@ -36,6 +32,10 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.texteditor.spelling.SpellingService;
 
 import org.eclipse.ui.editors.text.EditorsUI;
+
+import junit.extensions.TestSetup;
+import junit.framework.Test;
+import junit.framework.TestCase;
 
 /**
  * Superclass of Text performance test cases.
@@ -90,7 +90,7 @@ public class TextPerformanceTestCase extends TestCase {
 	private int fCustomMeasuredRuns= -1;
 
 	/** created performance meters */
-	private List fPerformanceMeters;
+	private List<PerformanceMeter> fPerformanceMeters;
 
 	/** {@link KeyboardProbe} singleton */
 	private static KeyboardProbe fgKeyboardProbe;
@@ -117,6 +117,7 @@ public class TextPerformanceTestCase extends TestCase {
 	 * @see junit.framework.TestCase#setUp()
 	 * @since 3.1
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -130,12 +131,13 @@ public class TextPerformanceTestCase extends TestCase {
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorsUI.getPreferenceStore().setToDefault(SpellingService.PREFERENCE_SPELLING_ENABLED);
 		if (fPerformanceMeters != null)
-			for (Iterator iter= fPerformanceMeters.iterator(); iter.hasNext();)
-				((PerformanceMeter) iter.next()).dispose();
+			for (Iterator<PerformanceMeter> iter= fPerformanceMeters.iterator(); iter.hasNext();)
+				iter.next().dispose();
 
 //		if (DEBUG)
 //			System.out.println(DATE_FORMAT.format(new Date()) + ": tearDown " + getClass().getName() + "." + getName());
@@ -334,7 +336,7 @@ public class TextPerformanceTestCase extends TestCase {
 	 * @param constructors the constructors whose invocations will be counted
 	 * @return the created performance meter
 	 */
-	protected final InvocationCountPerformanceMeter createInvocationCountPerformanceMeter(Constructor[] constructors) {
+	protected final InvocationCountPerformanceMeter createInvocationCountPerformanceMeter(Constructor<?>[] constructors) {
 		return createInvocationCountPerformanceMeter("", constructors);
 	}
 
@@ -348,7 +350,7 @@ public class TextPerformanceTestCase extends TestCase {
 	 * @param constructors the constructors whose invocations will be counted
 	 * @return the created performance meter
 	 */
-	protected final InvocationCountPerformanceMeter createInvocationCountPerformanceMeter(String subScenarioId, Constructor[] constructors) {
+	protected final InvocationCountPerformanceMeter createInvocationCountPerformanceMeter(String subScenarioId, Constructor<?>[] constructors) {
 		InvocationCountPerformanceMeter performanceMeter= new InvocationCountPerformanceMeter(getBaseScenarioId() + subScenarioId, constructors);
 		addPerformanceMeter(performanceMeter);
 		return performanceMeter;
@@ -360,8 +362,8 @@ public class TextPerformanceTestCase extends TestCase {
 	 */
 	protected final void commitAllMeasurements() {
 		if (fPerformanceMeters != null)
-			for (Iterator iter= fPerformanceMeters.iterator(); iter.hasNext();)
-				((PerformanceMeter) iter.next()).commit();
+			for (Iterator<PerformanceMeter> iter= fPerformanceMeters.iterator(); iter.hasNext();)
+				iter.next().commit();
 	}
 
 	/**
@@ -384,8 +386,8 @@ public class TextPerformanceTestCase extends TestCase {
 	 */
 	protected final void assertAllPerformance() {
 		if (fPerformanceMeters != null)
-			for (Iterator iter= fPerformanceMeters.iterator(); iter.hasNext();)
-				assertPerformance((PerformanceMeter) iter.next());
+			for (Iterator<PerformanceMeter> iter= fPerformanceMeters.iterator(); iter.hasNext();)
+				assertPerformance(iter.next());
 	}
 
 	/**
@@ -439,7 +441,7 @@ public class TextPerformanceTestCase extends TestCase {
 	 */
 	private void addPerformanceMeter(PerformanceMeter performanceMeter) {
 		if (fPerformanceMeters == null)
-			fPerformanceMeters= new ArrayList();
+			fPerformanceMeters= new ArrayList<>();
 		fPerformanceMeters.add(performanceMeter);
 	}
 

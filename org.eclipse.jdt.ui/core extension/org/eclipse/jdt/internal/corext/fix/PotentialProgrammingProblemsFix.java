@@ -91,9 +91,10 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 		public SerialVersionHashContext(IJavaProject project, ICompilationUnit[] compilationUnits) {
 			fProject= project;
 			fCompilationUnits= compilationUnits;
-			fIdsTable= new Hashtable<String, Long>();
+			fIdsTable= new Hashtable<>();
         }
 
+		@Override
 		public RefactoringStatus initialize(IProgressMonitor monitor) throws CoreException {
 			if (monitor == null)
 				monitor= new NullProgressMonitor();
@@ -138,9 +139,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 			return result;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public Long getSerialVersionId(ITypeBinding binding) {
 			return fIdsTable.get(binding.getKey());
 		}
@@ -155,13 +154,13 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 
 				IType serializable= project.findType(SERIALIZABLE_NAME);
 
-				List<IType> types= new ArrayList<IType>();
+				List<IType> types= new ArrayList<>();
 
 				if (compilationUnits.length > 500) {
 					//500 is a guess. Building the type hierarchy on serializable is very expensive
 					//depending on how many subtypes exit in the project.
 
-					HashSet<ICompilationUnit> cus= new HashSet<ICompilationUnit>();
+					HashSet<ICompilationUnit> cus= new HashSet<>();
 					for (int i= 0; i < compilationUnits.length; i++) {
 						cus.add(compilationUnits[i]);
 					}
@@ -238,9 +237,6 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 			fContext= context;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		protected boolean addInitializer(VariableDeclarationFragment fragment, ASTNode declarationNode) {
 			ITypeBinding typeBinding= getTypeBinding(declarationNode);
@@ -255,9 +251,6 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 			return true;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		protected void addLinkedPositions(ASTRewrite rewrite, VariableDeclarationFragment fragment, LinkedProposalModel positionGroups) {}
 
@@ -297,9 +290,11 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 
 		if (defaultId) {
 			fCurrentContext= new ISerialVersionFixContext() {
+				@Override
 				public Long getSerialVersionId(ITypeBinding binding) {
 					return new Long(1);
 				}
+				@Override
 				public RefactoringStatus initialize(IProgressMonitor pm) throws CoreException {
 	                return new RefactoringStatus();
                 }
@@ -308,9 +303,11 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 		} else if (randomId) {
 			fCurrentContext= new ISerialVersionFixContext() {
 				private Random rng;
+				@Override
 				public Long getSerialVersionId(ITypeBinding binding) {
 					return new Long(rng.nextLong());
 				}
+				@Override
 				public RefactoringStatus initialize(IProgressMonitor pm) throws CoreException {
 					rng= new Random((new Date()).getTime());
 	                return new RefactoringStatus();
@@ -350,7 +347,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 			if (unit == null)
 				return null;
 
-			List<ASTNode> declarationNodes= new ArrayList<ASTNode>();
+			List<ASTNode> declarationNodes= new ArrayList<>();
 			for (int i= 0; i < problems.length; i++) {
 				if (problems[i].getProblemId() == IProblem.MissingSerialVersion) {
 					final SimpleName simpleName= getSelectedName(compilationUnit, problems[i]);

@@ -54,11 +54,11 @@ public class CodeFormatFix implements ICleanUpFix {
 		if (!format && !removeTrailingWhitespacesAll && !removeTrailingWhitespacesIgnorEmpty && !correctIndentation)
 			return null;
 
-		ArrayList<CategorizedTextEditGroup> groups= new ArrayList<CategorizedTextEditGroup>();
+		ArrayList<CategorizedTextEditGroup> groups= new ArrayList<>();
 
 		MultiTextEdit formatEdit= new MultiTextEdit();
 		if (format) {
-			Map<String, String> formatterSettings= new HashMap<String, String>(cu.getJavaProject().getOptions(true));
+			Map<String, String> formatterSettings= new HashMap<>(cu.getJavaProject().getOptions(true));
 
 			String content= cu.getBuffer().getContents();
 			Document document= new Document(content);
@@ -212,9 +212,7 @@ public class CodeFormatFix implements ICleanUpFix {
 		fChange= change;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
 		return fChange;
 	}

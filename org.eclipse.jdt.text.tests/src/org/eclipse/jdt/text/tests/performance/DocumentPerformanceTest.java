@@ -35,6 +35,7 @@ public class DocumentPerformanceTest extends AbstractDocumentPerformanceTest {
 	 * @see org.eclipse.jdt.text.tests.performance.AbstractDocumentPerformanceTest#createDocument()
 	 * @since 3.3
 	 */
+	@Override
 	protected IDocument createDocument() {
 		return new Document();
 	}

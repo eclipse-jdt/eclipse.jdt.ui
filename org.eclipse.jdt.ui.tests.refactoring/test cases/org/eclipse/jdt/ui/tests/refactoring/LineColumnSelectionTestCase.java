@@ -43,6 +43,7 @@ public abstract class LineColumnSelectionTestCase extends AbstractCUTestCase {
 		super(name);
 	}
 
+	@Override
 	protected InputStream getFileInputStream(String fileName) throws IOException {
 		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
 	}
@@ -51,6 +52,7 @@ public abstract class LineColumnSelectionTestCase extends AbstractCUTestCase {
 	 * @param name e.g. "testSuch_ALongName17"
 	 * @return e.g. "ALongName17"
 	 */
+	@Override
 	protected String adaptName(String name) {
 		int separator= name.indexOf('_');
 		assertTrue(separator != -1);
@@ -92,6 +94,7 @@ public abstract class LineColumnSelectionTestCase extends AbstractCUTestCase {
 	/* @require refactoring.checkActivation().isOK() */
 	protected void performTest(final ICompilationUnit unit, final Refactoring refactoring, final String out) throws Exception {
 		JavaCore.run(new IWorkspaceRunnable() {
+			@Override
 			public void run(IProgressMonitor monitor) throws CoreException {
 				String original= unit.getSource();
 				final Change change= refactoring.createChange(monitor);

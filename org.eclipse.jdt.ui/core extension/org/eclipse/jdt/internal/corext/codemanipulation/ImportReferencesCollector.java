@@ -190,9 +190,6 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visitNode(org.eclipse.jdt.core.dom.ASTNode)
-	 */
 	@Override
 	protected boolean visitNode(ASTNode node) {
 		return isAffected(node);
@@ -379,18 +376,12 @@ public class ImportReferencesCollector extends GenericVisitor {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.MarkerAnnotation)
-	 */
 	@Override
 	public boolean visit(MarkerAnnotation node) {
 		typeRefFound(node.getTypeName());
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.MarkerAnnotation)
-	 */
 	@Override
 	public boolean visit(NormalAnnotation node) {
 		typeRefFound(node.getTypeName());
@@ -398,9 +389,6 @@ public class ImportReferencesCollector extends GenericVisitor {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.MarkerAnnotation)
-	 */
 	@Override
 	public boolean visit(SingleMemberAnnotation node) {
 		typeRefFound(node.getTypeName());
@@ -464,6 +452,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 	 * @return thrown exception names
 	 * @deprecated to avoid deprecation warnings
 	 */
+	@Deprecated
 	private static List<Name> getThrownExceptions(MethodDeclaration decl) {
 		return decl.thrownExceptions();
 	}

@@ -118,9 +118,6 @@ public class MoveAction extends SelectionDispatchAction{
 		setEnabled(computeEnableState());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#setSpecialSelectionProvider(org.eclipse.jface.viewers.ISelectionProvider)
-	 */
 	@Override
 	public void setSpecialSelectionProvider(ISelectionProvider provider) {
 		super.setSpecialSelectionProvider(provider);
@@ -199,7 +196,7 @@ public class MoveAction extends SelectionDispatchAction{
 	private static IMember[] convertToMemberArray(Object[] obj) {
 		if (obj == null)
 			return null;
-		Set<Object> memberSet= new HashSet<Object>();
+		Set<Object> memberSet= new HashSet<>();
 		memberSet.addAll(Arrays.asList(obj));
 		return memberSet.toArray(new IMember[memberSet.size()]);
 	}

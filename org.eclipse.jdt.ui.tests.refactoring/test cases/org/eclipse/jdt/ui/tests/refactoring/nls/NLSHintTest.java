@@ -38,7 +38,7 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class NLSHintTest extends TestCase {
 
-	private static final Class THIS= NLSHintTest.class;
+	private static final Class<NLSHintTest> THIS= NLSHintTest.class;
 
     private IJavaProject javaProject;
 
@@ -70,12 +70,14 @@ public class NLSHintTest extends TestCase {
 		return new ProjectTestSetup(test);
 	}
 
-    protected void setUp() throws Exception {
+    @Override
+	protected void setUp() throws Exception {
         javaProject = ProjectTestSetup.getProject();
         fSourceFolder = JavaProjectHelper.addSourceContainer(javaProject, "src");
     }
 
-    protected void tearDown() throws Exception {
+    @Override
+	protected void tearDown() throws Exception {
         JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
     }
 

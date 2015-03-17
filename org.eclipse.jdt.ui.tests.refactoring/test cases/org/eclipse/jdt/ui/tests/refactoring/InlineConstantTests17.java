@@ -13,7 +13,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 
 public class InlineConstantTests17 extends InlineConstantTests {
-	private static final Class clazz = InlineConstantTests17.class;
+	private static final Class<InlineConstantTests17> clazz = InlineConstantTests17.class;
 
 	public InlineConstantTests17(String name) {
 		super(name);
@@ -35,6 +35,7 @@ public class InlineConstantTests17 extends InlineConstantTests {
 
 	//--- TESTS
 
+	@Override
 	public void test0() throws Exception {
 		helper1("p.C", 5, 28, 5, 33, true, false);
 	}

@@ -34,6 +34,7 @@ public class BasicSelectionTransferDragAdapter extends DragSourceAdapter impleme
 	/**
 	 * @see TransferDragSourceListener#getTransfer
 	 */
+	@Override
 	public Transfer getTransfer() {
 		return LocalSelectionTransfer.getInstance();
 	}

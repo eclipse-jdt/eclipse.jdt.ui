@@ -52,6 +52,7 @@ public class CounterPanel extends Composite {
 		fNumberOfFailures= createLabel(JUnitMessages.CounterPanel_label_failures, fFailureIcon, " 0 "); //$NON-NLS-1$
 
 		addDisposeListener(new DisposeListener() {
+			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				disposeIcons();
 			}

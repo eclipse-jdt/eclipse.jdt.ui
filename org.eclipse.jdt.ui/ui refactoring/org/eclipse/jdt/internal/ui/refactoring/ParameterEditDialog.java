@@ -105,6 +105,7 @@ public class ParameterEditDialog extends StatusDialog {
 			fType.setText(fParameter.getNewTypeName());
 			fType.addModifyListener(
 				new ModifyListener() {
+					@Override
 					public void modifyText(ModifyEvent e) {
 						validate((Text)e.widget);
 					}
@@ -125,6 +126,7 @@ public class ParameterEditDialog extends StatusDialog {
 		fName.setText(newName);
 		fName.addModifyListener(
 			new ModifyListener() {
+				@Override
 				public void modifyText(ModifyEvent e) {
 					validate((Text)e.widget);
 				}
@@ -140,6 +142,7 @@ public class ParameterEditDialog extends StatusDialog {
 			fDefaultValue.setText(fParameter.getDefaultValue());
 			fDefaultValue.addModifyListener(
 				new ModifyListener() {
+					@Override
 					public void modifyText(ModifyEvent e) {
 						validate((Text)e.widget);
 					}

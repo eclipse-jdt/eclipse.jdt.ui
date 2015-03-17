@@ -59,6 +59,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 		/*
 		 * Implements method from Listener
 		 */
+		@Override
 		public void handleEvent(Event e) {
 			if (getControl() == null)
 				return;
@@ -103,6 +104,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 	/*
 	 * Method declared on IDialogPage.
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NULL);
 		composite.setLayout(new GridLayout());
@@ -387,6 +389,7 @@ class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
 	/*
 	 * Implements method from IJarPackageWizardPage.
 	 */
+	@Override
 	public void finish() {
 		saveWidgetValues();
 	}

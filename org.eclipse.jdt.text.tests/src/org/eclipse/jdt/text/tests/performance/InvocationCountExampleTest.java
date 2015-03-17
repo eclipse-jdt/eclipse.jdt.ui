@@ -34,7 +34,7 @@ public class InvocationCountExampleTest extends TestCase {
 			Double.class.getDeclaredMethod("equals", new Class[] { Object.class }),
 		});
 		try {
-			Set set= new HashSet();
+			Set<Double> set= new HashSet<>();
 			performanceMeter.start();
 			set.add(new Double(10));
 			set.add(new Double(9));

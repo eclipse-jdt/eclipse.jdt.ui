@@ -154,10 +154,12 @@ public class DialogsTest extends TestCase {
 
 
 	private static class TestLabelProvider extends LabelProvider {
+		@Override
 		public Image getImage(Object element) {
 			return null;
 		}
 
+		@Override
 		public String getText(Object element) {
 			Integer i= (Integer) element;
 			return "e-" + i.toString();

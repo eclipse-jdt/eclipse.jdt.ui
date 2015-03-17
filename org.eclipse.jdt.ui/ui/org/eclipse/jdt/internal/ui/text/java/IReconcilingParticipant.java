@@ -18,6 +18,7 @@ package org.eclipse.jdt.internal.ui.text.java;
  *
  * @deprecated as of 3.0 use {@link IJavaReconcilingListener}
  */
+@Deprecated
 public interface IReconcilingParticipant {
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,6 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.Hashtable;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -30,17 +27,21 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class PromoteTempToFieldTests extends RefactoringTest{
 
 	private static final boolean BUG_39363= true;
-	private static final Class clazz= PromoteTempToFieldTests.class;
+	private static final Class<PromoteTempToFieldTests> clazz= PromoteTempToFieldTests.class;
 	private static final String REFACTORING_PATH= "PromoteTempToField/";
-    private Object fCompactPref;
+    private String fCompactPref;
 
 	public PromoteTempToFieldTests(String name){
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -53,9 +54,10 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		return new RefactoringTestSetup(someTest);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 
 		String setting= DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR;
 		fCompactPref= options.get(setting);
@@ -63,9 +65,10 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		JavaCore.setOptions(options);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, fCompactPref);
 		JavaCore.setOptions(options);
 	}

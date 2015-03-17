@@ -15,7 +15,7 @@ import junit.framework.Test;
 
 public class ExtractConstantTests17 extends ExtractConstantTests {
 
-	private static final Class clazz = ExtractConstantTests17.class;
+	private static final Class<ExtractConstantTests17> clazz = ExtractConstantTests17.class;
 
 	public ExtractConstantTests17(String name) {
 		super(name);
@@ -39,6 +39,7 @@ public class ExtractConstantTests17 extends ExtractConstantTests {
 	//--- TESTS
 
 	// -- testing failing preconditions
+	@Override
 	public void testFail0() throws Exception{
 		failHelper1(10, 14, 10, 56, true, true, "CONSTANT");
 	}

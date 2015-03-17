@@ -22,7 +22,7 @@ import org.eclipse.ui.PartInitException;
 
 public class UndoTextEditorTest extends UndoEditorTest {
 
-	private static final Class THIS= UndoTextEditorTest.class;
+	private static final Class<UndoTextEditorTest> THIS= UndoTextEditorTest.class;
 
 	private static final String FILE_PREFIX= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText";
 
@@ -38,6 +38,7 @@ public class UndoTextEditorTest extends UndoEditorTest {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		ResourceTestHelper.copy(ORIG_FILE, FILE);
 		setWarmUpRuns(WARM_UP_RUNS);
@@ -45,6 +46,7 @@ public class UndoTextEditorTest extends UndoEditorTest {
 		super.setUp();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		ResourceTestHelper.delete(FILE);
@@ -58,6 +60,7 @@ public class UndoTextEditorTest extends UndoEditorTest {
 	 * @see org.eclipse.jdt.text.tests.performance.UndoEditorTest#createMeter()
 	 * @since 3.3
 	 */
+	@Override
 	protected PerformanceMeter createMeter() {
 		Performance performance= Performance.getDefault();
 		PerformanceMeter meter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));

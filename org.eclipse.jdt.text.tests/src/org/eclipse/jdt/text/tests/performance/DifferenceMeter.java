@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,7 @@ final class DifferenceMeter extends InternalPerformanceMeter {
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#start()
 	 */
+	@Override
 	public void start() {
 		throw new UnsupportedOperationException();
 	}
@@ -58,6 +59,7 @@ final class DifferenceMeter extends InternalPerformanceMeter {
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#stop()
 	 */
+	@Override
 	public void stop() {
 		throw new UnsupportedOperationException();
 	}
@@ -65,14 +67,16 @@ final class DifferenceMeter extends InternalPerformanceMeter {
 	/*
 	 * @see org.eclipse.test.performance.PerformanceMeter#dispose()
 	 */
+	@Override
 	public void dispose() {
 		fReferenceMeter.dispose();
 		fMeasuredMeter.dispose();
 		super.dispose();
 	}
 
+	@Override
 	public Sample getSample() {
-		Map properties= new HashMap();
+		Map<?, ?> properties= new HashMap<>();
 
 		Sample reference= fReferenceMeter.getSample();
 		DataPoint[] referencePoints= reference.getDataPoints();
@@ -97,13 +101,13 @@ final class DifferenceMeter extends InternalPerformanceMeter {
 	 * @see org.eclipse.test.internal.performance.InternalPerformanceMeter#printSample(java.io.PrintStream, org.eclipse.test.internal.performance.data.Sample)
 	 */
 	private DataPoint difference(DataPoint minuend, DataPoint subtrahend) {
-		Collection mDims= minuend.getDimensions2();
+		Collection<Dim> mDims= minuend.getDimensions2();
 		int step= minuend.getStep();
 		Assert.assertEquals(step, subtrahend.getStep());
 
-		Map scalars= new HashMap();
-		for (Iterator it= mDims.iterator(); it.hasNext();) {
-			Dim dimension= (Dim) it.next();
+		Map<Dim, Scalar> scalars= new HashMap<>();
+		for (Iterator<Dim> it= mDims.iterator(); it.hasNext();) {
+			Dim dimension= it.next();
 
 			Scalar m= minuend.getScalar(dimension);
 			Scalar s= subtrahend.getScalar(dimension);

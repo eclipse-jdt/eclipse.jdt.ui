@@ -134,8 +134,8 @@ public class JavadocWriter {
 
 
 		//set the packages and source files
-		List<String> packages= new ArrayList<String>();
-		List<String> sourcefiles= new ArrayList<String>();
+		List<String> packages= new ArrayList<>();
+		List<String> sourcefiles= new ArrayList<>();
 		sortSourceElement(store.getSourceElements(), sourcefiles, packages);
 		if (!packages.isEmpty())
 			xmlJavadocDesc.setAttribute(store.PACKAGENAMES, toSeparatedList(packages));
@@ -258,8 +258,8 @@ public class JavadocWriter {
 	private void xmlWriteDoclet(JavadocOptionsManager store, Document document, Element xmlJavadocDesc) throws DOMException {
 
 		//set the packages and source files
-		List<String> packages= new ArrayList<String>();
-		List<String> sourcefiles= new ArrayList<String>();
+		List<String> packages= new ArrayList<>();
+		List<String> sourcefiles= new ArrayList<>();
 		sortSourceElement(store.getSourceElements(), sourcefiles, packages);
 		if (!packages.isEmpty())
 			xmlJavadocDesc.setAttribute(store.PACKAGENAMES, toSeparatedList(packages));

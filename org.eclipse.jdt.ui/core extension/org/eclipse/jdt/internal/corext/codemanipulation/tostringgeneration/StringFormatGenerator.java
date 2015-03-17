@@ -51,7 +51,7 @@ public class StringFormatGenerator extends AbstractToStringGenerator {
 	@Override
 	protected void initialize() {
 		super.initialize();
-		arguments= new ArrayList<Expression>();
+		arguments= new ArrayList<>();
 		buffer= new StringBuffer();
 	}
 

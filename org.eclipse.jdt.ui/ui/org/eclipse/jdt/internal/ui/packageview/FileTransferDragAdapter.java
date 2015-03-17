@@ -66,6 +66,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		Assert.isNotNull(fProvider);
 	}
 
+	@Override
 	public Transfer getTransfer() {
 		return FileTransfer.getInstance();
 	}
@@ -194,7 +195,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 	}
 
 	protected Set<IResource> collectRoots(final List<IResource> elements) {
-		final Set<IResource> roots= new HashSet<IResource>(10);
+		final Set<IResource> roots= new HashSet<>(10);
 
 		Iterator<IResource> iter= elements.iterator();
 		while (iter.hasNext()) {
@@ -218,7 +219,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 	}
 
 	private List<IResource> convertIntoResources(IStructuredSelection selection) {
-		List<IResource> result= new ArrayList<IResource>(selection.size());
+		List<IResource> result= new ArrayList<>(selection.size());
 		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object o= iter.next();
 			IResource r= null;

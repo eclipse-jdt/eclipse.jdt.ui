@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,10 +68,12 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	}
 
 
+	@Override
 	public boolean canChildrenBeDestinations(IReorgDestination destination) {
 		return fCopyPolicy.canChildrenBeDestinations(destination);
 	}
 
+	@Override
 	public boolean canElementBeDestination(IReorgDestination destination) {
 		return fCopyPolicy.canElementBeDestination(destination);
 	}
@@ -101,10 +103,11 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 		try {
 			final DynamicValidationStateChange result= new DynamicValidationStateChange(getChangeName()) {
 
+				@SuppressWarnings("unchecked")
 				@Override
-				public Object getAdapter(Class adapter) {
+				public <T> T getAdapter(Class<T> adapter) {
 					if (ReorgExecutionLog.class.equals(adapter))
-						return fExecutionLog;
+						return (T) fExecutionLog;
 					return super.getAdapter(adapter);
 				}
 
@@ -140,7 +143,7 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	private String[] getAffectedProjectNatures() throws CoreException {
 		String[] jNatures= JavaProcessors.computeAffectedNaturs(fCopyPolicy.getJavaElements());
 		String[] rNatures= ResourceProcessors.computeAffectedNatures(fCopyPolicy.getResources());
-		Set<String> result= new HashSet<String>();
+		Set<String> result= new HashSet<>();
 		result.addAll(Arrays.asList(jNatures));
 		result.addAll(Arrays.asList(rNatures));
 		return result.toArray(new String[result.size()]);
@@ -158,7 +161,7 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	public Object[] getElements() {
 		IJavaElement[] jElements= fCopyPolicy.getJavaElements();
 		IResource[] resources= fCopyPolicy.getResources();
-		List<IAdaptable> result= new ArrayList<IAdaptable>(jElements.length + resources.length);
+		List<IAdaptable> result= new ArrayList<>(jElements.length + resources.length);
 		result.addAll(Arrays.asList(jElements));
 		result.addAll(Arrays.asList(resources));
 		return result.toArray();

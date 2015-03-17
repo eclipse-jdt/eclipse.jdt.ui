@@ -47,11 +47,11 @@ import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants
 public class AbstractTestRunListenerTest extends TestCase {
 
 	public static class TestRunLog {
-		private ArrayList/*<String>*/ fLog;
+		private ArrayList<String> fLog;
 		private boolean fIsDone;
 
 		public TestRunLog() {
-			fLog= new ArrayList();
+			fLog= new ArrayList<>();
 			fIsDone= false;
 		}
 
@@ -60,7 +60,7 @@ public class AbstractTestRunListenerTest extends TestCase {
 		}
 
 		public synchronized String[] getLog() {
-			return (String[]) fLog.toArray(new String[fLog.size()]);
+			return fLog.toArray(new String[fLog.size()]);
 		}
 
 		public synchronized void add(String entry) {
@@ -80,6 +80,7 @@ public class AbstractTestRunListenerTest extends TestCase {
 	IJavaProject fProject;
 	private boolean fLaunchHasTerminated= false;
 
+	@Override
 	protected void setUp() throws Exception {
 		fProject= JavaProjectHelper.createJavaProject("TestRunListenerTest", "bin");
 		// have to set up an 1.3 project to avoid requiring a 5.0 VM
@@ -87,6 +88,7 @@ public class AbstractTestRunListenerTest extends TestCase {
 		JavaProjectHelper.addVariableEntry(fProject, new Path("JUNIT_HOME/junit.jar"), null, null);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
 	}
@@ -116,6 +118,7 @@ public class AbstractTestRunListenerTest extends TestCase {
 		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
 		lm.removeLaunches(lm.getLaunches());
 		ILaunchesListener2 launchesListener= new ILaunchesListener2() {
+			@Override
 			public void launchesTerminated(ILaunch[] launches) {
 				for (int i= 0; i < launches.length; i++) {
 					if (isJUnitLaunch(launches[i]))
@@ -123,6 +126,7 @@ public class AbstractTestRunListenerTest extends TestCase {
 					logLaunch("terminated", launches[i]);
 				}
 			}
+			@Override
 			public void launchesRemoved(ILaunch[] launches) {
 				for (int i= 0; i < launches.length; i++) {
 					if (isJUnitLaunch(launches[i]))
@@ -130,10 +134,12 @@ public class AbstractTestRunListenerTest extends TestCase {
 					logLaunch("removed   ", launches[i]);
 				}
 			}
+			@Override
 			public void launchesAdded(ILaunch[] launches) {
 				for (int i= 0; i < launches.length; i++)
 					logLaunch("added     ", launches[i]);
 			}
+			@Override
 			public void launchesChanged(ILaunch[] launches) {
 				for (int i= 0; i < launches.length; i++)
 					logLaunch("changed   ", launches[i]);
@@ -162,6 +168,7 @@ public class AbstractTestRunListenerTest extends TestCase {
 		try {
 			configuration.launch(ILaunchManager.RUN_MODE, null);
 			new DisplayHelper() {
+				@Override
 				protected boolean condition() {
 					return fLaunchHasTerminated;
 				}
@@ -187,6 +194,7 @@ public class AbstractTestRunListenerTest extends TestCase {
 		launchJUnit(aTest, testKindID, testName);
 
 		boolean success= new DisplayHelper(){
+			@Override
 			protected boolean condition() {
 				return log.isDone();
 			}

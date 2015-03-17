@@ -275,12 +275,14 @@ public final class JavaUI {
 	 * 
 	 * @deprecated As of 1.0
 	 */
+	@Deprecated
 	public static final String ATTR_CMDLINE= "org.eclipse.jdt.ui.launcher.cmdLine"; //$NON-NLS-1$
 
 
 	/**
 	 * @deprecated Constant introduced to avoid deprecated warning
 	 */
+	@Deprecated
 	private final static int DEPRECATED_CONSIDER_TYPES= IJavaElementSearchConstants.CONSIDER_TYPES;
 
 	/**
@@ -333,7 +335,7 @@ public final class JavaUI {
 		if ((style & IJavaElementSearchConstants.CONSIDER_BINARIES) != 0) {
 			consideredRoots= Arrays.asList(roots);
 		} else {
-			consideredRoots= new ArrayList<IPackageFragmentRoot>(roots.length);
+			consideredRoots= new ArrayList<>(roots.length);
 			for (int i= 0; i < roots.length; i++) {
 				IPackageFragmentRoot root= roots[i];
 				if (root.getKind() != IPackageFragmentRoot.K_BINARY)
@@ -713,6 +715,7 @@ public final class JavaUI {
 	 *
 	 * @deprecated use <code>revealInEditor(IEditorPart, IJavaElement)</code> instead
 	 */
+	@Deprecated
 	public static void revealInEditor(IEditorPart part, ISourceReference element) {
 		if (element instanceof IJavaElement)
 			revealInEditor(part, (IJavaElement) element);
@@ -793,6 +796,7 @@ public final class JavaUI {
 	 * @deprecated Use {@link JavaCore#getWorkingCopies(org.eclipse.jdt.core.WorkingCopyOwner)} instead with <code>null</code> as
 	 * argument for owner.
 	 */
+	@Deprecated
 	public static org.eclipse.jdt.core.IWorkingCopy[] getSharedWorkingCopies() {
 		return JavaCore.getSharedWorkingCopies(getBufferFactory());
 	}
@@ -809,9 +813,10 @@ public final class JavaUI {
 	 * @deprecated Use {@link JavaCore#getWorkingCopies(org.eclipse.jdt.core.WorkingCopyOwner)} instead and filter the list
 	 * with {@link IJavaProject#isOnClasspath(IJavaElement)}.
 	 */
+	@Deprecated
 	public static org.eclipse.jdt.core.IWorkingCopy[] getSharedWorkingCopiesOnClasspath() {
 		org.eclipse.jdt.core.IWorkingCopy[] wcs= getSharedWorkingCopies();
-		List<org.eclipse.jdt.core.IWorkingCopy> result= new ArrayList<org.eclipse.jdt.core.IWorkingCopy>(wcs.length);
+		List<org.eclipse.jdt.core.IWorkingCopy> result= new ArrayList<>(wcs.length);
 		for (int i = 0; i < wcs.length; i++) {
 			org.eclipse.jdt.core.IWorkingCopy wc= wcs[i];
 			if (wc instanceof IJavaElement) {
@@ -835,6 +840,7 @@ public final class JavaUI {
 	 * The Java UI plug-in uses the <i>primary working copy owner</i> that can be accessed with <code>null</code> in
 	 * API's that require an owner
 	 */
+	@Deprecated
 	public static org.eclipse.jdt.core.IBufferFactory getBufferFactory() {
 		return JavaPlugin.getDefault().getBufferFactory();
 	}
@@ -864,6 +870,7 @@ public final class JavaUI {
 	 *
 	 * @since 2.0
 	 */
+	@Deprecated
 	public static void setLibraryJavadocLocation(IPath archivePath, URL url) {
 		// deprecated
 	}
@@ -882,6 +889,7 @@ public final class JavaUI {
 	 *
 	 * @since 3.0
 	 */
+	@Deprecated
 	public static void setLibraryJavadocLocations(IPath[] archivePaths, URL[] urls) {
 		// deprecated
 	}
@@ -900,6 +908,7 @@ public final class JavaUI {
 	 *
 	 * @since 2.0
 	 */
+	@Deprecated
 	public static URL getLibraryJavadocLocation(IPath archivePath) {
 		return null;
 	}

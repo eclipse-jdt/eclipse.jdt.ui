@@ -21,18 +21,22 @@ public interface ITestKind {
 			super(null);
 		}
 
+		@Override
 		public boolean isNull() {
 			return true;
 		}
 
+		@Override
 		protected String getAttribute(String arg0) {
 			return null;
 		}
 
+		@Override
 		public ITestFinder getFinder() {
 			return ITestFinder.NULL;
 		}
 
+		@Override
 		public JUnitRuntimeClasspathEntry[] getClasspathEntries() {
 			return new JUnitRuntimeClasspathEntry[0];
 		}

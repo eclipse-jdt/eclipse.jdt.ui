@@ -31,7 +31,7 @@ public final class ConstraintOperator {
 	private static final String STRING_EQUALS= "==";//$NON-NLS-1$
 	private static final String STRING_DEFINES= "=^=";//$NON-NLS-1$
 	private static final String STRING_STRICT_SUBTYPE= "<";//$NON-NLS-1$
-	private static final Collection<String> fgOperatorStrings= new HashSet<String>(Arrays.asList(new String[] {STRING_SUBTYPE, STRING_EQUALS, STRING_DEFINES, STRING_STRICT_SUBTYPE}));
+	private static final Collection<String> fgOperatorStrings= new HashSet<>(Arrays.asList(new String[] {STRING_SUBTYPE, STRING_EQUALS, STRING_DEFINES, STRING_STRICT_SUBTYPE}));
 
 	private static final ConstraintOperator fgSubtype= new ConstraintOperator(STRING_SUBTYPE, CODE_SUBTYPE);
 	private static final ConstraintOperator fgEquals= new ConstraintOperator(STRING_EQUALS, CODE_EQUALS);
@@ -65,17 +65,11 @@ public final class ConstraintOperator {
 		return fOperatorString;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		return getOperatorString();
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (! (obj instanceof ConstraintOperator))
@@ -84,9 +78,6 @@ public final class ConstraintOperator {
 		return fOperatorCode == other.fOperatorCode;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
 	@Override
 	public int hashCode() {
 		return fOperatorString.hashCode();

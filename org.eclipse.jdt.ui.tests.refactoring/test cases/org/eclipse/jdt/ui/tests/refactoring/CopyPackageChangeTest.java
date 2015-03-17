@@ -25,12 +25,13 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CopyPackageChange;
 public class CopyPackageChangeTest extends RefactoringTest {
 
 	private static final String REFACTORING_PATH= "CopyPackageChange/";
-	private static final Class clazz= CopyPackageChangeTest.class;
+	private static final Class<CopyPackageChangeTest> clazz= CopyPackageChangeTest.class;
 
 	public CopyPackageChangeTest(String name) {
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}

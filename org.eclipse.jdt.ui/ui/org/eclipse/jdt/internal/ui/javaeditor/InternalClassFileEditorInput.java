@@ -70,6 +70,7 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	/*
 	 * @see IClassFileEditorInput#getClassFile()
 	 */
+	@Override
 	public IClassFile getClassFile() {
 		return fClassFile;
 	}
@@ -77,6 +78,7 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	/*
 	 * @see IEditorInput#getPersistable()
 	 */
+	@Override
 	public IPersistableElement getPersistable() {
 		return this;
 	}
@@ -84,6 +86,7 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	/*
 	 * @see IEditorInput#getName()
 	 */
+	@Override
 	public String getName() {
 		return fClassFile.getElementName();
 	}
@@ -91,6 +94,7 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	/*
 	 * @see IEditorInput#getToolTipText()
 	 */
+	@Override
 	public String getToolTipText() {
 		return fClassFile.getType().getFullyQualifiedName();
 	}
@@ -98,6 +102,7 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	/*
 	 * @see IEditorInput#getImageDescriptor()
 	 */
+	@Override
 	public ImageDescriptor getImageDescriptor() {
 		try {
 			if (fClassFile.isClass())
@@ -112,10 +117,12 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	/*
 	 * @see IEditorInput#exists()
 	 */
+	@Override
 	public boolean exists() {
 		return fClassFile.exists();
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Class<T> adapter) {
 		if (adapter == IClassFile.class)
@@ -128,6 +135,7 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	/*
 	 * @see IPersistableElement#saveState(IMemento)
 	 */
+	@Override
 	public void saveState(IMemento memento) {
 		ClassFileEditorInputFactory.saveState(memento, this);
 	}
@@ -135,6 +143,7 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	/*
 	 * @see IPersistableElement#getFactoryId()
 	 */
+	@Override
 	public String getFactoryId() {
 		return ClassFileEditorInputFactory.ID;
 	}
@@ -143,6 +152,7 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	 * @see org.eclipse.ui.IPathEditorInput#getPath()
 	 * @since 3.7
 	 */
+	@Override
 	public IPath getPath() {
 		if (fPath == null)
 			fPath= writeToTempFile(fClassFile);

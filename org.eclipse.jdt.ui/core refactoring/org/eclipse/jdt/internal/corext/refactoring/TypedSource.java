@@ -80,9 +80,6 @@ public class TypedSource {
 		return fType;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(Object other) {
 		if (! (other instanceof TypedSource))
@@ -92,9 +89,6 @@ public class TypedSource {
 		return ts.getSource().equals(getSource()) && ts.getType() == getType();
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
 	@Override
 	public int hashCode() {
 		return getSource().hashCode() ^ (97 * getType());
@@ -117,6 +111,7 @@ public class TypedSource {
 
 	public static Comparator<TypedSource> createTypeComparator() {
 		return new Comparator<TypedSource>(){
+			@Override
 			public int compare(TypedSource arg0, TypedSource arg1) {
 				return arg0.getType() - arg1.getType();
 			}
@@ -125,7 +120,7 @@ public class TypedSource {
 	public static TypedSource[] createTypedSources(IJavaElement[] javaElements) throws CoreException {
 		//Map<ICompilationUnit, List<IJavaElement>>
 		Map<ICompilationUnit, List<IJavaElement>> grouped= ReorgUtils.groupByCompilationUnit(Arrays.asList(javaElements));
-		List<TypedSource> result= new ArrayList<TypedSource>(javaElements.length);
+		List<TypedSource> result= new ArrayList<>(javaElements.length);
 		for (Iterator<ICompilationUnit> iter= grouped.keySet().iterator(); iter.hasNext();) {
 			ICompilationUnit cu= iter.next();
 			for (Iterator<IJavaElement> iterator= grouped.get(cu).iterator(); iterator.hasNext();) {
@@ -150,7 +145,7 @@ public class TypedSource {
 
 	private static TypedSource[] createTypedSourcesForImportContainer(SourceTuple tuple, IImportContainer container) throws JavaModelException, CoreException {
 		IJavaElement[] imports= container.getChildren();
-		List<TypedSource> result= new ArrayList<TypedSource>(imports.length);
+		List<TypedSource> result= new ArrayList<>(imports.length);
 		for (int i= 0; i < imports.length; i++) {
 			result.addAll(Arrays.asList(createTypedSources(imports[i], tuple)));
 		}

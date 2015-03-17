@@ -74,10 +74,12 @@ public abstract class JavaHistoryAction extends Action implements IActionDelegat
 
  	//---- IActionDelegate
 
+	@Override
 	public final void selectionChanged(IAction uiProxy, ISelection selection) {
 		getDelegate().selectionChanged(uiProxy, selection);
 	}
 
+	@Override
 	public final void run(IAction action) {
 		getDelegate().run(action);
 	}

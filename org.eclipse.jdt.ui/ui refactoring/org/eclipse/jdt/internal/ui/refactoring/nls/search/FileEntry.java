@@ -39,6 +39,7 @@ public class FileEntry implements IAdaptable {
 		return fMessage;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Class<T> adapter) {
 		if (IResource.class.equals(adapter))

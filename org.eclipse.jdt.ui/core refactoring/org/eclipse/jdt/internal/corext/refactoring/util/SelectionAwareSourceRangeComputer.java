@@ -52,13 +52,13 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 			return super.computeSourceRange(node);
 		} catch (CoreException e) {
 			// fall back to standard implementation
-			fRanges= new HashMap<ASTNode, SourceRange>();
+			fRanges= new HashMap<>();
 		}
 		return super.computeSourceRange(node);
 	}
 
 	private void initializeRanges() throws CoreException {
-		fRanges= new HashMap<ASTNode, SourceRange>();
+		fRanges= new HashMap<>();
 		if (fSelectedNodes.length == 0)
 			return;
 

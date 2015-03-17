@@ -23,6 +23,7 @@ public class TestOptionsSetup extends TestSetup {
 		super(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		JavaCore.setOptions(TestOptions.getDefaultOptions());

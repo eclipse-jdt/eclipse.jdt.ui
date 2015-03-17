@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodPro
 
 public class RenameVirtualMethodInClassTests extends RefactoringTest {
 
-	private static final Class clazz= RenameVirtualMethodInClassTests.class;
+	private static final Class<RenameVirtualMethodInClassTests> clazz= RenameVirtualMethodInClassTests.class;
 	private static final String REFACTORING_PATH= "RenameVirtualMethodInClass/";
 
 	private static final boolean BUG_83217_IMPLICIT_ENUM_METHODS= true;
@@ -50,6 +50,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		return new RefactoringTestSetup(test);
 	}
 
+	@Override
 	protected String getRefactoringPath(){
 		return REFACTORING_PATH;
 	}

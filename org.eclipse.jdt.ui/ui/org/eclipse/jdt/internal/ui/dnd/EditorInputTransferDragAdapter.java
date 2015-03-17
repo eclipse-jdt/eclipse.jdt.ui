@@ -49,6 +49,7 @@ public class EditorInputTransferDragAdapter extends DragSourceAdapter implements
 	/*
 	 * @see TransferDragSourceListener#getTransfer
 	 */
+	@Override
 	public Transfer getTransfer() {
 		return EditorInputTransfer.getInstance();
 	}
@@ -58,7 +59,7 @@ public class EditorInputTransferDragAdapter extends DragSourceAdapter implements
 	 */
 	@Override
 	public void dragStart(DragSourceEvent event) {
-		fEditorInputDatas= new ArrayList<EditorInputData>();
+		fEditorInputDatas= new ArrayList<>();
 
 		ISelection selection= fProvider.getSelection();
 		if (selection instanceof IStructuredSelection) {

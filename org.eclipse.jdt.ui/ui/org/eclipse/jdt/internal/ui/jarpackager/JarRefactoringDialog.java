@@ -100,15 +100,12 @@ public final class JarRefactoringDialog extends TrayDialog {
 		return true;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void buttonPressed(final int buttonId) {
 		if (buttonId == IDialogConstants.OK_ID) {
 			fData.setRefactoringAware(true);
 			final RefactoringDescriptorProxy[] descriptors= fHistoryControl.getCheckedDescriptors();
-			Set<IProject> set= new HashSet<IProject>();
+			Set<IProject> set= new HashSet<>();
 			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 			for (int index= 0; index < descriptors.length; index++) {
 				final String project= descriptors[index].getProject();
@@ -125,9 +122,6 @@ public final class JarRefactoringDialog extends TrayDialog {
 		super.buttonPressed(buttonId);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void configureShell(final Shell shell) {
 		super.configureShell(shell);
@@ -135,18 +129,12 @@ public final class JarRefactoringDialog extends TrayDialog {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.JARPACKAGER_REFACTORING_DIALOG);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void create() {
 		super.create();
 		getButton(OK).setEnabled(!fHistory.isEmpty());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Control createDialogArea(final Composite parent) {
 		final Composite container= (Composite) super.createDialogArea(parent);

@@ -33,10 +33,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
  */
 public abstract class JavaRefactoringContribution extends RefactoringContribution {
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public final Map retrieveArgumentMap(final RefactoringDescriptor descriptor) {
+	@Override
+	public final Map<String, String> retrieveArgumentMap(final RefactoringDescriptor descriptor) {
 		Assert.isNotNull(descriptor);
 		if (descriptor instanceof JavaRefactoringDescriptor)
 			return ((JavaRefactoringDescriptor) descriptor).getArguments();

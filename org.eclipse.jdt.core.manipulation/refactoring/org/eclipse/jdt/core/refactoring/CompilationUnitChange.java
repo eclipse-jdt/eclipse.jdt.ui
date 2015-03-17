@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,9 +59,7 @@ public class CompilationUnitChange extends TextFileChange {
 		return (IFile) cunit.getResource();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Object getModifiedElement(){
 		return fCUnit;
 	}
@@ -75,9 +73,7 @@ public class CompilationUnitChange extends TextFileChange {
 		return fCUnit;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected IDocument acquireDocument(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		fCUnit.becomeWorkingCopy(new SubProgressMonitor(pm, 1));
@@ -85,9 +81,7 @@ public class CompilationUnitChange extends TextFileChange {
 		return super.acquireDocument(new SubProgressMonitor(pm, 1));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected void releaseDocument(IDocument document, IProgressMonitor pm) throws CoreException {
 		boolean isModified= isDocumentModified();
 		super.releaseDocument(document, pm);
@@ -108,9 +102,7 @@ public class CompilationUnitChange extends TextFileChange {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected Change createUndoChange(UndoEdit edit, ContentStamp stampToRestore) {
 		try {
 			return new UndoCompilationUnitChange(getName(), fCUnit, edit, stampToRestore, getSaveMode());
@@ -120,12 +112,11 @@ public class CompilationUnitChange extends TextFileChange {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public Object getAdapter(Class adapter) {
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getAdapter(Class<T> adapter) {
 		if (ICompilationUnit.class.equals(adapter))
-			return fCUnit;
+			return (T) fCUnit;
 		return super.getAdapter(adapter);
 	}
 
@@ -138,9 +129,7 @@ public class CompilationUnitChange extends TextFileChange {
 		fDescriptor= descriptor;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public ChangeDescriptor getDescriptor() {
 		return fDescriptor;
 	}

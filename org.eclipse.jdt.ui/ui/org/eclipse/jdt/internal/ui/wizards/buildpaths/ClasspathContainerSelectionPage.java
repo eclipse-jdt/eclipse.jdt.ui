@@ -77,9 +77,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 		validatePage();
 	}
 
-	/* (non-Javadoc)
-	 * @see IDialogPage#createControl(Composite)
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		fListViewer= new ListViewer(parent, SWT.SINGLE | SWT.BORDER);
 		fListViewer.setLabelProvider(new ClasspathContainerLabelProvider());
@@ -87,11 +85,13 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 		fListViewer.setComparator(new ViewerComparator());
 		fListViewer.setInput(Arrays.asList(fContainers));
 		fListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				validatePage();
 			}
 		});
 		fListViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				doDoubleClick();
 			}
@@ -135,17 +135,11 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see IWizardPage#canFlipToNextPage()
-	 */
 	@Override
 	public boolean canFlipToNextPage() {
 		return isPageComplete(); // avoid the getNextPage call to prevent potential plugin load
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
-	 */
 	@Override
 	public void setVisible(boolean visible) {
 		if (!visible && fListViewer != null) {

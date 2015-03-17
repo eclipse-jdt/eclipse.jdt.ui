@@ -89,7 +89,7 @@ public class JEResource extends JEAttribute {
 
 	@Override
 	public JEAttribute[] getChildren() {
-		ArrayList<JEAttribute> result= new ArrayList<JEAttribute>();
+		ArrayList<JEAttribute> result= new ArrayList<>();
 		
 		IContainer parent= fResource.getParent();
 		if (parent != null )

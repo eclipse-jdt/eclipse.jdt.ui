@@ -69,12 +69,13 @@ public class ChangeExceptionsControl extends Composite {
 //TODO: cleanup, adapt NLS strings
 
 	private static class ExceptionInfoContentProvider implements IStructuredContentProvider {
+		@Override
 		@SuppressWarnings("unchecked")
 		public Object[] getElements(Object inputElement) {
 			return removeMarkedAsDeleted((List<ExceptionInfo>) inputElement);
 		}
 		private ExceptionInfo[] removeMarkedAsDeleted(List<ExceptionInfo> exceptionInfos){
-			List<ExceptionInfo> result= new ArrayList<ExceptionInfo>(exceptionInfos.size());
+			List<ExceptionInfo> result= new ArrayList<>(exceptionInfos.size());
 			for (Iterator<ExceptionInfo> iter= exceptionInfos.iterator(); iter.hasNext();) {
 				ExceptionInfo info= iter.next();
 				if (! info.isDeleted())
@@ -82,9 +83,11 @@ public class ChangeExceptionsControl extends Composite {
 			}
 			return result.toArray(new ExceptionInfo[result.size()]);
 		}
+		@Override
 		public void dispose() {
 			// do nothing
 		}
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			// do nothing
 		}
@@ -98,9 +101,11 @@ public class ChangeExceptionsControl extends Composite {
 			fInterfaceImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS);
 		}
 
+		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			return fInterfaceImage;
 		}
+		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			ExceptionInfo info= (ExceptionInfo) element;
 			return BasicElementLabels.getJavaElementName(info.getFullyQualifiedName());
@@ -147,6 +152,7 @@ public class ChangeExceptionsControl extends Composite {
 		fTableViewer.setContentProvider(new ExceptionInfoContentProvider());
 		fTableViewer.setLabelProvider(new ExceptionInfoLabelProvider());
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateButtonsEnabledState();
 			}
@@ -250,6 +256,7 @@ public class ChangeExceptionsControl extends Composite {
 		dialog.setMessage(RefactoringMessages.ChangeExceptionsControl_choose_message);
 		dialog.setInitialPattern("*Exception*"); //$NON-NLS-1$
 		dialog.setValidator(new ISelectionStatusValidator() {
+			@Override
 			public IStatus validate(Object[] selection) {
 				if (selection.length == 0)
 					return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$

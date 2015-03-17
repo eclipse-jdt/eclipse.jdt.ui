@@ -38,6 +38,7 @@ public class JUnit3TestFinderTest extends TestCase {
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fRoot;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
@@ -48,6 +49,7 @@ public class JUnit3TestFinderTest extends TestCase {
 		fRoot= JavaProjectHelper.addSourceContainer(fProject, "src");
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
 		super.tearDown();
@@ -383,14 +385,14 @@ public class JUnit3TestFinderTest extends TestCase {
 			assertEquals(type.getFullyQualifiedName('.'), isValidTest, finder.isTest(type));
 		}
 
-		HashSet set= new HashSet();
+		HashSet<IType> set= new HashSet<>();
 		finder.findTestsInContainer(container, set, null);
 
-		HashSet namesFound= new HashSet();
-		for (Iterator iterator= set.iterator(); iterator.hasNext();) {
-			namesFound.add(((IType) iterator.next()).getFullyQualifiedName('.'));
+		HashSet<String> namesFound= new HashSet<>();
+		for (Iterator<IType> iterator= set.iterator(); iterator.hasNext();) {
+			namesFound.add(iterator.next().getFullyQualifiedName('.'));
 		}
-		String[] actuals= (String[]) namesFound.toArray(new String[namesFound.size()]);
+		String[] actuals= namesFound.toArray(new String[namesFound.size()]);
 		StringAsserts.assertEqualStringsIgnoreOrder(actuals, expectedValidTests);
 	}
 

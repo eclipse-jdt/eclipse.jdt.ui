@@ -70,9 +70,6 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_tooltip);
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getDetailedDescription() {
 		if (!isEnabled())
@@ -93,15 +90,13 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
         return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
 		try {
 			final IFile[] files= getSelectedElements().toArray(new IFile[getSelectedElements().size()]);
 
 			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 				        IJavaProject project= JavaCore.create(files[0].getProject());
@@ -124,7 +119,7 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 	}
 
 	private List<IJavaElement> addLibraryEntries(IFile[] resources, IJavaProject project, IProgressMonitor monitor) throws CoreException {
-		List<CPListElement> addedEntries= new ArrayList<CPListElement>();
+		List<CPListElement> addedEntries= new ArrayList<>();
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4);
 			for (int i= 0; i < resources.length; i++) {
@@ -141,7 +136,7 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
         	delta.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));
         	informListeners(delta);
 
-			List<IJavaElement> result= new ArrayList<IJavaElement>(addedEntries.size());
+			List<IJavaElement> result= new ArrayList<>(addedEntries.size());
 			for (int i= 0; i < resources.length; i++) {
 				IResource res= resources[i];
 				IJavaElement elem= project.getPackageFragmentRoot(res);

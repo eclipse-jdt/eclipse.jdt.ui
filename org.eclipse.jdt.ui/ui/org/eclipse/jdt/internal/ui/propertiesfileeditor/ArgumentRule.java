@@ -30,6 +30,7 @@ public final class ArgumentRule extends WordPatternRule {
 		/*
 		 * @see IWordDetector#isWordStart
 		 */
+		@Override
 		public boolean isWordStart(char c) {
 			return '{' == c;
 		}
@@ -37,6 +38,7 @@ public final class ArgumentRule extends WordPatternRule {
 		/*
 		 * @see IWordDetector#isWordPart
 		 */
+		@Override
 		public boolean isWordPart(char c) {
 			return c == '}' || Character.isDigit(c);
 		}

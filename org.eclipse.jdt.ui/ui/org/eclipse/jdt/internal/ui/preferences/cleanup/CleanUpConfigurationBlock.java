@@ -95,13 +95,10 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		return fProfileManager;
     }
 
-	/**
-     * {@inheritDoc}
-     */
     @Override
 	protected void configurePreview(Composite composite, int numColumns, final ProfileManager profileManager) {
     	Map<String, String> settings= profileManager.getSelected().getSettings();
-		final Map<String, String> sharedSettings= new Hashtable<String, String>();
+		final Map<String, String> sharedSettings= new Hashtable<>();
 		fill(settings, sharedSettings);
 
 		final ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
@@ -120,6 +117,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 
 		profileManager.addObserver(new Observer() {
 
+			@Override
 			public void update(Observable o, Object arg) {
 				final int value= ((Integer)arg).intValue();
 				switch (value) {
@@ -172,9 +170,6 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
         return new CleanUpModifyDialog(shell, profile, profileManager, profileStore, newProfile, CLEANUP_PAGE_SETTINGS_KEY, DIALOGSTORE_LASTSAVELOADPATH);
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Composite createContents(Composite parent) {
 	    Composite composite= super.createContents(parent);
@@ -197,6 +192,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 			fShowCleanUpWizardDialogField.setSelection(true);
 
 	    fShowCleanUpWizardDialogField.setDialogFieldListener(new IDialogFieldListener() {
+			@Override
 			public void dialogFieldChanged(DialogField field) {
 				doShowCleanUpWizard(fShowCleanUpWizardDialogField.isSelected());
             }
@@ -214,9 +210,6 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		preferences.putBoolean(CleanUpConstants.SHOW_CLEAN_UP_WIZARD, showWizard);
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void performDefaults() {
 		super.performDefaults();
@@ -228,15 +221,13 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
 		fShowCleanUpWizardDialogField.setDialogFieldListener(null);
 		fShowCleanUpWizardDialogField.setSelection(showWizard);
 		fShowCleanUpWizardDialogField.setDialogFieldListener(new IDialogFieldListener() {
+			@Override
 			public void dialogFieldChanged(DialogField field) {
 				doShowCleanUpWizard(fShowCleanUpWizardDialogField.isSelected());
             }
 	    });
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void preferenceChanged(PreferenceChangeEvent event) {
 		if (CleanUpConstants.CLEANUP_PROFILES.equals(event.getKey())) {

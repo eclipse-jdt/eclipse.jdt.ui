@@ -94,7 +94,7 @@ public abstract class ViewHistory<E> {
 	 * @return a history drop down action, ready for inclusion in a view toolbar
 	 */
 	public final IAction createHistoryDropDownAction() {
-		return new HistoryDropDownAction<E>(this);
+		return new HistoryDropDownAction<>(this);
 	}
 
 	public abstract void addMenuEntries(MenuManager manager);

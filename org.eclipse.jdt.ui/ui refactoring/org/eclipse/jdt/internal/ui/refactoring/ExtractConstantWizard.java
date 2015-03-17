@@ -102,6 +102,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			fConstNameProposals= guessedNames;
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			Composite result= new Composite(parent, SWT.NONE);
 			setControl(result);

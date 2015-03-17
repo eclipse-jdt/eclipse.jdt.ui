@@ -49,6 +49,7 @@ public class JavadocLocationDialog extends StatusDialog {
 		super(parent);
 
 		IStatusChangeListener listener= new IStatusChangeListener() {
+			@Override
 			public void statusChanged(IStatus status) {
 				updateStatus(status);
 			}
@@ -67,9 +68,6 @@ public class JavadocLocationDialog extends StatusDialog {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);

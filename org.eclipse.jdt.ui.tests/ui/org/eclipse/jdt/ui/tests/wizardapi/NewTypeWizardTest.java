@@ -17,10 +17,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -47,11 +43,15 @@ import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 /**
  *
  */
 public class NewTypeWizardTest extends TestCase {
-	private static final Class THIS= NewTypeWizardTest.class;
+	private static final Class<NewTypeWizardTest> THIS= NewTypeWizardTest.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -68,8 +68,9 @@ public class NewTypeWizardTest extends TestCase {
 		return setUpTest(new TestSuite(THIS));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);
@@ -98,6 +99,7 @@ public class NewTypeWizardTest extends TestCase {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
@@ -113,7 +115,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		wizardPage.setSuperClass("", true);
 
-		List interfaces= new ArrayList();
+		List<String> interfaces= new ArrayList<>();
 		wizardPage.setSuperInterfaces(interfaces, true);
 
 		wizardPage.setMethodStubSelection(false, false, false, true);
@@ -152,7 +154,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		wizardPage.setSuperClass("java.util.ArrayList<String>", true);
 
-		List interfaces= new ArrayList();
+		List<String> interfaces= new ArrayList<>();
 		wizardPage.setSuperInterfaces(interfaces, true);
 
 		wizardPage.setMethodStubSelection(false, false, false, true);
@@ -203,7 +205,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		wizardPage.setSuperClass("pack.A<String>", true);
 
-		List interfaces= new ArrayList();
+		List<String> interfaces= new ArrayList<>();
 		wizardPage.setSuperInterfaces(interfaces, true);
 
 		wizardPage.setMethodStubSelection(false, false, true, true);
@@ -261,7 +263,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		wizardPage.setSuperClass("pack.A<String>", true);
 
-		List interfaces= new ArrayList();
+		List<String> interfaces= new ArrayList<>();
 		wizardPage.setSuperInterfaces(interfaces, true);
 
 		wizardPage.setMethodStubSelection(true, true, true, true);
@@ -328,7 +330,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		wizardPage.setSuperClass("java.util.ArrayList<S>", true);
 
-		List interfaces= new ArrayList();
+		List<String> interfaces= new ArrayList<>();
 		wizardPage.setSuperInterfaces(interfaces, true);
 
 		wizardPage.setMethodStubSelection(false, false, true, true);
@@ -377,7 +379,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		wizardPage.setSuperClass("", true);
 
-		List interfaces= new ArrayList();
+		List<String> interfaces= new ArrayList<>();
 		interfaces.add("java.util.List<java.io.File>");
 		wizardPage.setSuperInterfaces(interfaces, true);
 
@@ -437,7 +439,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		wizardPage.setSuperClass("pack.A", true);
 
-		List interfaces= new ArrayList();
+		List<String> interfaces= new ArrayList<>();
 		wizardPage.setSuperInterfaces(interfaces, true);
 
 		wizardPage.setMethodStubSelection(false, false, true, true);
@@ -507,7 +509,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		wizardPage.setSuperClass("pack.A", true);
 
-		List interfaces= new ArrayList();
+		List<String> interfaces= new ArrayList<>();
 		wizardPage.setSuperInterfaces(interfaces, true);
 
 		wizardPage.setMethodStubSelection(false, false, true, true);
@@ -556,7 +558,7 @@ public class NewTypeWizardTest extends TestCase {
 		wizardPage.setPackageFragment(pack1, true);
 		wizardPage.setTypeName("E", true);
 
-		List interfaces= new ArrayList();
+		List<String> interfaces= new ArrayList<>();
 		interfaces.add("java.util.List<String>");
 		interfaces.add("java.lang.Runnable");
 		wizardPage.setSuperInterfaces(interfaces, true);
@@ -595,7 +597,7 @@ public class NewTypeWizardTest extends TestCase {
 		wizardPage.setPackageFragment(pack1, true);
 		wizardPage.setTypeName("E", true);
 
-		List interfaces= new ArrayList();
+		List<String> interfaces= new ArrayList<>();
 		wizardPage.setSuperInterfaces(interfaces, true);
 
 		wizardPage.setAddComments(true, true);
@@ -630,7 +632,7 @@ public class NewTypeWizardTest extends TestCase {
 		wizardPage.setPackageFragment(pack1, true);
 		wizardPage.setTypeName("E", true);
 
-		List interfaces= new ArrayList();
+		List<String> interfaces= new ArrayList<>();
 		wizardPage.setSuperInterfaces(interfaces, true);
 
 		wizardPage.setAddComments(true, true);
@@ -670,7 +672,7 @@ public class NewTypeWizardTest extends TestCase {
 
 		wizardPage.setSuperClass("", true);
 
-		List interfaces= new ArrayList();
+		List<String> interfaces= new ArrayList<>();
 		wizardPage.setSuperInterfaces(interfaces, true);
 
 		//wizardPage.setMethodStubSelection(false, false, false, true);

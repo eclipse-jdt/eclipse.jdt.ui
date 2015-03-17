@@ -69,6 +69,7 @@ public class PropertiesFileAutoEditStrategyTest extends TestCase {
 		return new ProjectTestSetup(new TestSuite(PropertiesFileAutoEditStrategyTest.class));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		try {
@@ -91,6 +92,7 @@ public class PropertiesFileAutoEditStrategyTest extends TestCase {
 		}
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 		super.tearDown();
@@ -109,6 +111,7 @@ public class PropertiesFileAutoEditStrategyTest extends TestCase {
 		InputStream stream= new InputStream() {
 			private final Reader fReader= new StringReader(content);
 
+			@Override
 			public int read() throws IOException {
 				return fReader.read();
 			}

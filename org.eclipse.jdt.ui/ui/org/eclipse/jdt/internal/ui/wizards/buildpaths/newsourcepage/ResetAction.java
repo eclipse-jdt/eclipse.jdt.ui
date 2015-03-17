@@ -66,9 +66,6 @@ public class ResetAction extends BuildpathModifierAction {
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getDetailedDescription() {
 		if (!isEnabled())
@@ -93,12 +90,10 @@ public class ResetAction extends BuildpathModifierAction {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
 		final IRunnableWithProgress runnable= new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
 					Object firstElement= getSelectedElements().get(0);
@@ -136,7 +131,7 @@ public class ResetAction extends BuildpathModifierAction {
         try {
         	monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Resetting, selection.size());
         	List<CPListElement> entries= ClasspathModifier.getExistingEntries(project);
-        	List<Object> result= new ArrayList<Object>();
+        	List<Object> result= new ArrayList<>();
         	for (int i= 0; i < selection.size(); i++) {
         		Object element= selection.get(i);
         		if (element instanceof IJavaElement) {

@@ -22,11 +22,13 @@ public class SWTProjectTestSetup extends RefactoringPerformanceTestSetup {
 		super(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fTestProject= new SWTTestProject();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		fTestProject.delete();
 		super.tearDown();

@@ -63,13 +63,13 @@ public class CallHierarchyUI {
 
     private static CallHierarchyUI fgInstance;
     private int fViewCount= 0;
-    private final List<IMember[]> fMethodHistory= new ArrayList<IMember[]>();
+    private final List<IMember[]> fMethodHistory= new ArrayList<>();
 
 	/**
 	 * List of the Call Hierarchy views in LRU order, where the most recently used view is at index 0.
 	 * @since 3.7
 	 */
-	private List<CallHierarchyViewPart> fLRUCallHierarchyViews= new ArrayList<CallHierarchyViewPart>();
+	private List<CallHierarchyViewPart> fLRUCallHierarchyViews= new ArrayList<>();
 
     private CallHierarchyUI() {
         // Do nothing
@@ -321,7 +321,7 @@ public class CallHierarchyUI {
 
         if (selection instanceof IStructuredSelection) {
             IStructuredSelection structuredSelection= (IStructuredSelection) selection;
-            List<IMember> javaElements= new ArrayList<IMember>();
+            List<IMember> javaElements= new ArrayList<>();
             for (Iterator<?> iter= structuredSelection.iterator(); iter.hasNext();) {
                 Object element= iter.next();
                 if (element instanceof MethodWrapper) {

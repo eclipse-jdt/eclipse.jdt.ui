@@ -36,6 +36,7 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 	/*
 	 * @see IInformationProvider#getSubject(ITextViewer, int)
 	 */
+	@Override
 	public IRegion getSubject(ITextViewer textViewer, int offset) {
 
 		if (textViewer != null)
@@ -48,6 +49,8 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 	 * @see IInformationProvider#getInformation(ITextViewer, IRegion)
 	 * @deprecated
 	 */
+	@Deprecated
+	@Override
 	public String getInformation(ITextViewer textViewer, IRegion subject) {
 		if (fImplementation != null) {
 			String s= fImplementation.getHoverInfo(textViewer, subject);
@@ -61,6 +64,7 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 	/*
 	 * @see org.eclipse.jface.text.information.IInformationProviderExtension#getInformation2(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 */
+	@Override
 	public Object getInformation2(ITextViewer textViewer, IRegion subject) {
 		if (fImplementation == null)
 			return null;
@@ -71,6 +75,7 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 	 * @see IInformationProviderExtension2#getInformationPresenterControlCreator()
 	 * @since 3.1
 	 */
+	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		if (fImplementation == null)
 			return null;

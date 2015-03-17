@@ -333,7 +333,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
-			final Map<String, String> arguments= new HashMap<String, String>();
+			final Map<String, String> arguments= new HashMap<>();
 			String project= null;
 			final IJavaProject javaProject= fSubType.getJavaProject();
 			if (javaProject != null)
@@ -417,7 +417,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					copy.getBuffer().setContents(fSuperSource);
 					JavaModelUtil.reconcile(copy);
 				}
-				final Set<String> replacements= new HashSet<String>();
+				final Set<String> replacements= new HashSet<>();
 				if (fReplace)
 					rewriteTypeOccurrences(manager, sourceRewrite, copy, replacements, status, new SubProgressMonitor(monitor, 220));
 				rewriteSourceMethods(sourceRewrite, replacements);
@@ -488,9 +488,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected final void createMemberDeclarations(final CompilationUnitRewrite sourceRewrite, final ASTRewrite targetRewrite, final AbstractTypeDeclaration targetDeclaration) throws CoreException {
 		Assert.isNotNull(sourceRewrite);
@@ -498,6 +495,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		Assert.isNotNull(targetDeclaration);
 		Arrays.sort(fMembers, new Comparator<IMember>() {
 
+			@Override
 			public final int compare(final IMember first, final IMember second) {
 				try {
 					return first.getSourceRange().getOffset() - second.getSourceRange().getOffset();
@@ -767,7 +765,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 *             if an error occurs
 	 */
 	public final IMember[] getExtractableMembers() throws JavaModelException {
-		final List<IJavaElement> list= new ArrayList<IJavaElement>();
+		final List<IJavaElement> list= new ArrayList<>();
 		IJavaElement[] children= fSubType.getChildren();
 		for (int index= 0; index < children.length; index++) {
 			if (children[index] instanceof IMember && isExtractableMember((IMember) children[index]))
@@ -787,7 +785,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 */
 	protected final IField[] getExtractedFields(final ICompilationUnit unit) {
 		Assert.isNotNull(unit);
-		final List<IJavaElement> list= new ArrayList<IJavaElement>();
+		final List<IJavaElement> list= new ArrayList<>();
 		for (int index= 0; index < fMembers.length; index++) {
 			if (fMembers[index] instanceof IField) {
 				final IJavaElement element= JavaModelUtil.findInCompilationUnit(unit, fMembers[index]);
@@ -809,7 +807,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 */
 	protected final IMethod[] getExtractedMethods(final ICompilationUnit unit) throws JavaModelException {
 		Assert.isNotNull(unit);
-		final List<IJavaElement> list= new ArrayList<IJavaElement>();
+		final List<IJavaElement> list= new ArrayList<>();
 		for (int index= 0; index < fMembers.length; index++) {
 			if (fMembers[index] instanceof IMethod) {
 				final IJavaElement element= JavaModelUtil.findInCompilationUnit(unit, fMembers[index]);
@@ -897,7 +895,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
 		int count= 1;
-		final List<IJavaElement> elements= new ArrayList<IJavaElement>();
+		final List<IJavaElement> elements= new ArrayList<>();
 		String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
 		final RefactoringStatus status= new RefactoringStatus();
 		while ((handle= extended.getAttribute(attribute)) != null) {
@@ -967,9 +965,6 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		resetWorkingCopies();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected final void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set<String> replacements, final IProgressMonitor monitor) throws CoreException {
 		try {

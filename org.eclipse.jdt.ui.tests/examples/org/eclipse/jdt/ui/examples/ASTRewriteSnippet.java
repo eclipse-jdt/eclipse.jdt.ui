@@ -66,7 +66,7 @@ public class ASTRewriteSnippet extends TestCase {
 					JavaRuntime.getDefaultJREContainerEntry()
 			};
 			javaProject.setRawClasspath(cpentry, javaProject.getPath(), null);
-			Map options= new HashMap();
+			Map<String, String> options= new HashMap<>();
 			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 			options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 			javaProject.setOptions(options);

@@ -29,7 +29,7 @@ import org.eclipse.ltk.core.refactoring.resource.RenameResourceChange;
 
 public class RenameResourceChangeTests extends RefactoringTest {
 
-	private static final Class clazz= RenameResourceChangeTests.class;
+	private static final Class<RenameResourceChangeTests> clazz= RenameResourceChangeTests.class;
 	public RenameResourceChangeTests(String name) {
 		super(name);
 	}

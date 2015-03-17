@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,6 @@ package org.eclipse.jdt.ui.tests.core;
 
 import java.util.Hashtable;
 import java.util.List;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -39,11 +36,14 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 /**
   */
 public class ASTNodesInsertTest extends CoreTests {
 
-	private static final Class THIS= ASTNodesInsertTest.class;
+	private static final Class<ASTNodesInsertTest> THIS= ASTNodesInsertTest.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -60,15 +60,17 @@ public class ASTNodesInsertTest extends CoreTests {
 		return setUpTest(new TestSuite(THIS));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 
 		fJProject1= ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		JavaCore.setOptions(options);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
@@ -87,7 +89,7 @@ public class ASTNodesInsertTest extends CoreTests {
 		CompilationUnit astRoot= createAST(compilationUnit);
 
 		TypeDeclaration typeDecl= (TypeDeclaration) astRoot.types().get(0);
-		List bodyDecls= typeDecl.bodyDeclarations();
+		List<BodyDeclaration> bodyDecls= typeDecl.bodyDeclarations();
 
 		AST ast = astRoot.getAST();
 
@@ -137,7 +139,7 @@ public class ASTNodesInsertTest extends CoreTests {
 		CompilationUnit astRoot= createAST(compilationUnit);
 
 		TypeDeclaration typeDecl= (TypeDeclaration) astRoot.types().get(0);
-		List bodyDecls= typeDecl.bodyDeclarations();
+		List<BodyDeclaration> bodyDecls= typeDecl.bodyDeclarations();
 
 		AST ast = astRoot.getAST();
 
@@ -189,7 +191,7 @@ public class ASTNodesInsertTest extends CoreTests {
 		CompilationUnit astRoot= createAST(compilationUnit);
 
 		TypeDeclaration typeDecl= (TypeDeclaration) astRoot.types().get(0);
-		List bodyDecls= typeDecl.bodyDeclarations();
+		List<BodyDeclaration> bodyDecls= typeDecl.bodyDeclarations();
 
 		AST ast = astRoot.getAST();
 
@@ -241,7 +243,7 @@ public class ASTNodesInsertTest extends CoreTests {
 		CompilationUnit astRoot= createAST(compilationUnit);
 
 		TypeDeclaration typeDecl= (TypeDeclaration) astRoot.types().get(0);
-		List bodyDecls= typeDecl.bodyDeclarations();
+		List<BodyDeclaration> bodyDecls= typeDecl.bodyDeclarations();
 
 		AST ast = astRoot.getAST();
 

@@ -96,9 +96,6 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
-	 */
 	@Override
 	public StyledString getStyledText(Object element) {
 		StyledString styledString= getColoredLabelWithCounts(element, internalGetStyledText(element));

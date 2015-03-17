@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
  */
 public class GenerateGettersSettersTest extends SourceTestCase {
 
-	static final Class THIS= GenerateGettersSettersTest.class;
+	static final Class<GenerateGettersSettersTest> THIS= GenerateGettersSettersTest.class;
 
 	public static Test suite() {
 		return setUpTest(new TestSuite(THIS));
@@ -92,6 +92,7 @@ public class GenerateGettersSettersTest extends SourceTestCase {
 
 		IRequestQuery allYes= new IRequestQuery() {
 
+			@Override
 			public int doQuery(IMember member) {
 				return IRequestQuery.YES_ALL;
 			}

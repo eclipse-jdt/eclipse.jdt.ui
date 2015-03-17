@@ -46,6 +46,7 @@ public final class PropertyValueScanner extends AbstractJavaScanner {
 		/*
 		 * @see IWordDetector#isWordStart
 		 */
+		@Override
 		public boolean isWordStart(char c) {
 			if ('=' != c && ':' != c || fDocument == null)
 				return false;
@@ -72,6 +73,7 @@ public final class PropertyValueScanner extends AbstractJavaScanner {
 		/*
 		 * @see IWordDetector#isWordPart
 		 */
+		@Override
 		public boolean isWordPart(char c) {
 			return false;
 		}
@@ -110,7 +112,7 @@ public final class PropertyValueScanner extends AbstractJavaScanner {
 	@Override
 	protected List<IRule> createRules() {
 		setDefaultReturnToken(getToken(PreferenceConstants.PROPERTIES_FILE_COLORING_VALUE));
-		List<IRule> rules= new ArrayList<IRule>();
+		List<IRule> rules= new ArrayList<>();
 
 		// Add rule for arguments.
 		IToken token= getToken(PreferenceConstants.PROPERTIES_FILE_COLORING_ARGUMENT);

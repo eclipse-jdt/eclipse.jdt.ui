@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.JavaCore;
  * @since 3.2
  */
 public class CamelCaseCompletionTest extends AbstractCompletionTest {
-	private static final Class THIS= CamelCaseCompletionTest.class;
+	private static final Class<CamelCaseCompletionTest> THIS= CamelCaseCompletionTest.class;
 
 	public static Test setUpTest(Test test) {
 		return new CompletionTestSetup(test);
@@ -35,7 +35,8 @@ public class CamelCaseCompletionTest extends AbstractCompletionTest {
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#configureCoreOptions(java.util.Hashtable)
 	 */
-	protected void configureCoreOptions(Hashtable options) {
+	@Override
+	protected void configureCoreOptions(Hashtable<String, String> options) {
 		super.configureCoreOptions(options);
 		options.put(JavaCore.CODEASSIST_CAMEL_CASE_MATCH, JavaCore.ENABLED);
 	}

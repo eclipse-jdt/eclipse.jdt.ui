@@ -25,7 +25,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  */
 public class TypeCompletionTest extends AbstractCompletionTest {
 
-	private static final Class THIS= TypeCompletionTest.class;
+	private static final Class<TypeCompletionTest> THIS= TypeCompletionTest.class;
 
 	public static Test setUpTest(Test test) {
 		return new CompletionTestSetup(test);
@@ -38,6 +38,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);

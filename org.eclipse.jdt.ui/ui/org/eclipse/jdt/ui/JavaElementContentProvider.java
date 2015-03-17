@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  *
  * @noextend This class is not intended to be subclassed by clients.
  */
+@Deprecated
 public class JavaElementContentProvider extends StandardJavaElementContentProvider implements IElementChangedListener {
 
 	/** The tree viewer */
@@ -53,18 +54,12 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 	/** The input object */
 	protected Object fInput;
 
-	/* (non-Javadoc)
-	 * Method declared on IContentProvider.
-	 */
 	@Override
 	public void dispose() {
 		super.dispose();
 		JavaCore.removeElementChangedListener(this);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on IContentProvider.
-	 */
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		super.inputChanged(viewer, oldInput, newInput);
@@ -97,9 +92,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		super(provideMembers, provideWorkingCopy);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on IElementChangedListener.
-	 */
+	@Override
 	public void elementChanged(final ElementChangedEvent event) {
 		try {
 			processDelta(event.getDelta());
@@ -240,6 +233,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 	 */
 	 private void updatePackageIcon(final IJavaElement element) {
 	 	postRunnable(new Runnable() {
+			@Override
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
@@ -288,6 +282,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 
 	private void postRefresh(final Object root) {
 		postRunnable(new Runnable() {
+			@Override
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
@@ -299,6 +294,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 
 	private void postAdd(final Object parent, final Object element) {
 		postRunnable(new Runnable() {
+			@Override
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();
@@ -310,6 +306,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 
 	private void postRemove(final Object element) {
 		postRunnable(new Runnable() {
+			@Override
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				Control ctrl= fViewer.getControl();

@@ -100,9 +100,6 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 			fResult= resultingCollection;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public boolean visit(TypeDeclaration node) {
 			if (!fFindUnqualifiedStaticAccesses && !fFindUnqualifiedStaticMethodAccesses && node.isInterface())
@@ -133,9 +130,6 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 			return false;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public boolean visit(MethodInvocation node) {
 			if (!fFindUnqualifiedMethodAccesses && !fFindUnqualifiedStaticMethodAccesses)
@@ -253,9 +247,6 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 			fOperations= result;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public boolean visit(final FieldAccess node) {
 			if (!fRemoveFieldQualifiers)
@@ -305,9 +296,6 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 			return super.visit(node);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public boolean visit(final MethodInvocation node) {
 			if (!fRemoveMethodQualifiers)
@@ -398,9 +386,6 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 			return Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {nameLabel, qualifierLabel});
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -431,9 +416,6 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 			fName= name;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -472,9 +454,6 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 			return fDeclaringTypeBinding.getName();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			TextEditGroup group= createTextEditGroup(FixMessages.CodeStyleFix_ChangeAccessUsingDeclaring_description, cuRewrite);
@@ -587,7 +566,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		if (!addThisQualifier && !changeNonStaticAccessToStatic && !qualifyStaticFieldAccess && !changeIndirectStaticAccessToDirect && !qualifyMethodAccess && !qualifyStaticMethodAccess && !removeFieldQualifier && !removeMethodQualifier)
 			return null;
 
-		List<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
+		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 		if (addThisQualifier || qualifyStaticFieldAccess || qualifyMethodAccess || qualifyStaticMethodAccess) {
 			CodeStyleVisitor codeStyleVisitor= new CodeStyleVisitor(compilationUnit, addThisQualifier, qualifyStaticFieldAccess, qualifyMethodAccess, qualifyStaticMethodAccess, operations);
 			compilationUnit.accept(codeStyleVisitor);
@@ -620,7 +599,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		if (!addThisQualifier && !changeNonStaticAccessToStatic && !changeIndirectStaticAccessToDirect)
 			return null;
 
-		List<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
+		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 		if (addThisQualifier) {
 			for (int i= 0; i < problems.length; i++) {
 				IProblemLocation problem= problems[i];
@@ -645,8 +624,8 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		if (!changeNonStaticAccessToStatic && !changeIndirectStaticAccessToDirect)
 			return;
 
-		List<ToStaticAccessOperation> operations= new ArrayList<ToStaticAccessOperation>();
-		HashMap<ASTNode, Block> createdBlocks= new HashMap<ASTNode, Block>();
+		List<ToStaticAccessOperation> operations= new ArrayList<>();
+		HashMap<ASTNode, Block> createdBlocks= new HashMap<>();
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= problems[i];
 			boolean isNonStaticAccess= changeNonStaticAccessToStatic && isNonStaticAccess(problem);
@@ -672,6 +651,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 		// Make sure qualifiers are processed inside-out and left-to-right, so that
 		// ToStaticAccessOperation#extractQualifier(..) extracts qualifiers in execution order:
 		Collections.sort(operations, new Comparator<ToStaticAccessOperation>() {
+			@Override
 			public int compare(ToStaticAccessOperation o1, ToStaticAccessOperation o2) {
 				if (ASTNodes.isParent(o1.fQualifier, o2.fQualifier)) {
 					return -1;

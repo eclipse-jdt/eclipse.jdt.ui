@@ -77,6 +77,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 
 	private static class CPSorter implements Comparator<IClasspathEntry> {
 		private Collator fCollator= Collator.getInstance();
+		@Override
 		public int compare(IClasspathEntry e1, IClasspathEntry e2) {
 			return fCollator.compare(e1.getPath().toString(), e2.getPath().toString());
 		}
@@ -84,9 +85,9 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 
 
 	public ClassPathDetector(IProject project, IProgressMonitor monitor) throws CoreException {
-		fSourceFolders= new HashMap<IPath, List<IPath>>();
-		fJARFiles= new HashSet<IPath>(10);
-		fClassFiles= new ArrayList<IResource>(100);
+		fSourceFolders= new HashMap<>();
+		fJARFiles= new HashSet<>(10);
+		fClassFiles= new ArrayList<>(100);
 		fProject= project;
 
 		fResultClasspath= null;
@@ -124,7 +125,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 			fProject.accept(this, IResource.NONE);
 			monitor.worked(1);
 
-			ArrayList<IClasspathEntry> cpEntries= new ArrayList<IClasspathEntry>();
+			ArrayList<IClasspathEntry> cpEntries= new ArrayList<>();
 
 			detectSourceFolders(cpEntries);
 			if (monitor.isCanceled()) {
@@ -178,7 +179,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 	}
 
 	private IPath detectOutputFolder() throws CoreException {
-		HashSet<IPath> classFolders= new HashSet<IPath>();
+		HashSet<IPath> classFolders= new HashSet<>();
 
 		for (Iterator<IResource> iter= fClassFiles.iterator(); iter.hasNext();) {
 			IFile file= (IFile) iter.next();
@@ -241,7 +242,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 
 
 	private void detectLibraries(ArrayList<IClasspathEntry> cpEntries, IPath outputLocation) {
-		ArrayList<IClasspathEntry> res= new ArrayList<IClasspathEntry>();
+		ArrayList<IClasspathEntry> res= new ArrayList<>();
 		Set<IPath> sourceFolderSet= fSourceFolders.keySet();
 		for (Iterator<IPath> iter= fJARFiles.iterator(); iter.hasNext();) {
 			IPath path= iter.next();
@@ -260,11 +261,11 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 
 
 	private void detectSourceFolders(ArrayList<IClasspathEntry> resEntries) {
-		ArrayList<IClasspathEntry> res= new ArrayList<IClasspathEntry>();
+		ArrayList<IClasspathEntry> res= new ArrayList<>();
 		Set<IPath> sourceFolderSet= fSourceFolders.keySet();
 		for (Iterator<IPath> iter= sourceFolderSet.iterator(); iter.hasNext();) {
 			IPath path= iter.next();
-			ArrayList<IPath> excluded= new ArrayList<IPath>();
+			ArrayList<IPath> excluded= new ArrayList<>();
 			for (Iterator<IPath> inner= sourceFolderSet.iterator(); inner.hasNext();) {
 				IPath other= inner.next();
 				if (!path.equals(other) && path.isPrefixOf(other)) {
@@ -306,7 +307,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 	private void addToMap(HashMap<IPath, List<IPath>> map, IPath folderPath, IPath relPath) {
 		List<IPath> list= map.get(folderPath);
 		if (list == null) {
-			list= new ArrayList<IPath>(50);
+			list= new ArrayList<>(50);
 			map.put(folderPath, list);
 		}
 		list.add(relPath);
@@ -331,9 +332,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 		return !JavaConventionsUtil.validateCompilationUnitName(name, JavaCore.create(fProject)).matches(IStatus.ERROR);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.resources.IResourceProxyVisitor#visit(org.eclipse.core.resources.IResourceProxy)
-	 */
+	@Override
 	public boolean visit(IResourceProxy proxy) {
 		if (fMonitor.isCanceled()) {
 			throw new OperationCanceledException();

@@ -76,7 +76,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	protected final class SectionManager {
 		/** The preference setting for keeping no section open. */
 		private static final String __NONE= "__none"; //$NON-NLS-1$
-		private Set<ExpandableComposite> fSections= new HashSet<ExpandableComposite>();
+		private Set<ExpandableComposite> fSections= new HashSet<>();
 		private boolean fIsBeingManaged= false;
 		private ExpansionAdapter fListener= new ExpansionAdapter() {
 			@Override
@@ -213,10 +213,12 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	protected static final int INDENT= 20;
 	private OverlayPreferenceStore fStore;
 
-	private Map<Button, String> fCheckBoxes= new HashMap<Button, String>();
+	private Map<Button, String> fCheckBoxes= new HashMap<>();
 	private SelectionListener fCheckBoxListener= new SelectionListener() {
+		@Override
 		public void widgetDefaultSelected(SelectionEvent e) {
 		}
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 			Button button= (Button) e.widget;
 			fStore.setValue(fCheckBoxes.get(button), button.getSelection());
@@ -224,16 +226,18 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	};
 
 
-	private Map<Text, String> fTextFields= new HashMap<Text, String>();
+	private Map<Text, String> fTextFields= new HashMap<>();
 	private ModifyListener fTextFieldListener= new ModifyListener() {
+		@Override
 		public void modifyText(ModifyEvent e) {
 			Text text= (Text) e.widget;
 			fStore.setValue(fTextFields.get(text), text.getText());
 		}
 	};
 
-	private ArrayList<Text> fNumberFields= new ArrayList<Text>();
+	private ArrayList<Text> fNumberFields= new ArrayList<>();
 	private ModifyListener fNumberFieldListener= new ModifyListener() {
+		@Override
 		public void modifyText(ModifyEvent e) {
 			numberFieldChanged((Text) e.widget);
 		}
@@ -245,7 +249,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	 * @see #createDependency(Button, Control)
 	 * @since 3.0
 	 */
-	private ArrayList<SelectionListener> fMasterSlaveListeners= new ArrayList<SelectionListener>();
+	private ArrayList<SelectionListener> fMasterSlaveListeners= new ArrayList<>();
 
 	private StatusInfo fStatus;
 	private final PreferencePage fMainPage;
@@ -360,10 +364,12 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		Assert.isNotNull(slave);
 		indent(slave);
 		SelectionListener listener= new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean state= master.getSelection();
 				slave.setEnabled(state);
 			}
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		};
 		master.addSelectionListener(listener);
@@ -374,6 +380,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 		((GridData) control.getLayoutData()).horizontalIndent+= LayoutUtil.getIndent();
 	}
 
+	@Override
 	public void initialize() {
 		initializeFields();
 	}
@@ -404,9 +411,11 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
         updateStatus(new StatusInfo());
 	}
 
+	@Override
 	public void performOk() {
 	}
 
+	@Override
 	public void performDefaults() {
 		initializeFields();
 	}
@@ -421,6 +430,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#dispose()
 	 * @since 3.0
 	 */
+	@Override
 	public void dispose() {
 	}
 

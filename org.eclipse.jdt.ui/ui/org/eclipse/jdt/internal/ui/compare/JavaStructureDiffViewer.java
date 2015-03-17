@@ -258,6 +258,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 	 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
 	 * @since 3.5
 	 */
+	@Override
 	public void elementChanged(ElementChangedEvent event) {
 		ITypedElement[] elements= findAffectedElement(event);
 		for (int i= 0; i < elements.length; i++) {
@@ -280,7 +281,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer implements IElementCha
 		if (!(input instanceof ICompareInput))
 			return new ITypedElement[0];
 
-		Set<ITypedElement> affectedElements= new HashSet<ITypedElement>();
+		Set<ITypedElement> affectedElements= new HashSet<>();
 		ICompareInput ci= (ICompareInput)input;
 		IJavaElementDelta delta= event.getDelta();
 		addAffectedElement(ci.getAncestor(), delta, affectedElements);

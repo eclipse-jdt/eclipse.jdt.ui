@@ -98,7 +98,8 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	 * @deprecated Use {@link #setSpecialSelectionProvider(ISelectionProvider)} instead. This API will be
 	 * removed after 3.2 M5.
      */
-    public OpenTypeHierarchyAction(IWorkbenchSite site, ISelectionProvider provider) {
+    @Deprecated
+	public OpenTypeHierarchyAction(IWorkbenchSite site, ISelectionProvider provider) {
         this(site);
         setSpecialSelectionProvider(provider);
     }
@@ -116,16 +117,10 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(isEnabled(selection));
@@ -186,9 +181,6 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		return hasValidElement;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		IJavaElement input= SelectionConverter.getInput(fEditor);
@@ -199,7 +191,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 			IJavaElement[] elements= SelectionConverter.codeResolveOrInputForked(fEditor);
 			if (elements == null)
 				return;
-			List<IJavaElement> candidates= new ArrayList<IJavaElement>(elements.length);
+			List<IJavaElement> candidates= new ArrayList<>(elements.length);
 			for (int i= 0; i < elements.length; i++) {
 				IJavaElement[] resolvedElements= OpenTypeHierarchyUtil.getCandidates(elements[i]);
 				if (resolvedElements != null)
@@ -213,12 +205,9 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
-		List<IJavaElement> validElements= new ArrayList<IJavaElement>();
+		List<IJavaElement> validElements= new ArrayList<>();
 		Object[] selectedElements= selection.toArray();
 
 		for (int i= 0; i < selectedElements.length; i++) {
@@ -257,7 +246,7 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 			ErrorDialog.openError(getShell(), getDialogTitle(), ActionMessages.OpenTypeHierarchyAction_messages_title, status);
 			return;
 		}
-		List<IJavaElement> result= new ArrayList<IJavaElement>();
+		List<IJavaElement> result= new ArrayList<>();
 		IStatus status= compileCandidates(result, validElements);
 		if (status.isOK()) {
 			run(result.toArray(new IJavaElement[result.size()]));

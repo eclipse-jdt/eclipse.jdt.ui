@@ -373,7 +373,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	private int findAssignmentInsertIndex(List<Statement> statements) {
 
-		HashSet<String> paramsBefore= new HashSet<String>();
+		HashSet<String> paramsBefore= new HashSet<>();
 		List<SingleVariableDeclaration> params = ((MethodDeclaration) fNodeToAssign.getParent()).parameters();
 		for (int i = 0; i < params.size() && (params.get(i) != fNodeToAssign); i++) {
 			SingleVariableDeclaration decl= params.get(i);

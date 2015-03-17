@@ -67,14 +67,15 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setDescription(PreferencesMessages.JavaBasePreferencePage_description);
 
-		fRadioButtons= new ArrayList<Button>();
-		fCheckBoxes= new ArrayList<Button>();
-		fTextControls= new ArrayList<Text>();
+		fRadioButtons= new ArrayList<>();
+		fCheckBoxes= new ArrayList<>();
+		fTextControls= new ArrayList<>();
 	}
 
 	/*
 	 * @see IWorkbenchPreferencePage#init(IWorkbench)
 	 */
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 
@@ -191,9 +192,11 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		clearButton.setText(PreferencesMessages.JavaBasePreferencePage_do_not_hide_button);
 		clearButton.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false));
 		clearButton.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				unhideAllDialogs();
 			}
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				unhideAllDialogs();
 			}

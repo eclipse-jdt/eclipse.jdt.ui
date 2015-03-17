@@ -50,7 +50,7 @@ public class RemoveBlockCommentAction extends BlockCommentAction {
 	 */
 	@Override
 	protected void runInternal(ITextSelection selection, IDocumentExtension3 docExtension, Edit.EditFactory factory) throws BadPartitioningException, BadLocationException {
-		List<Edit> edits= new LinkedList<Edit>();
+		List<Edit> edits= new LinkedList<>();
 		int tokenLength= getCommentStart().length();
 
 		int offset= selection.getOffset();

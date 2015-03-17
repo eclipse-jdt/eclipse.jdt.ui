@@ -76,9 +76,6 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 		return JavaCore.create(fHandle);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
-	 */
 	@Override
 	protected IResource getModifiedResource() {
 		IJavaElement elem= JavaCore.create(fHandle);

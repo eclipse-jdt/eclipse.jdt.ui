@@ -57,9 +57,6 @@ public class CleanUpPreview extends JavaPreview {
 		fCorrectIndentation= enabled;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void doFormatPreview() {
 		format(fPage.getPreview());

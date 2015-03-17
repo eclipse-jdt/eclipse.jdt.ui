@@ -39,24 +39,17 @@ public final class SimpleTypeConstraint implements ITypeConstraint {
 		return fOperator;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public  String toString(){
 		return getLeft().toString() + " " + fOperator.toString() + " " + getRight().toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.experiments.TypeConstraint#toResolvedString()
-	 */
+	@Override
 	public  String toResolvedString() {
 		return getLeft().toResolvedString() + " " + fOperator.toString() + " " + getRight().toResolvedString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.experiments.ITypeConstraint#isSimpleTypeConstraint()
-	 */
+	@Override
 	public  boolean isSimpleTypeConstraint() {
 		return true;
 	}

@@ -54,9 +54,6 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		fIsSaveAction= kind == CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setWorkingValues(Map<String, String> workingValues) {
 		super.setWorkingValues(workingValues);
@@ -70,10 +67,12 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		return fIsSaveAction;
 	}
 
+	@Override
 	public int getCleanUpCount() {
 		return fCount;
 	}
 
+	@Override
 	public int getSelectedCleanUpCount() {
 		return fSelectedCount;
 	}
@@ -103,6 +102,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	protected void registerPreference(final CheckboxPreference preference) {
 		fCount++;
 		preference.addObserver(new Observer() {
+			@Override
 			public void update(Observable o, Object arg) {
 				if (preference.getChecked()) {
 					setSelectedCleanUpCount(fSelectedCount + 1);
@@ -143,6 +143,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 				for (int j= 0; j < subSlaves[i].length; j++) {
 					final CheckboxPreference subSlave= subSlaves[i][j];
 					master.addObserver(new Observer() {
+						@Override
 						public void update(Observable o, Object arg) {
 							boolean enabled= master.getChecked() && slave.getChecked();
 							subSlave.setEnabled(enabled);
@@ -153,6 +154,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		}
 		
 		master.addObserver(new Observer() {
+			@Override
 			public void update(Observable o, Object arg) {
 				boolean masterChecked= master.getChecked();
 				for (int i= 0; i < slaves.length; i++) {
@@ -173,6 +175,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		for (int i= 0; i < slaves.length; i++) {
 			final CheckboxPreference slave= slaves[i];
 			slave.addObserver(new Observer() {
+				@Override
 				public void update(Observable o, Object arg) {
 					setSelectedCleanUpCount(fSelectedCount + (slave.getChecked() ? 1 : -1));
 				}
@@ -190,7 +193,8 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 
 	private void internalRegisterSlavePreference(final CheckboxPreference master, final ButtonPreference[] slaves) {
     	master.addObserver( new Observer() {
-    		public void update(Observable o, Object arg) {
+    		@Override
+			public void update(Observable o, Object arg) {
     			for (int i= 0; i < slaves.length; i++) {
 					slaves[i].setEnabled(master.getChecked());
 				}

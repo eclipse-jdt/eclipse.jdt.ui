@@ -61,7 +61,7 @@ public class FilteredElementTreeSelectionDialog extends ElementTreeSelectionDial
 			super.setPattern(patternString);
 			fMatchers= null;
 			if (patternString != null && patternString.length() > 0) {
-				ArrayList<StringMatcher> res= new ArrayList<StringMatcher>();
+				ArrayList<StringMatcher> res= new ArrayList<>();
 				StringTokenizer tok= new StringTokenizer(patternString, ",;"); //$NON-NLS-1$
 				int tokenCount= tok.countTokens();
 				for (int i= 0; i < tokenCount; i++) {

@@ -95,7 +95,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 
 	@Override
 	public ClasspathFixProposal[] getFixImportProposals(IJavaProject project, String missingType) throws CoreException {
-		ArrayList<DefaultClasspathFixProposal> res= new ArrayList<DefaultClasspathFixProposal>();
+		ArrayList<DefaultClasspathFixProposal> res= new ArrayList<>();
 		collectProposals(project, missingType, res);
 		return res.toArray(new ClasspathFixProposal[res.size()]);
 	}
@@ -110,7 +110,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 		}
 
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
-		ArrayList<TypeNameMatch> res= new ArrayList<TypeNameMatch>();
+		ArrayList<TypeNameMatch> res= new ArrayList<>();
 		TypeNameMatchCollector requestor= new TypeNameMatchCollector(res);
 		int matchMode= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
 		new SearchEngine().searchAllTypeNames(packageName, matchMode, typeName,
@@ -120,7 +120,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 		if (res.isEmpty()) {
 			return;
 		}
-		HashSet<Object> addedClaspaths= new HashSet<Object>();
+		HashSet<Object> addedClaspaths= new HashSet<>();
 		for (int i= 0; i < res.size(); i++) {
 			TypeNameMatch curr= res.get(i);
 			IType type= curr.getType();

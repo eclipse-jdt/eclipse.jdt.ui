@@ -67,6 +67,7 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 			return fParent;
 		}
 
+		@Override
 		@SuppressWarnings("unchecked")
 		public <T> T getAdapter(Class<T> adapter) {
 			if (adapter == IWorkbenchAdapter.class)
@@ -74,18 +75,22 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 			return null;
 		}
 
+		@Override
 		public Object[] getChildren(Object o) {
 			return new Object[0];
 		}
 
+		@Override
 		public ImageDescriptor getImageDescriptor(Object object) {
 			return PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
 		}
 
+		@Override
 		public String getLabel(Object o) {
 			return fProject.getElementName();
 		}
 
+		@Override
 		public Object getParent(Object o) {
 			return fParent;
 		}
@@ -126,7 +131,7 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 
 	@Override
 	public IAdaptable[] getChildren() {
-		List<IAdaptable> list= new ArrayList<IAdaptable>();
+		List<IAdaptable> list= new ArrayList<>();
 		IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
 			list.add(roots[i]);

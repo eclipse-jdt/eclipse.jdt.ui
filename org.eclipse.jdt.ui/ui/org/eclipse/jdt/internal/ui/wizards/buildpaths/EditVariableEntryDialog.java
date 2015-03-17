@@ -65,7 +65,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 		super(parent);
 		setTitle(NewWizardMessages.EditVariableEntryDialog_title);
 
-		fExistingEntries= new HashSet<IPath>();
+		fExistingEntries= new HashSet<>();
 		if (existingEntries != null) {
 			for (int i = 0; i < existingEntries.length; i++) {
 				IPath curr= existingEntries[i];
@@ -100,9 +100,6 @@ public class EditVariableEntryDialog extends StatusDialog {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		initializeDialogUnits(parent);
@@ -140,11 +137,13 @@ public class EditVariableEntryDialog extends StatusDialog {
 	private class SourceAttachmentAdapter implements IStringButtonAdapter, IDialogFieldListener {
 
 		// -------- IStringButtonAdapter --------
+		@Override
 		public void changeControlPressed(DialogField field) {
 			attachmentChangeControlPressed(field);
 		}
 
 		// ---------- IDialogFieldListener --------
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			attachmentDialogFieldChanged(field);
 		}

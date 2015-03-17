@@ -45,8 +45,8 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 
 	public CheckedListDialogField(IListAdapter<E> adapter, String[] customButtonLabels, ILabelProvider lprovider) {
 		super(adapter, customButtonLabels, lprovider);
-		fCheckedElements= new ArrayList<E>();
-		fGrayedElements= new ArrayList<E>();
+		fCheckedElements= new ArrayList<>();
+		fGrayedElements= new ArrayList<>();
 
 		fCheckAllButtonIndex= -1;
 		fUncheckAllButtonIndex= -1;
@@ -86,6 +86,7 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 		table.setFont(parent.getFont());
 		CheckboxTableViewer tableViewer= new CheckboxTableViewer(table);
 		tableViewer.addCheckStateListener(new ICheckStateListener() {
+			@Override
 			public void checkStateChanged(CheckStateChangedEvent e) {
 				doCheckStateChanged(e);
 			}
@@ -136,7 +137,7 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 		if (isOkToUse(fTableControl)) {
 			// workaround for bug 53853
 			Object[] checked= ((CheckboxTableViewer) fTable).getCheckedElements();
-			ArrayList<E> res= new ArrayList<E>(checked.length);
+			ArrayList<E> res= new ArrayList<>(checked.length);
 			for (int i= 0; i < checked.length; i++) {
 				res.add((E) checked[i]);
 			}
@@ -144,7 +145,7 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 		}
 
 
-		return new ArrayList<E>(fCheckedElements);
+		return new ArrayList<>(fCheckedElements);
 	}
 
 	/**
@@ -184,7 +185,7 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 	 * @param list the list of checked elements
 	 */
 	public void setCheckedElements(Collection<E> list) {
-		fCheckedElements= new ArrayList<E>(list);
+		fCheckedElements= new ArrayList<>(list);
 		if (isOkToUse(fTableControl)) {
 			((CheckboxTableViewer)fTable).setCheckedElements(list.toArray());
 		}
@@ -263,9 +264,6 @@ public class CheckedListDialogField<E> extends ListDialogField<E> {
 		checkStateChanged();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField#replaceElement(java.lang.Object, java.lang.Object)
-	 */
 	@Override
 	public void replaceElement(E oldElement, E newElement) throws IllegalArgumentException {
 		boolean wasChecked= isChecked(oldElement);

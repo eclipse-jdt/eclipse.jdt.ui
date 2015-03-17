@@ -74,9 +74,7 @@ public class RenameTypeArguments extends RenameArguments {
 		return similarDeclarations;
 	}
 
-	/* (non-Javadoc)
-	 * @see RefactoringArguments#toString()
-	 */
+	@Override
 	public String toString() {
 		return super.toString()
 				+ (updateSimilarDeclarations ? " (update derived elements)" : " (don't update derived elements)"); //$NON-NLS-1$//$NON-NLS-2$

@@ -135,9 +135,6 @@ public class ReplaceInvocationsAction extends SelectionDispatchAction {
 		ExceptionHandler.handle(e, RefactoringMessages.ReplaceInvocationsAction_dialog_title, RefactoringMessages.ReplaceInvocationsAction_unavailable);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		ITypeRoot typeRoot= SelectionConverter.getInput(fEditor);

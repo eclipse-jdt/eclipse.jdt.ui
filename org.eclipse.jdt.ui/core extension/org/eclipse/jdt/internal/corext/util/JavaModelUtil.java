@@ -689,7 +689,7 @@ public final class JavaModelUtil {
 	 *             accessing its corresponding resource
 	 */
 	public static ICompilationUnit[] getAllCompilationUnits(IJavaElement[] javaElements) throws JavaModelException {
-		HashSet<ICompilationUnit> result= new HashSet<ICompilationUnit>();
+		HashSet<ICompilationUnit> result= new HashSet<>();
 		for (int i= 0; i < javaElements.length; i++) {
 			addAllCus(result, javaElements[i]);
 		}

@@ -42,10 +42,12 @@ public class Java17ProjectTestSetup extends ProjectTestSetup {
 		super(test);
 	}
 
+	@Override
 	protected boolean projectExists() {
 		return getProject().exists();
 	}
 
+	@Override
 	protected IJavaProject createAndInitializeProject() throws CoreException {
 		IJavaProject javaProject= JavaProjectHelper.createJavaProject(PROJECT_NAME17, "bin");
 		javaProject.setRawClasspath(getDefaultClasspath(), null);

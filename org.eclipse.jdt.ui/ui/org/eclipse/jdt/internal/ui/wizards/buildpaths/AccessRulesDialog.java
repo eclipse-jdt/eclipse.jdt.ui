@@ -118,7 +118,7 @@ public class AccessRulesDialog extends StatusDialog {
 		TypeRestrictionAdapter adapter= new TypeRestrictionAdapter();
 		AccessRulesLabelProvider labelProvider= new AccessRulesLabelProvider();
 
-		ListDialogField<IAccessRule> patternList= new ListDialogField<IAccessRule>(adapter, buttonLabels, labelProvider);
+		ListDialogField<IAccessRule> patternList= new ListDialogField<>(adapter, buttonLabels, labelProvider);
 		patternList.setDialogFieldListener(adapter);
 
 		patternList.setLabelText(label);
@@ -128,7 +128,7 @@ public class AccessRulesDialog extends StatusDialog {
 		patternList.enableButton(IDX_EDIT, false);
 
 		IAccessRule[] rules= (IAccessRule[]) entryToEdit.getAttribute(CPListElement.ACCESSRULES);
-		ArrayList<IAccessRule> elements= new ArrayList<IAccessRule>(rules.length);
+		ArrayList<IAccessRule> elements= new ArrayList<>(rules.length);
 		for (int i= 0; i < rules.length; i++) {
 			elements.add(rules[i]);
 		}
@@ -319,6 +319,7 @@ public class AccessRulesDialog extends StatusDialog {
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#customButtonPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField, int)
 		 */
+		@Override
 		public void customButtonPressed(ListDialogField<IAccessRule> field, int index) {
 			doCustomButtonPressed(field, index);
 		}
@@ -326,12 +327,14 @@ public class AccessRulesDialog extends StatusDialog {
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#selectionChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
+		@Override
 		public void selectionChanged(ListDialogField<IAccessRule> field) {
 			doSelectionChanged(field);
 		}
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#doubleClicked(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
+		@Override
 		public void doubleClicked(ListDialogField<IAccessRule> field) {
 			doDoubleClicked(field);
 		}
@@ -339,6 +342,7 @@ public class AccessRulesDialog extends StatusDialog {
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
 		 */
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 		}
 
@@ -374,7 +378,7 @@ public class AccessRulesDialog extends StatusDialog {
 	}
 
 	public void performPageSwitch(IWorkbenchPreferenceContainer pageContainer) {
-		HashMap<String, String> data= new HashMap<String, String>();
+		HashMap<String, String> data= new HashMap<>();
 		data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_KEY, JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE);
 		data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
 		pageContainer.openPage(ProblemSeveritiesPreferencePage.PROP_ID, data);

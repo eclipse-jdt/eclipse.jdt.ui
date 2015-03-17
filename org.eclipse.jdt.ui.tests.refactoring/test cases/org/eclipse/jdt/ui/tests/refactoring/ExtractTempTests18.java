@@ -16,7 +16,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class ExtractTempTests18 extends ExtractTempTests {
 
-	private static final Class clazz= ExtractTempTests18.class;
+	private static final Class<ExtractTempTests18> clazz= ExtractTempTests18.class;
 
 	public ExtractTempTests18(String name) {
 		super(name);
@@ -39,10 +39,12 @@ public class ExtractTempTests18 extends ExtractTempTests {
 
 	//--- TESTS
 
+	@Override
 	public void test110() throws Exception {
 		helper1(6, 77, 6, 82, true, false, "x", "x");
 	}
 
+	@Override
 	public void test111() throws Exception {
 		helper1(6, 73, 6, 83, true, false, "foo", "foo");
 	}
@@ -51,14 +53,17 @@ public class ExtractTempTests18 extends ExtractTempTests {
 		helper1(6, 51, 6, 57, true, false, "x2", "i");
 	}
 
+	@Override
 	public void test113() throws Exception {
 		helper1(7, 28, 7, 34, true, false, "x2", "i");
 	}
 
+	@Override
 	public void test114() throws Exception {
 		helper1(6, 32, 6, 44, true, false, "string", "string");
 	}
 
+	@Override
 	public void test115() throws Exception {
 		helper1(6, 32, 6, 32, true, false, "x2", "x2");
 	}
@@ -80,10 +85,12 @@ public class ExtractTempTests18 extends ExtractTempTests {
 	}
 
 	// -- testing failing preconditions
+	@Override
 	public void testFail1() throws Exception {
 		failHelper1(6, 32, 6, 58, false, false, "temp", RefactoringStatus.FATAL);
 	}
 
+	@Override
 	public void testFail2() throws Exception {
 		failHelper1(6, 27, 6, 58, false, false, "temp", RefactoringStatus.FATAL);
 	}

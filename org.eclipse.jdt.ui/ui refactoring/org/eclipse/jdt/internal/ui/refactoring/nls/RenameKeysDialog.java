@@ -53,9 +53,6 @@ public class RenameKeysDialog extends StatusDialog {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
@@ -65,9 +62,6 @@ public class RenameKeysDialog extends StatusDialog {
 		return composite;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
-	 */
 	@Override
 	protected void okPressed() {
 		String prefix= fNameField.getText();

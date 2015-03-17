@@ -86,7 +86,7 @@ public final class JDTRefactoringDescriptorComment {
 	private final String fProject;
 
 	/** The settings list */
-	private final List<String> fSettings= new ArrayList<String>(6);
+	private final List<String> fSettings= new ArrayList<>(6);
 
 	/**
 	 * Creates a new JDT refactoring descriptor comment.
@@ -216,7 +216,7 @@ public final class JDTRefactoringDescriptorComment {
 				if (destination != null)
 					fSettings.add(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptorComment_destination_pattern, JavaElementLabels.getTextLabel(destination, JavaElementLabels.ALL_FULLY_QUALIFIED)));
 			}
-			final List<IAdaptable> list= new ArrayList<IAdaptable>();
+			final List<IAdaptable> list= new ArrayList<>();
 			list.addAll(Arrays.asList(policy.getJavaElements()));
 			list.addAll(Arrays.asList(policy.getResources()));
 			final Object[] elements= list.toArray();

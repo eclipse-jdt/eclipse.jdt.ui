@@ -339,6 +339,7 @@ public class JavadocConfigurationBlock {
 		private String fTitle=  PreferencesMessages.JavadocConfigurationBlock_MessageDialog_title;
 		private String fUnable= PreferencesMessages.JavadocConfigurationBlock_UnableToValidateLocation_message;
 
+		@Override
 		public void run() {
 
 			URL location= getJavadocLocation();
@@ -442,6 +443,7 @@ public class JavadocConfigurationBlock {
 	private class JDocConfigurationAdapter implements IDialogFieldListener {
 
 		// ---------- IDialogFieldListener --------
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			jdocDialogFieldChanged(field);
 		}
@@ -507,6 +509,7 @@ public class JavadocConfigurationBlock {
 	private String chooseArchivePath() {
 		final String[] res= new String[] { null };
 		BusyIndicator.showWhile(fShell.getDisplay(), new Runnable() {
+			@Override
 			public void run() {
 				res[0]= internalChooseArchivePath();
 			}
@@ -815,6 +818,7 @@ public class JavadocConfigurationBlock {
 		/* non java-doc
 		 * @see ITreeContentProvider#inputChanged
 		 */
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			// nothing to do
 		}
@@ -822,6 +826,7 @@ public class JavadocConfigurationBlock {
 		/* non java-doc
 		  * @see ITreeContentProvider#getParent
 		  */
+		@Override
 		public Object getParent(Object element) {
 			if (element.equals(fProvider.getRoot())) {
 				return null;
@@ -836,6 +841,7 @@ public class JavadocConfigurationBlock {
 		/* non java-doc
 		 * @see ITreeContentProvider#hasChildren
 		 */
+		@Override
 		public boolean hasChildren(Object element) {
 			List<?> list= fProvider.getChildren(element);
 			if (list != null) {
@@ -851,9 +857,10 @@ public class JavadocConfigurationBlock {
 		/* non java-doc
 		 * @see ITreeContentProvider#getChildren
 		 */
+		@Override
 		public Object[] getChildren(Object element) {
 			List<?> list= fProvider.getChildren(element);
-			ArrayList<Object> res= new ArrayList<Object>();
+			ArrayList<Object> res= new ArrayList<>();
 			if (list != null) {
 				for (int i= 0; i < list.size(); i++) {
 					Object curr= list.get(i);
@@ -868,6 +875,7 @@ public class JavadocConfigurationBlock {
 		/* non java-doc
 		 * @see ITreeContentProvider#getElements
 		 */
+		@Override
 		public Object[] getElements(Object element) {
 			return new Object[] {fProvider.getRoot() };
 		}
@@ -875,6 +883,7 @@ public class JavadocConfigurationBlock {
 		/* non java-doc
 		 * @see IContentProvider#dispose
 		 */
+		@Override
 		public void dispose() {
 			// nothing to do
 		}
@@ -919,6 +928,7 @@ public class JavadocConfigurationBlock {
 		/*
 		 * @see ISelectionValidator#validate(Object[])
 		 */
+		@Override
 		public IStatus validate(Object[] selection) {
 			String message= ""; //$NON-NLS-1$
 			return new StatusInfo(IStatus.INFO, message);

@@ -173,6 +173,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#getUpdateReferences()
 	 */
+	@Override
 	public boolean getUpdateReferences() {
 		return fUpdateReferences;
 	}
@@ -180,6 +181,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating#setUpdateReferences(boolean)
 	 */
+	@Override
 	public void setUpdateReferences(boolean updateReferences) {
 		fUpdateReferences= updateReferences;
 	}
@@ -187,6 +189,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#getCurrentElementName()
 	 */
+	@Override
 	public String getCurrentElementName() {
 		return fCurrentName;
 	}
@@ -211,6 +214,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#getNewElement()
 	 */
+	@Override
 	public Object getNewElement() {
 		return null; //cannot create an ILocalVariable
 	}
@@ -295,6 +299,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#checkNewElementName(java.lang.String)
 	 */
+	@Override
 	public RefactoringStatus checkNewElementName(String newName) throws JavaModelException {
 		RefactoringStatus result= Checks.checkFieldName(newName, fCu);
 		if (! Checks.startsWithLowerCase(newName))

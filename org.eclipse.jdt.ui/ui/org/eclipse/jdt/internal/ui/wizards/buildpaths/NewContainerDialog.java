@@ -103,6 +103,7 @@ public class NewContainerDialog extends StatusDialog {
 
 		// -------- IDialogFieldListener
 
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			doStatusLineUpdate();
 		}

@@ -73,6 +73,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 			fEditor= editor;
 			fExitStrategy= new CompoundEditExitStrategy(new String[] {ITextEditorActionDefinitionIds.MOVE_LINES_UP, ITextEditorActionDefinitionIds.MOVE_LINES_DOWN, ITextEditorActionDefinitionIds.COPY_LINES_UP, ITextEditorActionDefinitionIds.COPY_LINES_DOWN});
 			fExitStrategy.addCompoundListener(new ICompoundEditListener() {
+				@Override
 				public void endCompoundEdit() {
 					SharedState.this.endCompoundEdit();
 				}

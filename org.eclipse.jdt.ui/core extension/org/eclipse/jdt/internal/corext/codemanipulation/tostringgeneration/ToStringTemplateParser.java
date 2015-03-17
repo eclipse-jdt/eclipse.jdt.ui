@@ -188,7 +188,7 @@ public class ToStringTemplateParser {
 	}
 
 	protected ArrayList<String> extractElements(String template, String[] wantedVariables) {
-		ArrayList<String> result= new ArrayList<String>();
+		ArrayList<String> result= new ArrayList<>();
 		while (true) {
 			if (template.length() == 0)
 				break;
@@ -232,7 +232,7 @@ public class ToStringTemplateParser {
 
 	public Map<String, String> getVariableDescriptions() {
 		if (descriptions == null) {
-			descriptions= new HashMap<String, String>();
+			descriptions= new HashMap<>();
 			for (int i= 0; i < ToStringTemplateParser.VARIABLES.length; i++)
 				descriptions.put(ToStringTemplateParser.VARIABLES[i], ToStringTemplateParser.VARIABLE_DESCRIPTIONS[i]);
 		}

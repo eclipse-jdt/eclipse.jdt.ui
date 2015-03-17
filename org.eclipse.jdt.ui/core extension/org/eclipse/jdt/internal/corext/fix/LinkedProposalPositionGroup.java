@@ -212,9 +212,6 @@ public class LinkedProposalPositionGroup {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.fix.PositionGroup.Proposal#computeEdits(int, org.eclipse.jface.text.link.LinkedPosition, char, int, org.eclipse.jface.text.link.LinkedModeModel)
-		 */
 		@Override
 		public TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model) throws CoreException {
 			ImportRewrite impRewrite= StubUtility.createImportRewrite(fCompilationUnit, true);
@@ -235,8 +232,8 @@ public class LinkedProposalPositionGroup {
 
 	public LinkedProposalPositionGroup(String groupID) {
 		fGroupId= groupID;
-		fPositions= new ArrayList<PositionInformation>();
-		fProposals= new ArrayList<Proposal>();
+		fPositions= new ArrayList<>();
+		fProposals= new ArrayList<>();
 	}
 
 	public void addPosition(PositionInformation position) {

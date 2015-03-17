@@ -27,13 +27,15 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 
 public class MockReorgQueries implements IReorgQueries, INewNameQueries {
-	private final List fQueriesRun= new ArrayList();
+	private final List<Integer> fQueriesRun= new ArrayList<>();
 
+	@Override
 	public IConfirmQuery createYesNoQuery(String queryTitle, boolean allowCancel, int queryID) {
 		run(queryID);
 		return yesQuery;
 	}
 
+	@Override
 	public IConfirmQuery createYesYesToAllNoNoToAllQuery(String queryTitle, boolean allowCancel, int queryID) {
 		run(queryID);
 		return yesQuery;
@@ -44,20 +46,23 @@ public class MockReorgQueries implements IReorgQueries, INewNameQueries {
 	}
 
 	//List<Integer>
-	public List getRunQueryIDs() {
+	public List<Integer> getRunQueryIDs() {
 		return fQueriesRun;
 	}
 
 	private final IConfirmQuery yesQuery= new IConfirmQuery() {
+		@Override
 		public boolean confirm(String question) throws OperationCanceledException {
 			return true;
 		}
 
+		@Override
 		public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
 			return true;
 		}
 	};
 
+	@Override
 	public IConfirmQuery createSkipQuery(String queryTitle, int queryID) {
 		run(queryID);
 		return yesQuery;
@@ -68,32 +73,39 @@ public class MockReorgQueries implements IReorgQueries, INewNameQueries {
 		public NewNameQuery(String name) {
 			fName= name;
 		}
+		@Override
 		public String getNewName() throws OperationCanceledException {
 			return fName;
 		}
 	}
 
 
+	@Override
 	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String initialSuggestedName) throws OperationCanceledException {
 		return new NewNameQuery(initialSuggestedName + '1');
 	}
 
+	@Override
 	public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName) throws OperationCanceledException {
 		return new NewNameQuery(initialSuggestedName + '1');
 	}
 
+	@Override
 	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String initialSuggestedName) throws OperationCanceledException {
 		return new NewNameQuery(initialSuggestedName + '1');
 	}
 
+	@Override
 	public INewNameQuery createNewResourceNameQuery(IResource res, String initialSuggestedName) throws OperationCanceledException {
 		return new NewNameQuery(initialSuggestedName + '1');
 	}
 
+	@Override
 	public INewNameQuery createNullQuery() {
 		return new NewNameQuery(null);
 	}
 
+	@Override
 	public INewNameQuery createStaticQuery(String newName) throws OperationCanceledException {
 		return new NewNameQuery(newName);
 	}

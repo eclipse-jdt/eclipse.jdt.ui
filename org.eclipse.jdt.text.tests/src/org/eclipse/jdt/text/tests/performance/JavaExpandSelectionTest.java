@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectio
  */
 public class JavaExpandSelectionTest extends TextPerformanceTestCase {
 
-	private static final Class THIS= JavaExpandSelectionTest.class;
+	private static final Class<JavaExpandSelectionTest> THIS= JavaExpandSelectionTest.class;
 
 	private static final String FILE= PerformanceTestSetup.STYLED_TEXT;
 
@@ -50,6 +50,7 @@ public class JavaExpandSelectionTest extends TextPerformanceTestCase {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
@@ -58,6 +59,7 @@ public class JavaExpandSelectionTest extends TextPerformanceTestCase {
 		setMeasuredRuns(MEASURED_RUNS);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();

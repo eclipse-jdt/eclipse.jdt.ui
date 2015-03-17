@@ -64,6 +64,7 @@ public class JavaElementHyperlink implements IHyperlink {
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkRegion()
 	 * @since 3.1
 	 */
+	@Override
 	public IRegion getHyperlinkRegion() {
 		return fRegion;
 	}
@@ -72,6 +73,7 @@ public class JavaElementHyperlink implements IHyperlink {
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#open()
 	 * @since 3.1
 	 */
+	@Override
 	public void open() {
 		if (fElement != null)
 			fOpenAction.run(new StructuredSelection(fElement));
@@ -83,6 +85,7 @@ public class JavaElementHyperlink implements IHyperlink {
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getTypeLabel()
 	 * @since 3.1
 	 */
+	@Override
 	public String getTypeLabel() {
 		return null;
 	}
@@ -91,6 +94,7 @@ public class JavaElementHyperlink implements IHyperlink {
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkText()
 	 * @since 3.1
 	 */
+	@Override
 	public String getHyperlinkText() {
 		if (fQualify && fElement != null) {
 			String elementLabel= JavaElementLabels.getElementLabel(fElement, JavaElementLabels.ALL_POST_QUALIFIED);

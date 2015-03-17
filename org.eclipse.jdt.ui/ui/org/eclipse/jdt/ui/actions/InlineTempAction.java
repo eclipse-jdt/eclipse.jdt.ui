@@ -70,9 +70,6 @@ public class InlineTempAction extends SelectionDispatchAction {
 
 	//---- text selection ----------------------------------------------------------
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
@@ -93,9 +90,6 @@ public class InlineTempAction extends SelectionDispatchAction {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(fEditor);

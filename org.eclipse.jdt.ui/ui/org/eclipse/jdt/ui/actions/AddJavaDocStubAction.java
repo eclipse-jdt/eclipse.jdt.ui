@@ -98,18 +98,12 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 
 	//---- Structured Viewer -----------------------------------------------------------
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		IMember[] members= getSelectedMembers(selection);
 		setEnabled(members != null && members.length > 0);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		IMember[] members= getSelectedMembers(selection);
@@ -138,9 +132,6 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 
 	//---- Java Editor --------------------------------------------------------------
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
@@ -149,9 +140,6 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 		return fEditor != null && SelectionConverter.canOperateOn(fEditor);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		try {

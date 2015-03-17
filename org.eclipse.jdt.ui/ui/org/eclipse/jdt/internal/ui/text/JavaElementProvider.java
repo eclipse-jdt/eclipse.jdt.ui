@@ -51,6 +51,7 @@ public class JavaElementProvider implements IInformationProvider, IInformationPr
 	/*
 	 * @see IInformationProvider#getSubject(ITextViewer, int)
 	 */
+	@Override
 	public IRegion getSubject(ITextViewer textViewer, int offset) {
 		if (textViewer != null && fEditor != null) {
 			IRegion region= JavaWordFinder.findWord(textViewer.getDocument(), offset);
@@ -65,6 +66,7 @@ public class JavaElementProvider implements IInformationProvider, IInformationPr
 	/*
 	 * @see IInformationProvider#getInformation(ITextViewer, IRegion)
 	 */
+	@Override
 	public String getInformation(ITextViewer textViewer, IRegion subject) {
 		return getInformation2(textViewer, subject).toString();
 	}
@@ -72,6 +74,7 @@ public class JavaElementProvider implements IInformationProvider, IInformationPr
 	/*
 	 * @see IInformationProviderExtension#getElement(ITextViewer, IRegion)
 	 */
+	@Override
 	public Object getInformation2(ITextViewer textViewer, IRegion subject) {
 		if (fEditor == null)
 			return null;

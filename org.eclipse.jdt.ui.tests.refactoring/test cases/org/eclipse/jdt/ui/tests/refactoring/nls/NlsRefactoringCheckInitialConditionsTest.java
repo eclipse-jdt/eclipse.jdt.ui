@@ -28,7 +28,7 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class NlsRefactoringCheckInitialConditionsTest extends TestCase {
 
-	private static final Class THIS= NlsRefactoringCheckInitialConditionsTest.class;
+	private static final Class<NlsRefactoringCheckInitialConditionsTest> THIS= NlsRefactoringCheckInitialConditionsTest.class;
 
 	private NlsRefactoringTestHelper fHelper;
 	private IJavaProject javaProject;
@@ -45,11 +45,13 @@ public class NlsRefactoringCheckInitialConditionsTest extends TestCase {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		javaProject= ProjectTestSetup.getProject();
 		fHelper= new NlsRefactoringTestHelper(javaProject);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
 	}

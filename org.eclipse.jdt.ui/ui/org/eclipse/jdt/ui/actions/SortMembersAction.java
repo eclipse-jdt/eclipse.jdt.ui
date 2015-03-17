@@ -111,9 +111,6 @@ public class SortMembersAction extends SelectionDispatchAction {
 
 	//---- Structured Viewer -----------------------------------------------------------
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		boolean enabled= false;
@@ -121,9 +118,6 @@ public class SortMembersAction extends SelectionDispatchAction {
 		setEnabled(enabled);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		Shell shell= getShell();
@@ -174,16 +168,10 @@ public class SortMembersAction extends SelectionDispatchAction {
 
 	//---- Java Editor --------------------------------------------------------------
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		Shell shell= getShell();

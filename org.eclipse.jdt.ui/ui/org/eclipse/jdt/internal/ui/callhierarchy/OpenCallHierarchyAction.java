@@ -75,25 +75,16 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 		// Do nothing
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(CallHierarchy.arePossibleInputElements(selection.toList()));
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		ITypeRoot input= SelectionConverter.getInput(fEditor);
@@ -104,7 +95,7 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 			IJavaElement[] elements= SelectionConverter.codeResolveOrInputForked(fEditor);
 			if (elements == null)
 				return;
-			List<IJavaElement> candidates= new ArrayList<IJavaElement>(elements.length);
+			List<IJavaElement> candidates= new ArrayList<>(elements.length);
 			for (int i= 0; i < elements.length; i++) {
 				IJavaElement element= elements[i];
 				if (CallHierarchy.isPossibleInputElement(element)) {
@@ -142,9 +133,6 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		List<?> elements= selection.toList();

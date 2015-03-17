@@ -38,18 +38,12 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		super(options);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public CleanUpRequirements getRequirements() {
 		boolean requiresChangedRegions= isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE) && isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY);
 		return new CleanUpRequirements(false, false, requiresChangedRegions, null);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		ICompilationUnit compilationUnit= context.getCompilationUnit();
@@ -72,12 +66,9 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.FORMAT_CORRECT_INDENTATION));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String[] getStepDescriptions() {
-		ArrayList<String> result= new ArrayList<String>();
+		ArrayList<String> result= new ArrayList<>();
 		if (isEnabled(CleanUpConstants.FORMAT_SOURCE_CODE))
 			result.add(MultiFixMessages.CodeFormatCleanUp_description);
 
@@ -95,9 +86,6 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 		return result.toArray(new String[result.size()]);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();

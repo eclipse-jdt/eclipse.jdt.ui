@@ -72,15 +72,15 @@ public class ImportRemover {
 	private final String REMOVED= "removed"; //$NON-NLS-1$
 	private final String RETAINED= "retained"; //$NON-NLS-1$
 	
-	private Set<String> fAddedImports= new HashSet<String>();
+	private Set<String> fAddedImports= new HashSet<>();
 
-	private Set<StaticImportData> fAddedStaticImports= new HashSet<StaticImportData>();
+	private Set<StaticImportData> fAddedStaticImports= new HashSet<>();
 
 	private final IJavaProject fProject;
 
 	private boolean fHasRemovedNodes;
 
-	private List<ImportDeclaration> fInlinedStaticImports= new ArrayList<ImportDeclaration>();
+	private List<ImportDeclaration> fInlinedStaticImports= new ArrayList<>();
 
 	private final CompilationUnit fRoot;
 
@@ -90,7 +90,7 @@ public class ImportRemover {
 	}
 
 	private void divideTypeRefs(List<SimpleName> importNames, List<SimpleName> staticNames, List<SimpleName> removedRefs, List<SimpleName> unremovedRefs) {
-		final List<int[]> removedStartsEnds= new ArrayList<int[]>();
+		final List<int[]> removedStartsEnds= new ArrayList<>();
 		fRoot.accept(new ASTVisitor(true) {
 			int fRemovingStart= -1;
 			@Override
@@ -174,13 +174,13 @@ public class ImportRemover {
 	}
 
 	public IBinding[] getImportsToRemove() {
-		ArrayList<SimpleName> importNames= new ArrayList<SimpleName>();
-		ArrayList<SimpleName> staticNames= new ArrayList<SimpleName>();
+		ArrayList<SimpleName> importNames= new ArrayList<>();
+		ArrayList<SimpleName> staticNames= new ArrayList<>();
 
 		ImportReferencesCollector.collect(fRoot, fProject, null, importNames, staticNames);
 
-		List<SimpleName> removedRefs= new ArrayList<SimpleName>();
-		List<SimpleName> unremovedRefs= new ArrayList<SimpleName>();
+		List<SimpleName> removedRefs= new ArrayList<>();
+		List<SimpleName> unremovedRefs= new ArrayList<>();
 		divideTypeRefs(importNames, staticNames, removedRefs, unremovedRefs);
 		if (removedRefs.size() == 0)
 			return new IBinding[0];
@@ -196,7 +196,7 @@ public class ImportRemover {
 	}
 
 	private HashMap<String, IBinding> getPotentialRemoves(List<SimpleName> removedRefs) {
-		HashMap<String, IBinding>potentialRemoves= new HashMap<String, IBinding>();
+		HashMap<String, IBinding>potentialRemoves= new HashMap<>();
 		for (Iterator<SimpleName> iterator= removedRefs.iterator(); iterator.hasNext();) {
 			SimpleName name= iterator.next();
 			if (fAddedImports.contains(name.getIdentifier()) || hasAddedStaticImport(name))

@@ -26,6 +26,7 @@ public class ExtractMethodTestSetup17 extends Java17Setup {
 		super(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 

@@ -48,6 +48,7 @@ public class BinaryReferencesTestSetup extends AbstractRefactoringTestSetup {
 		return fBinaryReference;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		Bundle bundle= RefactoringTestPlugin.getDefault().getBundle();
@@ -76,6 +77,7 @@ public class BinaryReferencesTestSetup extends AbstractRefactoringTestSetup {
 		JavaProjectHelper.addToClasspath(fBinaryReference, cpeBinary);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fSource);
 		JavaProjectHelper.delete(fBinaryReference);

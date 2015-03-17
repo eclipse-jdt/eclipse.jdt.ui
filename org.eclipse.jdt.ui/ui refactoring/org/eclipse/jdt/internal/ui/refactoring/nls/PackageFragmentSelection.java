@@ -52,6 +52,7 @@ class PackageFragmentSelection extends StringButtonStatusDialogField implements 
 
 		final Text text= getTextControl(null);
 		text.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				updateListener();
 			}
@@ -90,6 +91,7 @@ class PackageFragmentSelection extends StringButtonStatusDialogField implements 
 		}
 	}
 
+	@Override
 	public void sourceRootChanged(IPackageFragmentRoot newRoot) {
 		fCurrPackageCompletionProcessor.setPackageFragmentRoot(newRoot);
 

@@ -23,6 +23,7 @@ public class TemplateContentProvider implements IStructuredContentProvider {
 	/*
 	 * @see IStructuredContentProvider#getElements(Object)
 	 */
+	@Override
 	public Object[] getElements(Object input) {
 		return fTemplateSet.getTemplates();
 	}
@@ -30,6 +31,7 @@ public class TemplateContentProvider implements IStructuredContentProvider {
 	/*
 	 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 	 */
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		fTemplateSet= (TemplateSet) newInput;
 	}
@@ -37,6 +39,7 @@ public class TemplateContentProvider implements IStructuredContentProvider {
 	/*
 	 * @see IContentProvider#dispose()
 	 */
+	@Override
 	public void dispose() {
 		fTemplateSet= null;
 	}

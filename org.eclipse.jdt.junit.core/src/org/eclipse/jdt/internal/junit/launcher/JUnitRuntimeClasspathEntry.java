@@ -35,10 +35,12 @@ public class JUnitRuntimeClasspathEntry {
 		return new JUnitRuntimeClasspathEntry(getPluginId(), "bin"); //$NON-NLS-1$
 	}
 
+	@Override
 	public String toString() {
 		return "ClasspathEntry(" + fPluginId + "/" + fPluginRelativePath + ")"; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 	}
 
+	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof JUnitRuntimeClasspathEntry))
 			return false;
@@ -48,6 +50,7 @@ public class JUnitRuntimeClasspathEntry {
 						|| fPluginRelativePath.equals(other.getPluginRelativePath()) );
 	}
 
+	@Override
 	public int hashCode() {
 		// TODO Auto-generated method stub
 		return super.hashCode();

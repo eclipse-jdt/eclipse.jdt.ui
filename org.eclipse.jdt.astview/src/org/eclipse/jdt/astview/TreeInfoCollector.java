@@ -23,6 +23,7 @@ public class TreeInfoCollector {
 
 		public int numberOfNodes= 0;
 		
+		@Override
 		public void preVisit(ASTNode node) {
 			numberOfNodes++;
 		}

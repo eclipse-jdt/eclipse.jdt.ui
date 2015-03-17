@@ -23,16 +23,12 @@ public class SettingsProperty extends ASTAttribute {
 		fRoot= root;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getParent()
-	 */
+	@Override
 	public Object getParent() {
 		return fRoot;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getChildren()
-	 */
+	@Override
 	public Object[] getChildren() {
 		AST ast= fRoot.getAST();
 		Object[] res= {
@@ -44,16 +40,12 @@ public class SettingsProperty extends ASTAttribute {
 		return res;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getLabel()
-	 */
+	@Override
 	public String getLabel() {
 		return "> AST settings";  //$NON-NLS-1$
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getImage()
-	 */
+	@Override
 	public Image getImage() {
 		return null;
 	}
@@ -61,6 +53,7 @@ public class SettingsProperty extends ASTAttribute {
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -73,6 +66,7 @@ public class SettingsProperty extends ASTAttribute {
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return 19;
 	}

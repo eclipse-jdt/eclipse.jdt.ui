@@ -58,6 +58,7 @@ public class OffOnTagsTabPage extends FormatterTabPage {
 			 * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage.StringPreference.Validator#isValid(java.lang.String)
 			 * @since 3.6
 			 */
+			@Override
 			public String isValid(String input) {
 				if (input.length() == 0)
 					return null;
@@ -86,6 +87,7 @@ public class OffOnTagsTabPage extends FormatterTabPage {
 				inputValidator);
 
 		enablePref.getControl().addListener(SWT.Selection, new Listener() {
+			@Override
 			public void handleEvent(Event event) {
 				boolean enabled= enablePref.getChecked();
 				enableTagPref.setEnabled(enabled);

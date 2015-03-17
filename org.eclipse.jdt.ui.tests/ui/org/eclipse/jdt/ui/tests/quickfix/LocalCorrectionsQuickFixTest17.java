@@ -13,9 +13,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -34,13 +31,17 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.Java17ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 
-	private static final Class THIS= LocalCorrectionsQuickFixTest17.class;
+	private static final Class<LocalCorrectionsQuickFixTest17> THIS= LocalCorrectionsQuickFixTest17.class;
 
 	private IJavaProject fJProject1;
 
@@ -60,8 +61,9 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
@@ -85,6 +87,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java17ProjectTestSetup.getDefaultClasspath());
 	}
@@ -113,7 +116,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
@@ -210,7 +213,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 3, 0); //quick fix on 1st problem
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, 0); //quick fix on 1st problem
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -325,7 +328,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 3, 1); //quick fix on 2nd problem
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, 1); //quick fix on 2nd problem
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -440,7 +443,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 3, 2); //quick fix on 3rd problem
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, 2); //quick fix on 3rd problem
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
@@ -602,7 +605,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -697,7 +700,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2, 0); //quick fix on 1st problem
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, 0); //quick fix on 1st problem
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -777,7 +780,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -837,7 +840,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -902,7 +905,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -967,7 +970,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -1000,7 +1003,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -1034,7 +1037,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -1068,7 +1071,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 

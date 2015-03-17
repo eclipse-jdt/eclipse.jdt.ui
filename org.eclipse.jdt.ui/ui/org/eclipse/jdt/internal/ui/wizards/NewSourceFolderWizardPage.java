@@ -184,6 +184,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -226,11 +227,13 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	private class RootFieldAdapter implements IStringButtonAdapter, IDialogFieldListener {
 
 		// -------- IStringButtonAdapter
+		@Override
 		public void changeControlPressed(DialogField field) {
 			packRootChangeControlPressed(field);
 		}
 
 		// -------- IDialogFieldListener
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			packRootDialogFieldChanged(field);
 		}
@@ -355,7 +358,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 						}
 					}
 				}
-				ArrayList<IClasspathEntry> newEntries= new ArrayList<IClasspathEntry>(fEntries.length + 1);
+				ArrayList<IClasspathEntry> newEntries= new ArrayList<>(fEntries.length + 1);
 				int projectEntryIndex= -1;
 
 				for (int i= 0; i < fEntries.length; i++) {
@@ -380,7 +383,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 				}
 				IClasspathEntry newEntry= JavaCore.newSourceEntry(path, null, null, null, attributes);
 
-				Set<IClasspathEntry> modified= new HashSet<IClasspathEntry>();
+				Set<IClasspathEntry> modified= new HashSet<>();
 				if (fExcludeInOthersFields.isSelected()) {
 					addExclusionPatterns(newEntry, newEntries, modified);
 					IClasspathEntry entry= JavaCore.newSourceEntry(path, null, null, null, attributes);

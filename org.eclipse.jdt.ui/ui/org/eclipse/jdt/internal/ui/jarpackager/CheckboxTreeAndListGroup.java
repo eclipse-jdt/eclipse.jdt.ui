@@ -51,10 +51,10 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 
 	private Object fRoot;
 	private Object fCurrentTreeSelection;
-	private List<Object> fExpandedTreeNodes= new ArrayList<Object>();
-	private Map<Object, List<Object>> fCheckedStateStore= new HashMap<Object, List<Object>>(9);
-	private List<Object> fWhiteCheckedTreeItems= new ArrayList<Object>();
-	private List<ICheckStateListener> fListeners= new ArrayList<ICheckStateListener>();
+	private List<Object> fExpandedTreeNodes= new ArrayList<>();
+	private Map<Object, List<Object>> fCheckedStateStore= new HashMap<>(9);
+	private List<Object> fWhiteCheckedTreeItems= new ArrayList<>();
+	private List<ICheckStateListener> fListeners= new ArrayList<>();
 
 	private ITreeContentProvider fTreeContentProvider;
 	private IStructuredContentProvider fListContentProvider;
@@ -130,7 +130,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 
 		// if this tree element is already gray then its ancestors all are as well
 		if (!fCheckedStateStore.containsKey(treeElement))
-			fCheckedStateStore.put(treeElement, new ArrayList<Object>());
+			fCheckedStateStore.put(treeElement, new ArrayList<>());
 
 		Object parent= fTreeContentProvider.getParent(treeElement);
 		if (parent != null)
@@ -187,10 +187,12 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	*
 	*	@param event CheckStateChangedEvent
 	*/
+	@Override
 	public void checkStateChanged(final CheckStateChangedEvent event) {
 
 		//Potentially long operation - show a busy cursor
 		BusyIndicator.showWhile(fTreeViewer.getControl().getDisplay(), new Runnable() {
+			@Override
 			public void run() {
 				if (event.getCheckable().equals(fTreeViewer))
 					treeItemChecked(event.getElement(), event.getChecked());
@@ -338,7 +340,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *	@return java.util.Vector
 	 */
 	public Iterator<Object> getAllCheckedListItems() {
-		Set<Object> result= new HashSet<Object>();
+		Set<Object> result= new HashSet<>();
 		Iterator<List<Object>> listCollectionsEnum= fCheckedStateStore.values().iterator();
 		while (listCollectionsEnum.hasNext())
 			result.addAll(listCollectionsEnum.next());
@@ -351,7 +353,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *	@return java.util.Vector
 	 */
 	public Set<Object> getAllCheckedTreeItems() {
-		return new HashSet<Object>(fCheckedStateStore.keySet());
+		return new HashSet<>(fCheckedStateStore.keySet());
 	}
 	/**
 	 *	Answers the number of elements that have been checked by the
@@ -418,7 +420,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 		if (fCheckedStateStore.containsKey(treeElement))
 			return; // no need to proceed upwards from here
 
-		fCheckedStateStore.put(treeElement, new ArrayList<Object>());
+		fCheckedStateStore.put(treeElement, new ArrayList<>());
 		if (determineShouldBeWhiteChecked(treeElement)) {
 			setWhiteChecked(treeElement, true);
 		}
@@ -528,8 +530,10 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *
 	 *	@param event ISelection
 	 */
+	@Override
 	public void selectionChanged(final SelectionChangedEvent event) {
 		BusyIndicator.showWhile(getTable().getShell().getDisplay(), new Runnable() {
+			@Override
 			public void run() {
 				IStructuredSelection selection= (IStructuredSelection) event.getSelection();
 				Object selectedElement= selection.getFirstElement();
@@ -552,6 +556,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 
 		//Potentially long operation - show a busy cursor
 		BusyIndicator.showWhile(fTreeViewer.getControl().getDisplay(), new Runnable() {
+			@Override
 			public void run() {
 				setTreeChecked(fRoot, selection);
 				fListViewer.setAllChecked(selection);
@@ -602,7 +607,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 
 		if (state) {
 			Object[] listItems= getListElements(treeElement);
-			List<Object> listItemsChecked= new ArrayList<Object>();
+			List<Object> listItemsChecked= new ArrayList<>();
 			for (int i= 0; i < listItems.length; ++i)
 				listItemsChecked.add(listItems[i]);
 
@@ -656,6 +661,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *	Handle the collapsing of an element in a tree viewer
 	 * @param event
 	 */
+	@Override
 	public void treeCollapsed(TreeExpansionEvent event) {
 		// We don't need to do anything with this
 	}
@@ -664,6 +670,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 *	Handles the expansionsion of an element in a tree viewer
 	 * @param event
 	 */
+	@Override
 	public void treeExpanded(TreeExpansionEvent event) {
 
 		Object item= event.getElement();
@@ -744,6 +751,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 
 		//Potentially long operation - show a busy cursor
 		BusyIndicator.showWhile(fTreeViewer.getControl().getDisplay(), new Runnable() {
+			@Override
 			public void run() {
 				handleUpdateSelection(items);
 			}
@@ -758,7 +766,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	 */
 	protected Object[] filter(ViewerFilter[] filters, Object[] elements) {
 		if (filters != null) {
-			ArrayList<Object> filtered = new ArrayList<Object>(elements.length);
+			ArrayList<Object> filtered = new ArrayList<>(elements.length);
 			for (int i = 0; i < elements.length; i++) {
 				boolean add = true;
 				for (int j = 0; j < filters.length; j++) {
@@ -783,7 +791,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	}
 
 	public Set<Object> getWhiteCheckedTreeItems() {
-		return new HashSet<Object>(fWhiteCheckedTreeItems);
+		return new HashSet<>(fWhiteCheckedTreeItems);
 	}
 
 	private void handleUpdateSelection(Map<Object, List<Object>> items) {

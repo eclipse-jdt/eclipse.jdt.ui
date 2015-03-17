@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
  */
 public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
-	static final Class THIS= GenerateHashCodeEqualsTest.class;
+	static final Class<GenerateHashCodeEqualsTest> THIS= GenerateHashCodeEqualsTest.class;
 
 	public GenerateHashCodeEqualsTest(String name) {
 		super(name);
@@ -1199,8 +1199,8 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	 */
 	public void testSubTypeAndArraysIn14() throws Exception {
 		IJavaProject javaProject= fPackageP.getJavaProject();
-		Map oldOptions= javaProject.getOptions(false);
-		Map newOptions= new HashMap(oldOptions);
+		Map<String, String> oldOptions= javaProject.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(oldOptions);
 		JavaModelUtil.setComplianceOptions(newOptions, JavaCore.VERSION_1_4);
 		javaProject.setOptions(newOptions);
 		try {
@@ -1431,8 +1431,8 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	 */
 	public void testArraysDeepEqualsIn15() throws Exception {
 		IJavaProject javaProject= fPackageP.getJavaProject();
-		Map oldOptions= javaProject.getOptions(false);
-		Map newOptions= new HashMap(oldOptions);
+		Map<String, String> oldOptions= javaProject.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(oldOptions);
 		JavaModelUtil.setComplianceOptions(newOptions, JavaCore.VERSION_1_5);
 		javaProject.setOptions(newOptions);
 		try {

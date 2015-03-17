@@ -257,7 +257,7 @@ public class ASTNodes {
 		@Override
 		protected boolean visitNode(ASTNode node) {
 			if (result == null) { // first visitNode: on the node's parent: do nothing, return true
-				result= new ArrayList<ASTNode>();
+				result= new ArrayList<>();
 				return true;
 			}
 			result.add(node);
@@ -363,7 +363,7 @@ public class ASTNodes {
 			else if (parent instanceof VariableDeclarationStatement)
 				return ((VariableDeclarationStatement)parent).modifiers();
 		}
-		return new ArrayList<IExtendedModifier>(0);
+		return new ArrayList<>(0);
 	}
 
 	public static boolean isSingleDeclaration(VariableDeclaration declaration) {
@@ -768,6 +768,7 @@ public class ASTNodes {
 			fExpressionIsExplicitlyTyped= expressionIsExplicitlyTyped;
 		}
 
+		@Override
 		public boolean visit(ITypeBinding type) {
 			IMethodBinding[] methods= type.getDeclaredMethods();
 			for (int i= 0; i < methods.length; i++) {
@@ -1189,7 +1190,7 @@ public class ASTNodes {
 		if (root == node)
 			return problems;
 		final int iterations= computeIterations(scope);
-		List<IProblem> result= new ArrayList<IProblem>(5);
+		List<IProblem> result= new ArrayList<>(5);
 		for (int i= 0; i < problems.length; i++) {
 			IProblem problem= problems[i];
 			boolean consider= false;
@@ -1225,7 +1226,7 @@ public class ASTNodes {
 		if (root == node)
 			return messages;
 		final int iterations= computeIterations(flags);
-		List<Message> result= new ArrayList<Message>(5);
+		List<Message> result= new ArrayList<>(5);
 		for (int i= 0; i < messages.length; i++) {
 			Message message= messages[i];
 			ASTNode temp= node;
@@ -1557,7 +1558,7 @@ public class ASTNodes {
 	 * @since 3.10
 	 */
 	public static List<String> getVisibleLocalVariablesInScope(ASTNode node) {
-		List<String> variableNames= new ArrayList<String>();
+		List<String> variableNames= new ArrayList<>();
 		CompilationUnit root= (CompilationUnit) node.getRoot();
 		IBinding[] bindings= new ScopeAnalyzer(root).
 				getDeclarationsInScope(node.getStartPosition(), ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY);

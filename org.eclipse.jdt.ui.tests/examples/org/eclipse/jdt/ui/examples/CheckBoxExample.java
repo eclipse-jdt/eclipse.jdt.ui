@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,7 +60,7 @@ public class CheckBoxExample {
 			/* 6 */ null,
 			/* 7 */ "Remove"
 		};
-		CheckedListDialogField list= new CheckedListDialogField(adapter, addButtons, new LabelProvider());
+		CheckedListDialogField<String> list= new CheckedListDialogField<>(adapter, addButtons, new LabelProvider());
 		list.setCheckAllButtonIndex(4);
 		list.setUncheckAllButtonIndex(5);
 		list.setRemoveButtonIndex(7);
@@ -75,21 +75,23 @@ public class CheckBoxExample {
 
 	private static Random fgRandom= new Random();
 
-	private class Adapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter {
+	private class Adapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter<String> {
 
 		// -------- IStringButtonAdapter
+		@Override
 		public void changeControlPressed(DialogField field) {
 		}
 
 		// -------- IListAdapter
-		public void customButtonPressed(ListDialogField field, int index) {
+		@Override
+		public void customButtonPressed(ListDialogField<String> field, int index) {
 			if (field instanceof CheckedListDialogField) {
-				CheckedListDialogField list= (CheckedListDialogField)field;
+				CheckedListDialogField<String> list= (CheckedListDialogField<String>)field;
 				if (index == 0) {
 					list.addElement("element-" + (fgRandom.nextInt() % 1000));
 				} else if (index == 2) {
 					System.out.println("---- printing all");
-					List checked= list.getCheckedElements();
+					List<String> checked= list.getCheckedElements();
 					for (int i= 0; i < checked.size(); i++) {
 						System.out.println(checked.get(i).toString());
 					}
@@ -99,15 +101,15 @@ public class CheckBoxExample {
 			}
 		}
 
-		public void selectionChanged(ListDialogField field) {}
+		@Override
+		public void selectionChanged(ListDialogField<String> field) {}
 
 		// -------- IDialogFieldListener
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 		}
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#doubleClicked(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
-		 */
-		public void doubleClicked(ListDialogField field) {
+		@Override
+		public void doubleClicked(ListDialogField<String> field) {
 		}
 	}
 

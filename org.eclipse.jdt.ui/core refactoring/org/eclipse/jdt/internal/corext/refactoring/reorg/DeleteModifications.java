@@ -56,8 +56,8 @@ public class DeleteModifications extends RefactoringModifications {
 	private List<IPackageFragment> fPackagesToDelete;
 
 	public DeleteModifications() {
-		fDelete= new ArrayList<IJavaElement>();
-		fPackagesToDelete= new ArrayList<IPackageFragment>();
+		fDelete= new ArrayList<>();
+		fPackagesToDelete= new ArrayList<>();
 	}
 
 	public void delete(IResource resource) {
@@ -121,7 +121,7 @@ public class DeleteModifications extends RefactoringModifications {
 	 * @throws CoreException
 	 */
 	public List<IResource> postProcess() throws CoreException {
-		ArrayList<IResource> resourcesCollector= new ArrayList<IResource>();
+		ArrayList<IResource> resourcesCollector= new ArrayList<>();
 		for (Iterator<IPackageFragment> iter= fPackagesToDelete.iterator(); iter.hasNext();) {
 			IPackageFragment pack= iter.next();
 			handlePackageFragmentDelete(pack, resourcesCollector);
@@ -136,7 +136,7 @@ public class DeleteModifications extends RefactoringModifications {
 
 	@Override
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {
-		List<RefactoringParticipant> result= new ArrayList<RefactoringParticipant>();
+		List<RefactoringParticipant> result= new ArrayList<>();
 		for (Iterator<IJavaElement> iter= fDelete.iterator(); iter.hasNext();) {
 			result.addAll(Arrays.asList(ParticipantManager.loadDeleteParticipants(status,
 				owner, iter.next(),

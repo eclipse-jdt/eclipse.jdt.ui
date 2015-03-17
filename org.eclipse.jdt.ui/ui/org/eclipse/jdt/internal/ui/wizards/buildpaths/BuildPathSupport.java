@@ -168,18 +168,22 @@ public class BuildPathSupport {
 			fOriginal= original;
 		}
 
+		@Override
 		public IClasspathEntry[] getClasspathEntries() {
 			return fNewEntries;
 		}
 
+		@Override
 		public String getDescription() {
 			return fOriginal.getDescription();
 		}
 
+		@Override
 		public int getKind() {
 			return fOriginal.getKind();
 		}
 
+		@Override
 		public IPath getPath() {
 			return fOriginal.getPath();
 		}
@@ -257,7 +261,7 @@ public class BuildPathSupport {
 	private static void updateProjectClasspath(Shell shell, IJavaProject jproject, IClasspathEntry newEntry, String[] changedAttributes, IProgressMonitor monitor) throws JavaModelException {
 		IClasspathEntry[] oldClasspath= jproject.getRawClasspath();
 		int nEntries= oldClasspath.length;
-		ArrayList<IClasspathEntry> newEntries= new ArrayList<IClasspathEntry>(nEntries + 1);
+		ArrayList<IClasspathEntry> newEntries= new ArrayList<>(nEntries + 1);
 		int entryKind= newEntry.getEntryKind();
 		IPath jarPath= newEntry.getPath();
 		boolean found= false;
@@ -289,6 +293,7 @@ public class BuildPathSupport {
 
 		final boolean[] result= new boolean[1];
 		shell.getDisplay().syncExec(new Runnable() {
+			@Override
 			public void run() {
 				String title= NewWizardMessages.BuildPathSupport_putoncpdialog_title;
 				String message= NewWizardMessages.BuildPathSupport_putoncpdialog_message;
@@ -309,7 +314,7 @@ public class BuildPathSupport {
 	private static void updateReferencedClasspathEntry(IJavaProject jproject, IClasspathEntry newReferencedEntry, String[] changedAttributes, IProgressMonitor monitor) throws CoreException {
 		IClasspathEntry[] oldReferencedClasspath= jproject.getReferencedClasspathEntries();
 		int nEntries= oldReferencedClasspath.length;
-		ArrayList<IClasspathEntry> newReferencedEntries= new ArrayList<IClasspathEntry>(nEntries + 1);
+		ArrayList<IClasspathEntry> newReferencedEntries= new ArrayList<>(nEntries + 1);
 		int entryKind= newReferencedEntry.getEntryKind();
 		IPath jarPath= newReferencedEntry.getPath();
 		boolean found= false;
@@ -425,7 +430,7 @@ public class BuildPathSupport {
 			return null;
 	
 		// eeOptions can miss some options, make sure they are complete:
-		HashMap<String, String> options= new HashMap<String, String>();
+		HashMap<String, String> options= new HashMap<>();
 		JavaModelUtil.setComplianceOptions(options, (String)complianceOption);
 		options.putAll(eeOptions);
 		return options;

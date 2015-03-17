@@ -218,6 +218,7 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 		
 		final ITypeBinding oldTypeDeclaration= oldType.getTypeDeclaration();
 		Arrays.sort(typeProposals, new Comparator<ITypeBinding>() {
+			@Override
 			public int compare(ITypeBinding o1, ITypeBinding o2) {
 				return rank(o2) - rank(o1);
 			}

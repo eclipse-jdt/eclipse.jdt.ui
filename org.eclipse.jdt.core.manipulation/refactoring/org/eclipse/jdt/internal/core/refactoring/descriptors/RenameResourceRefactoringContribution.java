@@ -31,11 +31,10 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameResourceDescriptor;
  * @deprecated since 1.2 moved to <code>org.eclipse.ltk.core.refactoring</code>.
  * Contribution still available for backwards compatibility of scripts
  */
+@Deprecated
 public final class RenameResourceRefactoringContribution extends JavaRefactoringContribution {
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Refactoring createRefactoring(JavaRefactoringDescriptor javaDescriptor, RefactoringStatus status) throws CoreException {
 		if (javaDescriptor instanceof RenameResourceDescriptor) {
 			RenameResourceDescriptor descriptor= (RenameResourceDescriptor) javaDescriptor;
@@ -56,17 +55,13 @@ public final class RenameResourceRefactoringContribution extends JavaRefactoring
 		return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public RefactoringDescriptor createDescriptor() {
 		return new RenameResourceDescriptor();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
+	@Override
+	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return new RenameResourceDescriptor(project, description, comment, arguments, flags);
 	}
 }

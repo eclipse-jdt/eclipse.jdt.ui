@@ -68,8 +68,8 @@ public final class ImportRewriteUtil {
 		Assert.isNotNull(node);
 		Assert.isNotNull(typeImports);
 		Assert.isNotNull(staticImports);
-		final Set<SimpleName> types= new HashSet<SimpleName>();
-		final Set<SimpleName> members= new HashSet<SimpleName>();
+		final Set<SimpleName> types= new HashSet<>();
+		final Set<SimpleName> members= new HashSet<>();
 
 		ImportReferencesCollector.collect(node, rewrite.getCu().getJavaProject(), null, declarations, types, members);
 
@@ -137,8 +137,8 @@ public final class ImportRewriteUtil {
 		Assert.isNotNull(node);
 		Assert.isNotNull(typeBindings);
 		Assert.isNotNull(staticBindings);
-		final Set<SimpleName> types= new HashSet<SimpleName>();
-		final Set<SimpleName> members= new HashSet<SimpleName>();
+		final Set<SimpleName> types= new HashSet<>();
+		final Set<SimpleName> members= new HashSet<>();
 
 		ImportReferencesCollector.collect(node, project, null, declarations, types, members);
 

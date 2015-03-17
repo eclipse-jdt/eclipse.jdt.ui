@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,6 @@
 package org.eclipse.jdt.ui.tests.leaks;
 
 import java.io.ByteArrayInputStream;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DisplayHelper;
@@ -67,11 +64,14 @@ import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class JavaLeakTest extends LeakTestCase {
 
 	private IJavaProject fJProject;
 
-	private static final Class THIS= JavaLeakTest.class;
+	private static final Class<JavaLeakTest> THIS= JavaLeakTest.class;
 
 	public JavaLeakTest(String name) {
 		super(name);
@@ -259,6 +259,7 @@ public class JavaLeakTest extends LeakTestCase {
 
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
@@ -266,6 +267,7 @@ public class JavaLeakTest extends LeakTestCase {
 		assertTrue(JavaPlugin.getActivePage().closeAllEditors(false));
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		JavaProjectHelper.delete(fJProject);
@@ -289,11 +291,11 @@ public class JavaLeakTest extends LeakTestCase {
 		return file;
 	}
 
-	private void internalTestEditorClose(Object objectToOpen, final Class clazz, boolean closeAll) throws Exception {
+	private void internalTestEditorClose(Object objectToOpen, final Class<?> clazz, boolean closeAll) throws Exception {
 		internalTestEditorClose(objectToOpen, clazz, closeAll, false);
 	}
 
-	private void internalTestEditorClose(Object objectToOpen, final Class clazz, boolean closeAll, boolean activateBreadcrumb) throws Exception {
+	private void internalTestEditorClose(Object objectToOpen, final Class<?> clazz, boolean closeAll, boolean activateBreadcrumb) throws Exception {
 		IEditorPart part= internalTestEditorOpen(objectToOpen, clazz);
 
 		if (activateBreadcrumb && part instanceof JavaEditor) {
@@ -360,7 +362,7 @@ public class JavaLeakTest extends LeakTestCase {
 		DisplayHelper.sleep(editor.getSite().getShell().getDisplay(), 10 * 1000);
 	}
 
-	private IEditorPart internalTestEditorOpen(Object objectToOpen, final Class clazz) throws PartInitException {
+	private IEditorPart internalTestEditorOpen(Object objectToOpen, final Class<?> clazz) throws PartInitException {
 		// verify that no instance is there when we start
 		assertInstanceCount(clazz, 0);
 
@@ -434,7 +436,8 @@ public class JavaLeakTest extends LeakTestCase {
         menu.setVisible(true);
 
 		display.asyncExec(new Runnable() {
-            public void run() {
+            @Override
+			public void run() {
                 menu.setVisible(false);
             }
         });

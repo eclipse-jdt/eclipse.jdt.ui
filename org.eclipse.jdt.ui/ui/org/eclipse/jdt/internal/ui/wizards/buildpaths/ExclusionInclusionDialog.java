@@ -145,7 +145,7 @@ public class ExclusionInclusionDialog extends StatusDialog {
 	private ListDialogField<String> createListContents(CPListElement entryToEdit, String key, String label, ImageDescriptor descriptor, String[] buttonLabels) {
 		ExclusionPatternAdapter adapter= new ExclusionPatternAdapter();
 
-		ListDialogField<String> patternList= new ListDialogField<String>(adapter, buttonLabels, new ExclusionInclusionLabelProvider(descriptor));
+		ListDialogField<String> patternList= new ListDialogField<>(adapter, buttonLabels, new ExclusionInclusionLabelProvider(descriptor));
 		patternList.setDialogFieldListener(adapter);
 		patternList.setLabelText(label);
 		patternList.setRemoveButtonIndex(IDX_REMOVE);
@@ -153,7 +153,7 @@ public class ExclusionInclusionDialog extends StatusDialog {
 
 		IPath[] pattern= (IPath[]) entryToEdit.getAttribute(key);
 
-		ArrayList<String> elements= new ArrayList<String>(pattern.length);
+		ArrayList<String> elements= new ArrayList<>(pattern.length);
 		for (int i= 0; i < pattern.length; i++) {
 			elements.add(pattern[i].toString());
 		}
@@ -252,6 +252,7 @@ public class ExclusionInclusionDialog extends StatusDialog {
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#customButtonPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField, int)
 		 */
+		@Override
 		public void customButtonPressed(ListDialogField<String> field, int index) {
 			doCustomButtonPressed(field, index);
 		}
@@ -259,12 +260,14 @@ public class ExclusionInclusionDialog extends StatusDialog {
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#selectionChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
+		@Override
 		public void selectionChanged(ListDialogField<String> field) {
 			doSelectionChanged(field);
 		}
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#doubleClicked(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
+		@Override
 		public void doubleClicked(ListDialogField<String> field) {
 			doDoubleClicked(field);
 		}
@@ -272,6 +275,7 @@ public class ExclusionInclusionDialog extends StatusDialog {
 		/**
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
 		 */
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 		}
 

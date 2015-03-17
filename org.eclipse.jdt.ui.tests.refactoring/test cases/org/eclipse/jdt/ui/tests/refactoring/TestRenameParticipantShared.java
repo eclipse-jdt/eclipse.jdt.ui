@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,12 +40,13 @@ import org.eclipse.jdt.core.refactoring.RenameTypeArguments;
 public class TestRenameParticipantShared extends RenameParticipant implements ISharableParticipant {
 
 	static TestRenameParticipantShared fgInstance;
-	List fElements= new ArrayList(3);
-	List fHandles= new ArrayList(3);
-	List fArguments= new ArrayList(3);
-	Map fSimilarToHandle= new HashMap();
-	Map fSimilarToNewName= new HashMap();
+	List<Object> fElements= new ArrayList<>(3);
+	List<String> fHandles= new ArrayList<>(3);
+	List<RefactoringArguments> fArguments= new ArrayList<>(3);
+	Map<String, String> fSimilarToHandle= new HashMap<>();
+	Map<String, String> fSimilarToNewName= new HashMap<>();
 
+	@Override
 	public boolean initialize(Object element) {
 		fgInstance= this;
 		fElements.add(element);
@@ -83,6 +84,7 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 		return "";
 	}
 
+	@Override
 	public void addElement(Object element, RefactoringArguments args) {
 		fElements.add(element);
 		fArguments.add(args);
@@ -92,14 +94,17 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 			fHandles.add(((IResource)element).getFullPath().toString());
 	}
 
+	@Override
 	public String getName() {
 		return getClass().getName();
 	}
 
+	@Override
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) {
 		return new RefactoringStatus();
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		return null;
 	}
@@ -134,13 +139,13 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 			Assert.assertEquals(expected, fgInstance.fSimilarToHandle.size());
 	}
 
-	public static void testSimilarElements(List similarList, List similarNewNameList, List similarNewHandleList) {
+	public static void testSimilarElements(List<String> similarList, List<String> similarNewNameList, List<String> similarNewHandleList) {
 		for (int i=0; i< similarList.size(); i++) {
-			String handle= (String) similarList.get(i);
-			String newHandle= (String)similarNewHandleList.get(i);
-			String newName= (String)similarNewNameList.get(i);
-			String actualNewHandle= (String)fgInstance.fSimilarToHandle.get(handle);
-			String actualNewName= (String)fgInstance.fSimilarToNewName.get(handle);
+			String handle= similarList.get(i);
+			String newHandle= similarNewHandleList.get(i);
+			String newName= similarNewNameList.get(i);
+			String actualNewHandle= fgInstance.fSimilarToHandle.get(handle);
+			String actualNewName= fgInstance.fSimilarToNewName.get(handle);
 			Assert.assertEquals("New element handle not as expected", newHandle, actualNewHandle);
 			Assert.assertEquals("New element name not as expected", newName, actualNewName);
 		}

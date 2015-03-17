@@ -49,6 +49,7 @@ public class PropertiesCorrectionAssistant extends QuickAssistAssistant {
 
 	private IInformationControlCreator getInformationControlCreator() {
 		return new IInformationControlCreator() {
+			@Override
 			public IInformationControl createInformationControl(Shell parent) {
 				return new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
 			}

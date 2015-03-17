@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,9 +17,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import junit.extensions.TestSetup;
-import junit.framework.Test;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -69,7 +66,11 @@ import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
+
+import junit.extensions.TestSetup;
+import junit.framework.Test;
 
 public class CleanUpPerfTest extends JdtPerformanceTestCase {
 
@@ -82,6 +83,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			super(test);
 		}
 
+		@Override
 		protected void setUp() throws Exception {
 			fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 			assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
@@ -89,6 +91,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		}
 
+		@Override
 		protected void tearDown() throws Exception {
 			if (fJProject1 != null && fJProject1.exists())
 				JavaProjectHelper.delete(fJProject1);
@@ -133,23 +136,23 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		}
 	}
 
-	private static Map getNullSettings() {
-		Map result= new HashMap();
+	private static Map<String, String> getNullSettings() {
+		Map<String, String> result= new HashMap<>();
 
-		Collection keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getKeys();
-		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
-			String key= (String)iterator.next();
+		Collection<String> keys= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getKeys();
+		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
+			String key= iterator.next();
 			result.put(key, CleanUpOptions.FALSE);
 		}
 
 		return result;
 	}
 
-	private static void storeSettings(Map node) throws CoreException {
+	private static void storeSettings(Map<String, String> node) throws CoreException {
 		ProfileManager.CustomProfile profile= new ProfileManager.CustomProfile("testProfile", node, CleanUpProfileVersioner.CURRENT_VERSION, CleanUpProfileVersioner.PROFILE_KIND);
 		InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).put(CleanUpConstants.CLEANUP_PROFILE, profile.getID());
 
-		List profiles= CleanUpPreferenceUtil.getBuiltInProfiles();
+		List<Profile> profiles= CleanUpPreferenceUtil.getBuiltInProfiles();
 		profiles.add(profile);
 
 		CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();
@@ -165,6 +168,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			/*
 			 * @see org.eclipse.jdt.internal.ui.fix.AbstractCleanUp#getRequirements()
 			 */
+			@Override
 			public CleanUpRequirements getRequirements() {
 				return new CleanUpRequirements(true, false, false, null);
 			}
@@ -177,7 +181,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
-		Map node= getNullSettings();
+		Map<String, String> node= getNullSettings();
 
 		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, CleanUpOptions.TRUE);
 		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, CleanUpOptions.TRUE);
@@ -241,7 +245,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
-		Map node= getNullSettings();
+		Map<String, String> node= getNullSettings();
 
 		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS, CleanUpOptions.TRUE);
 		node.put(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS_ALWAYS, CleanUpOptions.TRUE);
@@ -264,7 +268,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
-		Map node= getNullSettings();
+		Map<String, String> node= getNullSettings();
 
 		node.put(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS, CleanUpOptions.TRUE);
 		node.put(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS, CleanUpOptions.TRUE);
@@ -281,7 +285,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
-		Map node= getNullSettings();
+		Map<String, String> node= getNullSettings();
 
 		node.put(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
 
@@ -297,7 +301,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
-		Map node= getNullSettings();
+		Map<String, String> node= getNullSettings();
 
 		node.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.TRUE);
 		node.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.TRUE);
@@ -313,7 +317,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
-		Map node= getNullSettings();
+		Map<String, String> node= getNullSettings();
 
 		node.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
 		node.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_DEPRECATED, CleanUpOptions.TRUE);
@@ -330,7 +334,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
-		Map node= getNullSettings();
+		Map<String, String> node= getNullSettings();
 
 		node.put(CleanUpConstants.ADD_MISSING_NLS_TAGS, CleanUpOptions.TRUE);
 
@@ -345,7 +349,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
-		Map node= getNullSettings();
+		Map<String, String> node= getNullSettings();
 
 		node.put(CleanUpConstants.SORT_MEMBERS, CleanUpOptions.TRUE);
 		node.put(CleanUpConstants.SORT_MEMBERS_ALL, CleanUpOptions.TRUE);
@@ -361,7 +365,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
-		Map node= getNullSettings();
+		Map<String, String> node= getNullSettings();
 		node.put(CleanUpConstants.REMOVE_UNNECESSARY_CASTS, CleanUpOptions.TRUE);
 		storeSettings(node);
 
@@ -374,7 +378,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
-		Map node= getNullSettings();
+		Map<String, String> node= getNullSettings();
 
 		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS, CleanUpOptions.TRUE);
 		node.put(CleanUpConstants.REMOVE_UNUSED_CODE_PRIVATE_MEMBERS, CleanUpOptions.TRUE);
@@ -395,7 +399,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
-		Map node= getNullSettings();
+		Map<String, String> node= getNullSettings();
 
 		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL, CleanUpOptions.TRUE);
 		node.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, CleanUpOptions.TRUE);
@@ -413,7 +417,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
-		Map node= getNullSettings();
+		Map<String, String> node= getNullSettings();
 
 		node.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpOptions.TRUE);
 
@@ -428,7 +432,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 
-		Map node= getNullSettings();
+		Map<String, String> node= getNullSettings();
 
 		node.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpOptions.TRUE);
 
@@ -485,7 +489,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		for (int i= 0; i < cleanUps.length; i++) {
 			ICleanUp cleanUp= cleanUps[i];
 			if (cleanUp instanceof AbstractCleanUp) {
-				Accessor accessor= new Accessor(cleanUp, AbstractCleanUp.class);
+				Accessor<AbstractCleanUp> accessor= new Accessor<>(cleanUp, AbstractCleanUp.class);
 				accessor.set("fOptions", null);
 			}
 		}

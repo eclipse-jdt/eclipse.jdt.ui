@@ -45,9 +45,6 @@ public class StringCleanUp extends AbstractMultiFix {
 		super();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public CleanUpRequirements getRequirements() {
 		boolean requireAST= requireAST();
@@ -60,9 +57,6 @@ public class StringCleanUp extends AbstractMultiFix {
 		       isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
@@ -73,9 +67,6 @@ public class StringCleanUp extends AbstractMultiFix {
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
@@ -87,7 +78,7 @@ public class StringCleanUp extends AbstractMultiFix {
 	}
 
 	private Map<String, String> getRequiredOptions() {
-		Map<String, String> result= new Hashtable<String, String>();
+		Map<String, String> result= new Hashtable<>();
 
 		if (isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS) || isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS))
 			result.put(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.WARNING);
@@ -95,12 +86,9 @@ public class StringCleanUp extends AbstractMultiFix {
 		return result;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String[] getStepDescriptions() {
-		List<String> result= new ArrayList<String>();
+		List<String> result= new ArrayList<>();
 		if (isEnabled(CleanUpConstants.ADD_MISSING_NLS_TAGS))
 			result.add(MultiFixMessages.StringMultiFix_AddMissingNonNls_description);
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS))
@@ -108,9 +96,6 @@ public class StringCleanUp extends AbstractMultiFix {
 		return result.toArray(new String[result.size()]);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
@@ -124,9 +109,7 @@ public class StringCleanUp extends AbstractMultiFix {
 		return buf.toString();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		if (problem.getProblemId() == IProblem.UnnecessaryNLSTag)
 			return isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS);
@@ -137,9 +120,6 @@ public class StringCleanUp extends AbstractMultiFix {
 		return false;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		try {

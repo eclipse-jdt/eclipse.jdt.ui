@@ -119,6 +119,7 @@ public class JavaCompilerPropertyPage extends PropertyPage {
 
 	private static IWorkspaceRunnable getRunnable(final Shell shell, final IJavaProject project, final IClasspathEntry entry) {
 		return new IWorkspaceRunnable() {
+			@Override
 			public void run(IProgressMonitor monitor) throws CoreException {
 				String[] changedAttributes= { CPListElement.IGNORE_OPTIONAL_PROBLEMS };
 				BuildPathSupport.modifyClasspathEntry(shell, entry, changedAttributes, project, null, entry.getReferencingEntry() != null, monitor);

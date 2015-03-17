@@ -15,7 +15,7 @@ import junit.framework.Test;
 
 public class IntroduceParameterTests17 extends IntroduceParameterTests {
 
-	private static final Class clazz= IntroduceParameterTests17.class;
+	private static final Class<IntroduceParameterTests17> clazz= IntroduceParameterTests17.class;
 
 	public IntroduceParameterTests17(String name) {
 		super(name);

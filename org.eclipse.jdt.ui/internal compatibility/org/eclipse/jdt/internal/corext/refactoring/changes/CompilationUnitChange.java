@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
  * DO NOT REMOVE, used in a product.</p>
  * @deprecated As of 3.5, replaced by {@link org.eclipse.jdt.core.refactoring.CompilationUnitChange}
  */
+@Deprecated
 public class CompilationUnitChange extends org.eclipse.jdt.core.refactoring.CompilationUnitChange {
 
 	/**

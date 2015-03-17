@@ -64,7 +64,7 @@ public final class ExtractSuperclassDescriptor extends JavaRefactoringDescriptor
 	 *
 	 * @since 1.2
 	 */
-	public ExtractSuperclassDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public ExtractSuperclassDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.EXTRACT_SUPERCLASS, project, description, comment, arguments, flags);
 	}
 

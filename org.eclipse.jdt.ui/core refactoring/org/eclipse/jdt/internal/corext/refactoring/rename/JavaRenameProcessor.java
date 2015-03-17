@@ -43,7 +43,7 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements INa
 
 	@Override
 	public final RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException, OperationCanceledException {
-		ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
+		ResourceChangeChecker checker= context.getChecker(ResourceChangeChecker.class);
 		IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
 		RefactoringStatus result= doCheckFinalConditions(pm, context);
 		if (result.hasFatalError())
@@ -54,7 +54,7 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements INa
 		}
 		fRenameModifications= computeRenameModifications();
 		fRenameModifications.buildDelta(deltaFactory);
-		fRenameModifications.buildValidateEdits((ValidateEditChecker)context.getChecker(ValidateEditChecker.class));
+		fRenameModifications.buildValidateEdits(context.getChecker(ValidateEditChecker.class));
 		return result;
 	}
 
@@ -66,11 +66,13 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements INa
 
 	protected abstract String[] getAffectedProjectNatures() throws CoreException;
 
+	@Override
 	public void setNewElementName(String newName) {
 		Assert.isNotNull(newName);
 		fNewElementName= newName;
 	}
 
+	@Override
 	public String getNewElementName() {
 		return fNewElementName;
 	}

@@ -42,9 +42,6 @@ public final class JavaModelContentProvider extends StandardJavaElementContentPr
 		super(true);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Object[] getChildren(final Object element) {
 		if (element instanceof ICompilationUnit)
@@ -52,7 +49,7 @@ public final class JavaModelContentProvider extends StandardJavaElementContentPr
 		else if (element instanceof RefactoringHistory)
 			return ((RefactoringHistory) element).getDescriptors();
 		else if (element instanceof IJavaProject) {
-			final List<Object> elements= new ArrayList<Object>();
+			final List<Object> elements= new ArrayList<>();
 			elements.add(((IJavaProject) element).getProject().getFolder(NAME_SETTINGS_FOLDER));
 			final Object[] children= super.getChildren(element);
 			for (int index= 0; index < children.length; index++) {
@@ -71,9 +68,6 @@ public final class JavaModelContentProvider extends StandardJavaElementContentPr
 		return super.getChildren(element);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean hasChildren(final Object element) {
 		if (element instanceof ICompilationUnit)

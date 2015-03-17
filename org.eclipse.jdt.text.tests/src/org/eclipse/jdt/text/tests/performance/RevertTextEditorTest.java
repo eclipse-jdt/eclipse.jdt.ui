@@ -23,7 +23,7 @@ import org.eclipse.ui.PartInitException;
  */
 public class RevertTextEditorTest extends RevertEditorTest {
 
-	private static final Class THIS= RevertTextEditorTest.class;
+	private static final Class<RevertTextEditorTest> THIS= RevertTextEditorTest.class;
 
 	private static final String PREFIX= "/" + PerformanceTestSetup.PROJECT + "/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout";
 
@@ -35,12 +35,14 @@ public class RevertTextEditorTest extends RevertEditorTest {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		ResourceTestHelper.copy(ORIG_FILE, FILE);
 		super.setUp();
 		EditorTestHelper.runEventQueue();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		ResourceTestHelper.delete(FILE);

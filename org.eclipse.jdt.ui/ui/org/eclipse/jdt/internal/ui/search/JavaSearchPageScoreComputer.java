@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 
 public class JavaSearchPageScoreComputer implements ISearchPageScoreComputer {
 
+	@Override
 	public int computeScore(String id, Object element) {
 		if (!JavaSearchPage.EXTENSION_POINT_ID.equals(id))
 			// Can't decide

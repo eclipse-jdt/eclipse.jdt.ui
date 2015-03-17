@@ -77,8 +77,8 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 
 		fSite= site;
 		fSelectionTarget= selectionTarget;
-		fSelectedElements= new ArrayList<Object>();
-		fListeners= new ArrayList<IBuildpathModifierListener>();
+		fSelectedElements= new ArrayList<>();
+		fListeners= new ArrayList<>();
 
 		setId(Integer.toString(id));
     }
@@ -92,9 +92,7 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 	 */
 	public abstract String getDetailedDescription();
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void selectionChanged(final SelectionChangedEvent event) {
 		final ISelection selection = event.getSelection();
 		if (selection instanceof IStructuredSelection) {
@@ -160,7 +158,7 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 			return;
 
 		// get all the view and editor parts
-		List<IWorkbenchPart> parts= new ArrayList<IWorkbenchPart>();
+		List<IWorkbenchPart> parts= new ArrayList<>();
 		IWorkbenchPartReference refs[]= page.getViewReferences();
 		for (int i= 0; i < refs.length; i++) {
 			IWorkbenchPart part= refs[i].getPart(false);
@@ -188,6 +186,7 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 				// select and reveal resource
 				final ISetSelectionTarget finalTarget= target;
 				page.getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable() {
+					@Override
 					public void run() {
 						finalTarget.selectReveal(selection);
 					}

@@ -180,7 +180,7 @@ public class CustomCodeFormatterBlock extends Observable {
 	}
 
 	private void initializeFormatters() {
-		ArrayList<FormatterContribution> formatters= new ArrayList<FormatterContribution>();
+		ArrayList<FormatterContribution> formatters= new ArrayList<>();
 		IExtensionPoint point= Platform.getExtensionRegistry().getExtensionPoint(JavaCore.PLUGIN_ID, JavaCore.JAVA_FORMATTER_EXTENSION_POINT_ID);
 		if (point != null) {
 			IExtension[] exts= point.getExtensions();
@@ -194,6 +194,7 @@ public class CustomCodeFormatterBlock extends Observable {
 			}
 		}
 		Collections.sort(formatters, new Comparator<FormatterContribution>() {
+			@Override
 			public int compare(FormatterContribution o1, FormatterContribution o2) {
 				return o1.fName.compareTo(o2.fName);
 			}

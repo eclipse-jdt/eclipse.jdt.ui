@@ -104,6 +104,7 @@ class SourceFirstPackageSelectionDialogField {
 
 	class PackageSelectionDialogFieldListener implements IDialogFieldListener {
 
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			String packName= fPackageSelection.getText();
 			if (packName.length() == 0)
@@ -114,6 +115,7 @@ class SourceFirstPackageSelectionDialogField {
 	}
 
 	class SFStringButtonAdapter implements IStringButtonAdapter {
+		@Override
 		public void changeControlPressed(DialogField field) {
 
 			IPackageFragmentRoot newSourceContainer= chooseSourceContainer(fSourceFolderSelection.getRoot());

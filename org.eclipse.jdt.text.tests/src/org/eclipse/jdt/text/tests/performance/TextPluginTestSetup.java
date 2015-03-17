@@ -45,6 +45,7 @@ public class TextPluginTestSetup extends TestSetup {
 	/*
 	 * @see junit.extensions.TestSetup#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		EditorTestHelper.showView(EditorTestHelper.INTRO_VIEW_ID, false);
 
@@ -70,6 +71,7 @@ public class TextPluginTestSetup extends TestSetup {
 	/*
 	 * @see junit.extensions.TestSetup#tearDown()
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 //		/*
 //		 * Work around bug 72633: Problem deleting resources

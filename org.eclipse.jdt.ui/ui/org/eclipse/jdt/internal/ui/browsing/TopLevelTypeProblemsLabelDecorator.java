@@ -31,9 +31,6 @@ class TopLevelTypeProblemsLabelDecorator extends ProblemsLabelDecorator {
 		super(registry);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.ProblemsLabelDecorator#isInside(int, ISourceReference)
-	 */
 	@Override
 	protected boolean isInside(int pos, ISourceReference sourceElement) throws CoreException {
 //		XXX: Work in progress for problem decorator being a workbench decorator

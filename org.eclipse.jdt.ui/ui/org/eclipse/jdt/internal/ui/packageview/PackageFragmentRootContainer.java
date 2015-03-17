@@ -26,36 +26,28 @@ public abstract class PackageFragmentRootContainer implements IAdaptable {
 
 	private static class WorkbenchAdapterImpl implements IWorkbenchAdapter {
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getChildren(java.lang.Object)
-		 */
+		@Override
 		public Object[] getChildren(Object o) {
 			if (o instanceof PackageFragmentRootContainer)
 				return ((PackageFragmentRootContainer) o).getChildren();
 			return new Object[0];
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getImageDescriptor(java.lang.Object)
-		 */
+		@Override
 		public ImageDescriptor getImageDescriptor(Object o) {
 			if (o instanceof PackageFragmentRootContainer)
 				return ((PackageFragmentRootContainer) o).getImageDescriptor();
 			return null;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getLabel(java.lang.Object)
-		 */
+		@Override
 		public String getLabel(Object o) {
 			if (o instanceof PackageFragmentRootContainer)
 				return ((PackageFragmentRootContainer) o).getLabel();
 			return new String();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.model.IWorkbenchAdapter#getParent(java.lang.Object)
-		 */
+		@Override
 		public Object getParent(Object o) {
 			if (o instanceof PackageFragmentRootContainer)
 				return ((PackageFragmentRootContainer) o).getJavaProject();
@@ -70,6 +62,7 @@ public abstract class PackageFragmentRootContainer implements IAdaptable {
 		fProject= project;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Class<T> adapter) {
 		if (adapter == IWorkbenchAdapter.class)

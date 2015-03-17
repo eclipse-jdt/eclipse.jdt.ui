@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 public class MethodOverrideTest18 extends MethodOverrideTest {
 
-	private static final Class THIS= MethodOverrideTest18.class;
+	private static final Class<MethodOverrideTest18> THIS= MethodOverrideTest18.class;
 
 	public static Test suite() {
 		return setUpTest(new NoSuperTestsSuite(THIS));
@@ -49,14 +49,16 @@ public class MethodOverrideTest18 extends MethodOverrideTest {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= Java18ProjectTestSetup.getProject();
 		fSrc= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		JavaCore.setOptions(options);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}

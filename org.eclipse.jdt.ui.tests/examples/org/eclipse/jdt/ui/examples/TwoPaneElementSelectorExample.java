@@ -30,11 +30,13 @@ public class TwoPaneElementSelectorExample {
 		for (int i= 0; i < elements.length; i++)
 			elements[i]= new Integer(random.nextInt()).toString();
 		ILabelProvider elementRenderer= new org.eclipse.jface.viewers.LabelProvider() {
+			@Override
 			public String getText(Object element) {
 				return element.toString();
 			}
 		};
 		ILabelProvider qualfierRenderer= new org.eclipse.jface.viewers.LabelProvider() {
+			@Override
 			public String getText(Object element) {
 				return element.toString();
 			}

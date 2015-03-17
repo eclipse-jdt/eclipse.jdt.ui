@@ -54,25 +54,16 @@ public class AllCleanUpsAction extends CleanUpAction {
 		updateActionLabel();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected ICleanUp[] getCleanUps(ICompilationUnit[] units) {
 		return JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected String getActionName() {
 		return ActionMessages.CleanUpAction_actionName;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void performRefactoring(ICompilationUnit[] cus, ICleanUp[] cleanUps) throws InvocationTargetException {
 		RefactoringExecutionStarter.startCleanupRefactoring(cus, cleanUps, !showWizard(), getShell(), showWizard(), getActionName());
@@ -97,6 +88,7 @@ public class AllCleanUpsAction extends CleanUpAction {
 
 	private void installPreferenceListener() {
 	    fPreferenceChangeListener= new IPreferenceChangeListener() {
+			@Override
 			public void preferenceChange(PreferenceChangeEvent event) {
 				if (event.getKey().equals(CleanUpConstants.SHOW_CLEAN_UP_WIZARD)) {
 					updateActionLabel();

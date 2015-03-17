@@ -109,9 +109,6 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 		return contents;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IconAndMessageDialog#createMessageArea(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected Control createMessageArea(Composite parent) {
 		initializeDialogUnits(parent);
@@ -157,6 +154,7 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 		label.setFont(warningComposite.getFont());
 
 		fNotSortAllRadio.setDialogFieldListener(new IDialogFieldListener() {
+			@Override
 			public void dialogFieldChanged(DialogField field) {
 				imageLabel1.setEnabled(!fNotSortAllRadio.isSelected());
 				label.setEnabled(!fNotSortAllRadio.isSelected());
@@ -168,9 +166,6 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 		return messageComposite;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.window.Window#open()
-	 */
 	@Override
 	public int open() {
 		if (isDialogEnabled(OPTIONAL_ID))
@@ -179,9 +174,6 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#close()
-	 */
 	@Override
 	public boolean close() {
 		fDialogSettings.put(DIALOG_SETTINGS_SORT_ALL, fSortAllRadio.isSelected());

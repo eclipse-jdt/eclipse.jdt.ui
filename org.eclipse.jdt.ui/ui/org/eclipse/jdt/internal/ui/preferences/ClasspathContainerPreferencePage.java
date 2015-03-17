@@ -50,9 +50,6 @@ public class ClasspathContainerPreferencePage extends WizardPropertyPage {
 		noDefaultAndApplyButton();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setElement(IAdaptable element) {
 		super.setElement(element);
@@ -109,6 +106,7 @@ public class ClasspathContainerPreferencePage extends WizardPropertyPage {
 			IRunnableContext context= new ProgressMonitorDialog(getShell());
 			context= PlatformUI.getWorkbench().getProgressService();
 			context.run(true, true, new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						if (result.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {

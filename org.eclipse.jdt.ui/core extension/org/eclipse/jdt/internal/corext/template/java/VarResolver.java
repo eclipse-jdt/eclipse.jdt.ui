@@ -27,9 +27,6 @@ public class VarResolver extends AbstractVariableResolver {
 		super(defaultType);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.template.java.AbstractVariableResolver#getVisibleVariables(java.lang.String, org.eclipse.jdt.internal.corext.template.java.JavaContext)
-	 */
 	@Override
 	protected Variable[] getVisibleVariables(String type, JavaContext context) {
 		Variable[] localVariables= context.getLocalVariables(type);

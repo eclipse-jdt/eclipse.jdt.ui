@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.io.IOException;
 import java.util.Hashtable;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -38,17 +35,20 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 	private static final boolean BUG_304827= true; // too many imports, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=304827
 	
 	private static final String FIELD_COMMENT= "/** Comment */";
-	private static final Class clazz= MoveInnerToTopLevelTests.class;
+	private static final Class<MoveInnerToTopLevelTests> clazz= MoveInnerToTopLevelTests.class;
 	private static final String REFACTORING_PATH= "MoveInnerToTopLevel/";
 
 	private static final int NOT_AVAILABLE= 1001;
 
-	private Object fCompactPref;
+	private String fCompactPref;
 
 	public MoveInnerToTopLevelTests(String name) {
 		super(name);
@@ -62,10 +62,12 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	    return new Java15Setup(someTest);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		StubUtility.setCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, FIELD_COMMENT, null);
@@ -74,7 +76,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 			System.getProperty("line.separator", "\n") +
 			"${type_declaration}", null);
 
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 
 		String setting= DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR;
 		fCompactPref= options.get(setting);
@@ -82,9 +84,10 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		JavaCore.setOptions(options);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, fCompactPref);
 		JavaCore.setOptions(options);
 	}

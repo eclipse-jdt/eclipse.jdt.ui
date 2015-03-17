@@ -92,6 +92,7 @@ public class ToggleBreadcrumbAction extends ResourceAction implements IPropertyC
 	/*
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (event.getProperty().equals(getPreferenceKey()))
 			setChecked(Boolean.valueOf(event.getNewValue().toString()).booleanValue());
@@ -126,6 +127,7 @@ public class ToggleBreadcrumbAction extends ResourceAction implements IPropertyC
 	 * @see org.eclipse.ui.IPerspectiveListener#perspectiveActivated(org.eclipse.ui.IWorkbenchPage, org.eclipse.ui.IPerspectiveDescriptor)
 	 * @since 3.4
 	 */
+	@Override
 	public void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
 		boolean isChecked= fStore.getBoolean(getPreferenceKey());
 		if (isChecked != isChecked()) {
@@ -137,6 +139,7 @@ public class ToggleBreadcrumbAction extends ResourceAction implements IPropertyC
 	/*
 	 * @see org.eclipse.ui.IPerspectiveListener#perspectiveChanged(org.eclipse.ui.IWorkbenchPage, org.eclipse.ui.IPerspectiveDescriptor, java.lang.String)
 	 */
+	@Override
 	public void perspectiveChanged(IWorkbenchPage page, IPerspectiveDescriptor perspective, String changeId) {
 	}
 }

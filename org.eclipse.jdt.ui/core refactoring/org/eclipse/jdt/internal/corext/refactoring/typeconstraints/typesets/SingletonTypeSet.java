@@ -27,25 +27,16 @@ public class SingletonTypeSet extends TypeSet {
 		fType= t;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isUniverse()
-	 */
 	@Override
 	public boolean isUniverse() {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
-	 */
 	@Override
 	public TypeSet makeClone() {
 		return this; //new SingletonTypeSet(fType, getTypeSetEnvironment());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#intersectedWith(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
-	 */
 	@Override
 	protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
 		if (s2.contains(fType))
@@ -54,73 +45,46 @@ public class SingletonTypeSet extends TypeSet {
 			return getTypeSetEnvironment().getEmptyTypeSet();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isEmpty()
-	 */
 	@Override
 	public boolean isEmpty() {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#upperBound()
-	 */
 	@Override
 	public TypeSet upperBound() {
 		return this; // makeClone();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#lowerBound()
-	 */
 	@Override
 	public TypeSet lowerBound() {
 		return this; // makeClone();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueLowerBound()
-	 */
 	@Override
 	public boolean hasUniqueLowerBound() {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueUpperBound()
-	 */
 	@Override
 	public boolean hasUniqueUpperBound() {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueLowerBound()
-	 */
 	@Override
 	public TType uniqueLowerBound() {
 		return fType;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueUpperBound()
-	 */
 	@Override
 	public TType uniqueUpperBound() {
 		return fType;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(TType)
-	 */
 	@Override
 	public boolean contains(TType t) {
 		return fType.equals(t);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#containsAll(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
-	 */
 	@Override
 	public boolean containsAll(TypeSet s) {
 		if (s.isEmpty())
@@ -130,19 +94,19 @@ public class SingletonTypeSet extends TypeSet {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#iterator()
-	 */
 	@Override
 	public Iterator<TType> iterator() {
 		return new Iterator<TType>() {
 			private boolean done= false;
+			@Override
 			public void remove() {
 				throw new UnsupportedOperationException();
 			}
+			@Override
 			public boolean hasNext() {
 				return !done;
 			}
+			@Override
 			public TType next() {
 				done= true;
 				return fType;
@@ -150,25 +114,16 @@ public class SingletonTypeSet extends TypeSet {
 		};
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isSingleton()
-	 */
 	@Override
 	public boolean isSingleton() {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#anyMember()
-	 */
 	@Override
 	public TType anyMember() {
 		return fType;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#enumerate()
-	 */
 	@Override
 	public EnumeratedTypeSet enumerate() {
 		EnumeratedTypeSet enumeratedTypeSet= new EnumeratedTypeSet(fType, getTypeSetEnvironment());

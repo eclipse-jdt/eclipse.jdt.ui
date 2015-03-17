@@ -27,9 +27,7 @@ public abstract class ChangeMethodSignatureParticipant extends RefactoringPartic
 
 	private ChangeMethodSignatureArguments fArguments;
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected final void initialize(RefactoringArguments arguments) {
 		fArguments= (ChangeMethodSignatureArguments) arguments;
 	}

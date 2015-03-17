@@ -174,9 +174,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 	// ---- Structured Viewer -----------------------------------------------------------
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
@@ -189,9 +186,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		try {
@@ -314,7 +308,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			dialog.setInitialSelections(preselected);
 			dialog.setExpandedElements(preselected);
 		}
-		final Set<IField> keySet= new LinkedHashSet<IField>(entries.keySet());
+		final Set<IField> keySet= new LinkedHashSet<>(entries.keySet());
 		int dialogResult= dialog.open();
 		if (dialogResult == Window.OK) {
 			Object[] result= dialog.getResult();
@@ -350,11 +344,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			fEntries= entries;
 		}
 
+		@Override
 		public IStatus validate(Object[] selection) {
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38478
 			HashSet<Object> map= null;
 			if ((selection != null) && (selection.length > 1)) {
-				map= new HashSet<Object>(selection.length);
+				map= new HashSet<>(selection.length);
 			}
 
 			int selectedCount= 0;
@@ -417,7 +412,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 	// returns a list of fields with setter entries checked
 	private static IField[] getSetterFields(Object[] result, Set<IField> set) {
-		List<IField> list= new ArrayList<IField>(0);
+		List<IField> list= new ArrayList<>(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		for (int i= 0; i < result.length; i++) {
@@ -435,7 +430,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 	// returns a list of fields with getter entries checked
 	private static IField[] getGetterFields(Object[] result, Set<IField> set) {
-		List<IField> list= new ArrayList<IField>(0);
+		List<IField> list= new ArrayList<>(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		for (int i= 0; i < result.length; i++) {
@@ -453,7 +448,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 	// returns a list of fields with only getter entries checked
 	private static IField[] getGetterOnlyFields(Object[] result, Set<IField> set) {
-		List<IField> list= new ArrayList<IField>(0);
+		List<IField> list= new ArrayList<>(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		boolean getterSet= false;
@@ -478,7 +473,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 	// returns a list of fields with only setter entries checked
 	private static IField[] getSetterOnlyFields(Object[] result, Set<IField> set) {
-		List<IField> list= new ArrayList<IField>(0);
+		List<IField> list= new ArrayList<>(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		boolean getterSet= false;
@@ -502,7 +497,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 	// returns a list of fields with both entries checked
 	private static IField[] getGetterSetterFields(Object[] result, Set<IField> set) {
-		List<IField> list= new ArrayList<IField>(0);
+		List<IField> list= new ArrayList<>(0);
 		Object each= null;
 		GetterSetterEntry entry= null;
 		boolean getterSet= false;
@@ -525,7 +520,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 
 	private static List<IField> reorderFields(List<IField> collection, Set<IField> set) {
-		final List<IField> list= new ArrayList<IField>(collection.size());
+		final List<IField> list= new ArrayList<>(collection.size());
 		for (final Iterator<IField> iterator= set.iterator(); iterator.hasNext();) {
 			final IField field= iterator.next();
 			if (collection.contains(field))
@@ -551,16 +546,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 	// ---- Java Editor --------------------------------------------------------------
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		try {
@@ -645,6 +634,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	private IRequestQuery skipReplaceQuery() {
 		return new IRequestQuery() {
 
+			@Override
 			public int doQuery(IMember method) {
 				int[] returnCodes= { IRequestQuery.YES, IRequestQuery.NO, IRequestQuery.YES_ALL, IRequestQuery.CANCEL};
 				String skipLabel= ActionMessages.AddGetterSetterAction_SkipExistingDialog_skip_label;
@@ -667,6 +657,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		final int[] result= { Window.CANCEL};
 		shell.getDisplay().syncExec(new Runnable() {
 
+			@Override
 			public void run() {
 				String title= ActionMessages.AddGetterSetterAction_QueryDialog_title;
 				MessageDialog dialog= new MessageDialog(shell, title, null, message, MessageDialog.QUESTION, buttonLabels, 0);
@@ -775,12 +766,12 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 */
 	private Map<IField, GetterSetterEntry[]> createGetterSetterMapping(IType type) throws JavaModelException {
 		IField[] fields= type.getFields();
-		Map<IField, GetterSetterEntry[]> result= new LinkedHashMap<IField, GetterSetterEntry[]>();
+		Map<IField, GetterSetterEntry[]> result= new LinkedHashMap<>();
 		for (int i= 0; i < fields.length; i++) {
 			IField field= fields[i];
 			int flags= field.getFlags();
 			if (!Flags.isEnum(flags)) {
-				List<GetterSetterEntry> l= new ArrayList<GetterSetterEntry>(2);
+				List<GetterSetterEntry> l= new ArrayList<>(2);
 				if (GetterSetterUtil.getGetter(field) == null) {
 					l.add(new GetterSetterEntry(field, true, Flags.isFinal(flags)));
 					incNumEntries();
@@ -811,12 +802,14 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		/*
 		 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 		 */
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 
 		/*
 		 * @see ITreeContentProvider#getChildren(Object)
 		 */
+		@Override
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof IField)
 				return fGetterSetterEntries.get(parentElement);
@@ -826,6 +819,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		/*
 		 * @see ITreeContentProvider#getParent(Object)
 		 */
+		@Override
 		public Object getParent(Object element) {
 			if (element instanceof IMember)
 				return ((IMember) element).getDeclaringType();
@@ -837,6 +831,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		/*
 		 * @see ITreeContentProvider#hasChildren(Object)
 		 */
+		@Override
 		public boolean hasChildren(Object element) {
 			return getChildren(element).length > 0;
 		}
@@ -844,6 +839,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		/*
 		 * @see IStructuredContentProvider#getElements(Object)
 		 */
+		@Override
 		public Object[] getElements(Object inputElement) {
 			return fGetterSetterEntries.keySet().toArray();
 		}
@@ -851,6 +847,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		/*
 		 * @see IContentProvider#dispose()
 		 */
+		@Override
 		public void dispose() {
 			fGetterSetterEntries.clear();
 			fGetterSetterEntries= null;
@@ -907,7 +904,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		public GetterSetterTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, AddGetterSetterContentProvider contentProvider, CompilationUnitEditor editor, IType type) throws JavaModelException {
 			super(parent, labelProvider, contentProvider, editor, type, false);
 			fContentProvider= contentProvider;
-			fPreviousSelectedFinals= new ArrayList<GetterSetterEntry>();
+			fPreviousSelectedFinals= new ArrayList<>();
 
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
@@ -948,7 +945,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				fSettings.put(ALLOW_SETTERS_FOR_FINALS, allowSettersForFinals);
 				CheckboxTreeViewer treeViewer= getTreeViewer();
 				if (treeViewer != null) {
-					ArrayList<GetterSetterEntry> newChecked= new ArrayList<GetterSetterEntry>();
+					ArrayList<GetterSetterEntry> newChecked= new ArrayList<>();
 					if (allowSettersForFinals) {
 						newChecked.addAll(fPreviousSelectedFinals);
 					}
@@ -975,9 +972,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.dialogs.CheckedTreeSelectionDialog#createTreeViewer(org.eclipse.swt.widgets.Composite)
-		 */
 		@Override
 		protected CheckboxTreeViewer createTreeViewer(Composite parent) {
 			CheckboxTreeViewer treeViewer= super.createTreeViewer(parent);
@@ -1031,11 +1025,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			allowSettersForFinalsButton.setText(ActionMessages.AddGetterSetterAction_allow_setters_for_finals_description);
 
 			allowSettersForFinalsButton.addSelectionListener(new SelectionListener() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					boolean isSelected= (((Button) e.widget).getSelection());
 					allowSettersForFinals(isSelected);
 				}
 
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					widgetSelected(e);
 				}
@@ -1072,7 +1068,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 		private Object[] getGetterSetterElements(boolean isGetter) {
 			Object[] allFields= fContentProvider.getElements(null);
-			Set<GetterSetterEntry> result= new HashSet<GetterSetterEntry>();
+			Set<GetterSetterEntry> result= new HashSet<>();
 			for (int i= 0; i < allFields.length; i++) {
 				IField field= (IField) allFields[i];
 				GetterSetterEntry[] entries= getEntries(field);

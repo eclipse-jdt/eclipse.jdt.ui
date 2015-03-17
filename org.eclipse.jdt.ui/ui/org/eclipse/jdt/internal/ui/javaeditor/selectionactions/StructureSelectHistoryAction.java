@@ -39,6 +39,7 @@ public class StructureSelectHistoryAction extends Action implements IUpdate {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.STRUCTURED_SELECTION_HISTORY_ACTION);
 	}
 
+	@Override
 	public void update() {
 		setEnabled(!fHistory.isEmpty());
 	}

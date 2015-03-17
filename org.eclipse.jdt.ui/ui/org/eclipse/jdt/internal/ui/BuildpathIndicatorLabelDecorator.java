@@ -27,9 +27,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 public class BuildpathIndicatorLabelDecorator extends AbstractJavaElementLabelDecorator {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void decorate(Object element, IDecoration decoration) {
 		ImageDescriptor overlay= getOverlay(element);

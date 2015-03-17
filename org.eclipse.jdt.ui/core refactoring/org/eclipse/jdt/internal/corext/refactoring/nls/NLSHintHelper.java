@@ -214,7 +214,7 @@ public class NLSHintHelper {
 		if (astRoot == null)
 			return null;
 
-		final Map<Object, Object> resultCollector= new HashMap<Object, Object>(5);
+		final Map<Object, Object> resultCollector= new HashMap<>(5);
 		final Object RESULT_KEY= new Object();
 		final Object FIELD_KEY= new Object();
 

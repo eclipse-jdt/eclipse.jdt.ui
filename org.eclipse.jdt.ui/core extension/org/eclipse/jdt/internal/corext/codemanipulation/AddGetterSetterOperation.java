@@ -287,6 +287,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 	/*
 	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public final void run(IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
@@ -314,9 +315,9 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
 			fSkipAllExisting= (fSkipExistingQuery == null);
 			
-			Set<IField> accessors = new HashSet<IField>(Arrays.asList(fAccessorFields));
-			Set<IField> getters = new HashSet<IField>(Arrays.asList(fGetterFields));
-			Set<IField> setters= new HashSet<IField>(Arrays.asList(fSetterFields));
+			Set<IField> accessors = new HashSet<>(Arrays.asList(fAccessorFields));
+			Set<IField> getters = new HashSet<>(Arrays.asList(fGetterFields));
+			Set<IField> setters= new HashSet<>(Arrays.asList(fSetterFields));
 			IField[] fields= fType.getFields(); // generate methods in order of field declarations
 			if (!fSort) {
 				for (int i= 0; i < fields.length; i++) {

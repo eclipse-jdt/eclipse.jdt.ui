@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public class CodeFormatterTest extends CoreTests {
 
-	private static final Class THIS= CodeFormatterTest.class;
+	private static final Class<CodeFormatterTest> THIS= CodeFormatterTest.class;
 
 	private IJavaProject fJProject1;
 
@@ -66,19 +66,21 @@ public class CodeFormatterTest extends CoreTests {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "999");
 		JavaCore.setOptions(options);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 	}

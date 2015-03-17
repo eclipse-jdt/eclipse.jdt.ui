@@ -116,6 +116,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 		 * @see Comparator#compare(java.lang.Object, java.lang.Object)
 		 * @see CompilationUnitSorter#sort(int, org.eclipse.jdt.core.ICompilationUnit, int[], java.util.Comparator, int, org.eclipse.core.runtime.IProgressMonitor)
 		 */
+		@Override
 		public int compare(BodyDeclaration bodyDeclaration1, BodyDeclaration bodyDeclaration2) {
 			boolean preserved1= fDoNotSortFields && isSortPreserved(bodyDeclaration1);
 			boolean preserved2= fDoNotSortFields && isSortPreserved(bodyDeclaration2);
@@ -320,6 +321,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 	 * resource
 	 * </ul>
 	 */
+	@Override
 	public void run(IProgressMonitor monitor) throws CoreException {
 		CompilationUnitSorter.sort(ASTProvider.SHARED_AST_LEVEL, fCompilationUnit, fPositions, new DefaultJavaElementComparator(fDoNotSortFields), 0, monitor);
 	}

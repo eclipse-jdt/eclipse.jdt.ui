@@ -60,12 +60,9 @@ public class LibraryContainer extends PackageFragmentRootContainer {
 		return PackagesMessages.LibraryContainer_name;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.packageview.PackageFragmentRootContainer#getPackageFragmentRoots()
-	 */
 	@Override
 	public IPackageFragmentRoot[] getPackageFragmentRoots() {
-		List<IPackageFragmentRoot> list= new ArrayList<IPackageFragmentRoot>();
+		List<IPackageFragmentRoot> list= new ArrayList<>();
 		try {
 			IPackageFragmentRoot[] roots= getJavaProject().getPackageFragmentRoots();
 			for (int i= 0; i < roots.length; i++) {

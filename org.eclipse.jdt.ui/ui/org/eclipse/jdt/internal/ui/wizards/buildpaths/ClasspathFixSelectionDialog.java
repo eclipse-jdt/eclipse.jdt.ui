@@ -78,6 +78,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 		final ClasspathFixProposal[][] classPathFixProposals= { null };
 		try {
 			context.run(true, true, new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, NewWizardMessages.ClasspathFixSelectionDialog_eval_proposals_error_message, null);
 					classPathFixProposals[0]= ClasspathFixProcessorDescriptor.getProposals(project, missingType, status);
@@ -95,6 +96,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 		if (dialog.open() == Window.OK) {
 			try {
 				context.run(false, true, new IRunnableWithProgress() { // don't fork, because change execution must be in UI thread
+					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						if (monitor == null) {
 							monitor= new NullProgressMonitor();
@@ -221,7 +223,7 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 	protected final void configureBuildPathPressed() {
 		cancelPressed();
 		String id= BUILD_PATH_PAGE_ID;
-		Map<Object, Boolean> input= new HashMap<Object, Boolean>();
+		Map<Object, Boolean> input= new HashMap<>();
 		input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
 		if (PreferencesUtil.createPropertyDialogOn(getShell(), fProject, id, new String[] { id }, input).open() != Window.OK) {
 			return;
@@ -253,18 +255,22 @@ public class ClasspathFixSelectionDialog extends StatusDialog {
 
 	private class ListenerMix implements IDoubleClickListener, ISelectionChangedListener, SelectionListener {
 
+		@Override
 		public void doubleClick(DoubleClickEvent event) {
 			performDoubleClick();
 		}
 
+		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			performSelectionChanged();
 		}
 
+		@Override
 		public void widgetDefaultSelected(SelectionEvent e) {
 			configureBuildPathPressed();
 		}
 
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 			configureBuildPathPressed();
 		}

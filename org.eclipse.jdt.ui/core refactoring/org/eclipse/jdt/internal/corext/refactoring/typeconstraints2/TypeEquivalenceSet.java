@@ -47,14 +47,14 @@ public class TypeEquivalenceSet {
 
 	public void addAll(ConstraintVariable2[] variables) {
 		if (fVariables.length * variables.length > 100) {
-			LinkedHashSet<ConstraintVariable2> result= new LinkedHashSet<ConstraintVariable2>(fVariables.length + variables.length);
+			LinkedHashSet<ConstraintVariable2> result= new LinkedHashSet<>(fVariables.length + variables.length);
 			result.addAll(Arrays.asList(fVariables));
 			result.addAll(Arrays.asList(variables));
 			fVariables= result.toArray(new ConstraintVariable2[result.size()]);
 
 		} else {
 			List<ConstraintVariable2> elements= Arrays.asList(fVariables);
-			ArrayList<ConstraintVariable2> result= new ArrayList<ConstraintVariable2>(fVariables.length + variables.length);
+			ArrayList<ConstraintVariable2> result= new ArrayList<>(fVariables.length + variables.length);
 			result.addAll(elements);
 			for (int i= 0; i < variables.length; i++) {
 				ConstraintVariable2 right= variables[i];

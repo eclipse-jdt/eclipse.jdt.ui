@@ -26,9 +26,7 @@ public class NonRelevantFilter extends ViewerFilter {
 		fShowNonRelevant= showNonRelevant;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-	 */
+	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if (fShowNonRelevant)
 			return true;

@@ -37,6 +37,7 @@ public class MultiElementListSelectorExample {
 
 
 		ISelectionStatusValidator validator= new ISelectionStatusValidator() {
+			@Override
 			public IStatus validate(Object[] selection) {
 				if (selection != null && selection.length == 1) {
 					return new StatusInfo();
@@ -54,6 +55,7 @@ public class MultiElementListSelectorExample {
 		Random random= new Random();
 
 		ILabelProvider elementRenderer= new org.eclipse.jface.viewers.LabelProvider() {
+			@Override
 			public String getText(Object element) {
 				return element.toString();
 			}

@@ -136,9 +136,7 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 	 */
 	protected abstract void run(IClassFile file, IFileStore parent, IProgressMonitor monitor) throws CoreException;
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void run(IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();

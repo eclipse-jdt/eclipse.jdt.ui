@@ -84,6 +84,7 @@ public class BuildActionGroup extends ActionGroup {
 		/*
 		 * @see org.eclipse.jface.window.IShellProvider#getShell()
 		 */
+		@Override
 		public Shell getShell() {
 			return fShell;
 		}
@@ -148,18 +149,12 @@ public class BuildActionGroup extends ActionGroup {
 		return fRefreshAction;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillActionBars(IActionBars actionBar) {
 		super.fillActionBars(actionBar);
 		setGlobalActionHandlers(actionBar);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		ISelection selection= getContext().getSelection();
@@ -170,9 +165,6 @@ public class BuildActionGroup extends ActionGroup {
 		super.fillContextMenu(menu);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void dispose() {
 		fSelectionProvider.removeSelectionChangedListener(fBuildAction);

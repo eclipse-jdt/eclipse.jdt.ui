@@ -50,6 +50,7 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 			super(test);
 		}
 
+		@Override
 		protected void setUp() throws Exception {
 			fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 			// we must make sure that the performance test are compatible to 2.1.3 & 3.0 so use rt13
@@ -58,6 +59,7 @@ public class TypeHierarchyPerfTest extends JdtPerformanceTestCase {
 			fJunitSrcRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		}
 
+		@Override
 		protected void tearDown() throws Exception {
 			if (fJProject1 != null && fJProject1.exists())
 				JavaProjectHelper.delete(fJProject1);

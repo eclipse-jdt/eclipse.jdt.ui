@@ -29,9 +29,7 @@ import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
  */
 public final class JavaModelAdapterFactory implements IAdapterFactory {
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Object adaptable, Class<T> adapter) {
 		if (adaptable instanceof JavaModelProvider) {
@@ -51,9 +49,7 @@ public final class JavaModelAdapterFactory implements IAdapterFactory {
 		return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Class<?>[] getAdapterList() {
 		return new Class[] { ResourceMapping.class, ISynchronizationCompareAdapter.class, IResource.class};
 	}

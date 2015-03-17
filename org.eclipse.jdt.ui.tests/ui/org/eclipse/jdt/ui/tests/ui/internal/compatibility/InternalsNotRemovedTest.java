@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 IBM Corporation and others.
+ * Copyright (c) 2010, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import org.eclipse.text.tests.Accessor;
  * @deprecated to hide deprecation warnings
  * @since 3.6
  */
+@Deprecated
 public class InternalsNotRemovedTest {
 
 	static final String[] INTERNAL_FIELDS= new String[] {
@@ -42,7 +43,7 @@ public class InternalsNotRemovedTest {
 
 	};
 
-	static final Class[] INTERNAL_TYPES= new Class[] {
+	static final Class<?>[] INTERNAL_TYPES= new Class[] {
 			org.eclipse.jdt.internal.corext.SourceRange.class,
 			org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper.class,
 			org.eclipse.jdt.internal.ui.util.PixelConverter.class,

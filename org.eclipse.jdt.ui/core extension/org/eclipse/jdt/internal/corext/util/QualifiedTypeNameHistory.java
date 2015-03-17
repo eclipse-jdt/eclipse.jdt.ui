@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.corext.util;
 
 import org.w3c.dom.Element;
 
-public class QualifiedTypeNameHistory extends History {
+public class QualifiedTypeNameHistory extends History<String, String> {
 
 	private static final String NODE_ROOT= "qualifiedTypeNameHistroy"; //$NON-NLS-1$
 	private static final String NODE_TYPE_INFO= "fullyQualifiedTypeName"; //$NON-NLS-1$
@@ -33,27 +33,18 @@ public class QualifiedTypeNameHistory extends History {
 		load();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void setAttributes(Object object, Element element) {
 		element.setAttribute(NODE_NAME, (String)object);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
-	protected Object createFromElement(Element element) {
+	protected String createFromElement(Element element) {
 		return element.getAttribute(NODE_NAME);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
-	protected Object getKey(Object object) {
+	protected String getKey(String object) {
 		return object;
 	}
 

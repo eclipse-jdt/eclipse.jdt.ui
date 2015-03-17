@@ -52,9 +52,7 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 	 */
 	private final class BuildPathChangeListener implements IElementChangedListener {
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
-		 */
+		@Override
 		public void elementChanged(ElementChangedEvent event) {
 			IJavaProject javaProject= getCachedJavaProject();
 			if (javaProject == null)
@@ -148,9 +146,6 @@ public class SWTTemplateCompletionProposalComputer extends AbstractTemplateCompl
 		return new TemplateEngine(contextType);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.java.TemplateCompletionProposalComputer#computeCompletionEngine(org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
-	 */
 	@Override
 	protected TemplateEngine computeCompletionEngine(JavaContentAssistInvocationContext context) {
 		ICompilationUnit unit= context.getCompilationUnit();

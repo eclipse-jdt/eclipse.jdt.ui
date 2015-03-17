@@ -53,7 +53,7 @@ public final class TypeVariableUtil {
 		else {
 			TypeVariableMaplet source= null;
 			TypeVariableMaplet target= null;
-			final Set<TypeVariableMaplet> set= new HashSet<TypeVariableMaplet>(first.length * second.length);
+			final Set<TypeVariableMaplet> set= new HashSet<>(first.length * second.length);
 			for (int index= 0; index < first.length; index++) {
 				for (int offset= 0; offset < second.length; offset++) {
 					source= first[index];
@@ -125,7 +125,7 @@ public final class TypeVariableUtil {
 			}
 		} else if (member instanceof IMethod) {
 			final IMethod method= (IMethod) member;
-			final HashSet<String> set= new HashSet<String>();
+			final HashSet<String> set= new HashSet<>();
 			final String[] types= method.getParameterTypes();
 			for (int index= 0; index < types.length; index++)
 				extractTypeVariables(types[index], set);
@@ -142,7 +142,7 @@ public final class TypeVariableUtil {
 			Assert.isTrue(false);
 		}
 
-		final List<String> list= new ArrayList<String>(variables.length);
+		final List<String> list= new ArrayList<>(variables.length);
 		String variable= null;
 		for (int index= 0; index < variables.length; index++) {
 			variable= variables[index];
@@ -177,10 +177,10 @@ public final class TypeVariableUtil {
 		List<String> list= null;
 		final String[] types= getReferencedVariables(declaring, member);
 		if (mapping.length == 0) {
-			list= new ArrayList<String>(types.length);
+			list= new ArrayList<>(types.length);
 			list.addAll(Arrays.asList(types));
 		} else {
-			final Set<String> mapped= new HashSet<String>(types.length);
+			final Set<String> mapped= new HashSet<>(types.length);
 			String type= null;
 			for (int index= 0; index < types.length; index++) {
 				for (int offset= 0; offset < mapping.length; offset++) {
@@ -189,7 +189,7 @@ public final class TypeVariableUtil {
 						mapped.add(type);
 				}
 			}
-			list= new ArrayList<String>(types.length - mapped.size());
+			list= new ArrayList<>(types.length - mapped.size());
 			for (int index= 0; index < types.length; index++) {
 				type= types[index];
 				if (!mapped.contains(type))
@@ -255,7 +255,7 @@ public final class TypeVariableUtil {
 		Assert.isNotNull(domain);
 		Assert.isNotNull(range);
 
-		final Set<TypeVariableMaplet> set= new HashSet<TypeVariableMaplet>();
+		final Set<TypeVariableMaplet> set= new HashSet<>();
 		ITypeParameter source= null;
 		String target= null;
 		String element= null;
@@ -312,7 +312,7 @@ public final class TypeVariableUtil {
 		Assert.isNotNull(range);
 		Assert.isTrue(domain.length == 0 || domain.length == range.length);
 
-		final List<TypeVariableMaplet> list= new ArrayList<TypeVariableMaplet>();
+		final List<TypeVariableMaplet> list= new ArrayList<>();
 		String source= null;
 		String target= null;
 		for (int index= 0; index < domain.length; index++) {

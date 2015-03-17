@@ -45,10 +45,12 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 
 	private static class AtJavaIdentifierDetector implements IWordDetector {
 
+		@Override
 		public boolean isWordStart(char c) {
 			return c == '@' || Character.isJavaIdentifierStart(c);
 		}
 
+		@Override
 		public boolean isWordPart(char c) {
 			return c == '.' || Character.isJavaIdentifierPart(c);
 		}
@@ -61,7 +63,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 		 * Uppercase words
 		 * @since 3.0
 		 */
-		private Map<CharacterBuffer, IToken> fUppercaseWords= new HashMap<CharacterBuffer, IToken>();
+		private Map<CharacterBuffer, IToken> fUppercaseWords= new HashMap<>();
 		/**
 		 * <code>true</code> if task tag detection is case-sensitive.
 		 * @since 3.0
@@ -213,7 +215,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 	 */
 	@Override
 	protected List<IRule> createRules() {
-		List<IRule> list= new ArrayList<IRule>();
+		List<IRule> list= new ArrayList<>();
 		Token defaultToken= getToken(fDefaultTokenProperty);
 
 		List<WordMatcher> matchers= createMatchers();
@@ -235,7 +237,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 	 * @return the list of word matchers
 	 */
 	protected List<WordMatcher> createMatchers() {
-		List<WordMatcher> list= new ArrayList<WordMatcher>();
+		List<WordMatcher> list= new ArrayList<>();
 
 		// Add rule for Task Tags.
 		boolean isCaseSensitive= true;

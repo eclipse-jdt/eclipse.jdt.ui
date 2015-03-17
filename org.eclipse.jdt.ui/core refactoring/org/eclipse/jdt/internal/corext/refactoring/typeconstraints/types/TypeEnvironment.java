@@ -105,15 +105,15 @@ public class TypeEnvironment {
 
 	private TType OBJECT_TYPE= null;
 
-	private List<Map<TType, ArrayType>>      fArrayTypes= new ArrayList<Map<TType, ArrayType>>();
-	private Map<IJavaElement, StandardType>  fStandardTypes= new HashMap<IJavaElement, StandardType>();
-	private Map<IJavaElement, GenericType>   fGenericTypes= new HashMap<IJavaElement, GenericType>();
-	private Map<ProjectKeyPair, ParameterizedType> fParameterizedTypes= new HashMap<ProjectKeyPair, ParameterizedType>();
-	private Map<IJavaElement, RawType>       fRawTypes= new HashMap<IJavaElement, RawType>();
-	private Map<IJavaElement, TypeVariable>  fTypeVariables= new HashMap<IJavaElement, TypeVariable>();
-	private Map<ProjectKeyPair, CaptureType> fCaptureTypes= new HashMap<ProjectKeyPair, CaptureType>();
-	private Map<TType, ExtendsWildcardType>  fExtendsWildcardTypes= new HashMap<TType, ExtendsWildcardType>();
-	private Map<TType, SuperWildcardType>    fSuperWildcardTypes= new HashMap<TType, SuperWildcardType>();
+	private List<Map<TType, ArrayType>>      fArrayTypes= new ArrayList<>();
+	private Map<IJavaElement, StandardType>  fStandardTypes= new HashMap<>();
+	private Map<IJavaElement, GenericType>   fGenericTypes= new HashMap<>();
+	private Map<ProjectKeyPair, ParameterizedType> fParameterizedTypes= new HashMap<>();
+	private Map<IJavaElement, RawType>       fRawTypes= new HashMap<>();
+	private Map<IJavaElement, TypeVariable>  fTypeVariables= new HashMap<>();
+	private Map<ProjectKeyPair, CaptureType> fCaptureTypes= new HashMap<>();
+	private Map<TType, ExtendsWildcardType>  fExtendsWildcardTypes= new HashMap<>();
+	private Map<TType, SuperWildcardType>    fSuperWildcardTypes= new HashMap<>();
 	private UnboundWildcardType fUnboundWildcardType= null;
 
 	private static final int MAX_ENTRIES= 1024;
@@ -137,8 +137,8 @@ public class TypeEnvironment {
 	private final boolean fRemoveCapures;
 
 	public static ITypeBinding[] createTypeBindings(TType[] types, IJavaProject project) {
-		final Map<String, Object> mapping= new HashMap<String, Object>();
-		List<String> keys= new ArrayList<String>();
+		final Map<String, Object> mapping= new HashMap<>();
+		List<String> keys= new ArrayList<>();
 		for (int i= 0; i < types.length; i++) {
 			TType type= types[i];
 			String bindingKey= type.getBindingKey();
@@ -177,7 +177,7 @@ public class TypeEnvironment {
 	
 	public TypeEnvironment(boolean rememberSubtypes, boolean removeCapures) {
 		if (rememberSubtypes) {
-			fSubTypes= new HashMap<TType, ArrayList<TType>>();
+			fSubTypes= new HashMap<>();
 		}
 		fRemoveCapures= removeCapures;
 	}
@@ -299,7 +299,7 @@ public class TypeEnvironment {
 
 		ArrayList<TType> subtypes= fSubTypes.get(supertype);
 		if (subtypes == null) {
-			subtypes= new ArrayList<TType>(5);
+			subtypes= new ArrayList<>(5);
 			fSubTypes.put(supertype, subtypes);
 		} else {
 			Assert.isTrue(! subtypes.contains(result));
@@ -361,7 +361,7 @@ public class TypeEnvironment {
 		}
 		Map<TType, ArrayType> arrayTypes= fArrayTypes.get(index);
 		if (arrayTypes == null) {
-			arrayTypes= new HashMap<TType, ArrayType>();
+			arrayTypes= new HashMap<>();
 			fArrayTypes.set(index, arrayTypes);
 		}
 		return arrayTypes;

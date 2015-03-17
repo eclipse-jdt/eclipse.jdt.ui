@@ -58,20 +58,17 @@ public class ReorgQueries implements IReorgQueries {
 			return fShell;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries#createYesYesToAllNoNoToAllQuery(java.lang.String)
-	 */
+	@Override
 	public IConfirmQuery createYesYesToAllNoNoToAllQuery(String dialogTitle, boolean allowCancel, int queryID) {
 		return new YesYesToAllNoNoToAllQuery(getShell(), allowCancel, dialogTitle);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries#createYesNoQuery(java.lang.String)
-	 */
+	@Override
 	public IConfirmQuery createYesNoQuery(String dialogTitle, boolean allowCancel, int queryID) {
 		return new YesNoQuery(getShell(), allowCancel, dialogTitle);
 	}
 
+	@Override
 	public IConfirmQuery createSkipQuery(String dialogTitle, int queryID) {
 		return new SkipQuery(getShell(), dialogTitle);
 	}
@@ -89,9 +86,7 @@ public class ReorgQueries implements IReorgQueries {
 			fAllowCancel= allowCancel;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IConfirmQuery#confirm(java.lang.String)
-		 */
+		@Override
 		public boolean confirm(final String question) throws OperationCanceledException {
 			if (fYesToAll)
 				return true;
@@ -104,9 +99,7 @@ public class ReorgQueries implements IReorgQueries {
 			return getResult(result);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IConfirmQuery#confirm(java.lang.String, java.lang.Object[])
-		 */
+		@Override
 		public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
 			if (fYesToAll)
 				return true;
@@ -121,6 +114,7 @@ public class ReorgQueries implements IReorgQueries {
 
 		private Runnable createQueryRunnable(final String question, final int[] result) {
 			return new Runnable() {
+				@Override
 				public void run() {
 					int[] resultId= getResultIDs();
 
@@ -178,6 +172,7 @@ public class ReorgQueries implements IReorgQueries {
 
 		private Runnable createQueryRunnable(final String question, final Object[] elements, final int[] result) {
 			return new Runnable() {
+				@Override
 				public void run() {
 					ListDialog dialog= new YesNoListDialog(fShell, true);
 					dialog.setAddCancelButton(false);
@@ -227,18 +222,14 @@ public class ReorgQueries implements IReorgQueries {
 			fAllowCancel= allowCancel;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IConfirmQuery#confirm(java.lang.String)
-		 */
+		@Override
 		public boolean confirm(String question) throws OperationCanceledException {
 			final int[] result= new int[1];
 			fShell.getDisplay().syncExec(createQueryRunnable(question, result));
 			return getResult(result);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries.IConfirmQuery#confirm(java.lang.String, java.lang.Object[])
-		 */
+		@Override
 		public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
 			final int[] result= new int[1];
 			fShell.getDisplay().syncExec(createQueryRunnable(question, elements, result));
@@ -247,6 +238,7 @@ public class ReorgQueries implements IReorgQueries {
 
 		private Runnable createQueryRunnable(final String question, final int[] result){
 			return new Runnable() {
+				@Override
 				public void run() {
 					MessageDialog dialog= new MessageDialog(
 						fShell,
@@ -292,6 +284,7 @@ public class ReorgQueries implements IReorgQueries {
 
 		private Runnable createQueryRunnable(final String question, final Object[] elements, final int[] result) {
 			return new Runnable() {
+				@Override
 				public void run() {
 					ListDialog dialog= new YesNoListDialog(fShell, false);
 					dialog.setAddCancelButton(false);
@@ -335,9 +328,7 @@ public class ReorgQueries implements IReorgQueries {
 			fSkipAll= false;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IConfirmQuery#confirm(java.lang.String)
-		 */
+		@Override
 		public boolean confirm(String question) throws OperationCanceledException {
 			if (fSkipAll)
 				return false;
@@ -346,15 +337,14 @@ public class ReorgQueries implements IReorgQueries {
 			return getResult(result);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries.IConfirmQuery#confirm(java.lang.String, java.lang.Object[])
-		 */
+		@Override
 		public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
 			throw new UnsupportedOperationException("Not supported for skip queries"); //$NON-NLS-1$
 		}
 
 		private Runnable createQueryRunnable(final String question, final int[] result){
 			return new Runnable() {
+				@Override
 				public void run() {
 					MessageDialog dialog= new MessageDialog(
 						fShell,

@@ -94,9 +94,6 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see ILabelProvider#getImage
-	 */
 	@Override
 	public Image getImage(Object element) {
 		Image result= null;
@@ -162,9 +159,6 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		return new JavaElementImageDescriptor(desc, adornmentFlags, JavaElementImageProvider.BIG_SIZE);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
-	 */
 	@Override
 	public Color getForeground(Object element) {
 		if (element instanceof IMethod) {

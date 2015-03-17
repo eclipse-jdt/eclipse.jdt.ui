@@ -395,7 +395,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * call sites to the constructor.
 	 */
 	private ICompilationUnit[] collectAffectedUnits(SearchResultGroup[] searchHits) {
-		Collection<ICompilationUnit>	result= new ArrayList<ICompilationUnit>();
+		Collection<ICompilationUnit>	result= new ArrayList<>();
 		boolean hitInFactoryClass= false;
 
 		for(int i=0; i < searchHits.length; i++) {
@@ -456,7 +456,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * (i.e. are binary and therefore can't be modified).
 	 */
 	private SearchResultGroup[] excludeBinaryUnits(SearchResultGroup[] groups) {
-		Collection<SearchResultGroup>	result= new ArrayList<SearchResultGroup>();
+		Collection<SearchResultGroup>	result= new ArrayList<>();
 
 		for (int i = 0; i < groups.length; i++) {
 			SearchResultGroup	rg=   groups[i];
@@ -1016,6 +1016,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			 * This is necessary, since they can only be moved into the factory method invocation
 			 * after they have been rewritten.
 			 */
+			@Override
 			public int compare(SearchMatch m1, SearchMatch m2) {
 				return m2.getOffset() - m1.getOffset();
 			}
@@ -1152,15 +1153,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		unitRewriter.getListRewrite(factoryOwner, factoryOwner.getBodyDeclarationsProperty()).insertAt(fFactoryMethod, idx, gd);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ltk.core.refactoring.Refactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.IntroduceFactory_createChanges, fAllCallsTo.length);
 			final ITypeBinding binding= fFactoryOwningClass.resolveBinding();
-			final Map<String, String> arguments= new HashMap<String, String>();
+			final Map<String, String> arguments= new HashMap<>();
 			String project= null;
 			IJavaProject javaProject= fCUHandle.getJavaProject();
 			if (javaProject != null)
@@ -1218,9 +1216,6 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ltk.core.refactoring.Refactoring#getName()
-	 */
 	@Override
 	public String getName() {
 		return RefactoringCoreMessages.IntroduceFactory_name;

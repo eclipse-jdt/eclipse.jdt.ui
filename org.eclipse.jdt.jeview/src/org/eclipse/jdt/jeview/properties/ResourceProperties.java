@@ -41,7 +41,7 @@ public class ResourceProperties implements IPropertySource {
 	
 	protected IResource fResource;
 	
-	private static final ArrayList<IPropertyDescriptor> RESOURCE_PROPERTY_DESCRIPTORS= new ArrayList<IPropertyDescriptor>();
+	private static final ArrayList<IPropertyDescriptor> RESOURCE_PROPERTY_DESCRIPTORS= new ArrayList<>();
 	static {
 		addResourceDescriptor(new PropertyDescriptor(P_NAME, "name"));
 		addResourceDescriptor(new PropertyDescriptor(P_FULL_PATH, "fullPath"));
@@ -71,8 +71,9 @@ public class ResourceProperties implements IPropertySource {
 		fResource= resource;
 	}
 	
+	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		ArrayList<IPropertyDescriptor> result= new ArrayList<IPropertyDescriptor>(RESOURCE_PROPERTY_DESCRIPTORS);
+		ArrayList<IPropertyDescriptor> result= new ArrayList<>(RESOURCE_PROPERTY_DESCRIPTORS);
 //		if (fJavaElement instanceof IMember)
 //			result.addAll(MEMBER_PROPERTY_DESCRIPTORS);
 //		if (fJavaElement instanceof IParent)
@@ -82,6 +83,7 @@ public class ResourceProperties implements IPropertySource {
 	}
 
 	
+	@Override
 	public Object getPropertyValue(Object name) {
 		if (name.equals(P_NAME)) {
 			return fResource.getName();
@@ -118,18 +120,22 @@ public class ResourceProperties implements IPropertySource {
 		return null;
 	}
 	
+	@Override
 	public void setPropertyValue(Object name, Object value) {
 		// do nothing
 	}
 	
+	@Override
 	public Object getEditableValue() {
 		return this;
 	}
 	
+	@Override
 	public boolean isPropertySet(Object property) {
 		return false;
 	}
 	
+	@Override
 	public void resetPropertyValue(Object property) {
 		// do nothing
 	}

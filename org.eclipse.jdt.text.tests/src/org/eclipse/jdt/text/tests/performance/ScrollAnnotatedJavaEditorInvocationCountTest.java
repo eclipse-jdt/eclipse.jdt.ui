@@ -29,9 +29,10 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
  * @since 3.1
  * @deprecated since INVOCATION_COUNT dimension is no longer supported.
  */
+@Deprecated
 public class ScrollAnnotatedJavaEditorInvocationCountTest extends AbstractScrollAnnotatedJavaEditorTest {
 
-	private static final Class THIS= ScrollAnnotatedJavaEditorInvocationCountTest.class;
+	private static final Class<ScrollAnnotatedJavaEditorInvocationCountTest> THIS= ScrollAnnotatedJavaEditorInvocationCountTest.class;
 
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
@@ -41,6 +42,7 @@ public class ScrollAnnotatedJavaEditorInvocationCountTest extends AbstractScroll
 		return new PerformanceTestSetup(someTest);
 	}
 
+	@Override
 	protected void setUp(AbstractTextEditor editor) throws Exception {
 		editor.showChangeInformation(false); // don't need to test quick diff...
 		super.setUp(editor);

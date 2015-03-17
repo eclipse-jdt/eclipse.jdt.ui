@@ -61,14 +61,12 @@ public class TypesView extends JavaBrowsingPart {
 						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getAdapter(java.lang.Class)
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> key) {
 		if (key == IShowInTargetList.class) {
 			return (T) new IShowInTargetList() {
+				@Override
 				public String[] getShowInTargetIds() {
 					return new String[] { JavaUI.ID_PACKAGES, JavaPlugin.ID_RES_NAV };
 				}

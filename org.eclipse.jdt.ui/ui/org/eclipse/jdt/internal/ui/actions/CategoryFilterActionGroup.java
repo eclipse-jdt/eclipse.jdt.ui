@@ -70,9 +70,6 @@ public class CategoryFilterActionGroup extends ActionGroup {
 
 	private class CategoryFilter extends ViewerFilter {
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			if (element instanceof IMember) {
@@ -113,12 +110,18 @@ public class CategoryFilterActionGroup extends ActionGroup {
 					ActionMessages.CategoryFilterActionGroup_DeselectAllCategories
 					};
 
-			fCategoryList= new CheckedListDialogField<String>(this, buttons, new ILabelProvider() {
+			fCategoryList= new CheckedListDialogField<>(this, buttons, new ILabelProvider() {
+							@Override
 							public Image getImage(Object element) {return null;}
+							@Override
 							public String getText(Object element) {return (String)element;}
+							@Override
 							public void addListener(ILabelProviderListener listener) {}
+							@Override
 							public void dispose() {}
+							@Override
 							public boolean isLabelProperty(Object element, String property) {return false;}
+							@Override
 							public void removeListener(ILabelProviderListener listener) {}
 						});
 			fCategoryList.addElements(categories);
@@ -134,9 +137,6 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			}
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
@@ -148,17 +148,12 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			return composite;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		protected void computeResult() {
 			setResult(fCategoryList.getCheckedElements());
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void customButtonPressed(ListDialogField<String> field, int index) {
 			if (index == SELECT_ALL) {
 				fCategoryList.checkAll(true);
@@ -169,6 +164,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			}
 		}
 
+		@Override
 		public void doubleClicked(ListDialogField<String> field) {
 			List<?> selectedElements= field.getSelectedElements();
 			if (selectedElements.size() == 1) {
@@ -176,6 +172,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 				fCategoryList.setChecked(selected, !fCategoryList.isChecked(selected));
 			}
 		}
+		@Override
 		public void selectionChanged(ListDialogField<String> field) {}
 	}
 
@@ -188,9 +185,6 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			JavaPluginImages.setLocalImageDescriptors(this, "category_menu.png"); //$NON-NLS-1$
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void run() {
 			showCategorySelectionDialog(fInputElement);
@@ -211,9 +205,6 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			setId(FILTER_CATEGORY_ACTION_ID);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void run() {
 			super.run();
@@ -237,9 +228,6 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			setId(FILTER_CATEGORY_ACTION_ID);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void run() {
 			fFilterUncategorizedMembers= !fFilterUncategorizedMembers;
@@ -287,7 +275,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 
 		fFilter= new CategoryFilter();
 
-		fFilteredCategories= new HashSet<String>();
+		fFilteredCategories= new HashSet<>();
 		loadSettings();
 
 		fMenuAction= new CategoryFilterMenuAction();
@@ -353,6 +341,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		menuManager.add(new Separator(CATEGORY_MENU_GROUP_NAME));
 		menuManager.appendToGroup(CATEGORY_MENU_GROUP_NAME, fMenuAction);
 		fMenuListener= new IMenuListener() {
+					@Override
 					public void menuAboutToShow(IMenuManager manager) {
 						if (!manager.isVisible())
 							return;
@@ -363,9 +352,6 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		fMenuManager= menuManager;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -389,7 +375,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 				}
 			}
 		}
-		List<String> menuEntries= new ArrayList<String>();
+		List<String> menuEntries= new ArrayList<>();
 		boolean hasUncategorizedMembers= getMenuCategories(menuEntries);
 		Collections.sort(menuEntries, Collator.getInstance());
 
@@ -405,11 +391,12 @@ public class CategoryFilterActionGroup extends ActionGroup {
 	}
 
 	private boolean getMenuCategories(List<String> result) {
-		final HashSet<String> categories= new HashSet<String>();
-		final HashSet<String> foundLRUCategories= new HashSet<String>();
+		final HashSet<String> categories= new HashSet<>();
+		final HashSet<String> foundLRUCategories= new HashSet<>();
 		final boolean hasUncategorizedMember[]= new boolean[] {false};
 		for (int i= 0; i < fInputElement.length && !(hasUncategorizedMember[0] && foundLRUCategories.size() >= MAX_NUMBER_OF_CATEGORIES_IN_MENU); i++) {
 			collectCategories(fInputElement[i], new IResultCollector() {
+				@Override
 				public boolean accept(String[] cats) {
 					if (cats.length > 0) {
 						for (int j= 0; j < cats.length; j++) {
@@ -433,7 +420,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 			count++;
 		}
 		if (count < MAX_NUMBER_OF_CATEGORIES_IN_MENU) {
-			List<String> sortedCategories= new ArrayList<String>(categories);
+			List<String> sortedCategories= new ArrayList<>(categories);
 			Collections.sort(sortedCategories, Collator.getInstance());
 			for (Iterator<String> iter= sortedCategories.iterator(); iter.hasNext() && count < MAX_NUMBER_OF_CATEGORIES_IN_MENU;) {
 				String element= iter.next();
@@ -483,6 +470,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 	private void fireSelectionChange() {
 		fViewer.getControl().setRedraw(false);
 		BusyIndicator.showWhile(fViewer.getControl().getDisplay(), new Runnable() {
+			@Override
 			public void run() {
 				fViewer.refresh();
 			}
@@ -495,9 +483,10 @@ public class CategoryFilterActionGroup extends ActionGroup {
 	}
 
 	private void showCategorySelectionDialog(IJavaElement[] input) {
-		final HashSet<String> categories= new HashSet<String>();
+		final HashSet<String> categories= new HashSet<>();
 		for (int i= 0; i < input.length; i++) {
 			collectCategories(input[i], new IResultCollector() {
+				@Override
 				public boolean accept(String[] cats) {
 					for (int j= 0; j < cats.length; j++) {
 						categories.add(cats[j]);
@@ -506,7 +495,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 				}
 			});
 		}
-		CategoryFilterSelectionDialog dialog= new CategoryFilterSelectionDialog(fViewer.getControl().getShell(), new ArrayList<String>(categories), new ArrayList<String>(fFilteredCategories));
+		CategoryFilterSelectionDialog dialog= new CategoryFilterSelectionDialog(fViewer.getControl().getShell(), new ArrayList<>(categories), new ArrayList<>(fFilteredCategories));
 		if (dialog.open() == Window.OK) {
 			Object[] selected= dialog.getResult();
 			for (Iterator<String> iter= categories.iterator(); iter.hasNext();) {

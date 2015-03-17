@@ -189,7 +189,7 @@ public class ElementValidator {
 	}
 
 	private static IResource[] getResources(IAdaptable[] elements) {
-		Set<IResource> result= new HashSet<IResource>();
+		Set<IResource> result= new HashSet<>();
 		for (int i= 0; i < elements.length; i++) {
 			IAdaptable element= elements[i];
 			IResource resource= null;

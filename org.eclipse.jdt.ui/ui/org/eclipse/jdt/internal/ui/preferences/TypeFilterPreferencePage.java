@@ -94,18 +94,22 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 			return field.getSelectedElements().size() == 1;
 		}
 
-        public void customButtonPressed(ListDialogField<String> field, int index) {
+        @Override
+		public void customButtonPressed(ListDialogField<String> field, int index) {
         	doButtonPressed(index);
         }
 
-        public void selectionChanged(ListDialogField<String> field) {
+        @Override
+		public void selectionChanged(ListDialogField<String> field) {
 			fFilterListField.enableButton(IDX_EDIT, canEdit(field));
         }
 
-        public void dialogFieldChanged(DialogField field) {
+        @Override
+		public void dialogFieldChanged(DialogField field) {
         }
 
-        public void doubleClicked(ListDialogField<String> field) {
+        @Override
+		public void doubleClicked(ListDialogField<String> field) {
         	if (canEdit(field)) {
 				doButtonPressed(IDX_EDIT);
         	}
@@ -140,7 +144,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 
 		TypeFilterAdapter adapter= new TypeFilterAdapter();
 
-		fFilterListField= new CheckedListDialogField<String>(adapter, buttonLabels, new LabelProvider());
+		fFilterListField= new CheckedListDialogField<>(adapter, buttonLabels, new LabelProvider());
 		fFilterListField.setDialogFieldListener(adapter);
 		fFilterListField.setLabelText(PreferencesMessages.TypeFilterPreferencePage_list_label);
 		fFilterListField.setCheckAllButtonIndex(IDX_SELECT);
@@ -194,7 +198,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		spacer.setLayoutData(gd);
 		
 		String label= PreferencesMessages.TypeFilterPreferencePage_restricted_link;
-		Map<String, String> targetInfo= new java.util.HashMap<String, String>(2);
+		Map<String, String> targetInfo= new java.util.HashMap<>(2);
 		targetInfo.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_KEY,	JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE);
 		targetInfo.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
 		createPreferencePageLink(composite, label, targetInfo);
@@ -224,7 +228,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 		String enabled= fromDefault ? store.getDefaultString(PREF_FILTER_ENABLED) : store.getString(PREF_FILTER_ENABLED);
 		String disabled= fromDefault ? store.getDefaultString(PREF_FILTER_DISABLED) : store.getString(PREF_FILTER_DISABLED);
 
-		ArrayList<String> res= new ArrayList<String>();
+		ArrayList<String> res= new ArrayList<>();
 
 		String[] enabledEntries= unpackOrderList(enabled);
 		for (int i= 0; i < enabledEntries.length; i++) {
@@ -305,6 +309,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 	}
 
 
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 

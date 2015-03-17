@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring
 
 public class PushDownTests extends RefactoringTest {
 
-	private static final Class clazz= PushDownTests.class;
+	private static final Class<PushDownTests> clazz= PushDownTests.class;
 
 	private static final String REFACTORING_PATH= "PushDown/";
 
@@ -54,6 +54,7 @@ public class PushDownTests extends RefactoringTest {
 		return new Java15Setup(someTest);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -84,8 +85,8 @@ public class PushDownTests extends RefactoringTest {
 	private void prepareForInputCheck(PushDownRefactoringProcessor processor, IMethod[] selectedMethods, IField[] selectedFields, String[] namesOfMethodsToPullUp, String[][] signaturesOfMethodsToPullUp, String[] namesOfFieldsToPullUp, String[] namesOfMethodsToDeclareAbstract, String[][] signaturesOfMethodsToDeclareAbstract) {
 		IMethod[] methodsToPushDown= findMethods(selectedMethods, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp);
 		IField[] fieldsToPushDown= findFields(selectedFields, namesOfFieldsToPullUp);
-		List membersToPushDown= Arrays.asList(merge(methodsToPushDown, fieldsToPushDown));
-		List methodsToDeclareAbstract= Arrays.asList(findMethods(selectedMethods, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract));
+		List<IMember> membersToPushDown= Arrays.asList(merge(methodsToPushDown, fieldsToPushDown));
+		List<IMethod> methodsToDeclareAbstract= Arrays.asList(findMethods(selectedMethods, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract));
 
 		MemberActionInfo[] infos= processor.getMemberActionInfos();
 		for (int i= 0; i < infos.length; i++) {
@@ -198,25 +199,25 @@ public class PushDownTests extends RefactoringTest {
 		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 
 		processor.computeAdditionalRequiredMembersToPushDown(new NullProgressMonitor());
-		List required= getMembersToPushDown(processor);
+		List<IMember> required= getMembersToPushDown(processor);
 		processor.getMemberActionInfos();
 		IField[] expectedFields= getFields(type, expectedFieldNames);
 		IMethod[] expectedMethods= getMethods(type, expectedMethodNames, expectedMethodSignatures);
-		List expected= Arrays.asList(merge(expectedFields, expectedMethods));
+		List<IMember> expected= Arrays.asList(merge(expectedFields, expectedMethods));
 		assertEquals("incorrect size", expected.size(), required.size());
-		for (Iterator iter= expected.iterator(); iter.hasNext();) {
+		for (Iterator<IMember> iter= expected.iterator(); iter.hasNext();) {
 			Object each= iter.next();
 			assertTrue ("required does not contain " + each, required.contains(each));
 		}
-		for (Iterator iter= required.iterator(); iter.hasNext();) {
+		for (Iterator<IMember> iter= required.iterator(); iter.hasNext();) {
 			Object each= iter.next();
 			assertTrue ("expected does not contain " + each, expected.contains(each));
 		}
 	}
 
-	private static List getMembersToPushDown(PushDownRefactoringProcessor processor) {
+	private static List<IMember> getMembersToPushDown(PushDownRefactoringProcessor processor) {
 		MemberActionInfo[] infos= processor.getMemberActionInfos();
-		List result= new ArrayList(infos.length);
+		List<IMember> result= new ArrayList<>(infos.length);
 		for (int i= 0; i < infos.length; i++) {
 			if (infos[i].isToBePushedDown())
 				result.add(infos[i].getMember());

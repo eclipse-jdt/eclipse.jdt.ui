@@ -95,7 +95,7 @@ import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 public class FatJarExportTests extends TestCase {
 
-	private static final Class THIS= FatJarExportTests.class;
+	private static final Class<FatJarExportTests> THIS= FatJarExportTests.class;
 
 	private static final int JAVA_RUN_TIMEOUT= 50; // 10th of a second
 	
@@ -111,13 +111,11 @@ public class FatJarExportTests extends TestCase {
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fMainRoot;
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected void setUp() throws Exception {
 		fProject= ProjectTestSetup.getProject();
 
-		Map options= fProject.getOptions(false);
+		Map<String, String> options= fProject.getOptions(false);
 		String compliance= JavaCore.VERSION_1_4;
 		JavaModelUtil.setComplianceOptions(options, compliance);
 		JavaModelUtil.setDefaultClassfileOptions(options, compliance); // complete compliance options
@@ -138,9 +136,7 @@ public class FatJarExportTests extends TestCase {
 		fragment.createCompilationUnit("Main.java", buf.toString(), true, null); //$NON-NLS-1$
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fProject, ProjectTestSetup.getDefaultClasspath());
 	}

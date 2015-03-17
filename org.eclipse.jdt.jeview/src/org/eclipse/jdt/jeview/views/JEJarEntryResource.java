@@ -82,7 +82,7 @@ public class JEJarEntryResource extends JEAttribute {
 
 	@Override
 	public JEAttribute[] getChildren() {
-		ArrayList<JEAttribute> result= new ArrayList<JEAttribute>();
+		ArrayList<JEAttribute> result= new ArrayList<>();
 		
 		Object parent= fJarEntryResource.getParent();
 		if (parent instanceof IJarEntryResource)

@@ -57,7 +57,7 @@ public final class SuperTypeConstraintsModel {
 	private static class HashedSet<E> extends AbstractSet<E> {
 
 		/** The backing hash map */
-		private final Map<E, E> fImplementation= new HashMap<E, E>();
+		private final Map<E, E> fImplementation= new HashMap<>();
 
 		/*
 		 * @see java.util.AbstractCollection#add(java.lang.Object)
@@ -180,7 +180,7 @@ public final class SuperTypeConstraintsModel {
 			Collection<ITypeConstraint2> collection= (Collection<ITypeConstraint2>) data;
 			collection.add(constraint);
 		} else {
-			final Collection<Object> usage= new ArrayList<Object>(2);
+			final Collection<Object> usage= new ArrayList<>(2);
 			usage.add(data);
 			usage.add(constraint);
 			variable.setData(DATA_USAGE, usage);
@@ -188,16 +188,16 @@ public final class SuperTypeConstraintsModel {
 	}
 
 	/** The cast variables (element type: <code>CastVariable2</code>) */
-	private final Collection<CastVariable2> fCastVariables= new ArrayList<CastVariable2>();
+	private final Collection<CastVariable2> fCastVariables= new ArrayList<>();
 
 	/** The compliance level */
 	private int fCompliance= 3;
 
 	/** The set of constraint variables (element type: <code>ConstraintVariable2</code>) */
-	private final HashedSet<ConstraintVariable2> fConstraintVariables= new HashedSet<ConstraintVariable2>();
+	private final HashedSet<ConstraintVariable2> fConstraintVariables= new HashedSet<>();
 
 	/** The covariant type constraints (element type: <code>CovariantTypeConstraint</code>) */
-	private final Collection<ITypeConstraint2> fCovariantTypeConstraints= new ArrayList<ITypeConstraint2>();
+	private final Collection<ITypeConstraint2> fCovariantTypeConstraints= new ArrayList<>();
 
 	/** The type environment to use */
 	private TypeEnvironment fEnvironment;
@@ -220,7 +220,7 @@ public final class SuperTypeConstraintsModel {
 	};
 
 	/** The set of type constraints (element type: <code>ITypeConstraint2</code>) */
-	private final Set<ITypeConstraint2> fTypeConstraints= new HashSet<ITypeConstraint2>();
+	private final Set<ITypeConstraint2> fTypeConstraints= new HashSet<>();
 
 	/**
 	 * Creates a new super type constraints model.

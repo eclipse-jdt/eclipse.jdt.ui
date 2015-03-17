@@ -65,17 +65,11 @@ public class NLSAccessorFieldRenameParticipant extends RenameParticipant {
 	public NLSAccessorFieldRenameParticipant() {
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getName() {
 		return NLSMessages.NLSAccessorFieldRenameParticipant_participantName;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) throws OperationCanceledException {
 		if (pm == null)
@@ -125,7 +119,7 @@ public class NLSAccessorFieldRenameParticipant extends RenameParticipant {
 				String changeDescription= Messages.format(NLSMessages.NLSAccessorFieldRenameParticipant_changeDescription, new Object[] { fField.getElementName(), fNewName });
 				fChange.addTextEditChangeGroup(new TextEditChangeGroup(fChange, new TextEditGroup(changeDescription, edit)));
 
-				ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
+				ResourceChangeChecker checker= context.getChecker(ResourceChangeChecker.class);
 				IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
 				deltaFactory.change((IFile) resourceBundle);
 			} finally {
@@ -144,26 +138,17 @@ public class NLSAccessorFieldRenameParticipant extends RenameParticipant {
 		return new RefactoringStatus();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		return fChange;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean initialize(Object element) {
 		fField= (IField) element;
 		return true;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean initialize(RefactoringProcessor processor, Object element, RefactoringArguments arguments) {
 		fNewName= ((RenameArguments) arguments).getNewName();

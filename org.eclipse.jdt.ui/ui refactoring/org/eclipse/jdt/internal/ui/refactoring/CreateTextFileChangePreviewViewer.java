@@ -61,6 +61,7 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 		public CreateTextFilePreviewer(Composite parent, int style) {
 			super(parent, style);
 			addDisposeListener(new DisposeListener() {
+				@Override
 				public void widgetDisposed(DisposeEvent e) {
 					disposeImage();
 				}
@@ -100,9 +101,7 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 
 	private SourceViewer fSourceViewer;
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		fPane= new CreateTextFilePreviewer(parent, SWT.BORDER | SWT.FLAT);
 		Dialog.applyDialogFont(fPane);
@@ -113,9 +112,7 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 		fPane.setContent(fSourceViewer.getControl());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Control getControl() {
 		return fPane;
 	}
@@ -125,9 +122,7 @@ public final class CreateTextFileChangePreviewViewer implements IChangePreviewVi
 	}
 
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setInput(ChangePreviewViewerInput input) {
 		Change change= input.getChange();
 		if (change != null) {

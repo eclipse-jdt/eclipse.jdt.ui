@@ -25,7 +25,7 @@ import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
 
 public class ChangeSignatureTests18 extends ChangeSignatureTests {
 
-	private static final Class THIS= ChangeSignatureTests18 .class;
+	private static final Class<ChangeSignatureTests18> THIS= ChangeSignatureTests18 .class;
 
 	private IJavaProject fJProject1;
 

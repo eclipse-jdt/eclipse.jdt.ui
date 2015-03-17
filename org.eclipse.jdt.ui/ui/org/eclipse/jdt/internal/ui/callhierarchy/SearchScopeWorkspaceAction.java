@@ -29,25 +29,16 @@ class SearchScopeWorkspaceAction extends SearchScopeAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getSearchScope(int)
-	 */
 	@Override
 	public IJavaSearchScope getSearchScope(int includeMask) {
 		return fFactory.createWorkspaceScope(includeMask);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeActionGroup.SearchScopeAction#getSearchScopeType()
-	 */
 	@Override
 	public int getSearchScopeType() {
 		return SearchScopeActionGroup.SEARCH_SCOPE_TYPE_WORKSPACE;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.callhierarchy.SearchScopeAction#getFullDescription()
-	 */
 	@Override
 	public String getFullDescription(int includeMask) {
 		return fFactory.getWorkspaceScopeDescription(includeMask);

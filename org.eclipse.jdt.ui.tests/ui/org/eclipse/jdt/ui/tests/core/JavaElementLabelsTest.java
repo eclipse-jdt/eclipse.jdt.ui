@@ -35,7 +35,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 public class JavaElementLabelsTest extends CoreTests {
 
-	private static final Class THIS= JavaElementLabelsTest.class;
+	private static final Class<JavaElementLabelsTest> THIS= JavaElementLabelsTest.class;
 
 	private IJavaProject fJProject1;
 
@@ -51,6 +51,7 @@ public class JavaElementLabelsTest extends CoreTests {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
 
@@ -59,6 +60,7 @@ public class JavaElementLabelsTest extends CoreTests {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}

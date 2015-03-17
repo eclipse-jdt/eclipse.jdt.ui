@@ -109,9 +109,6 @@ public class ProblemHover extends AbstractAnnotationHover {
 			setToolTipText(JavaHoverMessages.ProblemHover_action_configureProblemSeverity);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.action.Action#run()
-		 */
 		@Override
 		public void run() {
 			boolean showPropertyPage;
@@ -145,7 +142,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 				showPropertyPage= true;
 			}
 
-			Map<String, Object> data= new HashMap<String, Object>();
+			Map<String, Object> data= new HashMap<>();
 			String pageId;
 			if (fIsJavadocOption) {
 				if (showPropertyPage) {
@@ -221,7 +218,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 			if (!SpellingAnnotation.TYPE.equals(javaAnnotation.getType()) && !hasProblem(context.getASTRoot().getProblems(), location))
 				return NO_PROPOSALS;
 
-			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<IJavaCompletionProposal>();
+			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
 			JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
 			Collections.sort(proposals, new CompletionProposalComparator());
 
@@ -261,7 +258,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 
 			AssistContext context= new AssistContext(cu, sourceViewer, position.getOffset(), position.getLength());
 
-			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<IJavaCompletionProposal>();
+			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
 			JavaCorrectionProcessor.collectProposals(context, model, new Annotation[] { markerAnnotation }, true, false, proposals);
 
 			return proposals.toArray(new ICompletionProposal[proposals.size()]);

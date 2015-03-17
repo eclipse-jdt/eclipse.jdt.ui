@@ -41,8 +41,8 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 	private Stack<List<ITypeBinding>> fTryStack;
 
 	protected AbstractExceptionAnalyzer() {
-		fTryStack= new Stack<List<ITypeBinding>>();
-		fCurrentExceptions= new ArrayList<ITypeBinding>(1);
+		fTryStack= new Stack<>();
+		fCurrentExceptions= new ArrayList<>(1);
 		fTryStack.push(fCurrentExceptions);
 	}
 
@@ -93,7 +93,7 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 
 	@Override
 	public boolean visit(TryStatement node) {
-		fCurrentExceptions= new ArrayList<ITypeBinding>(1);
+		fCurrentExceptions= new ArrayList<>(1);
 		fTryStack.push(fCurrentExceptions);
 
 		// visit try block
@@ -176,7 +176,7 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 	private void removeCaughtExceptions(ITypeBinding catchTypeBinding) {
 		if (catchTypeBinding == null)
 			return;
-		for (Iterator<ITypeBinding> exceptions= new ArrayList<ITypeBinding>(fCurrentExceptions).iterator(); exceptions.hasNext();) {
+		for (Iterator<ITypeBinding> exceptions= new ArrayList<>(fCurrentExceptions).iterator(); exceptions.hasNext();) {
 			ITypeBinding throwTypeBinding= exceptions.next();
 			if (catches(catchTypeBinding, throwTypeBinding))
 				fCurrentExceptions.remove(throwTypeBinding);

@@ -93,16 +93,12 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	}
 
 
-	/* (non-Javadoc)
-	 * @see ILabelDecorator#decorateText(String, Object)
-	 */
+	@Override
 	public String decorateText(String text, Object element) {
 		return text;
 	}
 
-	/* (non-Javadoc)
-	 * @see ILabelDecorator#decorateImage(Image, Object)
-	 */
+	@Override
 	public Image decorateImage(Image image, Object element) {
 		if (image == null)
 			return null;
@@ -212,6 +208,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 * 
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
+	@Deprecated
 	protected int findInHierarchy(IType type, ITypeHierarchy hierarchy, String name, String[] paramTypes) throws JavaModelException {
 		IType superClass= hierarchy.getSuperclass(type);
 		if (superClass != null) {
@@ -238,37 +235,27 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 		return 0;
 	}
 
-	/* (non-Javadoc)
-	 * @see IBaseLabelProvider#addListener(ILabelProviderListener)
-	 */
+	@Override
 	public void addListener(ILabelProviderListener listener) {
 	}
 
-	/* (non-Javadoc)
-	 * @see IBaseLabelProvider#dispose()
-	 */
+	@Override
 	public void dispose() {
 		if (fRegistry != null && fUseNewRegistry) {
 			fRegistry.dispose();
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see IBaseLabelProvider#isLabelProperty(Object, String)
-	 */
+	@Override
 	public boolean isLabelProperty(Object element, String property) {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see IBaseLabelProvider#removeListener(ILabelProviderListener)
-	 */
+	@Override
 	public void removeListener(ILabelProviderListener listener) {
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ILightweightLabelDecorator#decorate(java.lang.Object, org.eclipse.jface.viewers.IDecoration)
-	 */
+	@Override
 	public void decorate(Object element, IDecoration decoration) {
 		int adornmentFlags= computeAdornmentFlags(element);
 		if ((adornmentFlags & JavaElementImageDescriptor.IMPLEMENTS) != 0) {

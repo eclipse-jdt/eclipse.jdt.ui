@@ -86,7 +86,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 
-		ArrayList<OverlayKey> overlayKeys= new ArrayList<OverlayKey>();
+		ArrayList<OverlayKey> overlayKeys= new ArrayList<>();
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MATCHING_BRACKETS));
@@ -114,6 +114,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	 * @param parent the parent composite
 	 * @return the control for the preference page
 	 */
+	@Override
 	public Control createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -344,6 +345,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		foregroundColorButton.setLayoutData(gd);
 
 		SelectionListener colorDefaultSelectionListener= new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean systemDefault= fAppearanceColorDefault.getSelection();
 				fAppearanceColorEditor.getButton().setEnabled(!systemDefault);
@@ -356,6 +358,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 				if (key != null)
 					getPreferenceStore().setValue(key, systemDefault);
 			}
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
 		};
 
@@ -369,17 +372,21 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		fAppearanceColorDefault.addSelectionListener(colorDefaultSelectionListener);
 
 		fAppearanceColorList.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleAppearanceColorListSelection();
 			}
 		});
 		foregroundColorButton.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				int i= fAppearanceColorList.getSelectionIndex();
 				if (i == -1)
@@ -459,6 +466,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 			fAppearanceColorList.add(fAppearanceColorListModel[i][0]);
 
 		fAppearanceColorList.getDisplay().asyncExec(new Runnable() {
+			@Override
 			public void run() {
 				if (fAppearanceColorList != null && !fAppearanceColorList.isDisposed()) {
 					fAppearanceColorList.select(0);

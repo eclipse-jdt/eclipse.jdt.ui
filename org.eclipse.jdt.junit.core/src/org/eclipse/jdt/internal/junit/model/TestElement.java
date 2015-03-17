@@ -46,6 +46,7 @@ public abstract class TestElement implements ITestElement {
 			return fOldCode;
 		}
 
+		@Override
 		public String toString() {
 			return fName;
 		}
@@ -202,16 +203,12 @@ public abstract class TestElement implements ITestElement {
 			parent.addChild(this);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.junit.ITestElement#getProgressState()
-	 */
+	@Override
 	public ProgressState getProgressState() {
 		return getStatus().convertToProgressState();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.junit.ITestElement#getTestResult()
-	 */
+	@Override
 	public Result getTestResult(boolean includeChildren) {
 		if (fAssumptionFailed) {
 			return Result.IGNORED;
@@ -219,16 +216,12 @@ public abstract class TestElement implements ITestElement {
 		return getStatus().convertToResult();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.junit.ITestElement#getTestRunSession()
-	 */
+	@Override
 	public ITestRunSession getTestRunSession() {
 		return getRoot().getTestRunSession();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.junit.ITestElement#getParentContainer()
-	 */
+	@Override
 	public ITestElementContainer getParentContainer() {
 		if (fParent instanceof TestRoot) {
 			return getTestRunSession();
@@ -236,9 +229,7 @@ public abstract class TestElement implements ITestElement {
 		return fParent;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.junit.model.ITestElement#getFailureTrace()
-	 */
+	@Override
 	public FailureTrace getFailureTrace() {
 		Result testResult= getTestResult(false);
 		if (testResult == Result.ERROR || testResult == Result.FAILURE
@@ -351,6 +342,7 @@ public abstract class TestElement implements ITestElement {
 		fTime= time;
 	}
 
+	@Override
 	public double getElapsedTimeInSeconds() {
 		if (Double.isNaN(fTime) || fTime < 0.0d) {
 			return Double.NaN;
@@ -367,6 +359,7 @@ public abstract class TestElement implements ITestElement {
 		return fAssumptionFailed;
 	}
 
+	@Override
 	public String toString() {
 		return getProgressState() + " - " + getTestResult(true); //$NON-NLS-1$
 	}

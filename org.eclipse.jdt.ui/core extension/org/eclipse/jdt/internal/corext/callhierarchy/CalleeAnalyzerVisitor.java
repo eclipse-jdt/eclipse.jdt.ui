@@ -76,9 +76,6 @@ class CalleeAnalyzerVisitor extends HierarchicalASTVisitor {
         return fSearchResults.getCallers();
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ClassInstanceCreation)
-     */
     @Override
 	public boolean visit(ClassInstanceCreation node) {
         progressMonitorWorked(1);

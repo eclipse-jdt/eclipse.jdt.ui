@@ -65,6 +65,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 
 		// -------- IListAdapter --------
 
+		@Override
 		public void customButtonPressed(ListDialogField<CPVariableElement> field, int index) {
 			switch (index) {
 			case IDX_EXTEND: /* extend */
@@ -73,16 +74,19 @@ public class NewVariableEntryDialog extends StatusDialog {
 			}
 		}
 
+		@Override
 		public void selectionChanged(ListDialogField<CPVariableElement> field) {
 			doSelectionChanged();
 		}
 
+		@Override
 		public void doubleClicked(ListDialogField<CPVariableElement> field) {
 			doDoubleClick();
 		}
 
 		// ---------- IDialogFieldListener --------
 
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			if (field == fConfigButton) {
 				configButtonPressed();
@@ -118,7 +122,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 
 		CPVariableElementLabelProvider labelProvider= new CPVariableElementLabelProvider(false);
 
-		fVariablesList= new ListDialogField<CPVariableElement>(adapter, buttonLabels, labelProvider);
+		fVariablesList= new ListDialogField<>(adapter, buttonLabels, labelProvider);
 		fVariablesList.setDialogFieldListener(adapter);
 		fVariablesList.setLabelText(NewWizardMessages.NewVariableEntryDialog_vars_label);
 
@@ -159,7 +163,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 
 	private void initializeElements() {
 		String[] entries= JavaCore.getClasspathVariableNames();
-		ArrayList<CPVariableElement> elements= new ArrayList<CPVariableElement>(entries.length);
+		ArrayList<CPVariableElement> elements= new ArrayList<>(entries.length);
 		for (int i= 0; i < entries.length; i++) {
 			String name= entries[i];
 			IPath entryPath= JavaCore.getClasspathVariable(name);
@@ -172,26 +176,17 @@ public class NewVariableEntryDialog extends StatusDialog {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see Window#configureShell(Shell)
-	 */
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.NEW_VARIABLE_ENTRY_DIALOG);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#getDialogBoundsSettings()
-	 */
 	@Override
 	protected IDialogSettings getDialogBoundsSettings() {
 		return JavaPlugin.getDefault().getDialogSettingsSection(getClass().getName());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		initializeDialogUnits(parent);
@@ -337,7 +332,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 
 	protected final void configButtonPressed() {
 		String id= ClasspathVariablesPreferencePage.ID;
-		Map<String, String> options= new HashMap<String, String>();
+		Map<String, String> options= new HashMap<>();
 		List<CPVariableElement> selected= fVariablesList.getSelectedElements();
 		if (!selected.isEmpty()) {
 			String varName= selected.get(0).getName();

@@ -91,9 +91,6 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 		return "org.eclipse.jdt.ui.JavaWorkingSetPage"; //$NON-NLS-1$
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
@@ -102,9 +99,6 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.JAVA_WORKING_SET_PAGE);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void configureTree(TreeViewer tree) {
 		tree.setContentProvider(new JavaWorkingSetPageContentProvider());
@@ -139,9 +133,6 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void configureTable(TableViewer table) {
 		AppearanceAwareLabelProvider javaElementLabelProvider= new AppearanceAwareLabelProvider(
@@ -154,9 +145,6 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 		table.setComparator(new JavaElementComparator());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Object[] getInitialWorkingSetElements(IWorkingSet workingSet) {
 		Object[] elements;
@@ -203,6 +191,7 @@ public class JavaWorkingSetPage extends AbstractWorkingSetWizardPage {
 	private Object[] getInitialTreeSelection() {
 		final Object[][] result= new Object[1][];
 		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
+			@Override
 			public void run() {
 				IStructuredSelection selection= fInitialSelection;
 				if (selection == null) {

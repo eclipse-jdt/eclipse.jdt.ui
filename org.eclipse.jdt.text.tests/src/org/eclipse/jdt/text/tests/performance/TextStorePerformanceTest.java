@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,7 +35,7 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 	protected static final String FAUST1;
 	protected static final String FAUST100;
 	protected static final String FAUST500;
-	protected static final Map LOCAL_FINGERPRINTS= new HashMap();
+	protected static final Map<String, String> LOCAL_FINGERPRINTS= new HashMap<>();
 
 	static {
 		String faust;
@@ -58,10 +58,12 @@ public abstract class TextStorePerformanceTest extends TextPerformanceTestCase2 
 	/*
 	 * @see org.eclipse.jdt.text.tests.performance.PerformanceTestCase2#getLocalFingerprints()
 	 */
-	protected final Map getLocalFingerprints() {
+	@Override
+	protected final Map<String, String> getLocalFingerprints() {
 		return LOCAL_FINGERPRINTS;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 

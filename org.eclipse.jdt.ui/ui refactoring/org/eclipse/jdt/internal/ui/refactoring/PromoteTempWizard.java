@@ -78,6 +78,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 			setDescription(DESCRIPTION);
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			Composite result= new Composite(parent, SWT.NONE);
 			setControl(result);
@@ -112,6 +113,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 			fNameField.selectAll();
 			fNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fNameField.addModifyListener(new ModifyListener(){
+				@Override
 				public void modifyText(ModifyEvent e) {
 					PromoteTempInputPage.this.getPromoteTempRefactoring().setFieldName(fNameField.getText());
 					PromoteTempInputPage.this.updateStatus();
@@ -220,10 +222,12 @@ public class PromoteTempWizard extends RefactoringWizard {
 			int[] availableVisibilities= getPromoteTempRefactoring().getAvailableVisibilities();
 			int currectVisibility= getPromoteTempRefactoring().getVisibility();
 			IVisibilityChangeListener visibilityChangeListener= new IVisibilityChangeListener(){
+				@Override
 				public void visibilityChanged(int newVisibility) {
 					getPromoteTempRefactoring().setVisibility(newVisibility);
 				}
 
+				@Override
 				public void modifierChanged(int modifier, boolean isChecked) {
 				}
 			};
@@ -236,9 +240,6 @@ public class PromoteTempWizard extends RefactoringWizard {
 		private PromoteTempToFieldRefactoring getPromoteTempRefactoring(){
 			return (PromoteTempToFieldRefactoring)getRefactoring();
 		}
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
-		 */
 		@Override
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);

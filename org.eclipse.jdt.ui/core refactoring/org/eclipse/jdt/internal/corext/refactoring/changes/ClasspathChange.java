@@ -46,7 +46,7 @@ public class ClasspathChange extends ResourceChange {
 
 	public static ClasspathChange removeEntryChange(IJavaProject project, IClasspathEntry entryToRemove) throws JavaModelException {
 		IClasspathEntry[] rawClasspath= project.getRawClasspath();
-		ArrayList<IClasspathEntry> newClasspath= new ArrayList<IClasspathEntry>();
+		ArrayList<IClasspathEntry> newClasspath= new ArrayList<>();
 		for (int i= 0; i < rawClasspath.length; i++) {
 			IClasspathEntry curr= rawClasspath[i];
 			if (curr.getEntryKind() != entryToRemove.getEntryKind() || !curr.getPath().equals(entryToRemove.getPath())) {

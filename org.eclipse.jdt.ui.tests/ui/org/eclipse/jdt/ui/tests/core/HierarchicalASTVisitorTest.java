@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,10 +15,6 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -37,6 +33,10 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 @SuppressWarnings("javadoc")
 public class HierarchicalASTVisitorTest extends TestCase {
@@ -68,6 +68,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		 * Accordingly for endVisit(XX) and superEndVisit(XX).
 		 */
 
+		@Override
 		public boolean visit(ASTNode node) {
 			registerCall(ASTNode.class);
 			return false;
@@ -75,6 +76,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void superVisit(ASTNode node) {
 			super.visit(node);
 		}
+		@Override
 		public void endVisit(ASTNode node) {
 			registerCall(ASTNode.class);
 		}
@@ -82,6 +84,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			super.visit(node);
 		}
 
+		@Override
 		public boolean visit(Expression node) {
 			registerCall(Expression.class);
 			return false;
@@ -89,6 +92,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void superVisit(Expression node) {
 			super.visit(node);
 		}
+		@Override
 		public void endVisit(Expression node) {
 			registerCall(Expression.class);
 		}
@@ -96,6 +100,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			super.visit(node);
 		}
 
+		@Override
 		public boolean visit(AnnotatableType node) {
 			registerCall(AnnotatableType.class);
 			return false;
@@ -103,6 +108,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void superVisit(AnnotatableType node) {
 			super.visit(node);
 		}
+		@Override
 		public void endVisit(AnnotatableType node) {
 			registerCall(AnnotatableType.class);
 		}
@@ -110,6 +116,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			super.visit(node);
 		}
 
+		@Override
 		public boolean visit(Annotation node) {
 			registerCall(Annotation.class);
 			return false;
@@ -117,6 +124,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void superVisit(Annotation node) {
 			super.visit(node);
 		}
+		@Override
 		public void endVisit(Annotation node) {
 			registerCall(Annotation.class);
 		}
@@ -124,6 +132,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			super.visit(node);
 		}
 
+		@Override
 		public boolean visit(MethodReference node) {
 			registerCall(MethodReference.class);
 			return false;
@@ -131,6 +140,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void superVisit(MethodReference node) {
 			super.visit(node);
 		}
+		@Override
 		public void endVisit(MethodReference node) {
 			registerCall(MethodReference.class);
 		}
@@ -138,6 +148,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			super.visit(node);
 		}
 
+		@Override
 		public boolean visit(Name node) {
 			registerCall(Name.class);
 			return false;
@@ -145,6 +156,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void superVisit(Name node) {
 			super.visit(node);
 		}
+		@Override
 		public void endVisit(Name node) {
 			registerCall(Name.class);
 		}
@@ -152,6 +164,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			super.visit(node);
 		}
 
+		@Override
 		public boolean visit(BodyDeclaration node) {
 			registerCall(BodyDeclaration.class);
 			return false;
@@ -159,6 +172,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void superVisit(BodyDeclaration node) {
 			super.visit(node);
 		}
+		@Override
 		public void endVisit(BodyDeclaration node) {
 			registerCall(BodyDeclaration.class);
 		}
@@ -166,6 +180,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			super.visit(node);
 		}
 
+		@Override
 		public boolean visit(AbstractTypeDeclaration node) {
 			registerCall(AbstractTypeDeclaration.class);
 			return false;
@@ -173,6 +188,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void superVisit(AbstractTypeDeclaration node) {
 			super.visit(node);
 		}
+		@Override
 		public void endVisit(AbstractTypeDeclaration node) {
 			registerCall(AbstractTypeDeclaration.class);
 		}
@@ -180,6 +196,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			super.visit(node);
 		}
 
+		@Override
 		public boolean visit(Comment node) {
 			registerCall(Comment.class);
 			return false;
@@ -187,6 +204,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void superVisit(Comment node) {
 			super.visit(node);
 		}
+		@Override
 		public void endVisit(Comment node) {
 			registerCall(Comment.class);
 		}
@@ -194,6 +212,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			super.visit(node);
 		}
 
+		@Override
 		public boolean visit(Type node) {
 			registerCall(Type.class);
 			return false;
@@ -201,6 +220,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void superVisit(Type node) {
 			super.visit(node);
 		}
+		@Override
 		public void endVisit(Type node) {
 			registerCall(Type.class);
 		}
@@ -208,6 +228,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			super.visit(node);
 		}
 
+		@Override
 		public boolean visit(Statement node) {
 			registerCall(Statement.class);
 			return false;
@@ -215,6 +236,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void superVisit(Statement node) {
 			super.visit(node);
 		}
+		@Override
 		public void endVisit(Statement node) {
 			registerCall(Statement.class);
 		}
@@ -222,6 +244,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			super.visit(node);
 		}
 
+		@Override
 		public boolean visit(VariableDeclaration node) {
 			registerCall(VariableDeclaration.class);
 			return false;
@@ -229,6 +252,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void superVisit(VariableDeclaration node) {
 			super.visit(node);
 		}
+		@Override
 		public void endVisit(VariableDeclaration node) {
 			registerCall(VariableDeclaration.class);
 		}
@@ -245,7 +269,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		 *
 		 * <code>clazz</code> must be a <b>proper</b> descendant of ASTNode (<code>clazz</code> is not ASTNode).
 		 */
-		private static void checkMethodCallsSuperclassMethod(Class clazz, boolean isLeaf, boolean isEndVisit) {
+		private static void checkMethodCallsSuperclassMethod(Class<? extends ASTNode> clazz, boolean isLeaf, boolean isEndVisit) {
 			Assert.isTrue(ASTNode.class.isAssignableFrom(clazz));
 			Assert.isTrue(!ASTNode.class.equals(clazz));
 
@@ -258,7 +282,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		 * ASTNode descendant class <code>clazz</code>.
 		 * This method reflectively verifies that they are present.
 		 */
-		private static void checkRequiredMethodsForNonLeaf(Class clazz, boolean isEndVisit) {
+		private static void checkRequiredMethodsForNonLeaf(Class<? extends ASTNode> clazz, boolean isEndVisit) {
 			Assert.isTrue(ASTNode.class.isAssignableFrom(clazz));
 			try {
 				TestHierarchicalASTVisitor.class.getDeclaredMethod(getVisitMethodName(isEndVisit), new Class[] { clazz });
@@ -272,9 +296,9 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			}
 		}
 
-		private Class fNodeClassForCalledMethod= null;
+		private Class<? extends ASTNode> fNodeClassForCalledMethod= null;
 
-		private void _checkMethodCallsSuperclassMethod(Class clazz, boolean isLeaf, boolean isEndVisit) {
+		private void _checkMethodCallsSuperclassMethod(Class<? extends ASTNode> clazz, boolean isLeaf, boolean isEndVisit) {
 			/* Invoke a method which will result in the execution of
 			 * HierarchicalASTVisitor's implementation of visit(XX), where
 			 * XX is the name of clazz.
@@ -313,7 +337,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			 */
 			checkSuperclassMethodCalled(clazz, isEndVisit);
 		}
-		private void checkSuperclassMethodCalled(Class clazz, boolean isEndVisit) {
+		private void checkSuperclassMethodCalled(Class<? extends ASTNode> clazz, boolean isEndVisit) {
 			Assert.isNotNull(clazz.getSuperclass());
 			/*
 			 * This class' implementations of the visit(YY) methods (for non-
@@ -325,11 +349,11 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			 */
 			assertTrue(getSuperMethodNotCalledMessageFor(clazz, isEndVisit), clazz.getSuperclass().equals(fNodeClassForCalledMethod));
 		}
-		private String getSuperMethodNotCalledMessageFor(Class clazz, boolean isEndVisit) {
+		private String getSuperMethodNotCalledMessageFor(Class<? extends ASTNode> clazz, boolean isEndVisit) {
 			return getMethodSignatureFor(clazz, isEndVisit) + " in HierarchicalASTVisitor should call " + getMethodSignatureFor(clazz.getSuperclass(), isEndVisit) + ", the visitor method for its superclass.";
 		}
 
-		private void registerCall(Class nodeClassForMethod) {
+		private void registerCall(Class<? extends ASTNode> nodeClassForMethod) {
 			assertNull("The invocation of a visit(XX) method in HierarchicalASTVisitor has caused " +
 					"more than one other visit(XX) method to be called.  Every visit(XX) method in " +
 					"HierarchicalASTVisitor, except visit(ASTNode), should simply call visit(YY), " +
@@ -376,9 +400,9 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		
 	}
 
-	private static final Class THIS_CLASS= HierarchicalASTVisitorTest.class;
+	private static final Class<HierarchicalASTVisitorTest> THIS_CLASS= HierarchicalASTVisitorTest.class;
 
-	private Set/*<Class>*/ fLeaves;
+	private Set<Class<? extends ASTNode>> fLeaves;
 
 	public HierarchicalASTVisitorTest(String name) {
 		super(name);
@@ -390,7 +414,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 
 	public void test() {
 		fLeaves= getLeafASTNodeDescendants();
-		Set allASTNodeDescendants= computeAllDescendantsFromLeaves(fLeaves.iterator(), ASTNode.class);
+		Set<Class<? extends ASTNode>> allASTNodeDescendants= computeAllDescendantsFromLeaves(fLeaves.iterator(), ASTNode.class);
 
 		checkAllMethodsForHierarchyExist(allASTNodeDescendants.iterator(), false);
 		checkAllMethodsForHierarchyExist(allASTNodeDescendants.iterator(), true);
@@ -398,7 +422,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		checkMethodsCallSuperclassMethod(allASTNodeDescendants.iterator(), true);
 	}
 
-	private boolean isLeaf(Class clazz) {
+	private boolean isLeaf(Class<? extends ASTNode> clazz) {
 		return fLeaves.contains(clazz);
 	}
 
@@ -413,9 +437,9 @@ public class HierarchicalASTVisitorTest extends TestCase {
 	 * This method verifies that these required methods exist, and suggests the updates
 	 * that are needed to properly maintain the set of methods.
 	 */
-	private void checkAllMethodsForHierarchyExist(Iterator hierarchyClasses, boolean isEndVisit) {
+	private void checkAllMethodsForHierarchyExist(Iterator<Class<? extends ASTNode>> hierarchyClasses, boolean isEndVisit) {
 		while (hierarchyClasses.hasNext()) {
-			Class descendant= (Class) hierarchyClasses.next();
+			Class<? extends ASTNode> descendant= hierarchyClasses.next();
 			checkHierarchicalASTVisitorMethodExistsFor(descendant, isEndVisit);
 			if (!isLeaf(descendant))
 				TestHierarchicalASTVisitor.checkRequiredMethodsForNonLeaf(descendant, isEndVisit);
@@ -429,15 +453,15 @@ public class HierarchicalASTVisitorTest extends TestCase {
 	 * reflection and a contrived subclass of HierarchicalASTVisitor,
 	 * TestHierarchicalASTVisitor.
 	 */
-	private void checkMethodsCallSuperclassMethod(Iterator hierarchyClasses, boolean isEndVisit) {
+	private void checkMethodsCallSuperclassMethod(Iterator<Class<? extends ASTNode>> hierarchyClasses, boolean isEndVisit) {
 		while (hierarchyClasses.hasNext()) {
-			Class descendant= (Class) hierarchyClasses.next();
+			Class<? extends ASTNode> descendant= hierarchyClasses.next();
 			if (!ASTNode.class.equals(descendant))
 				TestHierarchicalASTVisitor.checkMethodCallsSuperclassMethod(descendant, isLeaf(descendant), isEndVisit);
 		}
 	}
 
-	private void checkHierarchicalASTVisitorMethodExistsFor(Class nodeClass, boolean isEndVisit) {
+	private void checkHierarchicalASTVisitorMethodExistsFor(Class<? extends ASTNode> nodeClass, boolean isEndVisit) {
 		Assert.isTrue(ASTNode.class.isAssignableFrom(nodeClass));
 		try {
 			HierarchicalASTVisitor.class.getDeclaredMethod(getVisitMethodName(isEndVisit), new Class[] { nodeClass });
@@ -455,12 +479,12 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		return isEndVisit ? "superEndVisit" : "superVisit";
 	}
 
-	private static String getSimpleName(Class clazz) {
+	private static String getSimpleName(Class<?> clazz) {
 		String qualified= clazz.getName();
 		return qualified.substring(qualified.lastIndexOf('.') + 1);
 	}
 
-	private static String getMethodSignatureFor(Class clazz, boolean isEndVisit) {
+	private static String getMethodSignatureFor(Class<?> clazz, boolean isEndVisit) {
 		return getVisitMethodName(isEndVisit) + "(" + getSimpleName(clazz) + ")";
 	}
 
@@ -469,23 +493,25 @@ public class HierarchicalASTVisitorTest extends TestCase {
 	 * of a class in the sequence <code>leaves</code>.  This will include <code>root</code>
 	 * and all the elements of <code>leaves</code>.
 	 */
-	private static Set computeAllDescendantsFromLeaves(Iterator leaves, Class root) {
-		Set all= new HashSet();
+	private static Set<Class<? extends ASTNode>> computeAllDescendantsFromLeaves(Iterator<Class<? extends ASTNode>> leaves, Class<? extends ASTNode> root) {
+		Set<Class<? extends ASTNode>> all= new HashSet<>();
 		while (leaves.hasNext()) {
-			Class leaf= (Class) leaves.next();
+			Class<? extends ASTNode> leaf= leaves.next();
 			addAllAncestorsInclusive(leaf, root, all);
 		}
 		return all;
 	}
 
-	private static void addAllAncestorsInclusive(Class from, Class to, Set set) {
+	private static void addAllAncestorsInclusive(Class<? extends ASTNode> from, Class<? extends ASTNode> to, Set<Class<? extends ASTNode>> set) {
 		Assert.isTrue(to.isAssignableFrom(from));
 		Assert.isTrue(!from.isInterface());
 		Assert.isTrue(!to.isInterface());
 
-		Class ancestor= from;
+		Class<?> ancestor= from;
 		while (!ancestor.equals(to)) {
-			set.add(ancestor);
+			@SuppressWarnings("unchecked")
+			Class<? extends ASTNode> nodeType= (Class<? extends ASTNode>) ancestor;
+			set.add(nodeType);
 			ancestor= ancestor.getSuperclass();
 			if (ancestor == null) {
 				Assert.isTrue(false);
@@ -507,13 +533,15 @@ public class HierarchicalASTVisitorTest extends TestCase {
 	 * "up-to-date" would be to require something that HierarchicalASTVisitor would,
 	 * semantically, not be able to provide anyway!).
 	 */
-	private static Set getLeafASTNodeDescendants() {
-		Set result= new HashSet();
+	private static Set<Class<? extends ASTNode>> getLeafASTNodeDescendants() {
+		Set<Class<? extends ASTNode>> result= new HashSet<>();
 		Method[] methods= ASTVisitor.class.getMethods();
 		for (int i= 0; i < methods.length; i++) {
 			Method method= methods[i];
 			if (isVisitMethod(method)) {
-				result.add(method.getParameterTypes()[0]);
+				@SuppressWarnings("unchecked")
+				Class<? extends ASTNode> nodeType= (Class<? extends ASTNode>) method.getParameterTypes()[0];
+				result.add(nodeType);
 			}
 		}
 		return result;
@@ -522,7 +550,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		if (!"visit".equals(method.getName()))
 			return false;
 
-		Class[] parameters= method.getParameterTypes();
+		Class<?>[] parameters= method.getParameterTypes();
 		return parameters.length == 1 && ASTNode.class.isAssignableFrom(parameters[0]);
 	}
 }

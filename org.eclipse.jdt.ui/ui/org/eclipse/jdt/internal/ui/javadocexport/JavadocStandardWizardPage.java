@@ -109,13 +109,14 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		setDescription(JavadocExportMessages.JavadocStandardWizardPage_description);
 
 		fStore= store;
-		fButtonsList= new ArrayList<FlaggedButton>();
+		fButtonsList= new ArrayList<>();
 		fStyleSheetStatus= new StatusInfo();
 		fLinkRefStatus= new StatusInfo();
 	}
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 
 		initializeDialogUnits(parent);
@@ -219,6 +220,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		});
 
 		fStyleSheetText.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				doValidation(STYLESHEETSTATUS);
 			}
@@ -246,7 +248,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 
 		ListAdapter adapter= new ListAdapter();
 
-		fListDialogField= new CheckedListDialogField<JavadocLinkRef>(adapter, buttonlabels, labelProvider);
+		fListDialogField= new CheckedListDialogField<>(adapter, buttonlabels, labelProvider);
 		fListDialogField.setDialogFieldListener(adapter);
 		fListDialogField.setCheckAllButtonIndex(0);
 		fListDialogField.setUncheckAllButtonIndex(1);
@@ -261,11 +263,11 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	}
 
 	private List<JavadocLinkRef> getCheckedReferences(JavadocLinkRef[] referencesClasses) {
-		List<JavadocLinkRef> checkedElements= new ArrayList<JavadocLinkRef>();
+		List<JavadocLinkRef> checkedElements= new ArrayList<>();
 
 		String hrefs[]= fStore.getHRefs();
 		if (hrefs.length > 0) {
-			HashSet<String> set= new HashSet<String>();
+			HashSet<String> set= new HashSet<>();
 			for (int i= 0; i < hrefs.length; i++) {
 				set.add(hrefs[i]);
 			}
@@ -288,7 +290,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	 * @return all IJavaProjects and IPaths that will be on the classpath
 	 */
 	private JavadocLinkRef[] getReferencedElements(IJavaProject[] checkedProjects) {
-		HashSet<JavadocLinkRef> result= new HashSet<JavadocLinkRef>();
+		HashSet<JavadocLinkRef> result= new HashSet<>();
 		for (int i= 0; i < checkedProjects.length; i++) {
 			IJavaProject project= checkedProjects[i];
 			try {
@@ -401,7 +403,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	}
 
 	private String[] getHRefs() {
-		HashSet<String> res= new HashSet<String>();
+		HashSet<String> res= new HashSet<>();
 		List<JavadocLinkRef> checked= fListDialogField.getCheckedElements();
 		for (Iterator<JavadocLinkRef> iterator= checked.iterator(); iterator.hasNext();) {
 			JavadocLinkRef element= iterator.next();
@@ -481,6 +483,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		/**
 		 * @see IListAdapter#customButtonPressed(ListDialogField, int)
 		 */
+		@Override
 		public void customButtonPressed(ListDialogField<JavadocLinkRef> field, int index) {
 			if (index == 2)
 				doEditButtonPressed();
@@ -489,6 +492,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		/**
 		 * @see IListAdapter#selectionChanged(ListDialogField)
 		 */
+		@Override
 		public void selectionChanged(ListDialogField<JavadocLinkRef> field) {
 			List<JavadocLinkRef> selection= fListDialogField.getSelectedElements();
 			if (selection.size() != 1) {
@@ -498,10 +502,12 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			}
 		}
 
+		@Override
 		public void doubleClicked(ListDialogField<JavadocLinkRef> field) {
 			doEditButtonPressed();
 		}
 
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			doValidation(LINK_REFERENCES);
 		}
@@ -550,6 +556,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			return composite;
 		}
 
+		@Override
 		public void statusChanged(IStatus status) {
 			updateStatus(status);
 
@@ -562,6 +569,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		protected void okPressed() {
 			try {
 				IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+					@Override
 					public void run(IProgressMonitor monitor) throws CoreException {
 						URL javadocLocation= fJavadocConfigurationBlock.getJavadocLocation();
 						fElement.setURL(javadocLocation, monitor);

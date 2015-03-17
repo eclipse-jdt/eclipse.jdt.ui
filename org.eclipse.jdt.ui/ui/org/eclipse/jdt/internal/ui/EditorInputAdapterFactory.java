@@ -34,11 +34,13 @@ public class EditorInputAdapterFactory implements IAdapterFactory {
 
 	private Object fSearchPageScoreComputer;
 
+	@Override
 	public Class<?>[] getAdapterList() {
 		updateLazyLoadedAdapters();
 		return PROPERTIES;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Object element, Class<T> key) {
 		updateLazyLoadedAdapters();

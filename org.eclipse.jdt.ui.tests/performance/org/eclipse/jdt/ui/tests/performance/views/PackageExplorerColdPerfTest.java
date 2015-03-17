@@ -36,12 +36,14 @@ public class PackageExplorerColdPerfTest extends JdtPerformanceTestCase {
 		super(name);
 	}
 
+	@Override
 	public final void finishMeasurements() {
 		stopMeasuring();
 		commitMeasurements();
 		Performance.getDefault().assertPerformanceInAbsoluteBand(fPerformanceMeter, Dimension.ELAPSED_PROCESS, 0, 80);
 	}
 
+	@Override
 	public final void startMeasuring() {
 		super.startMeasuring();
 	}

@@ -64,6 +64,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
 		fJProject1.getProject().getFolder(ANNOTATION_PATH).create(true, true, null);
@@ -96,10 +97,13 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 			// invoke the full command and asynchronously collect the result:
 			final ICompletionProposal[] proposalBox= new ICompletionProposal[1];
 			viewer.getQuickAssistAssistant().addCompletionListener(new ICompletionListener() {
+				@Override
 				public void selectionChanged(ICompletionProposal proposal, boolean smartToggle) {
 					proposalBox[0]= proposal;
 				}
+				@Override
 				public void assistSessionStarted(ContentAssistEvent event) { /* nop */ }
+				@Override
 				public void assistSessionEnded(ContentAssistEvent event) { /* nop */ }
 			});
 
@@ -561,6 +565,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 				};
 		
 		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, new ClassFileFilter() {
+			@Override
 			public boolean include(CompilationResult unitResult) {
 				return !new Path(MISSINGPATH + ".java").equals(new Path(String.valueOf(unitResult.getFileName())));
 			}
@@ -576,6 +581,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 			// not expecting proposals, but a log message, due to incomplete AST (no binding information available).
 			final IStatus[] resultingStatus= new IStatus[1];
 			logListener= new ILogListener() {
+				@Override
 				public void logging(IStatus status, String plugin) {
 					assertTrue("Only one status", resultingStatus[0] == null);
 					assertEquals("Expected status message",

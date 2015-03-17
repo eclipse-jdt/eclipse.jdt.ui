@@ -133,7 +133,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		private static final String inheritedMethodsNode= JavaUIMessages.GenerateToStringDialog_inherited_methods_node;
 
 		public GenerateToStringContentProvider(IVariableBinding[] fields, IVariableBinding[] inheritedFields, IMethodBinding[] methods, IMethodBinding[] inheritedMethods) {
-			ArrayList<String> nodes= new ArrayList<String>();
+			ArrayList<String> nodes= new ArrayList<>();
 			fFields= fields.clone();
 			if (fFields.length > 0)
 				nodes.add(fieldsNode);
@@ -207,6 +207,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		public void sort() {
 			Comparator<IBinding> comparator= new Comparator<IBinding>() {
 				Collator collator= Collator.getInstance();
+				@Override
 				public int compare(IBinding b1, IBinding b2) {
 					return collator.compare(b1.getName(), b2.getName());
 				}
@@ -217,11 +218,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			Arrays.sort(fInheritedMethods, comparator);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
-		 */
+		@Override
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement == fieldsNode)
 				return fFields;
@@ -234,11 +231,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			return EMPTY;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
-		 */
+		@Override
 		public Object getParent(Object element) {
 			Object[] array= getContainingArray(element);
 			if (array == fFields)
@@ -252,41 +245,23 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			return null;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
-		 */
+		@Override
 		public boolean hasChildren(Object element) {
 			if (element instanceof String)
 				return true;
 			return false;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
-		 */
+		@Override
 		public Object[] getElements(Object inputElement) {
 			return mainNodes;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
-		 */
+		@Override
 		public void dispose() {
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see
-		 * org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer,
-		 * java.lang.Object, java.lang.Object)
-		 */
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 	}
@@ -321,6 +296,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		}
 
 
+		@Override
 		public IStatus validate(Object[] selection) {
 			if (getGenerationSettings().toStringStyle == GenerateToStringOperation.CUSTOM_BUILDER) {
 				if (fValidator == null)
@@ -417,6 +393,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 				templateName.setSelection(0, templateName.getText().length());
 
 				templateName.addModifyListener(new ModifyListener() {
+					@Override
 					public void modifyText(ModifyEvent e) {
 						validate(templateName.getText());
 					}
@@ -424,6 +401,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 
 				//Ctrl+Enter should execute the default button, workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=145959
 				template.addTraverseListener(new TraverseListener() {
+					@Override
 					public void keyTraversed(TraverseEvent e) {
 						if (e.detail == SWT.TRAVERSE_RETURN && (e.stateMask & SWT.MODIFIER_MASK) != 0) {
 							buttonPressed(((Integer)getShell().getDefaultButton().getData()).intValue());
@@ -503,20 +481,24 @@ public class GenerateToStringDialog extends SourceActionDialog {
 					this.position= proposal.length();
 				}
 
+				@Override
 				public String getContent() {
 					int overlap= stringOverlap(latestContents.substring(0, latestPosition), proposal);
 					position= proposal.length() - overlap;
 					return proposal.substring(overlap);
 				}
 
+				@Override
 				public int getCursorPosition() {
 					return position;
 				}
 
+				@Override
 				public String getDescription() {
 					return parser.getVariableDescriptions().get(proposal);
 				}
 
+				@Override
 				public String getLabel() {
 					return proposal;
 				}
@@ -526,9 +508,10 @@ public class GenerateToStringDialog extends SourceActionDialog {
 
 			private int latestPosition;
 
+			@Override
 			public IContentProposal[] getProposals(String contents, int position) {
-				List<Proposal> primaryProposals= new ArrayList<Proposal>();
-				List<Proposal> secondaryProposals= new ArrayList<Proposal>();
+				List<Proposal> primaryProposals= new ArrayList<>();
+				List<Proposal> secondaryProposals= new ArrayList<>();
 				String[] proposalStrings= parser.getVariables();
 				String contentToCursor= contents.substring(0, position);
 				for (int i= 0; i < proposalStrings.length; i++) {
@@ -640,16 +623,18 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			gd.widthHint= 450;
 			templateTextControl.setLayoutData(gd);
 
-			templateNames= new ArrayList<String>(Arrays.asList(getTemplateNames()));
-			templates= new ArrayList<String>(Arrays.asList(getTemplates(getDialogSettings())));
+			templateNames= new ArrayList<>(Arrays.asList(getTemplateNames()));
+			templates= new ArrayList<>(Arrays.asList(getTemplates(getDialogSettings())));
 			selectedTemplateNumber= getGenerationSettings().stringFormatTemplateNumber;
 			refreshControls();
 
 			templateNameControl.addSelectionListener(new SelectionListener() {
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					onEdit();
 				}
 
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					if (templateNameControl.getSelectionIndex() >= 0) {
 						selectedTemplateNumber= templateNameControl.getSelectionIndex();
@@ -807,6 +792,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 			}
 		}
 
+		@Override
 		public IStatus validate(Object[] selection) {
 			return validateBuilderType(((IType)selection[0]));
 		}
@@ -859,6 +845,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 				return fLastValidAppendMethodSuggestions;
 			}
 			return getMethodSuggestions(type, new MethodChecker() {
+				@Override
 				public boolean isMethodOK(IMethod method) throws JavaModelException {
 					if (!Flags.isPublic(method.getFlags()) || method.isConstructor())
 						return false;
@@ -887,6 +874,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 				return fLastValidResultMethodSuggestions;
 			}
 			return getMethodSuggestions(type, new MethodChecker() {
+				@Override
 				public boolean isMethodOK(IMethod method) throws JavaModelException {
 					return Flags.isPublic(method.getFlags()) && method.getParameterTypes().length == 0 && "java.lang.String".equals(JavaModelUtil.getResolvedTypeName(method.getReturnType(), type)); //$NON-NLS-1$
 				}
@@ -898,7 +886,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		}
 
 		private List<String> getMethodSuggestions(IType type, MethodChecker checker) throws JavaModelException {
-			ArrayList<String> result= new ArrayList<String>();
+			ArrayList<String> result= new ArrayList<>();
 			IType[] classes= type.newSupertypeHierarchy(null).getAllClasses();
 			for (int i= 0; i < classes.length; i++) {
 				IMethod[] methods= classes[i].getMethods();
@@ -937,6 +925,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		 */
 		private final ModifyListener modifyListener= new ModifyListener() {
 
+			@Override
 			public void modifyText(ModifyEvent e) {
 				if (e.widget == fBuilderClassName) {
 					fBuilderSettings.className= fBuilderClassName.getText();
@@ -1015,6 +1004,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 
 			updateCombos();
 			ModifyListener comboListener= new ModifyListener() {
+				@Override
 				public void modifyText(ModifyEvent e) {
 					Combo c= (Combo)e.widget;
 					if (c.getText().length() > 0) {
@@ -1225,9 +1215,6 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		fGenerationSettings= new ToStringGenerationSettings(getDialogSettings());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean close() {
 		fGenerationSettings.writeDialogSettings();
@@ -1242,7 +1229,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 	@Override
 	public Object[] getResult() {
 		Object[] oldResult= super.getResult();
-		List<Object> newResult= new ArrayList<Object>();
+		List<Object> newResult= new ArrayList<>();
 		for (int i= 0; i < oldResult.length; i++) {
 			if (!(oldResult[i] instanceof String)) {
 				newResult.add(oldResult[i]);
@@ -1270,6 +1257,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		treeViewer.expandToLevel(GenerateToStringContentProvider.fieldsNode, 1);
 
 		treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection selection= (IStructuredSelection)getTreeViewer().getSelection();
 
@@ -1282,6 +1270,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 
 		});
 		treeViewer.addCheckStateListener(new ICheckStateListener() {
+			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				getTreeViewer().setSubtreeChecked(event.getElement(), event.getChecked());
 				getTreeViewer().setGrayed(event.getElement(), false);

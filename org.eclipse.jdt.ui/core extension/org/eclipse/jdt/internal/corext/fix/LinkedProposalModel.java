@@ -29,7 +29,7 @@ public class LinkedProposalModel {
 		}
 
 		if (fPositionGroups == null) {
-			fPositionGroups= new HashMap<String, LinkedProposalPositionGroup>();
+			fPositionGroups= new HashMap<>();
 		}
 		fPositionGroups.put(positionGroup.getGroupId(), positionGroup);
 	}
@@ -46,8 +46,11 @@ public class LinkedProposalModel {
 	public Iterator<LinkedProposalPositionGroup> getPositionGroupIterator() {
 		if (fPositionGroups == null) {
 			return new Iterator<LinkedProposalPositionGroup>() {
+				@Override
 				public boolean hasNext() {return false;}
+				@Override
 				public LinkedProposalPositionGroup next() {return null;}
+				@Override
 				public void remove() {throw new UnsupportedOperationException();}
 			};
 		}

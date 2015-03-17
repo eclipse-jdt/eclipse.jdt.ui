@@ -237,7 +237,7 @@ public class ReorgUtils {
 	}
 
 	public static IResource[] getResources(List<?> elements) {
-		List<IResource> resources= new ArrayList<IResource>(elements.size());
+		List<IResource> resources= new ArrayList<>(elements.size());
 		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IResource)
@@ -247,7 +247,7 @@ public class ReorgUtils {
 	}
 
 	public static IJavaElement[] getJavaElements(List<?> elements) {
-		List<IJavaElement> resources= new ArrayList<IJavaElement>(elements.size());
+		List<IJavaElement> resources= new ArrayList<>(elements.size());
 		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IJavaElement)
@@ -264,7 +264,7 @@ public class ReorgUtils {
 	 * @since 3.6
 	 */
 	public static IJarEntryResource[] getJarEntryResources(List<?> elements) {
-		List<IJarEntryResource> resources= new ArrayList<IJarEntryResource>(elements.size());
+		List<IJarEntryResource> resources= new ArrayList<>(elements.size());
 		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IJarEntryResource)
@@ -274,7 +274,7 @@ public class ReorgUtils {
 	}
 
 	public static IWorkingSet[] getWorkingSets(List<?> elements) {
-		List<IWorkingSet> result= new ArrayList<IWorkingSet>(1);
+		List<IWorkingSet> result= new ArrayList<>(1);
 		for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IWorkingSet) {
@@ -290,28 +290,28 @@ public class ReorgUtils {
 	}
 
 	public static IResource[] setMinus(IResource[] setToRemoveFrom, IResource[] elementsToRemove) {
-		Set<IResource> setMinus= new HashSet<IResource>(setToRemoveFrom.length - setToRemoveFrom.length);
+		Set<IResource> setMinus= new HashSet<>(setToRemoveFrom.length - setToRemoveFrom.length);
 		setMinus.addAll(Arrays.asList(setToRemoveFrom));
 		setMinus.removeAll(Arrays.asList(elementsToRemove));
 		return setMinus.toArray(new IResource[setMinus.size()]);
 	}
 
 	public static IJavaElement[] setMinus(IJavaElement[] setToRemoveFrom, IJavaElement[] elementsToRemove) {
-		Set<IJavaElement> setMinus= new HashSet<IJavaElement>(setToRemoveFrom.length - setToRemoveFrom.length);
+		Set<IJavaElement> setMinus= new HashSet<>(setToRemoveFrom.length - setToRemoveFrom.length);
 		setMinus.addAll(Arrays.asList(setToRemoveFrom));
 		setMinus.removeAll(Arrays.asList(elementsToRemove));
 		return setMinus.toArray(new IJavaElement[setMinus.size()]);
 	}
 
 	public static IJavaElement[] union(IJavaElement[] set1, IJavaElement[] set2) {
-		List<IJavaElement> union= new ArrayList<IJavaElement>(set1.length + set2.length);//use lists to avoid sequence problems
+		List<IJavaElement> union= new ArrayList<>(set1.length + set2.length);//use lists to avoid sequence problems
 		addAll(set1, union);
 		addAll(set2, union);
 		return union.toArray(new IJavaElement[union.size()]);
 	}
 
 	public static IResource[] union(IResource[] set1, IResource[] set2) {
-		List<IResource> union= new ArrayList<IResource>(set1.length + set2.length);//use lists to avoid sequence problems
+		List<IResource> union= new ArrayList<>(set1.length + set2.length);//use lists to avoid sequence problems
 		addAll(ReorgUtils.getNotNulls(set1), union);
 		addAll(ReorgUtils.getNotNulls(set2), union);
 		return union.toArray(new IResource[union.size()]);
@@ -325,7 +325,7 @@ public class ReorgUtils {
 	}
 
 	public static IType[] getMainTypes(IJavaElement[] javaElements) throws JavaModelException {
-		List<IJavaElement> result= new ArrayList<IJavaElement>();
+		List<IJavaElement> result= new ArrayList<>();
 		for (int i= 0; i < javaElements.length; i++) {
 			IJavaElement element= javaElements[i];
 			if (element instanceof IType && JavaElementUtil.isMainType((IType)element))
@@ -346,7 +346,7 @@ public class ReorgUtils {
 
 	//the result can be cast down to the requested type array
 	public static Set<IResource> getResourcesOfType(IResource[] resources, int typeMask){
-		Set<IResource> result= new HashSet<IResource>(resources.length);
+		Set<IResource> result= new HashSet<>(resources.length);
 		for (int i= 0; i < resources.length; i++) {
 			if (isOfType(resources[i], typeMask))
 				result.add(resources[i]);
@@ -357,7 +357,7 @@ public class ReorgUtils {
 	//the result can be cast down to the requested type array
 	//type is _not_ a mask
 	public static List<?> getElementsOfType(IJavaElement[] javaElements, int type){
-		List<IJavaElement> result= new ArrayList<IJavaElement>(javaElements.length);
+		List<IJavaElement> result= new ArrayList<>(javaElements.length);
 		for (int i= 0; i < javaElements.length; i++) {
 			if (isOfType(javaElements[i], type))
 				result.add(javaElements[i]);
@@ -550,7 +550,7 @@ public class ReorgUtils {
 	}
 
 	public static IResource[] getNotNulls(IResource[] resources) {
-		Collection<IResource> result= new ArrayList<IResource>(resources.length);
+		Collection<IResource> result= new ArrayList<>(resources.length);
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
 			if (resource != null && ! result.contains(resource))
@@ -560,7 +560,7 @@ public class ReorgUtils {
 	}
 
 	public static IResource[] getNotLinked(IResource[] resources) {
-		Collection<IResource> result= new ArrayList<IResource>(resources.length);
+		Collection<IResource> result= new ArrayList<>(resources.length);
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
 			if (resource != null && ! result.contains(resource) && ! resource.isLinked())
@@ -573,7 +573,7 @@ public class ReorgUtils {
 	 * return ICompilationUnit -> List<IJavaElement>
 	 */
 	public static Map<ICompilationUnit, List<IJavaElement>> groupByCompilationUnit(List<IJavaElement> javaElements){
-		Map<ICompilationUnit, List<IJavaElement>> result= new HashMap<ICompilationUnit, List<IJavaElement>>();
+		Map<ICompilationUnit, List<IJavaElement>> result= new HashMap<>();
 		for (Iterator<IJavaElement> iter= javaElements.iterator(); iter.hasNext();) {
 			IJavaElement element= iter.next();
 			ICompilationUnit cu= ReorgUtils.getCompilationUnit(element);

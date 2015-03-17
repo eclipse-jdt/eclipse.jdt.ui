@@ -71,9 +71,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 		fResourceToItemsMapper= new ResourceToItemsMapper(this);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.ResourceToItemsMapper.IContentViewerAccessor#doUpdateItem(org.eclipse.swt.widgets.Widget)
-	 */
+	@Override
 	public void doUpdateItem(Widget item) {
 		doUpdateItem(item, item.getData(), true);
 	}
@@ -123,7 +121,7 @@ public class ProblemTableViewer extends TableViewer implements ResourceToItemsMa
 
 		Object[] changed= event.getElements();
 		if (changed != null && !fResourceToItemsMapper.isEmpty()) {
-			ArrayList<Object> others= new ArrayList<Object>(changed.length);
+			ArrayList<Object> others= new ArrayList<>(changed.length);
 			for (int i= 0; i < changed.length; i++) {
 				Object curr= changed[i];
 				if (curr instanceof IResource) {

@@ -64,7 +64,7 @@ public final class EncapsulateFieldDescriptor extends JavaRefactoringDescriptor 
 	 *
 	 * @since 1.2
 	 */
-	public EncapsulateFieldDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public EncapsulateFieldDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.ENCAPSULATE_FIELD, project, description, comment, arguments, flags);
 	}
 

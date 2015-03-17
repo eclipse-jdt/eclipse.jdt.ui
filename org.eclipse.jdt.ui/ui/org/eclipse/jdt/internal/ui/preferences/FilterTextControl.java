@@ -152,6 +152,7 @@ public class FilterTextControl {
 		fTextControl.setLayoutData(gridData);
 
 		fTextControl.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				updateClearButtonVisibility(!(fTextControl.getText().length() == 0));
 			}
@@ -184,6 +185,7 @@ public class FilterTextControl {
 					fMoveListener= new MouseMoveListener() {
 						private boolean fMouseInButton= true;
 
+						@Override
 						public void mouseMove(MouseEvent e1) {
 							boolean mouseInButton= isMouseInButton(e1);
 							if (mouseInButton != fMouseInButton) {
@@ -215,18 +217,22 @@ public class FilterTextControl {
 				}
 			});
 			clearButton.addMouseTrackListener(new MouseTrackListener() {
+				@Override
 				public void mouseEnter(MouseEvent e) {
 					clearButton.setImage(activeImage);
 				}
 
+				@Override
 				public void mouseExit(MouseEvent e) {
 					clearButton.setImage(inactiveImage);
 				}
 
+				@Override
 				public void mouseHover(MouseEvent e) {
 				}
 			});
 			clearButton.addDisposeListener(new DisposeListener() {
+				@Override
 				public void widgetDisposed(DisposeEvent e) {
 					inactiveImage.dispose();
 					activeImage.dispose();

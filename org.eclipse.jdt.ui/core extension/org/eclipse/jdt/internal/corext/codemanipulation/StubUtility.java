@@ -126,7 +126,7 @@ public class StubUtility {
 
 	private static final Set<String> VALID_TYPE_BODY_TEMPLATES;
 	static {
-		VALID_TYPE_BODY_TEMPLATES= new HashSet<String>();
+		VALID_TYPE_BODY_TEMPLATES= new HashSet<>();
 		VALID_TYPE_BODY_TEMPLATES.add(CodeTemplateContextType.CLASSBODY_ID);
 		VALID_TYPE_BODY_TEMPLATES.add(CodeTemplateContextType.INTERFACEBODY_ID);
 		VALID_TYPE_BODY_TEMPLATES.add(CodeTemplateContextType.ENUMBODY_ID);
@@ -484,7 +484,7 @@ public class StubUtility {
 		IDocument doc= new Document(buffer.getString());
 		int nLines= doc.getNumberOfLines();
 		MultiTextEdit edit= new MultiTextEdit();
-		HashSet<Integer> removedLines= new HashSet<Integer>();
+		HashSet<Integer> removedLines= new HashSet<>();
 		for (int i= 0; i < variables.length; i++) {
 			TemplateVariable position= findVariable(buffer, variables[i]); // look if Javadoc tags have to be added
 			if (position == null || position.getLength() > 0) {
@@ -694,6 +694,7 @@ public class StubUtility {
 	 * @return the exception names
 	 * @deprecated to avoid deprecation warnings
 	 */
+	@Deprecated
 	private static String[] getExceptionNames(MethodDeclaration decl) {
 		String[] exceptionNames;
 		if (decl.getAST().apiLevel() >= AST.JLS8) {
@@ -721,6 +722,7 @@ public class StubUtility {
 	 * @return the return type
 	 * @deprecated Deprecated to avoid deprecated warnings
 	 */
+	@Deprecated
 	private static ASTNode getReturnType(MethodDeclaration decl) {
 		// used from API, can't eliminate
 		return decl.getAST().apiLevel() == AST.JLS2 ? decl.getReturnType() : decl.getReturnType2();
@@ -937,7 +939,7 @@ public class StubUtility {
 	// --------------------------- name suggestions --------------------------
 
 	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, ITypeBinding expectedType, Expression assignedExpression, Collection<String> excluded) {
-		LinkedHashSet<String> res= new LinkedHashSet<String>(); // avoid duplicates but keep order
+		LinkedHashSet<String> res= new LinkedHashSet<>(); // avoid duplicates but keep order
 
 		if (assignedExpression != null) {
 			String nameFromExpression= getBaseNameFromExpression(project, assignedExpression, variableKind);
@@ -974,7 +976,7 @@ public class StubUtility {
 	}
 
 	public static String[] getVariableNameSuggestions(int variableKind, IJavaProject project, Type expectedType, Expression assignedExpression, Collection<String> excluded) {
-		LinkedHashSet<String> res= new LinkedHashSet<String>(); // avoid duplicates but keep order
+		LinkedHashSet<String> res= new LinkedHashSet<>(); // avoid duplicates but keep order
 
 		if (assignedExpression != null) {
 			String nameFromExpression= getBaseNameFromExpression(project, assignedExpression, variableKind);
@@ -1224,7 +1226,7 @@ public class StubUtility {
 
 	public static String[][] suggestArgumentNamesWithProposals(IJavaProject project, String[] paramNames) {
 		String[][] newNames= new String[paramNames.length][];
-		ArrayList<String> takenNames= new ArrayList<String>();
+		ArrayList<String> takenNames= new ArrayList<>();
 
 		// Ensure that the code generation preferences are respected
 		for (int i= 0; i < paramNames.length; i++) {
@@ -1234,7 +1236,7 @@ public class StubUtility {
 			String[] proposedNames= getVariableNameSuggestions(NamingConventions.VK_PARAMETER, project, curr, 0, takenNames, true);
 			if (!curr.equals(baseName)) {
 				// make the existing name to favorite
-				LinkedHashSet<String> updatedNames= new LinkedHashSet<String>();
+				LinkedHashSet<String> updatedNames= new LinkedHashSet<>();
 				updatedNames.add(curr);
 				for (int k= 0; k < proposedNames.length; k++) {
 					updatedNames.add(proposedNames[k]);
@@ -1280,7 +1282,7 @@ public class StubUtility {
 					String[] paramNames= method.getParameterNames();
 					if (paramNames.length == nParams) {
 						String[] namesArray= EMPTY;
-						ArrayList<String> newNames= new ArrayList<String>(paramNames.length);
+						ArrayList<String> newNames= new ArrayList<>(paramNames.length);
 						// Ensure that the code generation preferences are respected
 						for (int i= 0; i < paramNames.length; i++) {
 							String curr= paramNames[i];

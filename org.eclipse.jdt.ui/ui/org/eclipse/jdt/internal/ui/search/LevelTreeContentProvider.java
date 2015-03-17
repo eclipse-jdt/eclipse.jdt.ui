@@ -83,6 +83,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		fContentProvider= new FastJavaElementProvider();
 	}
 
+	@Override
 	public Object getParent(Object child) {
 		Object possibleParent= internalGetParent(child);
 		if (possibleParent instanceof IJavaElement) {
@@ -117,6 +118,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		return fContentProvider.getParent(child);
 	}
 
+	@Override
 	public Object[] getElements(Object inputElement) {
 		return getChildren(inputElement);
 	}
@@ -124,7 +126,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	@Override
 	protected synchronized void initialize(AbstractTextSearchResult result) {
 		super.initialize(result);
-		fChildrenMap= new HashMap<Object, Set<Object>>();
+		fChildrenMap= new HashMap<>();
 		if (result != null) {
 			Object[] elements= result.getElements();
 			for (int i= 0; i < elements.length; i++) {
@@ -162,7 +164,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 	private boolean insertInto(Object parent, Object child, Map<Object, Set<Object>> map) {
 		Set<Object> children= map.get(parent);
 		if (children == null) {
-			children= new HashSet<Object>();
+			children= new HashSet<>();
 			map.put(parent, children);
 		}
 		return children.add(child);
@@ -212,6 +214,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		}
 	}
 
+	@Override
 	public Object[] getChildren(Object parentElement) {
 		Set<Object> children= fChildrenMap.get(parentElement);
 		if (children == null)
@@ -229,6 +232,7 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 		return children.toArray();
 	}
 
+	@Override
 	public boolean hasChildren(Object element) {
 		Set<Object> children= fChildrenMap.get(element);
 		return children != null && !children.isEmpty();
@@ -241,9 +245,9 @@ public class LevelTreeContentProvider extends JavaSearchContentProvider implemen
 
 		AbstractTreeViewer viewer= (AbstractTreeViewer) getPage().getViewer();
 
-		Set<Object> toRemove= new HashSet<Object>();
-		Set<Object> toUpdate= new HashSet<Object>();
-		Map<Object, Set<Object>> toAdd= new HashMap<Object, Set<Object>>();
+		Set<Object> toRemove= new HashSet<>();
+		Set<Object> toUpdate= new HashSet<>();
+		Map<Object, Set<Object>> toAdd= new HashMap<>();
 		for (int i= 0; i < updatedElements.length; i++) {
 			if (getPage().getDisplayedMatchCount(updatedElements[i]) > 0)
 				insert(toAdd, toUpdate, updatedElements[i]);

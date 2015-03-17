@@ -252,6 +252,7 @@ public class SelectionConverter {
 	private static IJavaElement[] performForkedCodeResolve(final ITypeRoot input, final ITextSelection selection) throws InvocationTargetException, InterruptedException {
 		final class CodeResolveRunnable implements IRunnableWithProgress {
 			IJavaElement[] result;
+			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
 					result= codeResolve(input, selection);

@@ -84,6 +84,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			/*
 			 * @see IDialogFieldListener#dialogFieldChanged(DialogField)
 			 */
+			@Override
 			public void dialogFieldChanged(DialogField field) {
 				doValidation();
 			}
@@ -91,6 +92,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			/*
 			 * @see IStringButtonAdapter#changeControlPressed(DialogField)
 			 */
+			@Override
 			public void changeControlPressed(DialogField field) {
 				doBrowseTypes();
 			}
@@ -269,19 +271,23 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 			return selected.size() == 1;
 		}
 
-        public void customButtonPressed(ListDialogField<String> field, int index) {
+        @Override
+		public void customButtonPressed(ListDialogField<String> field, int index) {
         	doButtonPressed(index);
         }
 
-        public void selectionChanged(ListDialogField<String> field) {
+        @Override
+		public void selectionChanged(ListDialogField<String> field) {
 			fList.enableButton(IDX_EDIT, canEdit(field));
         }
 
-        public void dialogFieldChanged(DialogField field) {
+        @Override
+		public void dialogFieldChanged(DialogField field) {
         	doDialogFieldChanged(field);
         }
 
-        public void doubleClicked(ListDialogField<String> field) {
+        @Override
+		public void doubleClicked(ListDialogField<String> field) {
         	if (canEdit(field)) {
 				doButtonPressed(IDX_EDIT);
         	}
@@ -348,7 +354,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 
 		ListAdapter adapter= new ListAdapter();
 
-		fList= new ListDialogField<String>(adapter, buttonLabels, new ListLabelProvider());
+		fList= new ListDialogField<>(adapter, buttonLabels, new ListLabelProvider());
 		fList.setDialogFieldListener(adapter);
 		fList.setLabelText(PreferencesMessages.CodeAssistStaticMembersConfigurationBlock_description);
 		fList.setRemoveButtonIndex(IDX_REMOVE);

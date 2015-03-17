@@ -64,7 +64,7 @@ public final class DeleteDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
-	public DeleteDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public DeleteDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.DELETE, project, description, comment, arguments, flags);
 	}
 

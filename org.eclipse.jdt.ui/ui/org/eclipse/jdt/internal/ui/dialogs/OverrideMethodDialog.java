@@ -128,15 +128,17 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		/*
 		 * @see IContentProvider#dispose()
 		 */
+		@Override
 		public void dispose() {
 		}
 
 		/*
 		 * @see ITreeContentProvider#getChildren(Object)
 		 */
+		@Override
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof ITypeBinding) {
-				ArrayList<IMethodBinding> result= new ArrayList<IMethodBinding>(fMethods.length);
+				ArrayList<IMethodBinding> result= new ArrayList<>(fMethods.length);
 				for (int index= 0; index < fMethods.length; index++) {
 					if (fMethods[index].getDeclaringClass().isEqualTo((IBinding) parentElement))
 						result.add(fMethods[index]);
@@ -149,6 +151,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		/*
 		 * @see IStructuredContentProvider#getElements(Object)
 		 */
+		@Override
 		public Object[] getElements(Object inputElement) {
 			return fShowTypes ? fTypes : fMethods;
 		}
@@ -156,6 +159,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		/*
 		 * @see ITreeContentProvider#getParent(Object)
 		 */
+		@Override
 		public Object getParent(Object element) {
 			if (element instanceof IMethodBinding) {
 				return ((IMethodBinding) element).getDeclaringClass();
@@ -170,6 +174,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		/*
 		 * @see ITreeContentProvider#hasChildren(Object)
 		 */
+		@Override
 		public boolean hasChildren(Object element) {
 			return getChildren(element).length > 0;
 		}
@@ -182,6 +187,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		/*
 		 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 		 */
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			fViewer= (ContainerCheckedTreeViewer) viewer;
 		}
@@ -246,6 +252,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		/*
 		 * @see ISelectionValidator#validate(Object[])
 		 */
+		@Override
 		public IStatus validate(Object[] selection) {
 			int count= 0;
 			for (int index= 0; index < selection.length; index++) {
@@ -288,12 +295,12 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		RefactoringASTParser parser= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL);
 		fUnit= parser.parse(type.getCompilationUnit(), true);
 		final ITypeBinding binding= ASTNodes.getTypeBinding(fUnit, type);
-		List<IMethodBinding> toImplement= new ArrayList<IMethodBinding>();
+		List<IMethodBinding> toImplement= new ArrayList<>();
 		IMethodBinding[] overridable= null;
 		if (binding != null) {
 			final IPackageBinding pack= binding.getPackage();
 			final IMethodBinding[] methods= StubUtility2.getOverridableMethods(fUnit.getAST(), binding, false);
-			List<IMethodBinding> list= new ArrayList<IMethodBinding>(methods.length);
+			List<IMethodBinding> list= new ArrayList<>(methods.length);
 			for (int index= 0; index < methods.length; index++) {
 				final IMethodBinding cur= methods[index];
 				if (Bindings.isVisibleInHierarchy(cur, pack))
@@ -323,12 +330,12 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		IMethodBinding[] toImplementArray= toImplement.toArray(new IMethodBinding[toImplement.size()]);
 		setInitialSelections(toImplementArray);
 
-		HashSet<ITypeBinding> expanded= new HashSet<ITypeBinding>(toImplementArray.length);
+		HashSet<ITypeBinding> expanded= new HashSet<>(toImplementArray.length);
 		for (int i= 0; i < toImplementArray.length; i++) {
 			expanded.add(toImplementArray[i].getDeclaringClass());
 		}
 
-		HashSet<ITypeBinding> types= new HashSet<ITypeBinding>(overridable.length);
+		HashSet<ITypeBinding> types= new HashSet<>(overridable.length);
 		for (int i= 0; i < overridable.length; i++) {
 			types.add(overridable[i].getDeclaringClass());
 		}

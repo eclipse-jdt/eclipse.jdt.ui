@@ -25,9 +25,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
  */
 public class ContainedLibraryFilter extends ViewerFilter {
 
-	/* (non-Javadoc)
-	 * Method declared on ViewerFilter.
-	 */
 	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if (element instanceof IPackageFragmentRoot) {

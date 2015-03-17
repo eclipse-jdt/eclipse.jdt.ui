@@ -80,7 +80,7 @@ public class RefactoringAnalyzeUtil {
 	}
 
 	public static IProblem[] getIntroducedCompileProblems(CompilationUnit newCUNode, CompilationUnit oldCuNode) {
-		Set<IProblem> subResult= new HashSet<IProblem>();
+		Set<IProblem> subResult= new HashSet<>();
 		Set<IProblem> oldProblems= getOldProblems(oldCuNode);
 		IProblem[] newProblems= ASTNodes.getProblems(newCUNode, ASTNodes.INCLUDE_ALL_PARENTS, ASTNodes.PROBLEMS);
 		for (int i= 0; i < newProblems.length; i++) {
@@ -126,6 +126,6 @@ public class RefactoringAnalyzeUtil {
 	}
 
 	private static Set<IProblem> getOldProblems(CompilationUnit oldCuNode) {
-		return new HashSet<IProblem>(Arrays.asList(ASTNodes.getProblems(oldCuNode, ASTNodes.INCLUDE_ALL_PARENTS, ASTNodes.PROBLEMS)));
+		return new HashSet<>(Arrays.asList(ASTNodes.getProblems(oldCuNode, ASTNodes.INCLUDE_ALL_PARENTS, ASTNodes.PROBLEMS)));
 	}
 }

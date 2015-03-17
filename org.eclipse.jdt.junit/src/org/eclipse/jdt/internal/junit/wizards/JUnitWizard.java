@@ -84,6 +84,7 @@ public abstract class JUnitWizard extends Wizard implements INewWizard {
 				final Display display= Display.getDefault();
 				if (display != null) {
 					display.asyncExec(new Runnable() {
+						@Override
 						public void run() {
 							try {
 								IDE.openEditor(activePage, (IFile)resource, true);
@@ -97,9 +98,7 @@ public abstract class JUnitWizard extends Wizard implements INewWizard {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)
-	 */
+	@Override
 	public void init(IWorkbench workbench, IStructuredSelection currentSelection) {
 		fWorkbench= workbench;
 		fSelection= currentSelection;

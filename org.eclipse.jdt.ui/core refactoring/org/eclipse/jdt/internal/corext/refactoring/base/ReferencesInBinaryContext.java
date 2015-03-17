@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class ReferencesInBinaryContext extends RefactoringStatusContext {
 
-	private List<SearchMatch> fMatches= new ArrayList<SearchMatch>();
+	private List<SearchMatch> fMatches= new ArrayList<>();
 
 	private final String fDescription;
 

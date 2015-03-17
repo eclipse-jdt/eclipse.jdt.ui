@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,13 +28,14 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.junit.JUnitMessages;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.JUnitMessages;
 import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
 
 public class JUnit3TestFinder implements ITestFinder {
 
-	public void findTestsInContainer(IJavaElement element, Set result, IProgressMonitor pm) throws CoreException {
+	@Override
+	public void findTestsInContainer(IJavaElement element, Set<IType> result, IProgressMonitor pm) throws CoreException {
 		if (element == null || result == null) {
 			throw new IllegalArgumentException();
 		}
@@ -46,7 +47,7 @@ public class JUnit3TestFinder implements ITestFinder {
 		try {
 			if (element instanceof IType) {
 				if (isTest((IType) element)) {
-					result.add(element);
+					result.add((IType) element);
 				}
 			} else if (element instanceof ICompilationUnit) {
 				IType[] types= ((ICompilationUnit) element).getAllTypes();
@@ -71,7 +72,7 @@ public class JUnit3TestFinder implements ITestFinder {
 		}
 	}
 
-	private static void findTestCases(IJavaElement element, Set result, IProgressMonitor pm) throws JavaModelException {
+	private static void findTestCases(IJavaElement element, Set<IType> result, IProgressMonitor pm) throws JavaModelException {
 		IJavaProject javaProject= element.getJavaProject();
 
 		IType testCaseType= javaProject.findType(JUnitCorePlugin.TEST_INTERFACE_NAME);
@@ -83,6 +84,7 @@ public class JUnit3TestFinder implements ITestFinder {
 		CoreTestSearchEngine.findTestImplementorClasses(typeHierarchy, testCaseType, region, result);
 	}
 
+	@Override
 	public boolean isTest(IType type) throws JavaModelException {
 		return CoreTestSearchEngine.isAccessibleClass(type) && (CoreTestSearchEngine.hasSuiteMethod(type) || isTestImplementor(type));
 	}

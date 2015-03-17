@@ -62,9 +62,7 @@ public final class LoggedNewNameQueries implements INewNameQueries {
 			return name;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public String getNewName() {
 			String name= null;
 			if (fObject instanceof ICompilationUnit)
@@ -90,47 +88,36 @@ public final class LoggedNewNameQueries implements INewNameQueries {
 		fLog= log;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public INewNameQuery createNewCompilationUnitNameQuery(final ICompilationUnit unit, final String initialSuggestedName) {
 		return new NewNameQuery(unit, initialSuggestedName);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public INewNameQuery createNewPackageFragmentRootNameQuery(final IPackageFragmentRoot root, final String initialSuggestedName) {
 		return new NewNameQuery(root, initialSuggestedName);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public INewNameQuery createNewPackageNameQuery(final IPackageFragment fragment, final String initialSuggestedName) {
 		return new NewNameQuery(fragment, initialSuggestedName);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public INewNameQuery createNewResourceNameQuery(final IResource resource, final String initialSuggestedName) {
 		return new NewNameQuery(resource, initialSuggestedName);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public INewNameQuery createNullQuery() {
 		return createStaticQuery(null);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public INewNameQuery createStaticQuery(final String name) {
 		return new INewNameQuery() {
 
+			@Override
 			public String getNewName() {
 				return name;
 			}

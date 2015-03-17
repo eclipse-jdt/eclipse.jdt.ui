@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -96,17 +96,17 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	private boolean fIsQueryShowing= false;
 	private final MultiOrganizeImportAction fCleanUpDelegate;
 
-	/* (non-Javadoc)
-	 * Class implements IObjectActionDelegate
-	 */
 	public static class ObjectDelegate implements IObjectActionDelegate {
 		private OrganizeImportsAction fAction;
+		@Override
 		public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 			fAction= new OrganizeImportsAction(targetPart.getSite());
 		}
+		@Override
 		public void run(IAction action) {
 			fAction.run();
 		}
+		@Override
 		public void selectionChanged(IAction action, ISelection selection) {
 			if (fAction == null)
 				action.setEnabled(false);
@@ -115,11 +115,12 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 
 	private static final class OrganizeImportComparator implements Comparator<String> {
 
+		@Override
 		public int compare(String o1, String o2) {
 			if (o1.equals(o2))
 				return 0;
 
-			History history= QualifiedTypeNameHistory.getDefault();
+			History<String, String> history= QualifiedTypeNameHistory.getDefault();
 
 			int pos1= history.getPosition(o1);
 			int pos2= history.getPosition(o2);
@@ -176,27 +177,18 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		setEnabled(fCleanUpDelegate.isEnabled());
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 		fCleanUpDelegate.selectionChanged(selection);
 		setEnabled(fCleanUpDelegate.isEnabled());
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		fCleanUpDelegate.selectionChanged(selection);
 		setEnabled(fCleanUpDelegate.isEnabled());
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		ICompilationUnit cu= getCompilationUnit(fEditor);
@@ -213,9 +205,6 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		return (ICompilationUnit)element;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		ICompilationUnit[] cus= fCleanUpDelegate.getCompilationUnits(selection);
@@ -329,6 +318,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 
 	private IChooseImportQuery createChooseImportQuery(final JavaEditor editor) {
 		return new IChooseImportQuery() {
+			@Override
 			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
 				return doChooseImports(openChoices, ranges, editor);
 			}
@@ -388,9 +378,11 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 
 	private IEditingSupport createViewerHelper() {
 		return new IEditingSupport() {
+			@Override
 			public boolean isOriginator(DocumentEvent event, IRegion subjectRegion) {
 				return true; // assume true, since we only register while we are active
 			}
+			@Override
 			public boolean ownsFocusShell() {
 				return fIsQueryShowing;
 			}

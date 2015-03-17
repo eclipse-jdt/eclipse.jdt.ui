@@ -31,9 +31,6 @@ import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefac
  */
 public final class SelfEncapsulateRefactoringContribution extends JavaUIRefactoringContribution {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(null);
@@ -47,7 +44,7 @@ public final class SelfEncapsulateRefactoringContribution extends JavaUIRefactor
 	}
 
 	@Override
-	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
+	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createEncapsulateFieldDescriptor(project, description, comment, arguments, flags);
 	}
 }

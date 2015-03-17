@@ -17,6 +17,7 @@ import org.eclipse.jdt.junit.tests.AbstractTestRunListenerTest.TestRunLog;
 /**
  * @deprecated
  */
+@Deprecated
 public class LegacyTestRunListener implements ITestRunListener {
 
 	private TestRunLog fLog;
@@ -25,6 +26,7 @@ public class LegacyTestRunListener implements ITestRunListener {
 		fLog= log;
 	}
 
+	@Override
 	public void testRunStarted(int testCount) {
 		if (fLog != null)
 			fLog.add(testRunStartedMessage(testCount));
@@ -33,6 +35,7 @@ public class LegacyTestRunListener implements ITestRunListener {
 		return "testRunStarted(" + testCount + ")";
 	}
 
+	@Override
 	public void testRunEnded(long elapsedTime) {
 		if (fLog != null) {
 			fLog.add(testRunEndedMessage());
@@ -43,6 +46,7 @@ public class LegacyTestRunListener implements ITestRunListener {
 		return "testRunEnded(" + ")";
 	}
 
+	@Override
 	public void testRunStopped(long elapsedTime) {
 		if (fLog != null) {
 			fLog.add(testRunStoppedMessage());
@@ -53,6 +57,7 @@ public class LegacyTestRunListener implements ITestRunListener {
 		return "testRunStopped(" + ")";
 	}
 
+	@Override
 	public void testStarted(String testId, String testName) {
 		if (fLog != null)
 			fLog.add(testStartedMessage(testId, testName));
@@ -61,6 +66,7 @@ public class LegacyTestRunListener implements ITestRunListener {
 		return "testStarted(" + testId + "," + testName + ")";
 	}
 
+	@Override
 	public void testEnded(String testId, String testName) {
 		if (fLog != null)
 			fLog.add(testEndedMessage(testId, testName));
@@ -69,6 +75,7 @@ public class LegacyTestRunListener implements ITestRunListener {
 		return "testEnded(" + testId + "," + testName + ")";
 	}
 
+	@Override
 	public void testFailed(int status, String testId, String testName, String trace) {
 		if (fLog != null)
 			fLog.add(testFailedMessage(status, testId, testName));
@@ -77,6 +84,7 @@ public class LegacyTestRunListener implements ITestRunListener {
 		return "testFailed(" + status + "," + testId + "," + testName + ")";
 	}
 
+	@Override
 	public void testRunTerminated() {
 		if (fLog != null) {
 			fLog.add(testRunTerminatedMessage());
@@ -87,6 +95,7 @@ public class LegacyTestRunListener implements ITestRunListener {
 		return "testRunTerminated(" + ")";
 	}
 
+	@Override
 	public void testReran(String testId, String testClass, String testName, int status, String trace) {
 		if (fLog != null)
 			fLog.add(testReranMessage(testId, testClass, testName, status, trace));

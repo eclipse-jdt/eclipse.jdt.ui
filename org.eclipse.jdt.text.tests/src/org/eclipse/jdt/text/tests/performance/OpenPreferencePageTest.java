@@ -38,7 +38,7 @@ import org.eclipse.ui.internal.IWorkbenchHelpContextIds;
  */
 public class OpenPreferencePageTest extends TextPerformanceTestCase {
 
-	private static final Class THIS= OpenPreferencePageTest.class;
+	private static final Class<OpenPreferencePageTest> THIS= OpenPreferencePageTest.class;
 
 	private PerformanceMeter fMeter;
 
@@ -119,6 +119,7 @@ public class OpenPreferencePageTest extends TextPerformanceTestCase {
 		return null;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		Performance performance= Performance.getDefault();
@@ -126,6 +127,7 @@ public class OpenPreferencePageTest extends TextPerformanceTestCase {
 		EditorTestHelper.joinJobs(1000, 10000, 100);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		fMeter.dispose();
 		super.tearDown();

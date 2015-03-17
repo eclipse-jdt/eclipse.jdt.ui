@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,9 +15,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -44,6 +41,9 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class TypeEnvironmentTests extends AbstractCUTestCase {
 
 	private static final boolean BUG_83616_core_wildcard_assignments= true;
@@ -54,6 +54,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		public MyTestSetup(Test test) {
 			super(test);
 		}
+		@Override
 		protected void setUp() throws Exception {
 			super.setUp();
 			fSignaturePackage= getDefaultSourceFolder().createPackageFragment("signature", true, null);
@@ -72,6 +73,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		public CreationChecker() {
 			fTypeEnvironment= new TypeEnvironment();
 		}
+		@Override
 		public boolean visit(SimpleName node) {
 			IBinding binding= node.resolveBinding();
 			if (!(binding instanceof ITypeBinding))
@@ -89,6 +91,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 				assertTrue("Not same type", refType == fTypeEnvironment.create(type));
 			}
 		}
+		@Override
 		public boolean visit(org.eclipse.jdt.core.dom.Type node) {
 			checkTypeBinding(node.resolveBinding());
 			return true;
@@ -96,10 +99,12 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 	}
 
 	private static class TypeBindingCollector extends ASTVisitor {
-		private List fResult= new ArrayList();
-		private List fWildcards= new ArrayList();
+		private List<ITypeBinding> fResult= new ArrayList<>();
+		private List<ITypeBinding> fWildcards= new ArrayList<>();
+		@Override
 		public boolean visit(FieldDeclaration node) {
-			VariableDeclarationFragment fragment= (VariableDeclarationFragment)node.fragments().get(0);
+			List<VariableDeclarationFragment> fragments= node.fragments();
+			VariableDeclarationFragment fragment= fragments.get(0);
 			if (fragment.getName().getIdentifier().equals("NullType")) {
 				fResult.add(fragment.getInitializer().resolveTypeBinding());
 			} else {
@@ -107,9 +112,10 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 			}
 			return false;
 		}
+		@Override
 		public void endVisit(CompilationUnit node) {
-			for (Iterator iter= fResult.iterator(); iter.hasNext();) {
-				ITypeBinding binding= (ITypeBinding)iter.next();
+			for (Iterator<ITypeBinding> iter= fResult.iterator(); iter.hasNext();) {
+				ITypeBinding binding= iter.next();
 				if (binding.isParameterizedType()) {
 					ITypeBinding[] args= binding.getTypeArguments();
 					for (int i= 0; i < args.length; i++) {
@@ -121,15 +127,16 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 			}
 		}
 		public ITypeBinding[] getResult() {
-			return (ITypeBinding[])fResult.toArray(new ITypeBinding[fResult.size()]);
+			return fResult.toArray(new ITypeBinding[fResult.size()]);
 		}
 		public ITypeBinding[] getWildcards() {
-			return (ITypeBinding[])fWildcards.toArray(new ITypeBinding[fWildcards.size()]);
+			return fWildcards.toArray(new ITypeBinding[fWildcards.size()]);
 		}
 	}
 
 	private static class CaptureTypeBindingCollector extends ASTVisitor {
-		private List fResult= new ArrayList();
+		private List<ITypeBinding> fResult= new ArrayList<>();
+		@Override
 		public boolean visit(Assignment node) {
 			Expression expression= node.getRightHandSide();
 			ITypeBinding typeBinding= expression.resolveTypeBinding();
@@ -137,7 +144,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 			collectTypeArgumentBindings(typeBinding, fResult);
 			return false;
 		}
-		private void collectTypeArgumentBindings(ITypeBinding typeBinding, List result) {
+		private void collectTypeArgumentBindings(ITypeBinding typeBinding, List<ITypeBinding> result) {
 			if (! typeBinding.isParameterizedType())
 				return;
 			ITypeBinding[] typeArguments= typeBinding.getTypeArguments();
@@ -150,7 +157,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 			}
 		}
 		public ITypeBinding[] getResult() {
-			return (ITypeBinding[])fResult.toArray(new ITypeBinding[fResult.size()]);
+			return fResult.toArray(new ITypeBinding[fResult.size()]);
 		}
 	}
 
@@ -167,14 +174,17 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		return new MyTestSetup(someTest);
 	}
 
+	@Override
 	protected InputStream getFileInputStream(String fileName) throws IOException {
 		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
 	}
 
+	@Override
 	protected String getResourceLocation() {
 		return "TypeEnvironment/TestProject/";
 	}
 
+	@Override
 	protected String adaptName(String name) {
 		return Character.toUpperCase(name.charAt(0)) + name.substring(1) + ".java";
 	}

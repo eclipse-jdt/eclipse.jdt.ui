@@ -198,12 +198,19 @@ public class PackageExplorerPart extends ViewPart
 
 
 	private final IPartListener2 fLinkWithEditorListener= new IPartListener2() {
+		@Override
 		public void partVisible(IWorkbenchPartReference partRef) {}
+		@Override
 		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
+		@Override
 		public void partClosed(IWorkbenchPartReference partRef) {}
+		@Override
 		public void partDeactivated(IWorkbenchPartReference partRef) {}
+		@Override
 		public void partHidden(IWorkbenchPartReference partRef) {}
+		@Override
 		public void partOpened(IWorkbenchPartReference partRef) {}
+		@Override
 		public void partInputChanged(IWorkbenchPartReference partRef) {
 			IWorkbenchPage activePage= JavaPlugin.getActivePage();
 			if (partRef instanceof IEditorReference && activePage != null && activePage.getActivePartReference() == partRef) {
@@ -211,6 +218,7 @@ public class PackageExplorerPart extends ViewPart
 			}
 		}
 
+		@Override
 		public void partActivated(IWorkbenchPartReference partRef) {
 			if (partRef instanceof IEditorReference) {
 				editorActivated(((IEditorReference) partRef).getEditor(true));
@@ -220,9 +228,11 @@ public class PackageExplorerPart extends ViewPart
 	};
 
 	private final ITreeViewerListener fExpansionListener= new ITreeViewerListener() {
+		@Override
 		public void treeCollapsed(TreeExpansionEvent event) {
 		}
 
+		@Override
 		public void treeExpanded(TreeExpansionEvent event) {
 			Object element= event.getElement();
 			if (element instanceof ICompilationUnit ||
@@ -238,7 +248,7 @@ public class PackageExplorerPart extends ViewPart
 
 		public PackageExplorerProblemTreeViewer(Composite parent, int style) {
 			super(parent, style);
-			fPendingRefreshes= Collections.synchronizedList(new ArrayList<Object>());
+			fPendingRefreshes= Collections.synchronizedList(new ArrayList<>());
 		}
 		@Override
 		public void add(Object parentElement, Object[] childElements) {
@@ -248,9 +258,6 @@ public class PackageExplorerPart extends ViewPart
 			super.add(parentElement, childElements);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.AbstractTreeViewer#internalRefresh(java.lang.Object, boolean)
-		 */
 	    @Override
 		protected void internalRefresh(Object element, boolean updateLabels) {
 			try {
@@ -305,9 +312,9 @@ public class PackageExplorerPart extends ViewPart
 			IStructuredSelection is= (IStructuredSelection)invalidSelection;
 			List<Object> ns= null;
 			if (newSelection instanceof IStructuredSelection) {
-				ns= new ArrayList<Object>(((IStructuredSelection)newSelection).toList());
+				ns= new ArrayList<>(((IStructuredSelection)newSelection).toList());
 			} else {
-				ns= new ArrayList<Object>();
+				ns= new ArrayList<>();
 			}
 			boolean changed= false;
 			for (Iterator<?> iter= is.iterator(); iter.hasNext();) {
@@ -335,9 +342,6 @@ public class PackageExplorerPart extends ViewPart
 			super.handleInvalidSelection(invalidSelection, newSelection);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		protected Object[] addAditionalProblemParents(Object[] elements) {
 			if (getRootMode() == WORKING_SETS_AS_ROOTS && elements != null) {
@@ -472,9 +476,6 @@ public class PackageExplorerPart extends ViewPart
 		super.dispose();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	public void createPartControl(Composite parent) {
 
@@ -511,6 +512,7 @@ public class PackageExplorerPart extends ViewPart
 		initKeyListener();
 
 		fViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				fActionSet.handleDoubleClick(event);
 			}
@@ -679,9 +681,6 @@ public class PackageExplorerPart extends ViewPart
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.WorkbenchPart#getAdapter(java.lang.Class)
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> key) {
@@ -692,6 +691,7 @@ public class PackageExplorerPart extends ViewPart
 		}
 		if (key == IShowInTargetList.class) {
 			return (T) new IShowInTargetList() {
+				@Override
 				public String[] getShowInTargetIds() {
 					return new String[] { JavaPlugin.ID_RES_NAV };
 				}
@@ -772,9 +772,6 @@ public class PackageExplorerPart extends ViewPart
 		return getToolTipText(fViewer.getInput());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.WorkbenchPart#setFocus()
-	 */
 	@Override
 	public void setFocus() {
 		fViewer.getTree().setFocus();
@@ -786,9 +783,7 @@ public class PackageExplorerPart extends ViewPart
 
 	//---- Action handling ----------------------------------------------------------
 
-	/* (non-Javadoc)
-	 * @see IMenuListener#menuAboutToShow(IMenuManager)
-	 */
+	@Override
 	public void menuAboutToShow(IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
 
@@ -826,9 +821,7 @@ public class PackageExplorerPart extends ViewPart
 		dropSupport.start();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.IRefreshable#refresh(org.eclipse.jface.viewers.IStructuredSelection)
-	 */
+	@Override
 	public void refresh(IStructuredSelection selection) {
 		Object[] selectedElements= selection.toArray();
 		for (int i= 0; i < selectedElements.length; i++) {
@@ -836,9 +829,7 @@ public class PackageExplorerPart extends ViewPart
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.ISetSelectionTarget#selectReveal(org.eclipse.jface.viewers.ISelection)
-	 */
+	@Override
 	public void selectReveal(final ISelection selection) {
 		Control ctrl= getTreeViewer().getControl();
 		if (ctrl == null || ctrl.isDisposed())
@@ -912,10 +903,12 @@ public class PackageExplorerPart extends ViewPart
 		return original;
 	}
 
+	@Override
 	public void selectAndReveal(Object element) {
 		selectReveal(new StructuredSelection(element));
 	}
 
+	@Override
 	public boolean isLinkingEnabled() {
 		return fLinkingEnabled;
 	}
@@ -1131,6 +1124,7 @@ public class PackageExplorerPart extends ViewPart
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
 					ctrl.getDisplay().asyncExec(new Runnable() {
+						@Override
 						public void run() {
 							Control ctrl2= fViewer.getControl();
 							if (ctrl2 != null && !ctrl2.isDisposed())
@@ -1148,6 +1142,7 @@ public class PackageExplorerPart extends ViewPart
  	 * Returns the TreeViewer.
 	 * @return the tree viewer
  	 */
+	@Override
 	public TreeViewer getTreeViewer() {
 		return fViewer;
 	}
@@ -1198,6 +1193,7 @@ public class PackageExplorerPart extends ViewPart
 	/*
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (fViewer == null)
 			return;
@@ -1217,9 +1213,7 @@ public class PackageExplorerPart extends ViewPart
 			fViewer.refresh();
 	}
 
-	/* (non-Javadoc)
-	 * @see IViewPartInputProvider#getViewPartInput()
-	 */
+	@Override
 	public Object getViewPartInput() {
 		if (fViewer != null) {
 			return fViewer.getInput();
@@ -1236,9 +1230,7 @@ public class PackageExplorerPart extends ViewPart
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.IShowInTarget#show(org.eclipse.ui.part.ShowInContext)
-	 */
+	@Override
 	public boolean show(ShowInContext context) {
 		ISelection selection= context.getSelection();
 		if (selection instanceof IStructuredSelection) {
@@ -1271,6 +1263,7 @@ public class PackageExplorerPart extends ViewPart
 	 */
 	protected IShowInSource getShowInSource() {
 		return new IShowInSource() {
+			@Override
 			public ShowInContext getShowInContext() {
 				return new ShowInContext(
 					getTreeViewer().getInput(),
@@ -1279,9 +1272,7 @@ public class PackageExplorerPart extends ViewPart
 		};
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.IPackagesViewPart#setLinkingEnabled(boolean)
-	 */
+	@Override
 	public void setLinkingEnabled(boolean enabled) {
 		fLinkingEnabled= enabled;
 		saveDialogSettings();
@@ -1463,9 +1454,11 @@ public class PackageExplorerPart extends ViewPart
 
 	private void createWorkingSetModel() {
 		SafeRunner.run(new ISafeRunnable() {
+			@Override
 			public void run() throws Exception {
 				fWorkingSetModel= new WorkingSetModel(fMemento);
 			}
+			@Override
 			public void handleException(Throwable exception) {
 				fWorkingSetModel= new WorkingSetModel(null);
 			}

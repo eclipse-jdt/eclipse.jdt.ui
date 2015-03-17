@@ -74,7 +74,7 @@ import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
 
 public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 
-	private static final HashSet<String> ASSERT_METHOD_NAMES= new HashSet<String>();
+	private static final HashSet<String> ASSERT_METHOD_NAMES= new HashSet<>();
 
 	public JUnitQuickFixProcessor() {
 		ASSERT_METHOD_NAMES.add("fail"); //$NON-NLS-1$
@@ -90,16 +90,12 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 		ASSERT_METHOD_NAMES.add("failNotSame"); //$NON-NLS-1$
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.text.java.IQuickFixProcessor#hasCorrections(org.eclipse.jdt.core.ICompilationUnit, int)
-	 */
+	@Override
 	public boolean hasCorrections(ICompilationUnit unit, int problemId) {
 		return problemId == IProblem.UndefinedType || problemId ==  IProblem.UndefinedMethod;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.text.java.IQuickFixProcessor#getCorrections(org.eclipse.jdt.ui.text.java.IInvocationContext, org.eclipse.jdt.ui.text.java.IProblemLocation[])
-	 */
+	@Override
 	public IJavaCompletionProposal[] getCorrections(final IInvocationContext context, IProblemLocation[] locations)  {
 		ArrayList<IJavaCompletionProposal> res= null;
 		for (IProblemLocation problem : locations) {
@@ -122,7 +118,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			String methodName= args[1];
 			if (ASSERT_METHOD_NAMES.contains(methodName) && isInsideJUnit4Test(context)) {
 				if (proposals == null) {
-					proposals= new ArrayList<IJavaCompletionProposal>();
+					proposals= new ArrayList<>();
 				}
 				proposals.add(new AddAssertProposal(context.getASTRoot(), methodName, 9));
 				proposals.add(new AddAssertProposal(context.getASTRoot(), "*", 10)); //$NON-NLS-1$
@@ -157,7 +153,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 				ClasspathFixProposal[] fixProposals= ClasspathFixProcessor.getContributedFixImportProposals(javaProject, qualifiedName, null);
 				for (ClasspathFixProposal fixProposal : fixProposals) {
 					if (proposals == null)
-						proposals= new ArrayList<IJavaCompletionProposal>();
+						proposals= new ArrayList<>();
 					proposals.add(new JUnitClasspathFixCorrectionProposal(javaProject, fixProposal, getImportRewrite(context.getASTRoot(), qualifiedName)));
 				}
 			}
@@ -225,9 +221,11 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			return change;
 		}
 
+		@Override
 		public void apply(IDocument document) {
 			try {
 				PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, true, new IRunnableWithProgress() {
+					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						try {
 							Change change= createChange();
@@ -250,26 +248,32 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			}
 		}
 
+		@Override
 		public String getAdditionalProposalInfo() {
 			return fClasspathFixProposal.getAdditionalProposalInfo();
 		}
 
+		@Override
 		public int getRelevance() {
 			return fClasspathFixProposal.getRelevance();
 		}
 
+		@Override
 		public IContextInformation getContextInformation() {
 			return null;
 		}
 
+		@Override
 		public String getDisplayString() {
 			return fClasspathFixProposal.getDisplayString();
 		}
 
+		@Override
 		public Image getImage() {
 			return fClasspathFixProposal.getImage();
 		}
 
+		@Override
 		public Point getSelection(IDocument document) {
 			return null;
 		}
@@ -287,16 +291,12 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			fRelevance= relevance;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
-		 */
+		@Override
 		public int getRelevance() {
 			return fRelevance;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
-		 */
+		@Override
 		public void apply(IDocument document) {
 			try {
 				ImportRewrite rewrite= CodeStyleConfiguration.createImportRewrite(fAstRoot, true);
@@ -309,37 +309,27 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
-		 */
+		@Override
 		public String getAdditionalProposalInfo() {
 			return Messages.format(JUnitMessages.JUnitQuickFixProcessor_add_assert_info, BasicElementLabels.getJavaElementName("org.junit.Assert." + fMethodName)); //$NON-NLS-1$
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
-		 */
+		@Override
 		public IContextInformation getContextInformation() {
 			return null;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
-		 */
+		@Override
 		public String getDisplayString() {
 			return Messages.format(JUnitMessages.JUnitQuickFixProcessor_add_assert_description, BasicElementLabels.getJavaElementName("org.junit.Assert." + fMethodName)); //$NON-NLS-1$
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
-		 */
+		@Override
 		public Image getImage() {
 			return JavaUI.getSharedImages().getImage(ISharedImages.IMG_OBJS_IMPDECL);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
-		 */
+		@Override
 		public Point getSelection(IDocument document) {
 			return null;
 		}

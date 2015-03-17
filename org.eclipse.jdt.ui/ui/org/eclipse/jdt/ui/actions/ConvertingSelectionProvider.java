@@ -49,6 +49,7 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 
 		ListenerList fListeners= new ListenerList();
 
+		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			ISelection selection= convertFrom(event.getSelection());
 			SelectionChangedEvent newEvent= new SelectionChangedEvent(ConvertingSelectionProvider.this, selection);
@@ -98,7 +99,7 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 		if (! (viewerSelection instanceof IStructuredSelection))
 			return viewerSelection;
 		IStructuredSelection selection= (IStructuredSelection)viewerSelection;
-		List<Object> result= new ArrayList<Object>(selection.size());
+		List<Object> result= new ArrayList<>(selection.size());
 		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IResource || element instanceof IJavaElement) {
@@ -136,23 +137,17 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 	}
 
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public final ISelection getSelection() {
 		return convertFrom(fProvider.getSelection());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public final void setSelection(ISelection selection) {
 		fProvider.setSelection(convertTo(selection));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 		if (fListener == null) {
 			fListener= new SelectionChangedListener();
@@ -161,9 +156,7 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 		fListener.addListener(listener);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 		if (fListener == null)
 			return;

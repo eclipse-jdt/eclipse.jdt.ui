@@ -36,6 +36,7 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		super();
 	}
 
+	@Override
 	public void createInitialLayout(IPageLayout layout) {
  		String editorArea = layout.getEditorArea();
 

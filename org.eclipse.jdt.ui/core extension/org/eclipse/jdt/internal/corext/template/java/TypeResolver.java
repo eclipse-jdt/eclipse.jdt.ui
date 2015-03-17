@@ -39,9 +39,6 @@ public class TypeResolver extends TemplateVariableResolver {
 		fDefaultType= defaultType;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
-	 */
 	@Override
 	public void resolve(TemplateVariable variable, TemplateContext context) {
 		List<String> params= variable.getVariableType().getParams();

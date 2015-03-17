@@ -170,9 +170,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			return composite;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
-		 */
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			// validate
 			IStatus prefixStatus= validateIdentifiers(getTokens(fPrefixField.getText(), ","), true); //$NON-NLS-1$
@@ -216,25 +214,17 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 
 	private static class NameConventionLabelProvider extends LabelProvider implements ITableLabelProvider {
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
-		 */
 		@Override
 		public Image getImage(Object element) {
 			return getColumnImage(element, 0);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
-		 */
 		@Override
 		public String getText(Object element) {
 			return getColumnText(element, 0);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
-		 */
+		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			if (columnIndex != 0) {
 				return null;
@@ -255,9 +245,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 					return registry.get(JavaPluginImages.DESC_OBJS_LOCAL_VARIABLE);
 			}
 		}
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
-		 */
+		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			NameConventionEntry entry= (NameConventionEntry) element;
 			if (columnIndex == 0) {
@@ -287,20 +275,24 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			return field.getSelectedElements().size() == 1;
 		}
 
+		@Override
 		public void customButtonPressed(ListDialogField<NameConventionEntry> field, int index) {
 			doEditButtonPressed();
 		}
 
+		@Override
 		public void selectionChanged(ListDialogField<NameConventionEntry> field) {
 			field.enableButton(0, canEdit(field));
 		}
 
+		@Override
 		public void doubleClicked(ListDialogField<NameConventionEntry> field) {
 			if (canEdit(field)) {
 				doEditButtonPressed();
 			}
 		}
 
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			updateModel(field);
 		}
@@ -418,7 +410,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			public void widgetSelected(SelectionEvent e) {
 				IWorkbenchPreferenceContainer preferenceContainer= getPreferenceContainer();
 				if (preferenceContainer != null) {
-					HashMap<String, String> prefsData= new HashMap<String, String>();
+					HashMap<String, String> prefsData= new HashMap<>();
 					prefsData.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_KEY, JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION_FOR_INTERFACE_METHOD_IMPLEMENTATION);
 					prefsData.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
 					String id= fProject == null ? ProblemSeveritiesPreferencePage.PREF_ID : ProblemSeveritiesPreferencePage.PROP_ID;
@@ -434,9 +426,6 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		return composite;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String, java.lang.String)
-	 */
 	@Override
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		// no validation here
@@ -471,12 +460,9 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateControls()
-	 */
 	@Override
 	protected void updateControls() {
-		ArrayList<NameConventionEntry> list= new ArrayList<NameConventionEntry>(4);
+		ArrayList<NameConventionEntry> list= new ArrayList<>(4);
 		createEntry(list, PREF_FIELD_PREFIXES, PREF_FIELD_SUFFIXES, FIELD);
 		createEntry(list, PREF_STATIC_FIELD_PREFIXES, PREF_STATIC_FIELD_SUFFIXES, STATIC);
 		createEntry(list, PREF_STATIC_FINAL_FIELD_PREFIXES, PREF_STATIC_FINAL_FIELD_SUFFIXES, STATIC_FINAL);
@@ -490,9 +476,6 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		fUseOverrideAnnotation.setSelection(getBooleanValue(PREF_USE_OVERRIDE_ANNOT));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#getFullBuildDialogStrings(boolean)
-	 */
 	@Override
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		return null; // no build required

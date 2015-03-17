@@ -68,7 +68,7 @@ public class GenerateConstructorUsingFieldsValidator implements ISelectionStatus
 	}
 
 	private List<String> getExistingConstructorSignatures() {
-		List<String> existing= new ArrayList<String>();
+		List<String> existing= new ArrayList<>();
 		IMethodBinding[] methods= fType.getDeclaredMethods();
 		for (int index= 0; index < methods.length; index++) {
 			if (methods[index].isConstructor()) {
@@ -80,6 +80,7 @@ public class GenerateConstructorUsingFieldsValidator implements ISelectionStatus
 		return existing;
 	}
 
+	@Override
 	public IStatus validate(Object[] selection) {
 		StringBuffer buffer= new StringBuffer();
 		final IMethodBinding constructor= fDialog.getSuperConstructorChoice();

@@ -45,7 +45,7 @@ public class MethodOverrideTester {
 
 		public void addSubstitution(String typeVariable, String substitution, String erasure) {
 			if (fMap == null) {
-				fMap= new HashMap<String, String[]>(3);
+				fMap= new HashMap<>(3);
 			}
 			fMap.put(typeVariable, new String[] { substitution, erasure });
 		}
@@ -365,7 +365,7 @@ public class MethodOverrideTester {
 	 */
 	private Substitutions getMethodSubstitions(IMethod method) throws JavaModelException {
 		if (fMethodSubstitutions == null) {
-			fMethodSubstitutions= new LRUMap<IMethod, Substitutions>(3);
+			fMethodSubstitutions= new LRUMap<>(3);
 		}
 
 		Substitutions s= fMethodSubstitutions.get(method);
@@ -391,7 +391,7 @@ public class MethodOverrideTester {
 	 */
 	private Substitutions getTypeSubstitions(IType type) throws JavaModelException {
 		if (fTypeVariableSubstitutions == null) {
-			fTypeVariableSubstitutions= new HashMap<IType, Substitutions>();
+			fTypeVariableSubstitutions= new HashMap<>();
 			computeSubstitutions(fFocusType, null, null);
 		}
 		Substitutions subst= fTypeVariableSubstitutions.get(type);

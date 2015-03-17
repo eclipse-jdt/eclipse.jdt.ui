@@ -67,6 +67,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		/*
 		 * @see org.eclipse.jface.text.source.IAnnotationPresentation#paint(org.eclipse.swt.graphics.GC, org.eclipse.swt.widgets.Canvas, org.eclipse.swt.graphics.Rectangle)
 		 */
+		@Override
 		public void paint(GC gc, Canvas canvas, Rectangle bounds) {
 			// draw affordance so the user know she can click here to get a breakpoint
 			Image fImage= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
@@ -76,6 +77,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		/*
 		 * @see org.eclipse.jface.text.source.IAnnotationPresentation#getLayer()
 		 */
+		@Override
 		public int getLayer() {
 			return IAnnotationPresentation.DEFAULT_LAYER;
 		}
@@ -100,8 +102,8 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		if (model == null)
 			return null;
 
-		List<Annotation> exact= new ArrayList<Annotation>();
-		HashMap<Position, Object> messagesAtPosition= new HashMap<Position, Object>();
+		List<Annotation> exact= new ArrayList<>();
+		HashMap<Position, Object> messagesAtPosition= new HashMap<>();
 
 		Iterator<Annotation> e= model.getAnnotationIterator();
 		while (e.hasNext()) {
@@ -156,6 +158,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		input.fDoubleClickListener= fDblClickListener;
 		input.redoAction= new AnnotationExpansionControl.ICallback() {
 
+			@Override
 			public void run(IInformationControlExtension2 control) {
 				control.setInput(getHoverInfoForLine(viewer, line));
 			}

@@ -39,6 +39,7 @@ public class ManifestProvider implements IManifestProvider {
 	 * @return the manifest
 	 * @throws CoreException
 	 */
+	@Override
 	public Manifest create(JarPackageData jarPackage) throws CoreException {
 		Assert.isNotNull(jarPackage);
 		if (jarPackage.isManifestGenerated())
@@ -57,6 +58,7 @@ public class ManifestProvider implements IManifestProvider {
 	 * @param manifestVersion	the version of the manifest
 	 * @return the manifest
 	 */
+	@Override
 	public Manifest createDefault(String manifestVersion) {
 		Manifest manifest= new Manifest();
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, manifestVersion);

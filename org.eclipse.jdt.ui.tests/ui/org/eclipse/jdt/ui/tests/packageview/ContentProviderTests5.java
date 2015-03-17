@@ -78,6 +78,7 @@ public class ContentProviderTests5 extends TestCase{
 		return new TestSuite(ContentProviderTests5.class);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -136,6 +137,7 @@ public class ContentProviderTests5 extends TestCase{
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fold);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		JavaProjectHelper.delete(fJProject);

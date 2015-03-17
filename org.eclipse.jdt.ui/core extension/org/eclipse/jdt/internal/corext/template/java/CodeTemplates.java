@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.0
  * @deprecated use {@link org.eclipse.jdt.internal.ui.JavaPlugin#getCodeTemplateStore()} instead
  */
+@Deprecated
 public class CodeTemplates extends org.eclipse.jdt.internal.corext.template.java.TemplateSet {
 
 	private static final String TEMPLATE_FILE= "codetemplates.xml"; //$NON-NLS-1$

@@ -56,6 +56,7 @@ public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IRec
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#setDocument(org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public void setDocument(IDocument document) {
 		if (fStrategies == null)
 			return;
@@ -67,6 +68,7 @@ public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IRec
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.reconciler.DirtyRegion, org.eclipse.jface.text.IRegion)
 	 */
+	@Override
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
 		if (fStrategies == null)
 			return;
@@ -78,6 +80,7 @@ public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IRec
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
 	 */
+	@Override
 	public void reconcile(IRegion partition) {
 		if (fStrategies == null)
 			return;
@@ -89,6 +92,7 @@ public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IRec
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension#setProgressMonitor(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public void setProgressMonitor(IProgressMonitor monitor) {
 		if (fStrategies == null)
 			return;
@@ -104,6 +108,7 @@ public class CompositeReconcilingStrategy  implements IReconcilingStrategy, IRec
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension#initialReconcile()
 	 */
+	@Override
 	public void initialReconcile() {
 		if (fStrategies == null)
 			return;

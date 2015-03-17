@@ -141,7 +141,7 @@ public class SourceProvider {
 		}
 		fAnalyzer= new SourceAnalyzer(fTypeRoot, fDeclaration);
 		fReturnValueNeedsLocalVariable= true;
-		fReturnExpressions= new ArrayList<Expression>();
+		fReturnExpressions= new ArrayList<>();
 	}
 
 	/**
@@ -619,7 +619,7 @@ public class SourceProvider {
 
 	private List<IRegion> getReturnStatementRanges() {
 		fMarkerMode= RETURN_STATEMENT_MODE;
-		List<IRegion> result= new ArrayList<IRegion>(1);
+		List<IRegion> result= new ArrayList<>(1);
 		List<Statement> statements= fDeclaration.getBody().statements();
 		int size= statements.size();
 		if (size <= 1)
@@ -630,7 +630,7 @@ public class SourceProvider {
 
 	private List<IRegion> getStatementRanges() {
 		fMarkerMode= STATEMENT_MODE;
-		List<IRegion> result= new ArrayList<IRegion>(1);
+		List<IRegion> result= new ArrayList<>(1);
 		List<Statement> statements= fDeclaration.getBody().statements();
 		int size= statements.size();
 		if (size == 0)
@@ -641,7 +641,7 @@ public class SourceProvider {
 
 	private List<IRegion> getExpressionRanges() {
 		fMarkerMode= EXPRESSION_MODE;
-		List<IRegion> result= new ArrayList<IRegion>(2);
+		List<IRegion> result= new ArrayList<>(2);
 		List<Statement> statements= fDeclaration.getBody().statements();
 		ReturnStatement rs= null;
 		int size= statements.size();

@@ -28,7 +28,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 public class JavaIndenterTest extends TextPerformanceTestCase {
 
-	private static final Class THIS= JavaIndenterTest.class;
+	private static final Class<JavaIndenterTest> THIS= JavaIndenterTest.class;
 
 	private static final String FILE= PerformanceTestSetup.TEXT_LAYOUT;
 
@@ -44,6 +44,7 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		EditorTestHelper.runEventQueue();
@@ -59,6 +60,7 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 		setMeasuredRuns(MEASURED_RUNS);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();
@@ -78,6 +80,7 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 		final int originalNumberOfLines= document.getNumberOfLines();
 		for (int i= 0; i < runs; i++) {
 			DisplayHelper helper= new DisplayHelper() {
+				@Override
 				protected boolean condition() {
 					return document.getNumberOfLines() == originalNumberOfLines + 1;
 				}
@@ -89,6 +92,7 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 			assertTrue(success);
 			runAction(undo);
 			helper= new DisplayHelper() {
+				@Override
 				protected boolean condition() {
 					return document.getNumberOfLines() == originalNumberOfLines;
 				}

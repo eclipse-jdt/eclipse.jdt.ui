@@ -100,7 +100,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	private LexicalSortingAction fLexicalSortingAction;
 	private SortByDefiningTypeAction fSortByDefiningTypeAction;
 	private ShowOnlyMainTypeAction fShowOnlyMainTypeAction;
-	private Map<IType, ITypeHierarchy> fTypeHierarchies= new HashMap<IType, ITypeHierarchy>();
+	private Map<IType, ITypeHierarchy> fTypeHierarchies= new HashMap<>();
 
 	/**
 	 * Category filter action group.
@@ -214,9 +214,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		protected Object[] getFilteredChildren(Object parent) {
 			Object[] result = getRawChildren(parent);
@@ -230,9 +227,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			return result;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		protected void internalExpandToLevel(Widget node, int level) {
 			if (!fIsFiltering && node instanceof TreeItem && getMatcher() == null) {
@@ -302,9 +296,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			tree.setRedraw(true);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public Object[] getChildren(Object element) {
 			if (fShowOnlyMainType) {
@@ -321,7 +312,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 				if (type.getDeclaringType() == null || type.equals(fInitiallySelectedType)) {
 					ITypeHierarchy th= getSuperTypeHierarchy(type);
 					if (th != null) {
-						List<Object> children= new ArrayList<Object>();
+						List<Object> children= new ArrayList<>();
 						IType[] superClasses= th.getAllSupertypes(type);
 						children.addAll(Arrays.asList(super.getChildren(type)));
 						for (int i= 0, scLength= superClasses.length; i < scLength; i++)
@@ -333,18 +324,12 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			return super.getChildren(element);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			super.inputChanged(viewer, oldInput, newInput);
 			fTypeHierarchies.clear();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void dispose() {
 			super.dispose();
@@ -468,6 +453,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		private void valueChanged(final boolean on, boolean store) {
 			setChecked(on);
 			BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
+				@Override
 				public void run() {
 					fOutlineViewer.refresh(false);
 				}
@@ -512,6 +498,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		@Override
 		public void run() {
 			BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
+				@Override
 				public void run() {
 					fInnerLabelProvider.setShowDefiningType(isChecked());
 					getDialogSettings().put(STORE_SORT_BY_DEFINING_TYPE_CHECKED, isChecked());
@@ -540,9 +527,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		super(parent, shellStyle, treeStyle, commandId, true);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Text createFilterText(Composite parent) {
 		Text text= super.createFilterText(parent);
@@ -550,9 +534,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		return text;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected TreeViewer createTreeViewer(Composite parent, int style) {
 		Tree tree= new Tree(parent, SWT.SINGLE | (style & ~SWT.MULTI));
@@ -591,9 +572,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		return treeViewer;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected String getStatusFieldText() {
 		KeySequence[] sequences= getInvokingCommandKeySequences();
@@ -617,9 +595,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		return "org.eclipse.jdt.internal.ui.text.QuickOutline"; //$NON-NLS-1$
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setInput(Object information) {
 		if (information == null || information instanceof String) {

@@ -85,34 +85,23 @@ public class JavaStructureCreator extends StructureCreator {
 			fAdapter= adapter;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#isEditable()
-		 */
 		@Override
 		public boolean isEditable() {
 			return fEditable;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#nodeChanged(org.eclipse.compare.structuremergeviewer.DocumentRangeNode)
-		 */
 		@Override
 		protected void nodeChanged(DocumentRangeNode node) {
 			save(this, fInput);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.services.IDisposable#dispose()
-		 */
+		@Override
 		public void dispose() {
 			if (fAdapter != null) {
 				fAdapter.disconnect(fInput);
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#getAdapter(java.lang.Class)
-		 */
 		@Override
 		public Object getAdapter(Class adapter) {
 			if (adapter == ISharedDocumentAdapter.class) {
@@ -122,9 +111,6 @@ public class JavaStructureCreator extends StructureCreator {
 		}
 
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#isReadOnly()
-		 */
 		@Override
 		public boolean isReadOnly() {
 			if (fInput instanceof IEditableContentExtension) {
@@ -134,9 +120,6 @@ public class JavaStructureCreator extends StructureCreator {
 			return super.isReadOnly();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.compare.structuremergeviewer.DocumentRangeNode#validateEdit(org.eclipse.swt.widgets.Shell)
-		 */
 		@Override
 		public IStatus validateEdit(Shell shell) {
 			if (fInput instanceof IEditableContentExtension) {
@@ -159,7 +142,7 @@ public class JavaStructureCreator extends StructureCreator {
 		JavaNode fLeft= null;
 		JavaNode fRight= null;
 
-		ArrayList<IDiffElement> fChildren= new ArrayList<IDiffElement>();
+		ArrayList<IDiffElement> fChildren= new ArrayList<>();
 
 		void add(IDiffElement diff) {
 			fChildren.add(diff);
@@ -212,6 +195,7 @@ public class JavaStructureCreator extends StructureCreator {
 	/**
 	 * @return the name that appears in the enclosing pane title bar
 	 */
+	@Override
 	public String getName() {
 		return CompareMessages.JavaStructureViewer_title;
 	}
@@ -250,9 +234,6 @@ public class JavaStructureCreator extends StructureCreator {
 		return createStructureComparator(input, buffer, doc, null, null);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.compare.structuremergeviewer.StructureCreator#createStructureComparator(java.lang.Object, org.eclipse.jface.text.IDocument, org.eclipse.compare.ISharedDocumentAdapter, org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	protected IStructureComparator createStructureComparator(Object element,
 			IDocument document, ISharedDocumentAdapter sharedDocumentAdapter,
@@ -315,6 +296,7 @@ public class JavaStructureCreator extends StructureCreator {
 	 * @param ignoreWhiteSpace if <code>true</code> all Java white space (including comments) is removed from the contents.
 	 * @return contents for equality test
 	 */
+	@Override
 	public String getContents(Object node, boolean ignoreWhiteSpace) {
 
 		if (! (node instanceof IStreamContentAccessor))
@@ -388,7 +370,7 @@ public class JavaStructureCreator extends StructureCreator {
 	 */
 	public void rewriteTree(Differencer differencer, IDiffContainer root) {
 
-		HashMap<String, RewriteInfo> map= new HashMap<String, RewriteInfo>(10);
+		HashMap<String, RewriteInfo> map= new HashMap<>(10);
 
 		Object[] children= root.getChildren();
 		for (int i= 0; i < children.length; i++) {
@@ -480,32 +462,23 @@ public class JavaStructureCreator extends StructureCreator {
 		return JavaElementHistoryPageSource.hasEdition(je);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.compare.structuremergeviewer.StructureCreator#getDocumentPartitioner()
-	 */
 	@Override
 	protected IDocumentPartitioner getDocumentPartitioner() {
 		return JavaCompareUtilities.createJavaPartitioner();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.compare.structuremergeviewer.StructureCreator#getDocumentPartitioning()
-	 */
 	@Override
 	protected String getDocumentPartitioning() {
 		return IJavaPartitions.JAVA_PARTITIONING;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.compare.structuremergeviewer.StructureCreator#getPath(java.lang.Object, java.lang.Object)
-	 */
 	@Override
 	protected String[] getPath(Object element, Object input) {
 		if (element instanceof IJavaElement) {
 			IJavaElement je = (IJavaElement) element;
 			// build a path starting at the given Java element and walk
 			// up the parent chain until we reach a IWorkingCopy or ICompilationUnit
-			List<String> args= new ArrayList<String>();
+			List<String> args= new ArrayList<>();
 			while (je != null) {
 				// each path component has a name that uses the same
 				// conventions as a JavaNode name

@@ -58,9 +58,6 @@ public class MultiSortMembersAction extends CleanUpAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SORT_MEMBERS_ACTION);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected ICleanUp[] getCleanUps(ICompilationUnit[] units) {
 		try {
@@ -87,15 +84,12 @@ public class MultiSortMembersAction extends CleanUpAction {
 		if (dialog.open() != Window.OK)
 			return null;
 
-		Hashtable<String, String> settings= new Hashtable<String, String>();
+		Hashtable<String, String> settings= new Hashtable<>();
 		settings.put(CleanUpConstants.SORT_MEMBERS, CleanUpOptions.TRUE);
 		settings.put(CleanUpConstants.SORT_MEMBERS_ALL, !dialog.isNotSortingFieldsEnabled() ? CleanUpOptions.TRUE : CleanUpOptions.FALSE);
 		return settings;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected String getActionName() {
 		return ActionMessages.SortMembersAction_dialog_title;

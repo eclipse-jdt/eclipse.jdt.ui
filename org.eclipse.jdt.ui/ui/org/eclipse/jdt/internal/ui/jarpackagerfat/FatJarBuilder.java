@@ -47,9 +47,6 @@ public abstract class FatJarBuilder extends JarBuilder implements IJarBuilderExt
 
 	public abstract String getManifestClasspath();
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void open(JarPackageData jarPackage, Shell displayShell, MultiStatus status) throws CoreException {
 		super.open(jarPackage, displayShell, status);
@@ -57,20 +54,17 @@ public abstract class FatJarBuilder extends JarBuilder implements IJarBuilderExt
 		fJarWriter= new JarWriter4(fJarPackage, displayShell);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void writeFile(IFile resource, IPath destinationPath) throws CoreException {
 		fJarWriter.write(resource, destinationPath);
 	}
 
+	@Override
 	public void writeFile(File file, IPath destinationPath) throws CoreException {
 		fJarWriter.write(file, destinationPath);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void close() throws CoreException {
 		if (fJarWriter != null) {
 			fJarWriter.close();

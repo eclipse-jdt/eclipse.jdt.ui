@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,10 +14,10 @@ package org.eclipse.jdt.astview.views;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.astview.ASTViewPlugin;
+
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-
-import org.eclipse.jdt.astview.ASTViewPlugin;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -55,28 +55,20 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 public class ASTViewContentProvider implements ITreeContentProvider {
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-	 */
+	@Override
 	public void inputChanged(Viewer v, Object oldInput, Object newInput) {
 	}
 	
-	/*(non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
-	 */
+	@Override
 	public void dispose() {
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
-	 */
+	@Override
 	public Object[] getElements(Object parent) {
 		return getChildren(parent);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
-	 */
+	@Override
 	public Object getParent(Object child) {
 		if (child instanceof ASTNode) {
 			ASTNode node= (ASTNode) child;
@@ -91,9 +83,7 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
-	 */
+	@Override
 	public Object[] getChildren(Object parent) {
 		if (parent instanceof ASTAttribute) {
 			return ((ASTAttribute) parent).getChildren();
@@ -104,7 +94,7 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 	}
 	
 	private Object[] getNodeChildren(ASTNode node) {
-		ArrayList res= new ArrayList();
+		ArrayList<Object> res= new ArrayList<>();
 
 		if (node instanceof Expression) {
 			Expression expression= (Expression) node;
@@ -215,9 +205,9 @@ public class ASTViewContentProvider implements ITreeContentProvider {
  		
 		
 		
-		List list= node.structuralPropertiesForType();
+		List<StructuralPropertyDescriptor> list= node.structuralPropertiesForType();
 		for (int i= 0; i < list.size(); i++) {
-			StructuralPropertyDescriptor curr= (StructuralPropertyDescriptor) list.get(i);
+			StructuralPropertyDescriptor curr= list.get(i);
 			res.add(new NodeProperty(node, curr));
 		}
 		
@@ -243,6 +233,7 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 		return new Binding(parent, label, binding, true);
 	}
 	
+	@Override
 	public boolean hasChildren(Object parent) {
 		return getChildren(parent).length > 0;
 	}

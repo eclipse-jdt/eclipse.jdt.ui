@@ -20,131 +20,89 @@ public class EmptyTypeSet extends TypeSet {
 		super(typeSetEnvironment);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isUniverse()
-	 */
 	@Override
 	public boolean isUniverse() {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
-	 */
 	@Override
 	public TypeSet makeClone() {
 		return this;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#intersectedWith(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
-	 */
 	@Override
 	protected TypeSet specialCasesIntersectedWith(TypeSet s2) {
 		return this;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isEmpty()
-	 */
 	@Override
 	public boolean isEmpty() {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#upperBound()
-	 */
 	@Override
 	public TypeSet upperBound() {
 		return this;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#lowerBound()
-	 */
 	@Override
 	public TypeSet lowerBound() {
 		return this;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueLowerBound()
-	 */
 	@Override
 	public boolean hasUniqueLowerBound() {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueUpperBound()
-	 */
 	@Override
 	public boolean hasUniqueUpperBound() {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueLowerBound()
-	 */
 	@Override
 	public TType uniqueLowerBound() {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueUpperBound()
-	 */
 	@Override
 	public TType uniqueUpperBound() {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(TType)
-	 */
 	@Override
 	public boolean contains(TType t) {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#containsAll(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
-	 */
 	@Override
 	public boolean containsAll(TypeSet s) {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#iterator()
-	 */
 	@Override
 	public Iterator<TType> iterator() {
 		return new Iterator<TType>() {
+			@Override
 			public void remove() {
 				//do nothing
 			}
+			@Override
 			public boolean hasNext() {
 				return false;
 			}
+			@Override
 			public TType next() {
 				return null;
 			}
 		};
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isSingleton()
-	 */
 	@Override
 	public boolean isSingleton() {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#anyMember()
-	 */
 	@Override
 	public TType anyMember() {
 		return null;
@@ -155,9 +113,6 @@ public class EmptyTypeSet extends TypeSet {
 		return "{ }"; //$NON-NLS-1$
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#enumerate()
-	 */
 	@Override
 	public EnumeratedTypeSet enumerate() {
 		return new EnumeratedTypeSet(getTypeSetEnvironment());

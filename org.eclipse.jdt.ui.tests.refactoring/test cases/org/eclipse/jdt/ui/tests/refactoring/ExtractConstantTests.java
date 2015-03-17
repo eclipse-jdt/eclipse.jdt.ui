@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,6 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.Hashtable;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -36,21 +33,25 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class ExtractConstantTests extends RefactoringTest {
 
-	private static final Class clazz = ExtractConstantTests.class;
+	private static final Class<ExtractConstantTests> clazz = ExtractConstantTests.class;
 	private static final String REFACTORING_PATH = "ExtractConstant/";
 
 	private static final boolean BUG_86113_ImportRewrite= true;
 	private static final boolean BUG_405780= true; //XXX: [1.8][compiler] Bad syntax error 'insert ":: IdentifierOrNew"' for missing semicolon
 
-	private Object fCompactPref;
+	private String fCompactPref;
 	private boolean fAddComments;
 
 	public ExtractConstantTests(String name) {
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -80,9 +81,10 @@ public class ExtractConstantTests extends RefactoringTest {
 		return createCU(pack, getSimpleTestFileName(canExtract, input), getFileContents(getTestFileName(canExtract, input)));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 
 		String setting= DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR;
 		fCompactPref= options.get(setting);
@@ -94,9 +96,10 @@ public class ExtractConstantTests extends RefactoringTest {
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, fCompactPref);
 		JavaCore.setOptions(options);
 

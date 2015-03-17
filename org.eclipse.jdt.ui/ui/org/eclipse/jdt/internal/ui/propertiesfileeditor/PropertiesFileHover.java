@@ -94,27 +94,18 @@ public class PropertiesFileHover implements ITextHover, ITextHoverExtension, ITe
 			super(parent, tooltipAffordanceString, null);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * @see org.eclipse.jface.text.IInformationControlExtension2#setInput(java.lang.Object)
-		 */
+		@Override
 		public void setInput(Object input) {
 			setInformation((String)input);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.text.ITextHoverExtension2#getHoverInfo2(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
-	 */
+	@Override
 	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
 		return getHoverInfo(textViewer, hoverRegion);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.text.ITextHoverExtension#getHoverControlCreator()
-	 */
+	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		if (fHoverControlCreator == null)
 			fHoverControlCreator= new HoverControlCreator();
@@ -125,6 +116,8 @@ public class PropertiesFileHover implements ITextHover, ITextHoverExtension, ITe
 	 * {@inheritDoc}
 	 * @deprecated see {@link ITextHover#getHoverInfo(ITextViewer, IRegion)}
 	 */
+	@Deprecated
+	@Override
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		String hoverInfo= fTextHover.getHoverInfo(textViewer, hoverRegion);
 		if (hoverInfo != null && hoverInfo.length() > 0) {
@@ -164,10 +157,7 @@ public class PropertiesFileHover implements ITextHover, ITextHoverExtension, ITe
 		return unescapedString;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.text.ITextHover#getHoverRegion(org.eclipse.jface.text.ITextViewer, int)
-	 */
+	@Override
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
 		fOffset= offset;
 		return fTextHover.getHoverRegion(textViewer, offset);

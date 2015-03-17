@@ -39,11 +39,13 @@ public class HelloWorld extends TestCase {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 			fJProject= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject);
 	}

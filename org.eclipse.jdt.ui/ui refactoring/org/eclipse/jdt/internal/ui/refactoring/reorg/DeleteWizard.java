@@ -49,29 +49,20 @@ public class DeleteWizard extends RefactoringWizard {
 	public DeleteWizard(Refactoring refactoring) {
 		super(refactoring, DIALOG_BASED_USER_INTERFACE);
 		setDefaultPageTitle(RefactoringMessages.DeleteWizard_1);
-		fProcessor= (JavaDeleteProcessor) refactoring.getAdapter(JavaDeleteProcessor.class);
+		fProcessor= refactoring.getAdapter(JavaDeleteProcessor.class);
 		fProcessor.setQueries(new ReorgQueries(this));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#addUserInputPages()
-	 */
 	@Override
 	protected void addUserInputPages() {
 		addPage(new DeleteInputPage(fProcessor));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#getMessageLineWidthInChars()
-	 */
 	@Override
 	public int getMessageLineWidthInChars() {
 		return 0;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.Wizard#needsProgressMonitor()
-	 */
 	@Override
 	public boolean needsProgressMonitor() {
 		return fProcessor.needsProgressMonitor();
@@ -177,9 +168,6 @@ public class DeleteWizard extends RefactoringWizard {
 			return getSelectedJavaElements().length + getSelectedResources().length;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
-		 */
 		@Override
 		protected boolean performFinish() {
 			return super.performFinish() || getDeleteProcessor().wasCanceled(); //close the dialog if canceled

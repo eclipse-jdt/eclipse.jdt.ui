@@ -224,7 +224,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 * Loads the registered JUnit launch configurations
 	 */
 	private void loadLaunchConfigTypeIDs() {
-		fJUnitLaunchConfigTypeIDs= new ArrayList<String>();
+		fJUnitLaunchConfigTypeIDs= new ArrayList<>();
 		IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_JUNIT_LAUNCHCONFIGS);
 		if (extensionPoint == null) {
 			return;
@@ -298,6 +298,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	
 	public static void asyncShowTestRunnerViewPart() {
 		getDisplay().asyncExec(new Runnable() {
+			@Override
 			public void run() {
 				showTestRunnerViewPartInActivePage();
 			}

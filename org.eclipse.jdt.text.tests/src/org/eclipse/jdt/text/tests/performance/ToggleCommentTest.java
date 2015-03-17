@@ -28,7 +28,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
  */
 public class ToggleCommentTest extends TextPerformanceTestCase {
 
-	private static final Class THIS= ToggleCommentTest.class;
+	private static final Class<ToggleCommentTest> THIS= ToggleCommentTest.class;
 
 	private static final String FILE= PerformanceTestSetup.STYLED_TEXT;
 
@@ -42,6 +42,7 @@ public class ToggleCommentTest extends TextPerformanceTestCase {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
@@ -50,6 +51,7 @@ public class ToggleCommentTest extends TextPerformanceTestCase {
 		setMeasuredRuns(MEASURED_RUNS);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();

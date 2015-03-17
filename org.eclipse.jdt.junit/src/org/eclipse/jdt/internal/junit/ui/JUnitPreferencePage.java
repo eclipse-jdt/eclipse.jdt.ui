@@ -199,6 +199,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	 */
 	private static class FilterLabelProvider extends LabelProvider implements ITableLabelProvider {
 
+		@Override
 		public String getColumnText(Object object, int column) {
 			return (column == 0) ? getText(object) : ""; //$NON-NLS-1$
 		}
@@ -208,6 +209,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 			return TextProcessor.process(((Filter) element).getName());
 		}
 
+		@Override
 		public Image getColumnImage(Object object, int column) {
 			String name= ((Filter) object).getName();
 			if (name.indexOf(".*") != - 1 || name.equals(JUnitMessages.JUnitMainTab_label_defaultpackage)) {  //$NON-NLS-1$
@@ -247,12 +249,12 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		public void setDefaults() {
 			fFilterViewer.remove(fFilters.toArray());
 			List<String> active= JUnitPreferencesConstants.createDefaultStackFiltersList();
-			List<String> inactive= new ArrayList<String>();
+			List<String> inactive= new ArrayList<>();
 			populateFilters(active, inactive);
 		}
 
 		protected void populateFilters(List<String> activeList, List<String> inactiveList) {
-			fFilters= new ArrayList<Filter>(activeList.size() + inactiveList.size());
+			fFilters= new ArrayList<>(activeList.size() + inactiveList.size());
 			populateList(activeList, true);
 			if (inactiveList.size() != 0)
 				populateList(inactiveList, false);
@@ -279,8 +281,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		}
 
 		public void saveFilters() {
-			List<String> active= new ArrayList<String>(fFilters.size());
-			List<String> inactive= new ArrayList<String>(fFilters.size());
+			List<String> active= new ArrayList<>(fFilters.size());
+			List<String> inactive= new ArrayList<>(fFilters.size());
 			Iterator<Filter> iterator= fFilters.iterator();
 			while (iterator.hasNext()) {
 				Filter filter= iterator.next();
@@ -311,11 +313,14 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 			fFilterViewer.setChecked(filter, newState);
 		}
 
+		@Override
 		public Object[] getElements(Object inputElement) {
 			return fFilters.toArray();
 		}
 
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {}
+		@Override
 		public void dispose() {}
 
 	}
@@ -424,12 +429,14 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		// input just needs to be non-null
 		fFilterViewer.setInput(this);
 		fFilterViewer.addCheckStateListener(new ICheckStateListener() {
+			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				Filter filter= (Filter) event.getElement();
 				fStackFilterContentProvider.toggleFilter(filter);
 			}
 		});
 		fFilterViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection selection= event.getSelection();
 				fRemoveFilterButton.setEnabled(!selection.isEmpty());
@@ -453,6 +460,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fAddFilterButton.setLayoutData(gd);
 		LayoutUtil.setButtonDimensionHint(fAddFilterButton);
 		fAddFilterButton.addListener(SWT.Selection, new Listener() {
+			@Override
 			public void handleEvent(Event e) {
 				editFilter();
 			}
@@ -464,6 +472,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fAddTypeButton.setLayoutData(gd);
 		LayoutUtil.setButtonDimensionHint(fAddTypeButton);
 		fAddTypeButton.addListener(SWT.Selection, new Listener() {
+			@Override
 			public void handleEvent(Event e) {
 				addType();
 			}
@@ -475,6 +484,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fAddPackageButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fAddPackageButton);
 		fAddPackageButton.addListener(SWT.Selection, new Listener() {
+			@Override
 			public void handleEvent(Event e) {
 				addPackage();
 			}
@@ -486,6 +496,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fRemoveFilterButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fRemoveFilterButton);
 		fRemoveFilterButton.addListener(SWT.Selection, new Listener() {
+			@Override
 			public void handleEvent(Event e) {
 				removeFilters();
 			}
@@ -498,6 +509,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fEnableAllButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fEnableAllButton);
 		fEnableAllButton.addListener(SWT.Selection, new Listener() {
+			@Override
 			public void handleEvent(Event e) {
 				checkAllFilters(true);
 			}
@@ -509,6 +521,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fDisableAllButton.setLayoutData(gd);
 		SWTUtil.setButtonDimensionHint(fDisableAllButton);
 		fDisableAllButton.addListener(SWT.Selection, new Listener() {
+			@Override
 			public void handleEvent(Event e) {
 				checkAllFilters(false);
 			}
@@ -523,6 +536,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		return gd;
 	}
 
+	@Override
 	public void init(IWorkbench workbench) {}
 
 	/**
@@ -596,6 +610,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		// traverse away to dialog's default button.  Without this, hitting
 		// CR in the text field closes the entire dialog.
 		text.addListener(SWT.Traverse, new Listener() {
+			@Override
 			public void handleEvent(Event event) {
 				event.doit= false;
 			}

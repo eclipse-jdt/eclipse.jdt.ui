@@ -139,18 +139,22 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	// ---- IWorkbenchWindowActionDelegate
 	// ------------------------------------------------
 
+	@Override
 	public void run(IAction action) {
 		run();
 	}
 
+	@Override
 	public void dispose() {
 		// do nothing.
 	}
 
+	@Override
 	public void init(IWorkbenchWindow window) {
 		// do nothing.
 	}
 
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		// do nothing. Action doesn't depend on selection.
 	}
@@ -158,10 +162,12 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	// ---- IActionDelegate2
 	// ------------------------------------------------
 
+	@Override
 	public void runWithEvent(IAction action, Event event) {
 		runWithEvent(event);
 	}
 
+	@Override
 	public void init(IAction action) {
 		// do nothing.
 	}

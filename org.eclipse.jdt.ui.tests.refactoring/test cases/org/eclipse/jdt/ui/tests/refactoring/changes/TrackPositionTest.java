@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibili
 
 public class TrackPositionTest extends TestCase {
 
-	private static final Class THIS= TrackPositionTest.class;
+	private static final Class<TrackPositionTest> THIS= TrackPositionTest.class;
 	private static final String NN= "N.N";
 
 	private IDocument fDocument;
@@ -43,6 +43,7 @@ public class TrackPositionTest extends TestCase {
 		return new TestSuite(THIS);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fDocument= new Document("0123456789");
 		fChange= new DocumentChange(NN, fDocument);
@@ -50,6 +51,7 @@ public class TrackPositionTest extends TestCase {
 		fChange.initializeValidationData(new NullProgressMonitor());
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		fChange= null;
 	}

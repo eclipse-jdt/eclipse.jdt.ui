@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.JavaModelException;
  */
 public class ResourceLocator implements IResourceLocator {
 
+	@Override
 	public IResource getUnderlyingResource(Object element) throws JavaModelException {
 		if (element instanceof IJavaElement)
 			return ((IJavaElement) element).getUnderlyingResource();
@@ -28,6 +29,7 @@ public class ResourceLocator implements IResourceLocator {
 			return null;
 	}
 
+	@Override
 	public IResource getCorrespondingResource(Object element) throws JavaModelException {
 		if (element instanceof IJavaElement)
 			return ((IJavaElement) element).getCorrespondingResource();
@@ -35,6 +37,7 @@ public class ResourceLocator implements IResourceLocator {
 			return null;
 	}
 
+	@Override
 	public IResource getContainingResource(Object element) throws JavaModelException {
 		IResource resource= null;
 		if (element instanceof IResource)

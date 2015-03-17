@@ -23,6 +23,7 @@ public class RewriteMethodInvocationsTestSetup extends RefactoringTestSetup {
 		super(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 

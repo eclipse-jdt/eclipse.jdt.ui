@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,13 +15,13 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScanner;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScanner.TextMatch;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class RefactoringScannerTests extends RefactoringTest{
 
@@ -40,8 +40,9 @@ public class RefactoringScannerTests extends RefactoringTest{
 	}
 
 	private RefactoringScanner fScanner;
-	private static Class clazz= RefactoringScannerTests.class;
+	private static Class<RefactoringScannerTests> clazz= RefactoringScannerTests.class;
 
+	@Override
 	protected String getRefactoringPath() {
 		return "RefactoringScanner/";
 	}
@@ -50,11 +51,13 @@ public class RefactoringScannerTests extends RefactoringTest{
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		//no need to call super.setUp();
 		fScanner= new RefactoringScanner("TestPattern", "org.eclipse");
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		//no need to call super.tearDown();
 	}
@@ -69,13 +72,13 @@ public class RefactoringScannerTests extends RefactoringTest{
 		String text= getFileContents(getRefactoringPath() + fileName);
 		fScanner.scan(text);
 
-		ArrayList expectedMatchesList= new ArrayList(expectedMatches.length);
+		ArrayList<Integer> expectedMatchesList= new ArrayList<>(expectedMatches.length);
 		for (int i= 0; i < expectedMatches.length; i++)
 			expectedMatchesList.add(new Integer(TextRangeUtil.getOffset(text, expectedMatches[i].fLine, expectedMatches[i].fColumn)));
-		ArrayList matchesList= new ArrayList();
-		Set matches= fScanner.getMatches();
-		for (Iterator iter= matches.iterator(); iter.hasNext();) {
-			TextMatch element= (TextMatch) iter.next();
+		ArrayList<Integer> matchesList= new ArrayList<>();
+		Set<TextMatch> matches= fScanner.getMatches();
+		for (Iterator<TextMatch> iter= matches.iterator(); iter.hasNext();) {
+			TextMatch element= iter.next();
 			matchesList.add(new Integer(element.getStartPosition()));
 		}
 		Collections.sort(matchesList);

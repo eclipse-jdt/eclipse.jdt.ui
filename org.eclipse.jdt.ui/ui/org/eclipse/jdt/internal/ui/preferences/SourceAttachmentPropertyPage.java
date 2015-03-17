@@ -235,6 +235,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	/*
 	 * @see IStatusChangeListener#statusChanged
 	 */
+	@Override
 	public void statusChanged(IStatus status) {
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);

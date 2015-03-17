@@ -63,9 +63,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 		fIsAssist= isAssist;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-	 */
+	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		doExecute();
 		return null;
@@ -96,7 +94,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 
 	private ICompletionProposal findCorrection(String id, boolean isAssist, ITextSelection selection, ICompilationUnit cu, IAnnotationModel model) {
 		AssistContext context= new AssistContext(cu, fEditor.getViewer(), fEditor, selection.getOffset(), selection.getLength());
-		Collection<IJavaCompletionProposal> proposals= new ArrayList<IJavaCompletionProposal>(10);
+		Collection<IJavaCompletionProposal> proposals= new ArrayList<>(10);
 		if (isAssist) {
 			if (id.equals(LinkedNamesAssistProposal.ASSIST_ID)) {
 				return getLocalRenameProposal(context); // shortcut for local rename
@@ -123,7 +121,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 	}
 
 	private Annotation[] getAnnotations(int offset, boolean goToClosest) throws BadLocationException {
-		ArrayList<Annotation> resultingAnnotations= new ArrayList<Annotation>();
+		ArrayList<Annotation> resultingAnnotations= new ArrayList<>();
 		JavaCorrectionAssistant.collectQuickFixableAnnotations(fEditor, offset, goToClosest, resultingAnnotations);
 		return resultingAnnotations.toArray(new Annotation[resultingAnnotations.size()]);
 	}

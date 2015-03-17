@@ -71,9 +71,6 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_INCLUDE_ON_BUILDPATH);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getDetailedDescription() {
 		if (!isEnabled())
@@ -94,9 +91,6 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
         return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
 		IResource resource= (IResource)getSelectedElements().get(0);
@@ -104,6 +98,7 @@ public class IncludeToBuildpathAction extends BuildpathModifierAction {
 
 		try {
 			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						List<?> result= unExclude(getSelectedElements(), project, monitor);

@@ -735,6 +735,7 @@ public class JarPackageData {
 	 * @return <code>true</code> if errors are logged
 	 * @deprecated will be removed in final 2.0
 	 */
+	@Deprecated
 	public boolean logErrors() {
 		return true;
 	}
@@ -749,6 +750,7 @@ public class JarPackageData {
 	 * @param logErrors <code>true</code> if errors are logged
 	 * @deprecated will be removed in final 2.0
 	 */
+	@Deprecated
 	public void setLogErrors(boolean logErrors) {
 		// always true
 	}
@@ -763,6 +765,7 @@ public class JarPackageData {
 	 * @return <code>true</code> if warnings are logged
 	 * @deprecated will be removed in final 2.0
 	 */
+	@Deprecated
 	public boolean logWarnings() {
 		return true;
 	}
@@ -777,6 +780,7 @@ public class JarPackageData {
 	 * @param logWarnings <code>true</code> if warnings are logged
 	 * @deprecated will be removed in final 2.0
 	 */
+	@Deprecated
 	public void setLogWarnings(boolean logWarnings) {
 		// always true
 	}
@@ -876,6 +880,7 @@ public class JarPackageData {
 	 *
 	 * @deprecated Use {@link #createJarWriter3(Shell)} instead
 	 */
+	@Deprecated
 	public JarWriter2 createJarWriter(Shell parent) throws CoreException {
 		return new JarWriter2(this, parent);
 	}
@@ -893,6 +898,7 @@ public class JarPackageData {
 	 * @since 3.2
 	 * @deprecated use {@link #createPlainJarBuilder()} instead
 	 */
+	@Deprecated
 	public JarWriter3 createJarWriter3(Shell parent) throws CoreException {
 		return new JarWriter3(this, parent);
 	}
@@ -956,6 +962,7 @@ public class JarPackageData {
 	 * @return a JarWriter
 	 * @deprecated Use {@link #createJarDescriptionWriter(OutputStream, String)} instead
 	 */
+	@Deprecated
 	public IJarDescriptionWriter createJarDescriptionWriter(OutputStream outputStream) {
 		return new JarPackageWriter(outputStream, "UTF-8"); //$NON-NLS-1$
 	}

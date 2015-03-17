@@ -54,6 +54,7 @@ public class FilterDescriptor implements Comparable<FilterDescriptor>, IPluginCo
 	/**
 	 * @deprecated as of 3.0 use {@link FilterDescriptor#TARGET_ID_ATTRIBUTE}
 	 */
+	@Deprecated
 	private static final String VIEW_ID_ATTRIBUTE= "viewId"; //$NON-NLS-1$
 	private static final String TARGET_ID_ATTRIBUTE= "targetId"; //$NON-NLS-1$
 	private static final String CLASS_ATTRIBUTE= "class"; //$NON-NLS-1$
@@ -63,6 +64,7 @@ public class FilterDescriptor implements Comparable<FilterDescriptor>, IPluginCo
 	/**
 	 * @deprecated	use "enabled" instead
 	 */
+	@Deprecated
 	private static final String SELECTED_ATTRIBUTE= "selected"; //$NON-NLS-1$
 
 	private static FilterDescriptor[] fgFilterDescriptors;
@@ -90,7 +92,7 @@ public class FilterDescriptor implements Comparable<FilterDescriptor>, IPluginCo
 	 */
 	public static FilterDescriptor[] getFilterDescriptors(String targetId) {
 		FilterDescriptor[] filterDescs= FilterDescriptor.getFilterDescriptors();
-		List<FilterDescriptor> result= new ArrayList<FilterDescriptor>(filterDescs.length);
+		List<FilterDescriptor> result= new ArrayList<>(filterDescs.length);
 		for (int i= 0; i < filterDescs.length; i++) {
 			String tid= filterDescs[i].getTargetId();
 			if (WorkbenchActivityHelper.filterItem(filterDescs[i]))
@@ -128,6 +130,7 @@ public class FilterDescriptor implements Comparable<FilterDescriptor>, IPluginCo
 			/*
 			 * @see org.eclipse.core.runtime.ISafeRunnable#run()
 			 */
+			@Override
 			public void run() throws Exception {
 				result[0]= (ViewerFilter)fElement.createExecutableExtension(CLASS_ATTRIBUTE);
 			}
@@ -241,9 +244,7 @@ public class FilterDescriptor implements Comparable<FilterDescriptor>, IPluginCo
 		return strVal == null || Boolean.valueOf(strVal).booleanValue();
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
+	@Override
 	public int compareTo(FilterDescriptor o) {
 		return Collator.getInstance().compare(getName(), o.getName());
 	}
@@ -256,14 +257,15 @@ public class FilterDescriptor implements Comparable<FilterDescriptor>, IPluginCo
 	 * @return new filter descriptors
 	 */
 	private static FilterDescriptor[] createFilterDescriptors(IConfigurationElement[] elements) {
-		List<FilterDescriptor> result= new ArrayList<FilterDescriptor>(5);
-		Set<String> descIds= new HashSet<String>(5);
+		List<FilterDescriptor> result= new ArrayList<>(5);
+		Set<String> descIds= new HashSet<>(5);
 		for (int i= 0; i < elements.length; i++) {
 			final IConfigurationElement element= elements[i];
 			if (FILTER_TAG.equals(element.getName())) {
 
 				final FilterDescriptor[] desc= new FilterDescriptor[1];
 				SafeRunner.run(new SafeRunnable(FilterMessages.FilterDescriptor_filterDescriptionCreationError_message) {
+					@Override
 					public void run() throws Exception {
 						desc[0]= new FilterDescriptor(element);
 					}
@@ -278,11 +280,13 @@ public class FilterDescriptor implements Comparable<FilterDescriptor>, IPluginCo
 		return result.toArray(new FilterDescriptor[result.size()]);
 	}
 
+	@Override
 	public String getLocalId() {
 		return fElement.getAttribute(ID_ATTRIBUTE);
 	}
 
-    public String getPluginId() {
+    @Override
+	public String getPluginId() {
         return fElement.getContributor().getName();
     }
 }

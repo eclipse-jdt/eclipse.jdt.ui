@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
 public class RemoteTestRunnerClient {
 	
 	public abstract class ListenerSafeRunnable implements ISafeRunnable {
+		@Override
 		public void handleException(Throwable exception) {
 			JUnitCorePlugin.log(exception);
 		}
@@ -49,7 +50,8 @@ public class RemoteTestRunnerClient {
 	}
 
 	class DefaultProcessingState extends ProcessingState {
-	    ProcessingState readMessage(String message) {
+	    @Override
+		ProcessingState readMessage(String message) {
 	        if (message.startsWith(MessageIds.TRACE_START)) {
 	        	fFailedTrace.setLength(0);
 	            return fTraceState;
@@ -138,6 +140,7 @@ public class RemoteTestRunnerClient {
 			this.fEndString = endString;
 		}
 
+		@Override
 		ProcessingState readMessage(String message) {
 			if (message.startsWith(fEndString)) {
 				entireStringRead();
@@ -161,13 +164,15 @@ public class RemoteTestRunnerClient {
 			super(fFailedTrace, MessageIds.TRACE_END);
 		}
 
+		@Override
 		void entireStringRead() {
             notifyTestFailed();
             fExpectedResult.setLength(0);
             fActualResult.setLength(0);
 		}
 
-	    ProcessingState readMessage(String message) {
+	    @Override
+		ProcessingState readMessage(String message) {
 	        if (message.startsWith(MessageIds.TRACE_END)) {
 	            notifyTestFailed();
 	            fFailedTrace.setLength(0);
@@ -251,6 +256,7 @@ public class RemoteTestRunnerClient {
 			fServerPort= port;
 		}
 
+		@Override
 		public void run() {
 			try {
 				if (fDebug)
@@ -458,6 +464,7 @@ public class RemoteTestRunnerClient {
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener2 listener= fListeners[i];
 			SafeRunner.run(new ListenerSafeRunnable() {
+				@Override
 				public void run() {
 					listener.testReran(testId,
 								className, testName, statusCode, trace,
@@ -490,6 +497,7 @@ public class RemoteTestRunnerClient {
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener2 listener= fListeners[i];
 			SafeRunner.run(new ListenerSafeRunnable() {
+				@Override
 				public void run() {
 					listener.testRunStopped(elapsedTime);
 				}
@@ -503,6 +511,7 @@ public class RemoteTestRunnerClient {
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener2 listener= fListeners[i];
 			SafeRunner.run(new ListenerSafeRunnable() {
+				@Override
 				public void run() {
 					listener.testRunEnded(elapsedTime);
 				}
@@ -516,6 +525,7 @@ public class RemoteTestRunnerClient {
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener2 listener= fListeners[i];
 			SafeRunner.run(new ListenerSafeRunnable() {
+				@Override
 				public void run() {
 					String s[]= extractTestId(test);
 					listener.testEnded(s[0], s[1]);
@@ -530,6 +540,7 @@ public class RemoteTestRunnerClient {
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener2 listener= fListeners[i];
 			SafeRunner.run(new ListenerSafeRunnable() {
+				@Override
 				public void run() {
 					String s[]= extractTestId(test);
 					listener.testStarted(s[0], s[1]);
@@ -544,6 +555,7 @@ public class RemoteTestRunnerClient {
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener2 listener= fListeners[i];
 			SafeRunner.run(new ListenerSafeRunnable() {
+				@Override
 				public void run() {
 					listener.testRunStarted(count);
 				}
@@ -557,6 +569,7 @@ public class RemoteTestRunnerClient {
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener2 listener= fListeners[i];
 			SafeRunner.run(new ListenerSafeRunnable() {
+				@Override
 				public void run() {
 			        listener.testFailed(fFailureKind, fFailedTestId,
 			        		fFailedTest, fFailedTrace.toString(), nullifyEmpty(fExpectedResult), nullifyEmpty(fActualResult));
@@ -597,6 +610,7 @@ public class RemoteTestRunnerClient {
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener2 listener= fListeners[i];
 			SafeRunner.run(new ListenerSafeRunnable() {
+				@Override
 				public void run() {
 					listener.testRunTerminated();
 				}

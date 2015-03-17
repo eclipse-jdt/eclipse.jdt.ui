@@ -67,9 +67,6 @@ public final class JavaSynchronizationCompareAdapter extends AbstractSynchroniza
 	/** The workingSets name */
 	private static final String WORKING_SETS= "workingSets"; //$NON-NLS-1$
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public ICompareInput asCompareInput(final ISynchronizationContext context, final Object element) {
 		if (element instanceof RefactoringDescriptorProxy)
@@ -80,12 +77,10 @@ public final class JavaSynchronizationCompareAdapter extends AbstractSynchroniza
 		return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public ResourceMapping[] restore(final IMemento memento) {
 		IMemento[] children= memento.getChildren(RESOURCES);
-		final List<ResourceMapping> result= new ArrayList<ResourceMapping>();
+		final List<ResourceMapping> result= new ArrayList<>();
 		for (int index= 0; index < children.length; index++) {
 			final Integer typeInt= children[index].getInteger(RESOURCE_TYPE);
 			if (typeInt == null)
@@ -150,9 +145,7 @@ public final class JavaSynchronizationCompareAdapter extends AbstractSynchroniza
 		return result.toArray(new ResourceMapping[result.size()]);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void save(final ResourceMapping[] mappings, final IMemento memento) {
 		for (int index= 0; index < mappings.length; index++) {
 			final Object object= mappings[index].getModelObject();

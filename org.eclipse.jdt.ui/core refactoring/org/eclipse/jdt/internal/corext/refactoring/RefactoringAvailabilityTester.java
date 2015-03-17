@@ -91,7 +91,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static IJavaElement[] getJavaElements(final Object[] elements) {
-		List<IJavaElement> result= new ArrayList<IJavaElement>();
+		List<IJavaElement> result= new ArrayList<>();
 		for (int index= 0; index < elements.length; index++) {
 			if (elements[index] instanceof IJavaElement)
 				result.add((IJavaElement) elements[index]);
@@ -100,7 +100,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static IMember[] getPullUpMembers(final IType type) throws JavaModelException {
-		final List<IMember> list= new ArrayList<IMember>(3);
+		final List<IMember> list= new ArrayList<>(3);
 		if (type.exists()) {
 			IMember[] members= type.getFields();
 			for (int index= 0; index < members.length; index++) {
@@ -122,7 +122,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static IMember[] getPushDownMembers(final IType type) throws JavaModelException {
-		final List<IMember> list= new ArrayList<IMember>(3);
+		final List<IMember> list= new ArrayList<>(3);
 		if (type.exists()) {
 			IMember[] members= type.getFields();
 			for (int index= 0; index < members.length; index++) {
@@ -139,7 +139,7 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static IResource[] getResources(final Object[] elements) {
-		List<IResource> result= new ArrayList<IResource>();
+		List<IResource> result= new ArrayList<>();
 		for (int index= 0; index < elements.length; index++) {
 			if (elements[index] instanceof IResource)
 				result.add((IResource) elements[index]);
@@ -438,7 +438,7 @@ public final class RefactoringAvailabilityTester {
 				if (!(iterator.next() instanceof IMember))
 					return false;
 			}
-			final Set<IMember> members= new HashSet<IMember>();
+			final Set<IMember> members= new HashSet<>();
 			@SuppressWarnings("unchecked")
 			List<IMember> selectionList= (List<IMember>) (List<?>) Arrays.asList(selection.toArray());
 			members.addAll(selectionList);
@@ -969,7 +969,7 @@ public final class RefactoringAvailabilityTester {
 				if (!(iterator.next() instanceof IMember))
 					return false;
 			}
-			final Set<IMember> members= new HashSet<IMember>();
+			final Set<IMember> members= new HashSet<>();
 			@SuppressWarnings("unchecked")
 			List<IMember> selectionList= (List<IMember>) (List<?>) Arrays.asList(selection.toArray());
 			members.addAll(selectionList);
@@ -1039,7 +1039,7 @@ public final class RefactoringAvailabilityTester {
 				if (!(iterator.next() instanceof IMember))
 					return false;
 			}
-			final Set<IMember> members= new HashSet<IMember>();
+			final Set<IMember> members= new HashSet<>();
 			@SuppressWarnings("unchecked")
 			List<IMember> selectionList= (List<IMember>) (List<?>) Arrays.asList(selection.toArray());
 			members.addAll(selectionList);

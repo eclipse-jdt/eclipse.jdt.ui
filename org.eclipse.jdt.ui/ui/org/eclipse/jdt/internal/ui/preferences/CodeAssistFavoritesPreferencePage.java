@@ -69,9 +69,6 @@ public class CodeAssistFavoritesPreferencePage extends PropertyAndPreferencePage
 		return null;
 	}
 
-		/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
-	 */
 	@Override
 	public void dispose() {
 		if (fConfigurationBlock != null) {

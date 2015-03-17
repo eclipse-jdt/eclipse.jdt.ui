@@ -49,7 +49,7 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	private static final boolean DETERMINE_ELEMENT_TYPE_FROM_CAST= false;
 	private static final boolean BUG_map_entrySet_iterator= true;
 
-	private static final Class clazz= InferTypeArgumentsTests.class;
+	private static final Class<InferTypeArgumentsTests> clazz= InferTypeArgumentsTests.class;
 	private static final String REFACTORING_PATH= "InferTypeArguments/";
 
 	private boolean fAssumeCloneReturnsSameType= true;
@@ -67,6 +67,7 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -157,10 +158,10 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		// Test the same with 1.5:
 		IJavaProject project= RefactoringTestSetup.getProject();
 
-		ArrayList classpath= new ArrayList(Arrays.asList(project.getRawClasspath()));
+		ArrayList<IClasspathEntry> classpath= new ArrayList<>(Arrays.asList(project.getRawClasspath()));
 		IClasspathEntry jreEntry= RefactoringTestSetup.getJRELibrary().getRawClasspathEntry();
 		classpath.remove(jreEntry);
-		IClasspathEntry[] noRTJarCPEs= (IClasspathEntry[])classpath.toArray(new IClasspathEntry[classpath.size()]);
+		IClasspathEntry[] noRTJarCPEs= classpath.toArray(new IClasspathEntry[classpath.size()]);
 
 		project.setRawClasspath(noRTJarCPEs, new NullProgressMonitor());
 		JavaProjectHelper.addRTJar15(project);

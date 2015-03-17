@@ -98,7 +98,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		fEnabledFilterIds= enabledFilterIds;
 
 		fBuiltInFilters= FilterDescriptor.getFilterDescriptors(fViewId);
-		fFilterDescriptorChangeHistory= new Stack<FilterDescriptor>();
+		fFilterDescriptorChangeHistory= new Stack<>();
 	}
 
 	@Override
@@ -201,6 +201,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		data.heightHint= convertHeightInCharsToPixels(3);
 		description.setLayoutData(data);
 		fCheckBoxList.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection selection= event.getSelection();
 				if (selection instanceof IStructuredSelection) {
@@ -214,6 +215,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 			/*
 			 * @see org.eclipse.jface.viewers.ICheckStateListener#checkStateChanged(org.eclipse.jface.viewers.CheckStateChangedEvent)
 			 */
+			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				Object element= event.getElement();
 				if (element instanceof FilterDescriptor) {
@@ -276,7 +278,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 	@Override
 	protected void okPressed() {
 		if (fBuiltInFilters != null) {
-			ArrayList<FilterDescriptor> result= new ArrayList<FilterDescriptor>();
+			ArrayList<FilterDescriptor> result= new ArrayList<>();
 			for (int i= 0; i < fBuiltInFilters.length; ++i) {
 				if (fCheckBoxList.getChecked(fBuiltInFilters[i]))
 					result.add(fBuiltInFilters[i]);
@@ -330,7 +332,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 	 */
 	public String[] getEnabledFilterIds() {
 		Object[] result= getResult();
-		Set<String> enabledIds= new HashSet<String>(result.length);
+		Set<String> enabledIds= new HashSet<>(result.length);
 		for (int i= 0; i < result.length; i++)
 			enabledIds.add(((FilterDescriptor)result[i]).getId());
 		return enabledIds.toArray(new String[enabledIds.size()]);
@@ -353,7 +355,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 
 	private FilterDescriptor[] getEnabledFilterDescriptors() {
 		FilterDescriptor[] filterDescs= fBuiltInFilters;
-		List<FilterDescriptor> result= new ArrayList<FilterDescriptor>(filterDescs.length);
+		List<FilterDescriptor> result= new ArrayList<>(filterDescs.length);
 		List<String> enabledFilterIds= Arrays.asList(fEnabledFilterIds);
 		for (int i= 0; i < filterDescs.length; i++) {
 			String id= filterDescs[i].getId();
@@ -367,7 +369,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 	public static String[] convertFromString(String patterns, String separator) {
 		StringTokenizer tokenizer= new StringTokenizer(patterns, separator, true);
 		int tokenCount= tokenizer.countTokens();
-		List<String> result= new ArrayList<String>(tokenCount);
+		List<String> result= new ArrayList<>(tokenCount);
 		boolean escape= false;
 		boolean append= false;
 		while (tokenizer.hasMoreTokens()) {

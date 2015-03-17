@@ -54,6 +54,7 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 		return new PerfTestSuite(FileBufferPerformanceTest.class);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProject= ResourceHelper.createProject("project");
@@ -67,6 +68,7 @@ public class FileBufferPerformanceTest extends TextPerformanceTestCase2 {
 		assertTrue(buffer == null);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		ResourceHelper.deleteProject("project");
 		fTempFile.delete();

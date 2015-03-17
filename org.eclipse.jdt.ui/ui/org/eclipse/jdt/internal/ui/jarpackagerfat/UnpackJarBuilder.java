@@ -62,9 +62,7 @@ public class UnpackJarBuilder extends FatJarBuilder {
 		fJarPackage= jarPackage;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getId() {
 		return BUILDER_ID;
 	}
@@ -87,19 +85,14 @@ public class UnpackJarBuilder extends FatJarBuilder {
 		return false;
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public IManifestProvider getManifestProvider() {
 		return new FatJarManifestProvider(this);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getManifestClasspath() {
-		ArrayList<String> renamedJarNames= new ArrayList<String>();
+		ArrayList<String> renamedJarNames= new ArrayList<>();
 		Object[] elements= fJarPackage.getElements();
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];
@@ -120,14 +113,11 @@ public class UnpackJarBuilder extends FatJarBuilder {
 		return result.toString();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void open(JarPackageData jarPackage, Shell displayShell, MultiStatus status) throws CoreException {
 		super.open(jarPackage, displayShell, status);
 		fJarPackage= jarPackage;
-		jarNames= new HashSet<String>();
+		jarNames= new HashSet<>();
 		createBlankSubfolder(displayShell, jarPackage.allowOverwrite());
 	}
 
@@ -162,11 +152,7 @@ public class UnpackJarBuilder extends FatJarBuilder {
 		}
 	}
 
-	/**
-	 * 
-	 * {@inheritDoc}
-	 */
-
+	@Override
 	public void writeArchive(ZipFile jarFile, IProgressMonitor progressMonitor) {
 		File jarPathFile= new File(jarFile.getName());
 		String jarName= jarPathFile.getName();

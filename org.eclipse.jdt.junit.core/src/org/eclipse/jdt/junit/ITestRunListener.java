@@ -25,7 +25,8 @@ import org.eclipse.jdt.internal.junit.model.ITestRunListener2;
  *
  * @since 2.1
  */
- public interface ITestRunListener {
+ @Deprecated
+public interface ITestRunListener {
 	/**
    	 * Status constant indicating that a test passed (constant value 0).
  	 *

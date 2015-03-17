@@ -91,6 +91,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 *
 	 * @deprecated As of 3.2, replaced by {@link ITextEditorActionDefinitionIds#QUICK_ASSIST}
 	 */
+	@Deprecated
 	public static final String CORRECTION_ASSIST_PROPOSALS= QUICK_ASSIST;
 
 
@@ -106,6 +107,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.show.javadoc"</code>).
 	 * @deprecated As of 3.3, replaced by {@link ITextEditorActionDefinitionIds#SHOW_INFORMATION}
 	 */
+	@Deprecated
 	public static final String SHOW_JAVADOC= "org.eclipse.jdt.ui.edit.text.java.show.javadoc"; //$NON-NLS-1$
 
 	/**
@@ -287,18 +289,21 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * @since 3.0
 	 * @deprecated Use {@link IJavaEditorActionDefinitionIds#EXTERNALIZE_STRINGS} instead
 	 */
+	@Deprecated
 	public static final String FIND_STRINGS_TO_EXTERNALIZE= "org.eclipse.jdt.ui.edit.text.java.find.strings.to.externalize"; //$NON-NLS-1$
 
 	/**
 	 * Note: this id is for internal use only.
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds#GOTO_NEXT_ANNOTATION}
 	 */
+	@Deprecated
 	public static final String SHOW_NEXT_PROBLEM= "org.eclipse.jdt.ui.edit.text.java.show.next.problem"; //$NON-NLS-1$
 
 	/**
 	 * Note: this id is for internal use only.
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds#GOTO_PREVIOUS_ANNOTATION}
 	 */
+	@Deprecated
 	public static final String SHOW_PREVIOUS_PROBLEM= "org.eclipse.jdt.ui.edit.text.java.show.previous.problem"; //$NON-NLS-1$
 
 	// refactor
@@ -386,6 +391,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.inline.local.variable"</code>).
 	 * @deprecated Use INLINE
 	 */
+	@Deprecated
 	public static final String INLINE_LOCAL_VARIABLE= "org.eclipse.jdt.ui.edit.text.java.inline.local.variable"; //$NON-NLS-1$
 
 	/**
@@ -506,6 +512,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * <code>"org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"</code>).
 	 * @deprecated As of 3.6, replaced by {@link #OPEN_ATTACHED_JAVADOC}
 	 */
+	@Deprecated
 	public static final String OPEN_EXTERNAL_JAVADOC= "org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"; //$NON-NLS-1$
 
 	/**
@@ -533,6 +540,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * <code>"org.eclipse.jdt.ui.edit.text.java.show.in.package.view"</code>).
 	 * @deprecated As of 3.5, got replaced by generic Navigate &gt; Show In &gt;
 	 */
+	@Deprecated
 	public static final String SHOW_IN_PACKAGE_VIEW= "org.eclipse.jdt.ui.edit.text.java.show.in.package.view"; //$NON-NLS-1$
 
 	/**
@@ -703,6 +711,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.toggle.presentation"</code>).
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds#TOGGLE_SHOW_SELECTED_ELEMENT_ONLY}
 	 */
+	@Deprecated
 	public static final String TOGGLE_PRESENTATION= "org.eclipse.jdt.ui.edit.text.java.toggle.presentation"; //$NON-NLS-1$
 
 	/**

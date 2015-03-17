@@ -135,9 +135,6 @@ public class IntroduceIndirectionAction extends SelectionDispatchAction {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(fEditor))

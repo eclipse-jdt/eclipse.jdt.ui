@@ -100,6 +100,7 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 
 		private final Object[] EMPTY= new Object[0];
 
+		@Override
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof File) {
 				File[] children= ((File) parentElement).listFiles();
@@ -110,6 +111,7 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 			return EMPTY;
 		}
 
+		@Override
 		public Object getParent(Object element) {
 			if (element instanceof File) {
 				return ((File) element).getParentFile();
@@ -117,17 +119,21 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 			return null;
 		}
 
+		@Override
 		public boolean hasChildren(Object element) {
 			return getChildren(element).length > 0;
 		}
 
+		@Override
 		public Object[] getElements(Object element) {
 			return getChildren(element);
 		}
 
+		@Override
 		public void dispose() {
 		}
 
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 
@@ -190,6 +196,7 @@ public class JARFileSelectionDialog extends FilteredElementTreeSelectionDialog {
 			fAcceptFolders= acceptFolders;
 		}
 
+		@Override
 		public IStatus validate(Object[] selection) {
 			int nSelected= selection.length;
 			if (nSelected == 0 || (nSelected > 1 && !fMultiSelect)) {

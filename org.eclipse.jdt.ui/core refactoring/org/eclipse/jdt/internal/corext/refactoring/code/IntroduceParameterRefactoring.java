@@ -141,24 +141,29 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 
 	// ------------------- IDelegateUpdating ----------------------
 
+	@Override
 	public boolean canEnableDelegateUpdating() {
 		return true;
 	}
 
+	@Override
 	public boolean getDelegateUpdating() {
 		return (fChangeSignatureProcessor != null) ? fChangeSignatureProcessor.getDelegateUpdating() : false;
 	}
 
+	@Override
 	public void setDelegateUpdating(boolean updating) {
 		if (fChangeSignatureProcessor != null)
 			fChangeSignatureProcessor.setDelegateUpdating(updating);
 	}
 
+	@Override
 	public void setDeprecateDelegates(boolean deprecate) {
 		if (fChangeSignatureProcessor != null)
 			fChangeSignatureProcessor.setDeprecateDelegates(deprecate);
 	}
 
+	@Override
 	public boolean getDeprecateDelegates() {
 		return (fChangeSignatureProcessor != null) ? fChangeSignatureProcessor.getDeprecateDelegates() : false;
 	}
@@ -460,7 +465,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 	 * @return proposed variable names (may be empty, but not null).
 	 */
 	public String[] guessParameterNames() {
-		LinkedHashSet<String> proposals= new LinkedHashSet<String>(); //retain ordering, but prevent duplicates
+		LinkedHashSet<String> proposals= new LinkedHashSet<>(); //retain ordering, but prevent duplicates
 		if (fSelectedExpression instanceof MethodInvocation){
 			proposals.addAll(guessTempNamesFromMethodInvocation((MethodInvocation) fSelectedExpression, fExcludedParameterNames));
 		}
@@ -558,7 +563,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 
 		Map<String, String> argumentsMap= contribution.retrieveArgumentMap(extended);
 
-		final Map<String, String> arguments= new HashMap<String, String>();
+		final Map<String, String> arguments= new HashMap<>();
 		arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 		arguments.putAll(argumentsMap);
@@ -613,9 +618,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		return new RefactoringStatus();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getDelegateUpdatingTitle(boolean plural) {
 		if (plural)
 			return RefactoringCoreMessages.DelegateCreator_keep_original_changed_plural;

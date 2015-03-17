@@ -41,6 +41,7 @@ public class TestTestSearchEngine extends TestCase {
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fRoot;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
@@ -50,6 +51,7 @@ public class TestTestSearchEngine extends TestCase {
 		fRoot= JavaProjectHelper.addSourceContainer(fProject, "src");
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
 		super.tearDown();
@@ -207,14 +209,14 @@ public class TestTestSearchEngine extends TestCase {
 	}
 
 	private IType[] findTests(IJavaElement[] elements) throws InvocationTargetException, InterruptedException {
-		HashSet res= new HashSet();
+		HashSet<IType> res= new HashSet<>();
 		for (int i= 0; i < elements.length; i++) {
 			IType[] types= findTests(elements[i]);
 			for (int k= 0; k < types.length; k++) {
 				res.add(types[k]);
 			}
 		}
-		return (IType[]) res.toArray(new IType[res.size()]);
+		return res.toArray(new IType[res.size()]);
 	}
 
 
@@ -233,7 +235,7 @@ public class TestTestSearchEngine extends TestCase {
 
 	private void assertEqualTypes(String message, IType[] expected, IType[] actual) {
 		assertEquals("Wrong number of found tests", expected.length, actual.length);
-		List list= Arrays.asList(expected);
+		List<IType> list= Arrays.asList(expected);
 		for (int i= 0; i < actual.length; i++) {
 			if (!list.contains(expected[i])) {
 				fail(message + expected[i].getFullyQualifiedName());

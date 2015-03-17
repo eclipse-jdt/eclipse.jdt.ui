@@ -66,6 +66,7 @@ public class NLSSearchQuery implements ISearchQuery {
 	/*
 	 * @see org.eclipse.search.ui.ISearchQuery#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public IStatus run(IProgressMonitor monitor) {
 		monitor.beginTask("", 5 * fWrapperClass.length); //$NON-NLS-1$
 
@@ -145,6 +146,7 @@ public class NLSSearchQuery implements ISearchQuery {
 	/*
 	 * @see org.eclipse.search.ui.ISearchQuery#getLabel()
 	 */
+	@Override
 	public String getLabel() {
 		return NLSSearchMessages.NLSSearchQuery_label;
 	}
@@ -168,6 +170,7 @@ public class NLSSearchQuery implements ISearchQuery {
 	/*
 	 * @see org.eclipse.search.ui.ISearchQuery#canRerun()
 	 */
+	@Override
 	public boolean canRerun() {
 		return true;
 	}
@@ -175,6 +178,7 @@ public class NLSSearchQuery implements ISearchQuery {
 	/*
 	 * @see org.eclipse.search.ui.ISearchQuery#canRunInBackground()
 	 */
+	@Override
 	public boolean canRunInBackground() {
 		return true;
 	}
@@ -182,6 +186,7 @@ public class NLSSearchQuery implements ISearchQuery {
 	/*
 	 * @see org.eclipse.search.ui.ISearchQuery#getSearchResult()
 	 */
+	@Override
 	public ISearchResult getSearchResult() {
 		if (fResult == null)
 			fResult= new NLSSearchResult(this);

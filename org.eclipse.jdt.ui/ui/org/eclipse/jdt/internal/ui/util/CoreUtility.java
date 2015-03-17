@@ -96,6 +96,7 @@ public class CoreUtility {
 			final Object[] ret = new Object[1];
 			final CoreException[] exc = new CoreException[1];
 			BusyIndicator.showWhile(null, new Runnable() {
+				@Override
 				public void run() {
 					try {
 						ret[0] = element.createExecutableExtension(classAttribute);
@@ -135,9 +136,6 @@ public class CoreUtility {
 			return fProject != null && fProject.equals(other.fProject);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.runtime.jobs.Job#run(org.eclipse.core.runtime.IProgressMonitor)
-		 */
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			synchronized (getClass()) {

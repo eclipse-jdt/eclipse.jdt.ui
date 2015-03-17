@@ -32,7 +32,7 @@ public class QualifiedNameSearchResult {
 	private Map<IFile, TextChange> fChanges;
 
 	public QualifiedNameSearchResult() {
-		fChanges= new HashMap<IFile, TextChange>();
+		fChanges= new HashMap<>();
 	}
 
 	public TextChange getChange(IFile file) {

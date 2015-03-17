@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  */
 public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTest {
 	private static final boolean BUG_DISABLED_DUE_TO_FORMATTER_CONTEXT_INFO_INTERATION= true;
-	private static final Class THIS= MethodInsertionFormattedCompletionTest.class;
+	private static final Class<MethodInsertionFormattedCompletionTest> THIS= MethodInsertionFormattedCompletionTest.class;
 
 	public static Test setUpTest(Test test) {
 		return new CompletionTestSetup(test);
@@ -39,7 +39,8 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#configureCoreOptions(java.util.Hashtable)
 	 */
-	protected void configureCoreOptions(Hashtable options) {
+	@Override
+	protected void configureCoreOptions(Hashtable<String, String> options) {
 		super.configureCoreOptions(options);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_METHOD_INVOCATION, JavaCore.INSERT);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_METHOD_INVOCATION, JavaCore.INSERT);

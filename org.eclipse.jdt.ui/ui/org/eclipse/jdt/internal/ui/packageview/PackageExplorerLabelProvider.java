@@ -59,9 +59,6 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 		fWorkingSetImages= null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
-	 */
 	@Override
 	public StyledString getStyledText(Object element) {
 		String text= getSpecificText(element);
@@ -127,7 +124,7 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 				return null;
 			}
 			if (fWorkingSetImages == null) {
-				fWorkingSetImages= new HashMap<ImageDescriptor, Image>();
+				fWorkingSetImages= new HashMap<>();
 			}
 
 			Image result= fWorkingSetImages.get(image);

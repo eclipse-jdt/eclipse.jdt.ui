@@ -379,7 +379,7 @@ public class TypeMismatchSubProcessor {
 		ITypeBinding[] methodExceptions= methodDeclBinding.getExceptionTypes();
 		ITypeBinding[] definedExceptions= overridden.getExceptionTypes();
 
-		ArrayList<ITypeBinding> undeclaredExceptions= new ArrayList<ITypeBinding>();
+		ArrayList<ITypeBinding> undeclaredExceptions= new ArrayList<>();
 		{
 			ChangeDescription[] changes= new ChangeDescription[methodExceptions.length];
 

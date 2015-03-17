@@ -56,7 +56,7 @@ public class ReferenceFinderUtil {
 	}
 
 	private static SearchMatch[] getTypeReferencesIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
-		List<SearchMatch> referencedTypes= new ArrayList<SearchMatch>();
+		List<SearchMatch> referencedTypes= new ArrayList<>();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
 			referencedTypes.addAll(getTypeReferencesIn(elements[i], owner, new SubProgressMonitor(pm, 1)));
@@ -87,7 +87,7 @@ public class ReferenceFinderUtil {
 	}
 
 	private static SearchMatch[] getFieldReferencesIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
-		List<SearchMatch> referencedFields= new ArrayList<SearchMatch>();
+		List<SearchMatch> referencedFields= new ArrayList<>();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
 			referencedFields.addAll(getFieldReferencesIn(elements[i], owner, new SubProgressMonitor(pm, 1)));
@@ -118,7 +118,7 @@ public class ReferenceFinderUtil {
 	}
 
 	private static SearchMatch[] getMethodReferencesIn(IJavaElement[] elements, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException {
-		List<SearchMatch> referencedMethods= new ArrayList<SearchMatch>();
+		List<SearchMatch> referencedMethods= new ArrayList<>();
 		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
 			referencedMethods.addAll(getMethodReferencesIn(elements[i], owner, new SubProgressMonitor(pm, 1)));
@@ -135,7 +135,7 @@ public class ReferenceFinderUtil {
 	}
 
 	public static ITypeBinding[] getTypesReferencedInDeclarations(MethodDeclaration[] methods) {
-		Set<ITypeBinding> typesUsed= new HashSet<ITypeBinding>();
+		Set<ITypeBinding> typesUsed= new HashSet<>();
 		for (int i= 0; i < methods.length; i++) {
 			typesUsed.addAll(getTypesUsedInDeclaration(methods[i]));
 		}
@@ -145,8 +145,8 @@ public class ReferenceFinderUtil {
 	//set of ITypeBindings
 	public static Set<ITypeBinding> getTypesUsedInDeclaration(MethodDeclaration methodDeclaration) {
 		if (methodDeclaration == null)
-			return new HashSet<ITypeBinding>(0);
-		Set<ITypeBinding> result= new HashSet<ITypeBinding>();
+			return new HashSet<>(0);
+		Set<ITypeBinding> result= new HashSet<>();
 		ITypeBinding binding= null;
 		Type returnType= methodDeclaration.getReturnType2();
 		if (returnType != null) {
@@ -171,7 +171,7 @@ public class ReferenceFinderUtil {
 
 	/// private helpers
 	private static Set<IJavaElement> extractElements(SearchMatch[] searchResults, int elementType) {
-		Set<IJavaElement> elements= new HashSet<IJavaElement>();
+		Set<IJavaElement> elements= new HashSet<>();
 		for (int i= 0; i < searchResults.length; i++) {
 			IJavaElement el= SearchUtils.getEnclosingJavaElement(searchResults[i]);
 			if (el.exists() && el.getElementType() == elementType)

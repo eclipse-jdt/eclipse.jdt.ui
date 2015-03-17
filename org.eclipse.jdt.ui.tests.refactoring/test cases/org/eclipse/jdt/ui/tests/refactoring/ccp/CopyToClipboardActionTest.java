@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,6 @@ package org.eclipse.jdt.ui.tests.refactoring.ccp;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.FileTransfer;
@@ -52,12 +49,15 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.TypedSourceTransfer;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 
 public class CopyToClipboardActionTest extends RefactoringTest{
 
 	private ILabelProvider fLabelProvider;
 
-	private static final Class clazz= CopyToClipboardActionTest.class;
+	private static final Class<CopyToClipboardActionTest> clazz= CopyToClipboardActionTest.class;
 
 	private Clipboard fClipboard;
 
@@ -79,6 +79,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fClipboard= new MockClipboard(Display.getDefault());
@@ -120,6 +121,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		assertTrue("fOlder does not exist", fOlder.exists());
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		performDummySearch();
@@ -231,7 +233,8 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	}
 
 	private static void sortByName(Object[] copied) {
-		Arrays.sort(copied, new Comparator(){
+		Arrays.sort(copied, new Comparator<Object>(){
+			@Override
 			public int compare(Object arg0, Object arg1) {
 				return getName(arg0).compareTo(getName(arg1));
 			}
@@ -239,7 +242,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	}
 
 	private void checkNames(IResource[] resourcesCopied, IJavaElement[] javaElementsCopied, String clipboardText){
-		List stringLines= Arrays.asList(Strings.convertIntoLines(clipboardText));
+		List<String> stringLines= Arrays.asList(Strings.convertIntoLines(clipboardText));
 		assertEquals("different number of names", resourcesCopied.length + javaElementsCopied.length, stringLines.size());
 		for (int i= 0; i < resourcesCopied.length; i++) {
 			String name= getName(resourcesCopied[i]);
@@ -284,8 +287,8 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	}
 
 	private static IJavaElement[] getCompilationUnits(IJavaElement[] javaElements) {
-		List cus= ReorgUtils.getElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT);
-		return (ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]);
+		List<?> cus= ReorgUtils.getElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT);
+		return cus.toArray(new ICompilationUnit[cus.size()]);
 	}
 
 	private static IResource[] getResources(Object[] elements) {

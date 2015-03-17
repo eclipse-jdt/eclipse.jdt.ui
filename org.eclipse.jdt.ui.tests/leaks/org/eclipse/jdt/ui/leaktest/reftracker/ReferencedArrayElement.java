@@ -26,6 +26,7 @@ public class ReferencedArrayElement extends ReferencedObject {
 		fIndex= index;
 	}
 
+	@Override
 	public ReferencedObject getReferenceHolder() {
 		return fPrevious;
 	}

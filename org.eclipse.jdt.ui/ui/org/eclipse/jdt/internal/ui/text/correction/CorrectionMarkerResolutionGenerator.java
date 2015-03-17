@@ -93,16 +93,12 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			fMarker= marker;
 		}
 
-		/* (non-Javadoc)
-		 * @see IMarkerResolution#getLabel()
-		 */
+		@Override
 		public String getLabel() {
 			return fProposal.getDisplayString();
 		}
 
-		/* (non-Javadoc)
-		 * @see IMarkerResolution#run(IMarker)
-		 */
+		@Override
 		public void run(IMarker marker) {
 			try {
 				IEditorPart part= EditorUtility.isOpenInEditor(fCompilationUnit);
@@ -123,9 +119,6 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		}
 
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void run(IMarker[] markers, IProgressMonitor monitor) {
 			if (markers.length == 1) {
@@ -157,7 +150,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		}
 
 		private MultiFixTarget[] getCleanUpTargets(IMarker[] markers) {
-			Hashtable<ICompilationUnit, List<IProblemLocation>> problemLocations= new Hashtable<ICompilationUnit, List<IProblemLocation>>();
+			Hashtable<ICompilationUnit, List<IProblemLocation>> problemLocations= new Hashtable<>();
 			for (int i= 0; i < markers.length; i++) {
 				IMarker marker= markers[i];
 				ICompilationUnit cu= getCompilationUnit(marker);
@@ -168,7 +161,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 					if (location != null) {
 						List<IProblemLocation> l= problemLocations.get(cu.getPrimary());
 						if (l == null) {
-							l= new ArrayList<IProblemLocation>();
+							l= new ArrayList<>();
 							problemLocations.put(cu.getPrimary(), l);
 						}
 						l.add(location);
@@ -189,23 +182,16 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			return result;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.IMarkerResolution2#getDescription()
-		 */
+		@Override
 		public String getDescription() {
 			return fProposal.getAdditionalProposalInfo();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.IMarkerResolution2#getImage()
-		 */
+		@Override
 		public Image getImage() {
 			return fProposal.getImage();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public IMarker[] findOtherMarkers(IMarker[] markers) {
 			if (!(fProposal instanceof FixCorrectionProposal))
@@ -222,7 +208,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			if (fileMarkerTable.isEmpty())
 				return NO_MARKERS;
 
-			final List<IMarker> result= new ArrayList<IMarker>();
+			final List<IMarker> result= new ArrayList<>();
 
 			for (Iterator<Entry<IFile, List<IMarker>>> iterator= fileMarkerTable.entrySet().iterator(); iterator.hasNext();) {
 				Map.Entry<IFile, List<IMarker>> entry= iterator.next();
@@ -255,7 +241,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		 * @return mapping files to markers
 		 */
 		private Hashtable<IFile, List<IMarker>> getMarkersForFiles(IMarker[] markers) {
-			final Hashtable<IFile, List<IMarker>> result= new Hashtable<IFile, List<IMarker>>();
+			final Hashtable<IFile, List<IMarker>> result= new Hashtable<>();
 
 			String markerType;
 			try {
@@ -280,7 +266,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 						if (res instanceof IFile && res.isAccessible()) {
 							List<IMarker> markerList= result.get(res);
 							if (markerList == null) {
-								markerList= new ArrayList<IMarker>();
+								markerList= new ArrayList<>();
 								result.put((IFile) res, markerList);
 							}
 							markerList.add(marker);
@@ -302,16 +288,12 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		super();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IMarkerResolutionGenerator2#hasResolutions(org.eclipse.core.resources.IMarker)
-	 */
+	@Override
 	public boolean hasResolutions(IMarker marker) {
 		return internalHasResolutions(marker);
 	}
 
-	/* (non-Javadoc)
-	 * @see IMarkerResolutionGenerator#getResolutions(IMarker)
-	 */
+	@Override
 	public IMarkerResolution[] getResolutions(IMarker marker) {
 		return internalGetResolutions(marker);
 	}
@@ -338,7 +320,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 					if (!hasProblem (context.getASTRoot().getProblems(), location))
 						return NO_RESOLUTIONS;
 
-					ArrayList<IJavaCompletionProposal> proposals= new ArrayList<IJavaCompletionProposal>();
+					ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
 					JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
 					Collections.sort(proposals, new CompletionProposalComparator());
 

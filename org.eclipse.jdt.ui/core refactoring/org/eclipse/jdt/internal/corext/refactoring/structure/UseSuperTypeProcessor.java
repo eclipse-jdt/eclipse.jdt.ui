@@ -427,9 +427,6 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		return new RefactoringParticipant[0];
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected final void rewriteTypeOccurrences(final TextEditBasedChangeManager manager, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final ICompilationUnit unit, final CompilationUnit node, final Set<String> replacements, final IProgressMonitor monitor) throws CoreException {
 		try {

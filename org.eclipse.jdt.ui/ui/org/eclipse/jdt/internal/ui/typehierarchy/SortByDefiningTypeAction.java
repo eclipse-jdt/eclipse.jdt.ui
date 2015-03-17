@@ -51,6 +51,7 @@ public class SortByDefiningTypeAction extends Action {
 	@Override
 	public void run() {
 		BusyIndicator.showWhile(fMethodsViewer.getControl().getDisplay(), new Runnable() {
+			@Override
 			public void run() {
 				fMethodsViewer.sortByDefiningType(isChecked());
 			}

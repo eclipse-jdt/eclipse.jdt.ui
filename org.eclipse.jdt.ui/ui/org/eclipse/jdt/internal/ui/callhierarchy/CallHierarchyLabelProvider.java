@@ -94,9 +94,6 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		return getSpecialLabel(element);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
-	 */
 	@Override
 	public StyledString getStyledText(Object element) {
 		if (isNormalMethodWrapper(element)) {

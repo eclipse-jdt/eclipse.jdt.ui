@@ -32,10 +32,10 @@ public class BuildpathDelta {
 	public BuildpathDelta(String operationDescription) {
 		fOperationDescription= operationDescription;
 
-		fCreatedResources= new ArrayList<IResource>();
-		fDeletedResources= new ArrayList<IResource>();
-		fAddedEntries= new ArrayList<CPListElement>();
-		fRemovedEntries= new ArrayList<CPListElement>();
+		fCreatedResources= new ArrayList<>();
+		fDeletedResources= new ArrayList<>();
+		fAddedEntries= new ArrayList<>();
+		fRemovedEntries= new ArrayList<>();
     }
 
 	public String getOperationDescription() {

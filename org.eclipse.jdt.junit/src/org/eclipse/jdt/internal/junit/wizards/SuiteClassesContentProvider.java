@@ -42,6 +42,7 @@ public class SuiteClassesContentProvider implements IStructuredContentProvider {
 		this.fIncludeJunit4Tests = includeJunit4Tests;
 	}
 
+	@Override
 	public Object[] getElements(Object parent) {
 		if (! (parent instanceof IPackageFragment))
 			return new Object[0];
@@ -52,6 +53,7 @@ public class SuiteClassesContentProvider implements IStructuredContentProvider {
 		IType[] result= tests.toArray(new IType[tests.size()]);
 		Arrays.sort(result, new Comparator<IType>() {
 			private Collator fCollator= Collator.getInstance();
+			@Override
 			public int compare(IType t1, IType t2) {
 				return fCollator.compare(t1.getElementName(), t2.getElementName());
 			}
@@ -61,7 +63,7 @@ public class SuiteClassesContentProvider implements IStructuredContentProvider {
 
 	public Set<IType> getTests(IPackageFragment pack) {
 		try {
-			HashSet<IType> result= new HashSet<IType>();
+			HashSet<IType> result= new HashSet<>();
 			
 			if (isIncludeJunit4Tests()) {
 				new JUnit4TestFinder().findTestsInContainer(pack, result, null);
@@ -76,9 +78,11 @@ public class SuiteClassesContentProvider implements IStructuredContentProvider {
 		}
 	}
 
+	@Override
 	public void dispose() {
 	}
 
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 	}
 	

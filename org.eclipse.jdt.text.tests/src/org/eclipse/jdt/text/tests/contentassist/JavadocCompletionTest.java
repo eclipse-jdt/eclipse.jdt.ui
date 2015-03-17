@@ -26,7 +26,7 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	private static final boolean BUG_NO_HTML_TAG_PROPOSALS_IN_CORE_JDOC_ASSIST= true;
 	private static final boolean BUG_NO_BEST_EFFORT_IMPORTS_WITH_CORE_COMPLETION= true;
 	private static final boolean BUG_113544= true;
-	private static final Class THIS= JavadocCompletionTest.class;
+	private static final Class<JavadocCompletionTest> THIS= JavadocCompletionTest.class;
 	private static final String METHOD=
 			"	public int method(int param) {\n" +
 			"		return 0;\n" +
@@ -52,6 +52,7 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, false);
@@ -416,6 +417,7 @@ public class JavadocCompletionTest extends AbstractCompletionTest {
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#getContentType()
 	 */
+	@Override
 	protected String getContentType() {
 		return IJavaPartitions.JAVA_DOC;
 	}

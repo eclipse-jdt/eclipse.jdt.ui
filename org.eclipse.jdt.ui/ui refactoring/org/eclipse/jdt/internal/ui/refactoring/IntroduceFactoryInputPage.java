@@ -73,6 +73,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 	/**
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		Composite result = new Composite(parent, SWT.NONE);
 
@@ -117,6 +118,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		protectCtorCB.setLayoutData(gd);
 
 		fMethodName.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				fMethodNameStatus = getUseFactoryRefactoring().setNewMethodName(fMethodName.getText());
 				validateInput(true);
@@ -144,6 +146,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 		});
 
 		factoryTypeName.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				fDestinationStatus= getUseFactoryRefactoring().setFactoryClass(factoryTypeName.getText());
 				validateInput(false);

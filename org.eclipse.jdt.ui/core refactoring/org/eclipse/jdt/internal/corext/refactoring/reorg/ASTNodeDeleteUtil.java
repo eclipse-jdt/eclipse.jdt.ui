@@ -75,7 +75,7 @@ public class ASTNodeDeleteUtil {
 	}
 
 	private static Set<ASTNode> getRemovedNodes(final List<ASTNode> removed, final CompilationUnitRewrite rewrite) {
-		final Set<ASTNode> result= new HashSet<ASTNode>();
+		final Set<ASTNode> result= new HashSet<>();
 		rewrite.getRoot().accept(new GenericVisitor(true) {
 
 			@Override
@@ -89,7 +89,7 @@ public class ASTNodeDeleteUtil {
 	}
 
 	public static void markAsDeleted(IJavaElement[] javaElements, CompilationUnitRewrite rewrite, TextEditGroup group) throws JavaModelException {
-		final List<ASTNode> removed= new ArrayList<ASTNode>();
+		final List<ASTNode> removed= new ArrayList<>();
 		for (int i= 0; i < javaElements.length; i++) {
 			markAsDeleted(removed, javaElements[i], rewrite, group);
 		}

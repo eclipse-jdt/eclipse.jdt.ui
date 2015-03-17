@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 
 public class RenameTests18 extends RefactoringTest {
 
-	private static final Class clazz= RenameTests18.class;
+	private static final Class<RenameTests18> clazz= RenameTests18.class;
 
 	private static final String REFACTORING_PATH= "RenameTests18/";
 
@@ -74,20 +74,23 @@ public class RenameTests18 extends RefactoringTest {
 		};
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		JavaCore.setOptions(options);
 		fIsPreDeltaTest= true;
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		JavaCore.setOptions(options);
 	}
 
@@ -113,9 +116,9 @@ public class RenameTests18 extends RefactoringTest {
 		descriptor.setUpdateTextualOccurrences(false);
 
 		RenameRefactoring refactoring= (RenameRefactoring) createRefactoring(descriptor);
-		List list= new ArrayList();
+		List<IJavaElement> list= new ArrayList<>();
 		list.add(elements[0]);
-		List args= new ArrayList();
+		List<RenameArguments> args= new ArrayList<>();
 		args.add(new RenameArguments(newFieldName, updateReferences));
 		String[] renameHandles= ParticipantTesting.createHandles(list.toArray());
 
@@ -178,7 +181,7 @@ public class RenameTests18 extends RefactoringTest {
 
 		ParticipantTesting.testRename(
 			renameHandles,
-			(RenameArguments[]) args.toArray(new RenameArguments[args.size()]));
+			args.toArray(new RenameArguments[args.size()]));
 
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());

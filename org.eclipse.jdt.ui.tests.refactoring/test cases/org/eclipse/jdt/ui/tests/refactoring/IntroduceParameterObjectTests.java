@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,9 +14,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -42,9 +39,12 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class IntroduceParameterObjectTests extends RefactoringTest {
 
-	private static final Class CLAZZ= IntroduceParameterObjectTests.class;
+	private static final Class<IntroduceParameterObjectTests> CLAZZ= IntroduceParameterObjectTests.class;
 	private static final String DEFAULT_SUB_DIR= "sub";
 	private static final String REFACTORING_PATH= "IntroduceParameterObject/";
 
@@ -103,6 +103,7 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		return sb.toString();
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -168,6 +169,7 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		TestChangeMethodSignaturParticipant.testParticipant(typeOfMethod);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -198,6 +200,7 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		fPack= getRoot().createPackageFragment(inputPackage,true,null);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		fDescriptor=null;
@@ -245,9 +248,9 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 
 	public void testDelegateCreationCodeStyle() throws Exception {
 		IJavaProject javaProject= getRoot().getJavaProject();
-		Map originalOptions= javaProject.getOptions(false);
+		Map<String, String> originalOptions= javaProject.getOptions(false);
 		try {
-			Hashtable newOptions= new Hashtable();
+			Hashtable<String, String> newOptions= new Hashtable<>();
 			newOptions.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
 			newOptions.put(JavaCore.CODEASSIST_FIELD_SUFFIXES, "G");
 			javaProject.setOptions(newOptions);
@@ -374,9 +377,9 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 
 	public void testSimpleEnclosingCodeStyle() throws Exception {
 		IJavaProject javaProject= getRoot().getJavaProject();
-		Map originalOptions= javaProject.getOptions(false);
+		Map<String, String> originalOptions= javaProject.getOptions(false);
 		try {
-			Hashtable newOptions= new Hashtable();
+			Hashtable<String, String> newOptions= new Hashtable<>();
 			newOptions.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "f");
 			newOptions.put(JavaCore.CODEASSIST_FIELD_SUFFIXES, "G");
 			newOptions.put(JavaCore.CODEASSIST_ARGUMENT_PREFIXES, "a");

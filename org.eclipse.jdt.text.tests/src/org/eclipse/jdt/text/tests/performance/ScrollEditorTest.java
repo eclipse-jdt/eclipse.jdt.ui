@@ -63,68 +63,85 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 	}
 
 	protected static final ScrollingMode PAGE_WISE= new ScrollingMode(PG_DOWN, CTRL_HOME) {
+		@Override
 		public int computeOperations(int numberOfLines, int visibleLines) {
 			return numberOfLines / visibleLines;
 		}
+		@Override
 		public String getFile() {
 			return PAGE_SCROLLING_FILE;
 		}
 	};
 	protected static final ScrollingMode PAGE_WISE_SELECT= new ScrollingMode(SHIFT_PG_DOWN, CTRL_HOME) {
+		@Override
 		public int computeOperations(int numberOfLines, int visibleLines) {
 			return numberOfLines / visibleLines;
 		}
+		@Override
 		public String getFile() {
 			return PAGE_SCROLLING_FILE;
 		}
 	};
 	protected static final ScrollingMode LINE_WISE_NO_CARET_MOVE= new ScrollingMode(CTRL_DOWN, PG_UP) {
+		@Override
 		public int computeOperations(int numberOfLines, int visibleLines) {
 			return numberOfLines - visibleLines;
 		}
+		@Override
 		public String getFile() {
 			return LINE_SCROLLING_FILE;
 		}
 	};
 	protected static final ScrollingMode LINE_WISE_NO_CARET_MOVE_HOLD_KEYS= new ScrollingMode(CTRL_DOWN, PG_UP) {
+		@Override
 		public int computeOperations(int numberOfLines, int visibleLines) {
 			return numberOfLines - visibleLines;
 		}
+		@Override
 		public String getFile() {
 			return LINE_SCROLLING_FILE;
 		}
+		@Override
 		public boolean isPressAndHoldCombo() {
 			return true;
 		}
 	};
 	protected static final ScrollingMode LINE_WISE= new ScrollingMode(DOWN, CTRL_HOME) {
+		@Override
 		public int computeOperations(int numberOfLines, int visibleLines) {
 			return numberOfLines - 1;
 		}
+		@Override
 		public String getFile() {
 			return LINE_SCROLLING_FILE;
 		}
 	};
 	protected static final ScrollingMode LINE_WISE_SELECT= new ScrollingMode(SHIFT_DOWN, CTRL_HOME) {
+		@Override
 		public int computeOperations(int numberOfLines, int visibleLines) {
 			return numberOfLines - 1;
 		}
+		@Override
 		public String getFile() {
 			return LINE_SCROLLING_FILE;
 		}
 	};
 	protected static final ScrollingMode LINE_WISE_SELECT_HOLD_KEYS= new ScrollingMode(SHIFT_DOWN, CTRL_HOME) {
+		@Override
 		public int computeOperations(int numberOfLines, int visibleLines) {
 			return numberOfLines - 1;
 		}
+		@Override
 		public String getFile() {
 			return LINE_SCROLLING_FILE;
 		}
+		@Override
 		public boolean isPressAndHoldCombo() {
 			return true;
 		}
 	};
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		EditorTestHelper.bringToTop();
@@ -132,6 +149,7 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 		setMeasuredRuns(MEASURED_RUNS);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		// wait a little and consume any incoming events
 		DisplayHelper.sleep(Display.getCurrent(),8000);

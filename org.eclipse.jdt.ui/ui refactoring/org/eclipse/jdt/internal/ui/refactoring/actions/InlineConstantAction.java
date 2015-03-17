@@ -130,9 +130,6 @@ public class InlineConstantAction extends SelectionDispatchAction {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		run(selection.getOffset(), selection.getLength(), SelectionConverter.getInputAsCompilationUnit(fEditor));

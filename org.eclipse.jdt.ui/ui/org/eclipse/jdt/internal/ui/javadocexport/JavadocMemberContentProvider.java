@@ -24,6 +24,7 @@ public class JavadocMemberContentProvider implements ITreeContentProvider {
 	/*
 	 * @see ITreeContentProvider#getChildren(Object)
 	 */
+	@Override
 	public Object[] getChildren(Object parentElement) {
 		return new Object[0];
 	}
@@ -31,6 +32,7 @@ public class JavadocMemberContentProvider implements ITreeContentProvider {
 	/*
 	 * @see ITreeContentProvider#getParent(Object)
 	 */
+	@Override
 	public Object getParent(Object element) {
 		//@test
 		//System.out.println(element.getClass().toString());
@@ -42,6 +44,7 @@ public class JavadocMemberContentProvider implements ITreeContentProvider {
 	/*
 	 * @see ITreeContentProvider#hasChildren(Object)
 	 */
+	@Override
 	public boolean hasChildren(Object element) {
 		try {
 			if (element instanceof IPackageFragment) {
@@ -56,6 +59,7 @@ public class JavadocMemberContentProvider implements ITreeContentProvider {
 	/*
 	 * @see IStructuredContentProvider#getElements(Object)
 	 */
+	@Override
 	public Object[] getElements(Object inputElement) {
 		try {
 			if (inputElement instanceof IPackageFragment) {
@@ -71,12 +75,14 @@ public class JavadocMemberContentProvider implements ITreeContentProvider {
 	/*
 	 * @see IContentProvider#dispose()
 	 */
+	@Override
 	public void dispose() {
 	}
 
 	/*
 	 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 	 */
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 	}
 

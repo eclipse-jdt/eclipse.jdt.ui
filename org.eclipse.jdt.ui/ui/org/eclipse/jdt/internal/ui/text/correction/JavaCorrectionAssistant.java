@@ -87,14 +87,17 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 		setInformationControlCreator(getInformationControlCreator());
 
 		addCompletionListener(new ICompletionListener() {
+			@Override
 			public void assistSessionEnded(ContentAssistEvent event) {
 				fIsCompletionActive= false;
 			}
 
+			@Override
 			public void assistSessionStarted(ContentAssistEvent event) {
 				fIsCompletionActive= true;
 			}
 
+			@Override
 			public void selectionChanged(ICompletionProposal proposal, boolean smartToggle) {
 			}
 		});
@@ -107,15 +110,13 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 
 	private IInformationControlCreator getInformationControlCreator() {
 		return new IInformationControlCreator() {
+			@Override
 			public IInformationControl createInformationControl(Shell parent) {
 				return new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
 			}
 		};
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistant#install(org.eclipse.jface.text.ITextViewer)
-	 */
 	@Override
 	public void install(ISourceViewer sourceViewer) {
 		super.install(sourceViewer);
@@ -127,9 +128,6 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ContentAssistant#uninstall()
-	 */
 	@Override
 	public void uninstall() {
 		if (fLightBulbUpdater != null) {
@@ -175,7 +173,7 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 			return super.showPossibleQuickAssists();
 
 
-		ArrayList<Annotation> resultingAnnotations= new ArrayList<Annotation>(20);
+		ArrayList<Annotation> resultingAnnotations= new ArrayList<>(20);
 		try {
 			Point selectedRange= fViewer.getSelectedRange();
 			int currOffset= selectedRange.x;
@@ -230,8 +228,8 @@ public class JavaCorrectionAssistant extends QuickAssistAssistant {
 			int rangeStart= lineInfo.getOffset();
 			int rangeEnd= rangeStart + lineInfo.getLength();
 
-			ArrayList<Annotation> allAnnotations= new ArrayList<Annotation>();
-			ArrayList<Position> allPositions= new ArrayList<Position>();
+			ArrayList<Annotation> allAnnotations= new ArrayList<>();
+			ArrayList<Position> allPositions= new ArrayList<>();
 			int bestOffset= Integer.MAX_VALUE;
 			while (iter.hasNext()) {
 				Annotation annot= iter.next();

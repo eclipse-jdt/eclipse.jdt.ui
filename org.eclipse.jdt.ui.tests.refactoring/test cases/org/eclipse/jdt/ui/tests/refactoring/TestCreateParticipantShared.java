@@ -33,10 +33,11 @@ public class TestCreateParticipantShared extends CreateParticipant implements IS
 
 	static TestCreateParticipantShared fgInstance;
 
-	List fElements= new ArrayList(3);
-	List fHandles= new ArrayList(3);
-	List fArguments= new ArrayList(3);
+	List<Object> fElements= new ArrayList<>(3);
+	List<String> fHandles= new ArrayList<>(3);
+	List<RefactoringArguments> fArguments= new ArrayList<>(3);
 
+	@Override
 	public boolean initialize(Object element) {
 		fgInstance= this;
 		fElements.add(element);
@@ -48,6 +49,7 @@ public class TestCreateParticipantShared extends CreateParticipant implements IS
 		return true;
 	}
 
+	@Override
 	public void addElement(Object element, RefactoringArguments args) {
 		fElements.add(element);
 		fArguments.add(args);
@@ -57,14 +59,17 @@ public class TestCreateParticipantShared extends CreateParticipant implements IS
 			fHandles.add(((IResource)element).getFullPath().toString());
 	}
 
+	@Override
 	public String getName() {
 		return getClass().getName();
 	}
 
+	@Override
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) {
 		return new RefactoringStatus();
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		return null;
 	}

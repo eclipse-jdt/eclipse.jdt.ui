@@ -24,12 +24,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousM
 
 public class GoToNextPreviousMemberActionTests extends RefactoringTest{
 
-	private static final Class clazz= GoToNextPreviousMemberActionTests.class;
+	private static final Class<GoToNextPreviousMemberActionTests> clazz= GoToNextPreviousMemberActionTests.class;
 	private static final String REFACTORING_PATH= "GoToNextPreviousMemberAction/";
 	public GoToNextPreviousMemberActionTests(String name){
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}

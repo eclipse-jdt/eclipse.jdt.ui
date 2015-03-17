@@ -64,7 +64,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class AddUnimplementedMethodsTest extends TestCase {
 
-	private static final Class THIS= AddUnimplementedMethodsTest.class;
+	private static final Class<AddUnimplementedMethodsTest> THIS= AddUnimplementedMethodsTest.class;
 
 	private IJavaProject fJavaProject;
 	private IPackageFragment fPackage;
@@ -83,10 +83,11 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "999");
@@ -130,6 +131,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	}
 
 
+	@Override
 	protected void tearDown () throws Exception {
 		JavaProjectHelper.delete(fJavaProject);
 		fJavaProject= null;
@@ -357,6 +359,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	 * @throws Exception
 	 * @deprecated tests deprecated API
 	 */
+	@Deprecated
 	public void testJLS3() throws Exception {
 		doTestOldAstLevel(AST.JLS3);
 	}
@@ -365,6 +368,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	 * @throws Exception
 	 * @deprecated tests deprecated API
 	 */
+	@Deprecated
 	public void testJLS4() throws Exception {
 		doTestOldAstLevel(AST.JLS4);
 	}
@@ -378,6 +382,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	 * @throws Exception
 	 * @deprecated tests deprecated API
 	 */
+	@Deprecated
 	public void doTestOldAstLevel(int astLevel) throws Exception {
 		ICompilationUnit cu= fPackage.getCompilationUnit("Test1.java");
 		IType testClass= cu.createType(

@@ -68,6 +68,7 @@ public class JavaNavigatorContentProvider extends
 
 	private IPropertyChangeListener fLayoutPropertyListener;
 
+	@Override
 	public void init(ICommonContentExtensionSite commonContentExtensionSite) {
 		IExtensionStateModel stateModel = commonContentExtensionSite
 				.getExtensionStateModel();
@@ -76,6 +77,7 @@ public class JavaNavigatorContentProvider extends
 		fStateModel = stateModel;
 		restoreState(memento);
 		fLayoutPropertyListener = new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (Values.IS_LAYOUT_FLAT.equals(event.getProperty())) {
 					if (event.getNewValue() != null) {
@@ -133,7 +135,7 @@ public class JavaNavigatorContentProvider extends
 	}
 
 	private static IProject[] filterResourceProjects(IProject[] projects) {
-		List<IProject> filteredProjects= new ArrayList<IProject>(projects.length);
+		List<IProject> filteredProjects= new ArrayList<>(projects.length);
 		for (int i= 0; i < projects.length; i++) {
 			IProject project= projects[i];
 			if (!project.isOpen() || isJavaProject(project))
@@ -178,26 +180,32 @@ public class JavaNavigatorContentProvider extends
 		return newInput;
 	}
 
+	@Override
 	public void restoreState(IMemento memento) {
 
 	}
 
+	@Override
 	public void saveState(IMemento memento) {
 
 	}
 
+	@Override
 	public void getPipelinedChildren(Object parent, Set currentChildren) {
 		customize(getChildren(parent), currentChildren);
 	}
 
+	@Override
 	public void getPipelinedElements(Object input, Set currentElements) {
 		customize(getElements(input), currentElements);
 	}
 
+	@Override
 	public Object getPipelinedParent(Object object, Object suggestedParent) {
 		return getParent(object);
 	}
 
+	@Override
 	public PipelinedShapeModification interceptAdd(PipelinedShapeModification addModification) {
 
 		Object parent= addModification.getParent();
@@ -214,6 +222,7 @@ public class JavaNavigatorContentProvider extends
 		return addModification;
 	}
 
+	@Override
 	public PipelinedShapeModification interceptRemove(
 			PipelinedShapeModification removeModification) {
 		deconvertJavaProjects(removeModification);
@@ -222,7 +231,7 @@ public class JavaNavigatorContentProvider extends
 	}
 
 	private void deconvertJavaProjects(PipelinedShapeModification modification) {
-		Set<IProject> convertedChildren = new LinkedHashSet<IProject>();
+		Set<IProject> convertedChildren = new LinkedHashSet<>();
 		for (Iterator<IAdaptable> iterator = modification.getChildren().iterator(); iterator.hasNext();) {
 			Object added = iterator.next();
 			if(added instanceof IJavaProject) {
@@ -267,7 +276,7 @@ public class JavaNavigatorContentProvider extends
 	 */
 	private boolean convertToJavaElements(Set<Object> currentChildren) {
 
-		LinkedHashSet<Object> convertedChildren = new LinkedHashSet<Object>();
+		LinkedHashSet<Object> convertedChildren = new LinkedHashSet<>();
 		IJavaElement newChild;
 		for (Iterator<Object> childrenItr = currentChildren.iterator(); childrenItr
 				.hasNext();) {
@@ -332,11 +341,13 @@ public class JavaNavigatorContentProvider extends
 
 
 
+	@Override
 	public boolean interceptRefresh(PipelinedViewerUpdate refreshSynchronization) {
 		return convertToJavaElements(refreshSynchronization.getRefreshTargets());
 
 	}
 
+	@Override
 	public boolean interceptUpdate(PipelinedViewerUpdate updateSynchronization) {
 		return convertToJavaElements(updateSynchronization.getRefreshTargets());
 	}

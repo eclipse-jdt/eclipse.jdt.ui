@@ -57,6 +57,7 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 	/*
 	 * @see IContentProvider#dispose()
 	 */
+	@Override
 	public void dispose() {
 	}
 
@@ -71,6 +72,7 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 	/*
 	 * @see ITreeContentProvider#getChildren(Object)
 	 */
+	@Override
 	public Object[] getChildren(Object parentElement) {
 		return EMPTY;
 	}
@@ -78,6 +80,7 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 	/*
 	 * @see IStructuredContentProvider#getElements(Object)
 	 */
+	@Override
 	public Object[] getElements(Object inputElement) {
 		return fFields.toArray();
 	}
@@ -95,6 +98,7 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 	/*
 	 * @see ITreeContentProvider#getParent(Object)
 	 */
+	@Override
 	public Object getParent(Object element) {
 		return null;
 	}
@@ -102,6 +106,7 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 	/*
 	 * @see ITreeContentProvider#hasChildren(Object)
 	 */
+	@Override
 	public boolean hasChildren(Object element) {
 		return getChildren(element).length > 0;
 	}
@@ -109,11 +114,12 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 	/*
 	 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 	 */
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 	}
 
 	private List<IVariableBinding> moveUp(List<IVariableBinding> elements, List<?> move) {
-		List<IVariableBinding> result= new ArrayList<IVariableBinding>(elements.size());
+		List<IVariableBinding> result= new ArrayList<>(elements.size());
 		IVariableBinding floating= null;
 		for (int index= 0; index < elements.size(); index++) {
 			IVariableBinding current= elements.get(index);
@@ -133,7 +139,7 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 	}
 
 	private List<IVariableBinding> reverse(List<IVariableBinding> list) {
-		List<IVariableBinding> reverse= new ArrayList<IVariableBinding>(list.size());
+		List<IVariableBinding> reverse= new ArrayList<>(list.size());
 		for (int index= list.size() - 1; index >= 0; index--) {
 			reverse.add(list.get(index));
 		}
@@ -141,7 +147,7 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 	}
 
 	public void setElements(List<IVariableBinding> elements, CheckboxTreeViewer tree) {
-		fFields= new ArrayList<IVariableBinding>(elements);
+		fFields= new ArrayList<>(elements);
 		if (tree != null)
 			tree.refresh();
 	}

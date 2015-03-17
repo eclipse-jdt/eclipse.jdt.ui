@@ -27,7 +27,7 @@ import org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer;
 
 public class DocumentLineDifferModificationTest extends AbstractDocumentLineDifferTest {
 
-	private static final Class THIS= DocumentLineDifferModificationTest.class;
+	private static final Class<DocumentLineDifferModificationTest> THIS= DocumentLineDifferModificationTest.class;
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
@@ -37,6 +37,7 @@ public class DocumentLineDifferModificationTest extends AbstractDocumentLineDiff
 	private FindReplaceDocumentAdapter fFindReplaceAdapter;
 	private boolean fInitialized;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -44,6 +45,7 @@ public class DocumentLineDifferModificationTest extends AbstractDocumentLineDiff
 		fFindReplaceAdapter= new FindReplaceDocumentAdapter(fDocument);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		if (fMeter != null) {
 			fMeter.commit();
@@ -116,6 +118,7 @@ public class DocumentLineDifferModificationTest extends AbstractDocumentLineDiff
 			/*
 			 * @see org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer#initialize()
 			 */
+			@Override
 			protected synchronized void initialize() {
 				fInitialized= true;
 				super.initialize();
@@ -123,6 +126,7 @@ public class DocumentLineDifferModificationTest extends AbstractDocumentLineDiff
 		};
 		setUpDiffer(differ);
 		DisplayHelper helper= new DisplayHelper() {
+			@Override
 			public boolean condition() {
 				return differ.isSynchronized();
 			}

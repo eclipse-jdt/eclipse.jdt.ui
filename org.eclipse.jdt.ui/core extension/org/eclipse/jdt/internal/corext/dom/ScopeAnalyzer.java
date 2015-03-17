@@ -94,17 +94,15 @@ public class ScopeAnalyzer {
 		public DefaultBindingRequestor(ITypeBinding parentTypeBinding, int flags) {
 			fParentTypeBinding= parentTypeBinding;
 			fFlags= flags;
-			fResult= new ArrayList<IBinding>();
-			fNamesAdded= new HashSet<String>();
+			fResult= new ArrayList<>();
+			fNamesAdded= new HashSet<>();
 		}
 
 		public DefaultBindingRequestor() {
 			this(null, 0);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public boolean acceptBinding(IBinding binding) {
 			if (binding == null)
 				return false;
@@ -135,7 +133,7 @@ public class ScopeAnalyzer {
 	private final CompilationUnit fRoot;
 
 	public ScopeAnalyzer(CompilationUnit root) {
-		fTypesVisited= new HashSet<ITypeBinding>();
+		fTypesVisited= new HashSet<>();
 		fRoot= root;
 	}
 
@@ -401,6 +399,7 @@ public class ScopeAnalyzer {
 			fIsVisible= true;
 		}
 
+		@Override
 		public boolean acceptBinding(IBinding binding) {
 			if (fFound)
 				return true;
@@ -480,7 +479,7 @@ public class ScopeAnalyzer {
 
 	private IVariableBinding[] getEnumContants(ITypeBinding binding) {
 		IVariableBinding[] declaredFields= binding.getDeclaredFields();
-		ArrayList<IVariableBinding> res= new ArrayList<IVariableBinding>(declaredFields.length);
+		ArrayList<IVariableBinding> res= new ArrayList<>(declaredFields.length);
 		for (int i= 0; i < declaredFields.length; i++) {
 			IVariableBinding curr= declaredFields[i];
 			if (curr.isEnumConstant()) {
@@ -669,9 +668,6 @@ public class ScopeAnalyzer {
 		}
 
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.TypeParameter)
-		 */
 		@Override
 		public boolean visit(TypeParameter node) {
 			if (hasFlag(TYPES, fFlags) && node.getStartPosition() < fPosition) {
@@ -852,7 +848,7 @@ public class ScopeAnalyzer {
 	}
 
 	public Collection<String> getUsedVariableNames(int offset, int length) {
-		HashSet<String> result= new HashSet<String>();
+		HashSet<String> result= new HashSet<>();
 		IBinding[] bindingsBefore= getDeclarationsInScope(offset, VARIABLES);
 		for (int i= 0; i < bindingsBefore.length; i++) {
 			result.add(bindingsBefore[i].getName());

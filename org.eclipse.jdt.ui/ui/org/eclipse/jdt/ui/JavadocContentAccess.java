@@ -159,6 +159,7 @@ public class JavadocContentAccess {
 	 * @throws JavaModelException is thrown when the elements javadoc can not be accessed
 	 * @deprecated As of 3.2, replaced by {@link #getHTMLContentReader(IMember, boolean, boolean)}
 	 */
+	@Deprecated
 	public static Reader getHTMLContentReader(IMember member, boolean allowInherited) throws JavaModelException {
 		return getHTMLContentReader(member, allowInherited, false);
 	}

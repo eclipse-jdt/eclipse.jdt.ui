@@ -44,6 +44,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 	/*
 	 * @see IActionDelegate
 	 */
+	@Override
 	public void run(IAction action) {
 		IFile[] descriptions= getDescriptionFiles(getSelection());
 		MultiStatus mergedStatus;
@@ -78,7 +79,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 	}
 
 	private JarPackageData[] readJarPackages(IFile[] descriptions, MultiStatus readStatus) {
-		List<JarPackageData> jarPackagesList= new ArrayList<JarPackageData>(descriptions.length);
+		List<JarPackageData> jarPackagesList= new ArrayList<>(descriptions.length);
 		for (int i= 0; i < descriptions.length; i++) {
 			JarPackageData jarPackage= readJarPackage(descriptions[i], readStatus);
 			if (jarPackage != null)

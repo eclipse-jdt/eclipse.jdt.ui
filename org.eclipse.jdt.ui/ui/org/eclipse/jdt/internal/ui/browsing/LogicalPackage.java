@@ -33,7 +33,7 @@ public class LogicalPackage extends PlatformObject {
 
 	public LogicalPackage(IPackageFragment fragment){
 		Assert.isNotNull(fragment);
-		fPackages= new HashSet<IPackageFragment>();
+		fPackages= new HashSet<>();
 		fJavaProject= fragment.getJavaProject();
 		Assert.isNotNull(fJavaProject);
 		add(fragment);
@@ -127,9 +127,6 @@ public class LogicalPackage extends PlatformObject {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
 	@Override
 	public int hashCode() {
 		IPackageFragment[] fragments= getFragments();

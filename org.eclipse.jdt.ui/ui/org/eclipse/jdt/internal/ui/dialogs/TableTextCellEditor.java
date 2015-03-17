@@ -144,7 +144,8 @@ public class TableTextCellEditor extends CellEditor {
 	private ModifyListener getModifyListener() {
 	    if (fModifyListener == null) {
 	        fModifyListener = new ModifyListener() {
-	            public void modifyText(ModifyEvent e) {
+	            @Override
+				public void modifyText(ModifyEvent e) {
 	                editOccured(e);
 	            }
 	        };
@@ -152,9 +153,6 @@ public class TableTextCellEditor extends CellEditor {
 	    return fModifyListener;
 	}
 
-    /* (non-Javadoc)
-     * Method declared on CellEditor.
-     */
     @Override
 	protected Control createControl(Composite parent) {
         text= new Text(parent, getStyle());
@@ -227,7 +225,8 @@ public class TableTextCellEditor extends CellEditor {
             }
         });
         text.addTraverseListener(new TraverseListener() {
-            public void keyTraversed(TraverseEvent e) {
+            @Override
+			public void keyTraversed(TraverseEvent e) {
                 if (e.detail == SWT.TRAVERSE_ESCAPE
                         || e.detail == SWT.TRAVERSE_RETURN) {
                     e.doit = false;
@@ -249,6 +248,7 @@ public class TableTextCellEditor extends CellEditor {
             @Override
 			public void focusLost(FocusEvent e) {
             	e.display.asyncExec(new Runnable() {
+					@Override
 					public void run() {
 						if (text.isDisposed())
 							return;

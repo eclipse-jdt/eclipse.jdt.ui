@@ -151,9 +151,6 @@ public abstract class OptionsConfigurationBlock {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
 		@Override
 		public String toString() {
 			return fQualifier + '/' + fKey;
@@ -173,7 +170,7 @@ public abstract class OptionsConfigurationBlock {
 
 		private LocalKey(String key) {
 			super("local", key); //$NON-NLS-1$
-			fValues= new HashMap<IScopeContext, String>();
+			fValues= new HashMap<>();
 		}
 
 		@Override
@@ -362,7 +359,7 @@ public abstract class OptionsConfigurationBlock {
 
 		public PreferenceTreeNode addChild(String label, Key key, int controlType, boolean showAllChildren) {
 			if (fChildren == null) {
-				fChildren= new ArrayList<PreferenceTreeNode>();
+				fChildren= new ArrayList<>();
 			}
 			PreferenceTreeNode n= new PreferenceTreeNode(label, key, controlType, showAllChildren);
 			fChildren.add(n);
@@ -450,6 +447,7 @@ public abstract class OptionsConfigurationBlock {
 			fRefreshJob= doCreateRefreshJob();
 			fRefreshJob.setSystem(true);
 			fParentComposite.addDisposeListener(new DisposeListener() {
+				@Override
 				public void widgetDisposed(DisposeEvent e) {
 					fRefreshJob.cancel();
 				}
@@ -476,6 +474,7 @@ public abstract class OptionsConfigurationBlock {
 			filterBox.addModifyListener(new ModifyListener() {
 				private String fPrevFilterText;
 
+				@Override
 				public void modifyText(ModifyEvent e) {
 					String input= filterBox.getText();
 					if (input != null && input.equalsIgnoreCase(fPrevFilterText))
@@ -724,6 +723,7 @@ public abstract class OptionsConfigurationBlock {
 			fColor= color;
 		}
 
+		@Override
 		public void paintControl(PaintEvent e) {
 			if (((GridData) fLabelControl.getLayoutData()).exclude) {
 				fParent.removePaintListener(this);
@@ -802,7 +802,7 @@ public abstract class OptionsConfigurationBlock {
 		if (fProject == null || hasProjectSpecificOptions(fProject)) {
 			fDisabledProjectSettings= null;
 		} else {
-			fDisabledProjectSettings= new IdentityHashMap<Key, String>();
+			fDisabledProjectSettings= new IdentityHashMap<>();
 			for (int i= 0; i < allKeys.length; i++) {
 				Key curr= allKeys[i];
 				fDisabledProjectSettings.put(curr, curr.getStoredValue(fLookupOrder, false, fManager));
@@ -811,12 +811,12 @@ public abstract class OptionsConfigurationBlock {
 
 		settingsUpdated();
 
-		fCheckBoxes= new ArrayList<Button>();
-		fComboBoxes= new ArrayList<Combo>();
-		fTextBoxes= new ArrayList<Text>(2);
-		fLinks= new ArrayList<Link>(2);
-		fLabels= new HashMap<Control, Label>();
-		fExpandableComposites= new ArrayList<ExpandableComposite>();
+		fCheckBoxes= new ArrayList<>();
+		fComboBoxes= new ArrayList<>();
+		fTextBoxes= new ArrayList<>(2);
+		fLinks= new ArrayList<>(2);
+		fLabels= new HashMap<>();
+		fExpandableComposites= new ArrayList<>();
 
 		fRebuildCount= getRebuildCount();
 	}
@@ -1013,6 +1013,7 @@ public abstract class OptionsConfigurationBlock {
 			}
 		});
 		link.addTraverseListener(new TraverseListener() {
+			@Override
 			public void keyTraversed(TraverseEvent e) {
 				if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit == true) {
 					e.detail= SWT.TRAVERSE_NONE;
@@ -1060,9 +1061,11 @@ public abstract class OptionsConfigurationBlock {
 
 	private void addHighlight(final Composite parent, final Label labelControl, final Combo comboBox) {
 		comboBox.addFocusListener(new FocusListener() {
+			@Override
 			public void focusLost(FocusEvent e) {
 				highlight(parent, labelControl, comboBox, HIGHLIGHT_NONE);
 			}
+			@Override
 			public void focusGained(FocusEvent e) {
 				highlight(parent, labelControl, comboBox, HIGHLIGHT_FOCUS);
 			}
@@ -1088,17 +1091,21 @@ public abstract class OptionsConfigurationBlock {
 				if (! comboBox.isFocusControl())
 					highlight(parent, labelControl, comboBox, HIGHLIGHT_NONE);
 			}
+			@Override
 			public void mouseMove(MouseEvent e) {
 				int color= comboBox.isEnabled() ? comboBox.isFocusControl() ? HIGHLIGHT_FOCUS : isAroundLabel(e) ? HIGHLIGHT_MOUSE : HIGHLIGHT_NONE : HIGHLIGHT_NONE;
 				highlight(parent, labelControl, comboBox, color);
 			}
+			@Override
 			public void mouseDown(MouseEvent e) {
 				if (isAroundLabel(e))
 					comboBox.setFocus();
 			}
+			@Override
 			public void mouseDoubleClick(MouseEvent e) {
 				// not used
 			}
+			@Override
 			public void mouseUp(MouseEvent e) {
 				// not used
 			}
@@ -1257,7 +1264,7 @@ public abstract class OptionsConfigurationBlock {
 			link.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					HashMap<Object, Object> data= new HashMap<Object, Object>(1);
+					HashMap<Object, Object> data= new HashMap<>(1);
 					data.put(BuildPathsPropertyPage.DATA_REVEAL_ENTRY, sourceFolderEntry);
 					data.put(BuildPathsPropertyPage.DATA_REVEAL_ATTRIBUTE_KEY, IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS);
 					getPreferenceContainer().openPage(BuildPathsPropertyPage.PROP_ID, data);
@@ -1393,6 +1400,7 @@ public abstract class OptionsConfigurationBlock {
 	protected ModifyListener getTextModifyListener() {
 		if (fTextModifyListener == null) {
 			fTextModifyListener= new ModifyListener() {
+				@Override
 				public void modifyText(ModifyEvent e) {
 					textChanged((Text) e.widget);
 				}
@@ -1587,7 +1595,7 @@ public abstract class OptionsConfigurationBlock {
 				updateControls();
 				validateSettings(null, null, null);
 			} else {
-				fDisabledProjectSettings= new IdentityHashMap<Key, String>();
+				fDisabledProjectSettings= new IdentityHashMap<>();
 				for (int i= 0; i < fAllKeys.length; i++) {
 					Key curr= fAllKeys[i];
 					String oldSetting= curr.getStoredValue(fLookupOrder, false, fManager);
@@ -1615,7 +1623,7 @@ public abstract class OptionsConfigurationBlock {
 		IScopeContext currContext= fLookupOrder[0];
 
 
-		List<Key> changedOptions= new ArrayList<Key>();
+		List<Key> changedOptions= new ArrayList<>();
 		boolean needsBuild= getChanges(currContext, changedOptions);
 		if (changedOptions.isEmpty()) {
 			return true;

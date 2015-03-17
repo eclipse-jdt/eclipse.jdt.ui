@@ -119,7 +119,7 @@ public class ParameterGuesser {
 	 */
 	public ParameterGuesser(IJavaElement enclosingElement) {
 		fEnclosingElement= enclosingElement;
-		fAlreadyMatchedNames= new HashSet<String>();
+		fAlreadyMatchedNames= new HashSet<>();
 	}
 
 	private List<Variable> evaluateVisibleMatches(String expectedType, IJavaElement[] suggestions) throws JavaModelException {
@@ -128,7 +128,7 @@ public class ParameterGuesser {
 			currentType= (IType) fEnclosingElement.getAncestor(IJavaElement.TYPE);
 		}
 
-		ArrayList<Variable> res= new ArrayList<Variable>();
+		ArrayList<Variable> res= new ArrayList<>();
 		for (int i= 0; i < suggestions.length; i++) {
 			Variable variable= createVariable(suggestions[i], currentType, expectedType, i);
 			if (variable != null) {
@@ -339,6 +339,7 @@ public class ParameterGuesser {
 		MatchComparator(String paramName) {
 			fParamName= paramName;
 		}
+		@Override
 		public int compare(Variable one, Variable two) {
 			return score(two) - score(one);
 		}

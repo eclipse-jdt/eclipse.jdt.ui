@@ -148,7 +148,7 @@ public class JavaSpellingProblem extends SpellingProblem {
 								.getLocale()) };
 			else {
 
-				proposals= new ArrayList<RankedWordProposal>(checker.getProposals(arguments[0],
+				proposals= new ArrayList<>(checker.getProposals(arguments[0],
 						sentence));
 				size= proposals.size();
 

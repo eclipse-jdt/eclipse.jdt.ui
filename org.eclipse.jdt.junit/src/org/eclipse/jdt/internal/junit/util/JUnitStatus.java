@@ -58,6 +58,7 @@ public class JUnitStatus implements IStatus {
 	 * Returns if the status' severity is OK.
 	 * @return returns if the status' severity is OK.
 	 */
+	@Override
 	public boolean isOK() {
 		return fSeverity == IStatus.OK;
 	}
@@ -89,6 +90,7 @@ public class JUnitStatus implements IStatus {
 	/**
 	 * @see IStatus#getMessage()
 	 */
+	@Override
 	public String getMessage() {
 		return fStatusMessage;
 	}
@@ -134,6 +136,7 @@ public class JUnitStatus implements IStatus {
 	/*
 	 * @see IStatus#matches(int)
 	 */
+	@Override
 	public boolean matches(int severityMask) {
 		return (fSeverity & severityMask) != 0;
 	}
@@ -142,6 +145,7 @@ public class JUnitStatus implements IStatus {
 	 * Returns always <code>false</code>.
 	 * @see IStatus#isMultiStatus()
 	 */
+	@Override
 	public boolean isMultiStatus() {
 		return false;
 	}
@@ -149,6 +153,7 @@ public class JUnitStatus implements IStatus {
 	/*
 	 * @see IStatus#getSeverity()
 	 */
+	@Override
 	public int getSeverity() {
 		return fSeverity;
 	}
@@ -156,6 +161,7 @@ public class JUnitStatus implements IStatus {
 	/*
 	 * @see IStatus#getPlugin()
 	 */
+	@Override
 	public String getPlugin() {
 		return JUnitPlugin.PLUGIN_ID;
 	}
@@ -164,6 +170,7 @@ public class JUnitStatus implements IStatus {
 	 * Returns always <code>null</code>.
 	 * @see IStatus#getException()
 	 */
+	@Override
 	public Throwable getException() {
 		return null;
 	}
@@ -172,6 +179,7 @@ public class JUnitStatus implements IStatus {
 	 * Returns always the error severity.
 	 * @see IStatus#getCode()
 	 */
+	@Override
 	public int getCode() {
 		return fSeverity;
 	}
@@ -180,6 +188,7 @@ public class JUnitStatus implements IStatus {
 	 * Returns always <code>null</code>.
 	 * @see IStatus#getChildren()
 	 */
+	@Override
 	public IStatus[] getChildren() {
 		return new IStatus[0];
 	}

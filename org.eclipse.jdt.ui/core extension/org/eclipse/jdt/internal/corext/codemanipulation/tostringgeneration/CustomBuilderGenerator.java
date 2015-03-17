@@ -118,7 +118,7 @@ public class CustomBuilderGenerator extends AbstractToStringGenerator {
 	 * 
 	 * value: {@link AppendMethodInformation} - information about corresponding method
 	 */
-	private HashMap<String, AppendMethodInformation> appendMethodSpecificTypes= new HashMap<String, AppendMethodInformation>();
+	private HashMap<String, AppendMethodInformation> appendMethodSpecificTypes= new HashMap<>();
 
 	@Override
 	public RefactoringStatus checkConditions() {

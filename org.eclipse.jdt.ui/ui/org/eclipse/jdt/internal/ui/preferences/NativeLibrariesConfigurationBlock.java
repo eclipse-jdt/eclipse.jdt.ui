@@ -61,6 +61,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 public class NativeLibrariesConfigurationBlock {
 
 	private class NativeLibrariesAdapter implements IDialogFieldListener {
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			doFieldChanged(field);
 		}

@@ -24,6 +24,7 @@ public class JavaTaskListAdapter implements ITaskListResourceAdapter {
 	/*
 	 * @see ITaskListResourceAdapter#getAffectedResource(IAdaptable)
 	 */
+	@Override
 	public IResource getAffectedResource(IAdaptable element) {
 		IJavaElement java = (IJavaElement) element;
 		IResource resource= java.getResource();

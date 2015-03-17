@@ -70,6 +70,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public final void apply(final IDocument document) {
 
 		final ISpellCheckEngine engine= SpellCheckEngine.getInstance();
@@ -134,6 +135,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
+	@Override
 	public String getAdditionalProposalInfo() {
 		return Messages.format(JavaUIMessages.Spelling_add_info, new String[] { WordCorrectionProposal.getHtmlRepresentation(fWord)});
 	}
@@ -141,6 +143,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
 	 */
+	@Override
 	public final IContextInformation getContextInformation() {
 		return null;
 	}
@@ -148,6 +151,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 	 */
+	@Override
 	public String getDisplayString() {
 		return Messages.format(JavaUIMessages.Spelling_add_label, new String[] { fWord });
 	}
@@ -155,6 +159,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
 	 */
+	@Override
 	public Image getImage() {
 		return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 	}
@@ -162,6 +167,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
 	 */
+	@Override
 	public int getRelevance() {
 		return IProposalRelevance.ADD_WORD;
 	}
@@ -169,6 +175,7 @@ public class AddWordProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public final Point getSelection(final IDocument document) {
 		return new Point(fContext.getOffset(), fContext.getLength());
 	}

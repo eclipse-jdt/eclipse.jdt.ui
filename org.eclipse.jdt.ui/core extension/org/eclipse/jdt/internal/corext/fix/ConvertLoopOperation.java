@@ -75,7 +75,7 @@ public abstract class ConvertLoopOperation extends CompilationUnitRewriteOperati
 	}
 
 	protected String[] getUsedVariableNames() {
-		final List<String> results= new ArrayList<String>();
+		final List<String> results= new ArrayList<>();
 
 		ForStatement forStatement= getForStatement();
 		CompilationUnit root= (CompilationUnit)forStatement.getRoot();

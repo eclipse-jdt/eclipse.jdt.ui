@@ -137,12 +137,14 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		/*
 		 * @see IContentProvider#dispose()
 		 */
+		@Override
 		public void dispose() {
 		}
 
 		/*
 		 * @see ITreeContentProvider#getChildren(Object)
 		 */
+		@Override
 		public Object[] getChildren(Object parentElement) {
 			return EMPTY;
 		}
@@ -150,6 +152,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		/*
 		 * @see IStructuredContentProvider#getElements(Object)
 		 */
+		@Override
 		public Object[] getElements(Object inputElement) {
 			return fMethodsList;
 		}
@@ -157,6 +160,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		/*
 		 * @see ITreeContentProvider#getParent(Object)
 		 */
+		@Override
 		public Object getParent(Object element) {
 			return null;
 		}
@@ -164,6 +168,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		/*
 		 * @see ITreeContentProvider#hasChildren(Object)
 		 */
+		@Override
 		public boolean hasChildren(Object element) {
 			return getChildren(element).length > 0;
 		}
@@ -171,6 +176,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		/*
 		 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 		 */
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 
@@ -315,10 +321,12 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 
 			omitSuperButton.addSelectionListener(new SelectionListener() {
 
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					widgetSelected(e);
 				}
 
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					boolean isSelected= (((Button) e.widget).getSelection());
 					setOmitSuper(isSelected);
@@ -368,6 +376,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			return count;
 		}
 
+		@Override
 		public IStatus validate(Object[] selection) {
 			int count= countSelectedMethods(selection);
 			if (count == 0)
@@ -448,9 +457,6 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		Shell shell= getShell();
@@ -476,9 +482,6 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		}
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(fEditor))
@@ -536,7 +539,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 				return;
 			}
 
-			ArrayList<IMethodBinding> result= new ArrayList<IMethodBinding>();
+			ArrayList<IMethodBinding> result= new ArrayList<>();
 			for (int i= 0; i < elements.length; i++) {
 				Object elem= elements[i];
 				if (elem instanceof IMethodBinding) {
@@ -603,9 +606,6 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 
 	// ---- Structured Viewer -----------------------------------------------------------
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
@@ -620,9 +620,6 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 
 	// ---- Java Editor --------------------------------------------------------------
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}

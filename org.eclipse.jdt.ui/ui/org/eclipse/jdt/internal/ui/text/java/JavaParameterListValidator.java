@@ -49,6 +49,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 	 * @see IContextInformationValidator#install(IContextInformation, ITextViewer, int)
 	 * @see IContextInformationPresenter#install(IContextInformation, ITextViewer, int)
 	 */
+	@Override
 	public void install(IContextInformation info, ITextViewer viewer, int documentPosition) {
 		fPosition= documentPosition;
 		fViewer= viewer;
@@ -235,6 +236,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 	/**
 	 * @see IContextInformationValidator#isContextInformationValid(int)
 	 */
+	@Override
 	public boolean isContextInformationValid(int position) {
 
 		try {
@@ -257,6 +259,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 	/**
 	 * @see IContextInformationPresenter#updatePresentation(int, TextPresentation)
 	 */
+	@Override
 	public boolean updatePresentation(int position, TextPresentation presentation) {
 
 		int currentParameter= -1;
@@ -301,7 +304,7 @@ public class JavaParameterListValidator implements IContextInformationValidator,
 		final int length= code.length();
 	    int pos= 0;
 	    int angleLevel= 0;
-		List<Integer> positions= new ArrayList<Integer>();
+		List<Integer> positions= new ArrayList<>();
 		positions.add(new Integer(-1));
 		while (pos < length && pos != -1) {
 			char ch= code.charAt(pos);

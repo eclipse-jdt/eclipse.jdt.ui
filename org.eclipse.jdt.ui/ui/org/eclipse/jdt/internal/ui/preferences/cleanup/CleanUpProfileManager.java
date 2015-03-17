@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 public class CleanUpProfileManager extends ProfileManager {
 
 	public static KeySet[] KEY_SETS= {
-		new KeySet(JavaUI.ID_PLUGIN, new ArrayList<String>(JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getKeys()))
+		new KeySet(JavaUI.ID_PLUGIN, new ArrayList<>(JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS).getKeys()))
 	};
 
 	private final PreferencesAccess fPreferencesAccess;
@@ -38,17 +38,11 @@ public class CleanUpProfileManager extends ProfileManager {
 		fPreferencesAccess= preferencesAccess;
     }
 
-	/* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.preferences.cleanup.ProfileManager#getDefaultProfile()
-     */
     @Override
 	public Profile getDefaultProfile() {
     	return getProfile(CleanUpConstants.DEFAULT_PROFILE);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
 	protected void updateProfilesWithName(String oldName, Profile newProfile, boolean applySettings) {
         super.updateProfilesWithName(oldName, newProfile, applySettings);

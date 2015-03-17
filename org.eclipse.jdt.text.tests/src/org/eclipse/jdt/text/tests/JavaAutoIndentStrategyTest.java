@@ -419,6 +419,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		JavaPlugin.getDefault().getLog().addLogListener(this);
@@ -427,6 +428,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		JavaPlugin.getDefault().getLog().removeLogListener(this);
@@ -435,6 +437,7 @@ public class JavaAutoIndentStrategyTest extends TestCase implements ILogListener
 	/*
 	 * @see org.eclipse.core.runtime.ILogListener#logging(org.eclipse.core.runtime.IStatus, java.lang.String)
 	 */
+	@Override
 	public void logging(IStatus status, String plugin) {
 		fail();
 	}

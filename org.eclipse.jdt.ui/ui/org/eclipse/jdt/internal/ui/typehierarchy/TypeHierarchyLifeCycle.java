@@ -97,7 +97,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		fHierarchy= null;
 		fInputElements= null;
 		fIsSuperTypesOnly= isSuperTypesOnly;
-		fChangeListeners= new ArrayList<ITypeHierarchyLifeCycleListener>(2);
+		fChangeListeners= new ArrayList<>(2);
 	}
 
 	public ITypeHierarchy getHierarchy() {
@@ -197,6 +197,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		if (hierachyCreationNeeded || fHierarchyRefreshNeeded) {
 			if (fTypeHierarchyViewPart == null) {
 				IRunnableWithProgress op= new IRunnableWithProgress() {
+					@Override
 					public void run(IProgressMonitor pm) throws InvocationTargetException, InterruptedException {
 						try {
 							doHierarchyRefresh(elements, pm);
@@ -274,6 +275,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				/*
 				 * @see java.lang.Runnable#run()
 				 */
+				@Override
 				public void run() {
 					synchronized (TypeHierarchyLifeCycle.this) {
 						if (fRefreshHierarchyJob == null) {
@@ -345,6 +347,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	/*
 	 * @see ITypeHierarchyChangedListener#typeHierarchyChanged
 	 */
+	@Override
 	public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
 	 	fHierarchyRefreshNeeded= true;
  		fireChange(null);
@@ -353,6 +356,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	/*
 	 * @see IElementChangedListener#elementChanged(ElementChangedEvent)
 	 */
+	@Override
 	public void elementChanged(ElementChangedEvent event) {
 		if (fChangeListeners.isEmpty()) {
 			return;
@@ -361,7 +365,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		if (fHierarchyRefreshNeeded) {
 			return;
 		} else {
-			ArrayList<IType> changedTypes= new ArrayList<IType>();
+			ArrayList<IType> changedTypes= new ArrayList<>();
 			processDelta(event.getDelta(), changedTypes);
 			if (changedTypes.size() > 0) {
 				fireChange(changedTypes.toArray(new IType[changedTypes.size()]));

@@ -23,41 +23,53 @@ public abstract class EditorTracker implements IWindowListener, IPageListener, I
 
 	//--- Window listener
 
+	@Override
 	public void windowActivated(IWorkbenchWindow window) {
 	}
+	@Override
 	public void windowDeactivated(IWorkbenchWindow window) {
 	}
+	@Override
 	public void windowClosed(IWorkbenchWindow window) {
 		window.removePageListener(this);
 	}
+	@Override
 	public void windowOpened(IWorkbenchWindow window) {
 		window.addPageListener(this);
 	}
 
 	//---- IPageListener
 
+	@Override
 	public void pageActivated(IWorkbenchPage page) {
 	}
+	@Override
 	public void pageClosed(IWorkbenchPage page) {
 		page.removePartListener(this);
 	}
+	@Override
 	public void pageOpened(IWorkbenchPage page) {
 		page.addPartListener(this);
 	}
 
 	//---- Part Listener
 
+	@Override
 	public void partActivated(IWorkbenchPart part) {
 	}
+	@Override
 	public void partBroughtToTop(IWorkbenchPart part) {
 	}
+	@Override
 	public void partClosed(IWorkbenchPart part) {
 		if (part instanceof IEditorPart) {
 			editorClosed((IEditorPart)part);
 		}
 	}
+	@Override
 	public void partDeactivated(IWorkbenchPart part) {
 	}
+	@Override
 	public void partOpened(IWorkbenchPart part) {
 		if (part instanceof IEditorPart) {
 			editorOpened((IEditorPart)part);

@@ -70,7 +70,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 	 */
 	public void addLabelDecorator(ILabelDecorator decorator) {
 		if (fLabelDecorators == null) {
-			fLabelDecorators= new ArrayList<ILabelDecorator>(2);
+			fLabelDecorators= new ArrayList<>(2);
 		}
 		fLabelDecorators.add(decorator);
 	}
@@ -137,9 +137,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 		return image;
 	}
 
-	/* (non-Javadoc)
-	 * @see ILabelProvider#getImage
-	 */
+	@Override
 	public Image getImage(Object element) {
 		Image result= fImageLabelProvider.getImageLabel(element, evaluateImageFlags(element));
 		if (result == null && (element instanceof IStorage)) {
@@ -163,9 +161,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 	}
 
 
-	/* (non-Javadoc)
-	 * @see ILabelProvider#getText
-	 */
+	@Override
 	public String getText(Object element) {
 		String result= JavaElementLabels.getTextLabel(element, evaluateTextFlags(element));
 		if (result.length() == 0 && (element instanceof IStorage)) {
@@ -174,6 +170,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 		return decorateText(result, element);
 	}
 
+	@Override
 	public StyledString getStyledText(Object element) {
 		StyledString string= JavaElementLabels.getStyledTextLabel(element, (evaluateTextFlags(element) | JavaElementLabels.COLORIZE));
 		if (string.length() == 0 && (element instanceof IStorage)) {
@@ -186,9 +183,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 		return string;
 	}
 
-	/* (non-Javadoc)
-	 * @see IBaseLabelProvider#dispose
-	 */
+	@Override
 	public void dispose() {
 		if (fLabelDecorators != null) {
 			for (int i= 0; i < fLabelDecorators.size(); i++) {
@@ -201,9 +196,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 		fImageLabelProvider.dispose();
 	}
 
-	/* (non-Javadoc)
-	 * @see IBaseLabelProvider#addListener(ILabelProviderListener)
-	 */
+	@Override
 	public void addListener(ILabelProviderListener listener) {
 		if (fLabelDecorators != null) {
 			for (int i= 0; i < fLabelDecorators.size(); i++) {
@@ -214,16 +207,12 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 		fListeners.add(listener);
 	}
 
-	/* (non-Javadoc)
-	 * @see IBaseLabelProvider#isLabelProperty(Object, String)
-	 */
+	@Override
 	public boolean isLabelProperty(Object element, String property) {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see IBaseLabelProvider#removeListener(ILabelProviderListener)
-	 */
+	@Override
 	public void removeListener(ILabelProviderListener listener) {
 		if (fLabelDecorators != null) {
 			for (int i= 0; i < fLabelDecorators.size(); i++) {
@@ -248,16 +237,12 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
-	 */
+	@Override
 	public Color getForeground(Object element) {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
-	 */
+	@Override
 	public Color getBackground(Object element) {
 		return null;
 	}
@@ -275,7 +260,8 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
         for (int i = 0; i < listeners.length; ++i) {
             final ILabelProviderListener l = (ILabelProviderListener) listeners[i];
             SafeRunner.run(new SafeRunnable() {
-                public void run() {
+                @Override
+				public void run() {
                     l.labelProviderChanged(event);
                 }
             });

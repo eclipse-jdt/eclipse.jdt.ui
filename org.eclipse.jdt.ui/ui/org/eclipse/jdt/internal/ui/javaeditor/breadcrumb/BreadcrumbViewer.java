@@ -95,13 +95,14 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	 * @param style the style flag used for this viewer
 	 */
 	public BreadcrumbViewer(Composite parent, int style) {
-		fBreadcrumbItems= new ArrayList<BreadcrumbItem>();
+		fBreadcrumbItems= new ArrayList<>();
 		fMenuListeners= new ListenerList();
 
 		fContainer= new Composite(parent, SWT.NONE);
 		GridData layoutData= new GridData(SWT.FILL, SWT.TOP, true, false);
 		fContainer.setLayoutData(layoutData);
 		fContainer.addTraverseListener(new TraverseListener() {
+			@Override
 			public void keyTraversed(TraverseEvent e) {
 				e.doit= true;
 			}
@@ -109,6 +110,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		fContainer.setBackgroundMode(SWT.INHERIT_DEFAULT);
 
 		fContainer.addListener(SWT.Resize, new Listener() {
+			@Override
 			public void handleEvent(Event event) {
 				int height= fContainer.getClientArea().height;
 
@@ -138,6 +140,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		fContainer.setLayout(gridLayout);
 
 		fContainer.addListener(SWT.Resize, new Listener() {
+			@Override
 			public void handleEvent(Event event) {
 				refresh();
 			}
@@ -404,7 +407,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		if (fSelectedItem.getData() == null)
 			return Collections.EMPTY_LIST;
 
-		ArrayList<Object> result= new ArrayList<Object>();
+		ArrayList<Object> result= new ArrayList<>();
 		result.add(fSelectedItem.getData());
 		return result;
 	}

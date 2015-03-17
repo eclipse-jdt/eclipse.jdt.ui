@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,8 +82,10 @@ public class JUnitCorePlugin extends Plugin {
 
 	/**
 	 * List storing the registered test run listeners
+	 * @deprecated to avoid deprecation warnings
 	 */
-	private List/*<ITestRunListener>*/ fLegacyTestRunListeners;
+	@Deprecated
+	private List<org.eclipse.jdt.junit.ITestRunListener> fLegacyTestRunListeners;
 
 	/**
 	 * List storing the registered test run listeners
@@ -119,6 +121,7 @@ public class JUnitCorePlugin extends Plugin {
 	/**
 	 * @see Plugin#start(BundleContext)
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		fBundleContext= context;
@@ -128,6 +131,7 @@ public class JUnitCorePlugin extends Plugin {
 	/**
 	 * @see Plugin#stop(BundleContext)
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		fIsStopped= true;
 		try {
@@ -147,7 +151,7 @@ public class JUnitCorePlugin extends Plugin {
 	 * @since 3.5
 	 */
 	public Object getService(String serviceName) {
-		ServiceReference reference= fBundleContext.getServiceReference(serviceName);
+		ServiceReference<?> reference= fBundleContext.getServiceReference(serviceName);
 		if (reference == null)
 			return null;
 		return fBundleContext.getService(reference);
@@ -161,11 +165,12 @@ public class JUnitCorePlugin extends Plugin {
 	 * Initializes TestRun Listener extensions
 	 * @deprecated to avoid deprecation warning
 	 */
+	@Deprecated
 	private synchronized void loadTestRunListeners() {
 		if (fLegacyTestRunListeners != null)
 			return;
 
-		fLegacyTestRunListeners= new ArrayList();
+		fLegacyTestRunListeners= new ArrayList<>();
 		IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_LISTENERS);
 		if (extensionPoint == null) {
 			return;
@@ -179,7 +184,7 @@ public class JUnitCorePlugin extends Plugin {
 				if (testRunListener instanceof TestRunListener) {
 					fNewTestRunListeners.add(testRunListener);
 				} else if (testRunListener instanceof org.eclipse.jdt.junit.ITestRunListener) {
-					fLegacyTestRunListeners.add(testRunListener);
+					fLegacyTestRunListeners.add((org.eclipse.jdt.junit.ITestRunListener) testRunListener);
 				}
 			} catch (CoreException e) {
 				status.add(e.getStatus());
@@ -194,9 +199,10 @@ public class JUnitCorePlugin extends Plugin {
 	 * @return an array of all TestRun listeners
 	 * @deprecated to avoid deprecation warnings
 	 */
+	@Deprecated
 	public org.eclipse.jdt.junit.ITestRunListener[] getTestRunListeners() {
 		loadTestRunListeners();
-		return (org.eclipse.jdt.junit.ITestRunListener[]) fLegacyTestRunListeners.toArray(new org.eclipse.jdt.junit.ITestRunListener[fLegacyTestRunListeners.size()]);
+		return fLegacyTestRunListeners.toArray(new org.eclipse.jdt.junit.ITestRunListener[fLegacyTestRunListeners.size()]);
 	}
 
 	/**
@@ -227,7 +233,7 @@ public class JUnitCorePlugin extends Plugin {
 			return bundles;
 
 		// Accessing unresolved bundle
-		ServiceReference serviceRef= fBundleContext.getServiceReference(PackageAdmin.class.getName());
+		ServiceReference<?> serviceRef= fBundleContext.getServiceReference(PackageAdmin.class.getName());
 		PackageAdmin admin= (PackageAdmin)fBundleContext.getService(serviceRef);
 		bundles= admin.getBundles(bundleName, version);
 		if (bundles != null && bundles.length > 0)
@@ -240,11 +246,12 @@ public class JUnitCorePlugin extends Plugin {
 	 * @param newListener the listener to add
 	 * @deprecated to avoid deprecation warnings
 	 */
+	@Deprecated
 	public void addTestRunListener(org.eclipse.jdt.junit.ITestRunListener newListener) {
 		loadTestRunListeners();
 
-		for (Iterator iter= fLegacyTestRunListeners.iterator(); iter.hasNext();) {
-			Object o= iter.next();
+		for (Iterator<org.eclipse.jdt.junit.ITestRunListener> iter= fLegacyTestRunListeners.iterator(); iter.hasNext();) {
+			org.eclipse.jdt.junit.ITestRunListener o= iter.next();
 			if (o == newListener)
 				return;
 		}
@@ -256,6 +263,7 @@ public class JUnitCorePlugin extends Plugin {
 	 * @param newListener the listener to remove
 	 * @deprecated to avoid deprecation warnings
 	 */
+	@Deprecated
 	public void removeTestRunListener(org.eclipse.jdt.junit.ITestRunListener newListener) {
 		if (fLegacyTestRunListeners != null)
 			fLegacyTestRunListeners.remove(newListener);

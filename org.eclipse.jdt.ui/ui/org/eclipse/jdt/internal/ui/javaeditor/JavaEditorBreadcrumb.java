@@ -115,6 +115,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.viewsupport.ResourceToItemsMapper.IContentViewerAccessor#doUpdateItem(org.eclipse.swt.widgets.Widget)
 		 */
+		@Override
 		public void doUpdateItem(Widget item) {
 			doUpdateItem(item, item.getData(), true);
 		}
@@ -164,7 +165,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 			Object[] changed= event.getElements();
 			if (changed != null && !fResourceToItemsMapper.isEmpty()) {
-				ArrayList<Object> others= new ArrayList<Object>(changed.length);
+				ArrayList<Object> others= new ArrayList<>(changed.length);
 				for (int i= 0; i < changed.length; i++) {
 					Object curr= changed[i];
 					if (curr instanceof IResource) {
@@ -240,6 +241,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		/*
 		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 		 */
+		@Override
 		public Object[] getElements(Object inputElement) {
 			return getChildren(inputElement);
 		}
@@ -247,6 +249,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		/*
 		 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
 		 */
+		@Override
 		public Object[] getChildren(Object inputElement) {
 			if (inputElement == fLastInputElement)
 				return fElements;
@@ -268,7 +271,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			} else if (inputElement instanceof IPackageFragmentRoot) {
 				Object[] fragments= fParent.getChildren(inputElement);
 
-				ArrayList<Object> packages= new ArrayList<Object>();
+				ArrayList<Object> packages= new ArrayList<>();
 				for (int i= 0; i < fragments.length; i++) {
 					Object object= fragments[i];
 					if (object instanceof IPackageFragment) {
@@ -308,7 +311,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 			} catch (JavaModelException e) {
 				return fParent.getChildren(model);
 			}
-			ArrayList<IAdaptable> result= new ArrayList<IAdaptable>(javaProjects.length + nonJavaResources.length);
+			ArrayList<IAdaptable> result= new ArrayList<>(javaProjects.length + nonJavaResources.length);
 			for (int i= 0; i < nonJavaResources.length; i++) {
 				IProject project= (IProject)nonJavaResources[i];
 				if (project.isAccessible())
@@ -325,6 +328,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		/*
 		 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
 		 */
+		@Override
 		public Object getParent(Object element) {
 			if (element instanceof IType && ((IType) element).isBinary()) {
 				IType declaringType= ((IType) element).getDeclaringType();
@@ -350,6 +354,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		/*
 		 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
 		 */
+		@Override
 		public boolean hasChildren(Object element) {
 			if (element instanceof IProject) {
 				IProject project= (IProject) element;
@@ -368,7 +373,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		}
 
 		private Object[] getPackageContent(IPackageFragment pack) {
-			ArrayList<Object> result= new ArrayList<Object>();
+			ArrayList<Object> result= new ArrayList<>();
 			try {
 				ICompilationUnit[] units= pack.getCompilationUnits();
 				for (int i= 0; i < units.length; i++) {
@@ -413,6 +418,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		/*
 		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 		 */
+		@Override
 		public void dispose() {
 			fParent.dispose();
 		}
@@ -420,6 +426,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		/*
 		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 		 */
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			fElements= null;
 			fLastInputElement= null;
@@ -435,6 +442,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 		 * @seeorg.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.
 		 * ElementChangedEvent)
 		 */
+		@Override
 		public void elementChanged(ElementChangedEvent event) {
 			if (fViewer == null)
 				return;
@@ -451,6 +459,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				return;
 
 			fRunnable= new Runnable() {
+				@Override
 				public void run() {
 					if (fViewer == null)
 						return;
@@ -580,6 +589,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 
 		fViewer.setContentProvider(createContentProvider());
 		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				fBreadcrumbActionGroup.setContext(new ActionContext(fViewer.getSelection()));
 			}
@@ -625,7 +635,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				if (!project.getProject().isOpen())
 					return NO_CHILDREN;
 
-				List<Object> result= new ArrayList<Object>();
+				List<Object> result= new ArrayList<>();
 
 				IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 				for (int i= 0; i < roots.length; i++) {

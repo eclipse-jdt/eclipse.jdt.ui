@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class NLSSourceModifierTest extends TestCase {
 
-	private static final Class THIS= NLSSourceModifierTest.class;
+	private static final Class<NLSSourceModifierTest> THIS= NLSSourceModifierTest.class;
 
     private IJavaProject javaProject;
 
@@ -67,8 +67,9 @@ public class NLSSourceModifierTest extends TestCase {
 		return new ProjectTestSetup(test);
 	}
 
-    protected void setUp() throws Exception {
-    	Hashtable options= TestOptions.getDefaultOptions();
+    @Override
+	protected void setUp() throws Exception {
+    	Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 
@@ -89,7 +90,8 @@ public class NLSSourceModifierTest extends TestCase {
         fSourceFolder = JavaProjectHelper.addSourceContainer(javaProject, "src");
     }
 
-    protected void tearDown() throws Exception {
+    @Override
+	protected void tearDown() throws Exception {
         JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
     }
 

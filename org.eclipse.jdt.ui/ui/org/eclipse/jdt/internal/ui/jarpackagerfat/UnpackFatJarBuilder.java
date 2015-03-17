@@ -36,16 +36,12 @@ public class UnpackFatJarBuilder extends FatJarBuilder {
 
 	public static final String BUILDER_ID= "org.eclipse.jdt.ui.fat_jar_builder"; //$NON-NLS-1$
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getId() {
 		return BUILDER_ID;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public IManifestProvider getManifestProvider() {
 		return new FatJarManifestProvider(this);
 	}
@@ -65,9 +61,7 @@ public class UnpackFatJarBuilder extends FatJarBuilder {
 		return true;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void writeArchive(ZipFile jarFile, IProgressMonitor progressMonitor) {
 		Enumeration<? extends ZipEntry> jarEntriesEnum= jarFile.entries();
 		while (jarEntriesEnum.hasMoreElements()) {

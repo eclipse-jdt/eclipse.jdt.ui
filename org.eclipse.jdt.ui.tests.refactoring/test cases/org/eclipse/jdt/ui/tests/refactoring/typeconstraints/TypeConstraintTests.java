@@ -35,13 +35,14 @@ import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 
 public class TypeConstraintTests extends RefactoringTest {
 
-	private static final Class clazz= TypeConstraintTests.class;
+	private static final Class<TypeConstraintTests> clazz= TypeConstraintTests.class;
 	private static final String PATH= "TypeConstraints/";
 
 	public TypeConstraintTests(String name) {
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return PATH;
 	}
@@ -93,6 +94,7 @@ public class TypeConstraintTests extends RefactoringTest {
 
 	private ConstraintCollector getCollector() {
 		TypeConstraintFactory factory = new TypeConstraintFactory(){
+			@Override
 			public boolean filter(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator o){
 				return false;
 			}
@@ -101,12 +103,12 @@ public class TypeConstraintTests extends RefactoringTest {
 		return collector;
 	}
 
-	private static List allToStrings(Object[] elements) {
+	private static List<String> allToStrings(Object[] elements) {
 		String[] strings= new String[elements.length];
 		for (int i= 0; i < elements.length; i++) {
 			strings[i]= elements[i].toString();
 		}
-		return new ArrayList(Arrays.asList(strings));//want to be able to remove stuff from it
+		return new ArrayList<>(Arrays.asList(strings));//want to be able to remove stuff from it
 	}
 
 	private void testConstraints(String[] constraintStrings) throws Exception{
@@ -115,7 +117,7 @@ public class TypeConstraintTests extends RefactoringTest {
 		cuNode.accept(collector);
 		ITypeConstraint[] constraints= collector.getConstraints();
 
-		List externals= allToStrings(constraints);
+		List<String> externals= allToStrings(constraints);
 		assertEquals("length", constraintStrings.length, constraints.length);
 		for (int i= 0; i < constraintStrings.length; i++) {
 			assertTrue("missing constraint:" + constraintStrings[i], externals.remove(constraintStrings[i]));

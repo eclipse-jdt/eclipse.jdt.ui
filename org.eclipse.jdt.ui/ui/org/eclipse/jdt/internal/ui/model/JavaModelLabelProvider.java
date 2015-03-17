@@ -75,9 +75,6 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 		fRefactoringsLabel= refactorings;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -88,9 +85,6 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Image getImage(final Object element) {
 		if (element instanceof IFolder) {
@@ -114,9 +108,6 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 		return image;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getText(final Object element) {
 		if (element instanceof IFolder) {

@@ -79,9 +79,6 @@ public class FindBreakContinueTargetOccurrencesAction extends SelectionDispatchA
 
 	//---- Text Selection ----------------------------------------------------------------------
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
@@ -100,17 +97,11 @@ public class FindBreakContinueTargetOccurrencesAction extends SelectionDispatchA
 		setEnabled(astRoot != null && new BreakContinueTargetFinder().initialize(astRoot, selection.getOffset(), selection.getLength()) == null);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(false);
 	}
 
-	/* (non-JavaDoc)
-	 * Method declared in SelectionDispatchAction.
-	 */
 	@Override
 	public final void run(ITextSelection ts) {
 		ITypeRoot input= getEditorInput(fEditor);

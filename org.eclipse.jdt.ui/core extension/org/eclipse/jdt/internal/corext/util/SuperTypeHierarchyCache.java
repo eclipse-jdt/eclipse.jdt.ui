@@ -39,6 +39,7 @@ public class SuperTypeHierarchyCache {
 			markAsAccessed();
 		}
 
+		@Override
 		public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
 			removeHierarchyEntryFromCache(this);
 		}
@@ -62,9 +63,6 @@ public class SuperTypeHierarchyCache {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
 		@Override
 		public String toString() {
 			return "Super hierarchy of: " + fTypeHierarchy.getType().getElementName(); //$NON-NLS-1$
@@ -75,8 +73,8 @@ public class SuperTypeHierarchyCache {
 
 	private static final int CACHE_SIZE= 8;
 
-	private static ArrayList<HierarchyCacheEntry> fgHierarchyCache= new ArrayList<HierarchyCacheEntry>(CACHE_SIZE);
-	private static Map<IType, MethodOverrideTester> fgMethodOverrideTesterCache= new LRUMap<IType, MethodOverrideTester>(CACHE_SIZE);
+	private static ArrayList<HierarchyCacheEntry> fgHierarchyCache= new ArrayList<>(CACHE_SIZE);
+	private static Map<IType, MethodOverrideTester> fgMethodOverrideTesterCache= new LRUMap<>(CACHE_SIZE);
 
 	private static int fgCacheHits= 0;
 	private static int fgCacheMisses= 0;
@@ -155,7 +153,7 @@ public class SuperTypeHierarchyCache {
 			if (nEntries >= CACHE_SIZE) {
 				// find obsolete entries or remove entry that was least recently accessed
 				HierarchyCacheEntry oldest= null;
-				ArrayList<HierarchyCacheEntry> obsoleteHierarchies= new ArrayList<HierarchyCacheEntry>(CACHE_SIZE);
+				ArrayList<HierarchyCacheEntry> obsoleteHierarchies= new ArrayList<>(CACHE_SIZE);
 				for (int i= 0; i < nEntries; i++) {
 					HierarchyCacheEntry entry= fgHierarchyCache.get(i);
 					ITypeHierarchy curr= entry.getTypeHierarchy();

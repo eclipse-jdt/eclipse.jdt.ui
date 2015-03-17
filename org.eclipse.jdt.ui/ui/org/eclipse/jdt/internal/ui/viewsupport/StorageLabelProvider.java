@@ -38,7 +38,7 @@ import org.eclipse.jdt.core.IJarEntryResource;
 public class StorageLabelProvider extends LabelProvider {
 
 	private IEditorRegistry fEditorRegistry= null;
-	private Map<String, Image> fJarImageMap= new HashMap<String, Image>(10);
+	private Map<String, Image> fJarImageMap= new HashMap<>(10);
 	private Image fDefaultImage;
 
 	private IEditorRegistry getEditorRegistry() {
@@ -47,9 +47,6 @@ public class StorageLabelProvider extends LabelProvider {
 		return fEditorRegistry;
 	}
 
-	/* (non-Javadoc)
-	 * @see ILabelProvider#getImage
-	 */
 	@Override
 	public Image getImage(Object element) {
 		if (element instanceof IStorage)
@@ -58,9 +55,6 @@ public class StorageLabelProvider extends LabelProvider {
 		return super.getImage(element);
 	}
 
-	/* (non-Javadoc)
-	 * @see ILabelProvider#getText
-	 */
 	@Override
 	public String getText(Object element) {
 		if (element instanceof IStorage) {
@@ -69,10 +63,6 @@ public class StorageLabelProvider extends LabelProvider {
 		return super.getText(element);
 	}
 
-	/* (non-Javadoc)
-	 *
-	 * @see IBaseLabelProvider#dispose
-	 */
 	@Override
 	public void dispose() {
 		if (fJarImageMap != null) {

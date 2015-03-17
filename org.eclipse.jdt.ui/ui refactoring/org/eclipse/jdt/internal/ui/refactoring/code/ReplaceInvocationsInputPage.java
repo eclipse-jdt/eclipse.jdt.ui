@@ -58,6 +58,7 @@ public class ReplaceInvocationsInputPage extends UserInputWizardPage {
 		super(PAGE_NAME);
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 		fRefactoring= (ReplaceInvocationsRefactoring) getRefactoring();
@@ -120,8 +121,10 @@ public class ReplaceInvocationsInputPage extends UserInputWizardPage {
 		bodyControl.setFocus();
 
 		bodyDocument.addDocumentListener(new IDocumentListener() {
+			@Override
 			public void documentAboutToBeChanged(DocumentEvent event) {
 			}
+			@Override
 			public void documentChanged(DocumentEvent event) {
 				try {
 					fRefactoring.setBody(event.getDocument().get(), fRefactoring.getMethod().getParameterNames());

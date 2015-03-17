@@ -81,11 +81,13 @@ public final class JavaUIMessages extends NLS {
 	 * DO NOT REMOVE, used in a product.
 	 * @deprecated As of 3.6
 	 */
+	@Deprecated
 	public static String TypeSelectionDialog_lowerLabel;
 	/**
 	 * DO NOT REMOVE, used in a product.
 	 * @deprecated As of 3.6
 	 */
+	@Deprecated
 	public static String TypeSelectionDialog_upperLabel;
 
 	public static String ExceptionDialog_seeErrorLogMessage;

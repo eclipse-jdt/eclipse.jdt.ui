@@ -54,8 +54,8 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 	private void installTextHovers() {
 
 		// initialize lists - indicates that the initialization happened
-		fTextHoverSpecifications= new ArrayList<JavaEditorTextHoverDescriptor>(2);
-		fInstantiatedTextHovers= new ArrayList<IJavaEditorTextHover>(2);
+		fTextHoverSpecifications= new ArrayList<>(2);
+		fInstantiatedTextHovers= new ArrayList<>(2);
 
 		// populate list
 		JavaEditorTextHoverDescriptor[] hoverDescs= JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
@@ -98,6 +98,7 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 	/*
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */
+	@Override
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 
 		checkTextHovers();

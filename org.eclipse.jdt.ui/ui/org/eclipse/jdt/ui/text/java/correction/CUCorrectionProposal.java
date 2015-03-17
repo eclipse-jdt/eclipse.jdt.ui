@@ -152,9 +152,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		return buf.toString();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
-	 */
 	@Override
 	public void apply(IDocument document) {
 		try {
@@ -236,9 +233,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#createChange()
-	 */
 	@Override
 	protected final Change createChange() throws CoreException {
 		return createTextChange(); // make sure that only text changes are allowed here
@@ -275,9 +269,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		return getTextChange().getPreviewContent(new NullProgressMonitor());
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		try {

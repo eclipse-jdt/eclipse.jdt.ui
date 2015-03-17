@@ -122,9 +122,6 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void decorate(Object element, IDecoration decoration) {
 		try {

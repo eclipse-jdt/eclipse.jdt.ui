@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,15 +13,14 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -36,14 +35,18 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 
 public class QuickFixTest18 extends QuickFixTest {
 
-	private static final Class THIS= QuickFixTest18.class;
+	private static final Class<QuickFixTest18> THIS= QuickFixTest18.class;
 
 	private IJavaProject fJProject1;
 
@@ -63,7 +66,7 @@ public class QuickFixTest18 extends QuickFixTest {
 
 	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE, JavaCore.DO_NOT_INSERT);
@@ -110,7 +113,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -155,7 +158,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("MyString.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 3);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -232,7 +235,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 4);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 4);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -304,7 +307,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack2.createCompilationUnit("Inter.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -389,7 +392,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -448,7 +451,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -495,7 +498,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -543,7 +546,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -589,7 +592,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -649,7 +652,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack2.createCompilationUnit("C1.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 		assertNumberOfProposals(proposals, 9);
 		assertCorrectLabels(proposals);
 
@@ -691,7 +694,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -740,7 +743,7 @@ public class QuickFixTest18 extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 
-		ArrayList proposals= collectCorrections(cu, astRoot, 4, 0);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 4, 0);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
@@ -852,7 +855,7 @@ public class QuickFixTest18 extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 
-		ArrayList proposals= collectCorrections(cu, astRoot, 2, 0);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, 0);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
@@ -879,7 +882,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Inter.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -909,7 +912,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Inter.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -941,7 +944,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -998,7 +1001,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -1052,7 +1055,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("I.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectAllCorrections(cu, astRoot, 3);
+		ArrayList<ICompletionProposal> proposals= collectAllCorrections(cu, astRoot, 3);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
@@ -1093,7 +1096,7 @@ public class QuickFixTest18 extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("AddThrows.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 

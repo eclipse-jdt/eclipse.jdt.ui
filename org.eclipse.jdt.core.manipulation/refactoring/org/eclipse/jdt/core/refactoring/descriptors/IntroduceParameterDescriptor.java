@@ -64,7 +64,7 @@ public final class IntroduceParameterDescriptor extends JavaRefactoringDescripto
 	 *
 	 * @since 1.2
 	 */
-	public IntroduceParameterDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public IntroduceParameterDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.INTRODUCE_PARAMETER, project, description, comment, arguments, flags);
 	}
 }

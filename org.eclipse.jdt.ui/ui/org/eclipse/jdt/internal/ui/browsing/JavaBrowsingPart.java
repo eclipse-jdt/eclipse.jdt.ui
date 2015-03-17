@@ -172,18 +172,25 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 	private boolean fProcessSelectionEvents= true;
 
 	private IPartListener2 fPartListener= new IPartListener2() {
+		@Override
 		public void partActivated(IWorkbenchPartReference ref) {
 		}
+		@Override
 		public void partBroughtToTop(IWorkbenchPartReference ref) {
 		}
-	 	public void partInputChanged(IWorkbenchPartReference ref) {
+	 	@Override
+		public void partInputChanged(IWorkbenchPartReference ref) {
 	 	}
+		@Override
 		public void partClosed(IWorkbenchPartReference ref) {
 		}
+		@Override
 		public void partDeactivated(IWorkbenchPartReference ref) {
 		}
+		@Override
 		public void partOpened(IWorkbenchPartReference ref) {
 		}
+		@Override
 		public void partVisible(IWorkbenchPartReference ref) {
 			if (ref != null && ref.getId() == getSite().getId()){
 				fProcessSelectionEvents= true;
@@ -195,6 +202,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 				}
 			}
 		}
+		@Override
 		public void partHidden(IWorkbenchPartReference ref) {
 			if (ref != null && ref.getId() == getSite().getId())
 				fProcessSelectionEvents= false;
@@ -285,7 +293,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		IMemento childMem;
 		childMem= memento.getChild(TAG_SELECTED_ELEMENTS);
 		if (childMem != null) {
-			ArrayList<Object> list= new ArrayList<Object>();
+			ArrayList<Object> list= new ArrayList<>();
 			IMemento[] elementMem= childMem.getChildren(TAG_SELECTED_ELEMENT);
 			for (int i= 0; i < elementMem.length; i++) {
 				String javaElementHandle= elementMem[i].getString(TAG_SELECTED_ELEMENT_PATH);
@@ -323,9 +331,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	public void createPartControl(Composite parent) {
 		Assert.isTrue(fViewer == null);
@@ -388,9 +393,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		setHelp();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.WorkbenchPart#getAdapter(java.lang.Class)
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> key) {
@@ -409,6 +411,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 	 */
 	protected IShowInSource getShowInSource() {
 		return new IShowInSource() {
+			@Override
 			public ShowInContext getShowInContext() {
 				return new ShowInContext(
 					null,
@@ -534,9 +537,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 	protected void fillToolBar(IToolBarManager tbm) {
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.action.IMenuListener#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
-	 */
+	@Override
 	public void menuAboutToShow(IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
 
@@ -579,6 +580,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 			String viewId= getConfigurationElement().getAttribute("id"); //$NON-NLS-1$
 			Assert.isNotNull(viewId);
 			IPropertyChangeListener workingSetListener= new IPropertyChangeListener() {
+				@Override
 				public void propertyChange(PropertyChangeEvent event) {
 					doWorkingSetChanged(event);
 				}
@@ -718,6 +720,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		return true;
 	}
 
+	@Override
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (!needsToProcessSelectionChanged(part))
 			return;
@@ -832,9 +835,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		return Messages.format(JavaBrowsingMessages.JavaBrowsingPart_toolTip2, new String[] { result, BasicElementLabels.getWorkingSetLabel(ws) });
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.WorkbenchPart#getTitleToolTip()
-	 */
 	@Override
 	public String getTitleToolTip() {
 		if (fViewer == null)
@@ -1292,9 +1292,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, IView
 		fProcessSelectionEvents= state;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider#getViewPartInput()
-	 */
+	@Override
 	public Object getViewPartInput() {
 		if (fViewer != null) {
 			return fViewer.getInput();

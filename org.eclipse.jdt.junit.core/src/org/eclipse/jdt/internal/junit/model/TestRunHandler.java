@@ -46,7 +46,7 @@ public class TestRunHandler extends DefaultHandler {
 	private TestRunSession fTestRunSession;
 	private TestSuiteElement fTestSuite;
 	private TestCaseElement fTestCase;
-	private Stack/*<Boolean>*/ fNotRun= new Stack();
+	private Stack<Boolean> fNotRun= new Stack<>();
 
 	private StringBuffer fFailureBuffer;
 	private boolean fInExpected;
@@ -73,13 +73,16 @@ public class TestRunHandler extends DefaultHandler {
 		fTestRunSession= testRunSession;
 	}
 
+	@Override
 	public void setDocumentLocator(Locator locator) {
 		fLocator= locator;
 	}
 
+	@Override
 	public void startDocument() throws SAXException {
 	}
 
+	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
 		if (fLocator != null && fMonitor != null) {
 			int line= fLocator.getLineNumber();
@@ -186,6 +189,7 @@ public class TestRunHandler extends DefaultHandler {
 		}
 	}
 
+	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
 		if (fInExpected) {
 			fExpectedBuffer.append(ch, start, length);
@@ -198,6 +202,7 @@ public class TestRunHandler extends DefaultHandler {
 		}
 	}
 
+	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		if (qName.equals(IXMLTags.NODE_TESTRUN)) {
 			// OK
@@ -288,10 +293,12 @@ public class TestRunHandler extends DefaultHandler {
 		throw new SAXException(msg);
 	}
 
+	@Override
 	public void error(SAXParseException e) throws SAXException {
 		throw e;
 	}
 
+	@Override
 	public void warning(SAXParseException e) throws SAXException {
 		throw e;
 	}

@@ -82,6 +82,7 @@ public class QuickAssistLightBulbUpdater {
 		/*
 		 * @see org.eclipse.jface.text.source.IAnnotationPresentation#getLayer()
 		 */
+		@Override
 		public int getLayer() {
 			return LAYER;
 		}
@@ -93,9 +94,7 @@ public class QuickAssistLightBulbUpdater {
 			return fImage;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.source.Annotation#paint(org.eclipse.swt.graphics.GC, org.eclipse.swt.widgets.Canvas, org.eclipse.swt.graphics.Rectangle)
-		 */
+		@Override
 		public void paint(GC gc, Canvas canvas, Rectangle r) {
 			ImageUtilities.drawImage(getImage(), gc, canvas, r, SWT.CENTER, SWT.TOP);
 		}
@@ -124,6 +123,7 @@ public class QuickAssistLightBulbUpdater {
 
 	private void installSelectionListener() {
 		fListener= new ISelectionListenerWithAST() {
+			@Override
 			public void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot) {
 				doSelectionChanged(selection.getOffset(), selection.getLength(), astRoot);
 			}
@@ -148,6 +148,7 @@ public class QuickAssistLightBulbUpdater {
 		}
 		if (fPropertyChangeListener == null) {
 			fPropertyChangeListener= new IPropertyChangeListener() {
+				@Override
 				public void propertyChange(PropertyChangeEvent event) {
 					doPropertyChanged(event.getProperty());
 				}

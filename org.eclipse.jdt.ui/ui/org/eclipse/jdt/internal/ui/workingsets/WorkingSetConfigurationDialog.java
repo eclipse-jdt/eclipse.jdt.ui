@@ -70,7 +70,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	private static class WorkingSetLabelProvider extends LabelProvider {
 		private Map<ImageDescriptor, Image> fIcons;
 		public WorkingSetLabelProvider() {
-			fIcons= new Hashtable<ImageDescriptor, Image>();
+			fIcons= new Hashtable<>();
 		}
 		@Override
 		public void dispose() {
@@ -147,16 +147,13 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		super(parentShell);
 		setTitle(WorkingSetMessages.WorkingSetConfigurationDialog_title);
 		setMessage(WorkingSetMessages.WorkingSetConfigurationDialog_message);
-		fAllWorkingSets= new ArrayList<IWorkingSet>(allWorkingSets.length);
+		fAllWorkingSets= new ArrayList<>(allWorkingSets.length);
 		for (int i= 0; i < allWorkingSets.length; i++) {
 			fAllWorkingSets.add(allWorkingSets[i]);
 		}
 		fIsSortingEnabled= isSortingEnabled;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void configureShell(Shell shell) {
 		super.configureShell(shell);
@@ -182,9 +179,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		setInitialSelections(workingSets);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Control createContents(Composite parent) {
 		Control control= super.createContents(parent);
@@ -193,9 +187,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		return control;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
@@ -232,6 +223,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	private void createTableViewer(Composite parent) {
 		fTableViewer= CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.MULTI);
 		fTableViewer.addCheckStateListener(new ICheckStateListener() {
+			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				updateButtonAvailability();
 			}
@@ -244,11 +236,13 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		fTableViewer.setLabelProvider(new WorkingSetLabelProvider());
 		fTableViewer.setContentProvider(new ArrayContentProvider());
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				handleSelectionChanged();
 			}
 		});
 		fTableViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				if (fEditButton.isEnabled())
 					editSelectedWorkingSet();
@@ -374,9 +368,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		});
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void okPressed() {
 		List<IWorkingSet> newResult= getResultWorkingSets();
@@ -394,9 +385,6 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		return new ArrayList(Arrays.asList(checked));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void cancelPressed() {
 		restoreAddedWorkingSets();
@@ -477,10 +465,10 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 */
 	@Override
 	public int open() {
-		fAddedWorkingSets= new ArrayList<IWorkingSet>();
-		fRemovedWorkingSets= new ArrayList<IWorkingSet>();
-		fEditedWorkingSets= new HashMap<IWorkingSet, IWorkingSet>();
-		fRemovedMRUWorkingSets= new ArrayList<IWorkingSet>();
+		fAddedWorkingSets= new ArrayList<>();
+		fRemovedWorkingSets= new ArrayList<>();
+		fEditedWorkingSets= new HashMap<>();
+		fRemovedMRUWorkingSets= new ArrayList<>();
 		return super.open();
 	}
 
@@ -579,7 +567,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	}
 
 	private boolean areAllGlobalWorkingSets(IStructuredSelection selection) {
-		Set<IWorkingSet> globals= new HashSet<IWorkingSet>(Arrays.asList(PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets()));
+		Set<IWorkingSet> globals= new HashSet<>(Arrays.asList(PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets()));
 		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			if (!globals.contains(iter.next()))
 				return false;
@@ -609,7 +597,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 	private List<IWorkingSet> moveUp(List<IWorkingSet> elements, List<IWorkingSet> move) {
 		int nElements= elements.size();
-		List<IWorkingSet> res= new ArrayList<IWorkingSet>(nElements);
+		List<IWorkingSet> res= new ArrayList<>(nElements);
 		IWorkingSet floating= null;
 		for (int i= 0; i < nElements; i++) {
 			IWorkingSet curr= elements.get(i);
@@ -629,7 +617,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	}
 
 	private List<IWorkingSet> reverse(List<IWorkingSet> p) {
-		List<IWorkingSet> reverse= new ArrayList<IWorkingSet>(p.size());
+		List<IWorkingSet> reverse= new ArrayList<>(p.size());
 		for (int i= p.size() - 1; i >= 0; i--) {
 			reverse.add(p.get(i));
 		}

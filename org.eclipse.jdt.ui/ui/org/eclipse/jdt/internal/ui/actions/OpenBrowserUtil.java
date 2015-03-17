@@ -34,6 +34,7 @@ public class OpenBrowserUtil {
 	 */
 	public static void open(final URL url, Display display) {
 		display.syncExec(new Runnable() {
+			@Override
 			public void run() {
 				internalOpen(url, false);
 			}
@@ -49,6 +50,7 @@ public class OpenBrowserUtil {
 	 */
 	public static void openExternal(final URL url, Display display) {
 		display.syncExec(new Runnable() {
+			@Override
 			public void run() {
 				internalOpen(url, true);
 			}
@@ -57,6 +59,7 @@ public class OpenBrowserUtil {
 
 	private static void internalOpen(final URL url, final boolean useExternalBrowser) {
 		BusyIndicator.showWhile(null, new Runnable() {
+			@Override
 			public void run() {
 				URL helpSystemUrl= PlatformUI.getWorkbench().getHelpSystem().resolve(url.toExternalForm(), true);
 				if (helpSystemUrl == null) { // can happen if org.eclipse.help.ui is not available
@@ -86,6 +89,7 @@ public class OpenBrowserUtil {
 	 * @param title the title
 	 * @deprecated As of 3.6, replaced by {@link #open(URL, Display)}
 	 */
+	@Deprecated
 	public static void open(final URL url, Display display, String title) {
 		open(url, display);
 	}

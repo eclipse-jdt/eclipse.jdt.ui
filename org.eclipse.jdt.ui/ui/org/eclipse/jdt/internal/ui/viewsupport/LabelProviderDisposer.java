@@ -28,6 +28,7 @@ public class LabelProviderDisposer implements DisposeListener {
 		fLabelProvider= labelProvider;
 	}
 
+	@Override
 	public void widgetDisposed(DisposeEvent e) {
 		fLabelProvider.dispose();
 	}

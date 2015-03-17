@@ -172,9 +172,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(org.eclipse.swt.widgets.Composite)
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		Composite comp = new Composite(parent, SWT.NONE);
 		setControl(comp);
@@ -218,6 +216,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		});
 		fTestLoaderViewer.setInput(items);
 		fTestLoaderViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				validatePage();
 				updateLaunchConfigurationDialog();
@@ -255,6 +254,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fProjText= new Text(comp, SWT.SINGLE | SWT.BORDER);
 		fProjText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fProjText.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent evt) {
 				validatePage();
 				updateLaunchConfigurationDialog();
@@ -282,6 +282,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fTestText = new Text(comp, SWT.SINGLE | SWT.BORDER);
 		fTestText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fTestText.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent evt) {
 				fTestMethodSearchButton.setEnabled(fTestText.getText().length() > 0);
 				validatePage();
@@ -312,6 +313,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fTestMethodText.setLayoutData(gd);
 
 		fTestMethodText.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent evt) {
 				validatePage();
 				updateLaunchConfigurationDialog();
@@ -340,10 +342,12 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		gd.horizontalSpan = 3;
 		fTestContainerRadioButton.setLayoutData(gd);
 		fTestContainerRadioButton.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (fTestContainerRadioButton.getSelection())
 					testModeChanged();
 			}
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
@@ -355,6 +359,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		gd.horizontalSpan = 2;
 		fContainerText.setLayoutData(gd);
 		fContainerText.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent evt) {
 				updateLaunchConfigurationDialog();
 			}
@@ -388,10 +393,12 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		GridData gd;
 		fKeepRunning = new Button(comp, SWT.CHECK);
 		fKeepRunning.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				updateLaunchConfigurationDialog();
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
@@ -406,9 +413,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		return JUnitPlugin.getImageDescriptor(path).createImage();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(org.eclipse.debug.core.ILaunchConfiguration)
-	 */
+	@Override
 	public void initializeFrom(ILaunchConfiguration config) {
 		fLaunchConfiguration= config;
 
@@ -498,10 +503,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fTestText.setText(""); //$NON-NLS-1$
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
-	 */
+	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy config) {
 		if (fTestContainerRadioButton.getSelection() && fContainerElement != null) {
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fContainerElement.getJavaProject().getElementName());
@@ -533,9 +535,6 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#dispose()
-	 */
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -543,9 +542,6 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fJavaElementLabelProvider.dispose();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#getImage()
-	 */
 	@Override
 	public Image getImage() {
 		return fTestIcon;
@@ -579,7 +575,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			fTestContainerRadioButton.setSelection(radioSetting[1]);
 		}
 
-		final HashSet<String> typeLookup= new HashSet<String>();
+		final HashSet<String> typeLookup= new HashSet<>();
 		for (IType type : types) {
 			typeLookup.add(type.getPackageFragment().getElementName() + '/' + type.getTypeQualifiedName('.'));
 		}
@@ -595,6 +591,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 						@Override
 						public ITypeInfoFilterExtension getFilterExtension() {
 							return new ITypeInfoFilterExtension() {
+								@Override
 								public boolean select(ITypeInfoRequestor requestor) {
 									StringBuffer buf= new StringBuffer();
 									buf.append(requestor.getPackageName()).append('/');
@@ -671,7 +668,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		if (methodsCacheKey.equals(fMethodsCacheKey))
 			return fMethodsCache;
 		
-		Set<String> methodNames= new HashSet<String>();
+		Set<String> methodNames= new HashSet<>();
 		fMethodsCache= methodNames;
 		fMethodsCacheKey= methodsCacheKey;
 
@@ -799,9 +796,6 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#isValid(org.eclipse.debug.core.ILaunchConfiguration)
-	 */
 	@Override
 	public boolean isValid(ILaunchConfiguration config) {
 		validatePage();
@@ -955,9 +949,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fTestMethodSearchButton.setEnabled(enabled && projectTextHasContents &&  fTestText.getText().length() > 0);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
-	 */
+	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
 		IJavaElement javaElement = getContext();
 		if (javaElement != null) {
@@ -1031,9 +1023,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		initializeName(config, name);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getName()
-	 */
+	@Override
 	public String getName() {
 		return JUnitMessages.JUnitLaunchConfigurationTab_tab_label;
 	}
@@ -1144,9 +1134,6 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		LayoutUtil.setButtonDimensionHint(button);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#getId()
-	 */
 	@Override
 	public String getId() {
 		return "org.eclipse.jdt.junit.JUnitLaunchConfigurationTab"; //$NON-NLS-1$

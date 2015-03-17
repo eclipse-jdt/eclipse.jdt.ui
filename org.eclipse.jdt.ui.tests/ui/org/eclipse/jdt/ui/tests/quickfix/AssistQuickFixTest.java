@@ -20,9 +20,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -43,6 +40,7 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -53,9 +51,12 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAss
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class AssistQuickFixTest extends QuickFixTest {
 
-	private static final Class THIS= AssistQuickFixTest.class;
+	private static final Class<AssistQuickFixTest> THIS= AssistQuickFixTest.class;
 
 	private static final String CHANGE_MODIFIER_TO_FINAL= FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
 
@@ -76,7 +77,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 
@@ -118,7 +119,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("getClass()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -170,7 +171,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("goo().iterator()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -239,7 +240,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("System");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -296,7 +297,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("Math");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -361,7 +362,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("System");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -413,7 +414,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("getClass()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -467,7 +468,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("goo().iterator()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -531,14 +532,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("new MyLayout().indent;");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		int numberOfProposals= 5;
 		assertNumberOfProposals(proposals, numberOfProposals);
 		assertCorrectLabels(proposals);
 
-		ArrayList previews= new ArrayList();
-		ArrayList expecteds= new ArrayList();
+		ArrayList<String> previews= new ArrayList<>();
+		ArrayList<String> expecteds= new ArrayList<>();
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -624,7 +625,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String string= "fField[0];";
 		int offset= buf.toString().indexOf(string);
 		AssistContext context= getCorrectionContext(cu, offset, string.length());
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -683,7 +684,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("System.getProperties()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -740,7 +741,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("System.getProperties()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -802,7 +803,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("System.getProperties()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -865,7 +866,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("new java.util.Timer()");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
@@ -943,7 +944,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	
 			String str= "g.get(0);";
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 			assertNumberOfProposals(proposals, 5);
 			assertCorrectLabels(proposals);
 	
@@ -1000,7 +1001,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	
 			String str= "ge.get(0)";
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
 	
@@ -1057,7 +1058,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	
 			String str= "gs.get(0)";
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
 	
@@ -1109,7 +1110,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String selection= "count";
 		int offset= buf.toString().indexOf(selection);
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1147,7 +1148,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String selection= "vec";
 		int offset= buf.toString().indexOf(selection);
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1191,7 +1192,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String selection= "vec";
 		int offset= buf.toString().indexOf(selection);
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1231,7 +1232,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("int count");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -1288,7 +1289,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("int p2");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -1346,7 +1347,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("Integer p2");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -1406,7 +1407,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String selection= "vec";
 		int offset= buf.toString().indexOf(selection);
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1444,7 +1445,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "goo().toArray();";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -1501,7 +1502,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String selection= "a + b";
 		int offset= buf.toString().indexOf(selection);
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
@@ -1588,7 +1589,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String selection= "b + c";
 		int offset= buf.toString().indexOf(selection);
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -1653,7 +1654,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String selection= "b + c";
 		int offset= buf.toString().indexOf(selection);
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -1718,7 +1719,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String selection= "1";
 		int offset= buf.toString().indexOf(selection);
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -1777,7 +1778,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String selection= "a + b";
 		int offset= buf.toString().indexOf(selection);
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
@@ -1863,7 +1864,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset1= buf.toString().indexOf("int b = 1;");
 		int offset2= buf.toString().indexOf("a + b;") + 6;
 		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -1917,7 +1918,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset1= buf.toString().indexOf("int a = 1;");
 		int offset2= buf.toString().indexOf("a + b;") + 6;
 		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -1973,7 +1974,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset= buf.toString().indexOf(selection);
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
 
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -2053,7 +2054,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "(IOException e)";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -2112,7 +2113,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "(IOException e)";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -2180,7 +2181,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "for";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -2229,7 +2230,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "do";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -2266,7 +2267,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "while";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -2304,7 +2305,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "if";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -2402,7 +2403,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "try";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -2441,7 +2442,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "};";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -2477,7 +2478,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "}//comment";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -2511,7 +2512,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "Math.abs(9+ 8)";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -2572,7 +2573,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "=";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -2605,7 +2606,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "=";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -2638,7 +2639,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "i[]";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -2680,7 +2681,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "=";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -2712,7 +2713,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "=";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -2744,7 +2745,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "=";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -2776,7 +2777,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "=";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -2810,7 +2811,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "var[]";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -2856,7 +2857,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "var = ";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -2925,7 +2926,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "var[]";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -2989,7 +2990,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "message;";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -3053,7 +3054,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		String str= "message =";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -3133,7 +3134,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { ex1, ex2, ex3, ex4 });
 	}
 	
-	private static final Class[] FILTER_EQ= { LinkedNamesAssistProposal.class, RenameRefactoringProposal.class, AssignToVariableAssistProposal.class };
+	private static final Class<?>[] FILTER_EQ= { LinkedNamesAssistProposal.class, RenameRefactoringProposal.class, AssignToVariableAssistProposal.class };
 
 	public void testInvertEquals1() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -3148,7 +3149,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
@@ -3199,7 +3200,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "s.equals(\"a\")";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), str.length());
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 4);
         assertCorrectLabels(proposals);
@@ -3330,7 +3331,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), str.length());
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
@@ -3388,7 +3389,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
@@ -3449,7 +3450,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
@@ -3510,7 +3511,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
@@ -3571,7 +3572,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
@@ -3625,7 +3626,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
 		assertNumberOfProposals(proposals, 2);
         assertCorrectLabels(proposals);
@@ -3713,7 +3714,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
@@ -3763,7 +3764,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
@@ -3785,7 +3786,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "E().equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
@@ -3813,7 +3814,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "E().equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
@@ -3841,7 +3842,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "E().equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
@@ -3872,7 +3873,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "E().equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
@@ -3900,7 +3901,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "E().equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
@@ -3929,7 +3930,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "E().equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
@@ -3954,7 +3955,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
@@ -3973,7 +3974,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals(o)";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 0);
         assertCorrectLabels(proposals);
@@ -3999,7 +4000,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
@@ -4052,7 +4053,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
@@ -4104,7 +4105,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
@@ -4154,7 +4155,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
@@ -4204,7 +4205,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
         String str= "equals";
         AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-        List proposals= collectAssists(context, FILTER_EQ);
+        List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
         assertNumberOfProposals(proposals, 1);
         assertCorrectLabels(proposals);
@@ -4258,7 +4259,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "equals";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, FILTER_EQ);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, FILTER_EQ);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -4315,13 +4316,13 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			String str= "{{";
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 2);
 			assertCorrectLabels(proposals);
 
-			ArrayList previews= new ArrayList();
-			ArrayList expecteds= new ArrayList();
+			ArrayList<String> previews= new ArrayList<>();
+			ArrayList<String> expecteds= new ArrayList<>();
 			
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
@@ -4374,7 +4375,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			String str= "foo";
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 2);
 			assertCorrectLabels(proposals);
@@ -4444,7 +4445,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			String str= "foo";
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 2);
 			assertCorrectLabels(proposals);
@@ -4501,7 +4502,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "if (";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -4569,7 +4570,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "else";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -4621,7 +4622,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "if (";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -4671,7 +4672,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "if (";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -4733,7 +4734,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "else";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -4800,7 +4801,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "else if (";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -4881,7 +4882,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "else if (";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -4957,7 +4958,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "if (";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -5025,7 +5026,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "if (";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -5101,7 +5102,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "{\n            ;";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -5164,7 +5165,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String str= "/* comment*/";
 		int indexOf= buf.toString().indexOf(str) + str.length();
 		AssistContext context= getCorrectionContext(cu, indexOf, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -5239,7 +5240,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= " (false) {";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -5323,7 +5324,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= " (true) {";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -5365,7 +5366,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= " (false) {";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -5410,7 +5411,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= " (true) {";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -5489,7 +5490,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= " (true) {";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -5529,7 +5530,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "while (";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -5571,7 +5572,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "for (";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -5613,7 +5614,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		String str= "do {";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -5654,7 +5655,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset1= buf.toString().indexOf("public");
 		int offset2= buf.toString().lastIndexOf("}");
 		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -5689,7 +5690,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset1= buf.toString().indexOf("public");
 		int offset2= buf.toString().lastIndexOf("}");
 		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
@@ -5713,7 +5714,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("i=");
 		AssistContext context= getCorrectionContext(cu, offset, 1);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
@@ -5752,7 +5753,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset= buf.toString().indexOf("int i= 0");
 		int length= "int i= 0".length();
 		AssistContext context= getCorrectionContext(cu, offset, length);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -5785,7 +5786,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset= buf.toString().indexOf("int i");
 		int length= "int i".length();
 		AssistContext context= getCorrectionContext(cu, offset, length);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -5817,7 +5818,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset1= buf.toString().indexOf("public");
 		int offset2= buf.toString().lastIndexOf("}");
 		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
@@ -5843,7 +5844,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset= buf.toString().indexOf("private int i= 0");
 		int length= "private int i= 0".length();
 		AssistContext context= getCorrectionContext(cu, offset, length);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 0);
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
@@ -5867,7 +5868,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset1= buf.toString().indexOf("public");
 		int offset2= buf.toString().lastIndexOf("}");
 		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
@@ -5893,7 +5894,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset1= buf.toString().indexOf("public");
 		int offset2= buf.toString().lastIndexOf("}");
 		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
@@ -5919,7 +5920,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset1= buf.toString().indexOf("public");
 		int offset2= buf.toString().lastIndexOf("}");
 		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
@@ -5943,7 +5944,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset1= buf.toString().indexOf("public");
 		int offset2= buf.toString().lastIndexOf("}");
 		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
@@ -5968,7 +5969,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset= buf.toString().indexOf("int i= 1");
 		int length= "int i= 1".length();
 		AssistContext context= getCorrectionContext(cu, offset, length);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -6004,7 +6005,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset= buf.toString().indexOf("j= i + 1");
 		int length= "j= i + 1".length();
 		AssistContext context= getCorrectionContext(cu, offset, length);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -6056,7 +6057,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset= buf.toString().indexOf("h= j + 1");
 		int length= "h= j + 1".length();
 		AssistContext context= getCorrectionContext(cu, offset, length);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -6112,7 +6113,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset1= buf.toString().indexOf("public");
 		int offset2= buf.toString().lastIndexOf("}");
 		AssistContext context= getCorrectionContext(cu, offset1, offset2 - offset1);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -6154,7 +6155,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset= buf.toString().indexOf("int i= 0");
 		int length= "int i= 0".length();
 		AssistContext context= getCorrectionContext(cu, offset, length);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 0);
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
@@ -6174,7 +6175,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 	
 		int offset= buf.toString().indexOf("i=");
 		AssistContext context= getCorrectionContext(cu, offset, 1);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
@@ -6210,7 +6211,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("E");
 		AssistContext context= getCorrectionContext(cu, offset, 1);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 0);
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
@@ -6231,7 +6232,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		int offset= buf.toString().indexOf("foo");
 		int length= "foo".length();
 		AssistContext context= getCorrectionContext(cu, offset, length);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 0);
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
@@ -6250,7 +6251,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		String selection= "public void foo(Integer i)";
 		int offset= buf.toString().indexOf(selection);
 		AssistContext context= getCorrectionContext(cu, offset, selection.length());
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -6280,7 +6281,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("Runnable");
 		AssistContext context= getCorrectionContext(cu, offset, 1);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -6332,7 +6333,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		int offset= buf.toString().indexOf("ArrayList(lVar)");
 		AssistContext context= getCorrectionContext(cu, offset, 1);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -6376,7 +6377,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\"+\""), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
@@ -6470,7 +6471,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
@@ -6554,7 +6555,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCommandIdDoesNotExist(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
@@ -6605,7 +6606,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCommandIdDoesNotExist(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
@@ -6667,7 +6668,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCommandIdDoesNotExist(proposals, QuickAssistProcessor.CONVERT_TO_STRING_BUFFER_ID);
@@ -6705,7 +6706,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("strX ="), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -6779,7 +6780,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\"+\""), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
@@ -6882,7 +6883,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\"+\""), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
@@ -6962,8 +6963,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 	public void testConvertToStringBufferJava14() throws Exception {
 
-		Map oldOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(oldOptions);
+		Map<String, String> oldOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(oldOptions);
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
 		fJProject1.setOptions(newOptions);
 
@@ -6979,7 +6980,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\"+\""), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
@@ -7073,7 +7074,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + 5"), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 9);
 		assertCorrectLabels(proposals);
@@ -7194,7 +7195,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 		
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + 5"), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		
 		assertNumberOfProposals(proposals, 9);
 		assertCorrectLabels(proposals);
@@ -7305,8 +7306,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 	
 	public void testConvertToMessageFormat14() throws Exception {
 
-		Map oldOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(oldOptions);
+		Map<String, String> oldOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(oldOptions);
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
 		fJProject1.setOptions(newOptions);
 
@@ -7322,7 +7323,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + o1 + \""), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
@@ -7422,7 +7423,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + \"\" + \""), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
@@ -7504,8 +7505,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 
 	public void testConvertToMessageFormatStringBoxing14() throws Exception {
-		Map oldOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(oldOptions);
+		Map<String, String> oldOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(oldOptions);
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
 		fJProject1.setOptions(newOptions);
 
@@ -7521,7 +7522,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 			ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("1 + \""), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
@@ -7609,7 +7610,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + 1 + \""), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
@@ -7704,7 +7705,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + o1 + \""), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
@@ -7800,7 +7801,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("\" + o1 + \""), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 7);
 		assertCorrectLabels(proposals);
@@ -7895,7 +7896,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 		
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(" + "), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		
 		assertNumberOfProposals(proposals, 8);
 		assertCorrectLabels(proposals);
@@ -8010,7 +8011,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("switch"), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 3);
@@ -8095,7 +8096,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("break;") + 7, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 3);
@@ -8184,7 +8185,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("case"), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -8260,7 +8261,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("default"), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -8317,7 +8318,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("switch"), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -8381,7 +8382,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("for"), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -8440,7 +8441,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("for"), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -8500,7 +8501,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(":"), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
@@ -8593,7 +8594,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 	
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("for"), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 	
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -8659,14 +8660,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(saveOptions);
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
 			String selection= "collection";
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
@@ -8717,14 +8718,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(saveOptions);
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
 			String selection= "collection;";
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 4);
 			assertCorrectLabels(proposals);
@@ -8775,14 +8776,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(saveOptions);
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
 			String selection= "keySet()";
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
@@ -8836,14 +8837,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(saveOptions);
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
 			String selection= "collection";
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
@@ -8914,14 +8915,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(saveOptions);
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
 			String selection= "collection";
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
@@ -8976,14 +8977,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(saveOptions);
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
 			String selection= "getIterable()";
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
@@ -9041,14 +9042,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(saveOptions);
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
 			String selection= "list";
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
@@ -9116,14 +9117,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(saveOptions);
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
 			String selection= "list";
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
@@ -9194,14 +9195,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(saveOptions);
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
 			String selection= "getList()";
 			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
@@ -9260,14 +9261,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(saveOptions);
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
 			String selection= "collection";
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
@@ -9317,8 +9318,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap();
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>();
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
@@ -9326,7 +9327,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 			String selection= "collection";
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 5);
 			assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_generate_enhanced_for_loop);
@@ -9366,14 +9367,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(saveOptions);
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
 			String selection= "array";
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 	
 			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
@@ -9419,14 +9420,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(saveOptions);
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
 			String selection= "array";
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 			assertNumberOfProposals(proposals, 6);
 			assertCorrectLabels(proposals);
@@ -9473,14 +9474,14 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 	
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(saveOptions);
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
 			String selection= "nums";
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 	
 			assertNumberOfProposals(proposals, 7);
 			assertCorrectLabels(proposals);
@@ -9545,8 +9546,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 		pack1.createCompilationUnit("B.java", buf2.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap();
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>();
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_5, newOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
@@ -9554,7 +9555,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 			String selection= "B.get( /*important: empty*/ );";
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 	
 			assertNumberOfProposals(proposals, 5);
 			assertCorrectLabels(proposals);
@@ -9643,8 +9644,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 		pack1.createCompilationUnit("B.java", buf2.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap();
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>();
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_5, newOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
@@ -9652,7 +9653,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 			String selection= "B.raw(1+ 2);";
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 	
 			assertNumberOfProposals(proposals, 4);
 			assertCorrectLabels(proposals);
@@ -9715,8 +9716,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 		pack1.createCompilationUnit("B.java", buf2.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap();
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>();
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_5, newOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
@@ -9724,7 +9725,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 			String selection= "B.get();";
 			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
-			List proposals= collectAssists(context, false);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 	
 			assertNumberOfProposals(proposals, 4);
 			assertCorrectLabels(proposals);

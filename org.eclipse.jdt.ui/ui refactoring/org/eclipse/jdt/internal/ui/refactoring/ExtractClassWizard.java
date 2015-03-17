@@ -100,6 +100,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 			setTitle(RefactoringMessages.ExtractClassWizard_page_title);
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			initializeDialogUnits(parent);
 			Composite result= new Composite(parent, SWT.NONE);
@@ -177,6 +178,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 			text.setFocus();
 			text.addModifyListener(new ModifyListener() {
 
+				@Override
 				public void modifyText(ModifyEvent e) {
 					fDescriptor.setClassName(text.getText());
 					validateRefactoring();
@@ -223,6 +225,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 			text.setText(fDescriptor.getFieldName());
 			text.addModifyListener(new ModifyListener() {
 
+				@Override
 				public void modifyText(ModifyEvent e) {
 					fDescriptor.setFieldName(text.getText());
 					validateRefactoring();
@@ -300,6 +303,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 						String title= RefactoringMessages.ExtractClassWizard_dialog_title;
 						InputDialog inputDialog= new InputDialog(getShell(), title, message, selected.getNewFieldName(), new IInputValidator() {
 
+							@Override
 							public String isValid(String newText) {
 								IStatus status= JavaConventionsUtil.validateIdentifier(newText, fDescriptor.getType());
 								if (!status.isOK())
@@ -317,6 +321,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 				}
 			});
 			tv.addCheckStateListener(new ICheckStateListener() {
+				@Override
 				public void checkStateChanged(CheckStateChangedEvent event) {
 					Field element= (Field) event.getElement();
 					element.setCreateField(event.getChecked());
@@ -326,6 +331,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 
 			});
 			tv.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
 					IStructuredSelection selection= (IStructuredSelection) tv.getSelection();
 					Field field= (Field) selection.getFirstElement();
@@ -523,7 +529,7 @@ public class ExtractClassWizard extends RefactoringWizard {
 	}
 
 	public ExtractClassDescriptorVerification getVerification() {
-		ExtractClassDescriptorVerification adapter= (ExtractClassDescriptorVerification) getRefactoring().getAdapter(ExtractClassDescriptorVerification.class);
+		ExtractClassDescriptorVerification adapter= getRefactoring().getAdapter(ExtractClassDescriptorVerification.class);
 		return adapter;
 	}
 

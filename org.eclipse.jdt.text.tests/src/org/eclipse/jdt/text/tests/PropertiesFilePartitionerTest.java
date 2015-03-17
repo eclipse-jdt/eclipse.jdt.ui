@@ -43,6 +43,7 @@ public class PropertiesFilePartitionerTest extends TestCase {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() {
 
 		fTextTools= new JavaTextTools(new PreferenceStore());
@@ -54,6 +55,7 @@ public class PropertiesFilePartitionerTest extends TestCase {
 
 		fDocumentPartitioningChanged= false;
 		fDocument.addDocumentPartitioningListener(new IDocumentPartitioningListener() {
+			@Override
 			public void documentPartitioningChanged(IDocument document) {
 				fDocumentPartitioningChanged= true;
 			}
@@ -64,6 +66,7 @@ public class PropertiesFilePartitionerTest extends TestCase {
 		return new TestSuite(PropertiesFilePartitionerTest.class);
 	}
 
+	@Override
 	protected void tearDown () {
 		fTextTools.dispose();
 		fTextTools= null;

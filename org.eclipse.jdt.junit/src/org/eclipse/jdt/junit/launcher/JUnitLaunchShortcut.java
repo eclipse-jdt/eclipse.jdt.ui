@@ -101,9 +101,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.ILaunchShortcut#launch(org.eclipse.ui.IEditorPart, java.lang.String)
-	 */
+	@Override
 	public void launch(IEditorPart editor, String mode) {
 		ITypeRoot element= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 		if (element != null) {
@@ -146,9 +144,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.ILaunchShortcut#launch(org.eclipse.jface.viewers.ISelection, java.lang.String)
-	 */
+	@Override
 	public void launch(ISelection selection, String mode) {
 		if (selection instanceof IStructuredSelection) {
 			launch(((IStructuredSelection) selection).toArray(), mode);
@@ -478,7 +474,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		ILaunchConfiguration[] configs= getLaunchManager().getLaunchConfigurations(configType);
 		String[] attributeToCompare= getAttributeNamesToCompare();
 
-		ArrayList<ILaunchConfiguration> candidateConfigs= new ArrayList<ILaunchConfiguration>(configs.length);
+		ArrayList<ILaunchConfiguration> candidateConfigs= new ArrayList<>(configs.length);
 		for (ILaunchConfiguration config : configs) {
 			if (hasSameAttributes(config, temporary, attributeToCompare)) {
 				candidateConfigs.add(config);
@@ -492,6 +488,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 *
 	 * @since 3.4
 	 */
+	@Override
 	public ILaunchConfiguration[] getLaunchConfigurations(ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection ss= (IStructuredSelection) selection;
@@ -507,6 +504,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 *
 	 * @since 3.4
 	 */
+	@Override
 	public ILaunchConfiguration[] getLaunchConfigurations(final IEditorPart editor) {
 		final ITypeRoot element= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 		if (element != null) {
@@ -514,6 +512,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			if (Display.getCurrent() == null) {
 				final IMethod[] temp = new IMethod[1];
 				Runnable runnable= new Runnable() {
+					@Override
 					public void run() {
 						temp[0]= resolveSelectedMethodName(editor, element);
 					}
@@ -572,6 +571,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 *
 	 * @since 3.4
 	 */
+	@Override
 	public IResource getLaunchableResource(ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection ss= (IStructuredSelection) selection;
@@ -593,6 +593,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	 *
 	 * @since 3.4
 	 */
+	@Override
 	public IResource getLaunchableResource(IEditorPart editor) {
 		ITypeRoot element= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 		if (element != null) {

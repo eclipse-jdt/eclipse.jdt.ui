@@ -25,6 +25,7 @@ public class PureProjectFilter extends ViewerFilter {
 		// TODO Auto-generated constructor stub
 	}
 
+	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if (element instanceof IJavaProject) {
 			element= ((IJavaProject) element).getResource();

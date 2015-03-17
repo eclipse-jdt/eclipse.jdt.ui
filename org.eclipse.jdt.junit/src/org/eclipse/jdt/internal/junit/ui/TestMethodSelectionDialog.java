@@ -59,7 +59,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 	private IJavaElement fElement;
 
 	public static class TestReferenceCollector extends SearchRequestor {
-		Set<IJavaElement> fResult= new HashSet<IJavaElement>(200);
+		Set<IJavaElement> fResult= new HashSet<>(200);
 
 		@Override
 		public void acceptSearchMatch(SearchMatch match) throws CoreException {
@@ -119,7 +119,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 	private IType findTestType() {
 		String qualifiedName= JUnitCorePlugin.TEST_INTERFACE_NAME;
 		IJavaProject[] projects;
-		Set<IType> result= new HashSet<IType>();
+		Set<IType> result= new HashSet<>();
 		try {
 			projects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
 			for (IJavaProject project : projects) {
@@ -167,6 +167,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		final TestReferenceCollector[] col= new TestReferenceCollector[1];
 
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
 					col[0]= doSearchTestMethods(element, testType, pm);

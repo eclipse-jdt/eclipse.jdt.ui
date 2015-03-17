@@ -205,6 +205,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	/*
 	 * @see WizardPage#createControl
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -269,6 +270,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 		// --------- IDialogFieldListener
 
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			fPackageStatus= getPackageStatus(getPackageText());
 			// tell all others
@@ -454,6 +456,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	 */
 	public IRunnableWithProgress getRunnable() {
 		return new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
 					createPackage(monitor);

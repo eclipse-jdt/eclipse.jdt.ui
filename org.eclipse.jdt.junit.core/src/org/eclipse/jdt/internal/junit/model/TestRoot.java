@@ -21,10 +21,12 @@ public class TestRoot extends TestSuiteElement {
 		fSession= session;
 	}
 
+	@Override
 	public TestRoot getRoot() {
 		return this;
 	}
 
+	@Override
 	public ITestRunSession getTestRunSession() {
 		return fSession;
 	}

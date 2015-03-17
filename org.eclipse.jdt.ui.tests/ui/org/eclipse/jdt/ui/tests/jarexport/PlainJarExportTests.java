@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 IBM Corporation and others.
+ * Copyright (c) 2008, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,10 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -50,10 +46,14 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 
 public class PlainJarExportTests extends TestCase {
 
-	private static final Class THIS= PlainJarExportTests.class;
+	private static final Class<PlainJarExportTests> THIS= PlainJarExportTests.class;
 
 	public static Test suite() {
 		return setUpTest(new TestSuite(THIS));
@@ -68,10 +68,11 @@ public class PlainJarExportTests extends TestCase {
 	private IPackageFragmentRoot fMainRoot;
 	private ICompilationUnit fCU;
 
+	@Override
 	protected void setUp() throws Exception {
 		fProject= ProjectTestSetup.getProject();
 
-		Map options= fProject.getOptions(false);
+		Map<String, String> options= fProject.getOptions(false);
 		String compliance= JavaCore.VERSION_1_4;
 		JavaModelUtil.setComplianceOptions(options, compliance);
 		JavaModelUtil.setDefaultClassfileOptions(options, compliance);
@@ -93,6 +94,7 @@ public class PlainJarExportTests extends TestCase {
 		fCU= fragment.createCompilationUnit("Main.java", buf.toString(), true, null);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fProject, ProjectTestSetup.getDefaultClasspath());
 	}
@@ -105,9 +107,9 @@ public class PlainJarExportTests extends TestCase {
 		data.setExportClassFiles(true);
 		
 		ZipFile jar= createArchive(data);
-		ArrayList entries= getSortedEntries(jar);
+		ArrayList<String> entries= getSortedEntries(jar);
 		jar.close();
-		List expected= Arrays.asList(new String[] {
+		List<String> expected= Arrays.asList(new String[] {
 				"META-INF/MANIFEST.MF\n",
 				"org/eclipse/jdt/ui/test/Main$1.class\n",
 				"org/eclipse/jdt/ui/test/Main$MainInner.class\n",
@@ -123,9 +125,9 @@ public class PlainJarExportTests extends TestCase {
 		data.setExportClassFiles(true);
 		
 		ZipFile jar= createArchive(data);
-		ArrayList entries= getSortedEntries(jar);
+		ArrayList<String> entries= getSortedEntries(jar);
 		jar.close();
-		List expected= Arrays.asList(new String[] { "META-INF/MANIFEST.MF\n", "org/eclipse/jdt/ui/test/Main$1.class\n",
+		List<String> expected= Arrays.asList(new String[] { "META-INF/MANIFEST.MF\n", "org/eclipse/jdt/ui/test/Main$1.class\n",
 				"org/eclipse/jdt/ui/test/Main$MainInner.class\n",
 				"org/eclipse/jdt/ui/test/Main.class\n", });
 
@@ -145,9 +147,9 @@ public class PlainJarExportTests extends TestCase {
 		data.setExportClassFiles(true);
 
 		ZipFile jar= createArchive(data);
-		ArrayList entries= getSortedEntries(jar);
+		ArrayList<String> entries= getSortedEntries(jar);
 		jar.close();
-		List expected= Arrays.asList(new String[] {
+		List<String> expected= Arrays.asList(new String[] {
 				"META-INF/MANIFEST.MF\n",
 				"org/eclipse/jdt/ui/test/Main$1.class\n",
 				"org/eclipse/jdt/ui/test/Main$MainInner.class\n",
@@ -176,10 +178,10 @@ public class PlainJarExportTests extends TestCase {
 		return JarPackagerUtil.getArchiveFile(data.getJarLocation());
 	}
 
-	private static ArrayList getSortedEntries(ZipFile jar) {
-		ArrayList entries= new ArrayList();
-		for (Enumeration entriesEnum= jar.entries(); entriesEnum.hasMoreElements(); ) {
-			ZipEntry entry= (ZipEntry) entriesEnum.nextElement();
+	private static ArrayList<String> getSortedEntries(ZipFile jar) {
+		ArrayList<String> entries= new ArrayList<>();
+		for (Enumeration<? extends ZipEntry> entriesEnum= jar.entries(); entriesEnum.hasMoreElements(); ) {
+			ZipEntry entry= entriesEnum.nextElement();
 			entries.add(entry.getName() + "\n");
 		}
 		Collections.sort(entries);

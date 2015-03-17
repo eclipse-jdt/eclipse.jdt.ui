@@ -54,9 +54,6 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.INTRODUCE_PARAMETER_ACTION);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled((fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null));
@@ -73,9 +70,6 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 		setEnabled(RefactoringAvailabilityTester.isIntroduceParameterAvailable(selection));
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))

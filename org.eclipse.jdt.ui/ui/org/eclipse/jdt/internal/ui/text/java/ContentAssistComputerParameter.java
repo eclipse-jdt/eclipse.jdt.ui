@@ -26,9 +26,10 @@ public final class ContentAssistComputerParameter implements IParameterValues {
 	/*
 	 * @see org.eclipse.core.commands.IParameterValues#getParameterValues()
 	 */
+	@Override
 	public Map<String, String> getParameterValues() {
 		Collection<CompletionProposalCategory> descriptors= CompletionProposalComputerRegistry.getDefault().getProposalCategories();
-		Map<String, String> map= new HashMap<String, String>(descriptors.size());
+		Map<String, String> map= new HashMap<>(descriptors.size());
 		for (Iterator<CompletionProposalCategory> it= descriptors.iterator(); it.hasNext();) {
 			CompletionProposalCategory category= it.next();
 			map.put(category.getDisplayName(), category.getId());

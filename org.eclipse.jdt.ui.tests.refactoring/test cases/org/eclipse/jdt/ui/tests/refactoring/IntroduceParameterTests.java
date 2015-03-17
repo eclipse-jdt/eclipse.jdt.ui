@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefact
 
 public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 
-	private static final Class clazz= IntroduceParameterTests.class;
+	private static final Class<IntroduceParameterTests> clazz= IntroduceParameterTests.class;
 
 	private static final String SLASH_OUT= "/out";
 	public IntroduceParameterTests(String name) {
@@ -43,6 +43,7 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 		return setUpTest(new TestSuite(clazz));
 	}
 
+	@Override
 	protected String getResourceLocation() {
 		return "IntroduceParameter/";
 	}

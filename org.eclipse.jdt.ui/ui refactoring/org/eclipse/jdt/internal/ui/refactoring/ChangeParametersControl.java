@@ -98,12 +98,13 @@ public class ChangeParametersControl extends Composite {
 	}
 
 	private static class ParameterInfoContentProvider implements IStructuredContentProvider {
+		@Override
 		@SuppressWarnings("unchecked")
 		public Object[] getElements(Object inputElement) {
 			return removeMarkedAsDeleted((List<ParameterInfo>) inputElement);
 		}
 		private ParameterInfo[] removeMarkedAsDeleted(List<ParameterInfo> paramInfos){
-			List<ParameterInfo> result= new ArrayList<ParameterInfo>(paramInfos.size());
+			List<ParameterInfo> result= new ArrayList<>(paramInfos.size());
 			for (Iterator<ParameterInfo> iter= paramInfos.iterator(); iter.hasNext();) {
 				ParameterInfo info= iter.next();
 				if (! info.isDeleted())
@@ -111,18 +112,22 @@ public class ChangeParametersControl extends Composite {
 			}
 			return result.toArray(new ParameterInfo[result.size()]);
 		}
+		@Override
 		public void dispose() {
 			// do nothing
 		}
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			// do nothing
 		}
 	}
 
 	private static class ParameterInfoLabelProvider extends LabelProvider implements ITableLabelProvider, ITableFontProvider {
+		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
 		}
+		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			ParameterInfo info= (ParameterInfo) element;
 			switch (columnIndex) {
@@ -139,6 +144,7 @@ public class ChangeParametersControl extends Composite {
 					throw new IllegalArgumentException(columnIndex + ": " + element); //$NON-NLS-1$
 			}
 		}
+		@Override
 		public Font getFont(Object element, int columnIndex) {
 			ParameterInfo info= (ParameterInfo) element;
 			if (info.isAdded())
@@ -149,6 +155,7 @@ public class ChangeParametersControl extends Composite {
 	}
 
 	private class ParametersCellModifier implements ICellModifier {
+		@Override
 		public boolean canModify(Object element, String property) {
 			Assert.isTrue(element instanceof ParameterInfo);
 			if (property.equals(PROPERTIES[TYPE_PROP]))
@@ -160,6 +167,7 @@ public class ChangeParametersControl extends Composite {
 			Assert.isTrue(false);
 			return false;
 		}
+		@Override
 		public Object getValue(Object element, String property) {
 			Assert.isTrue(element instanceof ParameterInfo);
 			if (property.equals(PROPERTIES[TYPE_PROP]))
@@ -171,6 +179,7 @@ public class ChangeParametersControl extends Composite {
 			Assert.isTrue(false);
 			return null;
 		}
+		@Override
 		public void modify(Object element, String property, Object value) {
 			if (element instanceof TableItem)
 				element= ((TableItem) element).getData();
@@ -313,12 +322,14 @@ public class ChangeParametersControl extends Composite {
 		fTableViewer.setContentProvider(new ParameterInfoContentProvider());
 		fTableViewer.setLabelProvider(new ParameterInfoLabelProvider());
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				updateButtonsEnabledState();
 			}
 		});
 
 		table.addTraverseListener(new TraverseListener() {
+			@Override
 			public void keyTraversed(TraverseEvent e) {
 				if (e.detail == SWT.TRAVERSE_RETURN && e.stateMask == SWT.NONE) {
 					editColumnOrNextPossible(0);
@@ -601,6 +612,7 @@ public class ChangeParametersControl extends Composite {
 			final TableTextCellEditor editor = editors[i];
 			// support tabbing between columns while editing:
 			editor.getText().addTraverseListener(new TraverseListener() {
+				@Override
 				public void keyTraversed(TraverseEvent e) {
 					switch (e.detail) {
 						case SWT.TRAVERSE_TAB_NEXT :
@@ -622,6 +634,7 @@ public class ChangeParametersControl extends Composite {
 		}
 
 		editors[NEWNAME_PROP].setActivationListener(new TableTextCellEditor.IActivationListener(){
+			@Override
 			public void activate() {
 				ParameterInfo[] selected= getSelectedElements();
 				if (selected.length == 1 && fNameContentAssistHandler != null) {
@@ -665,8 +678,8 @@ public class ChangeParametersControl extends Composite {
 	}
 
 	private static void moveUp(List<ParameterInfo> elements, List<ParameterInfo> move) {
-		List<ParameterInfo> res= new ArrayList<ParameterInfo>(elements.size());
-		List<ParameterInfo> deleted= new ArrayList<ParameterInfo>();
+		List<ParameterInfo> res= new ArrayList<>(elements.size());
+		List<ParameterInfo> deleted= new ArrayList<>();
 		ParameterInfo floating= null;
 		for (Iterator<ParameterInfo> iter= elements.iterator(); iter.hasNext();) {
 			ParameterInfo curr= iter.next();

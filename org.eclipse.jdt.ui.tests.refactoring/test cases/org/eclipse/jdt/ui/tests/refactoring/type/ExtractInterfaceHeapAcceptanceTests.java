@@ -54,6 +54,7 @@ public class ExtractInterfaceHeapAcceptanceTests extends RefactoringHeapTestCase
 		super(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProject= new SWTTestProject();
@@ -63,7 +64,7 @@ public class ExtractInterfaceHeapAcceptanceTests extends RefactoringHeapTestCase
 		fRefactoring= new ProcessorBasedRefactoring(processor);
 
 		IMethod[] methods= control.getMethods();
-		List extractedMembers= new ArrayList();
+		List<IMethod> extractedMembers= new ArrayList<>();
 		for (int i= 0; i < methods.length; i++) {
 			IMethod method= methods[i];
 			int flags= method.getFlags();
@@ -72,10 +73,11 @@ public class ExtractInterfaceHeapAcceptanceTests extends RefactoringHeapTestCase
 			}
 		}
 		processor.setTypeName("IControl");
-		processor.setExtractedMembers((IMember[])extractedMembers.toArray(new IMember[extractedMembers.size()]));
+		processor.setExtractedMembers(extractedMembers.toArray(new IMember[extractedMembers.size()]));
 		processor.setReplace(true);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		fProject.delete();
 		super.tearDown();

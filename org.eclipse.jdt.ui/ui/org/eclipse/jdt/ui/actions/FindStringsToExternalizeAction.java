@@ -89,6 +89,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  *
  * @noextend This class is not intended to be subclassed by clients.
  */
+@Deprecated
 public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 
 	private NonNLSElement[] fElements;
@@ -106,9 +107,6 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_STRINGS_TO_EXTERNALIZE_ACTION);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
@@ -144,9 +142,6 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(final IStructuredSelection selection) {
 		try {
@@ -165,6 +160,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 
 	private IRunnableWithProgress createRunnable(final IStructuredSelection selection) {
 		return new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
 					fElements= doRun(selection, pm);
@@ -183,7 +179,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		pm.beginTask(ActionMessages.FindStringsToExternalizeAction_find_strings, elements.size());
 
 		try{
-			List<NonNLSElement> l= new ArrayList<NonNLSElement>();
+			List<NonNLSElement> l= new ArrayList<>();
 			for (Iterator<?> iter= elements.iterator(); iter.hasNext();) {
 				IJavaElement element= (IJavaElement) iter.next();
 				if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
@@ -222,14 +218,14 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	private List<NonNLSElement> analyze(IPackageFragment pack, IProgressMonitor pm) throws CoreException {
 		try{
 			if (pack == null)
-				return new ArrayList<NonNLSElement>(0);
+				return new ArrayList<>(0);
 
 			ICompilationUnit[] cus= pack.getCompilationUnits();
 
 			pm.beginTask("", cus.length); //$NON-NLS-1$
 			pm.setTaskName(pack.getElementName());
 
-			List<NonNLSElement> l= new ArrayList<NonNLSElement>(cus.length);
+			List<NonNLSElement> l= new ArrayList<>(cus.length);
 			for (int i= 0; i < cus.length; i++){
 				pm.subTask(BasicElementLabels.getFileName(cus[i]));
 				NonNLSElement element= analyze(cus[i]);
@@ -253,7 +249,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			IJavaElement[] children= sourceFolder.getChildren();
 			pm.beginTask("", children.length); //$NON-NLS-1$
 			pm.setTaskName(JavaElementLabels.getElementLabel(sourceFolder, JavaElementLabels.ALL_DEFAULT));
-			List<NonNLSElement> result= new ArrayList<NonNLSElement>();
+			List<NonNLSElement> result= new ArrayList<>();
 			for (int i= 0; i < children.length; i++) {
 				IJavaElement iJavaElement= children[i];
 				if (iJavaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT){
@@ -278,7 +274,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		try{
 			IPackageFragment[] packs= project.getPackageFragments();
 			pm.beginTask("", packs.length); //$NON-NLS-1$
-			List<NonNLSElement> result= new ArrayList<NonNLSElement>();
+			List<NonNLSElement> result= new ArrayList<>();
 			for (int i= 0; i < packs.length; i++) {
 				if (! packs[i].isReadOnly())
 					result.addAll(analyze(packs[i], new SubProgressMonitor(pm, 1)));
@@ -377,6 +373,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		protected Control createDialogArea(Composite parent) {
 			Composite result= (Composite)super.createDialogArea(parent);
 			getTableViewer().addSelectionChangedListener(new ISelectionChangedListener(){
+				@Override
 				public void selectionChanged(SelectionChangedEvent event){
 					if (fOpenButton != null){
 						fOpenButton.setEnabled(! getTableViewer().getSelection().isEmpty());

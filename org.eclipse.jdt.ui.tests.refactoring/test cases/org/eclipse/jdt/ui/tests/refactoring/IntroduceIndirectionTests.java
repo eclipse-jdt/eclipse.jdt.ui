@@ -35,13 +35,14 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class IntroduceIndirectionTests extends RefactoringTest {
 
-	private static final Class clazz= IntroduceIndirectionTests.class;
+	private static final Class<IntroduceIndirectionTests> clazz= IntroduceIndirectionTests.class;
 	private static final String REFACTORING_PATH= "IntroduceIndirection/";
 
 	public IntroduceIndirectionTests(String name) {
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}

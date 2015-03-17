@@ -61,11 +61,6 @@ public class JUnit3TestReference implements ITestReference {
 		this.fTest= test;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jdt.internal.junit.runner.TestReference#countTestCases()
-	 */
 	public int countTestCases() {
 		return fTest.countTestCases();
 	}
@@ -82,11 +77,6 @@ public class JUnit3TestReference implements ITestReference {
 		return fTest.hashCode();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jdt.internal.junit.runner.TestReference#getName()
-	 */
 	public String getName() {
 		if (isJUnit4TestCaseAdapter(fTest)) {
 			Method method= (Method) callJUnit4GetterMethod(fTest, "getTestMethod"); //$NON-NLS-1$

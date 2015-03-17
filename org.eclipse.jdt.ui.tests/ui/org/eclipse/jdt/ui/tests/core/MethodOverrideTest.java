@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,6 @@ package org.eclipse.jdt.ui.tests.core;
 
 import java.util.Hashtable;
 import java.util.List;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -38,6 +35,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -54,6 +52,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class MethodOverrideTest extends CoreTests {
 
 
@@ -61,7 +62,7 @@ public class MethodOverrideTest extends CoreTests {
 	 * See bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=111093
 	 */
 
-	private static final Class THIS= MethodOverrideTest.class;
+	private static final Class<MethodOverrideTest> THIS= MethodOverrideTest.class;
 	private static final boolean DEBUG_SHOWRESULTS= true;
 
 	public static Test suite() {
@@ -78,13 +79,15 @@ public class MethodOverrideTest extends CoreTests {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		JavaCore.setOptions(options);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
@@ -401,6 +404,7 @@ public class MethodOverrideTest extends CoreTests {
 		final MethodDeclaration method=  (MethodDeclaration) root.findDeclaringNode(binding.getMethodDeclaration());
 
 		ASTFlattener flattener= new ASTFlattener() {
+			@Override
 			public boolean visit(MethodDeclaration node) {
 				if (node == method) {
 					super.visit(node);
@@ -493,7 +497,7 @@ public class MethodOverrideTest extends CoreTests {
 	}
 
 	private boolean hasOverrideAnnotation(MethodDeclaration declaration) {
-		List list= declaration.modifiers();
+		List<IExtendedModifier> list= declaration.modifiers();
 		for (int i= 0; i < list.size(); i++) {
 			if (list.get(i) instanceof Annotation) {
 				return "Override".equals(((Annotation) list.get(i)).getTypeName().getFullyQualifiedName());

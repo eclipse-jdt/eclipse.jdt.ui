@@ -50,6 +50,7 @@ public class WordQuickFixProcessor implements IQuickFixProcessor {
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.IQuickFixProcessor#getCorrections(org.eclipse.jdt.ui.text.java.IInvocationContext,org.eclipse.jdt.ui.text.java.IProblemLocation[])
 	 */
+	@Override
 	public IJavaCompletionProposal[] getCorrections(IInvocationContext invocationContext, IProblemLocation[] locations) throws CoreException {
 
 		final int threshold= PreferenceConstants.getPreferenceStore().getInt(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD);
@@ -92,7 +93,7 @@ public class WordQuickFixProcessor implements IQuickFixProcessor {
 							result= new IJavaCompletionProposal[] { new ChangeCaseProposal(arguments, location.getOffset(), location.getLength(), context, engine.getLocale())};
 						else {
 
-							proposals= new ArrayList<RankedWordProposal>(checker.getProposals(arguments[0], sentence));
+							proposals= new ArrayList<>(checker.getProposals(arguments[0], sentence));
 							size= proposals.size();
 
 							if (threshold > 0 && size > threshold) {
@@ -128,6 +129,7 @@ public class WordQuickFixProcessor implements IQuickFixProcessor {
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.IQuickFixProcessor#hasCorrections(org.eclipse.jdt.core.ICompilationUnit,int)
 	 */
+	@Override
 	public final boolean hasCorrections(ICompilationUnit unit, int id) {
 		return id == JavaSpellingReconcileStrategy.SPELLING_PROBLEM_ID;
 	}

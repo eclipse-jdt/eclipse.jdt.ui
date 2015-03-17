@@ -103,6 +103,7 @@ public final class ToggleCommentAction extends TextEditorAction {
 			display= shell.getDisplay();
 
 		BusyIndicator.showWhile(display, new Runnable() {
+			@Override
 			public void run() {
 				fOperationTarget.doOperation(operationCode);
 			}
@@ -297,7 +298,7 @@ public final class ToggleCommentAction extends TextEditorAction {
 		fPrefixesMap= null;
 
 		String[] types= configuration.getConfiguredContentTypes(sourceViewer);
-		Map<String, String[]> prefixesMap= new HashMap<String, String[]>(types.length);
+		Map<String, String[]> prefixesMap= new HashMap<>(types.length);
 		for (int i= 0; i < types.length; i++) {
 			String type= types[i];
 			String[] prefixes= configuration.getDefaultPrefixes(sourceViewer, type);

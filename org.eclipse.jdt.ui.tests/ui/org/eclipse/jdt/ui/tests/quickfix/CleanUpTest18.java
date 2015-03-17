@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -26,9 +23,12 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class CleanUpTest18 extends CleanUpTestCase {
 
-	private static final Class THIS= CleanUpTest18.class;
+	private static final Class<CleanUpTest18> THIS= CleanUpTest18.class;
 
 	public CleanUpTest18(String name) {
 		super(name);
@@ -48,10 +48,12 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, "", null);
 	}
 
+	@Override
 	protected IJavaProject getProject() {
 		return Java18ProjectTestSetup.getProject();
 	}
 
+	@Override
 	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
 		return Java18ProjectTestSetup.getDefaultClasspath();
 	}

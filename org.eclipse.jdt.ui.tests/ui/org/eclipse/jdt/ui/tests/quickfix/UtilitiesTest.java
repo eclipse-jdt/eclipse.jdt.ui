@@ -13,9 +13,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -42,12 +39,15 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 /**
  *
  */
 public class UtilitiesTest extends QuickFixTest {
 
-	private static final Class THIS= UtilitiesTest.class;
+	private static final Class<UtilitiesTest> THIS= UtilitiesTest.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -64,8 +64,9 @@ public class UtilitiesTest extends QuickFixTest {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(JavaCore.COMPILER_PB_UNUSED_IMPORT, JavaCore.ERROR);
@@ -80,6 +81,7 @@ public class UtilitiesTest extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}

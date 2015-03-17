@@ -52,6 +52,7 @@ public final class CompletionProposalComparator implements Comparator<ICompletio
 	 * {@inheritDoc}
 	 * @since 3.7
 	 */
+	@Override
 	public int compare(ICompletionProposal p1, ICompletionProposal p2) {
 		if (!fOrderAlphabetically) {
 			int r1= getRelevance(p1);

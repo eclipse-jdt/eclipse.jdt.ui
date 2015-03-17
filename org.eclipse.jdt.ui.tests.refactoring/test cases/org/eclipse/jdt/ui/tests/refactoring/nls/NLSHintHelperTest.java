@@ -72,6 +72,7 @@ public class NLSHintHelperTest extends TestCase {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject= ProjectTestSetup.getProject();
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.NLS_LIB);
@@ -423,6 +424,7 @@ public class NLSHintHelperTest extends TestCase {
         return  NLSHintHelper.getResourceBundleName(typeBinding);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject, ProjectTestSetup.getDefaultClasspath());
 	}

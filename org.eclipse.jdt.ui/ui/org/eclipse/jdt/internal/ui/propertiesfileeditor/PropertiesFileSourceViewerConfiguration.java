@@ -309,6 +309,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	@Override
 	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
 		return new IInformationControlCreator() {
+			@Override
 			public IInformationControl createInformationControl(Shell parent) {
 				return new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
 			}
@@ -344,11 +345,6 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 		return new String[] {"#", ""}; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getAutoEditStrategies(org.eclipse.jface.text.source.ISourceViewer, java.lang.String)
-	 * @since 3.7
-	 */
 	@Override
 	public IAutoEditStrategy[] getAutoEditStrategies(ISourceViewer sourceViewer, String contentType) {
 		IAutoEditStrategy[] autoEditStrategies= super.getAutoEditStrategies(sourceViewer, contentType);
@@ -360,7 +356,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 			if (!PropertiesFileDocumentProvider.isJavaPropertiesFile(fTextEditor.getEditorInput())) {
 				return autoEditStrategies;
 			}
-			List<IAutoEditStrategy> stratergies= new ArrayList<IAutoEditStrategy>();
+			List<IAutoEditStrategy> stratergies= new ArrayList<>();
 			for (int i= 0; i < autoEditStrategies.length; i++) {
 				stratergies.add(autoEditStrategies[i]);
 			}
@@ -372,21 +368,11 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getTextHover(org.eclipse.jface.text.source.ISourceViewer, java.lang.String, int)
-	 * @since 3.7
-	 */
 	@Override
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType, int stateMask) {
 		return new PropertiesFileHover(super.getTextHover(sourceViewer, contentType));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.editors.text.TextSourceViewerConfiguration#getQuickAssistAssistant(org.eclipse.jface.text.source.ISourceViewer)
-	 * @since 3.7
-	 */
 	@Override
 	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
 		if (getEditor() != null) {

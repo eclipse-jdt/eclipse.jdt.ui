@@ -41,6 +41,7 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner implements I
 		/*
 		 * @see IWordDetector#isWordStart
 		 */
+		@Override
 		public boolean isWordStart(char c) {
 			return (c == '/');
 		}
@@ -48,6 +49,7 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner implements I
 		/*
 		 * @see IWordDetector#isWordPart
 		 */
+		@Override
 		public boolean isWordPart(char c) {
 			return (c == '*' || c == '/');
 		}
@@ -73,6 +75,7 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner implements I
 		/*
 		 * @see IPredicateRule#evaluate(ICharacterScanner, boolean)
 		 */
+		@Override
 		public IToken evaluate(ICharacterScanner scanner, boolean resume) {
 			return evaluate(scanner);
 		}
@@ -80,6 +83,7 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner implements I
 		/*
 		 * @see IPredicateRule#getSuccessToken()
 		 */
+		@Override
 		public IToken getSuccessToken() {
 			return fSuccessToken;
 		}
@@ -99,7 +103,7 @@ public class JavaPartitionScanner extends RuleBasedPartitionScanner implements I
 		IToken multiLineComment= new Token(JAVA_MULTI_LINE_COMMENT);
 		IToken singleLineComment= new Token(JAVA_SINGLE_LINE_COMMENT);
 
-		List<IPredicateRule> rules= new ArrayList<IPredicateRule>();
+		List<IPredicateRule> rules= new ArrayList<>();
 
 		// Add rule for single line comments.
 		rules.add(new EndOfLineRule("//", singleLineComment)); //$NON-NLS-1$

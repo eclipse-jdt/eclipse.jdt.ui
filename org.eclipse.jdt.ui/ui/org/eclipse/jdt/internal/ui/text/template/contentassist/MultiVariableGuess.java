@@ -104,6 +104,7 @@ public class MultiVariableGuess {
 		/*
 		 * @see ICompletionProposal#apply(IDocument)
 		 */
+		@Override
 		public void apply(IDocument document) {
 			try {
 				document.replace(fReplacementOffset, fReplacementLength, fReplacementString);
@@ -115,6 +116,7 @@ public class MultiVariableGuess {
 		/*
 		 * @see ICompletionProposal#getSelection(IDocument)
 		 */
+		@Override
 		public Point getSelection(IDocument document) {
 			return new Point(fReplacementOffset + fCursorPosition, 0);
 		}
@@ -122,6 +124,7 @@ public class MultiVariableGuess {
 		/*
 		 * @see ICompletionProposal#getContextInformation()
 		 */
+		@Override
 		public IContextInformation getContextInformation() {
 			return fContextInformation;
 		}
@@ -129,6 +132,7 @@ public class MultiVariableGuess {
 		/*
 		 * @see ICompletionProposal#getImage()
 		 */
+		@Override
 		public Image getImage() {
 			return fImage;
 		}
@@ -136,6 +140,7 @@ public class MultiVariableGuess {
 		/*
 		 * @see ICompletionProposal#getDisplayString()
 		 */
+		@Override
 		public String getDisplayString() {
 			if (fDisplayString != null)
 				return fDisplayString;
@@ -145,6 +150,7 @@ public class MultiVariableGuess {
 		/*
 		 * @see ICompletionProposal#getAdditionalProposalInfo()
 		 */
+		@Override
 		public String getAdditionalProposalInfo() {
 			return fAdditionalProposalInfo;
 		}
@@ -152,6 +158,7 @@ public class MultiVariableGuess {
 		/*
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
 		 */
+		@Override
 		public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 			apply(viewer.getDocument());
 		}
@@ -159,18 +166,21 @@ public class MultiVariableGuess {
 		/*
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(org.eclipse.jface.text.ITextViewer, boolean)
 		 */
+		@Override
 		public void selected(ITextViewer viewer, boolean smartToggle) {
 		}
 
 		/*
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(org.eclipse.jface.text.ITextViewer)
 		 */
+		@Override
 		public void unselected(ITextViewer viewer) {
 		}
 
 		/*
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
 		 */
+		@Override
 		public boolean validate(IDocument document, int offset, DocumentEvent event) {
 			try {
 				String content= document.get(fReplacementOffset, fReplacementLength);
@@ -183,9 +193,9 @@ public class MultiVariableGuess {
 		}
 	}
 
-	private final Map<MultiVariable, Set<MultiVariable>> fDependencies= new HashMap<MultiVariable, Set<MultiVariable>>();
-	private final Map<MultiVariable, MultiVariable> fBackwardDeps= new HashMap<MultiVariable, MultiVariable>();
-	private final Map<MultiVariable, VariablePosition> fPositions= new HashMap<MultiVariable, VariablePosition>();
+	private final Map<MultiVariable, Set<MultiVariable>> fDependencies= new HashMap<>();
+	private final Map<MultiVariable, MultiVariable> fBackwardDeps= new HashMap<>();
+	private final Map<MultiVariable, VariablePosition> fPositions= new HashMap<>();
 
 	public MultiVariableGuess() {
 	}
@@ -277,7 +287,7 @@ public class MultiVariableGuess {
 
 		Set<MultiVariable> slaves= fDependencies.get(master);
 		if (slaves == null) {
-			slaves= new HashSet<MultiVariable>();
+			slaves= new HashSet<>();
 			fDependencies.put(master, slaves);
 		}
 		fBackwardDeps.put(slave, master);

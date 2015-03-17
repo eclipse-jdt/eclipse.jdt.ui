@@ -68,6 +68,7 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 		fIgnoreSelectionMarker= ignoreSelectionMarker;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fIsPreDeltaTest= false;
@@ -82,10 +83,12 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 		return new TextSelection(s[0], s[1]);
 	}
 
+	@Override
 	protected InputStream getFileInputStream(String fileName) throws IOException {
 		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
 	}
 
+	@Override
 	protected String getFileContents(InputStream in) throws IOException {
 		String result= super.getFileContents(in);
 		initializeSelection(result);
@@ -115,6 +118,7 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 				if (fIsPreDeltaTest) {
 					IWorkspace workspace= ResourcesPlugin.getWorkspace();
 					IResourceChangeListener listener= new IResourceChangeListener() {
+						@Override
 						public void resourceChanged(IResourceChangeEvent event) {
 							TestModelProvider.assertTrue(event.getDelta());
 						}

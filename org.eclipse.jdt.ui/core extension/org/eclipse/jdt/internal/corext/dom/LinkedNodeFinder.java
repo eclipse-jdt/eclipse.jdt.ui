@@ -48,7 +48,7 @@ public class LinkedNodeFinder  {
 	 * @return Return
 	 */
 	public static SimpleName[] findByBinding(ASTNode root, IBinding binding) {
-		ArrayList<SimpleName> res= new ArrayList<SimpleName>();
+		ArrayList<SimpleName> res= new ArrayList<>();
 		BindingFinder nodeFinder= new BindingFinder(binding, res);
 		root.accept(nodeFinder);
 		return res.toArray(new SimpleName[res.size()]);
@@ -73,7 +73,7 @@ public class LinkedNodeFinder  {
 		}
 		int parentKind= name.getParent().getNodeType();
 		if (parentKind == ASTNode.LABELED_STATEMENT || parentKind == ASTNode.BREAK_STATEMENT || parentKind == ASTNode.CONTINUE_STATEMENT) {
-			ArrayList<SimpleName> res= new ArrayList<SimpleName>();
+			ArrayList<SimpleName> res= new ArrayList<>();
 			LabelFinder nodeFinder= new LabelFinder(name, res);
 			root.accept(nodeFinder);
 			return res.toArray(new SimpleName[res.size()]);
@@ -124,7 +124,7 @@ public class LinkedNodeFinder  {
 
 
 	public static SimpleName[] findByProblems(ASTNode parent, SimpleName nameNode) {
-		ArrayList<SimpleName> res= new ArrayList<SimpleName>();
+		ArrayList<SimpleName> res= new ArrayList<>();
 
 		ASTNode astRoot = parent.getRoot();
 		if (!(astRoot instanceof CompilationUnit)) {

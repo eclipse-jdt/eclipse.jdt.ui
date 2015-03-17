@@ -68,8 +68,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 public class ReferencesInBinaryStatusContextViewer implements IStatusContextViewer {
 
 	private static class ContentProvider extends StandardJavaElementContentProvider {
-		private Map<Object, Object> fChildren= new HashMap<Object, Object>();
-		private Set<Object> fRoots= new HashSet<Object>();
+		private Map<Object, Object> fChildren= new HashMap<>();
+		private Set<Object> fRoots= new HashSet<>();
 
 		@Override
 		public Object[] getChildren(Object parentElement) {
@@ -110,7 +110,7 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 						oldChildrenSet.add(element);
 						return;
 					} else if (oldChildren != null) {
-						Set<Object> newChildren= new HashSet<Object>(4);
+						Set<Object> newChildren= new HashSet<>(4);
 						newChildren.add(oldChildren);
 						newChildren.add(element);
 						fChildren.put(parent, newChildren);
@@ -135,6 +135,7 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 	/*
 	 * @see org.eclipse.ltk.ui.refactoring.IStatusContextViewer#setInput(org.eclipse.ltk.core.refactoring.RefactoringStatusContext)
 	 */
+	@Override
 	public void setInput(RefactoringStatusContext input) {
 		ContentProvider contentProvider= new ContentProvider();
 
@@ -156,9 +157,7 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 	}
 
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		fForm= new ViewForm(parent, SWT.BORDER | SWT.FLAT);
 		fForm.marginWidth= 0;
@@ -213,9 +212,7 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 		fButton.setEnabled(false);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Control getControl() {
 		return fForm;
 	}
@@ -231,22 +228,27 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 			fResult= new ReferencesInBinarySearchResult(this);
 		}
 
+		@Override
 		public boolean canRerun() {
 			return false;
 		}
 
+		@Override
 		public boolean canRunInBackground() {
 			return true;
 		}
 
+		@Override
 		public String getLabel() {
 			return fContext.getDescription();
 		}
 
+		@Override
 		public ISearchResult getSearchResult() {
 			return fResult;
 		}
 
+		@Override
 		public IStatus run(IProgressMonitor monitor) throws OperationCanceledException {
 			fResult.removeAll();
 			List<SearchMatch> matches= fContext.getMatches();
@@ -275,18 +277,22 @@ public class ReferencesInBinaryStatusContextViewer implements IStatusContextView
 			fQuery= query;
 		}
 
+		@Override
 		public ImageDescriptor getImageDescriptor() {
 			return JavaPluginImages.DESC_OBJS_SEARCH_REF;
 		}
 
+		@Override
 		public String getLabel() {
 			return fQuery.getLabel();
 		}
 
+		@Override
 		public String getTooltip() {
 			return getLabel();
 		}
 
+		@Override
 		public ISearchQuery getQuery() {
 			return fQuery;
 		}

@@ -47,7 +47,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  */
 public class SpellCheckingTest extends TextPerformanceTestCase {
 
-	private static final Class THIS= SpellCheckingTest.class;
+	private static final Class<SpellCheckingTest> THIS= SpellCheckingTest.class;
 
 	private static final String FILE= PerformanceTestSetup.STYLED_TEXT;
 
@@ -64,6 +64,7 @@ public class SpellCheckingTest extends TextPerformanceTestCase {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		setWarmUpRuns(WARM_UP_RUNS);
@@ -88,6 +89,7 @@ public class SpellCheckingTest extends TextPerformanceTestCase {
 		}
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		PreferenceConstants.getPreferenceStore().setToDefault(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD);
@@ -127,6 +129,7 @@ public class SpellCheckingTest extends TextPerformanceTestCase {
 		/*
 		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#accept(org.eclipse.ui.texteditor.spelling.SpellingProblem)
 		 */
+		@Override
 		public void accept(SpellingProblem problem) {
 			fProblemCount++;
 		}
@@ -134,6 +137,7 @@ public class SpellCheckingTest extends TextPerformanceTestCase {
 		/*
 		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#beginCollecting()
 		 */
+		@Override
 		public void beginCollecting() {
 			fProblemCount= 0;
 		}
@@ -141,6 +145,7 @@ public class SpellCheckingTest extends TextPerformanceTestCase {
 		/*
 		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#endCollecting()
 		 */
+		@Override
 		public void endCollecting() {
 			if (fPrintCount)
 				System.out.println("No of spelling problems : " + fProblemCount);

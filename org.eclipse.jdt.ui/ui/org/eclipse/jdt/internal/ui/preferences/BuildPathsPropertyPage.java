@@ -137,9 +137,6 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		return super.okToLeave();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
-	 */
 	@Override
 	public void setVisible(boolean visible) {
 		if (fBuildPathsBlock != null) {
@@ -215,6 +212,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 			getSettings().put(INDEX, fBuildPathsBlock.getPageIndex());
 			if (fBuildPathsBlock.hasChangesInDialog() || fBuildPathsBlock.isClassfileMissing()) {
 				IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+					@Override
 					public void run(IProgressMonitor monitor)	throws CoreException, OperationCanceledException {
 						fBuildPathsBlock.configureJavaProject(monitor);
 					}
@@ -237,17 +235,12 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see IStatusChangeListener#statusChanged
-	 */
+	@Override
 	public void statusChanged(IStatus status) {
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
-	 */
 	@Override
 	public void applyData(Object data) {
 		if (data instanceof Map) {

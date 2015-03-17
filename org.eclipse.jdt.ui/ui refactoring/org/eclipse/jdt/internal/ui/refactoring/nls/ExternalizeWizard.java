@@ -76,6 +76,7 @@ public class ExternalizeWizard extends RefactoringWizard {
 		}
 		Display display= shell != null ? shell.getDisplay() : Display.getCurrent();
 		BusyIndicator.showWhile(display, new Runnable() {
+			@Override
 			public void run() {
 				NLSRefactoring refactoring= null;
 				try {

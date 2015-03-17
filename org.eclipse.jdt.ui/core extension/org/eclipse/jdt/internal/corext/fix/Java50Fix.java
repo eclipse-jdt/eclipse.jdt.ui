@@ -88,9 +88,6 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 			fAnnotation= annotation;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			AST ast= cuRewrite.getRoot().getAST();
@@ -110,9 +107,6 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 			fTypes= types;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel positionGroups) throws CoreException {
 			InferTypeArgumentsTCModel model= new InferTypeArgumentsTCModel();
@@ -199,7 +193,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 	}
 
 	public static Java50Fix createRawTypeReferenceFix(CompilationUnit compilationUnit, IProblemLocation problem) {
-		List<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
+		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 		SimpleType node= createRawTypeReferenceOperations(compilationUnit, new IProblemLocation[] {problem}, operations);
 		if (operations.size() == 0)
 			return null;
@@ -220,7 +214,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		if (!addOverrideAnnotation && !addDeprecatedAnnotation && !rawTypeReference)
 			return null;
 
-		List<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
+		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 
 		IProblem[] problems= compilationUnit.getProblems();
 		IProblemLocation[] locations= new IProblemLocation[problems.length];
@@ -264,7 +258,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		if (!addOverrideAnnotation && !addDeprecatedAnnotation && !rawTypeReferences)
 			return null;
 
-		List<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
+		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 
 		if (addOverrideAnnotation)
 			createAddOverrideAnnotationOperations(compilationUnit, addOverrideInterfaceAnnotation, problems, operations);
@@ -328,7 +322,7 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 		if (hasFatalError(compilationUnit))
 			return null;
 
-		List<SimpleType> result= new ArrayList<SimpleType>();
+		List<SimpleType> result= new ArrayList<>();
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
 

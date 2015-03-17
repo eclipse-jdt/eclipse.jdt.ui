@@ -280,9 +280,6 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 		fDestinationNamesCombo.setFocus();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void saveWidgetValues() {
 		IDialogSettings settings= getDialogSettings();
@@ -312,6 +309,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 	/*
 	 * Implements method from IJarPackageWizardPage.
 	 */
+	@Override
 	public void finish() {
 		saveWidgetValues();
 	}
@@ -319,6 +317,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 	/*
 	 * Implements method from Listener
 	 */
+	@Override
 	public void handleEvent(Event e) {
 		if (getControl() == null)
 			return;

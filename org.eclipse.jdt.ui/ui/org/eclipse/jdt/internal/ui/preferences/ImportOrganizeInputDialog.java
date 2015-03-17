@@ -66,6 +66,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		/**
 		 * @see IDialogFieldListener#dialogFieldChanged(DialogField)
 		 */
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			doDialogFieldChanged(field);
 		}
@@ -73,6 +74,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		/**
 		 * @see IStringButtonAdapter#changeControlPressed(DialogField)
 		 */
+		@Override
 		public void changeControlPressed(DialogField field) {
 			doBrowsePackages();
 		}

@@ -47,9 +47,6 @@ public class JavaStringStatusContext extends RefactoringStatusContext {
 		return fSourceRange;
 	}
 
-	/* (non-Javadoc)
-	 * @see RefactoringStatusContext#getCorrespondingElement()
-	 */
 	@Override
 	public Object getCorrespondingElement() {
 		return null;

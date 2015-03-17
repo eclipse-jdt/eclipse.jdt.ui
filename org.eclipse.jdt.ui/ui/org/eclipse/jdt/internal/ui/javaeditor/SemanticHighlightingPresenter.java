@@ -64,6 +64,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		/*
 		 * @see org.eclipse.jface.text.IPositionUpdater#update(org.eclipse.jface.text.DocumentEvent)
 		 */
+		@Override
 		public void update(DocumentEvent event) {
 
 			int eventOffset= event.getOffset();
@@ -234,7 +235,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	private JavaPresentationReconciler fPresentationReconciler;
 
 	/** UI's current highlighted positions - can contain <code>null</code> elements */
-	private List<Position> fPositions= new ArrayList<Position>();
+	private List<Position> fPositions= new ArrayList<>();
 	/** UI position lock */
 	private Object fPositionLock= new Object();
 
@@ -343,6 +344,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 			return null;
 
 		Runnable runnable= new Runnable() {
+			@Override
 			public void run() {
 				updatePresentation(textPresentation, added, removed);
 			}
@@ -393,7 +395,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 				 * removed on the fly. The second of two is the list of added positions. The result
 				 * is stored in newPositions.
 				 */
-				List<Position> newPositions= new ArrayList<Position>(newSize);
+				List<Position> newPositions= new ArrayList<>(newSize);
 				Position position= null;
 				Position addedPosition= null;
 				for (int i= 0, j= 0, n= oldPositions.size(), m= addedPositions.length; i < n || position != null || j < m || addedPosition != null;) {
@@ -541,11 +543,12 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	/*
 	 * @see org.eclipse.jface.text.ITextPresentationListener#applyTextPresentation(org.eclipse.jface.text.TextPresentation)
 	 */
+	@Override
 	public void applyTextPresentation(TextPresentation textPresentation) {
 		IRegion region= textPresentation.getExtent();
 		int i= computeIndexAtOffset(fPositions, region.getOffset()), n= computeIndexAtOffset(fPositions, region.getOffset() + region.getLength());
 		if (n - i > 2) {
-			List<StyleRange> ranges= new ArrayList<StyleRange>(n - i);
+			List<StyleRange> ranges= new ArrayList<>(n - i);
 			for (; i < n; i++) {
 				HighlightedPosition position= (HighlightedPosition) fPositions.get(i);
 				if (!position.isDeleted())
@@ -566,6 +569,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	/*
 	 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentAboutToBeChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
 		setCanceled(true);
 		releaseDocument(oldInput);
@@ -575,6 +579,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	/*
 	 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
 		manageDocument(newInput);
 	}
@@ -582,6 +587,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	/*
 	 * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
 	 */
+	@Override
 	public void documentAboutToBeChanged(DocumentEvent event) {
 		setCanceled(true);
 	}
@@ -589,6 +595,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	/*
 	 * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
 	 */
+	@Override
 	public void documentChanged(DocumentEvent event) {
 	}
 

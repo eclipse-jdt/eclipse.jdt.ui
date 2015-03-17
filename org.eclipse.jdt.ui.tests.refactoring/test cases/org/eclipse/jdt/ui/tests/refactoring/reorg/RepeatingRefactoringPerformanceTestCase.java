@@ -42,6 +42,7 @@ public abstract class RepeatingRefactoringPerformanceTestCase extends Refactorin
 		}
 	}
 
+	@Override
 	protected void finishMeasurements() {
 		stopMeasuring();
 	}

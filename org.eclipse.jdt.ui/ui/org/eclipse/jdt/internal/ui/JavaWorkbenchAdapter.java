@@ -37,6 +37,7 @@ public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
 		fImageProvider= new JavaElementImageProvider();
 	}
 
+	@Override
 	public Object[] getChildren(Object element) {
 		IJavaElement je= getJavaElement(element);
 		if (je instanceof IParent) {
@@ -49,6 +50,7 @@ public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
 		return NO_CHILDREN;
 	}
 
+	@Override
 	public ImageDescriptor getImageDescriptor(Object element) {
 		IJavaElement je= getJavaElement(element);
 		if (je != null)
@@ -58,10 +60,12 @@ public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
 
 	}
 
+	@Override
 	public String getLabel(Object element) {
 		return JavaElementLabels.getTextLabel(getJavaElement(element), JavaElementLabels.ALL_DEFAULT);
 	}
 
+	@Override
 	public Object getParent(Object element) {
 		IJavaElement je= getJavaElement(element);
 		return je != null ? je.getParent() :  null;

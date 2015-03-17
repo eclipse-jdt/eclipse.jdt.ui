@@ -30,7 +30,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
  */
 public class JavaFormatterTest extends TextPerformanceTestCase {
 
-	private static final Class THIS= JavaFormatterTest.class;
+	private static final Class<JavaFormatterTest> THIS= JavaFormatterTest.class;
 
 	private static final String FILE= PerformanceTestSetup.STYLED_TEXT;
 
@@ -44,6 +44,7 @@ public class JavaFormatterTest extends TextPerformanceTestCase {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
@@ -52,6 +53,7 @@ public class JavaFormatterTest extends TextPerformanceTestCase {
 		setMeasuredRuns(MEASURED_RUNS);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();

@@ -22,12 +22,13 @@ import junit.framework.TestSuite;
 public class ScrollJavaEditorTest extends ScrollEditorTest {
 
 	private static final boolean BUG_HOLDING_SCROLL_TESTS_DISABLED= true;
-	private static final Class THIS= ScrollJavaEditorTest.class;
+	private static final Class<ScrollJavaEditorTest> THIS= ScrollJavaEditorTest.class;
 
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected String getEditor() {
 		return EditorTestHelper.COMPILATION_UNIT_EDITOR_ID;
 	}

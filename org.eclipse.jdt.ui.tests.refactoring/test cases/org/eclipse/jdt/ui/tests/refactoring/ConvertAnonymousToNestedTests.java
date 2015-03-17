@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,9 +19,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -40,17 +37,21 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class ConvertAnonymousToNestedTests extends RefactoringTest {
 
-	private static final Class clazz= ConvertAnonymousToNestedTests.class;
+	private static final Class<ConvertAnonymousToNestedTests> clazz= ConvertAnonymousToNestedTests.class;
 	private static final String REFACTORING_PATH= "ConvertAnonymousToNested/";
 
-	private Object fCompactPref;
+	private String fCompactPref;
 
 	public ConvertAnonymousToNestedTests(String name) {
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -80,9 +81,10 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		return createCU(pack, getSimpleTestFileName(canConvert, input), getFileContents(getTestFileName(canConvert, input)));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 
 		String setting= DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR;
 		fCompactPref= options.get(setting);
@@ -96,9 +98,10 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, fCompactPref);
 		JavaCore.setOptions(options);
 	}

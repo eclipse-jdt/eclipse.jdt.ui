@@ -27,6 +27,8 @@ import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
@@ -43,6 +45,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -56,7 +59,7 @@ import junit.framework.TestSuite;
 
 public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
-	private static final Class THIS= LocalCorrectionsQuickFixTest.class;
+	private static final Class<LocalCorrectionsQuickFixTest> THIS= LocalCorrectionsQuickFixTest.class;
 	
 	/**
 	 * Bug 434188: [quick fix] shows sign of quick fix, but says no suggestions available.
@@ -82,7 +85,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
@@ -124,7 +127,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -170,7 +173,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -243,7 +246,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -300,7 +303,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -331,7 +334,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -380,7 +383,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -428,7 +431,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -494,7 +497,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -555,7 +558,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -596,7 +599,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -656,7 +659,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -697,7 +700,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -747,7 +750,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -797,7 +800,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -844,7 +847,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -896,7 +899,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -957,7 +960,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1030,7 +1033,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1108,7 +1111,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1186,7 +1189,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1263,7 +1266,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		pack2.createCompilationUnit("Exception.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 	
@@ -1345,7 +1348,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		int offset= buf.indexOf(begin);
 		int length= buf.indexOf(end) + end.length() - offset;
 		AssistContext context= getCorrectionContext(cu, offset, length);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2, context);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, context);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1413,7 +1416,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1487,7 +1490,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -1573,7 +1576,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1618,7 +1621,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1653,7 +1656,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1695,7 +1698,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1747,7 +1750,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1802,7 +1805,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1842,7 +1845,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1886,7 +1889,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2); // 2 uncaught exceptions
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2); // 2 uncaught exceptions
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1947,7 +1950,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2); // 2 uncaught exceptions
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2); // 2 uncaught exceptions
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2004,7 +2007,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -2048,7 +2051,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2111,7 +2114,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -2150,7 +2153,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2207,7 +2210,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2266,7 +2269,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2331,7 +2334,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2393,7 +2396,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2458,7 +2461,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2509,7 +2512,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack2.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2562,7 +2565,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack2.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2617,7 +2620,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack2.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2662,7 +2665,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2710,7 +2713,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2760,7 +2763,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -2819,7 +2822,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
@@ -2869,7 +2872,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("TestEnum.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -2908,7 +2911,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("TestEnum.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -2948,7 +2951,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("TestEnum.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -2987,7 +2990,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("TestEnum.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -3012,7 +3015,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnimplementedMethodsWithAnnotations() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, "test.NonNull");
 		hashtable.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "test.Nullable");
 		JavaCore.setOptions(hashtable);
@@ -3052,7 +3055,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		
-		ArrayList proposals= collectCorrections(cu, astRoot, 3, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, 2);
 		
 		assertCorrectLabels(proposals);
 		
@@ -3113,7 +3116,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 
@@ -3135,7 +3138,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnimplementedMethodsWithAnnotations3() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
 		hashtable.put(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, "annots.NonNull");
 		hashtable.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "annots.Nullable");
@@ -3185,7 +3188,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		
-		ArrayList proposals= collectCorrections(cu, astRoot, 3, 2); // 2 warnings regarding redundant null annotations
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, 2); // 2 warnings regarding redundant null annotations
 		
 		assertCorrectLabels(proposals);
 		
@@ -3212,7 +3215,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnimplementedMethodsWithAnnotations4() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
 		hashtable.put(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, "annots.NonNull");
 		hashtable.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "annots.Nullable");
@@ -3264,7 +3267,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		
-		ArrayList proposals= collectCorrections(cu, astRoot, 1, 0);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, 0);
 		
 		assertCorrectLabels(proposals);
 		
@@ -3292,7 +3295,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnimplementedMethodsWithAnnotations5() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
 		hashtable.put(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, "annots.NonNull");
 		hashtable.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "annots.Nullable");
@@ -3343,7 +3346,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		
-		ArrayList proposals= collectCorrections(cu, astRoot, 1, 0);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, 0);
 		
 		assertCorrectLabels(proposals);
 		
@@ -3386,7 +3389,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -3437,7 +3440,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -3480,7 +3483,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 	
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 	
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -3521,7 +3524,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 	
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 	
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -3563,7 +3566,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -3602,7 +3605,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -3641,7 +3644,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -3694,7 +3697,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -3713,7 +3716,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUndefinedConstructorWithLineBreaks() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "30");
 		String optionValue= DefaultCodeFormatterConstants.createAlignmentValue(false, DefaultCodeFormatterConstants.WRAP_ONE_PER_LINE, DefaultCodeFormatterConstants.INDENT_DEFAULT);
 		hashtable.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_CONSTRUCTOR_DECLARATION, optionValue);
@@ -3736,7 +3739,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -3783,7 +3786,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -3824,7 +3827,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -3863,7 +3866,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -3896,7 +3899,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("F.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -3940,7 +3943,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -3976,7 +3979,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -3998,7 +4001,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedPrivateField() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -4011,7 +4014,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -4042,7 +4045,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedPrivateField1() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -4055,7 +4058,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -4087,7 +4090,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedPrivateField2() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -4103,7 +4106,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -4137,7 +4140,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedPrivateField3() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -4157,7 +4160,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -4196,7 +4199,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedPrivateFieldBug328481() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -4217,7 +4220,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -4258,7 +4261,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedVariable() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -4278,7 +4281,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -4311,7 +4314,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedVariable1() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -4330,7 +4333,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -4360,7 +4363,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedVariable2() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -4378,7 +4381,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -4407,7 +4410,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedVariable4() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER_INCLUDE_DOC_COMMENT_REFERENCE, JavaCore.DISABLED);
@@ -4426,7 +4429,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -4445,7 +4448,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedVariable5() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -4459,7 +4462,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -4487,7 +4490,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedVariable6() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -4502,7 +4505,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -4535,7 +4538,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 
 	public void testUnusedVariable7() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -4554,7 +4557,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -4587,7 +4590,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedVariable8() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -4607,7 +4610,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -4644,7 +4647,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedVariableBug328481_1() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -4666,7 +4669,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -4695,7 +4698,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedVariableBug328481_2() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -4715,7 +4718,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -4746,7 +4749,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedVariableAsSwitchStatement() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -4768,7 +4771,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -4807,7 +4810,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedVariableBug120579() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -4824,7 +4827,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 0);
 		assertCorrectLabels(proposals);
 	}
@@ -4832,7 +4835,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 	public void testUnusedVariableWithSideEffectAssignments() throws Exception {
 		// https://bugs.eclipse.org/421717
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 		
@@ -4848,7 +4851,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -4878,7 +4881,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	
 	public void testUnusedVariableWithSideEffectAssignments2() throws Exception {
 		// https://bugs.eclipse.org/421717
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 	
@@ -4898,7 +4901,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 	
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 	
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -4931,7 +4934,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 	public void testUnusedVariableWithSideEffectAssignments3() throws Exception {
 		// https://bugs.eclipse.org/421717
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 	
@@ -4949,7 +4952,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 	
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 	
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -4987,7 +4990,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 	public void testUnusedVariableWithSideEffectAssignments4() throws Exception {
 		// https://bugs.eclipse.org/421717
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 	
@@ -5005,7 +5008,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 	
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 	
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -5040,7 +5043,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedParam() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -5059,7 +5062,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -5096,7 +5099,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedParam2() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -5114,7 +5117,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -5147,7 +5150,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedParamBug328481() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PARAMETER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -5168,7 +5171,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -5205,7 +5208,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedPrivateMethod() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5222,7 +5225,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -5238,7 +5241,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedPrivateConstructor() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5255,7 +5258,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -5272,7 +5275,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedPrivateType() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5289,7 +5292,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -5306,7 +5309,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnecessaryCast1() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5321,7 +5324,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -5339,7 +5342,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnecessaryCast2() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5354,7 +5357,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -5372,7 +5375,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnecessaryCast3() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5387,7 +5390,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -5405,7 +5408,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnecessaryCastBug335173_1() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5420,7 +5423,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -5438,7 +5441,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnecessaryCastBug335173_2() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5453,7 +5456,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -5471,7 +5474,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testSuperfluousSemicolon() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_EMPTY_STATEMENT, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5486,7 +5489,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -5504,7 +5507,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testIndirectStaticAccess1() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5535,7 +5538,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -5555,7 +5558,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testIndirectStaticAccess2() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5587,7 +5590,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -5609,7 +5612,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 	public void testIndirectStaticAccess_bug40880() throws Exception {
 
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5646,7 +5649,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -5665,7 +5668,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 	public void testIndirectStaticAccess_bug32022() throws Exception {
 
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5696,7 +5699,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -5726,7 +5729,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testIndirectStaticAccess_bug307407() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5744,7 +5747,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -5783,7 +5786,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 
 	public void testUnnecessaryInstanceof1() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5798,7 +5801,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -5816,7 +5819,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnecessaryInstanceof2() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5833,7 +5836,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -5853,7 +5856,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnecessaryThrownException1() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5871,7 +5874,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -5908,7 +5911,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnecessaryThrownException2() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -5930,7 +5933,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -5973,7 +5976,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnecessaryThrownException3() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_DECLARED_THROWN_EXCEPTION_INCLUDE_DOC_COMMENT_REFERENCE, JavaCore.DISABLED);
 		JavaCore.setOptions(hashtable);
@@ -5998,7 +6001,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -6025,7 +6028,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 
 	public void testUnqualifiedFieldAccess1() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -6041,7 +6044,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -6059,7 +6062,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnqualifiedFieldAccess2() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -6083,7 +6086,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -6101,7 +6104,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnqualifiedFieldAccess3() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6126,7 +6129,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -6144,7 +6147,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnqualifiedFieldAccess4() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6165,7 +6168,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -6187,7 +6190,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnqualifiedFieldAccess_bug50960() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6211,7 +6214,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -6229,7 +6232,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnqualifiedFieldAccess_bug88313() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6256,7 +6259,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -6277,7 +6280,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnqualifiedFieldAccess_bug115277() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6308,13 +6311,13 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("F.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 	}
 
 	public void testUnqualifiedFieldAccess_bug138325_1() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6331,7 +6334,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -6349,7 +6352,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnqualifiedFieldAccess_bug138325_2() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6370,7 +6373,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -6392,7 +6395,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnqualifiedFieldAccessWithGenerics() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6419,7 +6422,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -6440,7 +6443,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testHidingVariable1() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6457,14 +6460,14 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		assertTrue(proposals.get(0) instanceof LinkedNamesAssistProposal);
 	}
 
 	public void testHidingVariable2() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6480,14 +6483,14 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		assertTrue(proposals.get(0) instanceof LinkedNamesAssistProposal);
 	}
 
 	public void testHidingVariable3() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6505,14 +6508,14 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		assertTrue(proposals.get(0) instanceof LinkedNamesAssistProposal);
 	}
 
 	public void testHidingVariable4() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6531,14 +6534,14 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		assertTrue(proposals.get(0) instanceof LinkedNamesAssistProposal);
 	}
 
 	public void testHidingVariable5() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6558,14 +6561,14 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		assertTrue(proposals.get(0) instanceof LinkedNamesAssistProposal);
 	}
 
 	public void testHidingVariable6() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6584,14 +6587,14 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		assertTrue(proposals.get(0) instanceof LinkedNamesAssistProposal);
 	}
 
 	public void testSetParenteses1() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6608,7 +6611,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -6628,7 +6631,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testSetParenteses2() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.ERROR);
 		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
@@ -6644,7 +6647,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -6663,7 +6666,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnecessaryElse1() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_ELSE, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -6682,7 +6685,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -6703,7 +6706,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 	}
 	public void testUnnecessaryElse2() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_ELSE, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -6723,7 +6726,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -6746,7 +6749,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnecessaryElse3() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_ELSE, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -6764,7 +6767,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -6786,7 +6789,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnecessaryElse4() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_ELSE, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -6807,7 +6810,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -6832,7 +6835,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnecessaryElse5() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_ELSE, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -6855,7 +6858,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -6881,7 +6884,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testInterfaceExtendsClass() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_ELSE, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -6894,7 +6897,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -6922,7 +6925,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveUnreachableCodeStmt() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNNECESSARY_ELSE, JavaCore.IGNORE);
 		JavaCore.setOptions(hashtable);
 
@@ -6941,7 +6944,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -6980,7 +6983,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 	
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 	
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -7018,7 +7021,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -7036,7 +7039,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeIfThen() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 		
@@ -7055,7 +7058,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
@@ -7092,7 +7095,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testRemoveDeadCodeIfThen2() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -7114,7 +7117,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -7157,7 +7160,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeIfThen3() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -7179,7 +7182,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -7223,7 +7226,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeIfThen4() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -7243,7 +7246,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -7285,7 +7288,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeIfThen5() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -7305,7 +7308,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -7346,7 +7349,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeIfThenSwitch() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -7375,7 +7378,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -7431,7 +7434,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testRemoveDeadCodeIfElse() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 		
@@ -7450,7 +7453,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
@@ -7487,7 +7490,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testRemoveDeadCodeAfterIf() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 		
@@ -7503,7 +7506,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
@@ -7537,7 +7540,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testRemoveDeadCodeAfterIf2() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -7555,7 +7558,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -7594,7 +7597,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeAfterIf3() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -7612,7 +7615,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -7668,7 +7671,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeAfterIf4() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -7686,7 +7689,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -7742,7 +7745,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeAfterIf5() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -7760,7 +7763,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -7799,7 +7802,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeAfterIf6() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -7817,7 +7820,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -7856,7 +7859,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeAfterIf7() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -7874,7 +7877,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -7913,7 +7916,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeAfterIf8() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -7931,7 +7934,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -7970,7 +7973,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeAfterIf9() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -7988,7 +7991,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -8044,7 +8047,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeAfterIf10() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -8062,7 +8065,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -8101,7 +8104,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeAfterIf11() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 		
@@ -8119,7 +8122,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
@@ -8158,7 +8161,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeAfterIf12() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 		
@@ -8176,7 +8179,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
@@ -8215,7 +8218,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeAfterIf13() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 		
@@ -8233,7 +8236,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
@@ -8272,7 +8275,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeConditional() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 		
@@ -8287,7 +8290,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
@@ -8320,7 +8323,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testRemoveDeadCodeConditional2() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 		
@@ -8336,7 +8339,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
@@ -8354,7 +8357,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testRemoveDeadCodeConditional3() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 		
@@ -8369,7 +8372,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
@@ -8386,7 +8389,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testRemoveDeadCodeMultiStatements() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 		
@@ -8405,7 +8408,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
@@ -8442,7 +8445,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testRemoveUnreachableCodeMultiStatementsSwitch() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_DEAD_CODE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 		
@@ -8468,7 +8471,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
@@ -8495,7 +8498,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testUnusedObjectAllocation1() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_UNUSED_OBJECT_ALLOCATION, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 		
@@ -8514,7 +8517,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 5);
@@ -8591,7 +8594,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testUnusedObjectAllocation2() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_UNUSED_OBJECT_ALLOCATION, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 		
@@ -8607,7 +8610,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 6);
@@ -8679,7 +8682,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedObjectAllocation3() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_UNUSED_OBJECT_ALLOCATION, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -8697,7 +8700,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 5);
@@ -8720,7 +8723,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnessecaryNLSTag1() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -8734,7 +8737,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -8761,7 +8764,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnessecaryNLSTag2() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -8775,7 +8778,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -8802,7 +8805,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnessecaryNLSTag3() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -8817,7 +8820,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -8846,7 +8849,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnessecaryNLSTag4() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -8861,7 +8864,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -8890,7 +8893,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnessecaryNLSTag5() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -8905,7 +8908,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -8934,7 +8937,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnnessecaryNLSTag6() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -8949,7 +8952,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -8992,7 +8995,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -9037,7 +9040,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -9081,7 +9084,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -9113,12 +9116,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 4);
@@ -9153,12 +9156,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 4);
@@ -9195,7 +9198,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -9234,7 +9237,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -9274,7 +9277,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -9307,7 +9310,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Requires1.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -9326,7 +9329,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 
 	public void testTypeParametersToRawTypeReference01() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -9342,7 +9345,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 4);
@@ -9385,7 +9388,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testTypeParametersToRawTypeReference02() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -9401,7 +9404,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 4);
@@ -9462,7 +9465,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 //
 //		CompilationUnit astRoot= getASTRoot(cu);
-//		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+//		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 //
 //		assertCorrectLabels(proposals);
 //		assertNumberOfProposals(proposals, 3);
@@ -9513,7 +9516,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 //
 //		CompilationUnit astRoot= getASTRoot(cu);
-//		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+//		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 //
 //		assertCorrectLabels(proposals);
 //		assertNumberOfProposals(proposals, 3);
@@ -9568,7 +9571,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 //
 //		CompilationUnit astRoot= getASTRoot(cu);
-//		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+//		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 //
 //		assertCorrectLabels(proposals);
 //		assertNumberOfProposals(proposals, 3);
@@ -9601,7 +9604,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //	}
 
 	public void testTypeParametersToRawTypeReference06() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -9616,7 +9619,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 4);
@@ -9655,7 +9658,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testTypeParametersToRawTypeReference07() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -9672,7 +9675,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 3);
@@ -9706,7 +9709,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testTypeParametersToRawTypeReference08() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -9726,7 +9729,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 3);
@@ -9766,7 +9769,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testTypeParametersToRawTypeReference09() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -9781,7 +9784,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 3);
@@ -9811,7 +9814,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testTypeParametersToRawTypeReferenceBug212557() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 		
@@ -9826,7 +9829,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
@@ -9846,7 +9849,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testTypeParametersToRawTypeReferenceBug280193() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 		
@@ -9863,7 +9866,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
@@ -9894,7 +9897,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testSwitchCaseFallThrough1() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_FALLTHROUGH_CASE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -9916,7 +9919,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 3);
@@ -9977,7 +9980,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testSwitchCaseFallThrough2() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_FALLTHROUGH_CASE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -9999,7 +10002,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 3);
@@ -10060,7 +10063,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testSwitchCaseFallThrough3() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_FALLTHROUGH_CASE, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
@@ -10083,7 +10086,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 3);
@@ -10163,7 +10166,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, 1);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -10205,7 +10208,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 3, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, 2);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -10231,7 +10234,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testCollectionsFieldMethodReplacement() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_PB_TYPE_PARAMETER_HIDING, JavaCore.WARNING);
@@ -10250,7 +10253,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("CollectionsTest.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 3);
@@ -10271,7 +10274,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testCollectionsFieldMethodReplacement2() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_PB_TYPE_PARAMETER_HIDING, JavaCore.WARNING);
@@ -10293,7 +10296,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("CollectionsTest.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 3);
@@ -10317,7 +10320,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testCollectionsFieldMethodReplacement3() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_PB_TYPE_PARAMETER_HIDING, JavaCore.WARNING);
@@ -10338,7 +10341,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("CollectionsTest.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 3);
@@ -10361,7 +10364,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testMissingEnumConstantsInCase1() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);
 
@@ -10385,7 +10388,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 3);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -10437,7 +10440,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testMissingEnumConstantsInCase2() throws Exception {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);
 		JavaCore.setOptions(options);
@@ -10461,7 +10464,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -10514,7 +10517,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 	public void testMissingEnumConstantsInCase3() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=372840
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_PB_SWITCH_MISSING_DEFAULT_CASE, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);
@@ -10543,7 +10546,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -10577,7 +10580,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 	public void testMissingEnumConstantsInCase4() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=379086
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH, JavaCore.WARNING);
 		options.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);
 
@@ -10604,7 +10607,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 3);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -10676,7 +10679,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 	
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 	
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -10721,7 +10724,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testUnusedTypeParameter1() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_TYPE_PARAMETER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -10734,7 +10737,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -10762,7 +10765,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 	public void testUnusedTypeParameter2() throws Exception {
 
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_TYPE_PARAMETER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -10779,7 +10782,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -10812,7 +10815,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 
 	public void testUnusedTypeParameter3() throws Exception {
-		Hashtable hashtable= JavaCore.getOptions();
+		Hashtable<String, String> hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNUSED_TYPE_PARAMETER, JavaCore.ERROR);
 		JavaCore.setOptions(hashtable);
 
@@ -10825,7 +10828,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -10872,12 +10875,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(saveOptions);
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
-			List proposals= collectCorrections(cu, getASTRoot(cu), 3, null);
+			List<IJavaCompletionProposal> proposals= collectCorrections(cu, getASTRoot(cu), 3, null);
 
 			assertNumberOfProposals(proposals, 2);
 			assertCorrectLabels(proposals);
@@ -10936,12 +10939,12 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap(saveOptions);
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
-			List proposals= collectCorrections(cu, getASTRoot(cu));
+			List<IJavaCompletionProposal> proposals= collectCorrections(cu, getASTRoot(cu));
 
 			assertNumberOfProposals(proposals, 2);
 			assertCorrectLabels(proposals);
@@ -11001,13 +11004,13 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		Map saveOptions= fJProject1.getOptions(false);
-		Map newOptions= new HashMap();
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>();
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, newOptions);
 		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
 		try {
 			fJProject1.setOptions(newOptions);
-			List proposals= collectCorrections(cu, getASTRoot(cu), 3, null);
+			List<IJavaCompletionProposal> proposals= collectCorrections(cu, getASTRoot(cu), 3, null);
 
 			assertNumberOfProposals(proposals, 1);
 			assertCorrectLabels(proposals);
@@ -11053,7 +11056,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		ArrayList proposals= collectCorrections2(cu, 1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
@@ -11107,7 +11110,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		List proposals= collectAllCorrections(cu, astRoot, 9);
+		List<ICompletionProposal> proposals= collectAllCorrections(cu, astRoot, 9);
 		assertNumberOfProposals(proposals, 0);
 		
 		IProblem[] problems= astRoot.getProblems();
@@ -11136,7 +11139,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Lambda.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);

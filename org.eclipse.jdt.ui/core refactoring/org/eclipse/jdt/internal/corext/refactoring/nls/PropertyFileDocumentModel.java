@@ -113,8 +113,9 @@ public class PropertyFileDocumentModel {
      */
     public void insert(KeyValuePair[] keyValuePairs, TextChange change) {
 
-        ArrayList<KeyValuePair> sorted= new ArrayList<KeyValuePair>(Arrays.asList(keyValuePairs));
+        ArrayList<KeyValuePair> sorted= new ArrayList<>(Arrays.asList(keyValuePairs));
         Collections.sort(sorted, new Comparator<KeyValuePair>() {
+			@Override
 			public int compare(KeyValuePair p1, KeyValuePair p2) {
 				return Collator.getInstance().compare(p1.fKey, p2.fKey);
 			}
@@ -151,7 +152,7 @@ public class PropertyFileDocumentModel {
     }
 
     private int findInsertPosition(KeyValuePairModell keyValuePair) {
-    	ArrayList<String> keys= new ArrayList<String>();
+    	ArrayList<String> keys= new ArrayList<>();
         for (int i= 0; i < fKeyValuePairs.size(); i++) {
             KeyValuePairModell element = fKeyValuePairs.get(i);
             if (! (element instanceof LastKeyValuePair))
@@ -167,7 +168,7 @@ public class PropertyFileDocumentModel {
     }
 
     private void parsePropertyDocument(IDocument document) {
-        fKeyValuePairs = new ArrayList<KeyValuePairModell>();
+        fKeyValuePairs = new ArrayList<>();
 
         SimpleLineReader reader = new SimpleLineReader(document);
         int offset = 0;

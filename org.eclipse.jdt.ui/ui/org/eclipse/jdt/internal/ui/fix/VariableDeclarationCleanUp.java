@@ -35,9 +35,6 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 		super();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(requireAST(), false, false, null);
@@ -53,9 +50,6 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit compilationUnit= context.getAST();
@@ -72,12 +66,9 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String[] getStepDescriptions() {
-		List<String> result= new ArrayList<String>();
+		List<String> result= new ArrayList<>();
 		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS))
 			result.add(MultiFixMessages.VariableDeclarationCleanUp_AddFinalField_description);
 		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS))
@@ -88,9 +79,6 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 		return result.toArray(new String[result.size()]);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();

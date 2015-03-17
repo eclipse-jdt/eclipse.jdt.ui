@@ -60,9 +60,7 @@ public final class LoggedCreateTargetQueries implements ICreateTargetQueries {
 			project.setRawClasspath(list.toArray(new IClasspathEntry[list.size()]), new NullProgressMonitor());
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public Object getCreatedTarget(final Object selection) {
 			final Object target= fLog.getCreatedElement(selection);
 			if (target instanceof IPackageFragment) {
@@ -96,9 +94,7 @@ public final class LoggedCreateTargetQueries implements ICreateTargetQueries {
 			return target;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public String getNewButtonLabel() {
 			return "unused"; //$NON-NLS-1$
 		}
@@ -118,9 +114,7 @@ public final class LoggedCreateTargetQueries implements ICreateTargetQueries {
 		fLog= log;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public ICreateTargetQuery createNewPackageQuery() {
 		return new CreateTargetQuery();
 	}

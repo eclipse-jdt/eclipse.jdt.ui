@@ -60,9 +60,6 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.PROMOTE_TEMP_TO_FIELD_ACTION);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
@@ -83,9 +80,6 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))

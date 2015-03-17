@@ -158,9 +158,11 @@ public class SelectionButtonDialogFieldGroup extends DialogField {
 			fButtonComposite.setLayout(layout);
 
 			SelectionListener listener= new SelectionListener() {
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					doWidgetSelected(e);
 				}
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					doWidgetSelected(e);
 				}
@@ -262,9 +264,6 @@ public class SelectionButtonDialogFieldGroup extends DialogField {
 	}
 
 
-	/*(non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#refresh()
-	 */
 	@Override
 	public void refresh() {
 		super.refresh();

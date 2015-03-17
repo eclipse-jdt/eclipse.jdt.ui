@@ -178,7 +178,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 				URL newURL= fDestination.toFile().toURI().toURL();
 				String newExternalForm= newURL.toExternalForm();
-				List<IJavaProject> projs= new ArrayList<IJavaProject>();
+				List<IJavaProject> projs= new ArrayList<>();
 				//get javadoc locations for all projects
 				for (int i= 0; i < checkedProjects.length; i++) {
 					IJavaProject curr= checkedProjects[i];
@@ -236,9 +236,6 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		fLastWizardPage.updateStore();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.IWizard#performCancel()
-	 */
 	@Override
 	public boolean performCancel() {
 		updateStore();
@@ -284,8 +281,8 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	private boolean executeJavadocGeneration() {
 		Process process= null;
 		try {
-			ArrayList<String> vmArgs= new ArrayList<String>();
-			ArrayList<String> progArgs= new ArrayList<String>();
+			ArrayList<String> vmArgs= new ArrayList<>();
+			ArrayList<String> progArgs= new ArrayList<>();
 
 			IStatus status= fStore.getArgumentArray(vmArgs, progArgs);
 			if (!status.isOK()) {
@@ -420,6 +417,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		fLastWizardPage.init();
 	}
 
+	@Override
 	public void init(IWorkbench workbench, IStructuredSelection structuredSelection) {
 		IWorkbenchWindow window= workbench.getActiveWorkbenchWindow();
 		List<?> selected= Collections.EMPTY_LIST;
@@ -471,6 +469,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			fFile= file;
 		}
 
+		@Override
 		public void launchesTerminated(ILaunch[] launches) {
 			if (containsJavadocLaunch(launches)) {
 				onTerminated();
@@ -494,6 +493,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			}
 		}
 
+		@Override
 		public void launchesRemoved(ILaunch[] launches) {
 			if (containsJavadocLaunch(launches)) {
 				try {
@@ -505,7 +505,9 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			}
 		}
 
+		@Override
 		public void launchesAdded(ILaunch[] launches) { }
+		@Override
 		public void launchesChanged(ILaunch[] launches) { }
 	}
 

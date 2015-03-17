@@ -186,7 +186,7 @@ public class BuildPathsBlock {
 
 		};
 
-		fClassPathList= new CheckedListDialogField<CPListElement>(adapter, buttonLabels, new CPListLabelProvider());
+		fClassPathList= new CheckedListDialogField<>(adapter, buttonLabels, new CPListLabelProvider());
 		fClassPathList.setDialogFieldListener(adapter);
 		fClassPathList.setLabelText(NewWizardMessages.BuildPathsBlock_classpath_label);
 		fClassPathList.setUpButtonIndex(IDX_UP);
@@ -330,7 +330,7 @@ public class BuildPathsBlock {
 			newClassPath= getDefaultClassPath(jproject);
 		}
 
-		List<CPListElement> exportedEntries = new ArrayList<CPListElement>();
+		List<CPListElement> exportedEntries = new ArrayList<>();
 		for (int i= 0; i < newClassPath.size(); i++) {
 			CPListElement curr= newClassPath.get(i);
 			if (curr.isExported() || curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
@@ -365,6 +365,7 @@ public class BuildPathsBlock {
 			doUpdateUI();
 		} else {
 			Display.getDefault().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					if (fSWTWidget == null || fSWTWidget.isDisposed()) {
 						return;
@@ -417,7 +418,7 @@ public class BuildPathsBlock {
 
 	private ArrayList<CPListElement> getCPListElements(IClasspathEntry[] classpathEntries, IClasspathEntry[] existingEntries) {
 		List<IClasspathEntry> existing= existingEntries == null ? Collections.<IClasspathEntry>emptyList() : Arrays.asList(existingEntries);
-		ArrayList<CPListElement> newClassPath= new ArrayList<CPListElement>();
+		ArrayList<CPListElement> newClassPath= new ArrayList<>();
 		for (int i= 0; i < classpathEntries.length; i++) {
 			IClasspathEntry curr= classpathEntries[i];
 			newClassPath.add(CPListElement.create(curr, ! existing.contains(curr), fCurrJProject));
@@ -465,7 +466,7 @@ public class BuildPathsBlock {
 	// -------- evaluate default settings --------
 
 	private List<CPListElement> getDefaultClassPath(IJavaProject jproj) {
-		List<CPListElement> list= new ArrayList<CPListElement>();
+		List<CPListElement> list= new ArrayList<>();
 		IResource srcFolder;
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		String sourceFolderName= store.getString(PreferenceConstants.SRCBIN_SRCNAME);
@@ -495,23 +496,28 @@ public class BuildPathsBlock {
 	private class BuildPathAdapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter<CPListElement> {
 
 		// -------- IStringButtonAdapter --------
+		@Override
 		public void changeControlPressed(DialogField field) {
 			buildPathChangeControlPressed(field);
 		}
 
 		// ---------- IDialogFieldListener --------
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			buildPathDialogFieldChanged(field);
 		}
 
 		// ---------- IListAdapter --------
+		@Override
 		public void customButtonPressed(ListDialogField<CPListElement> field, int index) {
 			buildPathCustomButtonPressed(field, index);
 		}
 
+		@Override
 		public void doubleClicked(ListDialogField<CPListElement> field) {
 		}
 
+		@Override
 		public void selectionChanged(ListDialogField<CPListElement> field) {
 			updateTopButtonEnablement();
 		}
@@ -943,9 +949,11 @@ public class BuildPathsBlock {
 
 	public static IRemoveOldBinariesQuery getRemoveOldBinariesQuery(final Shell shell) {
 		return new IRemoveOldBinariesQuery() {
+			@Override
 			public boolean doQuery(final boolean removeFolder, final IPath oldOutputLocation) throws OperationCanceledException {
 				final int[] res= new int[] { 1 };
 				Display.getDefault().syncExec(new Runnable() {
+					@Override
 					public void run() {
 						Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
 						String title= NewWizardMessages.BuildPathsBlock_RemoveBinariesDialog_title;
@@ -977,7 +985,7 @@ public class BuildPathsBlock {
 		Class<?>[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
 		ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 		IProject[] allProjects= fWorkspaceRoot.getProjects();
-		ArrayList<IProject> rejectedElements= new ArrayList<IProject>(allProjects.length);
+		ArrayList<IProject> rejectedElements= new ArrayList<>(allProjects.length);
 		IProject currProject= fCurrJProject.getProject();
 		for (int i= 0; i < allProjects.length; i++) {
 			if (!allProjects[i].equals(currProject)) {
@@ -1083,7 +1091,7 @@ public class BuildPathsBlock {
 					}
 				}
 				BuildPathBasePage page= (BuildPathBasePage) fTabFolder.getItem(pageIndex).getData();
-				List<Object> selection= new ArrayList<Object>(1);
+				List<Object> selection= new ArrayList<>(1);
 				selection.add(elementToSelect);
 				page.setSelection(selection, true);
 			}

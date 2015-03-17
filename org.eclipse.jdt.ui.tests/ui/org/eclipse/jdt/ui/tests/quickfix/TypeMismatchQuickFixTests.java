@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,9 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -47,6 +44,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
@@ -54,9 +52,12 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class TypeMismatchQuickFixTests extends QuickFixTest {
 
-	private static final Class THIS= TypeMismatchQuickFixTests.class;
+	private static final Class<TypeMismatchQuickFixTests> THIS= TypeMismatchQuickFixTests.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -74,8 +75,9 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
@@ -97,6 +99,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
@@ -114,7 +117,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -180,7 +183,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -241,7 +244,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -282,7 +285,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -362,7 +365,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
@@ -457,7 +460,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
@@ -565,7 +568,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
@@ -660,7 +663,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -714,7 +717,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 	public void testTypeMismatchForParameterizedType() throws Exception {
 		Map<String, String> options= fJProject1.getOptions(false);
 		try {
-			Map<String, String> tempOptions= new HashMap<String, String>(options);
+			Map<String, String> tempOptions= new HashMap<>(options);
 			tempOptions.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.WARNING);
 			tempOptions.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 			fJProject1.setOptions(tempOptions);
@@ -731,7 +734,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 			CompilationUnit astRoot= getASTRoot(cu);
-			ArrayList proposals= collectCorrections(cu, astRoot);
+			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 			assertCorrectLabels(proposals);
 			assertNumberOfProposals(proposals, 5);
 		
@@ -779,7 +782,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -828,7 +831,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -869,7 +872,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
@@ -904,7 +907,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -954,7 +957,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1006,7 +1009,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1069,7 +1072,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
@@ -1128,7 +1131,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1185,7 +1188,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1236,7 +1239,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1290,7 +1293,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1342,7 +1345,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1379,7 +1382,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		
@@ -1406,7 +1409,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 	public void testMismatchingReturnTypeOnGenericMethod14() throws Exception {
 		Map<String, String> options= fJProject1.getOptions(false);
 		try {
-			Map<String, String> options14= new HashMap<String, String>(options);
+			Map<String, String> options14= new HashMap<>(options);
 			JavaModelUtil.setComplianceOptions(options14, JavaCore.VERSION_1_4);
 			fJProject1.setOptions(options14);
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1425,7 +1428,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 			
 			CompilationUnit astRoot= getASTRoot(cu);
-			ArrayList proposals= collectCorrections(cu, astRoot);
+			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 			assertNumberOfProposals(proposals, 1);
 			assertCorrectLabels(proposals);
 			
@@ -1474,7 +1477,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1506,7 +1509,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1552,7 +1555,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1605,7 +1608,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1662,7 +1665,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1735,7 +1738,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1804,7 +1807,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -1848,7 +1851,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -1881,7 +1884,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -1923,7 +1926,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -1956,7 +1959,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -1990,7 +1993,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -2023,7 +2026,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("TestShort.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -2073,7 +2076,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -2115,7 +2118,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -2155,7 +2158,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -2195,7 +2198,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -2235,7 +2238,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -2272,7 +2275,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot, 3, 2);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, 2);
 		
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 1);
@@ -2307,7 +2310,7 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -2356,12 +2359,12 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 3);
 
-		ICompletionProposal proposal= (ICompletionProposal) proposals.get(0);
+		ICompletionProposal proposal= proposals.get(0);
 		assertTrue(proposal.getDisplayString().indexOf("Integer") != -1);
 		
 		String[] expected= new String[3];
@@ -2418,18 +2421,18 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 3);
 
-		ICompletionProposal proposal= (ICompletionProposal) proposals.get(0);
+		ICompletionProposal proposal= proposals.get(0);
 		assertTrue(proposal.getDisplayString().indexOf("Integer") == -1);
 		
-		ICompletionProposal proposal2= (ICompletionProposal) proposals.get(1);
+		ICompletionProposal proposal2= proposals.get(1);
 		assertTrue(proposal2.getDisplayString().indexOf("Integer") == -1);
 		
-		ICompletionProposal proposal3= (ICompletionProposal) proposals.get(2);
+		ICompletionProposal proposal3= proposals.get(2);
 		assertTrue(proposal3.getDisplayString().indexOf("Integer") == -1);
 		
 		String[] expected= new String[3];

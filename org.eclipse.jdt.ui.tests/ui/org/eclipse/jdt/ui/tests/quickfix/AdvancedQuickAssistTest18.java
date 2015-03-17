@@ -13,9 +13,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.Hashtable;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -33,14 +30,18 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class AdvancedQuickAssistTest18 extends QuickFixTest {
 
-	private static final Class THIS= AdvancedQuickAssistTest18.class;
+	private static final Class<AdvancedQuickAssistTest18> THIS= AdvancedQuickAssistTest18.class;
 
 	private IJavaProject fJProject1;
 
@@ -59,8 +60,9 @@ public class AdvancedQuickAssistTest18 extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 
@@ -78,6 +80,7 @@ public class AdvancedQuickAssistTest18 extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
@@ -138,7 +141,7 @@ public class AdvancedQuickAssistTest18 extends QuickFixTest {
 
 		String str= "if (n1 == 0)";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		StringBuffer buf1= new StringBuffer();
@@ -404,7 +407,7 @@ public class AdvancedQuickAssistTest18 extends QuickFixTest {
 
 		String str= "if (x != 100)"; // #foo does not return void
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.AdvancedQuickAssistProcessor_convertToIfReturn);

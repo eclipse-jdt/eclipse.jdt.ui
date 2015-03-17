@@ -29,9 +29,7 @@ import org.eclipse.debug.ui.sourcelookup.SourceLookupTab;
 
 public class JUnitTabGroup extends AbstractLaunchConfigurationTabGroup {
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.ILaunchConfigurationTabGroup#createTabs(org.eclipse.debug.ui.ILaunchConfigurationDialog, java.lang.String)
-	 */
+	@Override
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		ILaunchConfigurationTab[] tabs= new ILaunchConfigurationTab[] {
 			new JUnitLaunchConfigurationTab(),
@@ -45,9 +43,6 @@ public class JUnitTabGroup extends AbstractLaunchConfigurationTabGroup {
 		setTabs(tabs);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup#setDefaults(org.eclipse.debug.core.ILaunchConfigurationWorkingCopy)
-	 */
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
 		super.setDefaults(config);

@@ -87,16 +87,10 @@ public class OpenAttachedJavadocAction extends SelectionDispatchAction {
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canEnableFor(selection));
@@ -114,9 +108,6 @@ public class OpenAttachedJavadocAction extends SelectionDispatchAction {
 		return selection.getFirstElement() instanceof IJavaElement;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		IJavaElement element= SelectionConverter.getInput(fEditor);
@@ -141,9 +132,6 @@ public class OpenAttachedJavadocAction extends SelectionDispatchAction {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		if (!canEnableFor(selection))
@@ -213,6 +201,7 @@ public class OpenAttachedJavadocAction extends SelectionDispatchAction {
 
 	private static void showMessage(final Shell shell, final String message, final boolean isError) {
 		Display.getDefault().asyncExec(new Runnable() {
+			@Override
 			public void run() {
 				if (isError) {
 					MessageDialog.openError(shell, getTitle(), message);

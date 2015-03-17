@@ -118,7 +118,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		}
 		else {
 			IClassFile[] classFiles= fragment.getClassFiles();
-			List<IClassFile> topLevelClassFile= new ArrayList<IClassFile>();
+			List<IClassFile> topLevelClassFile= new ArrayList<>();
 			for (int i= 0; i < classFiles.length; i++) {
 				IType type= classFiles[i].getType();
 				if (type != null && type.getDeclaringType() == null && !type.isAnonymous() && !type.isLocal())
@@ -134,7 +134,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	}
 
 	private Object[] removeImportAndPackageDeclarations(Object[] members) {
-		ArrayList<Object> tempResult= new ArrayList<Object>(members.length);
+		ArrayList<Object> tempResult= new ArrayList<>(members.length);
 		for (int i= 0; i < members.length; i++)
 			if (!(members[i] instanceof IImportContainer) && !(members[i] instanceof IPackageDeclaration))
 				tempResult.add(members[i]);
@@ -153,7 +153,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 
 		// Add import declarations
 		IJavaElement[] members= parent.getChildren();
-		ArrayList<IJavaElement> tempResult= new ArrayList<IJavaElement>(members.length);
+		ArrayList<IJavaElement> tempResult= new ArrayList<>(members.length);
 		for (int i= 0; i < members.length; i++)
 			if ((members[i] instanceof IImportContainer))
 				tempResult.add(members[i]);
@@ -167,7 +167,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			return NO_CHILDREN;
 
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-		List<IJavaElement> list= new ArrayList<IJavaElement>(roots.length);
+		List<IJavaElement> list= new ArrayList<>(roots.length);
 		// filter out package fragments that correspond to projects and
 		// replace them with the package fragments directly
 		for (int i= 0; i < roots.length; i++) {
@@ -186,9 +186,6 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 
 	// ---------------- Element change handling
 
-	/* (non-Javadoc)
-	 * Method declared on IContentProvider.
-	 */
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		super.inputChanged(viewer, oldInput, newInput);
@@ -204,18 +201,13 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		fInput= newInput;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on IContentProvider.
-	 */
 	@Override
 	public void dispose() {
 		super.dispose();
 		JavaCore.removeElementChangedListener(this);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on IElementChangedListener.
-	 */
+	@Override
 	public void elementChanged(final ElementChangedEvent event) {
 		try {
 			processDelta(event.getDelta());
@@ -378,6 +370,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 	 */
 	 private void postUpdateIcon(final IJavaElement element) {
 	 	postRunnable(new Runnable() {
+			@Override
 			public void run() {
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed())
@@ -388,6 +381,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 
 	private void postRefresh(final Object root, final boolean updateLabels) {
 		postRunnable(new Runnable() {
+			@Override
 			public void run() {
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed())
@@ -409,6 +403,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			return;
 
 		postRunnable(new Runnable() {
+			@Override
 			public void run() {
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
@@ -435,7 +430,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 
 	private Object[] getNewElements(Object[] elements) {
 		int elementsLength= elements.length;
-		ArrayList<Object> result= new ArrayList<Object>(elementsLength);
+		ArrayList<Object> result= new ArrayList<>(elementsLength);
 		for (int i= 0; i < elementsLength; i++) {
 			Object element= elements[i];
 			if (fViewer.testFindItem(element) == null)
@@ -453,6 +448,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			return;
 
 		postRunnable(new Runnable() {
+			@Override
 			public void run() {
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
@@ -469,6 +465,7 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 
 	private void postAdjustInputAndSetSelection(final Object element) {
 		postRunnable(new Runnable() {
+			@Override
 			public void run() {
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {

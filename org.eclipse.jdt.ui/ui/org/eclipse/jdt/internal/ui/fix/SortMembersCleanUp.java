@@ -53,9 +53,6 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 		super(options);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit compilationUnit= context.getAST();
@@ -66,16 +63,13 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 		ICleanUpFix fix= SortMembersFix.createCleanUp(compilationUnit, sortMembers, sortMembers && isEnabled(CleanUpConstants.SORT_MEMBERS_ALL));
 		if (fix != null) {
 			if (fTouchedFiles == null) {
-				fTouchedFiles= new HashSet<IResource>();
+				fTouchedFiles= new HashSet<>();
 			}
 			fTouchedFiles.add(((ICompilationUnit)compilationUnit.getJavaElement()).getResource());
 		}
 		return fix;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
 		if (fTouchedFiles == null) {
@@ -108,9 +102,6 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String[] getStepDescriptions() {
 		if (isEnabled(CleanUpConstants.SORT_MEMBERS)) {
@@ -123,9 +114,6 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 		return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
@@ -153,9 +141,6 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 		return buf.toString();
 	}
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
 	public CleanUpRequirements getRequirements() {
     	return new CleanUpRequirements(isEnabled(CleanUpConstants.SORT_MEMBERS), false, false, null);

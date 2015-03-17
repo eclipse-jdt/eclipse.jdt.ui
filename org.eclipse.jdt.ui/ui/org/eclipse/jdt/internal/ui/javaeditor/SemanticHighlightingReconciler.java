@@ -237,9 +237,9 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	private Highlighting[] fHighlightings;
 
 	/** Background job's added highlighted positions */
-	private List<Position> fAddedPositions= new ArrayList<Position>();
+	private List<Position> fAddedPositions= new ArrayList<>();
 	/** Background job's removed highlighted positions */
-	private List<Position> fRemovedPositions= new ArrayList<Position>();
+	private List<Position> fRemovedPositions= new ArrayList<>();
 	/** Number of removed positions */
 	private int fNOfRemovedPositions;
 
@@ -275,6 +275,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
 	 */
+	@Override
 	public void aboutToBeReconciled() {
 		// Do nothing
 	}
@@ -282,6 +283,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(CompilationUnit, boolean, IProgressMonitor)
 	 */
+	@Override
 	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
 		// ensure at most one thread can be reconciling at any time
 		synchronized (fReconcileLock) {
@@ -370,7 +372,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		for (int i= 0, n= subtrees.length; i < n; i++)
 			subtrees[i].accept(fCollector);
 		List<Position> oldPositions= fRemovedPositions;
-		List<Position> newPositions= new ArrayList<Position>(fNOfRemovedPositions);
+		List<Position> newPositions= new ArrayList<>(fNOfRemovedPositions);
 		for (int i= 0, n= oldPositions.size(); i < n; i ++) {
 			Position current= oldPositions.get(i);
 			if (current != null)
@@ -511,6 +513,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	/*
 	 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentAboutToBeChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
 		synchronized (fJobLock) {
 			if (fJob != null) {
@@ -523,6 +526,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	/*
 	 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
 		if (newInput != null)
 			scheduleJob();

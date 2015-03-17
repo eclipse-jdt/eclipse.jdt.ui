@@ -172,6 +172,7 @@ public class BuildPathSupport {
 						File[] files= bundleFile.listFiles(new FilenameFilter() {
 							private String pre= entryInBundle.substring(0, starIdx);
 							private String post= entryInBundle.substring(starIdx + 1);
+							@Override
 							public boolean accept(File dir, String name) {
 								return name.startsWith(pre) && name.endsWith(post);
 							}
@@ -207,6 +208,7 @@ public class BuildPathSupport {
 	public static final JUnitPluginDescription JUNIT4_AS_3_PLUGIN= new JUnitPluginDescription(
 			JUNIT4_PLUGIN.bundleId, JUNIT4_PLUGIN.versionRange, JUNIT4_PLUGIN.bundleRoot, JUNIT4_PLUGIN.binaryImportedRoot,
 			JUNIT4_PLUGIN.sourceBundleId, JUNIT4_PLUGIN.repositorySource, JUNIT3_PLUGIN.javadocPreferenceKey) {
+		@Override
 		public IAccessRule[] getAccessRules() {
 			return new IAccessRule[] {
 					JavaCore.newAccessRule(new Path("junit/"), IAccessRule.K_ACCESSIBLE), //$NON-NLS-1$

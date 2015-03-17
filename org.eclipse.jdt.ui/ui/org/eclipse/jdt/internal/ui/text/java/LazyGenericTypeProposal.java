@@ -102,6 +102,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 		/*
 		 * @see org.eclipse.jface.text.contentassist.IContextInformation#getContextDisplayString()
 		 */
+		@Override
 		public String getContextDisplayString() {
 			return fContextDisplayString;
 		}
@@ -109,6 +110,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 		/*
 		 * @see org.eclipse.jface.text.contentassist.IContextInformation#getImage()
 		 */
+		@Override
 		public Image getImage() {
 			return fImage;
 		}
@@ -116,6 +118,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 		/*
 		 * @see org.eclipse.jface.text.contentassist.IContextInformation#getInformationDisplayString()
 		 */
+		@Override
 		public String getInformationDisplayString() {
 			return fInformationDisplayString;
 		}
@@ -142,6 +145,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 		/*
 		 * @see org.eclipse.jface.text.contentassist.IContextInformationExtension#getContextInformationPosition()
 		 */
+		@Override
 		public int getContextInformationPosition() {
 			return fPosition;
 		}
@@ -477,7 +481,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 		if (!hierarchy.contains(superType))
 			return null; // no path
 
-		List<IType> path= new LinkedList<IType>();
+		List<IType> path= new LinkedList<>();
 		path.add(superType);
 		do {
 			// any sub type must be on a hierarchy chain from superType to subType
@@ -623,7 +627,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 		parser.setResolveBindings(true);
 		parser.setStatementsRecovery(true);
 
-		final Map<String, IBinding> bindings= new HashMap<String, IBinding>();
+		final Map<String, IBinding> bindings= new HashMap<>();
 		ASTRequestor requestor= new ASTRequestor() {
 			@Override
 			public void acceptBinding(String bindingKey, IBinding binding) {
@@ -765,11 +769,13 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 				document.addPosition(secondBracketPosition);
 
 				model.addLinkingListener(new ILinkedModeListener() {
+					@Override
 					public void left(LinkedModeModel environment, int flags) {
 						try {
 							if (getTextViewer().getSelectedRange().y > 1 || flags != ILinkedModeListener.EXTERNAL_MODIFICATION)
 								return;
 							((IDocumentExtension) document).registerPostNotificationReplace(null, new IDocumentExtension.IReplace() {
+								@Override
 								public void perform(IDocument d, IDocumentListener owner) {
 									try {
 										if ((firstBracketPosition.length == 0 || firstBracketPosition.isDeleted) && !secondBracketPosition.isDeleted) {
@@ -786,9 +792,11 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 						}
 					}
 
+					@Override
 					public void suspend(LinkedModeModel environment) {
 					}
 
+					@Override
 					public void resume(LinkedModeModel environment, int flags) {
 					}
 				});

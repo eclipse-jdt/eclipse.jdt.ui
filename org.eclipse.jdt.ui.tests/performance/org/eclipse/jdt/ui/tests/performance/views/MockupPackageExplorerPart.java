@@ -22,6 +22,7 @@ public final class MockupPackageExplorerPart extends PackageExplorerPart {
 		super();
 	}
 
+	@Override
 	public final void createPartControl(Composite parent) {
 		if (fgTest != null) {
 			fgTest.startMeasuring();

@@ -35,11 +35,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  */
 public abstract class AbstractScrollAnnotatedJavaEditorTest extends ScrollEditorTest {
 
+	@Override
 	protected void setUp(AbstractTextEditor editor) throws Exception {
 		super.setUp(editor);
 		createAnnotations(editor);
 	}
 
+	@Override
 	protected String getEditor() {
 		return EditorTestHelper.COMPILATION_UNIT_EDITOR_ID;
 	}
