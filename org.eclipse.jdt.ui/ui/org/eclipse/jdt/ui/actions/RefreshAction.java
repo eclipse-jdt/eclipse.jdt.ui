@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,8 +80,8 @@ public class RefreshAction extends SelectionDispatchAction {
 		}
 
 		@Override
-		protected List<IResource> getSelectedResources() {
-			List<IResource> selectedResources= super.getSelectedResources();
+		protected List<? extends IResource> getSelectedResources() {
+			List<? extends IResource> selectedResources= super.getSelectedResources();
 			if (!getStructuredSelection().isEmpty() && selectedResources.size() == 1 && selectedResources.get(0) instanceof IWorkspaceRoot) {
 				selectedResources= Collections.emptyList(); // Refresh action refreshes root when it can't find any resources in selection
 			}
