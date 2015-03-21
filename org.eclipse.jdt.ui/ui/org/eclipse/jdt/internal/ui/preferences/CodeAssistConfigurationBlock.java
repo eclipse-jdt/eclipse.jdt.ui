@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,10 +7,13 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Christian Georgi<christian.georgi@sap.com> - Bug 462770: Use OS symbol for 'Ctrl'
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.Map;
+
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -29,6 +32,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jface.bindings.keys.SWTKeySupport;
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -42,6 +46,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterHandle;
 import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -376,7 +381,8 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		fCompletionOverwritesRadioButton.addSelectionListener(completionSelectionListener);
 
 		Label label= new Label(completionComposite, SWT.NONE);
-		label.setText(PreferencesMessages.JavaEditorPreferencePage_completionToggleHint);
+		String modifier= SWTKeySupport.getKeyFormatterForPlatform().format(AbstractJavaCompletionProposal.MODIFIER_TOGGLE_COMPLETION_MODE);
+		label.setText(NLS.bind(PreferencesMessages.JavaEditorPreferencePage_completionToggleHint, modifier));
 		GridData gd= new GridData();
 		gd.horizontalIndent= LayoutUtil.getIndent();
 		gd.horizontalSpan= 2;

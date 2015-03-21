@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Christian Georgi<christian.georgi@sap.com> - Bug 462770: Use OS symbol for 'Ctrl'
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -106,6 +107,11 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
  */
 public abstract class AbstractJavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension5, ICompletionProposalExtension6 {
 
+
+	/**
+	 * The key modifier that toggles whether to insert or overwrite
+	 */
+	public static final int MODIFIER_TOGGLE_COMPLETION_MODE= SWT.CTRL;
 
 	/**
 	 * A class to simplify tracking a reference position in a document.
@@ -490,7 +496,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		// don't eat if not in preferences, XOR with Ctrl
 		// but: if there is a selection, replace it!
 		Point selection= viewer.getSelectedRange();
-		fToggleEating= (stateMask & SWT.CTRL) != 0;
+		fToggleEating= (stateMask & MODIFIER_TOGGLE_COMPLETION_MODE) != 0;
 		int newLength= selection.x + selection.y - getReplacementOffset();
 		if ((insertCompletion() ^ fToggleEating) && newLength >= 0)
 			setReplacementLength(newLength);
