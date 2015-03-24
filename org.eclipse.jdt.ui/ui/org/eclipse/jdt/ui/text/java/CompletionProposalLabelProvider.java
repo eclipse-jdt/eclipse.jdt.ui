@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -733,9 +733,14 @@ public class CompletionProposalLabelProvider {
 				|| kind == CompletionProposal.CONSTRUCTOR_INVOCATION)
 			if (Flags.isSynchronized(flags))
 				adornments |= JavaElementImageDescriptor.SYNCHRONIZED;
-		if (kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_NAME_REFERENCE || kind == CompletionProposal.METHOD_REF)
+
+		if (kind == CompletionProposal.METHOD_DECLARATION || kind == CompletionProposal.METHOD_NAME_REFERENCE || kind == CompletionProposal.METHOD_REF) {
 			if (Flags.isDefaultMethod(flags))
 				adornments|= JavaElementImageDescriptor.DEFAULT_METHOD;
+			else if (Flags.isAbstract(flags))
+				adornments|= JavaElementImageDescriptor.ABSTRACT;
+		}
+
 		if (kind == CompletionProposal.ANNOTATION_ATTRIBUTE_REF)
 			if (Flags.isAnnnotationDefault(flags))
 				adornments|= JavaElementImageDescriptor.ANNOTATION_DEFAULT;
