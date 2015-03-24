@@ -97,7 +97,8 @@ public final class BuildPathDialogAccess {
 	 *            <code>IClasspathEntry.CPE_LIBRARY</code> or
 	 *            <code>IClasspathEntry.CPE_VARIABLE</code>.
 	 * @return Returns the resulting classpath entry containing a potentially modified source
-	 *         attachment path, source attachment root and source attachment encoding. The resulting
+	 *         attachment path, source attachment root and source attachment encoding,
+	 *         or <code>null</code> if the dialog has been canceled. The resulting
 	 *         entry can be used to replace the original entry on the classpath. Note that the
 	 *         dialog does not make any changes on the passed entry nor on the classpath that
 	 *         contains it.
@@ -117,7 +118,8 @@ public final class BuildPathDialogAccess {
 	 *            <code>IClasspathEntry.CPE_VARIABLE</code>.
 	 * @param canEditEncoding whether the source attachment encoding can be edited
 	 * @return Returns the resulting classpath entry containing a potentially modified source
-	 *         attachment path, source attachment root and source attachment encoding. The resulting
+	 *         attachment path, source attachment root and source attachment encoding,
+	 *         or <code>null</code> if the dialog has been canceled. The resulting
 	 *         entry can be used to replace the original entry on the classpath. Note that the
 	 *         dialog does not make any changes on the passed entry nor on the classpath that
 	 *         contains it.
@@ -145,7 +147,8 @@ public final class BuildPathDialogAccess {
 	 *
 	 * @param shell The parent shell for the dialog
 	 * @param initialEntry The entry to edit.
-	 * @return Returns the selected path, possibly different from the initialEntry.
+	 * @return Returns the selected path, possibly different from the initialEntry,
+	 * or <code>null</code> if the dialog has been cancelled.
 	 * @since 3.11
 	 */
 	public static IPath configureExternalAnnotationsAttachment(Shell shell, IPath initialEntry) {
@@ -198,7 +201,8 @@ public final class BuildPathDialogAccess {
 	 * @param shell The parent shell for the dialog.
 	 * @param initialEntry The entry to edit. The kind of the classpath entry must be either
 	 * <code>IClasspathEntry.CPE_LIBRARY</code> or <code>IClasspathEntry.CPE_VARIABLE</code>.
-	 * @return Returns the resulting classpath entry containing a potentially modified javadoc location attribute
+	 * @return Returns the resulting classpath entry containing a potentially modified javadoc location attribute,
+	 * or <code>null</code> if the dialog has been canceled.
 	 * The resulting entry can be used to replace the original entry on the classpath.
 	 * Note that the dialog does not make any changes on the passed entry nor on the classpath that
 	 * contains it.

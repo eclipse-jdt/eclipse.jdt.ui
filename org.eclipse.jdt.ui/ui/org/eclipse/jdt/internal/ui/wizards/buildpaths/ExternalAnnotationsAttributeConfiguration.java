@@ -88,7 +88,9 @@ public class ExternalAnnotationsAttributeConfiguration extends ClasspathAttribut
 		String initialLocation= attribute.getClasspathAttribute().getValue();
 		IPath locationPath= initialLocation == null ? null : new Path(initialLocation);
 		IPath newPath= BuildPathDialogAccess.configureExternalAnnotationsAttachment(shell, locationPath);
-		return JavaCore.newClasspathAttribute(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH, newPath == null ? null : newPath.toPortableString());
+		if(null == newPath)	// Was the dialog cancelled?
+			return null;
+		return JavaCore.newClasspathAttribute(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH, newPath.segmentCount() == 0 ? null : newPath.toPortableString());
 	}
 
 	@Override

@@ -98,7 +98,7 @@ public class ExternalAnnotationsAttachmentDialog extends StatusDialog {
 	/**
 	 * Returns the configured class path entry.
 	 *
-	 * @return the configured class path entry
+	 * @return the configured class path entry, or Path.EMPTY if no path was selected.
 	 */
 	public IPath getResult() {
 		return fAnnotationsAttachmentBlock.getAnnotationsPath();

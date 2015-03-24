@@ -156,11 +156,11 @@ public class ExternalAnnotationsAttachmentBlock {
 	}
 
 	/**
-	 * Gets the source attachment path chosen by the user
-	 * @return the source attachment path
+	 * Gets the external annotation path chosen by the user
+	 * @return the external annotation path, or Path.EMPTY if no path is selected. 
 	 */
 	public IPath getAnnotationsPath() {
-		return (getFilePath().segmentCount() == 0) ? null : getFilePath();
+		return getFilePath();
 	}
 
 	/**
