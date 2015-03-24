@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -863,16 +863,17 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     /**
 	 * {@inheritDoc}
 	 */
-    @Override
-	public Object getAdapter(Class adapter) {
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getAdapter(Class<T> adapter) {
     	if (adapter == IShowInSource.class) {
-    		return getShowInSource();
+			return (T) getShowInSource();
     	}
     	if (adapter == IContextProvider.class) {
-    		return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
+			return (T) JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
     	}
 		if (adapter == IShowInTargetList.class) {
-			return new IShowInTargetList() {
+			return (T) new IShowInTargetList() {
 				public String[] getShowInTargetIds() {
 					return new String[] { JavaUI.ID_PACKAGES, JavaPlugin.ID_RES_NAV };
 				}
