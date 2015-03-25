@@ -425,8 +425,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					@Override
 					public IInformationControlCreator getInformationPresenterControlCreator() {
 						return new IInformationControlCreator() {
-							public IInformationControl createInformationControl(Shell parent) {
-								return new DefaultInformationControl(parent, (ToolBarManager) null, new FallbackInformationPresenter());
+							public IInformationControl createInformationControl(Shell parentShell) {
+								return new DefaultInformationControl(parentShell, (ToolBarManager) null, new FallbackInformationPresenter());
 							}
 						};
 					}
