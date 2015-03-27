@@ -13,6 +13,7 @@
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *     Eugene Lucash <e.lucash@gmail.com> - [quick assist] Add key binding for Extract method Quick Assist - https://bugs.eclipse.org/424166
  *     Lukas Hanke <hanke@yatta.de> - Bug 430818 [1.8][quick fix] Quick fix for "for loop" is not shown for bare local variable/argument/field - https://bugs.eclipse.org/bugs/show_bug.cgi?id=430818
+ *     Jeremie Bresson <dev@jmini.fr> - Bug 439912: [1.8][quick assist] Add quick assists to add and remove parentheses around single lambda parameter - https://bugs.eclipse.org/439912
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -246,6 +247,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getAddInferredLambdaParameterTypes(context, coveringNode, null)
 				|| getConvertMethodReferenceToLambdaProposal(context, coveringNode, null)
 				|| getConvertLambdaToMethodReferenceProposal(context, coveringNode, null)
+				|| getFixParenthesesInLambdaExpression(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
 				|| getMakeVariableDeclarationFinalProposals(context, null)
 				|| getMissingCaseStatementProposals(context, coveringNode, null)
@@ -297,6 +299,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getAddInferredLambdaParameterTypes(context, coveringNode, resultingCollections);
 				getConvertMethodReferenceToLambdaProposal(context, coveringNode, resultingCollections);
 				getConvertLambdaToMethodReferenceProposal(context, coveringNode, resultingCollections);
+				getFixParenthesesInLambdaExpression(context, coveringNode, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getConvertEnhancedForLoopProposal(context, coveringNode, resultingCollections);
@@ -1165,6 +1168,52 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
+	private static boolean getFixParenthesesInLambdaExpression(IInvocationContext context, ASTNode coveringNode, Collection<ICommandAccess> resultingCollections) {
+		LambdaExpression enclosingLambda= null;
+		if (coveringNode instanceof LambdaExpression) {
+			enclosingLambda= (LambdaExpression) coveringNode;
+		} else if (coveringNode.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY
+				&& ((VariableDeclarationFragment) coveringNode.getParent()).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
+			enclosingLambda= (LambdaExpression) coveringNode.getParent().getParent();
+		} else {
+			return false;
+		}
+
+		List<VariableDeclaration> lambdaParameters= enclosingLambda.parameters();
+		if (lambdaParameters.size() != 1)
+			return false;
+
+		if (lambdaParameters.get(0) instanceof SingleVariableDeclaration)
+			return false;
+
+		if (resultingCollections == null) {
+			return true;
+		}
+
+		String label;
+		Boolean parenthesesPropertyNewValue;
+		String imageKey;
+
+		if (enclosingLambda.hasParentheses()) {
+			label= CorrectionMessages.QuickAssistProcessor_removeParenthesesInLambda;
+			parenthesesPropertyNewValue= Boolean.FALSE;
+			imageKey= JavaPluginImages.IMG_CORRECTION_REMOVE;
+		} else {
+			label= CorrectionMessages.QuickAssistProcessor_addParenthesesInLambda;
+			parenthesesPropertyNewValue= Boolean.TRUE;
+			imageKey= JavaPluginImages.IMG_CORRECTION_CAST;
+		}
+
+		// Create the rewrite:
+		ASTRewrite rewrite= ASTRewrite.create(enclosingLambda.getAST());
+		rewrite.set(enclosingLambda, LambdaExpression.PARENTHESES_PROPERTY, parenthesesPropertyNewValue, null);
+
+		// add correction proposal
+		Image image= JavaPluginImages.get(imageKey);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.ADD_PARENTHESES_FOR_EXPRESSION, image);
+		resultingCollections.add(proposal);
+		return true;
+	}
 
 	public static boolean getAddInferredLambdaParameterTypes(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		LambdaExpression lambda;

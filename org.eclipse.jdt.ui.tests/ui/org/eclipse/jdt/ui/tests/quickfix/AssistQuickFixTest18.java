@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Jerome Cambon <jerome.cambon@oracle.com> - [1.8][clean up][quick assist] Convert lambda to anonymous must qualify references to 'this'/'super' - https://bugs.eclipse.org/430573
+ *     Jeremie Bresson <dev@jmini.fr> - Bug 439912: [1.8][quick assist] Add quick assists to add and remove parentheses around single lambda parameter - https://bugs.eclipse.org/439912
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -1204,7 +1205,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1253,7 +1254,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1525,7 +1526,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1565,7 +1566,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1606,7 +1607,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1646,7 +1647,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1687,7 +1688,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1729,7 +1730,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1770,7 +1771,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -1819,7 +1820,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("interface FI2 {\n");
 		buf.append("    void foo(int x);\n");
 		buf.append("}\n");
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		String expected1= buf.toString();
@@ -1857,7 +1858,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("interface FI2 {\n");
 		buf.append("    void foo(int x);\n");
 		buf.append("}\n");
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		String expected1= buf.toString();
@@ -1883,7 +1884,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression);
 	}
@@ -1908,7 +1909,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression);
 	}
@@ -1933,7 +1934,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_change_lambda_body_to_expression);
 	}
@@ -2026,7 +2027,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E2<T> {\n");
 		buf.append("    Function<T, Object> fi = (T t) -> null;\n");
 		buf.append("}\n");
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		String expected1= buf.toString();
@@ -3300,7 +3301,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
 
@@ -3324,7 +3325,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
 
@@ -3340,7 +3341,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
 
@@ -3348,7 +3349,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
 
@@ -3389,7 +3390,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3410,7 +3411,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3431,7 +3432,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3481,7 +3482,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3514,7 +3515,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3547,7 +3548,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3580,7 +3581,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3613,7 +3614,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3646,7 +3647,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3679,7 +3680,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3712,7 +3713,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3745,7 +3746,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3778,7 +3779,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3835,7 +3836,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		List proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_convert_to_method_reference);
 
@@ -3915,7 +3916,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3939,4 +3940,127 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		expected1= buf.toString();
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
+
+	public void testFixParenthesesInLambdaExpressionAdd() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("import java.util.function.Consumer;\n");
+		buf1.append("public class MyClass {\n");
+		buf1.append("    public void foo() {\n");
+		buf1.append("        Consumer<Integer> c = id -> {System.out.println(id);};\n");
+		buf1.append("    }\n");
+		buf1.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("MyClass.java", buf1.toString(), false, null);
+
+		int offset= buf1.toString().indexOf("->");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 7);
+		assertCorrectLabels(proposals);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Consumer;\n");
+		buf.append("public class MyClass {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Consumer<Integer> c = (id) -> {System.out.println(id);};\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testFixParenthesesInLambdaExpressionRemove() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("import java.util.function.Consumer;\n");
+		buf1.append("public class MyClass {\n");
+		buf1.append("    public void foo() {\n");
+		buf1.append("        Consumer<Integer> c = (id) -> {System.out.println(id);};\n");
+		buf1.append("    }\n");
+		buf1.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("MyClass.java", buf1.toString(), false, null);
+
+		int offset= buf1.toString().indexOf("->");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 7);
+		assertCorrectLabels(proposals);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.function.Consumer;\n");
+		buf.append("public class MyClass {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Consumer<Integer> c = id -> {System.out.println(id);};\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testFixParenthesesInLambdaExpressionCannotRemove1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class MyClass {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Runnable r = () -> System.out.println(\"Hello world!\");\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("MyClass.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("->");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 5);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_removeParenthesesInLambda);
+	}
+
+	public void testFixParenthesesInLambdaExpressionCannotRemove2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Comparator;\n");
+		buf.append("public class MyClass {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Comparator<String> c = (String s1, String s2) -> {return s1.length() - s2.length();};\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("MyClass.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("->");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_removeParenthesesInLambda);
+	}
+
+	public void testFixParenthesesInLambdaExpressionCannotRemove3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("import java.util.function.Consumer;\n");
+		buf1.append("public class MyClass {\n");
+		buf1.append("    public void foo() {\n");
+		buf1.append("        Consumer<Integer> c = (Integer id) -> {System.out.println(id);};\n");
+		buf1.append("    }\n");
+		buf1.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("MyClass.java", buf1.toString(), false, null);
+
+		int offset= buf1.toString().indexOf("->");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+		assertNumberOfProposals(proposals, 5);
+		assertCorrectLabels(proposals);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_removeParenthesesInLambda);
+	}
+
 }

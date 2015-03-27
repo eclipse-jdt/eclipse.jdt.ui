@@ -11,6 +11,7 @@
  *     Billy Huang <billyhuang31@gmail.com> - [quick assist] concatenate/merge string literals - https://bugs.eclipse.org/77632
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *     Sandra Lions <sandra.lions-piron@oracle.com> - [quick fix] for qualified enum constants in switch-case labels - https://bugs.eclipse.org/bugs/90140
+ *     Jeremie Bresson <dev@jmini.fr> - Bug 439912: [1.8][quick assist] Add quick assists to add and remove parentheses around single lambda parameter - https://bugs.eclipse.org/439912
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -263,6 +264,7 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_change_lambda_body_to_expression;
 	public static String QuickAssistProcessor_removecatchclause_description;
 	public static String QuickAssistProcessor_removeexception_description;
+	public static String QuickAssistProcessor_removeParenthesesInLambda;
 	public static String QuickAssistProcessor_unwrap_ifstatement;
 	public static String QuickAssistProcessor_unwrap_whilestatement;
 	public static String QuickAssistProcessor_unwrap_forstatement;
@@ -278,6 +280,7 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_add_inferred_lambda_parameter_types;
 	public static String QuickAssistProcessor_addfinallyblock_description;
 	public static String QuickAssistProcessor_addelseblock_description;
+	public static String QuickAssistProcessor_addParenthesesInLambda;
 	public static String QuickAssistProcessor_replacethenwithblock_description;
 	public static String QuickAssistProcessor_replaceelsewithblock_description;
 	public static String QuickAssistProcessor_replacethenelsewithblock_description;
