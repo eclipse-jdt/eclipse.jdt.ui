@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
  *   Benjamin Muskalla (buskalla@innoopract.com) - 104021: [quick fix] Introduce
  *   		new local with casted type applied more than once
  *   Billy Huang <billyhuang31@gmail.com> - [quick assist] concatenate/merge string literals - https://bugs.eclipse.org/77632
+ *   Robert Roth <robert.roth.off@gmail.com> - [templates] 2 new code templates: finally & lock - https://bugs.eclipse.org/184222
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -4947,9 +4948,9 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		List proposals= Arrays.asList(new QuickTemplateProcessor().getAssists(context, null));
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 7);
+		assertNumberOfProposals(proposals, 9);
 
-		String[] expected= new String[7];
+		String[] expected= new String[9];
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -5032,6 +5033,33 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[6]= buf.toString();
 
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        } finally {\n");
+		buf.append("            // TODO: handle finally clause\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[7]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        lock.lock();\n");
+		buf.append("        try {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        } finally {\n");
+		buf.append("            lock.unlock();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[8]= buf.toString();
+
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
@@ -5055,9 +5083,9 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		List proposals= Arrays.asList(new QuickTemplateProcessor().getAssists(context, null));
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 7);
+		assertNumberOfProposals(proposals, 9);
 
-		String[] expected= new String[7];
+		String[] expected= new String[9];
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -5147,6 +5175,35 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[6]= buf.toString();
 
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        try {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        } finally {\n");
+		buf.append("            // TODO: handle finally clause\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[7]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        lock.lock();\n");
+		buf.append("        try {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        } finally {\n");
+		buf.append("            lock.unlock();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[8]= buf.toString();
+
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
@@ -5171,9 +5228,9 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		List proposals= Arrays.asList(new QuickTemplateProcessor().getAssists(context, null));
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 7);
+		assertNumberOfProposals(proposals, 9);
 
-		String[] expected= new String[7];
+		String[] expected= new String[9];
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -5277,6 +5334,39 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("}\n");
 		expected[6]= buf.toString();
 
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i;\n");
+		buf.append("        try {\n");
+		buf.append("            i = 10;\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        } finally {\n");
+		buf.append("            // TODO: handle finally clause\n");
+		buf.append("        }\n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[7]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i;\n");
+		buf.append("        lock.lock();\n");
+		buf.append("        try {\n");
+		buf.append("            i = 10;\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        } finally {\n");
+		buf.append("            lock.unlock();\n");
+		buf.append("        }\n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[8]= buf.toString();
+
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
@@ -5301,9 +5391,9 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		List proposals= Arrays.asList(new QuickTemplateProcessor().getAssists(context, null));
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 7);
+		assertNumberOfProposals(proposals, 9);
 
-		String[] expected= new String[7];
+		String[] expected= new String[9];
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -5399,6 +5489,37 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[6]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        try {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        } finally {\n");
+		buf.append("            // TODO: handle finally clause\n");
+		buf.append("        }\n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[7]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        lock.lock();\n");
+		buf.append("        try {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        } finally {\n");
+		buf.append("            lock.unlock();\n");
+		buf.append("        }\n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[8]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}

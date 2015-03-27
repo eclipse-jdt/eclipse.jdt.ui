@@ -2,7 +2,7 @@
 
 <!--
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Robert Roth <robert.roth.off@gmail.com> - [templates] 2 new code templates: finally & lock - https://bugs.eclipse.org/184222
  *******************************************************************************/
 -->
 
@@ -74,14 +75,24 @@
 	${cursor}
 }</template>
 
-<template name="try" description="%Templates.try" id="org.eclipse.jdt.ui.templates.try" context="java-statements" enabled="true" autoinsert="false">try {
+<template name="try_catch" description="%Templates.try" id="org.eclipse.jdt.ui.templates.try" context="java-statements" enabled="true" autoinsert="false">try {
 	${line_selection}${cursor}
 } catch (${Exception} ${exception_variable_name}) {
 	// ${todo}: handle exception
 }</template>
 
+<template name="try_finally" description="%Templates.tryfinally" id="org.eclipse.jdt.ui.templates.tryfinally" context="java-statements" enabled="true" autoinsert="false">try {
+	${line_selection}${cursor}
+} finally {
+	// ${todo}: handle finally clause
+}</template>
+
 <template name="catch" description="%Templates.catch" id="org.eclipse.jdt.ui.templates.catch" context="java-statements" enabled="true" autoinsert="false">catch (${Exception} ${exception_variable_name}) {
 	${cursor}// ${todo}: handle exception
+}</template>
+
+<template name="finally" description="%Templates.finally" id="org.eclipse.jdt.ui.templates.finally" context="java-statements" enabled="true" autoinsert="false">finally {
+	${cursor}
 }</template>
 
 <template name="main" description="%Templates.main" id="org.eclipse.jdt.ui.templates.main" context="java-members" enabled="true" autoinsert="false">public static void main(String[] args) {
@@ -167,6 +178,13 @@ public void ${testName}() throws Exception {
 
 <template name="synchronized" description="%Templates.synchronized" id="org.eclipse.jdt.ui.templates.synchronized" context="java-statements" enabled="true" autoinsert="false">synchronized (${mutex:var}) {
 	${line_selection}
+}</template>
+
+<template name="lock" description="%Templates.lock" id="org.eclipse.jdt.ui.templates.lock" context="java-statements" enabled="true" autoinsert="false">${lock:var(java.util.concurrent.locks.Lock)}.lock();
+try {
+	${line_selection}${cursor}
+} finally {
+	${lock}.unlock();
 }</template>
 
 <template name="runnable" description="%Templates.runnable" id="org.eclipse.jdt.ui.templates.runnable" context="java" enabled="true" autoinsert="false">new Runnable() {
