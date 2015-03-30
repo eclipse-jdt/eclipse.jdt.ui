@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [inline] Inline local variable with initializer generates assignment where left-hand side is not a variable - https://bugs.eclipse.org/394721
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -338,6 +339,11 @@ public class InlineTempTests extends RefactoringTest {
 	public void test48() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=388078
 		helper1(6, 16, 6, 18);
+	}
+
+	public void test49() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=394721
+		helper1(5, 15, 5, 16);
 	}
 
 	//------

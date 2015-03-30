@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * Copyright (c) 2011, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Nikolay Metchev <nikolaymetchev@gmail.com> - [inline] Inline local variable with initializer generates assignment where left-hand side is not a variable - https://bugs.eclipse.org/394721
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.corext.dom;
@@ -15,6 +16,7 @@ import java.util.Iterator;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
@@ -358,6 +360,10 @@ public class NecessaryParenthesesChecker {
 			
 			if (expression instanceof PrefixExpression) { // see bug 405096
 				return needsParenthesesForPrefixExpression(parentExpression, ((PrefixExpression) expression).getOperator());
+			}
+
+			if (expression instanceof ArrayCreation) { // see bug 394721
+				return parentExpression instanceof ArrayAccess && ((ArrayCreation) expression).getInitializer() == null;
 			}
 
 			int expressionPrecedence= OperatorPrecedence.getExpressionPrecedence(expression);
