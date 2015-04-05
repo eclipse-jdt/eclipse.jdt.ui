@@ -10,6 +10,7 @@
  *     Philippe Marschall <philippe.marschall@netcetera.ch> - [type wizards] Allow the creation of a compilation unit called package-info.java - https://bugs.eclipse.org/86168
  *     Michael Pellaton <michael.pellaton@netcetera.ch> - [type wizards] Allow the creation of a compilation unit called package-info.java - https://bugs.eclipse.org/86168
  *     Frits Jalvingh <jal@etc.to> - Contribution for Bug 459831 - [launching] Support attaching external annotations to a JRE container
+ *     Stephan Herrmann - Contribution for Bug 463936 - ExternalAnnotationsAttachmentDialog should not allow virtual folders
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
@@ -413,6 +414,7 @@ public final class NewWizardMessages extends NLS {
 	public static String AnnotationsAttachmentBlock_filename_error_notvalid;
 	public static String AnnotationsAttachmentBlock_filename_error_notabsolute;
 	public static String AnnotationsAttachmentBlock_filename_error_filenotexists;
+	public static String AnnotationsAttachmentBlock_filename_error_virtual;
 	public static String AnnotationsAttachmentBlock_filename_workspace_browse;
 	public static String AnnotationsAttachmentBlock_filename_workspace_label;
 	public static String AnnotationsAttachmentBlock_intjardialog_title;

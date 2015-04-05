@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Frits Jalvingh <jal@etc.to> - Contribution for Bug 459831 - [launching] Support attaching external annotations to a JRE container
+ *     Stephan Herrmann - Contribution for Bug 463936 - ExternalAnnotationsAttachmentDialog should not allow virtual folders
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
@@ -29,6 +30,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -44,6 +46,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
@@ -297,6 +300,7 @@ public class ExternalAnnotationsAttachmentBlock {
 			File file= filePath.toFile();
 			IResource res= fWorkspaceRoot.findMember(filePath);
 			boolean exists;
+			boolean isVirtual= false;
 			if (res != null) {
 				IPath location= res.getLocation();
 				if (location != null) {
@@ -304,6 +308,7 @@ public class ExternalAnnotationsAttachmentBlock {
 				} else {
 					exists= res.exists();
 				}
+				isVirtual= res.isVirtual();
 			} else {
 				exists= file.exists();
 			}
@@ -312,9 +317,12 @@ public class ExternalAnnotationsAttachmentBlock {
 				status.setError(message);
 				return status;
 			}
+			if (isVirtual) {
+				status.setError(NewWizardMessages.AnnotationsAttachmentBlock_filename_error_virtual);
+				return status;
+			}
 			if (!filePath.isAbsolute()) {
-				String message= Messages.format(NewWizardMessages.AnnotationsAttachmentBlock_filename_error_notabsolute, BasicElementLabels.getPathLabel(filePath, false));
-				status.setError(message);
+				status.setError(NewWizardMessages.AnnotationsAttachmentBlock_filename_error_notabsolute);
 				return status;
 			}
 		}
@@ -396,6 +404,16 @@ public class ExternalAnnotationsAttachmentBlock {
 		dialog.setMessage(NewWizardMessages.AnnotationsAttachmentBlock_intjardialog_message);
 		dialog.setInput(fWorkspaceRoot);
 		dialog.setInitialSelection(initSel);
+		dialog.setValidator(new ISelectionStatusValidator() {
+			public IStatus validate(Object[] selection) {
+				if (selection != null && selection.length == 1) {
+					Object selectedObject= selection[0];
+					if (selectedObject instanceof IResource && ((IResource) selectedObject).isVirtual())
+						return new StatusInfo(IStatus.ERROR, NewWizardMessages.AnnotationsAttachmentBlock_filename_error_virtual);
+				}
+				return new Status(IStatus.OK, PlatformUI.PLUGIN_ID, IStatus.OK, "", null); //$NON-NLS-1$ 
+			}
+		});
 		if (dialog.open() == Window.OK) {
 			IResource res= (IResource) dialog.getFirstResult();
 			return res.getFullPath();
