@@ -343,6 +343,69 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	public void testOverrideDefaultMethod4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface I1 {\n");
+		buf.append("    default void m1() { }\n");
+		buf.append("}\n");
+		buf.append("interface I2<T2> {\n");
+		buf.append("    void m1();\n");
+		buf.append("}\n");
+		buf.append("interface I22 extends I2<String> { }\n");
+		buf.append("interface Both extends I1, I22 {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("I1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface I1 {\n");
+		buf.append("    default void m1() { }\n");
+		buf.append("}\n");
+		buf.append("interface I2<T2> {\n");
+		buf.append("    void m1();\n");
+		buf.append("}\n");
+		buf.append("interface I22 extends I2<String> { }\n");
+		buf.append("interface Both extends I1, I22 {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    default void m1() {\n");
+		buf.append("        I1.super.m1();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface I1 {\n");
+		buf.append("    default void m1() { }\n");
+		buf.append("}\n");
+		buf.append("interface I2<T2> {\n");
+		buf.append("    void m1();\n");
+		buf.append("}\n");
+		buf.append("interface I22 extends I2<String> { }\n");
+		buf.append("interface Both extends I1, I22 {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    default void m1() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 	public void testOverrideDefaultMethod_multiLevel() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

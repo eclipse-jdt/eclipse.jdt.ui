@@ -1926,31 +1926,64 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 
-		String[] args= problem.getProblemArguments();
-		if (args.length < 5) {
-			return;
-		}
+		if (problem.getProblemId() == IProblem.DuplicateInheritedDefaultMethods) {
+			String[] args= problem.getProblemArguments();
+			if (args.length < 5) {
+				return;
+			}
 
-		String methodName= args[0];
-		if (methodName == null) {
-			return;
-		}
+			String methodName= args[0];
+			if (methodName == null) {
+				return;
+			}
 
-		String[] parameters1= { };
-		if (args[1] != null && args[1].length() != 0) {
-			parameters1= args[1].split(", "); //$NON-NLS-1$
-		}
-		String[] parameters2= { };
-		if (args[2] != null && args[2].length() != 0) {
-			parameters2= args[2].split(", "); //$NON-NLS-1$
-		}
+			String[] parameters1= {};
+			if (args[1] != null && args[1].length() != 0) {
+				parameters1= args[1].split(", "); //$NON-NLS-1$
+			}
+			String[] parameters2= {};
+			if (args[2] != null && args[2].length() != 0) {
+				parameters2= args[2].split(", "); //$NON-NLS-1$
+			}
 
-		addOverrideProposal(typeNode, typeBinding, methodName, parameters1, args[3], context, proposals);
-		addOverrideProposal(typeNode, typeBinding, methodName, parameters2, args[4], context, proposals);
+			addOverrideProposal(typeNode, typeBinding, methodName, parameters1, args[3], context, proposals, true);
+			addOverrideProposal(typeNode, typeBinding, methodName, parameters2, args[4], context, proposals, true);
+
+		} else if (problem.getProblemId() == IProblem.InheritedDefaultMethodConflictsWithOtherInherited) {
+			String[] args= problem.getProblemArguments();
+			if (args.length < 3) {
+				return;
+			}
+
+			String arg0= args[0];
+			if (arg0 == null) {
+				return;
+			}
+			int indexOfLParen= arg0.indexOf('(');
+			if (indexOfLParen == -1) {
+				return;
+			}
+			int indexOfRParen= arg0.indexOf(')');
+			if (indexOfRParen == -1) {
+				return;
+			}
+
+			String methodName= arg0.substring(0, indexOfLParen);
+
+			String paramString= arg0.substring(indexOfLParen + 1, indexOfRParen);
+			String[] parameters= {};
+			if (paramString != null && paramString.length() != 0) {
+				parameters= paramString.split(", "); //$NON-NLS-1$
+			}
+
+			addOverrideProposal(typeNode, typeBinding, methodName, parameters, args[1], context, proposals, true);
+			addOverrideProposal(typeNode, typeBinding, methodName, parameters, args[2], context, proposals, false);
+
+		}
 	}
 
 	private static void addOverrideProposal(ASTNode typeNode, ITypeBinding typeBinding, String methodName, String[] parameters, String superType,
-			IInvocationContext context, Collection<ICommandAccess> proposals) {
+			IInvocationContext context, Collection<ICommandAccess> proposals, boolean isDefaultMethod) {
 		ITypeBinding superTypeBinding= null;
 		if (superType != null) {
 			int i= superType.indexOf('<');
@@ -1968,7 +2001,12 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 
-		String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_override_default_method_description, superTypeBinding.getName());
+		String label;
+		if (isDefaultMethod) {
+			label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_override_default_method_description, superTypeBinding.getName());
+		} else {
+			label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_override_method_description, superTypeBinding.getName());
+		}
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 
 		CompilationUnit astRoot= context.getASTRoot();
