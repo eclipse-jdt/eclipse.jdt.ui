@@ -115,7 +115,7 @@
 
 <template name="cast" description="%Templates.cast" id="org.eclipse.jdt.ui.templates.cast" context="java-statements" enabled="true" autoinsert="false">${type} ${new_name} = (${type}) ${name};</template>
 
-<template name="new" description="%Templates.new" id="org.eclipse.jdt.ui.templates.new" context="java" enabled="true" autoinsert="false">${type} ${name} = new ${type}(${arguments});</template>
+<template name="new" description="%Templates.new" id="org.eclipse.jdt.ui.templates.new" context="java" enabled="true" autoinsert="false">${type} ${name} = new ${type}(${});</template>
 
 <template name="lazy" description="%Templates.lazy" id="org.eclipse.jdt.ui.templates.lazy" context="java-statements" enabled="true" autoinsert="false">if (${name:var} == null) {
 	${name} = new ${type}(${arguments});
