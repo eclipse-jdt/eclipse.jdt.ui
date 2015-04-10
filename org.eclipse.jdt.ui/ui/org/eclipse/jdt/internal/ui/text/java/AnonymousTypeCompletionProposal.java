@@ -255,7 +255,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		}
 	}
 
-	private Image getImageForType(IType type) {
+	protected Image getImageForType(IType type) {
 		String imageName= JavaPluginImages.IMG_OBJS_CLASS; // default
 		try {
 			if (type.isAnnotation()) {
