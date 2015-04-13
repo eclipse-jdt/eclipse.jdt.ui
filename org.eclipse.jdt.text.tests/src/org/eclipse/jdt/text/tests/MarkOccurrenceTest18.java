@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 IBM Corporation and others.
+ * Copyright (c) 2011, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -206,4 +206,33 @@ public class MarkOccurrenceTest18 extends TestCase {
 		ranges= new OccurrenceLocation[] { find(s, "foo", 3), find(s, "@Critical(msg=\"He\"+\"llo\") E.@Critical() InnerException", 1)};
 		checkSelection(s, offset, length, ranges);
 	}
+
+	public void testThrownExceptionInLambda() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    void test(int i) throws IOException {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            throw new IOException();\n");
+		buf.append("        } else {\n");
+		buf.append("            FI fi = () -> { throw new IOException(); };\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("@FunctionalInterface\n");
+		buf.append("interface FI {\n");
+		buf.append("    void foo() throws IOException;\n");
+		buf.append("}\n");
+
+		fFinder= new ExceptionOccurrencesFinder();
+		int offset= buf.indexOf("IOException {");
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(buf, "IOException", 2), find(buf, "throw", 2) };
+		checkSelection(buf, offset, length, ranges);
+	}
+
 }
