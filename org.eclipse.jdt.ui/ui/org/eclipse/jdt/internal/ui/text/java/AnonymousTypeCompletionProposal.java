@@ -268,10 +268,6 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		return JavaPluginImages.get(imageName);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getImage()
-	 * @since 3.9
-	 */
 	@Override
 	public Image getImage() {
 		Image image= super.getImage();
