@@ -94,7 +94,6 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		fDeclarationSignature= declarationSignature;
 		fSuperType= superType;
 
-		setImage(getImageForType(fSuperType));
 		setCursorPosition(constructorCompletion.indexOf('(') + 1);
 	}
 
@@ -267,6 +266,20 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			JavaPlugin.log(e);
 		}
 		return JavaPluginImages.get(imageName);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#getImage()
+	 * @since 3.9
+	 */
+	@Override
+	public Image getImage() {
+		Image image= super.getImage();
+		if (image == null) {
+			image= getImageForType(fSuperType);
+			setImage(image);
+		}
+		return image;
 	}
 
 	/*
