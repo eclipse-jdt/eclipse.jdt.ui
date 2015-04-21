@@ -15,6 +15,8 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -24,6 +26,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -40,6 +43,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -198,16 +202,21 @@ public class ExternalAnnotationsAttachmentBlock {
 
 		fWorkspaceFileNameField.doFillIntoGrid(composite, 3);
 		LayoutUtil.setHorizontalIndent(fWorkspaceFileNameField.getLabelControl(null));
-		LayoutUtil.setWidthHint(fWorkspaceFileNameField.getTextControl(null), widthHint);
-		LayoutUtil.setHorizontalGrabbing(fWorkspaceFileNameField.getTextControl(null));
+		Text workspaceFileNameField= fWorkspaceFileNameField.getTextControl(null);
+		LayoutUtil.setWidthHint(workspaceFileNameField, widthHint);
+		LayoutUtil.setHorizontalGrabbing(workspaceFileNameField);
+		BidiUtils.applyBidiProcessing(workspaceFileNameField, StructuredTextTypeHandlerFactory.FILE);
 
 		DialogField.createEmptySpace(composite, 3);
 
 		fExternalRadio.doFillIntoGrid(composite, 3);
 		fExternalFileNameField.doFillIntoGrid(composite, 3);
 		LayoutUtil.setHorizontalIndent(fExternalFileNameField.getLabelControl(null));
-		LayoutUtil.setWidthHint(fExternalFileNameField.getTextControl(null), widthHint);
-		LayoutUtil.setHorizontalGrabbing(fExternalFileNameField.getTextControl(null));
+		Text externalFileNameField= fExternalFileNameField.getTextControl(null);
+		LayoutUtil.setWidthHint(externalFileNameField, widthHint);
+		LayoutUtil.setHorizontalGrabbing(externalFileNameField);
+		BidiUtils.applyBidiProcessing(externalFileNameField, StructuredTextTypeHandlerFactory.FILE);
+
 
 		DialogField.createEmptySpace(composite, 2);
 

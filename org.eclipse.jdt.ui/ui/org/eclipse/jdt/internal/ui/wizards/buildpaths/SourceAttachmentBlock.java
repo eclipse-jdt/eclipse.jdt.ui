@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,8 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -23,6 +25,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -39,6 +42,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -300,7 +304,9 @@ public class SourceAttachmentBlock {
 			desc.setText(NewWizardMessages.SourceAttachmentBlock_filename_description);
 
 			fVariableFileNameField.doFillIntoGrid(composite, 4);
-			LayoutUtil.setWidthHint(fVariableFileNameField.getTextControl(null), widthHint);
+			Text variableFileNameField= fVariableFileNameField.getTextControl(null);
+			LayoutUtil.setWidthHint(variableFileNameField, widthHint);
+			BidiUtils.applyBidiProcessing(variableFileNameField, StructuredTextTypeHandlerFactory.FILE);
 
 			// label that shows the resolved path for variable jars
 			//DialogField.createEmptySpace(composite, 1);
@@ -326,15 +332,19 @@ public class SourceAttachmentBlock {
 			fWorkspaceRadio.doFillIntoGrid(composite, 4);
 
 			fWorkspaceFileNameField.doFillIntoGrid(composite, 4);
-			LayoutUtil.setWidthHint(fWorkspaceFileNameField.getTextControl(null), widthHint);
-			LayoutUtil.setHorizontalGrabbing(fWorkspaceFileNameField.getTextControl(null));
+			Text workspaceFileNameField= fWorkspaceFileNameField.getTextControl(null);
+			LayoutUtil.setWidthHint(workspaceFileNameField, widthHint);
+			LayoutUtil.setHorizontalGrabbing(workspaceFileNameField);
+			BidiUtils.applyBidiProcessing(workspaceFileNameField, StructuredTextTypeHandlerFactory.FILE);
 
 			DialogField.createEmptySpace(composite, 4);
 
 			fExternalRadio.doFillIntoGrid(composite, 4);
 			fExternalFileNameField.doFillIntoGrid(composite, 4);
-			LayoutUtil.setWidthHint(fExternalFileNameField.getTextControl(null), widthHint);
-			LayoutUtil.setHorizontalGrabbing(fExternalFileNameField.getTextControl(null));
+			Text externalFileNameField= fExternalFileNameField.getTextControl(null);
+			LayoutUtil.setWidthHint(externalFileNameField, widthHint);
+			LayoutUtil.setHorizontalGrabbing(externalFileNameField);
+			BidiUtils.applyBidiProcessing(externalFileNameField, StructuredTextTypeHandlerFactory.FILE);
 
 			fEncodingCombo.doFillIntoGrid(composite, 2);
 			DialogField.createEmptySpace(composite, 1);
