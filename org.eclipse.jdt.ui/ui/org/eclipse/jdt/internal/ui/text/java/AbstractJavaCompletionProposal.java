@@ -109,7 +109,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 
 
 	/**
-	 * The key modifier that toggles whether to insert or overwrite
+	 * The key modifier that toggles whether to insert or overwrite.
 	 */
 	public static final int MODIFIER_TOGGLE_COMPLETION_MODE= SWT.CTRL;
 
