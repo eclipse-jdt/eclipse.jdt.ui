@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for Bug 465293 - External annotation path per container and project
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
@@ -38,6 +39,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -49,6 +51,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -526,6 +529,17 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				fLibrariesList.refresh(elem);
 				fClassPathList.dialogFieldChanged(); // validate
 				updateEnabledState();
+				if (key.equals(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH)) {
+					if (fCurrJProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.DISABLED)) {
+						MessageDialog messageDialog= new MessageDialog(getShell(),
+								NewWizardMessages.LibrariesWorkbookPage_externalAnnotationNeedsNullAnnotationEnabled_title,
+								null,
+								NewWizardMessages.LibrariesWorkbookPage_externalAnnotationNeedsNullAnnotationEnabled_message,
+								MessageDialog.INFORMATION, new String[] { IDialogConstants.OK_LABEL },
+								0);
+						messageDialog.open();
+					}
+				}
 			}
 		}
 	}

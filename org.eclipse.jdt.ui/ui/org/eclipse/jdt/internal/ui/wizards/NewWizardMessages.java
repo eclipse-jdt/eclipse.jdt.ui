@@ -10,7 +10,9 @@
  *     Philippe Marschall <philippe.marschall@netcetera.ch> - [type wizards] Allow the creation of a compilation unit called package-info.java - https://bugs.eclipse.org/86168
  *     Michael Pellaton <michael.pellaton@netcetera.ch> - [type wizards] Allow the creation of a compilation unit called package-info.java - https://bugs.eclipse.org/86168
  *     Frits Jalvingh <jal@etc.to> - Contribution for Bug 459831 - [launching] Support attaching external annotations to a JRE container
- *     Stephan Herrmann - Contribution for Bug 463936 - ExternalAnnotationsAttachmentDialog should not allow virtual folders
+ *     Stephan Herrmann - Contributions for
+ *								Bug 463936 - ExternalAnnotationsAttachmentDialog should not allow virtual folders
+ *								Bug 465293 - External annotation path per container and project
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
@@ -351,6 +353,8 @@ public final class NewWizardMessages extends NLS {
 	public static String LibrariesWorkbookPage_JavadocPropertyDialog_title;
 	public static String LibrariesWorkbookPage_exclusion_added_title;
 	public static String LibrariesWorkbookPage_exclusion_added_message;
+	public static String LibrariesWorkbookPage_externalAnnotationNeedsNullAnnotationEnabled_title;
+	public static String LibrariesWorkbookPage_externalAnnotationNeedsNullAnnotationEnabled_message;
 
 	public static String BuildPathDialogAccess_ExistingSourceFolderDialog_new_title;
 	public static String BuildPathDialogAccess_ExistingSourceFolderDialog_new_description;

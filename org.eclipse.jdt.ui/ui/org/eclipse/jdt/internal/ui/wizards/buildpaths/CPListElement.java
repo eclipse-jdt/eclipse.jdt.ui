@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Frits Jalvingh <jal@etc.to> - Contribution for Bug 459831 - [launching] Support attaching external annotations to a JRE container
+ *     Stephan Herrmann - Contribution for Bug 465293 - External annotation path per container and project
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
@@ -134,6 +135,8 @@ public class CPListElement {
 				break;
 			case IClasspathEntry.CPE_CONTAINER:
 				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
+				createAttributeElement(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH, null, false);
+				createAttributeElement(NATIVE_LIB_PATH, null, false);
 				try {
 					IClasspathContainer container= JavaCore.getClasspathContainer(fPath, fProject);
 					if (container != null) {
@@ -154,7 +157,6 @@ public class CPListElement {
 					}
 				} catch (JavaModelException e) {
 				}
-				createAttributeElement(NATIVE_LIB_PATH, null, false);
 				break;
 			default:
 		}
