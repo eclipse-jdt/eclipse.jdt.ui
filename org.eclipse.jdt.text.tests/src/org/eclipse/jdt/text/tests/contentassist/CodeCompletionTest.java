@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for Bug 463360 - [override method][null] generating method override should not create redundant null annotations
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
@@ -514,6 +516,266 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				"}\n" +
 				"");
 		assertEquals(buf.toString(), doc.get());
+	}
+	
+	private void prepareNullAnnotations(IPackageFragmentRoot sourceFolder) throws JavaModelException {
+		Map options= fJProject1.getOptions(true);
+		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		options.put(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, "annots.NonNull");
+		options.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "annots.Nullable");
+		options.put(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME, "annots.NonNullByDefault");
+		fJProject1.setOptions(options);
+		
+		IPackageFragment pack0= sourceFolder.createPackageFragment("annots", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
+		buf.append("public @interface NonNull {}\n");
+		pack0.createCompilationUnit("NonNull.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
+		buf.append("public @interface Nullable {}\n");
+		pack0.createCompilationUnit("Nullable.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
+		buf.append("public @interface NonNullByDefault {}\n");
+		pack0.createCompilationUnit("NonNullByDefault.java", buf.toString(), false, null);
+	}
+
+	// same CU
+	// @NonNullByDefault on class
+	// -> don't insert redundant @NonNull
+	public void testAnonymousTypeCompletion7() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		prepareNullAnnotations(sourceFolder);
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String before= "package test1;\n" +
+				"import annots.*;\n" +
+				"interface Ifc {\n" +
+				"    @NonNull Object test(@Nullable Object i1, @NonNull Object i2);\n" +
+				"}\n" +
+				"@NonNullByDefault\n" +
+				"public class A {\n" +
+				"    public void foo() {\n" +
+				"        Ifc ifc= new Ifc(";
+		String after= "    }\n" +
+				"}\n";
+		String contents= before + '\n' + after;
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		int offset= before.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		String expected= before
+				+
+				") {\n" +
+				"            \n" +
+				"            public Object test(@Nullable Object i1, Object i2) {\n" +
+				"                //TODO\n" +
+				"                return null;\n" +
+				"            }\n" +
+				"        };\n"
+				+ after;
+		assertEquals(expected, doc.get());
+	}
+
+	// not same CU
+	// @NonNullByDefault on method
+	// anonymous class is argument in a method invocation.
+	// -> don't insert redundant @NonNull
+	public void testAnonymousTypeCompletion8() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		prepareNullAnnotations(sourceFolder);
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		
+		String ifcContents=
+				"package test1;\n" +
+				"import annots.*;\n" +
+				"public interface Ifc {\n" +
+				"    @NonNull Object test(@Nullable Object i1, @NonNull Object i2);\n" +
+				"}\n";
+		pack1.createCompilationUnit("Ifc.java", ifcContents, false, null);
+
+		String before=
+				"package test1;\n" +
+				"import annots.*;\n" +
+				"public class A {\n" +
+				"    void bar(Ifc i) {}\n" +
+				"    @NonNullByDefault\n" +
+				"    public void foo() {\n" +
+				"        bar(new Ifc(";
+		String after=
+				");\n" +
+				"    }\n" +
+				"}\n";
+		String contents= before + '\n' + after;
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		int offset= before.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		String expected= before
+				+
+				") {\n" +
+				"            \n" +
+				"            public Object test(@Nullable Object i1, Object i2) {\n" +
+				"                //TODO\n" +
+				"                return null;\n" +
+				"            }\n" +
+				"        };\n"
+				+ after;
+		assertEquals(expected, doc.get());
+	}
+
+	// not same CU
+	// @NonNullByDefault on field
+	// -> don't insert redundant @NonNull
+	public void testAnonymousTypeCompletion9() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		prepareNullAnnotations(sourceFolder);
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		
+		String ifcContents=
+				"package test1;\n" +
+				"import annots.*;\n" +
+				"public interface Ifc {\n" +
+				"    @NonNull Object test(@Nullable Object i1, @NonNull Object i2);\n" +
+				"}\n";
+		pack1.createCompilationUnit("Ifc.java", ifcContents, false, null);
+
+		String before=
+				"package test1;\n" +
+				"import annots.*;\n" +
+				"public class A {\n" +
+				"    @NonNullByDefault\n" +
+				"    Ifc ifc= new Ifc(";
+		String after=
+				"}\n";
+		String contents= before + '\n' + after;
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		int offset= before.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		String expected= before
+				+
+				") {\n" +
+				"        \n" +
+				"        public Object test(@Nullable Object i1, Object i2) {\n" +
+				"            //TODO\n" +
+				"            return null;\n" +
+				"        }\n" +
+				"    };\n"
+				+ after;
+		assertEquals(expected, doc.get());
+	}
+
+	// not same CU
+	// @NonNullByDefault on class, completion in instance initializer
+	// -> don't insert redundant @NonNull
+	public void testAnonymousTypeCompletion10() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		prepareNullAnnotations(sourceFolder);
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		
+		String ifcContents=
+				"package test1;\n" +
+				"import annots.*;\n" +
+				"public interface Ifc {\n" +
+				"    @NonNull Object test(@Nullable Object i1, @NonNull Object i2);\n" +
+				"}\n";
+		pack1.createCompilationUnit("Ifc.java", ifcContents, false, null);
+
+		String before=
+				"package test1;\n" +
+				"import annots.*;\n" +
+				"@NonNullByDefault\n" +
+				"public class A {\n" +
+				"    {\n" +
+				"        Ifc ifc= new Ifc(";
+		String after=
+				"    }\n" +
+				"}\n";
+		String contents= before + '\n' + after;
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		int offset= before.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		String expected= before
+				+
+				") {\n" +
+				"            \n" +
+				"            public Object test(@Nullable Object i1, Object i2) {\n" +
+				"                //TODO\n" +
+				"                return null;\n" +
+				"            }\n" +
+				"        };\n"
+				+ after;
+		assertEquals(expected, doc.get());
 	}
 
 	public void testAnonymousTypeCompletionBug280801() throws Exception {

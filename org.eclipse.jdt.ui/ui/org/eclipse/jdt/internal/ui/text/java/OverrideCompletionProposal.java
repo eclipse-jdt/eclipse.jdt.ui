@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for Bug 463360 - [override method][null] generating method override should not create redundant null annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -155,7 +156,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 			}
 			if (methodToOverride != null) {
 				CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
-				MethodDeclaration stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType, settings, declaringType.isInterface());
+				MethodDeclaration stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType, settings, declaringType.isInterface(), declaringType);
 				ListRewrite rewriter= rewrite.getListRewrite(node, descriptor);
 				rewriter.insertFirst(stub, null);
 

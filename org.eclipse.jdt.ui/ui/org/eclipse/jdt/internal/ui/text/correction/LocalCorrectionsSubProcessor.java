@@ -11,6 +11,7 @@
  *     Benjamin Muskalla <bmuskalla@innoopract.com> - [quick fix] Shouldn't offer "Add throws declaration" quickfix for overriding signature if result would conflict with overridden signature
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *     Sandra Lions <sandra.lions-piron@oracle.com> - [quick fix] for qualified enum constants in switch-case labels - https://bugs.eclipse.org/bugs/90140
+ *     Stephan Herrmann - Contribution for Bug 463360 - [override method][null] generating method override should not create redundant null annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -1876,7 +1877,7 @@ public class LocalCorrectionsSubProcessor {
 		
 		try {
 			ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(astRoot, problem.getOffset(), importRewrite);
-			MethodDeclaration hashCode= StubUtility2.createImplementationStub(cu, rewrite, importRewrite, importContext, superHashCode, binding, settings, false);
+			MethodDeclaration hashCode= StubUtility2.createImplementationStub(cu, rewrite, importRewrite, importContext, superHashCode, binding, settings, false, null);
 			BodyDeclarationRewrite.create(rewrite, typeDeclaration).insert(hashCode, null);
 			
 			proposal2.setEndPosition(rewrite.track(hashCode));
@@ -2019,7 +2020,7 @@ public class LocalCorrectionsSubProcessor {
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
 		try {
 			MethodDeclaration stub= StubUtility2.createImplementationStub(cu, rewrite, importRewrite, importRewriteContext, methodToOverride, typeBinding, settings,
-					typeBinding.isInterface());
+					typeBinding.isInterface(), typeBinding);
 			BodyDeclarationRewrite.create(rewrite, typeNode).insert(stub, null);
 
 			proposal.setEndPosition(rewrite.track(stub));

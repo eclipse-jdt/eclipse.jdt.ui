@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
  *       bug Encapsulate field can fail when two variables in one variable declaration (see
  *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=51540).
+ *     Stephan Herrmann - Configuration for
+ *		 Bug 463360 - [override method][null] generating method override should not create redundant null annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
@@ -1156,6 +1158,29 @@ public class ASTNodes {
 		return null;
 	}
 
+	public static IBinding getEnclosingDeclaration(ASTNode node) {
+		while(node != null) {
+			if (node instanceof AbstractTypeDeclaration) {
+				return ((AbstractTypeDeclaration)node).resolveBinding();
+			} else if (node instanceof AnonymousClassDeclaration) {
+				return ((AnonymousClassDeclaration)node).resolveBinding();
+			} else if (node instanceof MethodDeclaration) {
+				return ((MethodDeclaration)node).resolveBinding();
+			} else if (node instanceof FieldDeclaration) {
+				List<?> fragments= ((FieldDeclaration)node).fragments();
+				if (fragments.size() > 0)
+					return ((VariableDeclarationFragment)fragments.get(0)).resolveBinding();
+			} else if (node instanceof VariableDeclarationFragment) {
+				IVariableBinding variableBinding= ((VariableDeclarationFragment)node).resolveBinding();
+				if (variableBinding.getDeclaringMethod() != null || variableBinding.getDeclaringClass() != null)
+					return variableBinding;
+				// workaround for incomplete wiring of DOM bindings: keep searching when variableBinding is unparented
+			}
+			node= node.getParent();
+		}
+		return null;
+	}
+
 	public static IProblem[] getProblems(ASTNode node, int scope, int severity) {
 		ASTNode root= node.getRoot();
 		if (!(root instanceof CompilationUnit))
@@ -1451,7 +1476,7 @@ public class ASTNodes {
 	/**
 	 * Escapes a string value to a literal that can be used in Java source.
 	 * 
-	 * @param stringValue the string value 
+	 * @param stringValue the string value
 	 * @return the escaped string
 	 * @see StringLiteral#getEscapedValue()
 	 */
@@ -1464,7 +1489,7 @@ public class ASTNodes {
 	/**
 	 * Escapes a character value to a literal that can be used in Java source.
 	 * 
-	 * @param ch the character value 
+	 * @param ch the character value
 	 * @return the escaped string
 	 * @see CharacterLiteral#getEscapedValue()
 	 */

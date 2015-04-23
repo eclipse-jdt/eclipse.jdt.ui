@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Jerome Cambon <jerome.cambon@oracle.com> - [1.8][clean up][quick assist] Convert lambda to anonymous must qualify references to 'this'/'super' - https://bugs.eclipse.org/430573
+ *     Stephan Herrmann - Contribution for Bug 463360 - [override method][null] generating method override should not create redundant null annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
@@ -22,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -452,9 +454,14 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cuRewrite.getCu().getJavaProject());
 				ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 				ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(lambdaExpression, importRewrite);
-				
+
+				IBinding contextBinding= null; // used to find @NonNullByDefault effective at that current context
+				if (cuRewrite.getCu().getJavaProject().getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED)) {
+					contextBinding= ASTNodes.getEnclosingDeclaration(lambdaExpression);
+				}
+
 				MethodDeclaration methodDeclaration= StubUtility2.createImplementationStub(cuRewrite.getCu(), rewrite, importRewrite, importContext,
-						methodBinding, parameterNames, lambdaTypeBinding, settings, false);
+						methodBinding, parameterNames, lambdaTypeBinding, settings, false, contextBinding);
 
 				// Qualify reference to this or super
 				ASTNode parentType= ASTResolving.findParentType(lambdaExpression);

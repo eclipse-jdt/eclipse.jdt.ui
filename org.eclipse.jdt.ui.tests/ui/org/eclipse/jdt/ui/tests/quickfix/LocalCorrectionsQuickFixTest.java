@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
  *     Lukas Hanke <hanke@yatta.de> - Bug 430818 [1.8][quick fix] Quick fix for "for loop" is not shown for bare local variable/argument/field - https://bugs.eclipse.org/bugs/show_bug.cgi?id=430818
  *     Sandra Lions <sandra.lions-piron@oracle.com> - [quick fix] for qualified enum constants in switch-case labels - https://bugs.eclipse.org/bugs/90140
  *     Yves Joan <yves.joan@oracle.com> - [quick fix] Dead code quick fix should remove unnecessary parentheses - https://bugs.eclipse.org/257505
+ *     Stephan Herrmann - Contribution for Bug 463360 - [override method][null] generating method override should not create redundant null annotations
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -3130,6 +3131,244 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}");
 		expected[0]= buf.toString();
 
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUnimplementedMethodsWithAnnotations3() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		hashtable.put(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, "annots.NonNull");
+		hashtable.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "annots.Nullable");
+		hashtable.put(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME, "annots.NonNullByDefault");
+		JavaCore.setOptions(hashtable);
+		
+		IPackageFragment pack0= fSourceFolder.createPackageFragment("annots", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
+		buf.append("public @interface NonNull {}\n");
+		pack0.createCompilationUnit("NonNull.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
+		buf.append("public @interface Nullable {}\n");
+		pack0.createCompilationUnit("Nullable.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
+		buf.append("public @interface NonNullByDefault {}\n");
+		pack0.createCompilationUnit("NonNullByDefault.java", buf.toString(), false, null);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("@annots.NonNullByDefault\n");
+		buf.append("package test;\n");
+		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import annots.*;\n");
+		buf.append("\n");
+		buf.append("abstract class A {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public abstract @NonNull Object foo(@Nullable Object i1, @NonNull Object i2);\n");
+		buf.append("}\n");
+		buf.append("class B extends A {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		
+		ArrayList proposals= collectCorrections(cu, astRoot, 3, 2); // 2 warnings regarding redundant null annotations
+		
+		assertCorrectLabels(proposals);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import annots.*;\n");
+		buf.append("\n");
+		buf.append("abstract class A {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public abstract @NonNull Object foo(@Nullable Object i1, @NonNull Object i2);\n");
+		buf.append("}\n");
+		buf.append("class B extends A {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    public Object foo(@Nullable Object i1, Object i2) {\n"); // @NonNull is not copied due to default
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUnimplementedMethodsWithAnnotations4() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		hashtable.put(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, "annots.NonNull");
+		hashtable.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "annots.Nullable");
+		hashtable.put(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME, "annots.NonNullByDefault");
+		JavaCore.setOptions(hashtable);
+		
+		
+		IPackageFragment pack0= fSourceFolder.createPackageFragment("annots", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
+		buf.append("public @interface NonNull {}\n");
+		pack0.createCompilationUnit("NonNull.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
+		buf.append("public @interface Nullable {}\n");
+		pack0.createCompilationUnit("Nullable.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
+		buf.append("public @interface NonNullByDefault { boolean value(); }\n");
+		pack0.createCompilationUnit("NonNullByDefault.java", buf.toString(), false, null);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("@annots.NonNullByDefault\n");
+		buf.append("package test;\n");
+		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import annots.*;\n");
+		buf.append("\n");
+		buf.append("abstract class A {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public abstract @NonNull Object foo(@Nullable Object i1, @NonNull Object i2);\n");
+		buf.append("}\n");
+		buf.append("@NonNullByDefault(false)\n");
+		buf.append("class B extends A {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		
+		ArrayList proposals= collectCorrections(cu, astRoot, 1, 0);
+		
+		assertCorrectLabels(proposals);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import annots.*;\n");
+		buf.append("\n");
+		buf.append("abstract class A {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public abstract @NonNull Object foo(@Nullable Object i1, @NonNull Object i2);\n");
+		buf.append("}\n");
+		buf.append("@NonNullByDefault(false)\n");
+		buf.append("class B extends A {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    public @NonNull Object foo(@Nullable Object i1, @NonNull Object i2) {\n"); // all copied since outer default is canceled
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUnimplementedMethodsWithAnnotations5() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		hashtable.put(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, "annots.NonNull");
+		hashtable.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "annots.Nullable");
+		hashtable.put(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME, "annots.NonNullByDefault");
+		JavaCore.setOptions(hashtable);
+		
+		
+		IPackageFragment pack0= fSourceFolder.createPackageFragment("annots", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
+		buf.append("public @interface NonNull {}\n");
+		pack0.createCompilationUnit("NonNull.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
+		buf.append("public @interface Nullable {}\n");
+		pack0.createCompilationUnit("Nullable.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
+		buf.append("public @interface NonNullByDefault { boolean value() default true; }\n");
+		pack0.createCompilationUnit("NonNullByDefault.java", buf.toString(), false, null);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		// no package default
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import annots.*;\n");
+		buf.append("\n");
+		buf.append("abstract class A {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public abstract @NonNull Object foo(@Nullable Object i1, @NonNull Object i2);\n");
+		buf.append("}\n");
+		buf.append("class B {\n");
+		buf.append("    @NonNullByDefault\n"); // finding this annotation requires https://bugs.eclipse.org/429813
+		buf.append("    A f = new A() {\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		
+		ArrayList proposals= collectCorrections(cu, astRoot, 1, 0);
+		
+		assertCorrectLabels(proposals);
+		
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import annots.*;\n");
+		buf.append("\n");
+		buf.append("abstract class A {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public abstract @NonNull Object foo(@Nullable Object i1, @NonNull Object i2);\n");
+		buf.append("}\n");
+		buf.append("class B {\n");
+		buf.append("    @NonNullByDefault\n");
+		buf.append("    A f = new A() {\n");
+		buf.append("\n");
+		buf.append("        @Override\n");
+		buf.append("        public Object foo(@Nullable Object i1, Object i2) {\n"); // don't copy @NonNull due to default at field f
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
 		assertExpectedExistInProposals(proposals, expected);
 	}
 

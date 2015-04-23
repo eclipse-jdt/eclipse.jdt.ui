@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Samrat Dhillon <samrat.dhillon@gmail.com> - [introduce factory] Introduce Factory on an abstract class adds a statement to create an instance of that class - https://bugs.eclipse.org/bugs/show_bug.cgi?id=395016
+ *     Stephan Herrmann - Contribution for Bug 463360 - [override method][null] generating method override should not create redundant null annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -638,7 +639,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			for (int i= 0; i < unimplementedMethods.length; i++) {
 				IMethodBinding unImplementedMethod= unimplementedMethods[i];
 				MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(fCUHandle, unitRewriter, fImportRewriter, context,
-						unImplementedMethod, unImplementedMethod.getDeclaringClass(), settings, false);
+						unImplementedMethod, unImplementedMethod.getDeclaringClass(), settings, false, fFactoryOwningClass.resolveBinding());
 				decl.bodyDeclarations().add(newMethodDecl);
 			}
 			newCtorCall.setAnonymousClassDeclaration(decl);

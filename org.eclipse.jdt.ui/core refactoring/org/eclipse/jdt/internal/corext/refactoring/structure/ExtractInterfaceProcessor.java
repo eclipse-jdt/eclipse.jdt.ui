@@ -605,7 +605,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 							if (extended.isAnnotation()) {
 								Annotation annotation= (Annotation) extended;
 								ITypeBinding binding= annotation.resolveTypeBinding();
-								if (binding != null && Bindings.isNullAnnotation(binding, project)) {
+								if (binding != null && Bindings.isAnyNullAnnotation(binding, project)) {
 									ASTRewrite rewrite= sourceRewrite.getASTRewrite();
 									rewrite.getListRewrite(declaration, MethodDeclaration.MODIFIERS2_PROPERTY).remove(annotation, null);
 								}
@@ -616,7 +616,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 								if (extended.isAnnotation()) {
 									Annotation annotation= (Annotation) extended;
 									ITypeBinding binding= annotation.resolveTypeBinding();
-									if (binding != null && Bindings.isNullAnnotation(binding, project)) {
+									if (binding != null && Bindings.isAnyNullAnnotation(binding, project)) {
 										ASTRewrite rewrite= sourceRewrite.getASTRewrite();
 										rewrite.getListRewrite(parameter, SingleVariableDeclaration.MODIFIERS2_PROPERTY).remove(annotation, null);
 									}
@@ -672,7 +672,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			} else if (extended.isAnnotation()) {
 				annotation= (Annotation) extended;
 				ITypeBinding binding= annotation.resolveTypeBinding();
-				if (binding != null && binding.getQualifiedName().equals("java.lang.Override") || ! Bindings.isNullAnnotation(binding, sourceProject)) //$NON-NLS-1$
+				if (binding != null && binding.getQualifiedName().equals("java.lang.Override") || ! Bindings.isAnyNullAnnotation(binding, sourceProject)) //$NON-NLS-1$
 					list.remove(annotation, null);
 			}
 		}
@@ -686,7 +686,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				} else if (extended.isAnnotation()) {
 					annotation= (Annotation) extended;
 					ITypeBinding binding= annotation.resolveTypeBinding();
-					if (binding != null && ! Bindings.isNullAnnotation(binding, sourceProject))
+					if (binding != null && ! Bindings.isAnyNullAnnotation(binding, sourceProject))
 						modifierRewrite.remove(annotation, null);
 				}
 			}

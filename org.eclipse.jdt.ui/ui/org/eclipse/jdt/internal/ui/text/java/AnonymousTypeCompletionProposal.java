@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for Bug 463360 - [override method][null] generating method override should not create redundant null annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -47,6 +48,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -61,6 +63,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -224,13 +227,18 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 				}
 				methodsToOverride= result.toArray(new IMethodBinding[result.size()]);
 			}
+			IBinding contextBinding= null; // used to find @NonNullByDefault effective at that current context
+			if (fCompilationUnit.getJavaProject().getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED)) {
+				ASTNode focusNode= NodeFinder.perform(astRoot, getReplacementOffset()+dummyClassContent.length(), 0);
+				contextBinding= ASTNodes.getEnclosingDeclaration(focusNode);
+			}
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 			ITrackedNodePosition trackedDeclaration= rewrite.track(declaration);
 
 			ListRewrite rewriter= rewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
 			for (int i= 0; i < methodsToOverride.length; i++) {
 				IMethodBinding curr= methodsToOverride[i];
-				MethodDeclaration stub= StubUtility2.createImplementationStub(workingCopy, rewrite, importRewrite, null, curr, dummyTypeBinding, settings, dummyTypeBinding.isInterface());
+				MethodDeclaration stub= StubUtility2.createImplementationStub(workingCopy, rewrite, importRewrite, null, curr, dummyTypeBinding, settings, dummyTypeBinding.isInterface(), contextBinding);
 				rewriter.insertFirst(stub, null);
 			}
 

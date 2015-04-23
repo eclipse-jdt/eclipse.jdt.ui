@@ -11,6 +11,7 @@
  *       bug "inline method - doesn't handle implicit cast" (see
  *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
  *     Rabea Gransberger <rgransberger@gmx.de> - [quick fix] Fix several visibility issues - https://bugs.eclipse.org/394692
+ *     Stephan Herrmann - Contribution for Bug 463360 - [override method][null] generating method override should not create redundant null annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
@@ -42,6 +43,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
@@ -1547,10 +1549,68 @@ public class Bindings {
 		}
 	}
 
-	public static boolean isNullAnnotation(ITypeBinding annotationType, IJavaProject project) {
+	public static boolean isNonNullAnnotation(ITypeBinding annotationType, IJavaProject project) {
+		String qualifiedName= annotationType.getQualifiedName();
+		return qualifiedName.equals(project.getOption(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, true));
+	}
+
+	public static boolean isAnyNullAnnotation(ITypeBinding annotationType, IJavaProject project) {
 		String qualifiedName= annotationType.getQualifiedName();
 		return qualifiedName.equals(project.getOption(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, true))
 				|| qualifiedName.equals(project.getOption(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, true));
+	}
+
+	/**
+	 * Answer the annotation binding representing a nullness default
+	 * effective at the point denoted by 'contextBinding'.
+	 * @param contextBinding method binding or type binding denoting the location of interest
+	 * @param javaProject the containing java project, consulted for the actual name of
+	 *  the annotation used for nullness defaults (default: <code>@NonNullByDefault</code>).
+	 * @return binding for the effective nullness default annotation
+	 * 	or null if no nullness default is effective at the context location.
+	 */
+	public static IAnnotationBinding findNullnessDefault(IBinding contextBinding, IJavaProject javaProject) {
+		if (JavaCore.ENABLED.equals(javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true))) {
+			String annotationName= javaProject.getOption(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME, true);
+			while (contextBinding != null) {
+				for (IAnnotationBinding annotation : contextBinding.getAnnotations()) {
+					ITypeBinding annotationType= annotation.getAnnotationType();
+					if (annotationType != null && annotationType.getQualifiedName().equals(annotationName))
+						return annotation;
+				}
+				// travel out:
+				switch (contextBinding.getKind()) {
+					case IBinding.METHOD:
+						IMethodBinding methodBinding= (IMethodBinding) contextBinding;
+						contextBinding= methodBinding.getDeclaringMember();
+						if (contextBinding == null)
+							contextBinding= methodBinding.getDeclaringClass();
+						break;
+					case IBinding.VARIABLE:
+						IVariableBinding variableBinding= (IVariableBinding) contextBinding;
+						contextBinding= variableBinding.getDeclaringMethod();
+						if (contextBinding == null)
+							contextBinding= variableBinding.getDeclaringClass();
+						break;
+					case IBinding.TYPE:
+						ITypeBinding currentClass= (ITypeBinding) contextBinding;
+						contextBinding= currentClass.getDeclaringMember();
+						if (contextBinding == null) {
+							contextBinding= currentClass.getDeclaringMethod();
+							if (contextBinding == null) {
+								contextBinding= currentClass.getDeclaringClass();
+								if (contextBinding == null)
+									contextBinding= currentClass.getPackage();
+							}
+						}
+						break;
+					default:
+						contextBinding= null;
+						break;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
