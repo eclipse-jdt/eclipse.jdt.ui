@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -137,7 +137,8 @@ public class CodeFormatFix implements ICleanUpFix {
 					}
 				}
 
-				if (correctIndentation) {
+				// Don't apply correct indentation if already formatting all lines
+				if (correctIndentation && (!format || regions != null)) {
 					JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 					TextEdit edit= IndentAction.indent(document, cu.getJavaProject());
 					if (edit != null) {
