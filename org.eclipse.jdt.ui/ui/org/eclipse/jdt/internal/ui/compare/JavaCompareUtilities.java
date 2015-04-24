@@ -101,9 +101,9 @@ public class JavaCompareUtilities {
 		switch (type) {
 		case IJavaElement.INITIALIZER:
 		case IJavaElement.METHOD:
-			return getImageDescriptor("obj16/compare_method.gif"); //$NON-NLS-1$
+			return getImageDescriptor("obj16/compare_method.png"); //$NON-NLS-1$
 		case IJavaElement.FIELD:
-			return getImageDescriptor("obj16/compare_field.gif"); //$NON-NLS-1$
+			return getImageDescriptor("obj16/compare_field.png"); //$NON-NLS-1$
 		case IJavaElement.PACKAGE_DECLARATION:
 			return JavaPluginImages.DESC_OBJS_PACKDECL;
 		case IJavaElement.IMPORT_DECLARATION:

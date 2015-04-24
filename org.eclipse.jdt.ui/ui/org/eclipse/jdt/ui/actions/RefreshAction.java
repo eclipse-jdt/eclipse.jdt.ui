@@ -136,7 +136,7 @@ public class RefreshAction extends SelectionDispatchAction {
 		super(site);
 		setText(ActionMessages.RefreshAction_label);
 		setToolTipText(ActionMessages.RefreshAction_toolTip);
-		JavaPluginImages.setLocalImageDescriptors(this, "refresh.gif");//$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "refresh.png");//$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.REFRESH_ACTION);
 	}
 

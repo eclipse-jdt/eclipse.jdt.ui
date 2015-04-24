@@ -476,7 +476,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					super();
 					PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LEXICAL_SORTING_OUTLINE_ACTION);
 					setText(JavaEditorMessages.JavaOutlinePage_Sort_label);
-					JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.gif"); //$NON-NLS-1$
+					JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.png"); //$NON-NLS-1$
 					setToolTipText(JavaEditorMessages.JavaOutlinePage_Sort_tooltip);
 					setDescription(JavaEditorMessages.JavaOutlinePage_Sort_description);
 
@@ -516,7 +516,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				setText(JavaEditorMessages.JavaOutlinePage_GoIntoTopLevelType_label);
 				setToolTipText(JavaEditorMessages.JavaOutlinePage_GoIntoTopLevelType_tooltip);
 				setDescription(JavaEditorMessages.JavaOutlinePage_GoIntoTopLevelType_description);
-				JavaPluginImages.setLocalImageDescriptors(this, "gointo_toplevel_type.gif"); //$NON-NLS-1$
+				JavaPluginImages.setLocalImageDescriptors(this, "gointo_toplevel_type.png"); //$NON-NLS-1$
 
 				IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 				boolean showclass= preferenceStore.getBoolean("GoIntoTopLevelTypeAction.isChecked"); //$NON-NLS-1$

@@ -49,7 +49,7 @@ public class TogglePresentationAction extends TextEditorAction implements IPrope
 	 */
 	public TogglePresentationAction() {
 		super(JavaEditorMessages.getBundleForConstructedKeys(), "TogglePresentation.", null, IAction.AS_CHECK_BOX); //$NON-NLS-1$
-		JavaPluginImages.setToolImageDescriptors(this, "segment_edit.gif"); //$NON-NLS-1$
+		JavaPluginImages.setToolImageDescriptors(this, "segment_edit.png"); //$NON-NLS-1$
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.TOGGLE_PRESENTATION_ACTION);
 		update();
 	}

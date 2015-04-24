@@ -37,19 +37,19 @@ public class ToggleViewAction extends Action {
 			contextHelpId= IJavaHelpContextIds.SHOW_SUPERTYPES;
 			setDescription(TypeHierarchyMessages.ToggleViewAction_supertypes_description);
 			setToolTipText(TypeHierarchyMessages.ToggleViewAction_supertypes_tooltip);
-			JavaPluginImages.setLocalImageDescriptors(this, "super_co.gif"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "super_co.png"); //$NON-NLS-1$
 		} else if (viewerIndex == ITypeHierarchyViewPart.HIERARCHY_MODE_SUBTYPES) {
 			setText(TypeHierarchyMessages.ToggleViewAction_subtypes_label);
 			contextHelpId= IJavaHelpContextIds.SHOW_SUBTYPES;
 			setDescription(TypeHierarchyMessages.ToggleViewAction_subtypes_description);
 			setToolTipText(TypeHierarchyMessages.ToggleViewAction_subtypes_tooltip);
-			JavaPluginImages.setLocalImageDescriptors(this, "sub_co.gif"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "sub_co.png"); //$NON-NLS-1$
 		} else if (viewerIndex == ITypeHierarchyViewPart.HIERARCHY_MODE_CLASSIC) {
 			setText(TypeHierarchyMessages.ToggleViewAction_vajhierarchy_label);
 			contextHelpId= IJavaHelpContextIds.SHOW_HIERARCHY;
 			setDescription(TypeHierarchyMessages.ToggleViewAction_vajhierarchy_description);
 			setToolTipText(TypeHierarchyMessages.ToggleViewAction_vajhierarchy_tooltip);
-			JavaPluginImages.setLocalImageDescriptors(this, "hierarchy_co.gif"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "hierarchy_co.png"); //$NON-NLS-1$
 		} else {
 			Assert.isTrue(false);
 		}

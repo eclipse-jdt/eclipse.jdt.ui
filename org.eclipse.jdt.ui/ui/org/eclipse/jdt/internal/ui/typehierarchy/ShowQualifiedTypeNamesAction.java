@@ -33,7 +33,7 @@ public class ShowQualifiedTypeNamesAction extends Action {
 		setDescription(TypeHierarchyMessages.ShowQualifiedTypeNamesAction_description);
 		setToolTipText(TypeHierarchyMessages.ShowQualifiedTypeNamesAction_tooltip);
 
-		JavaPluginImages.setLocalImageDescriptors(this, "th_showqualified.gif"); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "th_showqualified.png"); //$NON-NLS-1$
 
 		fView= v;
 		setChecked(initValue);

@@ -456,8 +456,8 @@ public class PackagesView extends JavaBrowsingPart{
 
 		LayoutAction switchToFlatViewAction= new LayoutAction(JavaBrowsingMessages.PackagesView_flatLayoutAction_label,LIST_VIEW_STATE);
 		LayoutAction switchToHierarchicalViewAction= new LayoutAction(JavaBrowsingMessages.PackagesView_HierarchicalLayoutAction_label, TREE_VIEW_STATE);
-		JavaPluginImages.setLocalImageDescriptors(switchToFlatViewAction, "flatLayout.gif"); //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(switchToHierarchicalViewAction, "hierarchicalLayout.gif"); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(switchToFlatViewAction, "flatLayout.png"); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(switchToHierarchicalViewAction, "hierarchicalLayout.png"); //$NON-NLS-1$
 
 		return new LayoutActionGroup(new IAction[]{switchToFlatViewAction,switchToHierarchicalViewAction}, fCurrViewState);
 	}

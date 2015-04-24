@@ -433,7 +433,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		public OpenPropertiesFileAction(NLSHoverControl control) {
 			fControl= control;
 			setText(JavaHoverMessages.NLSStringHover_open_in_properties_file);
-			JavaPluginImages.setLocalImageDescriptors(this, "goto_input.gif"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "goto_input.png"); //$NON-NLS-1$
 		}
 
 		/*

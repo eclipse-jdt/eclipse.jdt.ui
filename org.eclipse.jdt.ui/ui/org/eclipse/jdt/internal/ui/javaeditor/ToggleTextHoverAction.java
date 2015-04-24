@@ -43,7 +43,7 @@ public class ToggleTextHoverAction extends TextEditorAction implements IProperty
 	 */
 	public ToggleTextHoverAction() {
 		super(JavaEditorMessages.getBundleForConstructedKeys(), "ToggleTextHover.", null); //$NON-NLS-1$
-		JavaPluginImages.setToolImageDescriptors(this, "jdoc_hover_edit.gif"); //$NON-NLS-1$
+		JavaPluginImages.setToolImageDescriptors(this, "jdoc_hover_edit.png"); //$NON-NLS-1$
 		setActionDefinitionId(IJavaEditorActionDefinitionIds.TOGGLE_TEXT_HOVER);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.TOGGLE_TEXTHOVER_ACTION);
 		update();

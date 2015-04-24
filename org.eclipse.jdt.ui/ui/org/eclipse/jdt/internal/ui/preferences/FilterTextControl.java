@@ -50,13 +50,13 @@ public class FilterTextControl {
 	 * Image descriptor for enabled clear button.
 	 */
 	private static ImageDescriptor fgClearIconDescriptor= AbstractUIPlugin
-			.imageDescriptorFromPlugin(PlatformUI.PLUGIN_ID, "$nl$/icons/full/etool16/clear_co.gif"); //$NON-NLS-1$
+			.imageDescriptorFromPlugin(PlatformUI.PLUGIN_ID, "$nl$/icons/full/etool16/clear_co.png"); //$NON-NLS-1$
 
 	/**
 	 * Image descriptor for disabled clear button.
 	 */
 	private static ImageDescriptor fgDisabledClearIconDescriptor= AbstractUIPlugin.imageDescriptorFromPlugin(
-			PlatformUI.PLUGIN_ID, "$nl$/icons/full/dtool16/clear_co.gif"); //$NON-NLS-1$
+			PlatformUI.PLUGIN_ID, "$nl$/icons/full/dtool16/clear_co.png"); //$NON-NLS-1$
 
 
 	private static Boolean fgUseNativeSearchField;

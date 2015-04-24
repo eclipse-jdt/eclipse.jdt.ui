@@ -127,11 +127,11 @@ public class CommonLayoutActionGroup extends MultiActionGroup {
 
 		fFlatLayoutAction = new CommonLayoutAction(true);
 		fFlatLayoutAction.setText(PackagesMessages.LayoutActionGroup_flatLayoutAction_label);
-		JavaPluginImages.setLocalImageDescriptors(fFlatLayoutAction, "flatLayout.gif"); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(fFlatLayoutAction, "flatLayout.png"); //$NON-NLS-1$
 
 		fHierarchicalLayout = new CommonLayoutAction(false);
 		fHierarchicalLayout.setText(PackagesMessages.LayoutActionGroup_hierarchicalLayoutAction_label);
-		JavaPluginImages.setLocalImageDescriptors(fHierarchicalLayout, "hierarchicalLayout.gif"); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(fHierarchicalLayout, "hierarchicalLayout.png"); //$NON-NLS-1$
 
 		return new IAction[] { fFlatLayoutAction, fHierarchicalLayout };
 	}

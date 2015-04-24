@@ -72,7 +72,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		public OverrideFlatTreeAction() {
 			setToolTipText(JavaUIMessages.OverrideMethodDialog_groupMethodsByTypes);
 
-			JavaPluginImages.setLocalImageDescriptors(this, "impl_co.gif"); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "impl_co.png"); //$NON-NLS-1$
 
 			fToggle= getOverrideContentProvider().isShowTypes();
 			setChecked(fToggle);

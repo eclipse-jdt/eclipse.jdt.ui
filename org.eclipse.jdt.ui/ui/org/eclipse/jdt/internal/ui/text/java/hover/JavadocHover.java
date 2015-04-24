@@ -261,7 +261,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		public OpenDeclarationAction(BrowserInformationControl infoControl) {
 			fInfoControl= infoControl;
 			setText(JavaHoverMessages.JavadocHover_openDeclaration);
-			JavaPluginImages.setLocalImageDescriptors(this, "goto_input.gif"); //$NON-NLS-1$ //TODO: better images
+			JavaPluginImages.setLocalImageDescriptors(this, "goto_input.png"); //$NON-NLS-1$ //TODO: better images
 		}
 
 		/*

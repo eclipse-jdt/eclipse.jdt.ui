@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.ui.util.CoreUtility;
  * A type wizard is added to the type drop down if it has a paramater 'javatype':
  *     <wizard
  *         name="My Type Wizard"
- *         icon="icons/wiz.gif"
+ *         icon="icons/wiz.png"
  *         category="mycategory"
  *         id="xx.MyWizard">
  *         <class class="org.xx.MyWizard">

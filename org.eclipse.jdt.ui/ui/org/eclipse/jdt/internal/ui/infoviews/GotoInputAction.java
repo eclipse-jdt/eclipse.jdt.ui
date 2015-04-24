@@ -31,7 +31,7 @@ class GotoInputAction extends Action {
 		Assert.isNotNull(infoView);
 		fInfoView= infoView;
 
-		JavaPluginImages.setLocalImageDescriptors(this, "goto_input.gif"); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "goto_input.png"); //$NON-NLS-1$
 		setText(InfoViewMessages.GotoInputAction_label);
 		setToolTipText(InfoViewMessages.GotoInputAction_tooltip);
 		setDescription(InfoViewMessages.GotoInputAction_description);
