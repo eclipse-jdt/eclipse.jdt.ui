@@ -15,7 +15,7 @@ public class Bug {
 
 	String t3(int i,
 			int j)
-			[] []
+	[] []
 	{
 		return new String[0][0];
 	}

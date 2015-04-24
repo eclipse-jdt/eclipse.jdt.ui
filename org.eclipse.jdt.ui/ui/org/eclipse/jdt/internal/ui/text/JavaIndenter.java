@@ -1037,10 +1037,14 @@ public final class JavaIndenter {
 					if (isTryWithResources()) {
 						fIndent= fPrefs.prefContinuationIndent;
 						return fPosition;
-					} else {
-						fPosition= pos;
-						return skipToStatementStart(danglingElse, false);
 					}
+					fPosition= pos;
+					if (isSemicolonPartOfEnumBodyDeclaration()) {
+						fIndent= getBlockIndent(false, true);
+						return fPosition;
+					}
+					fPosition= pos;
+					return skipToStatementStart(danglingElse, false);
 				}
 			// scope introduction: special treat who special is
 			case Symbols.TokenLPAREN:
@@ -1537,6 +1541,8 @@ public final class JavaIndenter {
 				case Symbols.TokenRBRACE:
 				case Symbols.TokenGREATERTHAN:
 					skipScope();
+					startLine= fLine;
+					startPosition= fPosition;
 					break;
 
 				// scope introduction: special treat who special is
@@ -1687,13 +1693,16 @@ public final class JavaIndenter {
 				pos= fPosition; // store
 
 				// special: array initializer
-				if (looksLikeArrayInitializerIntro())
-					if (fPrefs.prefArrayDeepIndent)
+				if (looksLikeArrayInitializerIntro()) {
+					if (fPrefs.prefArrayDeepIndent) {
 						return setFirstElementAlignment(pos, bound);
-					else
+					} else {
 						fIndent= fPrefs.prefArrayIndent;
-				else
+						return pos;
+					}
+				} else {
 					fIndent= fPrefs.prefBlockIndent;
+				}
 
 				// normal: skip to the statement start before the scope introducer
 				// opening braces are often on differently ending indents than e.g. a method definition
@@ -1743,27 +1752,113 @@ public final class JavaIndenter {
 
 
 	/**
-	 * Returns <code>true</code> if the next token received after calling
-	 * <code>nextToken</code> is either an equal sign or an array designator ('[]').
+	 * Returns <code>true</code> if the next token received after calling <code>nextToken</code> is
+	 * either an equal sign or an array designator ('[]') preceded by array creation.
 	 *
 	 * @return <code>true</code> if the next elements look like the start of an array definition
 	 */
 	private boolean looksLikeArrayInitializerIntro() {
 		nextToken();
-		if (fToken == Symbols.TokenEQUAL || skipBrackets()) {
+		if (fToken == Symbols.TokenEQUAL) {
 			return true;
+		}
+
+		if (!skipScope(Symbols.TokenLBRACKET, Symbols.TokenRBRACKET)) {
+			return false;
+		}
+		nextToken();
+		if (fToken == Symbols.TokenIDENT) { // type name
+			nextToken();
+			while (fToken == Symbols.TokenOTHER) { // dot of qualification
+				nextToken();
+				if (fToken != Symbols.TokenIDENT) // qualifying name
+					return false;
+				nextToken();
+			}
+			return fToken == Symbols.TokenNEW;
 		}
 		return false;
 	}
 
 	/**
-	 * Skips over the next <code>if</code> keyword. The current token when calling
-	 * this method must be an <code>else</code> keyword. Returns <code>true</code>
-	 * if a matching <code>if</code> could be found, <code>false</code> otherwise.
-	 * The cursor (<code>fPosition</code>) is set to the offset of the <code>if</code>
-	 * token.
+	 * Returns <code>true</code> if the current position looks like a part of enum declaration
+	 * header. It calls {@link #nextToken} to scan backwards.
 	 *
-	 * @return <code>true</code> if a matching <code>if</code> token was found, <code>false</code> otherwise
+	 * @return <code>true</code> if the current position looks like a part of enum declaration
+	 *         header
+	 * @since 3.11
+	 */
+	private boolean looksLikeEnumDeclaration() {
+		while (true) {
+			nextToken();
+			switch (fToken) {
+				case Symbols.TokenENUM:
+					return true;
+				case Symbols.TokenIDENT:
+				case Symbols.TokenCOMMA:
+				case Symbols.TokenAT:
+					break;
+				case Symbols.TokenOTHER:
+					try {
+						if (fDocument.getChar(fPosition) != '.') {
+							return false;
+						}
+					} catch (BadLocationException e) {
+						return false;
+					}
+					break;
+				case Symbols.TokenRPAREN:
+				case Symbols.TokenRBRACKET:
+				case Symbols.TokenRBRACE:
+				case Symbols.TokenGREATERTHAN:
+					skipScope();
+					break;
+				case Symbols.TokenEOF:
+					return false;
+				default:
+					return false;
+			}
+		}
+	}
+
+	/**
+	 * Checks if the semicolon at the current position is part of enum body declaration.
+	 * 
+	 * @return returns <code>true</code> if the semicolon at the current position is part of enum
+	 *         body declaration
+	 * @since 3.11
+	 */
+	private boolean isSemicolonPartOfEnumBodyDeclaration() {
+		while (true) {
+			nextToken();
+			switch (fToken) {
+				case Symbols.TokenLBRACE:
+					return looksLikeEnumDeclaration();
+				case Symbols.TokenIDENT:
+				case Symbols.TokenCOMMA:
+					break;
+				case Symbols.TokenRPAREN:
+				case Symbols.TokenRBRACKET:
+				case Symbols.TokenRBRACE:
+				case Symbols.TokenGREATERTHAN:
+					skipScope();
+					break;
+				case Symbols.TokenEOF:
+					return false;
+				default:
+					return false;
+			}
+		}
+	}
+
+	/**
+	 * Skips over the next <code>if</code> keyword. The current token when calling this method must
+	 * be an <code>else</code> keyword. Returns <code>true</code> if a matching <code>if</code>
+	 * could be found, <code>false</code> otherwise. The cursor (<code>fPosition</code>) is set to
+	 * the offset of the <code>if</code> token.
+	 *
+	 * @return <code>true</code> if a matching <code>if</code> token was found, <code>false</code>
+	 *         otherwise
 	 */
 	private boolean skipNextIF() {
 		Assert.isTrue(fToken == Symbols.TokenELSE);
