@@ -12,6 +12,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -633,8 +636,25 @@ public class JavaPluginImages {
 	 * Added for 3.1.1.
 	 */
 	public static ImageDescriptor createImageDescriptor(Bundle bundle, IPath path, boolean useMissingImageDescriptor) {
-		URL url= FileLocator.find(bundle, path, null);
-		if (url != null) {
+		// Don't resolve the URL here, but create a URL using the
+		// "platform:/plugin" protocol, which also supports fragments,
+		// and for which URLImageDescriptor can find an "@2x" version.
+		// Caveat: The resulting URL may contain $nl$ etc., which is not
+		// directly supported by PlatformURLConnection and needs to go through
+		// FileLocator#find(URL), see bug 250432.
+		IPath uriPath= new Path("/plugin").append(bundle.getSymbolicName()).append(path); //$NON-NLS-1$
+		URL url= null;
+		try {
+			URI uri= new URI("platform", null, uriPath.toString(), null); //$NON-NLS-1$
+			url= uri.toURL();
+		} catch (MalformedURLException e) {
+			// no image
+		} catch (URISyntaxException e) {
+			// no image
+		}
+		
+		URL foundUrl= FileLocator.find(url);
+		if (foundUrl != null) {
 			return ImageDescriptor.createFromURL(url);
 		}
 		if (useMissingImageDescriptor) {
