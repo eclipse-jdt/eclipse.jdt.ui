@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,6 @@ import java.util.ArrayList;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jdt.astview.ASTViewPlugin;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
@@ -29,6 +27,8 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.StringLiteral;
+
+import org.eclipse.jdt.astview.ASTViewPlugin;
 
 /**
  *
@@ -175,6 +175,7 @@ public class Binding extends ASTAttribute {
 					res.add(new Binding(this, "PACKAGE", typeBinding.getPackage(), isRefType)); //$NON-NLS-1$
 					res.add(new Binding(this, "DECLARING CLASS", typeBinding.getDeclaringClass(), isType(typeKind, REF_TYPE | VARIABLE_TYPE | CAPTURE_TYPE))); //$NON-NLS-1$
 					res.add(new Binding(this, "DECLARING METHOD", typeBinding.getDeclaringMethod(), isType(typeKind, REF_TYPE | VARIABLE_TYPE | CAPTURE_TYPE))); //$NON-NLS-1$
+					res.add(new Binding(this, "DECLARING MEMBER", typeBinding.getDeclaringMember(), typeBinding.isLocal())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "MODIFIERS", getModifiersString(fBinding.getModifiers(), false), isRefType)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "BINARY NAME", typeBinding.getBinaryName(), true)); //$NON-NLS-1$
 					
@@ -207,6 +208,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "IS CONSTRUCTOR", methodBinding.isConstructor(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEFAULT CONSTRUCTOR", methodBinding.isDefaultConstructor(), true)); //$NON-NLS-1$
 					res.add(new Binding(this, "DECLARING CLASS", methodBinding.getDeclaringClass(), true)); //$NON-NLS-1$
+					res.add(new Binding(this, "DECLARING MEMBER", methodBinding.getDeclaringMember(), methodBinding.getDeclaringMember() != null)); //$NON-NLS-1$
 					res.add(new Binding(this, "RETURN TYPE", methodBinding.getReturnType(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "MODIFIERS", getModifiersString(fBinding.getModifiers(), true), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "PARAMETER TYPES", methodBinding.getParameterTypes(), true)); //$NON-NLS-1$
