@@ -57,120 +57,121 @@ public class JavaPluginImages {
 
 	/*
 	 * Keys for images available from the Java-UI plug-in image registry.
+	 * Caveat (bug 465521): Can't use *.png in all existing keys, since some of them are made API via org.eclipse.jdt.ui.ISharedImages!
 	 */
-	public static final String IMG_MISC_PUBLIC= NAME_PREFIX + "methpub_obj.png"; 			//$NON-NLS-1$
-	public static final String IMG_MISC_PROTECTED= NAME_PREFIX + "methpro_obj.png"; 		//$NON-NLS-1$
-	public static final String IMG_MISC_PRIVATE= NAME_PREFIX + "methpri_obj.png"; 		//$NON-NLS-1$
-	public static final String IMG_MISC_DEFAULT= NAME_PREFIX + "methdef_obj.png"; 		//$NON-NLS-1$
+	public static final String IMG_MISC_PUBLIC= NAME_PREFIX + "methpub_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_MISC_PROTECTED= NAME_PREFIX + "methpro_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_MISC_PRIVATE= NAME_PREFIX + "methpri_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_MISC_DEFAULT= NAME_PREFIX + "methdef_obj.gif"; 		//$NON-NLS-1$
 
-	public static final String IMG_FIELD_PUBLIC= NAME_PREFIX + "field_public_obj.png"; 			//$NON-NLS-1$
-	public static final String IMG_FIELD_PROTECTED= NAME_PREFIX + "field_protected_obj.png"; 		//$NON-NLS-1$
-	public static final String IMG_FIELD_PRIVATE= NAME_PREFIX + "field_private_obj.png"; 		//$NON-NLS-1$
-	public static final String IMG_FIELD_DEFAULT= NAME_PREFIX + "field_default_obj.png"; 		//$NON-NLS-1$
+	public static final String IMG_FIELD_PUBLIC= NAME_PREFIX + "field_public_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_FIELD_PROTECTED= NAME_PREFIX + "field_protected_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_FIELD_PRIVATE= NAME_PREFIX + "field_private_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_FIELD_DEFAULT= NAME_PREFIX + "field_default_obj.gif"; 		//$NON-NLS-1$
 
-	public static final String IMG_ELCL_VIEW_MENU= NAME_PREFIX + T_ELCL + "view_menu.png"; //$NON-NLS-1$
-	public static final String IMG_DLCL_VIEW_MENU= NAME_PREFIX + T_DLCL + "view_menu.png"; //$NON-NLS-1$
+	public static final String IMG_ELCL_VIEW_MENU= NAME_PREFIX + T_ELCL + "view_menu.gif"; //$NON-NLS-1$
+	public static final String IMG_DLCL_VIEW_MENU= NAME_PREFIX + T_DLCL + "view_menu.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_GHOST= NAME_PREFIX + "ghost.png"; 				//$NON-NLS-1$
-	public static final String IMG_OBJS_SEARCH_TSK= NAME_PREFIX + "search_tsk.png"; 		//$NON-NLS-1$
-	public static final String IMG_OBJS_PACKDECL= NAME_PREFIX + "packd_obj.png"; 			//$NON-NLS-1$
-	public static final String IMG_OBJS_IMPDECL= NAME_PREFIX + "imp_obj.png"; 			//$NON-NLS-1$
-	public static final String IMG_OBJS_IMPCONT= NAME_PREFIX + "impc_obj.png"; 			//$NON-NLS-1$
-	public static final String IMG_OBJS_JSEARCH= NAME_PREFIX + "jsearch_obj.png"; 		//$NON-NLS-1$
-	public static final String IMG_OBJS_SEARCH_DECL= NAME_PREFIX + "search_decl_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_SEARCH_REF= NAME_PREFIX + "search_ref_obj.png"; 	//$NON-NLS-1$
-	public static final String IMG_OBJS_CLASS= NAME_PREFIX + "class_obj.png"; 			//$NON-NLS-1$
-	public static final String IMG_OBJS_CLASSALT= NAME_PREFIX + "classfo_obj.png"; 			//$NON-NLS-1$
-	public static final String IMG_OBJS_CLASS_DEFAULT= NAME_PREFIX + "class_default_obj.png"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_GHOST= NAME_PREFIX + "ghost.gif"; 				//$NON-NLS-1$
+	public static final String IMG_OBJS_SEARCH_TSK= NAME_PREFIX + "search_tsk.gif"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_PACKDECL= NAME_PREFIX + "packd_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_IMPDECL= NAME_PREFIX + "imp_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_IMPCONT= NAME_PREFIX + "impc_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_JSEARCH= NAME_PREFIX + "jsearch_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_SEARCH_DECL= NAME_PREFIX + "search_decl_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_SEARCH_REF= NAME_PREFIX + "search_ref_obj.gif"; 	//$NON-NLS-1$
+	public static final String IMG_OBJS_CLASS= NAME_PREFIX + "class_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_CLASSALT= NAME_PREFIX + "classfo_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_CLASS_DEFAULT= NAME_PREFIX + "class_default_obj.gif"; 			//$NON-NLS-1$
 
-	public static final String IMG_OBJS_INNER_CLASS_PUBLIC= NAME_PREFIX + "innerclass_public_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_INNER_CLASS_DEFAULT= NAME_PREFIX + "innerclass_default_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_INNER_CLASS_PROTECTED= NAME_PREFIX + "innerclass_protected_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_INNER_CLASS_PRIVATE= NAME_PREFIX + "innerclass_private_obj.png"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_CLASS_PUBLIC= NAME_PREFIX + "innerclass_public_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_CLASS_DEFAULT= NAME_PREFIX + "innerclass_default_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_CLASS_PROTECTED= NAME_PREFIX + "innerclass_protected_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_CLASS_PRIVATE= NAME_PREFIX + "innerclass_private_obj.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_INTERFACE= NAME_PREFIX + "int_obj.png"; 			//$NON-NLS-1$
-	public static final String IMG_OBJS_INTERFACEALT= NAME_PREFIX + "intf_obj.png"; 			//$NON-NLS-1$
-	public static final String IMG_OBJS_INTERFACE_DEFAULT= NAME_PREFIX + "int_default_obj.png"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_INTERFACE= NAME_PREFIX + "int_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_INTERFACEALT= NAME_PREFIX + "intf_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_INTERFACE_DEFAULT= NAME_PREFIX + "int_default_obj.gif"; 		//$NON-NLS-1$
 
-	public static final String IMG_OBJS_INNER_INTERFACE_PUBLIC= NAME_PREFIX + "innerinterface_public_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_INNER_INTERFACE_DEFAULT= NAME_PREFIX + "innerinterface_default_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_INNER_INTERFACE_PROTECTED= NAME_PREFIX + "innerinterface_protected_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_INNER_INTERFACE_PRIVATE= NAME_PREFIX + "innerinterface_private_obj.png"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_INTERFACE_PUBLIC= NAME_PREFIX + "innerinterface_public_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_INTERFACE_DEFAULT= NAME_PREFIX + "innerinterface_default_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_INTERFACE_PROTECTED= NAME_PREFIX + "innerinterface_protected_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INNER_INTERFACE_PRIVATE= NAME_PREFIX + "innerinterface_private_obj.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_ANNOTATION= NAME_PREFIX + "annotation_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_ANNOTATION_DEFAULT= NAME_PREFIX + "annotation_default_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_ANNOTATION_PROTECTED= NAME_PREFIX + "annotation_protected_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_ANNOTATION_PRIVATE= NAME_PREFIX + "annotation_private_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_ANNOTATION_ALT= NAME_PREFIX + "annotation_alt_obj.png"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ANNOTATION= NAME_PREFIX + "annotation_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ANNOTATION_DEFAULT= NAME_PREFIX + "annotation_default_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ANNOTATION_PROTECTED= NAME_PREFIX + "annotation_protected_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ANNOTATION_PRIVATE= NAME_PREFIX + "annotation_private_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ANNOTATION_ALT= NAME_PREFIX + "annotation_alt_obj.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_ENUM= NAME_PREFIX + "enum_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_ENUM_DEFAULT= NAME_PREFIX + "enum_default_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_ENUM_PROTECTED= NAME_PREFIX + "enum_protected_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_ENUM_PRIVATE= NAME_PREFIX + "enum_private_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_ENUM_ALT= NAME_PREFIX + "enum_alt_obj.png"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ENUM= NAME_PREFIX + "enum_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ENUM_DEFAULT= NAME_PREFIX + "enum_default_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ENUM_PROTECTED= NAME_PREFIX + "enum_protected_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ENUM_PRIVATE= NAME_PREFIX + "enum_private_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ENUM_ALT= NAME_PREFIX + "enum_alt_obj.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_CUNIT= NAME_PREFIX + "jcu_obj.png"; 				//$NON-NLS-1$
-	public static final String IMG_OBJS_CUNIT_RESOURCE= NAME_PREFIX + "jcu_resource_obj.png"; 				//$NON-NLS-1$
-	public static final String IMG_OBJS_CFILE= NAME_PREFIX + "classf_obj.png";  			//$NON-NLS-1$
-	public static final String IMG_OBJS_CFILECLASS= NAME_PREFIX + "class_obj.png";  		//$NON-NLS-1$
-	public static final String IMG_OBJS_CFILEINT= NAME_PREFIX + "int_obj.png";  			//$NON-NLS-1$
-	public static final String IMG_OBJS_LOGICAL_PACKAGE= NAME_PREFIX + "logical_package_obj.png";//$NON-NLS-1$
-	public static final String IMG_OBJS_EMPTY_LOGICAL_PACKAGE= NAME_PREFIX + "empty_logical_package_obj.png";//$NON-NLS-1$
-	public static final String IMG_OBJS_PACKAGE= NAME_PREFIX + "package_obj.png"; 		//$NON-NLS-1$
-	public static final String IMG_OBJS_EMPTY_PACK_RESOURCE= NAME_PREFIX + "empty_pack_fldr_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_EMPTY_PACKAGE= NAME_PREFIX + "empty_pack_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_PACKFRAG_ROOT= NAME_PREFIX + "packagefolder_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_JAR= NAME_PREFIX + "jar_obj.png"; 				//$NON-NLS-1$
-	public static final String IMG_OBJS_EXTJAR= NAME_PREFIX + "jar_l_obj.png"; 			//$NON-NLS-1$
-	public static final String IMG_OBJS_JAR_WSRC= NAME_PREFIX + "jar_src_obj.png"; 		//$NON-NLS-1$
-	public static final String IMG_OBJS_EXTJAR_WSRC= NAME_PREFIX + "jar_lsrc_obj.png";	//$NON-NLS-1$
-	public static final String IMG_OBJS_CLASSFOLDER= NAME_PREFIX + "cf_obj.png"; 			//$NON-NLS-1$
-	public static final String IMG_OBJS_CLASSFOLDER_WSRC= NAME_PREFIX + "cf_src_obj.png"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_CUNIT= NAME_PREFIX + "jcu_obj.gif"; 				//$NON-NLS-1$
+	public static final String IMG_OBJS_CUNIT_RESOURCE= NAME_PREFIX + "jcu_resource_obj.gif"; 				//$NON-NLS-1$
+	public static final String IMG_OBJS_CFILE= NAME_PREFIX + "classf_obj.gif";  			//$NON-NLS-1$
+	public static final String IMG_OBJS_CFILECLASS= NAME_PREFIX + "class_obj.gif";  		//$NON-NLS-1$
+	public static final String IMG_OBJS_CFILEINT= NAME_PREFIX + "int_obj.gif";  			//$NON-NLS-1$
+	public static final String IMG_OBJS_LOGICAL_PACKAGE= NAME_PREFIX + "logical_package_obj.gif";//$NON-NLS-1$
+	public static final String IMG_OBJS_EMPTY_LOGICAL_PACKAGE= NAME_PREFIX + "empty_logical_package_obj.gif";//$NON-NLS-1$
+	public static final String IMG_OBJS_PACKAGE= NAME_PREFIX + "package_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_EMPTY_PACK_RESOURCE= NAME_PREFIX + "empty_pack_fldr_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_EMPTY_PACKAGE= NAME_PREFIX + "empty_pack_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_PACKFRAG_ROOT= NAME_PREFIX + "packagefolder_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_JAR= NAME_PREFIX + "jar_obj.gif"; 				//$NON-NLS-1$
+	public static final String IMG_OBJS_EXTJAR= NAME_PREFIX + "jar_l_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_JAR_WSRC= NAME_PREFIX + "jar_src_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_EXTJAR_WSRC= NAME_PREFIX + "jar_lsrc_obj.gif";	//$NON-NLS-1$
+	public static final String IMG_OBJS_CLASSFOLDER= NAME_PREFIX + "cf_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_CLASSFOLDER_WSRC= NAME_PREFIX + "cf_src_obj.gif"; 		//$NON-NLS-1$
 
-	public static final String IMG_OBJS_ENV_VAR= NAME_PREFIX + "envvar_obj.png"; 			//$NON-NLS-1$
-	public static final String IMG_OBJS_JAVA_MODEL= NAME_PREFIX + "java_model_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_ERROR_ALT= NAME_PREFIX + "error_alt_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_WARNING_ALT= NAME_PREFIX + "warning_alt_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_INFO_ALT= NAME_PREFIX + "info_alt_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_UNKNOWN= NAME_PREFIX + "unknown_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_LOCAL_VARIABLE= NAME_PREFIX + "localvariable_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_PROJECT_SETTINGS= NAME_PREFIX + "settings_obj.png"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ENV_VAR= NAME_PREFIX + "envvar_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_JAVA_MODEL= NAME_PREFIX + "java_model_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ERROR_ALT= NAME_PREFIX + "error_alt_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_WARNING_ALT= NAME_PREFIX + "warning_alt_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_INFO_ALT= NAME_PREFIX + "info_alt_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_UNKNOWN= NAME_PREFIX + "unknown_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_LOCAL_VARIABLE= NAME_PREFIX + "localvariable_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_PROJECT_SETTINGS= NAME_PREFIX + "settings_obj.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_LIBRARY= NAME_PREFIX + "library_obj.png"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_LIBRARY= NAME_PREFIX + "library_obj.gif"; 		//$NON-NLS-1$
 
-	public static final String IMG_OBJS_JAVADOCTAG= NAME_PREFIX + "jdoc_tag_obj.png"; 	//$NON-NLS-1$
-	public static final String IMG_OBJS_EXTERNAL_ANNOTATIONS = NAME_PREFIX + "external_annotation_location_attrib.png"; 	//$NON-NLS-1$
-	public static final String IMG_OBJS_HTMLTAG= NAME_PREFIX + "html_tag_obj.png"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_JAVADOCTAG= NAME_PREFIX + "jdoc_tag_obj.gif"; 	//$NON-NLS-1$
+	public static final String IMG_OBJS_EXTERNAL_ANNOTATIONS = NAME_PREFIX + "external_annotation_location_attrib.gif"; 	//$NON-NLS-1$
+	public static final String IMG_OBJS_HTMLTAG= NAME_PREFIX + "html_tag_obj.gif"; 		//$NON-NLS-1$
 
-	public static final String IMG_OBJS_TEMPLATE= NAME_PREFIX + "template_obj.png"; 		//$NON-NLS-1$
-	public static final String IMG_OBJS_SWT_TEMPLATE= NAME_PREFIX + "template_swt_obj.png"; 		//$NON-NLS-1$
-	public static final String IMG_OBJS_TYPEVARIABLE= NAME_PREFIX + "typevariable_obj.png"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_TEMPLATE= NAME_PREFIX + "template_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_SWT_TEMPLATE= NAME_PREFIX + "template_swt_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_TYPEVARIABLE= NAME_PREFIX + "typevariable_obj.gif"; 		//$NON-NLS-1$
 
-	public static final String IMG_OBJS_EXCEPTION= NAME_PREFIX + "jexception_obj.png"; 	//$NON-NLS-1$
-	public static final String IMG_OBJS_ERROR= NAME_PREFIX + "jrtexception_obj.png"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_EXCEPTION= NAME_PREFIX + "jexception_obj.gif"; 	//$NON-NLS-1$
+	public static final String IMG_OBJS_ERROR= NAME_PREFIX + "jrtexception_obj.gif"; 		//$NON-NLS-1$
 
-	public static final String IMG_OBJS_BREAKPOINT_INSTALLED= NAME_PREFIX + "brkpi_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_QUICK_ASSIST= NAME_PREFIX + "quickassist_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_QUICK_FIX= NAME_PREFIX + "quickfix_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_FIXABLE_PROBLEM= NAME_PREFIX + "quickfix_warning_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_FIXABLE_ERROR= NAME_PREFIX + "quickfix_error_obj.png"; //$NON-NLS-1$
+	public static final String IMG_OBJS_BREAKPOINT_INSTALLED= NAME_PREFIX + "brkpi_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_QUICK_ASSIST= NAME_PREFIX + "quickassist_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_QUICK_FIX= NAME_PREFIX + "quickfix_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_FIXABLE_PROBLEM= NAME_PREFIX + "quickfix_warning_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_FIXABLE_ERROR= NAME_PREFIX + "quickfix_error_obj.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_ACCESSRULES_ATTRIB= NAME_PREFIX + "access_restriction_attrib.png"; //$NON-NLS-1$
+	public static final String IMG_OBJS_ACCESSRULES_ATTRIB= NAME_PREFIX + "access_restriction_attrib.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_REFACTORING_FATAL= NAME_PREFIX + "fatalerror_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_REFACTORING_ERROR= NAME_PREFIX + "error_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_REFACTORING_WARNING= NAME_PREFIX + "warning_obj.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_REFACTORING_INFO= NAME_PREFIX + "info_obj.png"; 	//$NON-NLS-1$
+	public static final String IMG_OBJS_REFACTORING_FATAL= NAME_PREFIX + "fatalerror_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_REFACTORING_ERROR= NAME_PREFIX + "error_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_REFACTORING_WARNING= NAME_PREFIX + "warning_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_REFACTORING_INFO= NAME_PREFIX + "info_obj.gif"; 	//$NON-NLS-1$
 
-	public static final String IMG_OBJS_NLS_TRANSLATE= NAME_PREFIX + "translate.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_NLS_NEVER_TRANSLATE= NAME_PREFIX + "never_translate.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_NLS_SKIP= NAME_PREFIX + "skip.png"; //$NON-NLS-1$
+	public static final String IMG_OBJS_NLS_TRANSLATE= NAME_PREFIX + "translate.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_NLS_NEVER_TRANSLATE= NAME_PREFIX + "never_translate.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_NLS_SKIP= NAME_PREFIX + "skip.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_SEARCH_READACCESS= NAME_PREFIX + "occ_read.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_SEARCH_WRITEACCESS= NAME_PREFIX + "occ_write.png"; //$NON-NLS-1$
-	public static final String IMG_OBJS_SEARCH_OCCURRENCE= NAME_PREFIX + "occ_match.png"; //$NON-NLS-1$
+	public static final String IMG_OBJS_SEARCH_READACCESS= NAME_PREFIX + "occ_read.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_SEARCH_WRITEACCESS= NAME_PREFIX + "occ_write.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_SEARCH_OCCURRENCE= NAME_PREFIX + "occ_match.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_HELP= NAME_PREFIX + "help.png"; //$NON-NLS-1$
+	public static final String IMG_OBJS_HELP= NAME_PREFIX + "help.gif"; //$NON-NLS-1$
 
 
 	/*
@@ -286,8 +287,6 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_FIXABLE_PROBLEM= createManagedFromKey(T_OBJ, IMG_OBJS_FIXABLE_PROBLEM);
 	public static final ImageDescriptor DESC_OBJS_FIXABLE_ERROR= createManagedFromKey(T_OBJ, IMG_OBJS_FIXABLE_ERROR);
 
-	// public static final ImageDescriptor DESC_OBJS_SNIPPET_EVALUATING= createManaged(T_OBJ, IMG_OBJS_SNIPPET_EVALUATING);
-
 	public static final ImageDescriptor DESC_OBJS_DEFAULT_CHANGE= createUnManaged(T_OBJ, "change.png"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_EXCLUSION_FILTER_ATTRIB= createUnManaged(T_OBJ, "exclusion_filter_attrib.png"); //$NON-NLS-1$
@@ -326,16 +325,11 @@ public class JavaPluginImages {
     public static final ImageDescriptor DESC_ELCL_REMOVE_FROM_BP= createUnManaged(T_ELCL, "remove_from_buildpath.png"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_INCLUSION= createUnManaged(T_ELCL, "inclusion_filter_attrib.png"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_EXCLUSION= createUnManaged(T_ELCL, "exclusion_filter_attrib.png"); //$NON-NLS-1$
-//    public static final ImageDescriptor DESC_ELCL_INCLUSION_UNDO= createUnManaged(T_ELCL, "inclusion_filter_attrib_undo.png"); //$NON-NLS-1$
-//    public static final ImageDescriptor DESC_ELCL_EXCLUSION_UNDO= createUnManaged(T_ELCL, "exclusion_filter_attrib_undo.png"); //$NON-NLS-1$
 
     public static final ImageDescriptor DESC_DLCL_ADD_TO_BP= createUnManaged(T_DLCL, "add_to_buildpath.png"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_DLCL_REMOVE_FROM_BP= createUnManaged(T_DLCL, "remove_from_buildpath.png"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_DLCL_INCLUSION= createUnManaged(T_DLCL, "inclusion_filter_attrib.png"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_DLCL_EXCLUSION= createUnManaged(T_DLCL, "exclusion_filter_attrib.png"); //$NON-NLS-1$
-//TODO: remove (unused):    public static final ImageDescriptor DESC_DLCL_OUTPUT_FOLDER_ATTRIB= createUnManaged(T_DLCL, "output_folder_attrib.png"); //$NON-NLS-1$
-//    public static final ImageDescriptor DESC_DLCL_INCLUSION_UNDO= createUnManaged(T_DLCL, "inclusion_filter_attrib_undo.png"); //$NON-NLS-1$
-//    public static final ImageDescriptor DESC_DLCL_EXCLUSION_UNDO= createUnManaged(T_DLCL, "exclusion_filter_attrib_undo.png"); //$NON-NLS-1$
 
     public static final ImageDescriptor DESC_DLCL_ADD_LINKED_SOURCE_TO_BUILDPATH= createUnManaged(T_DLCL, "add_linked_source_to_buildpath.png"); //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_ADD_LINKED_SOURCE_TO_BUILDPATH= createUnManaged(T_ELCL, "add_linked_source_to_buildpath.png"); //$NON-NLS-1$
@@ -417,7 +411,6 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_NEWANNOT= createUnManaged(T_WIZBAN, "newannotation_wiz.png"); 				//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWJPRJ= createUnManaged(T_WIZBAN, "newjprj_wiz.png"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWSRCFOLDR= createUnManaged(T_WIZBAN, "newsrcfldr_wiz.png"); 	//$NON-NLS-1$
-//TODO: remove (unused):	public static final ImageDescriptor DESC_WIZBAN_NEWMETH= createUnManaged(T_WIZBAN, "newmeth_wiz.png"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWPACK= createUnManaged(T_WIZBAN, "newpack_wiz.png"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWSCRAPPAGE= createUnManaged(T_WIZBAN, "newsbook_wiz.png");		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_JAVA_LAUNCH= createUnManaged(T_WIZBAN, "java_app_wiz.png"); 		//$NON-NLS-1$
@@ -442,7 +435,6 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_CLEAN_UP= createUnManaged(T_WIZBAN, "cleanup_wiz.png"); //$NON-NLS-1$
 
 
-//TODO: remove (unused):	public static final ImageDescriptor DESC_TOOL_SHOW_EMPTY_PKG= createUnManaged(T_ETOOL, "show_empty_pkg.png"); 		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_TOOL_SHOW_SEGMENTS= createUnManaged(T_ETOOL, "segment_edit.png"); 		//$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_TOOL_OPENTYPE= createUnManaged(T_ETOOL, "opentype.png"); 					//$NON-NLS-1$
@@ -452,7 +444,6 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_TOOL_NEWINTERFACE= createUnManaged(T_ETOOL, "newint_wiz.png"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_TOOL_NEWSNIPPET= createUnManaged(T_ETOOL, "newsbook_wiz.png"); 			//$NON-NLS-1$
     public static final ImageDescriptor DESC_TOOL_NEWPACKROOT= createUnManaged(T_ETOOL, "newpackfolder_wiz.png");         //$NON-NLS-1$
-//TODO: remove (unused):    public static final ImageDescriptor DESC_DLCL_NEWPACKROOT= createUnManaged(T_DLCL, "newpackfolder_wiz.png");        //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_TOOL_CLASSPATH_ORDER= createUnManaged(T_OBJ, "cp_order_obj.png"); 		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_COLLAPSEALL= createUnManaged(T_ELCL, "collapseall.png"); //$NON-NLS-1$
@@ -460,16 +451,16 @@ public class JavaPluginImages {
 	// Keys for correction proposal. We have to put the image into the registry since "code assist" doesn't
 	// have a life cycle. So no chance to dispose icons.
 
-	public static final String IMG_CORRECTION_CHANGE= NAME_PREFIX + "correction_change.png"; //$NON-NLS-1$
-	public static final String IMG_CORRECTION_MOVE= NAME_PREFIX + "correction_move.png"; //$NON-NLS-1$
-	public static final String IMG_CORRECTION_RENAME= NAME_PREFIX + "correction_rename.png"; //$NON-NLS-1$
-	public static final String IMG_CORRECTION_LINKED_RENAME= NAME_PREFIX + "correction_linked_rename.png"; //$NON-NLS-1$
-	public static final String IMG_CORRECTION_DELETE_IMPORT= NAME_PREFIX + "correction_delete_import.png"; //$NON-NLS-1$
-	public static final String IMG_CORRECTION_LOCAL= NAME_PREFIX + "localvariable_obj.png"; //$NON-NLS-1$
-	public static final String IMG_CORRECTION_REMOVE= NAME_PREFIX + "remove_correction.png"; //$NON-NLS-1$
-	public static final String IMG_CORRECTION_ADD= NAME_PREFIX + "add_correction.png"; //$NON-NLS-1$
-	public static final String IMG_CORRECTION_CAST= NAME_PREFIX + "correction_cast.png"; //$NON-NLS-1$
-	public static final String IMG_CORRECTION_MULTI_FIX= NAME_PREFIX + "correction_multi_fix.png"; //$NON-NLS-1$
+	public static final String IMG_CORRECTION_CHANGE= NAME_PREFIX + "correction_change.gif"; //$NON-NLS-1$
+	public static final String IMG_CORRECTION_MOVE= NAME_PREFIX + "correction_move.gif"; //$NON-NLS-1$
+	public static final String IMG_CORRECTION_RENAME= NAME_PREFIX + "correction_rename.gif"; //$NON-NLS-1$
+	public static final String IMG_CORRECTION_LINKED_RENAME= NAME_PREFIX + "correction_linked_rename.gif"; //$NON-NLS-1$
+	public static final String IMG_CORRECTION_DELETE_IMPORT= NAME_PREFIX + "correction_delete_import.gif"; //$NON-NLS-1$
+	public static final String IMG_CORRECTION_LOCAL= NAME_PREFIX + "localvariable_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_CORRECTION_REMOVE= NAME_PREFIX + "remove_correction.gif"; //$NON-NLS-1$
+	public static final String IMG_CORRECTION_ADD= NAME_PREFIX + "add_correction.gif"; //$NON-NLS-1$
+	public static final String IMG_CORRECTION_CAST= NAME_PREFIX + "correction_cast.gif"; //$NON-NLS-1$
+	public static final String IMG_CORRECTION_MULTI_FIX= NAME_PREFIX + "correction_multi_fix.gif"; //$NON-NLS-1$
 
 	static {
 		createManagedFromKey(T_OBJ, IMG_CORRECTION_CHANGE);
@@ -636,6 +627,11 @@ public class JavaPluginImages {
 	 * Added for 3.1.1.
 	 */
 	public static ImageDescriptor createImageDescriptor(Bundle bundle, IPath path, boolean useMissingImageDescriptor) {
+		// Bug 465521: Can't use *.png in all existing keys, since some of them are made API via org.eclipse.jdt.ui.ISharedImages.
+		// Workaround is to keep keep keys as *.gif and convert them dynamically here.
+		if ("gif".equals(path.getFileExtension())) { //$NON-NLS-1$
+			path= path.removeFileExtension().addFileExtension("png"); //$NON-NLS-1$
+		}
 		// Don't resolve the URL here, but create a URL using the
 		// "platform:/plugin" protocol, which also supports fragments,
 		// and for which URLImageDescriptor can find an "@2x" version.
