@@ -1268,11 +1268,15 @@ public class TestRunnerViewPart extends ViewPart {
 		else {
 			updateViewIcon();
 		}
-		boolean hasErrorsOrFailures= hasErrorsOrFailures();
-		fNextAction.setEnabled(hasErrorsOrFailures);
-		fPreviousAction.setEnabled(hasErrorsOrFailures);
+		updateNextPreviousActions();
 
 		fTestViewer.processChangesInUI();
+	}
+
+	private void updateNextPreviousActions() {
+		boolean hasErrorsOrFailures= !fIgnoredOnlyFilterAction.isChecked() && hasErrorsOrFailures();
+		fNextAction.setEnabled(hasErrorsOrFailures);
+		fPreviousAction.setEnabled(hasErrorsOrFailures);
 	}
 
 	/**
@@ -2222,6 +2226,7 @@ action enablement
 		fFailuresOnlyFilterAction.setChecked(failuresOnly);
 		fIgnoredOnlyFilterAction.setChecked(ignoredOnly);
 		fTestViewer.setShowFailuresOrIgnoredOnly(failuresOnly, ignoredOnly, layoutMode);
+		updateNextPreviousActions();
 	}
 
 	private void setShowExecutionTime(boolean showTime) {
