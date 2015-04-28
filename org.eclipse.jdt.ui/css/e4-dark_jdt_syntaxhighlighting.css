@@ -113,3 +113,23 @@ FormatterPreferenceSectionComposite {
     color:#eeeeee;
     swt-titlebar-color: #cccccc;
 }
+
+#BreadcrumbComposite,
+#BreadcrumbItemComposite,
+#BreadcrumbItemDetailComposite,
+#BreadcrumbItemDetailTextComposite,
+#BreadcrumbItemDetailImageComposite,
+#BreadcrumbItemDetailTextLabel,
+#BreadcrumbItemDetailImageLabel,
+#BreadcrumbItemDropDownToolBar
+{
+    /*
+     * Bug 465666
+     *
+     * Note: as we can't change the arrow to black, we configure
+     * the background with the lighter color used for the background
+     * of toolbars and make the foreground color brighter too.
+     */
+    background-color:#515658;
+    color: white;
+}

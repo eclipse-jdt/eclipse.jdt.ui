@@ -6812,6 +6812,12 @@
                refid="org.eclipse.e4.ui.css.theme.e4_dark">
          </themeid>
       </stylesheet>
+      <stylesheet
+            uri="css/e4-light_jdt_syntaxhighlighting.css">
+         <themeid
+               refid="org.eclipse.e4.ui.css.theme.e4_default">
+         </themeid>
+      </stylesheet>
    </extension>
 
    <extension

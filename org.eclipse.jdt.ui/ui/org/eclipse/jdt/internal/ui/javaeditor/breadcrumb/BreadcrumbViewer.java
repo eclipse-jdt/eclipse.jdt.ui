@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Fabio Zadrozny - Bug 465666
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
 
@@ -21,15 +22,11 @@ import org.eclipse.swt.events.MenuDetectEvent;
 import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
@@ -50,8 +47,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerCell;
-
-import org.eclipse.ui.forms.FormColors;
 
 
 /**
@@ -108,22 +103,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 			}
 		});
 		fContainer.setBackgroundMode(SWT.INHERIT_DEFAULT);
-
-		fContainer.addListener(SWT.Resize, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				int height= fContainer.getClientArea().height;
-
-				if (fGradientBackground == null || fGradientBackground.getBounds().height != height) {
-					Image image= height == 0 ? null : createGradientImage(height, event.display);
-					fContainer.setBackgroundImage(image);
-
-					if (fGradientBackground != null)
-						fGradientBackground.dispose();
-					fGradientBackground= image;
-				}
-			}
-		});
+		fContainer.setData("org.eclipse.e4.ui.css.id", "BreadcrumbComposite"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		hookControl(fContainer);
 
@@ -742,71 +722,6 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 			return;
 
 		fContainer.setRedraw(false);
-	}
-
-	/**
-	 * The image to use for the breadcrumb background as specified in
-	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=221477
-	 *
-	 * @param height the height of the image to create
-	 * @param display the current display
-	 * @return the image for the breadcrumb background
-	 */
-	private Image createGradientImage(int height, Display display) {
-		int width= 50;
-
-		Image result= new Image(display, width, height);
-
-		GC gc= new GC(result);
-
-		Color colorC= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 35, display);
-		Color colorD= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 45, display);
-		Color colorE= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 80, display);
-		Color colorF= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_LIST_BACKGROUND, 70, display);
-		Color colorG= createColor(SWT.COLOR_WIDGET_BACKGROUND, SWT.COLOR_WHITE, 45, display);
-		Color colorH= createColor(SWT.COLOR_WIDGET_NORMAL_SHADOW, SWT.COLOR_LIST_BACKGROUND, 35, display);
-
-		try {
-			drawLine(width, 0, colorC, gc);
-			drawLine(width, 1, colorC, gc);
-
-			gc.setForeground(colorD);
-			gc.setBackground(colorE);
-			gc.fillGradientRectangle(0, 2, width, 2 + 8, true);
-
-			gc.setBackground(colorE);
-			gc.fillRectangle(0, 2 + 9, width, height - 4);
-
-			drawLine(width, height - 3, colorF, gc);
-			drawLine(width, height - 2, colorG, gc);
-			drawLine(width, height - 1, colorH, gc);
-
-		} finally {
-			gc.dispose();
-
-			colorC.dispose();
-			colorD.dispose();
-			colorE.dispose();
-			colorF.dispose();
-			colorG.dispose();
-			colorH.dispose();
-		}
-
-		return result;
-	}
-
-	private void drawLine(int width, int position, Color color, GC gc) {
-		gc.setForeground(color);
-		gc.drawLine(0, position, width, position);
-	}
-
-	private Color createColor(int color1, int color2, int ratio, Display display) {
-		RGB rgb1= display.getSystemColor(color1).getRGB();
-		RGB rgb2= display.getSystemColor(color2).getRGB();
-
-		RGB blend= FormColors.blend(rgb2, rgb1, ratio);
-
-		return new Color(display, blend);
 	}
 
 	/*
