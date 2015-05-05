@@ -628,8 +628,8 @@ public class JavaPluginImages {
 	 */
 	public static ImageDescriptor createImageDescriptor(Bundle bundle, IPath path, boolean useMissingImageDescriptor) {
 		// Bug 465521: Can't use *.png in all existing keys, since some of them are made API via org.eclipse.jdt.ui.ISharedImages.
-		// Workaround is to keep keep keys as *.gif and convert them dynamically here.
-		if ("gif".equals(path.getFileExtension())) { //$NON-NLS-1$
+		// Workaround is to keep keep keys as *.gif and convert them dynamically here (only for jdt.ui, but not for jdt.junit!).
+		if (bundle.equals(JavaPlugin.getDefault().getBundle()) && "gif".equals(path.getFileExtension())) { //$NON-NLS-1$
 			path= path.removeFileExtension().addFileExtension("png"); //$NON-NLS-1$
 		}
 		// Don't resolve the URL here, but create a URL using the
