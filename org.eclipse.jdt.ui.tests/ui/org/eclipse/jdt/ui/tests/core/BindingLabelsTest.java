@@ -732,7 +732,7 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		lab= getBindingLabel(foo2, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.F_PRE_TYPE_SIGNATURE);
 		assertLinkMatch(lab, "{{org.test.LambdaTests.{...}|Local}} toStringL - {{org}}.{{test}}.{{LambdaTests}}.{...}");
 		
-// can't select the constructor, only the type (label computation works fine once we find the binding) 
+// can't select the constructor, only the type (label computation works fine once we find the binding)
 //		IJavaElement ctor= cu.codeSelect(content.indexOf("Local()"), 0)[0];
 //		lab= getBindingLabel(ctor, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED);
 //		assertLinkMatch(lab, "{{org.test.LambdaTests}}.{...}.{{org.test.LambdaTests.{...}.|Local}}.Local()");
@@ -767,5 +767,51 @@ public class BindingLabelsTest extends AbstractBindingLabelsTest {
 		IJavaElement foo2= cu.codeSelect(content.indexOf("toStringL"), 9)[0];
 		lab= getBindingLabel(foo2, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_POST_QUALIFIED | JavaElementLabels.F_PRE_TYPE_SIGNATURE);
 		assertLinkMatch(lab, "{{org.test.LambdaTests.{...}|Local}} toStringL - {{org}}.{{test}}.{{LambdaTests}}.{...}");
+	}
+
+	public void testRecursiveType() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("public interface TypeTest {\n");
+		buf.append("    public <V extends Comparable<? super V>> boolean compare(V t);\n");
+		buf.append("}\n");
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("TypeTest.java", content, false, null);
+
+		IJavaElement compare= cu.getElementAt(content.indexOf("compare"));
+		String lab= getBindingLabel(compare, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED);
+		assertLinkMatch(lab, "{{org.test.TypeTest}}.compare({{org.test.TypeTest.compare(...)|V}}) <{{org.test.TypeTest.compare(...)|V}} extends {{java.lang|Comparable}}<? super {{org.test.TypeTest.compare(...)|V}}>>");
+
+		IJavaElement v= cu.codeSelect(content.indexOf("V t"), 0)[0];
+		lab= getBindingLabel(v, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED);
+		assertLinkMatch(lab, "V extends {{java.lang|Comparable}}<? super V>");
+
+		lab= getBindingLabel(v, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_POST_QUALIFIED);
+		assertLinkMatch(lab, "V extends {{java.lang|Comparable}}<? super V> - {{org.test.TypeTest}}.{{org.test.TypeTest|compare}}(V)");
+	}
+
+	public void testMultipleTypeVariables() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("class Two<B extends Number, A extends B> { }\n");
+		buf.append("public class Three<E extends Number> {\n");
+		buf.append("	<F extends E> void foo() { }\n");
+		buf.append("}\n");
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("Three.java", content, false, null);
+
+		IJavaElement two= cu.getElementAt(content.indexOf("Two"));
+		String lab= getBindingLabel(two, JavaElementLabels.ALL_DEFAULT |JavaElementLabels.ALL_FULLY_QUALIFIED);
+		assertLinkMatch(lab, "org.test.Two<{{org.test.Two|B}} extends {{java.lang|Number}}, {{org.test.Two|A}} extends {{org.test.Two|B}}>");
+
+		IJavaElement foo= cu.getElementAt(content.indexOf("foo"));
+		lab= getBindingLabel(foo, JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.T_TYPE_PARAMETERS | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PRE_TYPE_PARAMETERS);
+		assertLinkMatch(lab, "<{{org.test.Three.foo(...)|F}} extends {{org.test.Three|E}}> {{org.test.Three}}.foo()");
 	}
 }

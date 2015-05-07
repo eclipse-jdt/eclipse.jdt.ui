@@ -53,6 +53,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 	private static final long M_ALL_QUALIFIED= JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED;
 	
 	private static final long IS_POST_QUALIFICATION= 1L << 63;
+	private static final long TP_BOUNDS= 1L << 62;
 
 	private IJavaElement fEnclosingElement;
 	private boolean fIsFromSource;
@@ -90,7 +91,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 				appendMethodBindingLabel((IMethodBinding) binding, flags);
 				return;
 			case IBinding.TYPE:
-				appendTypeBindingLabel((ITypeBinding) binding, flags);
+				appendTypeBindingLabel((ITypeBinding) binding, flags | TP_BOUNDS);
 				return;
 			case IBinding.VARIABLE:
 				appendVariableLabel((IVariableBinding) binding, flags);
@@ -101,14 +102,15 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 			case IBinding.ANNOTATION:
 			case IBinding.MEMBER_VALUE_PAIR:
 				// not used for hovers
-		}		
+		}
 	}
 
 	private void appendMethodBindingLabel(IMethodBinding method, long flags) {
 		long qualificationFlags = flags & (QUALIFIER_FLAGS | JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.T_CONTAINER_QUALIFIED);
+		qualificationFlags |= TP_BOUNDS;
 		if (getFlag(flags, JavaElementLabels.T_POST_QUALIFIED))
 			flags |= JavaElementLabels.M_POST_QUALIFIED;
-		flags &= ~JavaElementLabels.T_POST_QUALIFIED;
+		flags &= ~(JavaElementLabels.T_POST_QUALIFIED | TP_BOUNDS);
 		IMethodBinding origMethod= method;
 		IBinding declaringMember= method.getDeclaringMember();
 		if (declaringMember != null) {
@@ -133,7 +135,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 		if (getFlag(flags, JavaElementLabels.M_PRE_TYPE_PARAMETERS)) {
 			ITypeBinding[] typeParameters= method.getTypeParameters();
 			if (typeParameters.length > 0) {
-				appendTypeArgumentsBindingLabel(typeParameters, null, flags);
+				appendTypeArgumentsBindingLabel(typeParameters, null, flags | TP_BOUNDS);
 				fBuffer.append(' ');
 			}
 		}
@@ -273,10 +275,11 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 	
 			if (getFlag(flags, JavaElementLabels.M_APP_TYPE_PARAMETERS)) {
 				int offset= fBuffer.length();
-				ITypeBinding[] typeParameters= method.isParameterizedMethod()
-													? method.getTypeArguments()
-													: method.getTypeParameters();
-				appendTypeArgumentsBindingLabel(typeParameters, String.valueOf(' '), flags);
+				if (method.isParameterizedMethod()) {
+					appendTypeArgumentsBindingLabel(method.getTypeArguments(), String.valueOf(' '), flags);
+				} else {
+					appendTypeArgumentsBindingLabel(method.getTypeParameters(), String.valueOf(' '), flags|TP_BOUNDS);
+				}
 				if (getFlag(flags, JavaElementLabels.COLORIZE) && offset != fBuffer.length()) {
 					fBuffer.setStyle(offset, fBuffer.length() - offset, StyledString.DECORATIONS_STYLER);
 				}
@@ -299,12 +302,13 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 
 	private void appendVariableLabel(IVariableBinding variable, long flags) {
 		long qualificationFlags = flags & (QUALIFIER_FLAGS | JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.T_CONTAINER_QUALIFIED);
+		qualificationFlags |= TP_BOUNDS;
 		if (fIsFromSource) {
 			flags &= ~JavaElementLabels.T_FULLY_QUALIFIED;
 		}
 		if (getFlag(flags, JavaElementLabels.T_POST_QUALIFIED))
 			flags |= JavaElementLabels.F_POST_QUALIFIED;
-		flags &= ~JavaElementLabels.T_POST_QUALIFIED;
+		flags &= ~(JavaElementLabels.T_POST_QUALIFIED | TP_BOUNDS);
 
 		if (getFlag(flags, JavaElementLabels.F_PRE_TYPE_SIGNATURE) && !Flags.isEnum(variable.getModifiers())) {
 			appendTypeBindingLabel(variable.getType(), flags);
@@ -380,7 +384,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 	private void appendTypeBindingLabel(ITypeBinding typeBinding, long flags) {
 		long typeRefFlags= flags & ~JavaElementLabels.ALL_POST_QUALIFIED;
 		if (fIsFromSource) {
-			typeRefFlags &= ~JavaElementLabels.ALL_FULLY_QUALIFIED;
+			typeRefFlags &= ~(JavaElementLabels.ALL_FULLY_QUALIFIED | TP_BOUNDS);
 		}
 		// qualification of anonymous (class or lambda):
 		IBinding declaringMember= typeBinding.getDeclaringMember();
@@ -391,7 +395,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 			if (getFlag(flags, JavaElementLabels.T_FULLY_QUALIFIED))
 				qualificationFlags |= JavaElementLabels.ALL_FULLY_QUALIFIED;
 			else if (getFlag(flags, JavaElementLabels.T_CONTAINER_QUALIFIED))
-				qualificationFlags |= (JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED); 
+				qualificationFlags |= (JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED);
 			appendBindingLabel(declaringMember, qualificationFlags);
 			fBuffer.append('.');
 			flags &= ~(JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_CONTAINER_QUALIFIED); // qualification is done
@@ -419,7 +423,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 					appendTypeArgumentsBindingLabel(typeArguments, null, typeRefFlags);
 				} else {
 					ITypeBinding[] typeParameters= typeBinding.getTypeParameters();
-					appendTypeArgumentsBindingLabel(typeParameters, null, typeRefFlags);
+					appendTypeArgumentsBindingLabel(typeParameters, null, typeRefFlags | TP_BOUNDS);
 				}
 			}
 		} else if (typeBinding.isParameterizedType()) {
@@ -434,15 +438,14 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 			fBuffer.append(getGT());
 		} else if (typeBinding.isTypeVariable()) {
 			appendNameLink(typeBinding, typeBinding);
-			// heuristically include type bounds only when not composing a post-qualification
-			if (!getFlag(flags, IS_POST_QUALIFICATION)) {
+			if (getFlag(flags, TP_BOUNDS)) {
 				ITypeBinding[] bounds= typeBinding.getTypeBounds();
 				if (hasRelevantBound(bounds)) {
 					fBuffer.append(" extends "); //$NON-NLS-1$
 					for (int i= 0; i < bounds.length; i++) {
 						if (i > 0)
 							fBuffer.append(" &amp; "); //$NON-NLS-1$
-						appendTypeBindingLabel(bounds[i], typeRefFlags | JavaElementLabels.T_TYPE_PARAMETERS);
+						appendTypeBindingLabel(bounds[i], (typeRefFlags | JavaElementLabels.T_TYPE_PARAMETERS) & ~TP_BOUNDS);
 					}
 				}
 			}
@@ -450,9 +453,9 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 			if (getFlag(flags, JavaElementLabels.TP_POST_QUALIFIED)) {
 				fBuffer.append(JavaElementLabels.CONCAT_STRING);
 				if (typeBinding.getDeclaringClass() != null)
-					appendTypeBindingLabel(typeBinding.getDeclaringClass(), getPostQualificationFlags(flags));
+					appendTypeBindingLabel(typeBinding.getDeclaringClass(), getPostQualificationFlags(flags) & ~JavaElementLabels.T_TYPE_PARAMETERS);
 				else
-					appendMethodBindingLabel(typeBinding.getDeclaringMethod(), getPostQualificationFlags(flags));
+					appendMethodBindingLabel(typeBinding.getDeclaringMethod(), getPostQualificationFlags(flags) & ~JavaElementLabels.M_APP_TYPE_PARAMETERS);
 			}
 			return;
 		} else if (typeBinding.isAnnotation()) {
@@ -550,7 +553,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 				appendTypeBindingLabel((ITypeBinding) value, flags);
 				fBuffer.append(".class"); //$NON-NLS-1$
 			} else if (value instanceof String) {
-				fBuffer.append(htmlEscape(ASTNodes.getEscapedStringLiteral((String) value))); 
+				fBuffer.append(htmlEscape(ASTNodes.getEscapedStringLiteral((String) value)));
 			} else if (value instanceof IVariableBinding) {
 				appendVariableLabel((IVariableBinding) value, flags);
 			} else if (value instanceof IAnnotationBinding) {
