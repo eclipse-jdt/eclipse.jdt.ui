@@ -64,7 +64,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	public void testAnnotateParameter_TypeArgument() throws Exception {
 		
 		String X_PATH= "pack/age/X";
-		String[] pathAndContents= new String[] { 
+		String[] pathAndContents= new String[] {
 					X_PATH+".java",
 					"package pack.age;\n" +
 					"import java.util.List;\n" +
@@ -72,7 +72,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 					"    public String test(int[] ints, List<String> list);\n" +
 					"}\n"
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 		
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
@@ -134,7 +134,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	public void testAnnotateParameter_ArrayOfPrimitive() throws Exception {
 		
 		String X_PATH= "pack/age/X";
-		String[] pathAndContents= new String[] { 
+		String[] pathAndContents= new String[] {
 					X_PATH+".java",
 					"package pack.age;\n" +
 					"import java.util.List;\n" +
@@ -142,7 +142,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 					"    public String test(int[] ints, List<String> list);\n" +
 					"}\n"
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
 
@@ -167,7 +167,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	public void testAnnotateParameter_WildcardBound() throws Exception {
 		
 		String X_PATH= "pack/age/X";
-		String[] pathAndContents= new String[] { 
+		String[] pathAndContents= new String[] {
 					X_PATH+".java",
 					"package pack.age;\n" +
 					"import java.util.List;\n" +
@@ -175,7 +175,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 					"    public String test(Object[] objects, List<? extends Number> list);\n" +
 					"}\n"
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 		
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
@@ -241,7 +241,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	public void testAnnotateParameter_Array2() throws Exception {
 		
 		String X_PATH= "pack/age/X";
-		String[] pathAndContents= new String[] { 
+		String[] pathAndContents= new String[] {
 					X_PATH+".java",
 					"package pack.age;\n" +
 					"import java.util.List;\n" +
@@ -249,7 +249,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 					"    public String test(int[][] ints, List<String> list);\n" +
 					"}\n"
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 		
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
@@ -313,7 +313,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	public void testAnnotateParameter_Array3() throws Exception {
 		
 		String X_PATH= "pack/age/X";
-		String[] pathAndContents= new String[] { 
+		String[] pathAndContents= new String[] {
 					X_PATH+".java",
 					"package pack.age;\n" +
 					"import java.util.List;\n" +
@@ -321,7 +321,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 					"    public String test(int[][] ints, List<String> list);\n" +
 					"}\n"
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 		
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
@@ -387,7 +387,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	public void _testAnnotateParameter_TypeParameter() throws Exception {
 		
 		String X_PATH= "pack/age/X";
-		String[] pathAndContents= new String[] { 
+		String[] pathAndContents= new String[] {
 					X_PATH+".java",
 					"package pack.age;\n" +
 					"import java.util.List;\n" +
@@ -395,7 +395,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 					"    public <X, T extends List<X>> X test(T list);\n" +
 					"}\n"
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 
 		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
@@ -449,7 +449,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	public void testAnnotateField1() throws Exception {
 		
 		String NODE_PATH= "pack/age/Node";
-		String[] pathAndContents= new String[] { 
+		String[] pathAndContents= new String[] {
 					NODE_PATH+".java",
 					"package pack.age;\n" +
 					"import java.util.List;\n" +
@@ -457,7 +457,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 					"    List<Object[]> value;\n" +
 					"}\n"
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
 		IType type= fJProject1.findType(NODE_PATH.replace('/', '.'));
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
 

@@ -146,11 +146,30 @@ public static CompilationUnit[] compilationUnits(String[] testFiles) {
     }
     return result;
 }
-/* inlined and simplified for JDT/UI */
+
+// should eventually be replaced by use of java.util.function.Predicate<CompilationResult>
+public interface ClassFileFilter {
+	boolean include(CompilationResult unitResult);
+}
+/* inlined and simplified / modified for JDT/UI */
 private static class Requestor implements ICompilerRequestor {
 	public boolean hasErrors = false;
 	public String outputPath;
 	public String problemLog = "";
+	private ClassFileFilter classFileFilter= null;
+	
+	public Requestor(ClassFileFilter classFileFilter) {
+		if (classFileFilter != null) {
+			this.classFileFilter = classFileFilter;
+		} else {
+			// default: all without errors
+			this.classFileFilter = new ClassFileFilter() {
+				public boolean include(CompilationResult unitResult) {
+					return (unitResult != null) && !unitResult.hasErrors();
+				}
+			};
+		}
+	}
 
 	public void acceptResult(CompilationResult compilationResult) {
 		this.hasErrors |= compilationResult.hasErrors();
@@ -158,7 +177,7 @@ private static class Requestor implements ICompilerRequestor {
 		outputClassFiles(compilationResult);
 	}
 	protected void outputClassFiles(CompilationResult unitResult) {
-		if ((unitResult != null) && !unitResult.hasErrors()) {
+		if (this.classFileFilter.include(unitResult)) {
 			ClassFile[] classFiles = unitResult.getClassFiles();
 			if (this.outputPath != null) {
 				for (int i = 0, fileCount = classFiles.length; i < fileCount; i++) {
@@ -176,9 +195,9 @@ private static class Requestor implements ICompilerRequestor {
 		}
 	}
 }
-public static void compile(String[] pathsAndContents, Map options, String[] classpath, String outputPath) {
+public static void compile(String[] pathsAndContents, Map options, String[] classpath, String outputPath, ClassFileFilter classFileFilter) {
         IProblemFactory problemFactory = new DefaultProblemFactory(Locale.getDefault());
-        Requestor requestor = new Requestor();
+        Requestor requestor = new Requestor(classFileFilter);
         requestor.outputPath = outputPath.endsWith(File.separator) ? outputPath : outputPath + File.separator;
 
         String[] classLibs = getJavaClassLibs();
@@ -229,12 +248,12 @@ public static void createFile(String path, String contents) throws IOException {
         output.close();
     }
 }
-public static void createJar(String[] pathsAndContents, String[] extraPathsAndContents, Map options, String[] classpath, String jarPath) throws IOException {
+public static void createJar(String[] pathsAndContents, String[] extraPathsAndContents, Map options, ClassFileFilter classFileFilter, String[] classpath, String jarPath) throws IOException {
     String classesPath = getOutputDirectory() + File.separator + "classes";
     File classesDir = new File(classesPath);
     flushDirectoryContent(classesDir);
 	if (pathsAndContents != null) {
-		compile(pathsAndContents, options, classpath, classesPath);
+		compile(pathsAndContents, options, classpath, classesPath, classFileFilter);
 	}
 	if (extraPathsAndContents != null) {
 		for (int i = 0, l = extraPathsAndContents.length; i < l; /* inc in loop */) {
@@ -245,12 +264,12 @@ public static void createJar(String[] pathsAndContents, String[] extraPathsAndCo
 	}
     zip(classesDir, jarPath);
 }
-public static void createJar(String[] javaPathsAndContents, String[] extraPathsAndContents, String jarPath, String[] classpath, String compliance, Map options) throws IOException {
+public static void createJar(String[] javaPathsAndContents, String[] extraPathsAndContents, String jarPath, String[] classpath, String compliance, Map options, ClassFileFilter classFileFilter) throws IOException {
 	Map compileOptions = getCompileOptions(compliance);
 	if (options != null) {
 		compileOptions.putAll(options);
 	}
-	createJar(javaPathsAndContents, extraPathsAndContents, compileOptions, classpath, jarPath);
+	createJar(javaPathsAndContents, extraPathsAndContents, compileOptions, classFileFilter, classpath, jarPath);
 }
 public static void createSourceZip(String[] pathsAndContents, String zipPath) throws IOException {
     String sourcesPath = getOutputDirectory() + File.separator + "sources";

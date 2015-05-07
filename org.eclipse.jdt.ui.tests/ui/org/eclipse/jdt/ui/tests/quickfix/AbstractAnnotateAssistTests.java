@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.core.ClasspathEntry;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.quickfix.JarUtil.ClassFileFilter;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
@@ -86,9 +87,9 @@ public abstract class AbstractAnnotateAssistTests extends QuickFixTest {
 	// === from jdt.core.tests.model: ===
 
 	protected void addLibrary(IJavaProject javaProject, String jarName, String sourceZipName, String[] pathAndContents,
-								String annotationpath, String compliance) throws CoreException, IOException 
-	{	
-		IProject project= createLibrary(javaProject, jarName, sourceZipName, pathAndContents, compliance);
+								String annotationpath, String compliance, ClassFileFilter classFileFilter) throws CoreException, IOException
+	{
+		IProject project= createLibrary(javaProject, jarName, sourceZipName, pathAndContents, compliance, classFileFilter);
 	
 		String projectPath= '/' + project.getName() + '/';
 		IClasspathEntry entry= JavaCore.newLibraryEntry(
@@ -106,13 +107,13 @@ public abstract class AbstractAnnotateAssistTests extends QuickFixTest {
 	}
 
 	protected IProject createLibrary(IJavaProject javaProject, String jarName, String sourceZipName, String[] pathAndContents,
-								String compliance) throws IOException, CoreException
+								String compliance, ClassFileFilter classFileFilter) throws IOException, CoreException
 	{
 		IProject project= javaProject.getProject();
 		String projectLocation= project.getLocation().toOSString();
 		String jarPath= projectLocation + File.separator + jarName;
 		String[] claspath= new String[] { javaProject.getResolvedClasspath(true)[0].getPath().toOSString() };
-		JarUtil.createJar(pathAndContents, null, jarPath, claspath, compliance, null);
+		JarUtil.createJar(pathAndContents, null, jarPath, claspath, compliance, null, classFileFilter);
 		if (pathAndContents != null && pathAndContents.length != 0) {
 			String sourceZipPath= projectLocation + File.separator + sourceZipName;
 			JarUtil.createSourceZip(pathAndContents, sourceZipPath);

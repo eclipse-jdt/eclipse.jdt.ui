@@ -31,6 +31,7 @@ import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
@@ -49,9 +50,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -65,6 +68,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.util.ExternalAnnotationUtil;
@@ -79,6 +83,7 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.text.correction.ExternalNullAnnotationQuickAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
 
@@ -277,6 +282,57 @@ public class ExternalNullAnnotationChangeProposals {
 		}
 	}
 
+	static class MissingBindingException extends RuntimeException {
+		private static final long serialVersionUID= 1L;
+		ASTNode fNode;
+		MissingBindingException(ASTNode/*Type or TypeParameter or MethodDeclaration*/ node) {
+			fNode= node;
+		}
+		@Override
+		public String getMessage() {
+			// check if compilation may have been aborted due to classpath trouble / unreportable problem:
+			ASTNode cu= ASTNodes.getParent(fNode, ASTNode.COMPILATION_UNIT);
+			if (cu instanceof CompilationUnit) {
+				for (IProblem problem : ((CompilationUnit) cu).getProblems()) {
+					if (problem.getID() == IProblem.IsClassPathCorrect || problem.getOriginatingFileName() == null)
+						return problem.getMessage();
+				}
+			}
+			switch (fNode.getNodeType()) {
+				case ASTNode.METHOD_DECLARATION:
+					return "Could not resolve method "+fNode.toString(); //$NON-NLS-1$
+				case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
+					return "Could not resolve field "+fNode.toString(); //$NON-NLS-1$
+				default:
+					return "Could not resolve type "+fNode.toString(); //$NON-NLS-1$
+			}
+		}
+	}
+
+	static ITypeBinding resolveBinding(TypeParameter type) {
+		ITypeBinding binding= type.resolveBinding();
+		if (binding == null) throw new MissingBindingException(type);
+		return binding;
+	}
+
+	static ITypeBinding resolveBinding(Type type) {
+		ITypeBinding binding= type.resolveBinding();
+		if (binding == null) throw new MissingBindingException(type);
+		return binding;
+	}
+	
+	static IMethodBinding resolveBinding(MethodDeclaration method) {
+		IMethodBinding binding= method.resolveBinding();
+		if (binding == null) throw new MissingBindingException(method);
+		return binding;
+	}
+
+	static IVariableBinding resolveBinding(VariableDeclaration variable) {
+		IVariableBinding binding= variable.resolveBinding();
+		if (binding == null) throw new MissingBindingException(variable);
+		return binding;
+	}
+
 	/* Quick assist on class file, propose changes an any type detail. */
 	public static void collectExternalAnnotationProposals(ICompilationUnit cu, ASTNode coveringNode, int offset, ArrayList<IJavaCompletionProposal> resultingCollection) {
 
@@ -316,42 +372,47 @@ public class ExternalNullAnnotationChangeProposals {
 			if (!(outer.getNodeType() == ASTNode.PARAMETERIZED_TYPE && inner.getParent() == outer))
 				return;
 		}
-		if (outer instanceof Type) {
-			ITypeBinding typeBinding= ((Type) outer).resolveBinding();
-			if (typeBinding != null && typeBinding.isPrimitive())
-				return;
-			outer.accept(rendererNonNull);
-			outer.accept(rendererNullable);
-			outer.accept(rendererRemove);
-		} else {
-			List<?> siblingList= (List<?>) outer.getParent().getStructuralProperty(outer.getLocationInParent());
-			rendererNonNull.visitTypeParameters(siblingList);
-			rendererNullable.visitTypeParameters(siblingList);
-			rendererRemove.visitTypeParameters(siblingList);
-		}
-
-		StructuralPropertyDescriptor locationInParent= outer.getLocationInParent();
-		ProposalCreator creator= null;
-		if (locationInParent == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
-			MethodDeclaration method= (MethodDeclaration) ASTNodes.getParent(coveringNode, MethodDeclaration.class);
-			creator= new ReturnProposalCreator(cu, method.resolveBinding());
-		} else if (locationInParent == SingleVariableDeclaration.TYPE_PROPERTY) {
-			ASTNode param= outer.getParent();
-			if (param.getLocationInParent() == MethodDeclaration.PARAMETERS_PROPERTY) {
+		try {
+			if (outer instanceof Type) {
+				ITypeBinding typeBinding= resolveBinding((Type) outer);
+				if (typeBinding.isPrimitive())
+					return;
+				outer.accept(rendererNonNull);
+				outer.accept(rendererNullable);
+				outer.accept(rendererRemove);
+			} else {
+				List<?> siblingList= (List<?>) outer.getParent().getStructuralProperty(outer.getLocationInParent());
+				rendererNonNull.visitTypeParameters(siblingList);
+				rendererNullable.visitTypeParameters(siblingList);
+				rendererRemove.visitTypeParameters(siblingList);
+			}
+		
+			StructuralPropertyDescriptor locationInParent= outer.getLocationInParent();
+			ProposalCreator creator= null;
+			if (locationInParent == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
 				MethodDeclaration method= (MethodDeclaration) ASTNodes.getParent(coveringNode, MethodDeclaration.class);
-				int paramIdx= method.parameters().indexOf(param);
-				if (paramIdx != -1)
-					creator= new ParameterProposalCreator(cu, method.resolveBinding(), paramIdx);
+				creator= new ReturnProposalCreator(cu, resolveBinding(method));
+			} else if (locationInParent == SingleVariableDeclaration.TYPE_PROPERTY) {
+				ASTNode param= outer.getParent();
+				if (param.getLocationInParent() == MethodDeclaration.PARAMETERS_PROPERTY) {
+					MethodDeclaration method= (MethodDeclaration) ASTNodes.getParent(coveringNode, MethodDeclaration.class);
+					int paramIdx= method.parameters().indexOf(param);
+					if (paramIdx != -1)
+						creator= new ParameterProposalCreator(cu, resolveBinding(method), paramIdx);
+				}
+			} else if (locationInParent == FieldDeclaration.TYPE_PROPERTY) {
+				FieldDeclaration field= (FieldDeclaration) ASTNodes.getParent(coveringNode, FieldDeclaration.class);
+				if (field.fragments().size() > 0) {
+					VariableDeclarationFragment fragment= (VariableDeclarationFragment) field.fragments().get(0);
+					creator= new FieldProposalCreator(cu, resolveBinding(fragment));
+				}
 			}
-		} else if (locationInParent == FieldDeclaration.TYPE_PROPERTY) {
-			FieldDeclaration field= (FieldDeclaration) ASTNodes.getParent(coveringNode, FieldDeclaration.class);
-			if (field.fragments().size() > 0) {
-				VariableDeclarationFragment fragment= (VariableDeclarationFragment) field.fragments().get(0);
-				creator= new FieldProposalCreator(cu, fragment.resolveBinding());
+			if (creator != null) {
+				createProposalsForType(cu, inner, offset, rendererNonNull, rendererNullable, rendererRemove, creator, resultingCollection);
 			}
-		}
-		if (creator != null) {
-			createProposalsForType(cu, inner, offset, rendererNonNull, rendererNullable, rendererRemove, creator, resultingCollection);
+		} catch (MissingBindingException mbe) {
+			JavaPlugin.log(JavaUIStatus.createError(IStatus.ERROR, "Error during computation of Annotate proposals: "+mbe.getMessage(), mbe)); //$NON-NLS-1$
+			return;
 		}
 	}
 
@@ -550,7 +611,7 @@ public class ExternalNullAnnotationChangeProposals {
 			fBuffer.append('L');
 			if (type == fFocusType || type.getType() == fFocusType)
 				fBuffer.append(fAnnotation);
-			fBuffer.append(binaryName(type.resolveBinding()));
+			fBuffer.append(binaryName(resolveBinding(type)));
 			fBuffer.append('<');
 			for (Object arg : type.typeArguments())
 				((Type) arg).accept(this);
@@ -601,7 +662,7 @@ public class ExternalNullAnnotationChangeProposals {
 			Type classBound= null;
 			for (Object bound : parameter.typeBounds()) {
 				Type typeBound= (Type) bound;
-				if (typeBound.resolveBinding().isClass()) {
+				if (resolveBinding(typeBound).isClass()) {
 					classBound= typeBound;
 					break;
 				}
@@ -610,7 +671,7 @@ public class ExternalNullAnnotationChangeProposals {
 				fBuffer.append(':');
 				classBound.accept(this);
 			} else {
-				ITypeBinding typeBinding= parameter.resolveBinding();
+				ITypeBinding typeBinding= resolveBinding(parameter);
 				fBuffer.append(":L").append(binaryName(typeBinding.getSuperclass())).append(';'); //$NON-NLS-1$
 			}
 			for (Object bound : parameter.typeBounds()) {
@@ -625,7 +686,7 @@ public class ExternalNullAnnotationChangeProposals {
 
 		@Override
 		public boolean visit(SimpleType type) {
-			ITypeBinding typeBinding= type.resolveBinding();
+			ITypeBinding typeBinding= resolveBinding(type);
 			if (typeBinding.isTypeVariable()) {
 				fBuffer.append('T');
 				if (fFocusType == type)
@@ -643,10 +704,10 @@ public class ExternalNullAnnotationChangeProposals {
 		@Override
 		public boolean visit(PrimitiveType node) {
 			// not a legal focus type, but could be array element type
-			fBuffer.append(node.resolveBinding().getBinaryName());
+			fBuffer.append(resolveBinding(node).getBinaryName());
 			return false;
 		}
-
+	
 		String binaryName(ITypeBinding type) {
 			return type.getBinaryName().replace('.', '/');
 		}

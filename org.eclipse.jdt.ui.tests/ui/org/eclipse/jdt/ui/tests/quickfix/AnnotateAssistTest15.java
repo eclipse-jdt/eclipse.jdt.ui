@@ -13,11 +13,10 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
+import org.eclipse.core.runtime.ILogListener;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFile;
@@ -32,12 +31,18 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.compiler.CompilationResult;
+
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.tests.quickfix.JarUtil.ClassFileFilter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 
@@ -67,19 +72,19 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 
 	/**
 	 * Assert that the "Annotate" command can be invoked on a ClassFileEditor
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public void testAnnotateReturn() throws Exception {
 		
 		String MY_MAP_PATH= "pack/age/MyMap";
-		String[] pathAndContents= new String[] { 
-					MY_MAP_PATH+".java", 
+		String[] pathAndContents= new String[] {
+					MY_MAP_PATH+".java",
 					"package pack.age;\n" +
 					"public interface MyMap<K,V> {\n" +
 					"    public V get(K key);\n" +
 					"}\n"
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
 		IType type= fJProject1.findType(MY_MAP_PATH.replace('/', '.'));
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
 
@@ -91,12 +96,12 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 			viewer.getQuickAssistAssistant().addCompletionListener(new ICompletionListener() {
 				public void selectionChanged(ICompletionProposal proposal, boolean smartToggle) {
 					proposalBox[0]= proposal;
-				}				
+				}
 				public void assistSessionStarted(ContentAssistEvent event) { /* nop */ }
 				public void assistSessionEnded(ContentAssistEvent event) { /* nop */ }
 			});
 
-			int offset= pathAndContents[1].indexOf("V get");		
+			int offset= pathAndContents[1].indexOf("V get");
 			viewer.setSelection(new TextSelection(offset, 0));
 			viewer.doOperation(JavaSourceViewer.ANNOTATE_CLASS_FILE);
 
@@ -142,14 +147,14 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	public void testAnnotateReturn2() throws Exception {
 		
 		String MY_MAP_PATH= "pack/age/MyMap";
-		String[] pathAndContents= new String[] { 
+		String[] pathAndContents= new String[] {
 					MY_MAP_PATH+".java",
 					"package pack.age;\n" +
 					"public interface MyMap<K,V> {\n" +
 					"    public V get(K key);\n" +
 					"}\n"
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
 		IType type= fJProject1.findType(MY_MAP_PATH.replace('/', '.'));
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
 
@@ -203,14 +208,14 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 		
 		String MY_MAP_PATH= "pack/age/MyMap";
 
-		String[] pathAndContents= new String[] { 
-				MY_MAP_PATH+".java", 
+		String[] pathAndContents= new String[] {
+				MY_MAP_PATH+".java",
 				"package pack.age;\n" +
 				"public interface MyMap<K,V> {\n" +
 				"    public V get(K key);\n" +
 				"}\n"
 			};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
 		IType type= fJProject1.findType(MY_MAP_PATH.replace('/', '.'));
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(MY_MAP_PATH+".eea"));
 		String initialContent=
@@ -273,7 +278,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	public void testAnnotateParameter_Array1() throws Exception {
 		
 		String X_PATH= "pack/age/X";
-		String[] pathAndContents= new String[] { 
+		String[] pathAndContents= new String[] {
 					X_PATH+".java",
 					"package pack.age;\n" +
 					"import java.util.List;\n" +
@@ -281,7 +286,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 					"    public String test(int[][] ints, List<String> list);\n" +
 					"}\n"
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
 		
 		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
 		String initialContent=
@@ -343,14 +348,14 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	public void testAnnotateField1() throws Exception {
 		
 		String NODE_PATH= "pack/age/Node";
-		String[] pathAndContents= new String[] { 
+		String[] pathAndContents= new String[] {
 					NODE_PATH+".java",
 					"package pack.age;\n" +
 					"public class Node<V> {\n" +
 					"    V value;\n" +
 					"}\n"
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
 		IType type= fJProject1.findType(NODE_PATH.replace('/', '.'));
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
 
@@ -403,14 +408,14 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	public void testAnnotateField2() throws Exception {
 		
 		String NODE_PATH= "pack/age/Node";
-		String[] pathAndContents= new String[] { 
+		String[] pathAndContents= new String[] {
 					NODE_PATH+".java",
 					"package pack.age;\n" +
 					"public class Node<V> {\n" +
 					"    Node<String> next;\n" +
 					"}\n"
 				};
-		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5);
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
 		IType type= fJProject1.findType(NODE_PATH.replace('/', '.'));
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
 
@@ -455,4 +460,64 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 		}
 	}
 
+	public void testBug466232() throws Exception {
+		final String MISSINGPATH= "pack/age/Missing";
+		String CLASS1_PATH= "pack/age/Class1";
+		String CLASS2_PATH= "pack/age/Class2";
+		String[] pathAndContents= new String[] {
+					MISSINGPATH+".java",
+					"package pack.age;\n" +
+					"@interface Missing {}\n",
+					CLASS1_PATH+".java",
+					"package pack.age;\n" +
+					"import pack.age.Missing;\n" +
+					"@Missing\n" +
+					"public class Class1 {\n" +
+					"    Class1 foo() { return this; }\n" +
+					"}\n",
+					CLASS2_PATH+".java",
+					"package pack.age;\n" +
+					"import pack.age.Class1;\n" + // creates UnresolvedReferenceBinding for transitively referenced "Missing"
+					"import pack.age.Missing;\n" + // throws AbortCompilation for unresolvable UnresolvedReferenceBinding "Missing"
+					"public class Class2 {\n" +
+					"    void test(Class1 c1) {\n" +
+					"        c1 = c1.foo();\n" +
+					"    }\n" +
+					"}\n"
+				};
+		
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, new ClassFileFilter() {
+			public boolean include(CompilationResult unitResult) {
+				return !new Path(MISSINGPATH + ".java").equals(new Path(String.valueOf(unitResult.getFileName())));
+			}
+		});
+		IType type= fJProject1.findType(CLASS2_PATH.replace('/', '.'));
+		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+
+		ILogListener logListener= null;
+		try {
+			int offset= pathAndContents[5].indexOf("Class1 c1");
+
+			// not expecting proposals, but a log message, due to incomplete AST (no binding information available).
+			final IStatus[] resultingStatus= new IStatus[1];
+			logListener= new ILogListener() {
+				public void logging(IStatus status, String plugin) {
+					assertTrue("Only one status", resultingStatus[0] == null);
+					assertEquals("Expected status message",
+							"Error during computation of Annotate proposals: " +
+							"The type pack.age.Missing cannot be resolved.\n It is indirectly referenced from required .class files",
+							status.getMessage());
+				}
+			};
+			JavaPlugin.getDefault().getLog().addLogListener(logListener);
+			List<ICompletionProposal> list= collectAnnotateProposals(javaEditor, offset);
+			
+			assertEquals("Expected number of proposals", 0, list.size());
+		} finally {
+			if (logListener != null) {
+				JavaPlugin.getDefault().getLog().removeLogListener(logListener);
+			}
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+	}
 }
