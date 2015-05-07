@@ -575,7 +575,9 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		super.editorContextMenuAboutToShow(menu);
 
 		IAction action = getAction(IJavaEditorActionDefinitionIds.ANNOTATE_CLASS_FILE);
-		menu.appendToGroup(ICommonMenuConstants.GROUP_EDIT, action);
+		if (action.isEnabled()) {
+			menu.appendToGroup(ICommonMenuConstants.GROUP_EDIT, action);
+		}
 
 		ActionContext context= new ActionContext(getSelectionProvider().getSelection());
 		fContextMenuGroup.setContext(context);
@@ -802,6 +804,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		IClassFile file= classFileEditorInput.getClassFile();
 
 		IAction copyQualifiedName= getAction(IJavaEditorActionConstants.COPY_QUALIFIED_NAME);
+		IAction annotateAction= getAction(IJavaEditorActionDefinitionIds.ANNOTATE_CLASS_FILE);
 
 		boolean wasUsingSourceCopyAction= fSourceCopyAction == getAction(ITextEditorActionConstants.COPY);
 
@@ -853,6 +856,8 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 
 			}
 
+			annotateAction.setEnabled(false);
+
 		} else { // show source viewer
 
 			if (fSourceAttachmentForm != null) {
@@ -866,6 +871,11 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			setAction(ITextEditorActionConstants.COPY, fSourceCopyAction);
 			setAction(ITextEditorActionConstants.SELECT_ALL, fSelectAllAction);
 			copyQualifiedName.setEnabled(true);
+
+			IJavaProject javaProject= file.getJavaProject();
+			boolean useExternalAnnotations= javaProject != null
+					&& javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED);
+			annotateAction.setEnabled(useExternalAnnotations);
 
 		}
 
