@@ -80,19 +80,17 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		if (node == null)
 			return SearchMessages.ExceptionOccurrencesFinder_no_exception;
 		
-		MethodDeclaration method= ASTResolving.findParentMethodDeclaration(node);
-		if (method == null)
-			return SearchMessages.ExceptionOccurrencesFinder_no_exception;
-		
 		// The ExceptionOccurrencesFinder selects the whole type, no matter what part of it was selected. MethodExitsFinder behaves similar.
 		
 		if (node instanceof Name) {
 			node= ASTNodes.getTopMostName((Name) node);
 		}
-		ASTNode parent= node.getParent();
 		if (node.getLocationInParent() == TagElement.FRAGMENTS_PROPERTY) {
+			MethodDeclaration method= ASTResolving.findParentMethodDeclaration(node);
+			if (method == null)
+				return SearchMessages.ExceptionOccurrencesFinder_no_exception;
 			// in Javadoc tag:
-			TagElement tagElement= (TagElement) parent;
+			TagElement tagElement= (TagElement) node.getParent();
 			String tagName= tagElement.getTagName();
 			if (node instanceof Name
 					&& node == tagElement.fragments().get(0)
@@ -110,6 +108,9 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			
 			// in method's "throws" list:
 			if (type.getLocationInParent() == MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY) {
+				MethodDeclaration method= ASTResolving.findParentMethodDeclaration(node);
+				if (method == null)
+					return SearchMessages.ExceptionOccurrencesFinder_no_exception;
 				fSelectedNode= type;
 				fException= type.resolveBinding();
 				fStart= method;

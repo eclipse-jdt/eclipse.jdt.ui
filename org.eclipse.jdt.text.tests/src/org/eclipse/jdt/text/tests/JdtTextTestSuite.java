@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,7 @@ public class JdtTextTestSuite {
 //		suite.addTest(PartitionTokenScannerTest.suite());
 		suite.addTest(MarkOccurrenceTest.suite());
 		suite.addTest(MarkOccurrenceTest17.suite());
+		suite.addTest(MarkOccurrenceTest18.suite());
 		suite.addTest(PluginsNotLoadedTest.suite());
 		PluginsNotLoadedTest.addLoadedPlugIns(
 				new String[] {

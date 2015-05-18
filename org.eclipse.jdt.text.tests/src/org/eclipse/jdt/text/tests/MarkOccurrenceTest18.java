@@ -235,4 +235,27 @@ public class MarkOccurrenceTest18 extends TestCase {
 		checkSelection(buf, offset, length, ranges);
 	}
 
+	public void testTryCatchInLambda() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.io.FileInputStream;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    Runnable lambda = () -> {\n");
+		buf.append("        try {\n");
+		buf.append("            new FileInputStream(\"dummy\");\n");
+		buf.append("        } catch (FileNotFoundException e) {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+
+		fFinder= new ExceptionOccurrencesFinder();
+		int offset= buf.indexOf("FileNotFoundException e");
+		int length= 0;
+		OccurrenceLocation[] ranges= { find(buf, "FileInputStream", 2), find(buf, "FileNotFoundException", 2) };
+		checkSelection(buf, offset, length, ranges);
+	}
+
 }
