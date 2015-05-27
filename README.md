@@ -59,5 +59,10 @@ Contact the project developers via the project's "dev" list.
 
 - <https://dev.eclipse.org/mailman/listinfo/jdt-ui-dev>
 
+License
+-------
+
+[Eclipse Public License (EPL) v1.0][2]
 
 [1]: https://wiki.eclipse.org/JDT_UI/How_to_Contribute
+[2]: http://wiki.eclipse.org/EPL
