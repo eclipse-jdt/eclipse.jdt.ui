@@ -315,7 +315,8 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				
 				lambdaExpression.setBody(ASTNodes.getCopyOrReplacement(rewrite, lambdaBody, group));
 				Expression replacement= lambdaExpression;
-				if (ASTNodes.isTargetAmbiguous(classInstanceCreation, lambdaParameters.isEmpty())) {
+				ITypeBinding targetTypeBinding= ASTNodes.getTargetType(classInstanceCreation);
+				if (ASTNodes.isTargetAmbiguous(classInstanceCreation, lambdaParameters.isEmpty()) || targetTypeBinding.getFunctionalInterfaceMethod() == null) {
 					CastExpression cast= ast.newCastExpression();
 					cast.setExpression(lambdaExpression);
 					ImportRewrite importRewrite= cuRewrite.getImportRewrite();
@@ -601,17 +602,17 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		if (SuperThisReferenceFinder.hasReference(methodDecl))
 			return false;
 		
-		if (!isInTargetTypeContext(node))
+		if (ASTNodes.getTargetType(node) == null) // #isInTargetTypeContext
 			return false;
 		
 		return true;
 	}
 
-	private static boolean isInTargetTypeContext(ClassInstanceCreation node) {
+	/*private static boolean isInTargetTypeContext(ClassInstanceCreation node) {
 		ITypeBinding targetType= ASTNodes.getTargetType(node);
 		return targetType != null && targetType.getFunctionalInterfaceMethod() != null;
 
-		/*
+		
 		//TODO: probably incomplete, should reuse https://bugs.eclipse.org/bugs/show_bug.cgi?id=408966#c6
 		StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
 		
@@ -643,6 +644,6 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				|| locationInParent == ConditionalExpression.THEN_EXPRESSION_PROPERTY
 				|| locationInParent == ConditionalExpression.ELSE_EXPRESSION_PROPERTY
 				|| locationInParent == CastExpression.EXPRESSION_PROPERTY;
-		*/
-	}
+		
+	}*/
 }
