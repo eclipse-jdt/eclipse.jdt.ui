@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -71,7 +75,7 @@ public final class JavaModelUtil {
 	 */
 	public static final String VERSION_LATEST;
 	static {
-		VERSION_LATEST= JavaCore.VERSION_1_8; // make sure it is not inlined
+		VERSION_LATEST= JavaCore.VERSION_1_9; // make sure it is not inlined
 	}
 	
 	/**
@@ -771,6 +775,10 @@ public final class JavaModelUtil {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_8);
 	}
 
+	public static boolean is19OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_1_9);
+	}
+	
 	/**
 	 * Checks if the given project or workspace has source compliance 1.5 or greater.
 	 *
@@ -835,6 +843,8 @@ public final class JavaModelUtil {
 		String version= vMInstall.getJavaVersion();
 		if (version == null) {
 			return defaultCompliance;
+		} else if (version.startsWith(JavaCore.VERSION_1_9)) {
+			return JavaCore.VERSION_1_9;
 		} else if (version.startsWith(JavaCore.VERSION_1_8)) {
 			return JavaCore.VERSION_1_8;
 		} else if (version.startsWith(JavaCore.VERSION_1_7)) {
@@ -865,7 +875,9 @@ public final class JavaModelUtil {
 		
 		// fallback:
 		String desc= executionEnvironment.getId();
-		if (desc.indexOf(JavaCore.VERSION_1_8) != -1) {
+		if (desc.indexOf(JavaCore.VERSION_1_9) != -1) {
+			return JavaCore.VERSION_1_9;
+		} else if (desc.indexOf(JavaCore.VERSION_1_8) != -1) {
 			return JavaCore.VERSION_1_8;
 		} else if (desc.indexOf(JavaCore.VERSION_1_7) != -1) {
 			return JavaCore.VERSION_1_7;
