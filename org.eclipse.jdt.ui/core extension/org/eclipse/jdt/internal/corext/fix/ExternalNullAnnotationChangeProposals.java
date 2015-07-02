@@ -343,44 +343,91 @@ public class ExternalNullAnnotationChangeProposals {
 		if (!hasAnnotationPathInWorkspace(javaProject, cu)) // refuse to update files outside the workspace
 			return;
 
-		ASTNode inner= null; // the innermost type or type parameter node
-		while (true) {
-			if (coveringNode instanceof Type || coveringNode instanceof TypeParameter) {
-				inner= coveringNode;
-				break;
-			}
-			coveringNode= coveringNode.getParent();
-			if (coveringNode == null)
-				return;
-		}
-		if (inner.getNodeType() == ASTNode.PRIMITIVE_TYPE)
-			return; // cannot be annotated
+		ASTNode inner= null; // the innermost type or type parameter node (to be annotated, unless annotating a dimension)
+		ASTNode outer= null; // will become the outermost type or type parameter node (to be traversed)
+		SingleVariableDeclaration variable= null; // when annotating extra dimension or varars this is where we get that additional info from
+		boolean annotateVarargs= false;
+		int extraDims= 0; // total number of extra dimensions
+		int outerExtraDims= 0; // number of outer extra dimension preceding the annotation position
 
-		// prepare three renderers for three proposals:
-		TypeRenderer rendererNonNull= new TypeRenderer(inner, offset, NONNULL);
-		TypeRenderer rendererNullable= new TypeRenderer(inner, offset, NULLABLE);
-		TypeRenderer rendererRemove= new TypeRenderer(inner, offset, NO_ANNOTATION);
-		ASTNode outer= inner; // will become the outermost type or type parameter node
-		{
+		if (coveringNode instanceof Dimension && coveringNode.getLocationInParent() == SingleVariableDeclaration.EXTRA_DIMENSIONS2_PROPERTY) {
+			// annotating extra dimensions, remember dimension counts
+			variable= (SingleVariableDeclaration) coveringNode.getParent();
+			outer= variable.getType();
+			inner= variable.getType();
+			List<?> extraDimensions= variable.extraDimensions();
+			extraDims= extraDimensions.size();
+			outerExtraDims= extraDimensions.indexOf(coveringNode);
+		} else if (coveringNode instanceof SingleVariableDeclaration) {
+			// annotating varargs ellipsis?
+			variable= (SingleVariableDeclaration) coveringNode;
+			outer= variable.getType();
+			inner= variable.getType();
+			if (variable.isVarargs()) {
+				Type type= variable.getType();
+				if (offset < type.getStartPosition()+type.getLength())
+					return;
+				if (offset+3 > variable.getName().getStartPosition())
+					return;
+				annotateVarargs= true;
+			} else {
+				return;
+			}
+		} else {
+			// annotating 'normal' type?
+			while (true) {
+				if (coveringNode instanceof Type || coveringNode instanceof TypeParameter) {
+					inner= coveringNode;
+					break;
+				}
+				coveringNode= coveringNode.getParent();
+				if (coveringNode == null)
+					return;
+			}
+			if (inner.getNodeType() == ASTNode.PRIMITIVE_TYPE)
+				return; // cannot be annotated
+			outer= inner;
 			ASTNode next;
 			while (((next= outer.getParent()) instanceof Type) || (next instanceof TypeParameter))
 				outer= next;
 		}
+
+		// prepare three renderers for three proposals:
+		ASTNode typeToAnnotate = (!annotateVarargs && extraDims == 0) ? inner : null;
+		TypeRenderer rendererNonNull= new TypeRenderer(typeToAnnotate, offset, NONNULL);
+		TypeRenderer rendererNullable= new TypeRenderer(typeToAnnotate, offset, NULLABLE);
+		TypeRenderer rendererRemove= new TypeRenderer(typeToAnnotate, offset, NO_ANNOTATION);
+
+		if (variable != null) {
+			// prepend dimensions which are not covered by type traversal below
+			if (variable.isVarargs()) {
+				rendererNonNull.addDimension(annotateVarargs);
+				rendererNullable.addDimension(annotateVarargs);
+				rendererRemove.addDimension(annotateVarargs);
+			}
+			for (int i= 0; i < extraDims; i++) {
+				rendererNonNull.addDimension(i == outerExtraDims);
+				rendererNullable.addDimension(i == outerExtraDims);
+				rendererRemove.addDimension(i == outerExtraDims);				
+			}
+		}
 		boolean useJava8= JavaModelUtil.is18OrHigher(javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
-		if (!useJava8 && outer != inner) { // below 1.8 we can only annotate the top type (not type parameter)
+		if (!useJava8 && (outer != inner || outerExtraDims > 0)) { // below 1.8 we can only annotate the top type (not type parameter)
 			// still need to handle ParameterizedType (outer) with SimpleType (inner)
 			if (!(outer.getNodeType() == ASTNode.PARAMETERIZED_TYPE && inner.getParent() == outer))
 				return;
 		}
 		try {
 			if (outer instanceof Type) {
-				ITypeBinding typeBinding= resolveBinding((Type) outer);
-				if (typeBinding.isPrimitive())
-					return;
+				if (extraDims == 0 && !annotateVarargs) {
+					ITypeBinding typeBinding= resolveBinding((Type) outer);
+					if (typeBinding.isPrimitive())
+						return;
+				}
 				outer.accept(rendererNonNull);
 				outer.accept(rendererNullable);
 				outer.accept(rendererRemove);
-			} else {
+			} else { // type parameter
 				List<?> siblingList= (List<?>) outer.getParent().getStructuralProperty(outer.getLocationInParent());
 				rendererNonNull.visitTypeParameters(siblingList);
 				rendererNullable.visitTypeParameters(siblingList);
@@ -408,7 +455,8 @@ public class ExternalNullAnnotationChangeProposals {
 				}
 			}
 			if (creator != null) {
-				createProposalsForType(cu, inner, offset, rendererNonNull, rendererNullable, rendererRemove, creator, resultingCollection);
+				createProposalsForType(cu, inner, extraDims, outerExtraDims, annotateVarargs, offset,
+						rendererNonNull, rendererNullable, rendererRemove, creator, resultingCollection);
 			}
 		} catch (MissingBindingException mbe) {
 			JavaPlugin.log(JavaUIStatus.createError(IStatus.ERROR, "Error during computation of Annotate proposals: "+mbe.getMessage(), mbe)); //$NON-NLS-1$
@@ -506,19 +554,19 @@ public class ExternalNullAnnotationChangeProposals {
 	}
 
 	/* Create one proposal from each of the three given renderers. */
-	static void createProposalsForType(ICompilationUnit cu, ASTNode type, int offset,
-			TypeRenderer rendererNonNull, TypeRenderer rendererNullable, TypeRenderer rendererRemove,
-			ProposalCreator creator, ArrayList<IJavaCompletionProposal> resultingCollection) {
+	static void createProposalsForType(ICompilationUnit cu, ASTNode type, int dims,
+			int outerDims, boolean annotateVarargs, int offset,
+			TypeRenderer rendererNonNull, TypeRenderer rendererNullable, TypeRenderer rendererRemove, ProposalCreator creator, ArrayList<IJavaCompletionProposal> resultingCollection) {
 		SignatureAnnotationChangeProposal operation;
 		String label;
 		// propose adding @NonNull:
-		label= getAddAnnotationLabel(NullAnnotationsFix.getNonNullAnnotationName(cu, true), type, offset);
+		label= getAddAnnotationLabel(NullAnnotationsFix.getNonNullAnnotationName(cu, true), type, dims, outerDims, annotateVarargs, offset);
 		operation= creator.create(rendererNonNull.getResult(), label);
 		if (operation != null)
 			resultingCollection.add(operation);
 
 		// propose adding @Nullable:
-		label= getAddAnnotationLabel(NullAnnotationsFix.getNullableAnnotationName(cu, true), type, offset);
+		label= getAddAnnotationLabel(NullAnnotationsFix.getNullableAnnotationName(cu, true), type, dims, outerDims, annotateVarargs, offset);
 		operation= creator.create(rendererNullable.getResult(), label);
 		if (operation != null)
 			resultingCollection.add(operation);
@@ -531,12 +579,14 @@ public class ExternalNullAnnotationChangeProposals {
 			resultingCollection.add(operation);
 	}
 
-	static String getAddAnnotationLabel(String annotationName, ASTNode type, int offset) {
+	static String getAddAnnotationLabel(String annotationName, ASTNode type, int dims, int outerDims, boolean annotateVarargs, int offset) {
+		StringBuilder left= null;
+		StringBuilder dimsRight= null;
 		if (type.getNodeType() == ASTNode.ARRAY_TYPE) {
-			// need to assemble special format with annotation attached to the selected dimension:
+			// find the insertion point using the text offset:
 			ArrayType arrayType= (ArrayType) type;
-			StringBuilder left= new StringBuilder(arrayType.getElementType().toString());
-			StringBuilder dimsRight= new StringBuilder();
+			left= new StringBuilder(arrayType.getElementType().toString());
+			dimsRight= new StringBuilder();
 			@SuppressWarnings("rawtypes")
 			List dimensions= arrayType.dimensions();
 			for (int i= 0; i < dimensions.size(); i++) {
@@ -546,6 +596,21 @@ public class ExternalNullAnnotationChangeProposals {
 				else
 					dimsRight.append("[]"); //$NON-NLS-1$
 			}
+		} else if (dims > 0) {
+			// find then insertion point using the dimension counts:
+			left= new StringBuilder(type.toString());
+			dimsRight= new StringBuilder();
+			for (int i= 0; i < dims; i++) {
+				if (i < outerDims)
+					left.append("[]"); //$NON-NLS-1$
+				else
+					dimsRight.append("[]"); //$NON-NLS-1$
+			}
+		}
+		if (left != null && dimsRight != null) {
+			if (annotateVarargs)
+				dimsRight.append("..."); //$NON-NLS-1$
+			// need to assemble special format with annotation attached to the selected dimension:
 			return Messages.format(FixMessages.ExternalNullAnnotationChangeProposals_add_nullness_array_annotation,
 					new String[] { left.toString(), annotationName, dimsRight.toString() });
 		}
@@ -594,6 +659,11 @@ public class ExternalNullAnnotationChangeProposals {
 			fAnnotation= annotation;
 		}
 
+		public void addDimension(boolean annotate) {
+			fBuffer.append('[');
+			if (annotate)
+				fBuffer.append(fAnnotation);
+		}
 		public String getResult() {
 			return fBuffer.toString();
 		}

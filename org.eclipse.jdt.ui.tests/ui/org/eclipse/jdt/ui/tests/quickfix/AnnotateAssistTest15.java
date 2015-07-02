@@ -15,9 +15,11 @@ import java.util.List;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.ILogListener;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
 
@@ -495,6 +497,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
 
 		ILogListener logListener= null;
+		ILog log= JavaPlugin.getDefault().getLog();
 		try {
 			int offset= pathAndContents[5].indexOf("Class1 c1");
 
@@ -509,13 +512,14 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 							status.getMessage());
 				}
 			};
-			JavaPlugin.getDefault().getLog().addLogListener(logListener);
+			log.addLogListener(logListener);
+			log.log(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, "Expecting an error message to be logged after this (3x)."));
 			List<ICompletionProposal> list= collectAnnotateProposals(javaEditor, offset);
 			
 			assertEquals("Expected number of proposals", 0, list.size());
 		} finally {
 			if (logListener != null) {
-				JavaPlugin.getDefault().getLog().removeLogListener(logListener);
+				log.removeLogListener(logListener);
 			}
 			JavaPlugin.getActivePage().closeAllEditors(false);
 		}
