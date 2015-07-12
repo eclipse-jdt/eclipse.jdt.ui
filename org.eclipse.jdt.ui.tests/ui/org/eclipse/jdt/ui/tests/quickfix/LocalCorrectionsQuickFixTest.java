@@ -22,9 +22,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -53,6 +50,9 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
@@ -10308,7 +10308,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("public class CollectionsTest {\n");
 		buf.append("    public void foo(Map<Object, Integer> map) { };\n");
 		buf.append("    {\n");
-		buf.append("        foo(Collections.<Object, Integer> emptyMap());\n");
+		buf.append("        foo(Collections.<Object, Integer>emptyMap());\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
@@ -10352,7 +10352,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("public class CollectionsTest {\n");
 		buf.append("    public void foo(Map<Date, Integer> map) { };\n");
 		buf.append("    {\n");
-		buf.append("        foo(Collections.<Date, Integer> emptyMap());\n");
+		buf.append("        foo(Collections.<Date, Integer>emptyMap());\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();

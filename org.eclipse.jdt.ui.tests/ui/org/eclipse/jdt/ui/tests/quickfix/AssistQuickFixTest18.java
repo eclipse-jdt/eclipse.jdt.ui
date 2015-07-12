@@ -15,9 +15,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.Hashtable;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -40,6 +37,9 @@ import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class AssistQuickFixTest18 extends QuickFixTest {
 
@@ -2184,7 +2184,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf1.append("class E3<T> {\n");
 		buf1.append("    IntFunction<int[][][]> ma = int[][][]::/*[1]*/new;\n");
 		buf1.append("    Supplier<MyHashSet<Integer>> mb = MyHashSet::/*[2]*/new;\n");
-		buf1.append("    Function<T, MyHashSet<Number>> mc = MyHashSet<Number>::/*[3]*/<T> new;\n");
+		buf1.append("    Function<T, MyHashSet<Number>> mc = MyHashSet<Number>::/*[3]*/<T>new;\n");
 		buf1.append("    Function<String, MyHashSet<Integer>> md = MyHashSet::/*[4]*/new;\n");
 		buf1.append("}\n");
 		buf1.append("class MyHashSet<T> extends HashSet<T> {\n");
@@ -2209,7 +2209,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("class E3<T> {\n");
 		buf.append("    IntFunction<int[][][]> ma = arg0 -> new int[arg0][][];\n");
 		buf.append("    Supplier<MyHashSet<Integer>> mb = MyHashSet::/*[2]*/new;\n");
-		buf.append("    Function<T, MyHashSet<Number>> mc = MyHashSet<Number>::/*[3]*/<T> new;\n");
+		buf.append("    Function<T, MyHashSet<Number>> mc = MyHashSet<Number>::/*[3]*/<T>new;\n");
 		buf.append("    Function<String, MyHashSet<Integer>> md = MyHashSet::/*[4]*/new;\n");
 		buf.append("}\n");
 		buf.append("class MyHashSet<T> extends HashSet<T> {\n");
@@ -2236,7 +2236,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("class E3<T> {\n");
 		buf.append("    IntFunction<int[][][]> ma = int[][][]::/*[1]*/new;\n");
 		buf.append("    Supplier<MyHashSet<Integer>> mb = () -> new MyHashSet<>();\n");
-		buf.append("    Function<T, MyHashSet<Number>> mc = MyHashSet<Number>::/*[3]*/<T> new;\n");
+		buf.append("    Function<T, MyHashSet<Number>> mc = MyHashSet<Number>::/*[3]*/<T>new;\n");
 		buf.append("    Function<String, MyHashSet<Integer>> md = MyHashSet::/*[4]*/new;\n");
 		buf.append("}\n");
 		buf.append("class MyHashSet<T> extends HashSet<T> {\n");
@@ -2263,7 +2263,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("class E3<T> {\n");
 		buf.append("    IntFunction<int[][][]> ma = int[][][]::/*[1]*/new;\n");
 		buf.append("    Supplier<MyHashSet<Integer>> mb = MyHashSet::/*[2]*/new;\n");
-		buf.append("    Function<T, MyHashSet<Number>> mc = arg0 -> new<T> MyHashSet<Number>(arg0);\n");
+		buf.append("    Function<T, MyHashSet<Number>> mc = arg0 -> new <T>MyHashSet<Number>(arg0);\n");
 		buf.append("    Function<String, MyHashSet<Integer>> md = MyHashSet::/*[4]*/new;\n");
 		buf.append("}\n");
 		buf.append("class MyHashSet<T> extends HashSet<T> {\n");
@@ -2290,7 +2290,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("class E3<T> {\n");
 		buf.append("    IntFunction<int[][][]> ma = int[][][]::/*[1]*/new;\n");
 		buf.append("    Supplier<MyHashSet<Integer>> mb = MyHashSet::/*[2]*/new;\n");
-		buf.append("    Function<T, MyHashSet<Number>> mc = MyHashSet<Number>::/*[3]*/<T> new;\n");
+		buf.append("    Function<T, MyHashSet<Number>> mc = MyHashSet<Number>::/*[3]*/<T>new;\n");
 		buf.append("    Function<String, MyHashSet<Integer>> md = arg0 -> new MyHashSet<>(arg0);\n");
 		buf.append("}\n");
 		buf.append("class MyHashSet<T> extends HashSet<T> {\n");
@@ -2309,7 +2309,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("import java.util.function.Function;\n");
 		buf.append("public class E4 {\n");
-		buf.append("    Function<String, String> p1 = E4::<Float> staticMethod;\n");
+		buf.append("    Function<String, String> p1 = E4::<Float>staticMethod;\n");
 		buf.append("    static <F> String staticMethod(String s) {\n");
 		buf.append("        return \"s\";\n");
 		buf.append("    }\n");
@@ -2327,7 +2327,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("import java.util.function.Function;\n");
 		buf.append("public class E4 {\n");
-		buf.append("    Function<String, String> p1 = arg0 -> E4.<Float> staticMethod(arg0);\n");
+		buf.append("    Function<String, String> p1 = arg0 -> E4.<Float>staticMethod(arg0);\n");
 		buf.append("    static <F> String staticMethod(String s) {\n");
 		buf.append("        return \"s\";\n");
 		buf.append("    }\n");
@@ -2406,7 +2406,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("}\n");
 		buf.append("class Sub extends E5<Integer> {\n");
 		buf.append("    Supplier<String> s1 = super::/*[1]*/method1;\n");
-		buf.append("    Supplier<String> s2 = () -> Sub.super.<Float> method1();\n");
+		buf.append("    Supplier<String> s2 = () -> Sub.super.<Float>method1();\n");
 		buf.append("    Function<E5<Integer>, String> s3 = super::/*[3]*/<Float>method1;\n");
 		buf.append("}\n");
 		expected= buf.toString();
@@ -2435,7 +2435,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("class Sub extends E5<Integer> {\n");
 		buf.append("    Supplier<String> s1 = super::/*[1]*/method1;\n");
 		buf.append("    Supplier<String> s2 = Sub.super::/*[2]*/<Float>method1;\n");
-		buf.append("    Function<E5<Integer>, String> s3 = arg0 -> super.<Float> method1(arg0);\n");
+		buf.append("    Function<E5<Integer>, String> s3 = arg0 -> super.<Float>method1(arg0);\n");
 		buf.append("}\n");
 		expected= buf.toString();
 
@@ -2519,7 +2519,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("        return \"b\";\n");
 		buf.append("    }\n");
 		buf.append("    Supplier<String> v1 = new E6<Integer>()::/*[1]*/method1;\n");
-		buf.append("    Supplier<String> v2 = () -> this.<Float> method1();\n");
+		buf.append("    Supplier<String> v2 = () -> this.<Float>method1();\n");
 		buf.append("    Function<E6<Integer>, String> v3 = new E6<Integer>()::/*[3]*/<Float>method1;\n");
 		buf.append("    T1[] ts = new T1[5];\n");
 		buf.append("    BiFunction<Integer, Integer, Integer> m6 = ts[1]::/*[4]*/bar;\n");
@@ -2553,7 +2553,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("    Supplier<String> v1 = new E6<Integer>()::/*[1]*/method1;\n");
 		buf.append("    Supplier<String> v2 = this::/*[2]*/<Float>method1;\n");
-		buf.append("    Function<E6<Integer>, String> v3 = arg0 -> new E6<Integer>().<Float> method1(arg0);\n");
+		buf.append("    Function<E6<Integer>, String> v3 = arg0 -> new E6<Integer>().<Float>method1(arg0);\n");
 		buf.append("    T1[] ts = new T1[5];\n");
 		buf.append("    BiFunction<Integer, Integer, Integer> m6 = ts[1]::/*[4]*/bar;\n");
 		buf.append("    int[] is = new int[5];\n");
@@ -2642,7 +2642,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf1.append("    <F> String method1() {\n");
 		buf1.append("        return \"a\";\n");
 		buf1.append("    }\n");
-		buf1.append("    Function<E7<Integer>, String> v1 = E7<Integer>::/*[1]*/<Float> method1;\n");
+		buf1.append("    Function<E7<Integer>, String> v1 = E7<Integer>::/*[1]*/<Float>method1;\n");
 		buf1.append("    Function<int[], int[]> v2 = int[]::/*[2]*/clone;\n");
 		buf1.append("    BiFunction<int[], int[], Boolean> v3 = int[]::/*[3]*/equals;\n");
 		buf1.append("}\n");
@@ -2663,7 +2663,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    <F> String method1() {\n");
 		buf.append("        return \"a\";\n");
 		buf.append("    }\n");
-		buf.append("    Function<E7<Integer>, String> v1 = arg0 -> arg0.<Float> method1();\n");
+		buf.append("    Function<E7<Integer>, String> v1 = arg0 -> arg0.<Float>method1();\n");
 		buf.append("    Function<int[], int[]> v2 = int[]::/*[2]*/clone;\n");
 		buf.append("    BiFunction<int[], int[], Boolean> v3 = int[]::/*[3]*/equals;\n");
 		buf.append("}\n");
@@ -2686,7 +2686,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    <F> String method1() {\n");
 		buf.append("        return \"a\";\n");
 		buf.append("    }\n");
-		buf.append("    Function<E7<Integer>, String> v1 = E7<Integer>::/*[1]*/<Float> method1;\n");
+		buf.append("    Function<E7<Integer>, String> v1 = E7<Integer>::/*[1]*/<Float>method1;\n");
 		buf.append("    Function<int[], int[]> v2 = arg0 -> arg0./*[2]*/clone();\n");
 		buf.append("    BiFunction<int[], int[], Boolean> v3 = int[]::/*[3]*/equals;\n");
 		buf.append("}\n");
@@ -2709,7 +2709,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    <F> String method1() {\n");
 		buf.append("        return \"a\";\n");
 		buf.append("    }\n");
-		buf.append("    Function<E7<Integer>, String> v1 = E7<Integer>::/*[1]*/<Float> method1;\n");
+		buf.append("    Function<E7<Integer>, String> v1 = E7<Integer>::/*[1]*/<Float>method1;\n");
 		buf.append("    Function<int[], int[]> v2 = int[]::/*[2]*/clone;\n");
 		buf.append("    BiFunction<int[], int[], Boolean> v3 = (arg0, arg1) -> arg0./*[3]*/equals(arg1);\n");
 		buf.append("}\n");
@@ -2838,12 +2838,12 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf1.append("public class E10 extends Sup {\n");
 		buf1.append("    {\n");
 		buf1.append("        Supplier<String> v1 = this::/*[1]*/method1;\n");
-		buf1.append("        Supplier<String> v2 = this::/*[2]*/<Number> method1;\n");
+		buf1.append("        Supplier<String> v2 = this::/*[2]*/<Number>method1;\n");
 		buf1.append("\n");
 		buf1.append("        Supplier<String> n1 = E10::/*[3]*/method2;\n");
 		buf1.append("        Supplier<String> n2 = E10::/*[4]*/method2a;\n");
 		buf1.append("        Supplier<String> n3 = E10::/*[5]*/method3;\n");
-		buf1.append("        Supplier<String> n4 = E10::/*[6]*/<Number> method2a;\n");
+		buf1.append("        Supplier<String> n4 = E10::/*[6]*/<Number>method2a;\n");
 		buf1.append("\n");
 		buf1.append("        Supplier<String> a1 = E10a::/*[7]*/method4;\n");
 		buf1.append("    }\n");
@@ -2889,12 +2889,12 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E10 extends Sup {\n");
 		buf.append("    {\n");
 		buf.append("        Supplier<String> v1 = () -> /*[1]*/method1();\n");
-		buf.append("        Supplier<String> v2 = this::/*[2]*/<Number> method1;\n");
+		buf.append("        Supplier<String> v2 = this::/*[2]*/<Number>method1;\n");
 		buf.append("\n");
 		buf.append("        Supplier<String> n1 = E10::/*[3]*/method2;\n");
 		buf.append("        Supplier<String> n2 = E10::/*[4]*/method2a;\n");
 		buf.append("        Supplier<String> n3 = E10::/*[5]*/method3;\n");
-		buf.append("        Supplier<String> n4 = E10::/*[6]*/<Number> method2a;\n");
+		buf.append("        Supplier<String> n4 = E10::/*[6]*/<Number>method2a;\n");
 		buf.append("\n");
 		buf.append("        Supplier<String> a1 = E10a::/*[7]*/method4;\n");
 		buf.append("    }\n");
@@ -2942,12 +2942,12 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E10 extends Sup {\n");
 		buf.append("    {\n");
 		buf.append("        Supplier<String> v1 = this::/*[1]*/method1;\n");
-		buf.append("        Supplier<String> v2 = () -> this.<Number> method1();\n");
+		buf.append("        Supplier<String> v2 = () -> this.<Number>method1();\n");
 		buf.append("\n");
 		buf.append("        Supplier<String> n1 = E10::/*[3]*/method2;\n");
 		buf.append("        Supplier<String> n2 = E10::/*[4]*/method2a;\n");
 		buf.append("        Supplier<String> n3 = E10::/*[5]*/method3;\n");
-		buf.append("        Supplier<String> n4 = E10::/*[6]*/<Number> method2a;\n");
+		buf.append("        Supplier<String> n4 = E10::/*[6]*/<Number>method2a;\n");
 		buf.append("\n");
 		buf.append("        Supplier<String> a1 = E10a::/*[7]*/method4;\n");
 		buf.append("    }\n");
@@ -2995,12 +2995,12 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E10 extends Sup {\n");
 		buf.append("    {\n");
 		buf.append("        Supplier<String> v1 = this::/*[1]*/method1;\n");
-		buf.append("        Supplier<String> v2 = this::/*[2]*/<Number> method1;\n");
+		buf.append("        Supplier<String> v2 = this::/*[2]*/<Number>method1;\n");
 		buf.append("\n");
 		buf.append("        Supplier<String> n1 = () -> /*[3]*/method2();\n");
 		buf.append("        Supplier<String> n2 = E10::/*[4]*/method2a;\n");
 		buf.append("        Supplier<String> n3 = E10::/*[5]*/method3;\n");
-		buf.append("        Supplier<String> n4 = E10::/*[6]*/<Number> method2a;\n");
+		buf.append("        Supplier<String> n4 = E10::/*[6]*/<Number>method2a;\n");
 		buf.append("\n");
 		buf.append("        Supplier<String> a1 = E10a::/*[7]*/method4;\n");
 		buf.append("    }\n");
@@ -3048,12 +3048,12 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E10 extends Sup {\n");
 		buf.append("    {\n");
 		buf.append("        Supplier<String> v1 = this::/*[1]*/method1;\n");
-		buf.append("        Supplier<String> v2 = this::/*[2]*/<Number> method1;\n");
+		buf.append("        Supplier<String> v2 = this::/*[2]*/<Number>method1;\n");
 		buf.append("\n");
 		buf.append("        Supplier<String> n1 = E10::/*[3]*/method2;\n");
 		buf.append("        Supplier<String> n2 = () -> /*[4]*/method2a();\n");
 		buf.append("        Supplier<String> n3 = E10::/*[5]*/method3;\n");
-		buf.append("        Supplier<String> n4 = E10::/*[6]*/<Number> method2a;\n");
+		buf.append("        Supplier<String> n4 = E10::/*[6]*/<Number>method2a;\n");
 		buf.append("\n");
 		buf.append("        Supplier<String> a1 = E10a::/*[7]*/method4;\n");
 		buf.append("    }\n");
@@ -3101,12 +3101,12 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E10 extends Sup {\n");
 		buf.append("    {\n");
 		buf.append("        Supplier<String> v1 = this::/*[1]*/method1;\n");
-		buf.append("        Supplier<String> v2 = this::/*[2]*/<Number> method1;\n");
+		buf.append("        Supplier<String> v2 = this::/*[2]*/<Number>method1;\n");
 		buf.append("\n");
 		buf.append("        Supplier<String> n1 = E10::/*[3]*/method2;\n");
 		buf.append("        Supplier<String> n2 = E10::/*[4]*/method2a;\n");
 		buf.append("        Supplier<String> n3 = () -> /*[5]*/method3();\n");
-		buf.append("        Supplier<String> n4 = E10::/*[6]*/<Number> method2a;\n");
+		buf.append("        Supplier<String> n4 = E10::/*[6]*/<Number>method2a;\n");
 		buf.append("\n");
 		buf.append("        Supplier<String> a1 = E10a::/*[7]*/method4;\n");
 		buf.append("    }\n");
@@ -3154,12 +3154,12 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E10 extends Sup {\n");
 		buf.append("    {\n");
 		buf.append("        Supplier<String> v1 = this::/*[1]*/method1;\n");
-		buf.append("        Supplier<String> v2 = this::/*[2]*/<Number> method1;\n");
+		buf.append("        Supplier<String> v2 = this::/*[2]*/<Number>method1;\n");
 		buf.append("\n");
 		buf.append("        Supplier<String> n1 = E10::/*[3]*/method2;\n");
 		buf.append("        Supplier<String> n2 = E10::/*[4]*/method2a;\n");
 		buf.append("        Supplier<String> n3 = E10::/*[5]*/method3;\n");
-		buf.append("        Supplier<String> n4 = () -> E10.<Number> method2a();\n");
+		buf.append("        Supplier<String> n4 = () -> E10.<Number>method2a();\n");
 		buf.append("\n");
 		buf.append("        Supplier<String> a1 = E10a::/*[7]*/method4;\n");
 		buf.append("    }\n");
@@ -3207,12 +3207,12 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E10 extends Sup {\n");
 		buf.append("    {\n");
 		buf.append("        Supplier<String> v1 = this::/*[1]*/method1;\n");
-		buf.append("        Supplier<String> v2 = this::/*[2]*/<Number> method1;\n");
+		buf.append("        Supplier<String> v2 = this::/*[2]*/<Number>method1;\n");
 		buf.append("\n");
 		buf.append("        Supplier<String> n1 = E10::/*[3]*/method2;\n");
 		buf.append("        Supplier<String> n2 = E10::/*[4]*/method2a;\n");
 		buf.append("        Supplier<String> n3 = E10::/*[5]*/method3;\n");
-		buf.append("        Supplier<String> n4 = E10::/*[6]*/<Number> method2a;\n");
+		buf.append("        Supplier<String> n4 = E10::/*[6]*/<Number>method2a;\n");
 		buf.append("\n");
 		buf.append("        Supplier<String> a1 = () -> E10a./*[7]*/method4();\n");
 		buf.append("    }\n");
@@ -3379,7 +3379,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf1.append("    public <A> E2(A a) {}\n");
 		buf1.append("    public E2(String s) {}\n");
 		buf1.append("    \n");
-		buf1.append("    Function<T, E2<Integer>> a1 = t ->/*[1]*/ (new<T> E2<Integer>(t));\n");
+		buf1.append("    Function<T, E2<Integer>> a1 = t ->/*[1]*/ (new <T>E2<Integer>(t));\n");
 		buf1.append("    Function<String, E2<Integer>> a2 = t ->/*[2]*/ new E2<>(t);\n");
 		buf1.append("    \n");
 		buf1.append("    Function<Integer, Float[]> a3 = t ->/*[3]*/ new Float[t];\n");
@@ -3399,7 +3399,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    public <A> E2(A a) {}\n");
 		buf.append("    public E2(String s) {}\n");
 		buf.append("    \n");
-		buf.append("    Function<T, E2<Integer>> a1 = E2<Integer>::<T> new;\n");
+		buf.append("    Function<T, E2<Integer>> a1 = E2<Integer>::<T>new;\n");
 		buf.append("    Function<String, E2<Integer>> a2 = t ->/*[2]*/ new E2<>(t);\n");
 		buf.append("    \n");
 		buf.append("    Function<Integer, Float[]> a3 = t ->/*[3]*/ new Float[t];\n");
@@ -3420,7 +3420,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    public <A> E2(A a) {}\n");
 		buf.append("    public E2(String s) {}\n");
 		buf.append("    \n");
-		buf.append("    Function<T, E2<Integer>> a1 = t ->/*[1]*/ (new<T> E2<Integer>(t));\n");
+		buf.append("    Function<T, E2<Integer>> a1 = t ->/*[1]*/ (new <T>E2<Integer>(t));\n");
 		buf.append("    Function<String, E2<Integer>> a2 = E2::new;\n");
 		buf.append("    \n");
 		buf.append("    Function<Integer, Float[]> a3 = t ->/*[3]*/ new Float[t];\n");
@@ -3441,7 +3441,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    public <A> E2(A a) {}\n");
 		buf.append("    public E2(String s) {}\n");
 		buf.append("    \n");
-		buf.append("    Function<T, E2<Integer>> a1 = t ->/*[1]*/ (new<T> E2<Integer>(t));\n");
+		buf.append("    Function<T, E2<Integer>> a1 = t ->/*[1]*/ (new <T>E2<Integer>(t));\n");
 		buf.append("    Function<String, E2<Integer>> a2 = t ->/*[2]*/ new E2<>(t);\n");
 		buf.append("    \n");
 		buf.append("    Function<Integer, Float[]> a3 = Float[]::new;\n");
@@ -3458,7 +3458,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf1.append("public class E3<T> extends SuperE3<Number> {\n");
 		buf1.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
 		buf1.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
-		buf1.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf1.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);\n");
 		buf1.append("\n");
 		buf1.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
 		buf1.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
@@ -3467,7 +3467,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf1.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
 		buf1.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
 		buf1.append("\n");
-		buf1.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf1.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();\n");
 		buf1.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
 		buf1.append("\n");
 		buf1.append("    <V> String method2() { return \"m2\";    }\n");
@@ -3490,7 +3490,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E3<T> extends SuperE3<Number> {\n");
 		buf.append("    Function<Integer, String> a1 = super::method1;\n");
 		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
-		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);\n");
 		buf.append("\n");
 		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
 		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
@@ -3499,7 +3499,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
 		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
 		buf.append("\n");
-		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();\n");
 		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
 		buf.append("\n");
 		buf.append("    <V> String method2() { return \"m2\";    }\n");
@@ -3523,7 +3523,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E3<T> extends SuperE3<Number> {\n");
 		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
 		buf.append("    Function<Integer, String> a2 = E3.super::method1;\n");
-		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);\n");
 		buf.append("\n");
 		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
 		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
@@ -3532,7 +3532,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
 		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
 		buf.append("\n");
-		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();\n");
 		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
 		buf.append("\n");
 		buf.append("    <V> String method2() { return \"m2\";    }\n");
@@ -3556,7 +3556,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E3<T> extends SuperE3<Number> {\n");
 		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
 		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
-		buf.append("    Function<Integer, String> a3 = SuperE3::<Float> staticMethod1;\n");
+		buf.append("    Function<Integer, String> a3 = SuperE3::<Float>staticMethod1;\n");
 		buf.append("\n");
 		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
 		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
@@ -3565,7 +3565,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
 		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
 		buf.append("\n");
-		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();\n");
 		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
 		buf.append("\n");
 		buf.append("    <V> String method2() { return \"m2\";    }\n");
@@ -3589,7 +3589,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E3<T> extends SuperE3<Number> {\n");
 		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
 		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
-		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);\n");
 		buf.append("\n");
 		buf.append("    Function<Integer, String> s1 = E3::staticMethod1;\n");
 		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
@@ -3598,7 +3598,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
 		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
 		buf.append("\n");
-		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();\n");
 		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
 		buf.append("\n");
 		buf.append("    <V> String method2() { return \"m2\";    }\n");
@@ -3622,7 +3622,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E3<T> extends SuperE3<Number> {\n");
 		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
 		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
-		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);\n");
 		buf.append("\n");
 		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
 		buf.append("    Function<Integer, String> s2 = E3::staticMethod1;\n");
@@ -3631,7 +3631,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
 		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
 		buf.append("\n");
-		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();\n");
 		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
 		buf.append("\n");
 		buf.append("    <V> String method2() { return \"m2\";    }\n");
@@ -3655,7 +3655,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E3<T> extends SuperE3<Number> {\n");
 		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
 		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
-		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);\n");
 		buf.append("\n");
 		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
 		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
@@ -3664,7 +3664,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
 		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
 		buf.append("\n");
-		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();\n");
 		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
 		buf.append("\n");
 		buf.append("    <V> String method2() { return \"m2\";    }\n");
@@ -3688,7 +3688,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E3<T> extends SuperE3<Number> {\n");
 		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
 		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
-		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);\n");
 		buf.append("\n");
 		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
 		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
@@ -3697,7 +3697,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    Function<Integer, String> b2 = this::method1;\n");
 		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
 		buf.append("\n");
-		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();\n");
 		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
 		buf.append("\n");
 		buf.append("    <V> String method2() { return \"m2\";    }\n");
@@ -3721,7 +3721,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E3<T> extends SuperE3<Number> {\n");
 		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
 		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
-		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);\n");
 		buf.append("\n");
 		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
 		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
@@ -3730,7 +3730,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
 		buf.append("    Function<Integer, String> b3 = (new SuperE3<String>())::method1;\n");
 		buf.append("\n");
-		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();\n");
 		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
 		buf.append("\n");
 		buf.append("    <V> String method2() { return \"m2\";    }\n");
@@ -3754,7 +3754,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E3<T> extends SuperE3<Number> {\n");
 		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
 		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
-		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);\n");
 		buf.append("\n");
 		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
 		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
@@ -3763,7 +3763,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
 		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
 		buf.append("\n");
-		buf.append("    Function<E3<Integer>, String> p1 = E3<Integer>::<Float> method2;\n");
+		buf.append("    Function<E3<Integer>, String> p1 = E3<Integer>::<Float>method2;\n");
 		buf.append("    Function<E3, String> p2 = t -> /*[10]*/t.method2();\n");
 		buf.append("\n");
 		buf.append("    <V> String method2() { return \"m2\";    }\n");
@@ -3787,7 +3787,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("public class E3<T> extends SuperE3<Number> {\n");
 		buf.append("    Function<Integer, String> a1 = t -> /*[1]*/super.method1(t);\n");
 		buf.append("    Function<Integer, String> a2 = t -> /*[2]*/E3.super.method1(t);\n");
-		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float> staticMethod1(t);\n");
+		buf.append("    Function<Integer, String> a3 = t -> /*[3]*/super.<Float>staticMethod1(t);\n");
 		buf.append("\n");
 		buf.append("    Function<Integer, String> s1 = t -> /*[4]*/(new E3()).staticMethod1(t);\n");
 		buf.append("    Function<Integer, String> s2 = t -> /*[5]*/staticMethod1(t);\n");
@@ -3796,7 +3796,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    Function<Integer, String> b2 = t -> /*[7]*/this.method1(t);\n");
 		buf.append("    Function<Integer, String> b3 = t -> /*[8]*/(new SuperE3<String>()).method1(t);\n");
 		buf.append("\n");
-		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float> method2();\n");
+		buf.append("    Function<E3<Integer>, String> p1 = t -> /*[9]*/t.<Float>method2();\n");
 		buf.append("    Function<E3, String> p2 = E3::method2;\n");
 		buf.append("\n");
 		buf.append("    <V> String method2() { return \"m2\";    }\n");
