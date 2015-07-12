@@ -606,6 +606,9 @@ public class ExternalNullAnnotationChangeProposals {
 				else
 					dimsRight.append("[]"); //$NON-NLS-1$
 			}
+		} else if (annotateVarargs) {
+			left = new StringBuilder(type.toString());
+			dimsRight = new StringBuilder();
 		}
 		if (left != null && dimsRight != null) {
 			if (annotateVarargs)
