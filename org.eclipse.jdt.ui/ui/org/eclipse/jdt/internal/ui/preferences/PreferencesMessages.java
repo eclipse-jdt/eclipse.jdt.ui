@@ -13,6 +13,7 @@
  *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
  *     Thomas Reinhardt <thomas@reinhardt.com> - [build path] user library dialog should allow to select JAR from workspace - http://bugs.eclipse.org/300542
  *     Stephan Herrmann <stephan@cs.tu-berlin.de> - [compiler][null] inheritance of null annotations as an option - https://bugs.eclipse.org/388281
+ *     Gábor Kövesdán - Contribution for Bug 350000 - [content assist] Include non-prefix matches in auto-complete suggestions
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -791,6 +792,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaBasePreferencePage_do_not_hide_dialog_title;
 	public static String JavaBasePreferencePage_do_not_hide_dialog_message;
 	public static String CodeAssistConfigurationBlock_matchCamelCase_label;
+	public static String CodeAssistConfigurationBlock_matchSubstring_label;
 	public static String ComplianceConfigurationBlock_version16;
 	public static String ComplianceConfigurationBlock_version17;
 	public static String ComplianceConfigurationBlock_version18;

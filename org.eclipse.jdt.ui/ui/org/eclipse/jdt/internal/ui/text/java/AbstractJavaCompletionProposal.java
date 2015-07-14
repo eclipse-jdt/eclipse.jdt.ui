@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Christian Georgi<christian.georgi@sap.com> - Bug 462770: Use OS symbol for 'Ctrl'
+ *     Gábor Kövesdán - Contribution for Bug 350000 - [content assist] Include non-prefix matches in auto-complete suggestions
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
@@ -881,7 +882,9 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		if (prefix == null || string ==null || prefix.length() > string.length())
 			return false;
 		String start= string.substring(0, prefix.length());
-		return start.equalsIgnoreCase(prefix) || isCamelCaseMatching() && CharOperation.camelCaseMatch(prefix.toCharArray(), string.toCharArray());
+		return start.equalsIgnoreCase(prefix) ||
+				isCamelCaseMatching() && CharOperation.camelCaseMatch(prefix.toCharArray(), string.toCharArray()) ||
+				isSubstringMatching() && CharOperation.substringMatch(prefix.toCharArray(), string.toCharArray());
 	}
 
 	/**
@@ -928,6 +931,17 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 */
 	protected boolean isCamelCaseMatching() {
 		String value= JavaCore.getOption(JavaCore.CODEASSIST_CAMEL_CASE_MATCH);
+		return JavaCore.ENABLED.equals(value);
+	}
+
+	/**
+	 * Returns true if substring matching is enabled.
+	 *
+	 * @return <code>true</code> if substring matching is enabled
+	 * @since 3.12
+	 */
+	protected boolean isSubstringMatching() {
+		String value= JavaCore.getOption(JavaCore.CODEASSIST_SUBSTRING_MATCH);
 		return JavaCore.ENABLED.equals(value);
 	}
 
