@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -485,7 +485,13 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 		path.add(superType);
 		do {
 			// any sub type must be on a hierarchy chain from superType to subType
-			superType= hierarchy.getSubtypes(superType)[0];
+			try {
+				superType= hierarchy.getSubtypes(superType)[0];
+			} catch (ArrayIndexOutOfBoundsException e) { // see bug 433587
+				String message= "Illegal supertype hierarchy for " + subType.getFullyQualifiedName('.') + ". No subtype found for " + superType.getFullyQualifiedName('.') + " in the hierarchy."; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				JavaPlugin.log(new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, message, e)));
+				break;
+			}
 			path.add(superType);
 		} while (!superType.equals(subType)); // since the equality case is handled above, we can spare one check
 
