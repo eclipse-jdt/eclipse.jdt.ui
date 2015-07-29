@@ -99,7 +99,6 @@ public class PluginsNotLoadedTest extends TestCase {
 			"org.eclipse.jface.databinding",
 			"org.eclipse.jface.text",
 			"org.eclipse.jface.text.tests",
-			"org.eclipse.jsch.core",
 			"org.eclipse.ltk.core.refactoring.tests",
 			"org.eclipse.ltk.ui.refactoring.tests",
 			"org.eclipse.osgi.services",
