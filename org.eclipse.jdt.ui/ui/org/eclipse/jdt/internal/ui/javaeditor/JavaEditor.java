@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Tom Eicher <eclipse@tom.eicher.name> - [formatting] 'Format Element' in JavaDoc does also format method body - https://bugs.eclipse.org/bugs/show_bug.cgi?id=238746
  *     Tom Eicher (Avaloq Evolution AG) - block selection mode
+ *     Stefan Xenos (sxenos@gmail.com) - bug 306646, make editor margins follow the java formatter preference 
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
@@ -3106,6 +3107,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		support.setMatchingCharacterPainterPreferenceKeys(MATCHING_BRACKETS, MATCHING_BRACKETS_COLOR, HIGHLIGHT_BRACKET_AT_CARET_LOCATION, ENCLOSING_BRACKETS);
 
 		super.configureSourceViewerDecorationSupport(support);
+
+		// The base class will have already called setMarginPainterPreferenceKeys. We override it
+		// here with more specific values for the java editor. Note that this needs to go after the
+		// call to super since the last invocation wins.
+		support.setMarginPainterPreferenceKeys(
+				AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN,
+				AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR,
+				DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT);
 	}
 
 	/**
