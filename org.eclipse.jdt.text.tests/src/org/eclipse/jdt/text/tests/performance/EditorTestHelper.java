@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -304,7 +304,7 @@ public class EditorTestHelper {
 			}
 		};
 		boolean quiet= helper.waitForCondition(getActiveDisplay(), maxTime > 0 ? maxTime : Long.MAX_VALUE, intervalTime);
-		Logger.global.exiting("EditorTestHelper", "joinJobs", new Boolean(quiet));
+		Logger.global.exiting("EditorTestHelper", "joinJobs", Boolean.valueOf(quiet));
 		return quiet;
 	}
 
@@ -376,7 +376,7 @@ public class EditorTestHelper {
 			}
 		};
 		boolean finished= helper.waitForCondition(getActiveDisplay(), maxTime > 0 ? maxTime : Long.MAX_VALUE, intervalTime);
-		Logger.global.exiting("EditorTestHelper", "joinReconciler", new Boolean(finished));
+		Logger.global.exiting("EditorTestHelper", "joinReconciler", Boolean.valueOf(finished));
 		return finished;
 	}
 
