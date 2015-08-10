@@ -6829,6 +6829,10 @@
                 <key name="org.eclipse.jdt.core.codeComplete.argumentSuffixes" />
                 <key name="org.eclipse.jdt.core.codeComplete.localPrefixes" />
                 <key name="org.eclipse.jdt.core.codeComplete.localSuffixes" />
+                <key
+                      match="prefix"
+                      name="org.eclipse.jdt.core.formatter">
+                </key>
              </entry>
           </mapping>
           <description>
