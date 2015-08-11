@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.SpellingService;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.ITypeRoot;
@@ -180,6 +181,11 @@ public class JavaReconciler extends MonoReconciler {
 		private boolean canIgnore(IJavaElementDelta[] delta) {
 			if (delta.length != 1)
 				return false;
+
+			// affects non-shared working copy
+			if (delta[0].getElement() instanceof ICompilationUnit
+					&& ((ICompilationUnit) delta[0].getElement()).getOwner() != null)
+				return true;
 
 			// become working copy
 			if (delta[0].getFlags() == IJavaElementDelta.F_PRIMARY_WORKING_COPY)
