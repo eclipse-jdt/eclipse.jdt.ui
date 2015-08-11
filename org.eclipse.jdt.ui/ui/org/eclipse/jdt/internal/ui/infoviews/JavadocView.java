@@ -102,7 +102,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
@@ -1279,22 +1278,19 @@ public class JavadocView extends AbstractInfoView {
 			return null;
 
 		Object constantValue;
-		IJavaProject preferenceProject;
 
 		if (selection instanceof ITextSelection && activePart instanceof JavaEditor) {
 			IEditorPart editor= (IEditorPart) activePart;
 			ITypeRoot activeType= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
-			preferenceProject= activeType.getJavaProject();
 			constantValue= getConstantValueFromActiveEditor(activeType, resolvedField, (ITextSelection) selection, monitor);
 			if (constantValue == null) // fall back - e.g. when selection is inside Javadoc of the element
 				constantValue= computeFieldConstantFromTypeAST(resolvedField, monitor);
 		} else {
 			constantValue= computeFieldConstantFromTypeAST(resolvedField, monitor);
-			preferenceProject= resolvedField.getJavaProject();
 		}
 
 		if (constantValue != null)
-			return JavadocHover.getFormattedAssignmentOperator(preferenceProject) + formatCompilerConstantValue(constantValue);
+			return JavadocHover.CONSTANT_VALUE_SEPARATOR + formatCompilerConstantValue(constantValue);
 
 		return null;
 	}

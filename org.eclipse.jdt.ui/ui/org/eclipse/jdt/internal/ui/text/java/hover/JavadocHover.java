@@ -68,7 +68,6 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
@@ -94,7 +93,6 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
@@ -127,6 +125,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
  * @since 2.1
  */
 public class JavadocHover extends AbstractJavaEditorTextHover {
+
+	public static final String CONSTANT_VALUE_SEPARATOR= " : "; //$NON-NLS-1$
 
 	public static class FallbackInformationPresenter extends HTMLTextPresenter {
 		public FallbackInformationPresenter() {
@@ -774,8 +774,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			String constantValue= getConstantValue((IField) element, editorInputElement, hoverRegion);
 			if (constantValue != null) {
 				constantValue= HTMLPrinter.convertToHTMLContentWithWhitespace(constantValue);
-				IJavaProject javaProject= element.getJavaProject();
-				label.append(getFormattedAssignmentOperator(javaProject));
+				label.append(CONSTANT_VALUE_SEPARATOR);
 				label.append(constantValue);
 			}
 		}
@@ -1214,26 +1213,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	private static StringBuffer addLink(StringBuffer buf, String uri, String label) {
 		return buf.append(JavaElementLinks.createLink(uri, label));
 	}
-		
-	/**
-	 * Returns the assignment operator string with the project's formatting applied to it.
-	 * 
-	 * @param javaProject the Java project whose formatting options will be used.
-	 * @return the formatted assignment operator string.
-	 * @since 3.4
-	 */
-	public static String getFormattedAssignmentOperator(IJavaProject javaProject) {
-		StringBuffer buffer= new StringBuffer();
-		if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, true)))
-			buffer.append(' ');
-		buffer.append('=');
-		if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR, true)))
-			buffer.append(' ');
-		return buffer.toString();
-	}
 
-	
-	
 	public static String getHexConstantValue(Object constantValue) {
 		if (constantValue instanceof Character) {
 			String constantResult= '\'' + constantValue.toString() + '\'';
