@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1007,6 +1007,29 @@ public class PullUpTests extends RefactoringTest {
 			StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, codeTemplate.getPattern(), null);
 		}
 
+	}
+
+	public void test51() throws Exception {
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+
+		String[] methodNames= new String[] { "b" };
+		String[][] signatures= new String[][] { new String[0] };
+
+		IType type= getType(cuA, "A");
+		IMethod[] methods= getMethods(type, methodNames, signatures);
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
+
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		setSuperclassAsTargetClass(processor);
+
+		RefactoringStatus result= performRefactoring(ref);
+		assertTrue("precondition was supposed to pass", result == null || !result.hasError());
+
+		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
+		assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
 	}
 
 	public void testFail0() throws Exception{
