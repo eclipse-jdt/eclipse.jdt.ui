@@ -123,18 +123,20 @@ public class MarkOccurrenceTest extends TestCase {
 				}
 			}
 
-			private synchronized void countOccurrences() {
-				int occurrences= 0;
-				Iterator<Annotation> iter= fAnnotationModel.getAnnotationIterator();
-				while (iter.hasNext()) {
-					Annotation annotation= iter.next();
-					if (OCCURRENCE_ANNOTATION.equals(annotation.getType()))
-						occurrences++;
-					if (OCCURRENCE_WRITE_ANNOTATION.equals(annotation.getType()))
-						occurrences++;
+			private void countOccurrences() {
+				synchronized (MarkOccurrenceTest.this) {
+					int occurrences= 0;
+					Iterator<Annotation> iter= fAnnotationModel.getAnnotationIterator();
+					while (iter.hasNext()) {
+						Annotation annotation= iter.next();
+						if (OCCURRENCE_ANNOTATION.equals(annotation.getType()))
+							occurrences++;
+						if (OCCURRENCE_WRITE_ANNOTATION.equals(annotation.getType()))
+							occurrences++;
 
+					}
+					fOccurrences= occurrences;
 				}
-				fOccurrences= occurrences;
 			}
 		};
 		SelectionListenerWithASTManager.getDefault().addListener(fEditor, fSelWASTListener);
@@ -401,11 +403,13 @@ public class MarkOccurrenceTest extends TestCase {
 		DisplayHelper helper= new DisplayHelper() {
 			@Override
 			protected boolean condition() {
-				if (fOccurrences != -1) {
-					assertEquals(expected, fOccurrences);
-					return true;
+				synchronized (MarkOccurrenceTest.this) {
+					if (fOccurrences != -1) {
+						assertEquals(expected, fOccurrences);
+						return true;
+					}
+					return false;
 				}
-				return false;
 			}
 		};
 		assertTrue(helper.waitForCondition(EditorTestHelper.getActiveDisplay(), 80000));
