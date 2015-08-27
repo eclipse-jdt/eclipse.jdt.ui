@@ -49,8 +49,10 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.PopupDialog;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ITreePathContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
@@ -143,7 +145,10 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		private boolean hasUnfilteredChild(TreeViewer viewer, TreePath parentPath, Object element) {
 			if (element instanceof IParent) {
 				TreePath elementPath= parentPath.createChildPath(element);
-				Object[] children=  ((ITreePathContentProvider) viewer.getContentProvider()).getChildren(elementPath);
+				IContentProvider contentProvider= viewer.getContentProvider();
+				Object[] children= contentProvider instanceof ITreePathContentProvider
+						? ((ITreePathContentProvider) contentProvider).getChildren(elementPath)
+						: ((ITreeContentProvider) contentProvider).getChildren(element);
 				for (int i= 0; i < children.length; i++)
 					if (selectTreePath(viewer, elementPath, children[i]))
 						return true;
