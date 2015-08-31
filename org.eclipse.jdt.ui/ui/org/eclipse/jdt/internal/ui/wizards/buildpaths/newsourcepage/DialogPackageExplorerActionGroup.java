@@ -136,19 +136,13 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         	    super.run();
         	}
 
-        	/**
-        	 * {@inheritDoc}
-        	 */
         	@Override
 			protected List<IJavaProject> getSelectedElements() {
-        		ArrayList<IJavaProject> result= new ArrayList<IJavaProject>();
+        		ArrayList<IJavaProject> result= new ArrayList<>();
         		result.add(page.getJavaProject());
         		return result;
         	}
 
-        	/**
-        	 * {@inheritDoc}
-        	 */
         	@Override
 			protected boolean canHandle(IStructuredSelection selection) {
         		return true;
@@ -162,19 +156,13 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         	    super.run();
         	}
 
-        	/**
-        	 * {@inheritDoc}
-        	 */
         	@Override
 			protected List<IJavaProject> getSelectedElements() {
-        		ArrayList<IJavaProject> result= new ArrayList<IJavaProject>();
+        		ArrayList<IJavaProject> result= new ArrayList<>();
         		result.add(page.getJavaProject());
         		return result;
         	}
 
-        	/**
-        	 * {@inheritDoc}
-        	 */
         	@Override
 			protected boolean canHandle(IStructuredSelection selection) {
         		return true;
@@ -192,9 +180,6 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         //ResetAllOutputFoldersAction
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.actions.CompositeActionGroup#dispose()
-     */
     @Override
 	public void dispose() {
         super.dispose();
@@ -311,7 +296,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     }
 
 	public BuildpathModifierAction[] getHintTextGroupActions() {
-		List<BuildpathModifierAction> result= new ArrayList<BuildpathModifierAction>();
+		List<BuildpathModifierAction> result= new ArrayList<>();
 
     	if (fCreateSourceFolderAction.isEnabled())
     		result.add(fCreateSourceFolderAction);

@@ -38,6 +38,7 @@ public class JavaPartitionerExtensionTest extends TestCase {
 		/*
 		 * @see IDocumentPartitioningListener#documentPartitioningChanged(IDocument)
 		 */
+		@Override
 		public void documentPartitioningChanged(IDocument document) {
 			fDocumentPartitioningChanged= true;
 		}
@@ -45,6 +46,7 @@ public class JavaPartitionerExtensionTest extends TestCase {
 		/*
 		 * @see IDocumentPartitioningListenerExtension#documentPartitioningChanged(IDocument, IRegion)
 		 */
+		@Override
 		public void documentPartitioningChanged(IDocument document, IRegion region) {
 			fDocumentPartitioningChanged= true;
 			fChangedDocumentPartitioning= region;
@@ -61,6 +63,7 @@ public class JavaPartitionerExtensionTest extends TestCase {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() {
 
 		fTextTools= new JavaTextTools(new PreferenceStore());
@@ -79,6 +82,7 @@ public class JavaPartitionerExtensionTest extends TestCase {
 		return new TestSuite(JavaPartitionerExtensionTest.class);
 	}
 
+	@Override
 	protected void tearDown () {
 		fTextTools.dispose();
 		fTextTools= null;

@@ -67,6 +67,7 @@ public class ContentProviderTests extends TestCase {
 		return new TestSuite(ContentProviderTests.class);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -99,6 +100,7 @@ public class ContentProviderTests extends TestCase {
 		setUpMockView();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 		if (fEnableAutoBuildAfterTesting)
@@ -133,11 +135,11 @@ public class ContentProviderTests extends TestCase {
 	}
 
 	private static void assertEqualSets(String message, Object[] expected, Object[] actual) {
-		List expList= Arrays.asList(expected);
-		List actList= Arrays.asList(actual);
+		List<Object> expList= Arrays.asList(expected);
+		List<Object> actList= Arrays.asList(actual);
 		
-		LinkedHashSet exp= new LinkedHashSet(expList);
-		LinkedHashSet act= new LinkedHashSet(actList);
+		LinkedHashSet<Object> exp= new LinkedHashSet<>(expList);
+		LinkedHashSet<Object> act= new LinkedHashSet<>(actList);
 		
 		if (!exp.equals(act))
 			throw new ComparisonFailure(message, expList.toString(), actList.toString());

@@ -60,17 +60,11 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip);
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getDetailedDescription() {
 	    return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath_library;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
 		final IJavaProject project= (IJavaProject)getSelectedElements().get(0);
@@ -90,13 +84,11 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 
 		ClasspathContainerWizard wizard= new ClasspathContainerWizard((IClasspathEntry) null, project, classpath) {
 
-			/**
-			 * {@inheritDoc}
-			 */
 			@Override
 			public boolean performFinish() {
 				if (super.performFinish()) {
 					IWorkspaceRunnable op= new IWorkspaceRunnable() {
+						@Override
 						public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 							try {
 								finishPage(monitor);
@@ -133,7 +125,7 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 					try {
 						pm.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4);
 
-						List<CPListElement> addedEntries= new ArrayList<CPListElement>();
+						List<CPListElement> addedEntries= new ArrayList<>();
 						for (int i= 0; i < selected.length; i++) {
 							addedEntries.add(CPListElement.create(selected[i], true, project));
 						}
@@ -153,7 +145,7 @@ public class AddLibraryToBuildpathAction extends BuildpathModifierAction {
 			        	delta.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));
 			        	informListeners(delta);
 
-						List<ClassPathContainer> result= new ArrayList<ClassPathContainer>(addedEntries.size());
+						List<ClassPathContainer> result= new ArrayList<>(addedEntries.size());
 						for (int i= 0; i < addedEntries.size(); i++) {
 							result.add(new ClassPathContainer(project, selected[i]));
 						}

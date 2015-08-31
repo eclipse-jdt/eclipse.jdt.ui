@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 
 public class PromoteTempToFieldTests18 extends PromoteTempToFieldTests {
-	private static final Class clazz= PromoteTempToFieldTests18.class;
+	private static final Class<PromoteTempToFieldTests18> clazz= PromoteTempToFieldTests18.class;
 
 	public PromoteTempToFieldTests18(String name) {
 		super(name);

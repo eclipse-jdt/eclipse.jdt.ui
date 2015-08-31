@@ -185,11 +185,11 @@ public final class StubUtility2 {
 			body.statements().add(invocation);
 		}
 
-		List<String> prohibited= new ArrayList<String>();
+		List<String> prohibited= new ArrayList<>();
 		for (final Iterator<SingleVariableDeclaration> iterator= parameters.iterator(); iterator.hasNext();)
 			prohibited.add(iterator.next().getName().getIdentifier());
 		String param= null;
-		List<String> list= new ArrayList<String>(prohibited);
+		List<String> list= new ArrayList<>(prohibited);
 		String[] excluded= null;
 		for (int i= 0; i < variableBindings.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
@@ -202,7 +202,7 @@ public final class StubUtility2 {
 			parameters.add(var);
 		}
 
-		list= new ArrayList<String>(prohibited);
+		list= new ArrayList<>(prohibited);
 		for (int i= 0; i < variableBindings.length; i++) {
 			excluded= new String[list.size()];
 			list.toArray(excluded);
@@ -483,7 +483,7 @@ public final class StubUtility2 {
 				@SuppressWarnings("unchecked")
 				List<Annotation>[] dimensionAnnotations= (List<Annotation>[]) new List<?>[dimensions];
 				for (int dim= 0; dim < dimensions; dim++) {
-					dimensionAnnotations[dim]= new ArrayList<Annotation>();
+					dimensionAnnotations[dim]= new ArrayList<>();
 					for (IAnnotationBinding annotation : type.getTypeAnnotations()) {
 						dimensionAnnotations[dim].add(imports.addAnnotation(annotation, ast, context));
 					}
@@ -540,6 +540,7 @@ public final class StubUtility2 {
 	 * @return thrown exception names
 	 * @deprecated to avoid deprecation warnings
 	 */
+	@Deprecated
 	private static List<Name> getThrownExceptions(MethodDeclaration decl) {
 		return decl.thrownExceptions();
 	}
@@ -607,8 +608,8 @@ public final class StubUtility2 {
 	}
 
 	public static DelegateEntry[] getDelegatableMethods(ITypeBinding binding) {
-		final List<DelegateEntry> tuples= new ArrayList<DelegateEntry>();
-		final List<IMethodBinding> declared= new ArrayList<IMethodBinding>();
+		final List<DelegateEntry> tuples= new ArrayList<>();
+		final List<IMethodBinding> declared= new ArrayList<>();
 		IMethodBinding[] typeMethods= binding.getDeclaredMethods();
 		for (int index= 0; index < typeMethods.length; index++)
 			declared.add(typeMethods[index]);
@@ -616,7 +617,7 @@ public final class StubUtility2 {
 		for (int index= 0; index < typeFields.length; index++) {
 			IVariableBinding fieldBinding= typeFields[index];
 			if (fieldBinding.isField() && !fieldBinding.isEnumConstant() && !fieldBinding.isSynthetic())
-				getDelegatableMethods(new ArrayList<IMethodBinding>(declared), fieldBinding, fieldBinding.getType(), binding, tuples);
+				getDelegatableMethods(new ArrayList<>(declared), fieldBinding, fieldBinding.getType(), binding, tuples);
 		}
 		// list of tuple<IVariableBinding, IMethodBinding>
 		return tuples.toArray(new DelegateEntry[tuples.size()]);
@@ -660,7 +661,7 @@ public final class StubUtility2 {
 	}
 
 	private static IMethodBinding[] getDelegateCandidates(ITypeBinding binding, ITypeBinding hierarchy) {
-		List<IMethodBinding> allMethods= new ArrayList<IMethodBinding>();
+		List<IMethodBinding> allMethods= new ArrayList<>();
 		boolean isInterface= binding.isInterface();
 		IMethodBinding[] typeMethods= binding.getDeclaredMethods();
 		for (int index= 0; index < typeMethods.length; index++) {
@@ -707,7 +708,7 @@ public final class StubUtility2 {
 				ASTNode otherMethod= NodeFinder.perform(otherCU, iMethod.getSourceRange());
 				if (otherMethod instanceof MethodDeclaration) {
 					MethodDeclaration otherMD= (MethodDeclaration) otherMethod;
-					ArrayList<IExtendedModifier> result= new ArrayList<IExtendedModifier>();
+					ArrayList<IExtendedModifier> result= new ArrayList<>();
 					List<IExtendedModifier> otherModifiers= otherMD.modifiers();
 					for (IExtendedModifier otherModifier : otherModifiers) {
 						if (otherModifier instanceof Modifier) {
@@ -736,7 +737,7 @@ public final class StubUtility2 {
 			}
 		}
 		
-		ArrayList<IExtendedModifier> result= new ArrayList<IExtendedModifier>();
+		ArrayList<IExtendedModifier> result= new ArrayList<>();
 		
 		for (IAnnotationBinding annotation : annotations) {
 			if (StubUtility2.isCopyOnInheritAnnotation(annotation.getAnnotationType(), javaProject, defaultNullness))
@@ -749,7 +750,7 @@ public final class StubUtility2 {
 	}
 
 	public static IMethodBinding[] getOverridableMethods(AST ast, ITypeBinding typeBinding, boolean isSubType) {
-		List<IMethodBinding> allMethods= new ArrayList<IMethodBinding>();
+		List<IMethodBinding> allMethods= new ArrayList<>();
 		IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
 		for (int index= 0; index < typeMethods.length; index++) {
 			final int modifiers= typeMethods[index].getModifiers();
@@ -808,8 +809,8 @@ public final class StubUtility2 {
 	}
 
 	public static IMethodBinding[] getUnimplementedMethods(ITypeBinding typeBinding, boolean implementAbstractsOfInput) {
-		ArrayList<IMethodBinding> allMethods= new ArrayList<IMethodBinding>();
-		ArrayList<IMethodBinding> toImplement= new ArrayList<IMethodBinding>();
+		ArrayList<IMethodBinding> allMethods= new ArrayList<>();
+		ArrayList<IMethodBinding> toImplement= new ArrayList<>();
 
 		IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
 		for (int i= 0; i < typeMethods.length; i++) {
@@ -844,7 +845,7 @@ public final class StubUtility2 {
 			}
 		}
 
-		HashSet<ITypeBinding> visited= new HashSet<ITypeBinding>();
+		HashSet<ITypeBinding> visited= new HashSet<>();
 		ITypeBinding curr= typeBinding;
 		while (curr != null) {
 			ITypeBinding[] superInterfaces= curr.getInterfaces();
@@ -858,14 +859,14 @@ public final class StubUtility2 {
 	}
 
 	public static IMethodBinding[] getVisibleConstructors(ITypeBinding binding, boolean accountExisting, boolean proposeDefault) {
-		List<IMethodBinding> constructorMethods= new ArrayList<IMethodBinding>();
+		List<IMethodBinding> constructorMethods= new ArrayList<>();
 		List<IMethodBinding> existingConstructors= null;
 		ITypeBinding superType= binding.getSuperclass();
 		if (superType == null)
 			return new IMethodBinding[0];
 		if (accountExisting) {
 			IMethodBinding[] methods= binding.getDeclaredMethods();
-			existingConstructors= new ArrayList<IMethodBinding>(methods.length);
+			existingConstructors= new ArrayList<>(methods.length);
 			for (int index= 0; index < methods.length; index++) {
 				IMethodBinding method= methods[index];
 				if (method.isConstructor() && !method.isDefaultConstructor())

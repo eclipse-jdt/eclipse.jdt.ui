@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,42 +37,43 @@ public class MockWorkbenchSite extends PlatformObject implements IWorkbenchSite 
 		this(new SimpleSelectionProvider(elements));
 	}
 
-	public MockWorkbenchSite(List elements){
+	public MockWorkbenchSite(List<?> elements){
 		this(new SimpleSelectionProvider(elements));
 	}
 
+	@Override
 	public IWorkbenchPage getPage() {
 		return null;
 	}
 
+	@Override
 	public ISelectionProvider getSelectionProvider() {
 		return fProvider;
 	}
 
+	@Override
 	public Shell getShell() {
 		return JavaPlugin.getActiveWorkbenchShell();
 	}
 
+	@Override
 	public IWorkbenchWindow getWorkbenchWindow() {
 		return null;
 	}
 
+	@Override
 	public void setSelectionProvider(ISelectionProvider provider) {
 		Assert.isNotNull(provider);
 		fProvider= provider;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.services.IServiceLocator#getService(java.lang.Class)
-	 */
-	public Object getService(Class key) {
+	@Override
+	public <T> T getService(Class<T> api) {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.services.IServiceLocator#hasService(java.lang.Class)
-	 */
-	public boolean hasService(Class key) {
+	@Override
+	public boolean hasService(Class<?> key) {
 		return false;
 	}
 }

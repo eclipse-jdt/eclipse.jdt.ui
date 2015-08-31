@@ -16,9 +16,6 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -49,9 +46,12 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.QuickTemplateProcessor;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class SurroundWithTemplateTest extends QuickFixTest {
 
-	private static final Class THIS= SurroundWithTemplateTest.class;
+	private static final Class<SurroundWithTemplateTest> THIS= SurroundWithTemplateTest.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -68,8 +68,9 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 
@@ -92,11 +93,12 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
-	private static List getRunnableProposal(AssistContext context) throws CoreException {
+	private static List<IJavaCompletionProposal> getRunnableProposal(AssistContext context) throws CoreException {
 
 		StringBuffer buf= new StringBuffer();
 		buf.append("Runnable runnable = new Runnable() {\n");
@@ -137,7 +139,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(1);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -186,7 +188,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(k);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -245,7 +247,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(h);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -296,7 +298,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("            j--;\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -337,7 +339,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        int i = 10;\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -379,7 +381,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(i);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -420,7 +422,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(i);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -465,7 +467,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(i);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -511,7 +513,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(i);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -555,7 +557,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(10);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -597,7 +599,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(i);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -636,7 +638,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(s);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -676,7 +678,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(s);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -716,7 +718,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(i);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -758,7 +760,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(i);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -801,7 +803,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(i);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -841,7 +843,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(i);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -882,7 +884,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(j);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -922,7 +924,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(k);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -966,7 +968,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(j);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1006,7 +1008,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("            int j = 10;\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1054,7 +1056,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("            }\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1098,7 +1100,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(i);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1142,7 +1144,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("            System.out.println(k);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1189,7 +1191,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("            System.out.println(e4);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 9);
 		assertCorrectLabels(proposals);
@@ -1240,7 +1242,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("            System.out.println(e4);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 9);
 		assertCorrectLabels(proposals);
@@ -1286,7 +1288,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(s);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1328,7 +1330,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(i);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1374,7 +1376,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(k);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1417,7 +1419,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("            System.out.println(1);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1456,7 +1458,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("            System.out.println(i);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1502,7 +1504,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        toString();\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1544,7 +1546,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        System.out.println(this);\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1587,7 +1589,7 @@ public class SurroundWithTemplateTest extends QuickFixTest {
 		selection.append("        // }\n");
 
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-		List proposals= getRunnableProposal(context);
+		List<IJavaCompletionProposal> proposals= getRunnableProposal(context);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);

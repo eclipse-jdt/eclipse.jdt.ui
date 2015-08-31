@@ -52,6 +52,7 @@ public class FieldNameProcessor implements IContentAssistProcessor, ISubjectCont
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeCompletionProposals(org.eclipse.jface.text.ITextViewer, int)
 	 */
+	@Override
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
 		return null;
@@ -60,6 +61,7 @@ public class FieldNameProcessor implements IContentAssistProcessor, ISubjectCont
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
 	 */
+	@Override
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
 		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
 		return null;
@@ -68,6 +70,7 @@ public class FieldNameProcessor implements IContentAssistProcessor, ISubjectCont
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
 	 */
+	@Override
 	public char[] getCompletionProposalAutoActivationCharacters() {
 		return null;
 	}
@@ -75,6 +78,7 @@ public class FieldNameProcessor implements IContentAssistProcessor, ISubjectCont
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationAutoActivationCharacters()
 	 */
+	@Override
 	public char[] getContextInformationAutoActivationCharacters() {
 		return null; //no context
 	}
@@ -82,6 +86,7 @@ public class FieldNameProcessor implements IContentAssistProcessor, ISubjectCont
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
 	 */
+	@Override
 	public String getErrorMessage() {
 		return fErrorMessage;
 	}
@@ -89,6 +94,7 @@ public class FieldNameProcessor implements IContentAssistProcessor, ISubjectCont
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationValidator()
 	 */
+	@Override
 	public IContextInformationValidator getContextInformationValidator() {
 		return null; //no context
 	}
@@ -96,6 +102,7 @@ public class FieldNameProcessor implements IContentAssistProcessor, ISubjectCont
 	/*
 	 * @see org.eclipse.jface.contentassist.IContentAssistProcessorExtension#computeContextInformation(org.eclipse.jface.contentassist.IContentAssistSubject, int)
 	 */
+	@Override
 	public IContextInformation[] computeContextInformation(IContentAssistSubjectControl contentAssistSubject, int documentOffset) {
 		return null; //no context
 	}
@@ -103,12 +110,13 @@ public class FieldNameProcessor implements IContentAssistProcessor, ISubjectCont
 	/*
 	 * @see org.eclipse.jface.contentassist.IContentAssistProcessorExtension#computeCompletionProposals(org.eclipse.jface.contentassist.IContentAssistSubject, int)
 	 */
+	@Override
 	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubject, int documentOffset) {
 		if (fFieldNameProposals.length == 0)
 			return null;
 		String input= contentAssistSubject.getDocument().get();
 
-		ArrayList<JavaCompletionProposal> proposals= new ArrayList<JavaCompletionProposal>();
+		ArrayList<JavaCompletionProposal> proposals= new ArrayList<>();
 		String prefix= input.substring(0, documentOffset);
 		ImageDescriptor imageDescriptor= JavaElementImageProvider.getFieldImageDescriptor(false, fRefactoring.getVisibility());
 		Image image= fImageRegistry.get(imageDescriptor);

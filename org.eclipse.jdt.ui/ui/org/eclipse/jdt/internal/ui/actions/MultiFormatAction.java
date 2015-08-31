@@ -38,7 +38,7 @@ public class MultiFormatAction extends CleanUpAction {
 	 */
 	@Override
 	protected ICleanUp[] getCleanUps(ICompilationUnit[] units) {
-		Map<String, String> settings= new Hashtable<String, String>();
+		Map<String, String> settings= new Hashtable<>();
 		settings.put(CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpOptions.TRUE);
 
 		return new ICleanUp[] {

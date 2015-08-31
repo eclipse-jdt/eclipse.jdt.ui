@@ -62,6 +62,7 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 	/*
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
+	@Override
 	public ICompletionProposal[] computeQuickAssistProposals(IQuickAssistInvocationContext quickAssistContext) {
 
 		ISourceViewer viewer= quickAssistContext.getSourceViewer();
@@ -74,7 +75,7 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 			res= fPreComputedProposals;
 		} else {
 			try {
-				List<ICompletionProposal> proposals= new ArrayList<ICompletionProposal>();
+				List<ICompletionProposal> proposals= new ArrayList<>();
 				ICompletionProposal[] spellingProposals= fSpellingCorrectionProcessor.computeQuickAssistProposals(quickAssistContext);
 				if (spellingProposals.length > 1) {
 					for (int i= 0; i < spellingProposals.length; i++) {
@@ -110,6 +111,7 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 	/*
 	 * @see IContentAssistProcessor#getErrorMessage()
 	 */
+	@Override
 	public String getErrorMessage() {
 		return fErrorMessage;
 	}
@@ -117,6 +119,7 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 	/*
 	 * @see org.eclipse.jface.text.quickassist.IQuickAssistProcessor#canFix(org.eclipse.jface.text.source.Annotation)
 	 */
+	@Override
 	public boolean canFix(Annotation annotation) {
 		return fSpellingCorrectionProcessor.canFix(annotation);
 	}
@@ -124,6 +127,7 @@ public class PropertiesCorrectionProcessor implements org.eclipse.jface.text.qui
 	/*
 	 * @see org.eclipse.jface.text.quickassist.IQuickAssistProcessor#canAssist(org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext)
 	 */
+	@Override
 	public boolean canAssist(IQuickAssistInvocationContext invocationContext) {
 		return PropertiesQuickAssistProcessor.hasAssists(createAssistContext(invocationContext));
 	}

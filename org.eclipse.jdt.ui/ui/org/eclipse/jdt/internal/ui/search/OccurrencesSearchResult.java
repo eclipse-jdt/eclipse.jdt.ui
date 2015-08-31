@@ -46,6 +46,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#findContainedMatches(org.eclipse.core.resources.IFile)
 	 */
+	@Override
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IFile file) {
 		Object[] elements= getElements();
 		if (elements.length == 0)
@@ -60,6 +61,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#findContainedMatches(org.eclipse.ui.IEditorPart)
 	 */
+	@Override
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
 		//TODO same code in JavaSearchResult
 		IEditorInput editorInput= editor.getEditorInput();
@@ -85,6 +87,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#getFile(java.lang.Object)
 	 */
+	@Override
 	public IFile getFile(Object element) {
 		JavaElementLine jel= (JavaElementLine) element;
 		IResource resource= null;
@@ -102,6 +105,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#isShownInEditor(org.eclipse.search.ui.text.Match, org.eclipse.ui.IEditorPart)
 	 */
+	@Override
 	public boolean isShownInEditor(Match match, IEditorPart editor) {
 		Object element= match.getElement();
 		IJavaElement je= ((JavaElementLine) element).getJavaElement();
@@ -122,6 +126,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 	/*
 	 * @see org.eclipse.search.ui.ISearchResult#getLabel()
 	 */
+	@Override
 	public String getLabel() {
 		return fQuery.getResultLabel(getMatchCount());
 	}
@@ -129,6 +134,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 	/*
 	 * @see org.eclipse.search.ui.ISearchResult#getTooltip()
 	 */
+	@Override
 	public String getTooltip() {
 		return getLabel();
 	}
@@ -136,6 +142,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 	/*
 	 * @see org.eclipse.search.ui.ISearchResult#getImageDescriptor()
 	 */
+	@Override
 	public ImageDescriptor getImageDescriptor() {
 		return JavaPluginImages.DESC_OBJS_SEARCH_REF;
 	}
@@ -143,6 +150,7 @@ public class OccurrencesSearchResult extends AbstractTextSearchResult implements
 	/*
 	 * @see org.eclipse.search.ui.ISearchResult#getQuery()
 	 */
+	@Override
 	public ISearchQuery getQuery() {
 		return fQuery;
 	}

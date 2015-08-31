@@ -33,7 +33,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 
 public class RippleMethodFinderTests extends AbstractCUTestCase {
 
-	private static final Class clazz= RippleMethodFinderTests.class;
+	private static final Class<RippleMethodFinderTests> clazz= RippleMethodFinderTests.class;
 	private static final String REFACTORING_PATH= "RippleMethodFinder/";
 	private static final String TARGET= "/*target*/";
 	private static final String RIPPLE= "/*ripple*/";
@@ -42,6 +42,7 @@ public class RippleMethodFinderTests extends AbstractCUTestCase {
 		super(name);
 	}
 
+	@Override
 	protected String getResourceLocation() {
 		return REFACTORING_PATH;
 	}
@@ -54,6 +55,7 @@ public class RippleMethodFinderTests extends AbstractCUTestCase {
 		return new RefactoringTestSetup(someTest);
 	}
 
+	@Override
 	protected InputStream getFileInputStream(String fileName) throws IOException {
 		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
 	}
@@ -69,7 +71,7 @@ public class RippleMethodFinderTests extends AbstractCUTestCase {
 		assertEquals(1, elements.length);
 		IMethod target= (IMethod) elements[0];
 
-		List/*<IMethod>*/ rippleMethods= new ArrayList();
+		List<IMethod> rippleMethods= new ArrayList<>();
 		rippleMethods.add(target);
 		int start= 0;
 		while (start < contents.length()) {

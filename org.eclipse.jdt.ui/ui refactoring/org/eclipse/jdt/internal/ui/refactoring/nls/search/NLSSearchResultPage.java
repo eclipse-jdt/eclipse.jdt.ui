@@ -101,6 +101,7 @@ public class NLSSearchResultPage extends AbstractTextSearchViewPage  implements 
 		viewer.setContentProvider(fContentProvider);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Class<T> adapter) {
 		if (IShowInTargetList.class.equals(adapter)) {

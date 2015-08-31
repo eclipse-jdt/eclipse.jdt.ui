@@ -240,7 +240,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	protected static class AstNodeFinder extends ASTVisitor {
 
 		/** The found ast nodes */
-		protected final Set<Expression> fResult= new HashSet<Expression>();
+		protected final Set<Expression> fResult= new HashSet<>();
 
 		/** The status of the find operation */
 		protected final RefactoringStatus fStatus= new RefactoringStatus();
@@ -302,7 +302,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	public final class EnclosingInstanceReferenceFinder extends AstNodeFinder {
 
 		/** The list of enclosing types */
-		private final List<ITypeBinding> fEnclosingTypes= new ArrayList<ITypeBinding>(3);
+		private final List<ITypeBinding> fEnclosingTypes= new ArrayList<>(3);
 
 		/**
 		 * Creates a new enclosing instance reference finder.
@@ -367,7 +367,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	public final class GenericReferenceFinder extends AstNodeFinder {
 
 		/** The type parameter binding keys */
-		protected final Set<String> fBindings= new HashSet<String>();
+		protected final Set<String> fBindings= new HashSet<>();
 
 		/**
 		 * Creates a new generic reference finder.
@@ -450,7 +450,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		protected final ASTRewrite fRewrite;
 
 		/** The existing static imports */
-		protected final Set<IBinding> fStaticImports= new HashSet<IBinding>();
+		protected final Set<IBinding> fStaticImports= new HashSet<>();
 
 		/** The refactoring status */
 		protected final RefactoringStatus fStatus= new RefactoringStatus();
@@ -738,13 +738,13 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 
 		/** The list of found bindings */
-		protected final List<IVariableBinding> fBindings= new LinkedList<IVariableBinding>();
+		protected final List<IVariableBinding> fBindings= new LinkedList<>();
 
 		/** The keys of the found binding keys */
-		protected final Set<String> fFound= new HashSet<String>();
+		protected final Set<String> fFound= new HashSet<>();
 
 		/** The keys of the written binding keys */
-		protected final Set<String> fWritten= new HashSet<String>();
+		protected final Set<String> fWritten= new HashSet<>();
 
 		/**
 		 * Creates a new read only field finder.
@@ -786,7 +786,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		 */
 		public final IVariableBinding[] getReadOnlyFields() {
 			IVariableBinding binding= null;
-			final List<IVariableBinding> list= new LinkedList<IVariableBinding>(fBindings);
+			final List<IVariableBinding> list= new LinkedList<>(fBindings);
 			for (final Iterator<IVariableBinding> iterator= list.iterator(); iterator.hasNext();) {
 				binding= iterator.next();
 				if (fWritten.contains(binding.getKey()))
@@ -1020,12 +1020,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			}
 		}
 
+		@Override
 		public ASTNode getArgumentNode(final IVariableBinding binding, final boolean last) throws JavaModelException {
 			Assert.isNotNull(binding);
 			adjustTypeVisibility(binding.getType());
 			return fAst.newSimpleName(binding.getName());
 		}
 
+		@Override
 		public ASTNode getTargetNode() throws JavaModelException {
 			return fAst.newThisExpression();
 		}
@@ -1058,7 +1060,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 */
 	protected static IVariableBinding[] getArgumentBindings(final MethodDeclaration declaration) {
 		Assert.isNotNull(declaration);
-		final List<IVariableBinding> parameters= new ArrayList<IVariableBinding>(declaration.parameters().size());
+		final List<IVariableBinding> parameters= new ArrayList<>(declaration.parameters().size());
 		for (final Iterator<SingleVariableDeclaration> iterator= declaration.parameters().iterator(); iterator.hasNext();) {
 			VariableDeclaration variable= iterator.next();
 			IVariableBinding binding= variable.resolveBinding();
@@ -1082,7 +1084,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	protected static ITypeBinding[] getArgumentTypes(final MethodDeclaration declaration) {
 		Assert.isNotNull(declaration);
 		final IVariableBinding[] parameters= getArgumentBindings(declaration);
-		final List<ITypeBinding> types= new ArrayList<ITypeBinding>(parameters.length);
+		final List<ITypeBinding> types= new ArrayList<>(parameters.length);
 		IVariableBinding binding= null;
 		ITypeBinding type= null;
 		for (int index= 0; index < parameters.length; index++) {
@@ -1196,9 +1198,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		status.merge(initializeStatus);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public final boolean canEnableDelegateUpdating() {
 		return true;
 	}
@@ -1566,7 +1566,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 *             if the method declaration could not be found
 	 */
 	protected String[] computeReservedIdentifiers() throws JavaModelException {
-		final List<String> names= new ArrayList<String>();
+		final List<String> names= new ArrayList<>();
 		final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
 		if (declaration != null) {
 			final List<SingleVariableDeclaration> parameters= declaration.parameters();
@@ -1598,8 +1598,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	protected IVariableBinding[] computeTargetCategories(final MethodDeclaration declaration) {
 		Assert.isNotNull(declaration);
 		if (fPossibleTargets.length == 0 || fCandidateTargets.length == 0) {
-			final List<IVariableBinding> possibleTargets= new ArrayList<IVariableBinding>(16);
-			final List<IVariableBinding> candidateTargets= new ArrayList<IVariableBinding>(16);
+			final List<IVariableBinding> possibleTargets= new ArrayList<>(16);
+			final List<IVariableBinding> candidateTargets= new ArrayList<>(16);
 			final IMethodBinding method= declaration.resolveBinding();
 			if (method != null) {
 				final ITypeBinding declaring= method.getDeclaringClass();
@@ -1741,9 +1741,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			final TextChange[] changes= fChangeManager.getAllChanges();
 			if (changes.length == 1)
 				return changes[0];
-			final List<TextChange> list= new ArrayList<TextChange>(changes.length);
+			final List<TextChange> list= new ArrayList<>(changes.length);
 			list.addAll(Arrays.asList(changes));
-			final Map<String, String> arguments= new HashMap<String, String>();
+			final Map<String, String> arguments= new HashMap<>();
 			String project= null;
 			final IJavaProject javaProject= fMethod.getJavaProject();
 			if (javaProject != null)
@@ -1804,7 +1804,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			final CompilationUnitRewrite targetRewrite= fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit()) ? fSourceRewrite : new CompilationUnitRewrite(getTargetType().getCompilationUnit());
 			final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
 			final SearchResultGroup[] references= computeMethodReferences(new SubProgressMonitor(monitor, 1), status);
-			final Map<ICompilationUnit, CompilationUnitRewrite> rewrites= new HashMap<ICompilationUnit, CompilationUnitRewrite>(2);
+			final Map<ICompilationUnit, CompilationUnitRewrite> rewrites= new HashMap<>(2);
 			rewrites.put(fSourceRewrite.getCu(), fSourceRewrite);
 			if (!fSourceRewrite.getCu().equals(targetRewrite.getCu()))
 				rewrites.put(targetRewrite.getCu(), targetRewrite);
@@ -2059,7 +2059,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		final AST ast= rewriter.getRoot().getAST();
 		final AstNodeFinder finder= new AnonymousClassReferenceFinder(declaration);
 		declaration.accept(finder);
-		final List<ASTNode> arguments= new ArrayList<ASTNode>(declaration.parameters().size() + 1);
+		final List<ASTNode> arguments= new ArrayList<>(declaration.parameters().size() + 1);
 		createArgumentList(declaration, arguments, new VisibilityAdjustingArgumentFactory(ast, rewrites, adjustments) {
 
 			@Override
@@ -2151,9 +2151,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		Assert.isNotNull(declaration);
 		final Javadoc comment= declaration.getJavadoc();
 		if (comment != null) {
-			final List<TagElement> tags= new LinkedList<TagElement>(comment.tags());
+			final List<TagElement> tags= new LinkedList<>(comment.tags());
 			final IVariableBinding[] bindings= getArgumentBindings(declaration);
-			final Map<String, TagElement> elements= new HashMap<String, TagElement>(bindings.length);
+			final Map<String, TagElement> elements= new HashMap<>(bindings.length);
 			String name= null;
 			List<? extends ASTNode> fragments= null;
 			TagElement element= null;
@@ -2186,9 +2186,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 						reference= element;
 				}
 			}
-			final List<ASTNode> arguments= new ArrayList<ASTNode>(bindings.length + 1);
+			final List<ASTNode> arguments= new ArrayList<>(bindings.length + 1);
 			createArgumentList(declaration, arguments, new IArgumentFactory() {
 
+				@Override
 				public final ASTNode getArgumentNode(final IVariableBinding argument, final boolean last) throws JavaModelException {
 					Assert.isNotNull(argument);
 					if (elements.containsKey(argument.getKey()))
@@ -2196,6 +2197,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					return JavadocUtil.createParamTag(argument.getName(), declaration.getAST(), fMethod.getJavaProject());
 				}
 
+				@Override
 				public final ASTNode getTargetNode() throws JavaModelException {
 					return JavadocUtil.createParamTag(fTargetName, declaration.getAST(), fMethod.getJavaProject());
 				}
@@ -2578,6 +2580,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		reference.setQualifier(ASTNodeFactory.newName(ast, fTargetType.getFullyQualifiedName('.')));
 		createArgumentList(declaration, reference.parameters(), new IArgumentFactory() {
 
+			@Override
 			public final ASTNode getArgumentNode(final IVariableBinding binding, final boolean last) {
 				Assert.isNotNull(binding);
 				final MethodRefParameter parameter= ast.newMethodRefParameter();
@@ -2585,6 +2588,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				return parameter;
 			}
 
+			@Override
 			public final ASTNode getTargetNode() {
 				final MethodRefParameter parameter= ast.newMethodRefParameter();
 				final IMethodBinding method= declaration.resolveBinding();
@@ -2732,16 +2736,12 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		return rewrite;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public final boolean getDelegateUpdating() {
 		return fDelegatingUpdating;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getDelegateUpdatingTitle(boolean plural) {
 		if (plural)
 			return RefactoringCoreMessages.DelegateMethodCreator_keep_original_moved_plural;
@@ -2749,24 +2749,16 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			return RefactoringCoreMessages.DelegateMethodCreator_keep_original_moved_singular;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public final boolean getDeprecateDelegates() {
 		return fDelegateDeprecation;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public final Object[] getElements() {
 		return new Object[] { fMethod };
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public final String getIdentifier() {
 		return IDENTIFIER;
@@ -2995,18 +2987,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		return fTargetNode;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public final void setDelegateUpdating(final boolean updating) {
 		fDelegatingUpdating= updating;
 		setInlineDelegator(!updating);
 		setRemoveDelegator(!updating);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public final void setDeprecateDelegates(final boolean deprecate) {
 		fDelegateDeprecation= deprecate;
 	}

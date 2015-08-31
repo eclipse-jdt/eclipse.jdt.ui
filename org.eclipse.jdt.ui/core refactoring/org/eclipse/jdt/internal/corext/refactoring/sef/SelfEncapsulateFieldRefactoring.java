@@ -364,7 +364,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		IVariableBinding fieldIdentifier= fFieldDeclaration.resolveBinding();
 		ITypeBinding declaringClass=
 			((AbstractTypeDeclaration)ASTNodes.getParent(fFieldDeclaration, AbstractTypeDeclaration.class)).resolveBinding();
-		List<TextEditGroup> ownerDescriptions= new ArrayList<TextEditGroup>();
+		List<TextEditGroup> ownerDescriptions= new ArrayList<>();
 		ICompilationUnit owner= fField.getCompilationUnit();
 		fImportRewrite= StubUtility.createImportRewrite(fRoot, true);
 
@@ -383,7 +383,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			} else {
 				root= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, true);
 				rewriter= ASTRewrite.create(root.getAST());
-				descriptions= new ArrayList<TextEditGroup>();
+				descriptions= new ArrayList<>();
 				importRewrite= StubUtility.createImportRewrite(root, true);
 			}
 			checkCompileErrors(result, root, unit);
@@ -428,7 +428,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 
 	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		final Map<String, String> arguments= new HashMap<String, String>();
+		final Map<String, String> arguments= new HashMap<>();
 		String project= null;
 		IJavaProject javaProject= fField.getJavaProject();
 		if (javaProject != null)
@@ -543,8 +543,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 
 	private void computeUsedNames() {
-		fUsedReadNames= new ArrayList<IMethodBinding>(0);
-		fUsedModifyNames= new ArrayList<IMethodBinding>(0);
+		fUsedReadNames= new ArrayList<>(0);
+		fUsedModifyNames= new ArrayList<>(0);
 		IVariableBinding binding= fFieldDeclaration.resolveBinding();
 		ITypeBinding type= binding.getType();
 		IMethodBinding[] methods= binding.getDeclaringClass().getDeclaredMethods();
@@ -560,7 +560,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 
 	private List<TextEditGroup> addGetterSetterChanges(CompilationUnit root, ASTRewrite rewriter, String lineDelimiter, boolean usingLocalSetter, boolean usingLocalGetter) throws CoreException {
-		List<TextEditGroup> result= new ArrayList<TextEditGroup>(2);
+		List<TextEditGroup> result= new ArrayList<>(2);
 		AST ast= root.getAST();
 		FieldDeclaration decl= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, ASTNode.FIELD_DECLARATION);
 		int position= 0;

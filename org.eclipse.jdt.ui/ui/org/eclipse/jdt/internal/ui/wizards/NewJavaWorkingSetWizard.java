@@ -52,9 +52,6 @@ public class NewJavaWorkingSetWizard extends Wizard implements INewWizard {
 		addPage(fPage);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
-	 */
 	@Override
 	public boolean performFinish() {
 		fPage.finish();
@@ -84,6 +81,7 @@ public class NewJavaWorkingSetWizard extends Wizard implements INewWizard {
 		return null;
 	}
 
+	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		fSelection= selection;
 	}

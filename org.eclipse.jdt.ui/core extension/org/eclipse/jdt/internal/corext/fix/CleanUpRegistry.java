@@ -63,6 +63,7 @@ public class CleanUpRegistry {
 			fException= e;
 		}
 
+		@Override
 		public Composite createContents(Composite parent) {
 			Composite result= new Composite(parent, SWT.NONE);
 			result.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -76,18 +77,22 @@ public class CleanUpRegistry {
 			return result;
 		}
 
+		@Override
 		public int getCleanUpCount() {
 			return 0;
 		}
 
+		@Override
 		public String getPreview() {
 			return FixMessages.CleanUpRegistry_ErrorTabPage_preview;
 		}
 
+		@Override
 		public int getSelectedCleanUpCount() {
 			return 0;
 		}
 
+		@Override
 		public void setOptions(CleanUpOptions options) {
 		}
 	}
@@ -224,6 +229,7 @@ public class CleanUpRegistry {
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
 					fOptionsProvider= new ICleanUpOptionsInitializer() {
+						@Override
 						public void setDefaultOptions(CleanUpOptions options) {
 						}
 					};
@@ -264,7 +270,7 @@ public class CleanUpRegistry {
 	 */
 	public synchronized ICleanUp[] createCleanUps(Set<String> ids) {
 		ensureCleanUpsRegistered();
-		ArrayList<ICleanUp> result= new ArrayList<ICleanUp>(fCleanUpDescriptors.length);
+		ArrayList<ICleanUp> result= new ArrayList<>(fCleanUpDescriptors.length);
 		for (int i= 0; i < fCleanUpDescriptors.length; i++) {
 			if (ids == null || ids.contains(fCleanUpDescriptors[i].getId())) {
 				ICleanUp cleanUp= fCleanUpDescriptors[i].createCleanUp();
@@ -286,7 +292,7 @@ public class CleanUpRegistry {
 	public synchronized CleanUpTabPageDescriptor[] getCleanUpTabPageDescriptors(int kind) {
 		ensurePagesRegistered();
 
-		ArrayList<CleanUpTabPageDescriptor> result= new ArrayList<CleanUpTabPageDescriptor>();
+		ArrayList<CleanUpTabPageDescriptor> result= new ArrayList<>();
 		for (int i= 0; i < fPageDescriptors.length; i++) {
 			if (fPageDescriptors[i].getKind() == kind)
 				result.add(fPageDescriptors[i]);
@@ -323,7 +329,7 @@ public class CleanUpRegistry {
 			return;
 
 
-		final ArrayList<CleanUpDescriptor> descriptors= new ArrayList<CleanUpDescriptor>();
+		final ArrayList<CleanUpDescriptor> descriptors= new ArrayList<>();
 
 		IExtensionPoint point= Platform.getExtensionRegistry().getExtensionPoint(JavaPlugin.getPluginId(), EXTENSION_POINT_NAME);
 		IConfigurationElement[] elements= point.getConfigurationElements();
@@ -342,6 +348,7 @@ public class CleanUpRegistry {
 			final boolean disable[]= new boolean[1];
 			ISafeRunnable runnable= new SafeRunnable() {
 				
+				@Override
 				public void run() throws Exception {
 					ICleanUp cleanUp= cleanUpDescriptor.createCleanUp();
 					if (cleanUp == null)
@@ -418,7 +425,7 @@ public class CleanUpRegistry {
 		if (fPageDescriptors != null)
 			return;
 		
-		ArrayList<CleanUpTabPageDescriptor> result= new ArrayList<CleanUpTabPageDescriptor>();
+		ArrayList<CleanUpTabPageDescriptor> result= new ArrayList<>();
 
 		IExtensionPoint point= Platform.getExtensionRegistry().getExtensionPoint(JavaPlugin.getPluginId(), EXTENSION_POINT_NAME);
 		IConfigurationElement[] elements= point.getConfigurationElements();
@@ -432,6 +439,7 @@ public class CleanUpRegistry {
 
 		fPageDescriptors= result.toArray(new CleanUpTabPageDescriptor[result.size()]);
 		Arrays.sort(fPageDescriptors, new Comparator<CleanUpTabPageDescriptor>() {
+			@Override
 			public int compare(CleanUpTabPageDescriptor o1, CleanUpTabPageDescriptor o2) {
 				String name1= o1.getName();
 				String name2= o2.getName();
@@ -444,7 +452,7 @@ public class CleanUpRegistry {
 		if (fCleanUpInitializerDescriptors != null)
 			return;
 
-		ArrayList<CleanUpInitializerDescriptor> result= new ArrayList<CleanUpInitializerDescriptor>();
+		ArrayList<CleanUpInitializerDescriptor> result= new ArrayList<>();
 
 		IExtensionPoint point= Platform.getExtensionRegistry().getExtensionPoint(JavaPlugin.getPluginId(), EXTENSION_POINT_NAME);
 		IConfigurationElement[] elements= point.getConfigurationElements();

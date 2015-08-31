@@ -52,21 +52,15 @@ public class JavadocConsoleLineTracker implements IConsoleLineTracker {
 			fLineNumber= lineNumber;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.debug.ui.console.IConsoleHyperlink#linkEntered()
-		 */
+		@Override
 		public void linkEntered() {
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.debug.ui.console.IConsoleHyperlink#linkExited()
-		 */
+		@Override
 		public void linkExited() {
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.debug.ui.console.IConsoleHyperlink#linkActivated()
-		 */
+		@Override
 		public void linkActivated() {
 			try {
 				IFile[] files= ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(URIUtil.toURI(fExternalPath.makeAbsolute()));
@@ -109,16 +103,12 @@ public class JavadocConsoleLineTracker implements IConsoleLineTracker {
 	public JavadocConsoleLineTracker() {
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.console.IConsoleLineTracker#init(org.eclipse.debug.ui.console.IConsole)
-	 */
+	@Override
 	public void init(IConsole console) {
 		fConsole= console;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.console.IConsoleLineTracker#lineAppended(org.eclipse.jface.text.IRegion)
-	 */
+	@Override
 	public void lineAppended(IRegion line) {
 		try {
 			int offset = line.getOffset();
@@ -159,9 +149,7 @@ public class JavadocConsoleLineTracker implements IConsoleLineTracker {
 
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.ui.console.IConsoleLineTracker#dispose()
-	 */
+	@Override
 	public void dispose() {
 		fConsole = null;
 	}

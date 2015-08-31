@@ -33,51 +33,37 @@ public class JavaSearchResult extends AbstractJavaSearchResult {
 
 	public JavaSearchResult(JavaSearchQuery query) {
 		fQuery= query;
-		fElementsToParticipants= new HashMap<Object, IMatchPresentation>();
+		fElementsToParticipants= new HashMap<>();
 		setActiveMatchFilters(JavaMatchFilter.getLastUsedFilters());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.ISearchResult#getImageDescriptor()
-	 */
+	@Override
 	public ImageDescriptor getImageDescriptor() {
 		return fQuery.getImageDescriptor();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.ISearchResult#getLabel()
-	 */
+	@Override
 	public String getLabel() {
 		return fQuery.getResultLabel(getMatchCount());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.ISearchResult#getTooltip()
-	 */
+	@Override
 	public String getTooltip() {
 		return getLabel();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#setMatchFilters(org.eclipse.search.ui.text.MatchFilter[])
-	 */
 	@Override
 	public void setActiveMatchFilters(MatchFilter[] filters) {
 		super.setActiveMatchFilters(filters);
 		JavaMatchFilter.setLastUsedFilters(filters);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#getAllMatchFilters()
-	 */
 	@Override
 	public MatchFilter[] getAllMatchFilters() {
 		return JavaMatchFilter.allFilters(fQuery);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.ISearchResult#getQuery()
-	 */
+	@Override
 	public ISearchQuery getQuery() {
 		return fQuery;
 	}

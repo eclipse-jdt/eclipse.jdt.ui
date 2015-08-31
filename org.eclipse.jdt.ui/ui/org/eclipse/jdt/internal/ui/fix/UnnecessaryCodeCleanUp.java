@@ -39,9 +39,6 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 		super();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public CleanUpRequirements getRequirements() {
 		boolean requireAST= isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
@@ -49,9 +46,6 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		return UnusedCodeFix.createCleanUp(compilationUnit,
@@ -64,9 +58,6 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 				isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		return UnusedCodeFix.createCleanUp(compilationUnit, problems,
@@ -80,7 +71,7 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 	}
 
 	private Map<String, String> getRequiredOptions() {
-		Map<String, String> result= new Hashtable<String, String>();
+		Map<String, String> result= new Hashtable<>();
 
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS))
 			result.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.WARNING);
@@ -88,20 +79,14 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 		return result;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String[] getStepDescriptions() {
-		List<String> result= new ArrayList<String>();
+		List<String> result= new ArrayList<>();
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS))
 			result.add(MultiFixMessages.UnusedCodeCleanUp_RemoveUnusedCasts_description);
 		return result.toArray(new String[result.size()]);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
@@ -115,9 +100,7 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 		return buf.toString();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		if (problem.getProblemId() == IProblem.UnnecessaryCast)
 			return isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS);
@@ -125,9 +108,6 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 		return false;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;

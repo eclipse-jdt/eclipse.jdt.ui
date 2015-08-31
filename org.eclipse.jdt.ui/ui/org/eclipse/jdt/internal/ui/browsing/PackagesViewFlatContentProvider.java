@@ -97,7 +97,7 @@ public class PackagesViewFlatContentProvider extends LogicalPackagesProvider imp
 	 * Weeds out packageFragments from external jars and folders
 	 */
 	private IPackageFragment[] getPackageFragments(IPackageFragment[] iPackageFragments) {
-		List<IPackageFragment> list= new ArrayList<IPackageFragment>();
+		List<IPackageFragment> list= new ArrayList<>();
 		for (int i= 0; i < iPackageFragments.length; i++) {
 			IPackageFragment fragment= iPackageFragments[i];
 			IJavaElement el= fragment.getParent();
@@ -114,6 +114,7 @@ public class PackagesViewFlatContentProvider extends LogicalPackagesProvider imp
 	/*
 	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 	 */
+	@Override
 	public Object[] getElements(Object inputElement) {
 		return getChildren(inputElement);
 	}
@@ -214,6 +215,7 @@ public class PackagesViewFlatContentProvider extends LogicalPackagesProvider imp
 
 	private void postAdd(final Object child) {
 		postRunnable(new Runnable() {
+			@Override
 			public void run() {
 				Control ctrl = fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
@@ -226,6 +228,7 @@ public class PackagesViewFlatContentProvider extends LogicalPackagesProvider imp
 
 	private void postRemove(final Object object) {
 		postRunnable(new Runnable() {
+			@Override
 			public void run() {
 				Control ctrl = fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
@@ -280,6 +283,7 @@ public class PackagesViewFlatContentProvider extends LogicalPackagesProvider imp
 		}
 
 		postRunnable(new Runnable() {
+			@Override
 			public void run() {
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {

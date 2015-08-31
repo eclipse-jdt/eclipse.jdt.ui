@@ -178,6 +178,8 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 * @deprecated This method is no longer called by the framework and clients should overwrite
 	 *             {@link #apply(ITextViewer, char, int, int)} instead
 	 */
+	@Deprecated
+	@Override
 	public final void apply(IDocument document) {
 		// not called anymore
 	}
@@ -185,6 +187,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
 	 */
+	@Override
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 
 		IDocument document= viewer.getDocument();
@@ -334,11 +337,14 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 				/*
 				 * @see org.eclipse.jface.text.link.ILinkedModeListener#left(org.eclipse.jface.text.link.LinkedModeModel, int)
 				 */
+				@Override
 				public void left(LinkedModeModel environment, int flags) {
 					ensurePositionCategoryRemoved(document);
 				}
 
+				@Override
 				public void suspend(LinkedModeModel environment) {}
+				@Override
 				public void resume(LinkedModeModel environment, int flags) {}
 			});
 		}
@@ -410,6 +416,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	/*
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
+	@Override
 	public Point getSelection(IDocument document) {
 		return new Point(fSelectedRegion.getOffset(), fSelectedRegion.getLength());
 	}
@@ -417,6 +424,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	/*
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
+	@Override
 	public String getAdditionalProposalInfo() {
 	    try {
 		    fContext.setReadOnly(true);
@@ -440,6 +448,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	/*
 	 * @see ICompletionProposal#getDisplayString()
 	 */
+	@Override
 	public String getDisplayString() {
 		return getStyledDisplayString().getString();
 	}
@@ -448,6 +457,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension6#getStyledDisplayString()
 	 * @since 3.4
 	 */
+	@Override
 	public StyledString getStyledDisplayString() {
 		if (fDisplayString == null) {
 			String[] arguments= new String[] { fTemplate.getName(), fTemplate.getDescription() };
@@ -465,6 +475,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	/*
 	 * @see ICompletionProposal#getImage()
 	 */
+	@Override
 	public Image getImage() {
 		return fImage;
 	}
@@ -472,6 +483,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	/*
 	 * @see ICompletionProposal#getContextInformation()
 	 */
+	@Override
 	public IContextInformation getContextInformation() {
 		return null;
 	}
@@ -487,6 +499,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	/*
 	 * @see IJavaCompletionProposal#getRelevance()
 	 */
+	@Override
 	public int getRelevance() {
 		return fRelevance;
 	}
@@ -498,6 +511,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getInformationControlCreator()
 	 */
+	@Override
 	public IInformationControlCreator getInformationControlCreator() {
 		int orientation;
 		IEditorPart editor= getJavaEditor();
@@ -511,18 +525,21 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(org.eclipse.jface.text.ITextViewer, boolean)
 	 */
+	@Override
 	public void selected(ITextViewer viewer, boolean smartToggle) {
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(org.eclipse.jface.text.ITextViewer)
 	 */
+	@Override
 	public void unselected(ITextViewer viewer) {
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
 	 */
+	@Override
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 		try {
 			int replaceOffset= getReplaceOffset();
@@ -544,6 +561,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementString()
 	 */
+	@Override
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		// bug 114360 - don't make selection templates prefix-completable
 		if (isSelectionTemplate())
@@ -554,6 +572,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementOffset()
 	 */
+	@Override
 	public int getPrefixCompletionStart(IDocument document, int completionOffset) {
 		return getReplaceOffset();
 	}
@@ -561,6 +580,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension4#isAutoInsertable()
 	 */
+	@Override
 	public boolean isAutoInsertable() {
 		if (isSelectionTemplate())
 			return false;

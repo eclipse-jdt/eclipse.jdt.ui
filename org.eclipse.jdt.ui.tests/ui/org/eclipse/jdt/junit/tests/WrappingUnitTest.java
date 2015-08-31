@@ -27,6 +27,7 @@ public class WrappingUnitTest extends TestCase {
 		TextualTrace trace = new TextualTrace("12345\n1234512345",
 				new String[0]);
 		trace.display(new ITraceDisplay() {
+			@Override
 			public void addTraceLine(int lineType, String label) {
 				assertEquals("12345", label);
 			}
@@ -37,12 +38,14 @@ public class WrappingUnitTest extends TestCase {
 			throws Exception {
 		final boolean[] wasCalled = { false };
 		WrappingSystemTest test = new WrappingSystemTest() {
+			@Override
 			protected void launchTests(String prefixForErrorMessage,
 					int howManyNumbersInErrorString) throws CoreException,
 					JavaModelException {
 				// do nothing
 			}
 
+			@Override
 			protected void waitForTableToFill(int numExpectedTableLines,
 					int millisecondTimeout, boolean lastItemHasImage) throws PartInitException {
 				wasCalled[0] = true;
@@ -57,6 +60,7 @@ public class WrappingUnitTest extends TestCase {
 	public void test02waitForTableToFillWaitsForNumberOfLines()
 			throws Exception {
 		WrappingSystemTest test = new WrappingSystemTest() {
+			@Override
 			protected boolean stillWaiting(int numExpectedTableLines, boolean lastItemHasImage)
 					throws PartInitException {
 				assertEquals(17, numExpectedTableLines);
@@ -68,14 +72,17 @@ public class WrappingUnitTest extends TestCase {
 
 	public void test03waitForTableToFillObeysTimeout() throws Exception {
 		final WrappingSystemTest test = new WrappingSystemTest() {
+			@Override
 			protected void dispatchEvents() {
 				// do nothing (avoid accessing display from non-UI thread)
 			}
 
+			@Override
 			protected int getNumTableItems() throws PartInitException {
 				return -1; // avoid accessing getActiveWorkbenchWindow() from non-UI thread
 			}
 
+			@Override
 			protected boolean stillWaiting(int numExpectedTableLines, boolean lastItemHasImage)
 					throws PartInitException {
 				return true;
@@ -85,6 +92,7 @@ public class WrappingUnitTest extends TestCase {
 		final boolean[] done = { false };
 
 		new Thread(new Runnable() {
+			@Override
 			public void run() {
 				synchronized (done) {
 					try {
@@ -108,10 +116,12 @@ public class WrappingUnitTest extends TestCase {
 	public void test04stillWaitingChecksForProperNumberOfLines()
 			throws Exception {
 		WrappingSystemTest test = new WrappingSystemTest() {
+			@Override
 			protected int getNumTableItems() throws PartInitException {
 				return 2;
 			}
 
+			@Override
 			protected synchronized boolean hasNotTerminated() {
 				return false;
 			}

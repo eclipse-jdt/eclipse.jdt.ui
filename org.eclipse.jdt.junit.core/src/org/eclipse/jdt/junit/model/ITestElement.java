@@ -46,6 +46,7 @@ public interface ITestElement {
 		private ProgressState(String name) {
 			fName= name;
 		}
+		@Override
 		public String toString() {
 			return fName;
 		}
@@ -70,6 +71,7 @@ public interface ITestElement {
 		private Result(String name) {
 			fName= name;
 		}
+		@Override
 		public String toString() {
 			return fName;
 		}

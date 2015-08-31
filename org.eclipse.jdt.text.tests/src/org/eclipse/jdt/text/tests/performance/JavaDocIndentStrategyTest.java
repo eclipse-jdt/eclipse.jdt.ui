@@ -54,6 +54,7 @@ public class JavaDocIndentStrategyTest extends TextPerformanceTestCase implement
 			super(test);
 		}
 
+		@Override
 		protected void setUp() throws Exception {
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			store.setValue(PreferenceConstants.EDITOR_CLOSE_JAVADOCS, true);
@@ -63,10 +64,12 @@ public class JavaDocIndentStrategyTest extends TextPerformanceTestCase implement
 			super.setUp();
 		}
 
+		@Override
 		protected String getFile() {
 			return "/" + PROJECT + "/src/" + FILE;
 		}
 
+		@Override
 		protected void tearDown () throws Exception {
 			super.tearDown();
 			if (fJavaProject != null)
@@ -82,7 +85,7 @@ public class JavaDocIndentStrategyTest extends TextPerformanceTestCase implement
 
 	public static final String LINKED_FOLDER= "/testResources/javaDocIndentStrategyTest1";
 
-	private static final Class THIS= JavaDocIndentStrategyTest.class;
+	private static final Class<JavaDocIndentStrategyTest> THIS= JavaDocIndentStrategyTest.class;
 
 	private static final String SHORT_NAME= "JavaDoc Indent Strategy";
 
@@ -100,10 +103,12 @@ public class JavaDocIndentStrategyTest extends TextPerformanceTestCase implement
 		return new PerformanceTestSetup(new Setup(new TestSuite(THIS)));
 	}
 
+	@Override
 	public void setEditor(AbstractTextEditor editor) {
 		fEditor= editor;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		EditorTestHelper.bringToTop();

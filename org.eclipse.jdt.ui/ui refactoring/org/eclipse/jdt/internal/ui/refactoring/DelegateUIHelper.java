@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class DelegateUIHelper {
 
 	public static Button generateDeprecateDelegateCheckbox(Composite parent, Refactoring refactoring) {
-		final IDelegateUpdating updating= (IDelegateUpdating) refactoring.getAdapter(IDelegateUpdating.class);
+		final IDelegateUpdating updating= refactoring.getAdapter(IDelegateUpdating.class);
 		if (updating == null || !updating.canEnableDelegateUpdating())
 			return null;
 		final Button button= createCheckbox(parent, getDeprecateDelegateCheckBoxTitle(), loadDeprecateDelegateSetting(updating));
@@ -48,7 +48,7 @@ public class DelegateUIHelper {
 	}
 
 	public static Button generateLeaveDelegateCheckbox(Composite parent, Refactoring refactoring, boolean plural) {
-		final IDelegateUpdating updating= (IDelegateUpdating) refactoring.getAdapter(IDelegateUpdating.class);
+		final IDelegateUpdating updating= refactoring.getAdapter(IDelegateUpdating.class);
 		if (updating == null || !updating.canEnableDelegateUpdating())
 			return null;
 		final Button button= createCheckbox(parent, updating.getDelegateUpdatingTitle(plural), loadLeaveDelegateSetting(updating));

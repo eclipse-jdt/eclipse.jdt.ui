@@ -182,6 +182,7 @@ public final class MemberVisibilityAdjustor {
 		/*
 		 * @see org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IVisibilityAdjustment#rewriteVisibility(org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor, org.eclipse.core.runtime.IProgressMonitor)
 		 */
+		@Override
 		public void rewriteVisibility(final MemberVisibilityAdjustor adjustor, final IProgressMonitor monitor) throws JavaModelException {
 			Assert.isNotNull(adjustor);
 			Assert.isNotNull(monitor);
@@ -422,7 +423,7 @@ public final class MemberVisibilityAdjustor {
 	}
 
 	/** The map of members to visibility adjustments */
-	private Map<IMember, IncomingMemberVisibilityAdjustment> fAdjustments= new LinkedHashMap<IMember, IncomingMemberVisibilityAdjustment>(); // LinkedHashMap to preserve order of generated warnings
+	private Map<IMember, IncomingMemberVisibilityAdjustment> fAdjustments= new LinkedHashMap<>(); // LinkedHashMap to preserve order of generated warnings
 
 	/** Should incoming references be adjusted? */
 	private boolean fIncoming= true;
@@ -440,7 +441,7 @@ public final class MemberVisibilityAdjustor {
 	private ASTRewrite fRewrite= null;
 
 	/** The map of compilation units to compilation unit rewrites */
-	private Map<ICompilationUnit, CompilationUnitRewrite> fRewrites= new HashMap<ICompilationUnit, CompilationUnitRewrite>(3);
+	private Map<ICompilationUnit, CompilationUnitRewrite> fRewrites= new HashMap<>(3);
 
 	/** The root node of the AST rewrite for reference visibility adjustments, or <code>null</code> to use a compilation unit rewrite */
 	private CompilationUnit fRoot= null;
@@ -452,7 +453,7 @@ public final class MemberVisibilityAdjustor {
 	private RefactoringStatus fStatus= new RefactoringStatus();
 
 	/** The type hierarchy cache */
-	private final Map<IType, ITypeHierarchy> fTypeHierarchies= new LRUMap<IType, ITypeHierarchy>(10);
+	private final Map<IType, ITypeHierarchy> fTypeHierarchies= new LRUMap<>(10);
 
 	/** The visibility message severity */
 	private int fVisibilitySeverity= RefactoringStatus.WARNING;

@@ -52,6 +52,7 @@ public class ShowInheritedMembersAction extends Action {
 	@Override
 	public void run() {
 		BusyIndicator.showWhile(fMethodsViewer.getControl().getDisplay(), new Runnable() {
+			@Override
 			public void run() {
 				fMethodsViewer.showInheritedMethods(isChecked());
 			}

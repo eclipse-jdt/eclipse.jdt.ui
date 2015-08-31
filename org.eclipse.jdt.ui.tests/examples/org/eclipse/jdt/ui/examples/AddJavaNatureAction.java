@@ -46,9 +46,7 @@ public class AddJavaNatureAction extends Action implements IActionDelegate {
 	private IProject fProject;
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
-	 */
+	@Override
 	public void run(IAction action) {
 		try {
 			if (fProject != null) {
@@ -59,9 +57,7 @@ public class AddJavaNatureAction extends Action implements IActionDelegate {
 		}
 
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction, org.eclipse.jface.viewers.ISelection)
-	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		fProject= null;
 		if (selection instanceof IStructuredSelection) {

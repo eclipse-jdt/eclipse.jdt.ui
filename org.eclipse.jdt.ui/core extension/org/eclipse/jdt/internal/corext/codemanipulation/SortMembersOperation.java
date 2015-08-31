@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 
 /**
- * Orders members is a compilation unit. A working copy must be passed.
+ * Orders members in a compilation unit. A working copy must be passed.
  */
 public class SortMembersOperation implements IWorkspaceRunnable {
 
@@ -116,6 +116,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 		 * @see Comparator#compare(java.lang.Object, java.lang.Object)
 		 * @see CompilationUnitSorter#sort(int, org.eclipse.jdt.core.ICompilationUnit, int[], java.util.Comparator, int, org.eclipse.core.runtime.IProgressMonitor)
 		 */
+		@Override
 		public int compare(BodyDeclaration bodyDeclaration1, BodyDeclaration bodyDeclaration2) {
 			boolean preserved1= fDoNotSortFields && isSortPreserved(bodyDeclaration1);
 			boolean preserved2= fDoNotSortFields && isSortPreserved(bodyDeclaration2);
@@ -320,6 +321,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 	 * resource
 	 * </ul>
 	 */
+	@Override
 	public void run(IProgressMonitor monitor) throws CoreException {
 		CompilationUnitSorter.sort(ASTProvider.SHARED_AST_LEVEL, fCompilationUnit, fPositions, new DefaultJavaElementComparator(fDoNotSortFields), 0, monitor);
 	}

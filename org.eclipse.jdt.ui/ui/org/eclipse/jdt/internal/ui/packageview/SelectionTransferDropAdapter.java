@@ -69,16 +69,12 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 
 	//---- TransferDropTargetListener interface ---------------------------------------
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Transfer getTransfer() {
 		return LocalSelectionTransfer.getInstance();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean isEnabled(DropTargetEvent event) {
 		Object target= event.item != null ? event.item.getData() : null;
 		if (target == null)
@@ -88,18 +84,12 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 
 	//---- Actual DND -----------------------------------------------------------------
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void dragEnter(DropTargetEvent event) {
 		clear();
 		super.dragEnter(event);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void dragLeave(DropTargetEvent event) {
 		clear();
@@ -116,17 +106,11 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		fCanCopyElements= 0;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean validateDrop(Object target, int operation, TransferData transferType) {
 		return determineOperation(target, operation, transferType, DND.DROP_MOVE | DND.DROP_LINK | DND.DROP_COPY) != DND.DROP_NONE;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected int determineOperation(Object target, int operation, TransferData transferType, int operations) {
 		int result= internalDetermineOperation(target, operation, operations);
@@ -209,9 +193,6 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		return fSelection;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean performDrop(Object data) {
 		try{
@@ -328,9 +309,6 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		return getViewer().getControl().getShell();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected int getCurrentLocation() {
 		if (getFeedbackEnabled()) {

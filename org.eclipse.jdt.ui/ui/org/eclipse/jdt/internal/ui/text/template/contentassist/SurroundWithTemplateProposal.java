@@ -79,7 +79,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		protected List<VariableDeclaration> getVariableDeclarationReadsInside(Statement[] selectedNodes, int maxVariableId) {
 			if (isNewContext())
 				return super.getVariableDeclarationReadsInside(selectedNodes, maxVariableId);
-			return new ArrayList<VariableDeclaration>();
+			return new ArrayList<>();
 		}
 
 		@Override
@@ -271,9 +271,6 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		MessageDialog.openError(shell, TemplateContentAssistMessages.TemplateEvaluator_error_title, e.getMessage());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 		return false;

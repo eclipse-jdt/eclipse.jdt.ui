@@ -47,7 +47,7 @@ public class CorrectionCommandInstaller {
 		if (fCorrectionHandlerActivations != null) {
 			JavaPlugin.logErrorMessage("correction handler activations not released"); //$NON-NLS-1$
 		}
-		fCorrectionHandlerActivations= new ArrayList<IHandlerActivation>();
+		fCorrectionHandlerActivations= new ArrayList<>();
 
 		Collection<String> definedCommandIds= commandService.getDefinedCommandIds();
 		for (Iterator<String> iter= definedCommandIds.iterator(); iter.hasNext();) {

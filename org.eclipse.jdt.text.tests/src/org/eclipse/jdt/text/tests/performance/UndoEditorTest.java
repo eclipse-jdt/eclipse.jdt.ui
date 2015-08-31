@@ -26,6 +26,7 @@ public abstract class UndoEditorTest extends TextPerformanceTestCase {
 
 	private PerformanceMeter fPerformanceMeter;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fPerformanceMeter= createMeter();
@@ -34,6 +35,7 @@ public abstract class UndoEditorTest extends TextPerformanceTestCase {
 
 	protected abstract PerformanceMeter createMeter();
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();

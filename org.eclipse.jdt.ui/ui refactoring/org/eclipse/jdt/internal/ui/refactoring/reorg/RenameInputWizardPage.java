@@ -62,6 +62,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		fHelpContextID= contextHelpId;
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		Composite superComposite= new Composite(parent, SWT.NONE);
 		setControl(superComposite);
@@ -122,7 +123,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
-			INameUpdating nameUpdating= (INameUpdating)getRefactoring().getAdapter(INameUpdating.class);
+			INameUpdating nameUpdating= getRefactoring().getAdapter(INameUpdating.class);
 			if (nameUpdating != null) {
 				String newName= getNewName(nameUpdating);
 				if (newName != null && newName.length() > 0 && !newName.equals(getInitialValue())) {
@@ -168,7 +169,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	}
 
 	private void addOptionalUpdateReferencesCheckbox(Composite result, RowLayouter layouter) {
-		final IReferenceUpdating ref= (IReferenceUpdating)getRefactoring().getAdapter(IReferenceUpdating.class);
+		final IReferenceUpdating ref= getRefactoring().getAdapter(IReferenceUpdating.class);
 		if (ref == null)
 			return;
 		String title= RefactoringMessages.RenameInputWizardPage_update_references;
@@ -184,7 +185,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	}
 
 	private void addOptionalUpdateTextualMatches(Composite result, RowLayouter layouter) {
-		final ITextUpdating refactoring= (ITextUpdating) getRefactoring().getAdapter(ITextUpdating.class);
+		final ITextUpdating refactoring= getRefactoring().getAdapter(ITextUpdating.class);
 		if (refactoring == null || !refactoring.canEnableTextUpdating())
 			return;
 		String title= RefactoringMessages.RenameInputWizardPage_update_textual_matches;
@@ -201,7 +202,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	}
 
 	private void addOptionalUpdateQualifiedNameComponent(Composite parent, RowLayouter layouter, int marginWidth) {
-		final IQualifiedNameUpdating ref= (IQualifiedNameUpdating)getRefactoring().getAdapter(IQualifiedNameUpdating.class);
+		final IQualifiedNameUpdating ref= getRefactoring().getAdapter(IQualifiedNameUpdating.class);
 		if (ref == null || !ref.canEnableQualifiedNameUpdating())
 			return;
 		fUpdateQualifiedNames= new Button(parent, SWT.CHECK);
@@ -235,7 +236,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	}
 
 	private void addOptionalLeaveDelegateCheckbox(Composite result, RowLayouter layouter) {
-		final IDelegateUpdating refactoring= (IDelegateUpdating) getRefactoring().getAdapter(IDelegateUpdating.class);
+		final IDelegateUpdating refactoring= getRefactoring().getAdapter(IDelegateUpdating.class);
 		if (refactoring == null || !refactoring.canEnableDelegateUpdating())
 			return;
 		fLeaveDelegateCheckBox= createCheckbox(result, refactoring.getDelegateUpdatingTitle(false), DelegateUIHelper.loadLeaveDelegateSetting(refactoring), layouter);
@@ -249,7 +250,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	}
 
 	private void addOptionalDeprecateDelegateCheckbox(Composite result, RowLayouter layouter, int marginWidth) {
-		final IDelegateUpdating refactoring= (IDelegateUpdating) getRefactoring().getAdapter(IDelegateUpdating.class);
+		final IDelegateUpdating refactoring= getRefactoring().getAdapter(IDelegateUpdating.class);
 		if (refactoring == null || !refactoring.canEnableDelegateUpdating())
 			return;
 		fDeprecateDelegateCheckBox= new Button(result, SWT.CHECK);
@@ -281,7 +282,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	protected void updateLeaveDelegateCheckbox(int delegateCount) {
 		if (fLeaveDelegateCheckBox == null)
 			return;
-		final IDelegateUpdating refactoring= (IDelegateUpdating) getRefactoring().getAdapter(IDelegateUpdating.class);
+		final IDelegateUpdating refactoring= getRefactoring().getAdapter(IDelegateUpdating.class);
 		fLeaveDelegateCheckBox.setEnabled(delegateCount > 0);
 		fLeaveDelegateCheckBox.setText(refactoring.getDelegateUpdatingTitle(delegateCount > 1));
 		if (delegateCount == 0) {
@@ -318,8 +319,8 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	private void updateForcePreview() {
 		boolean forcePreview= false;
 		Refactoring refactoring= getRefactoring();
-		ITextUpdating tu= (ITextUpdating) refactoring.getAdapter(ITextUpdating.class);
-		IQualifiedNameUpdating qu= (IQualifiedNameUpdating)refactoring.getAdapter(IQualifiedNameUpdating.class);
+		ITextUpdating tu= refactoring.getAdapter(ITextUpdating.class);
+		IQualifiedNameUpdating qu= refactoring.getAdapter(IQualifiedNameUpdating.class);
 		if (tu != null) {
 			forcePreview= tu.getUpdateTextualMatches();
 		}

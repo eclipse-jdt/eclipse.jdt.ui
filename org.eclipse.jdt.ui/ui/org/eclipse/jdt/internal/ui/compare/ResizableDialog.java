@@ -66,9 +66,11 @@ public abstract class ResizableDialog extends TrayDialog {
 		if (s != null) {
 			s.addControlListener(
 				new ControlListener() {
+					@Override
 					public void controlMoved(ControlEvent arg0) {
 						fNewBounds= s.getBounds();
 					}
+					@Override
 					public void controlResized(ControlEvent arg0) {
 						fNewBounds= s.getBounds();
 					}

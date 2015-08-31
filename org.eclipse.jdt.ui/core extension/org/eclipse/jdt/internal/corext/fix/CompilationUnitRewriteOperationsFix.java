@@ -78,9 +78,6 @@ public class CompilationUnitRewriteOperationsFix extends AbstractFix {
 		fLinkedProposalModel= new LinkedProposalModel();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public LinkedProposalModel getLinkedPositions() {
 		if (!fLinkedProposalModel.hasLinkedPositions())
@@ -89,9 +86,7 @@ public class CompilationUnitRewriteOperationsFix extends AbstractFix {
 		return fLinkedProposalModel;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
 		CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite((ICompilationUnit)fCompilationUnit.getJavaElement(), fCompilationUnit);
 
@@ -108,9 +103,6 @@ public class CompilationUnitRewriteOperationsFix extends AbstractFix {
 		return result;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getAdditionalProposalInfo(){
 		StringBuffer sb= new StringBuffer();

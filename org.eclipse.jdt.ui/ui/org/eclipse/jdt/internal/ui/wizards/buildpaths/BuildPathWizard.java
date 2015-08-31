@@ -47,13 +47,10 @@ public abstract class BuildPathWizard extends NewElementWizard {
 		setWindowTitle(titel);
 
 		fEntryToEdit= newEntry;
-		fExistingEntries= new ArrayList<CPListElement>(Arrays.asList(existingEntries));
+		fExistingEntries= new ArrayList<>(Arrays.asList(existingEntries));
 		fDoFlushChange= true;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		if (fDoFlushChange) {
@@ -69,9 +66,6 @@ public abstract class BuildPathWizard extends NewElementWizard {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public IJavaElement getCreatedElement() {
 		return fPackageFragmentRoot;
@@ -98,15 +92,15 @@ public abstract class BuildPathWizard extends NewElementWizard {
 	}
 
 	public List<CPListElement> getInsertedElements() {
-		return new ArrayList<CPListElement>();
+		return new ArrayList<>();
 	}
 
 	public List<CPListElement> getRemovedElements() {
-		return new ArrayList<CPListElement>();
+		return new ArrayList<>();
 	}
 
 	public List<CPListElement> getModifiedElements() {
-		ArrayList<CPListElement> result= new ArrayList<CPListElement>(1);
+		ArrayList<CPListElement> result= new ArrayList<>(1);
 		result.add(fEntryToEdit);
 		return result;
 	}

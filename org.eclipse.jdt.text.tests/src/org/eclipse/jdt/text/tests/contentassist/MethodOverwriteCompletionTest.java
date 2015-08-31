@@ -20,7 +20,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  * @since 3.2
  */
 public class MethodOverwriteCompletionTest extends AbstractCompletionTest {
-	private static final Class THIS= MethodOverwriteCompletionTest.class;
+	private static final Class<MethodOverwriteCompletionTest> THIS= MethodOverwriteCompletionTest.class;
 
 	public static Test setUpTest(Test test) {
 		return new CompletionTestSetup(test);
@@ -33,6 +33,7 @@ public class MethodOverwriteCompletionTest extends AbstractCompletionTest {
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, false);

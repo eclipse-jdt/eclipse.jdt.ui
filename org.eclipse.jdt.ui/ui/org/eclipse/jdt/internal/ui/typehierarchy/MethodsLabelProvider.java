@@ -48,6 +48,7 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 		fShowDefiningType= false;
 		fMethodsViewer= methodsViewer;
 		fColorRegistryListener= new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (event.getProperty().equals(ColoredViewersManager.INHERITED_COLOR_NAME)) {
 					fireLabelProviderChanged(new LabelProviderChangedEvent(MethodsLabelProvider.this, null));
@@ -89,9 +90,6 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 		return res.getDeclaringType();
 	}
 
-	/* (non-Javadoc)
-	 * @see ILabelProvider#getText
-	 */
 	@Override
 	public String getText(Object element) {
 		String text= super.getText(element);
@@ -102,9 +100,6 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 		return text;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getStyledText(java.lang.Object)
-	 */
 	@Override
 	public StyledString getStyledText(Object element) {
 		StyledString text= super.getStyledText(element);
@@ -132,9 +127,6 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
-	 */
 	@Override
 	public Color getForeground(Object element) {
 		if (fMethodsViewer.isShowInheritedMethods() && element instanceof IMethod) {

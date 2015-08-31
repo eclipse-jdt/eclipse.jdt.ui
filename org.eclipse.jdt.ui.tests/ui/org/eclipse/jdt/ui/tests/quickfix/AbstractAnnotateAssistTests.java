@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import static org.eclipse.jdt.core.IClasspathAttribute.EXTERNAL_ANNOTATION_PATH;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -47,8 +49,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.correction.ExternalNullAnnotationQuickAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
-
-import static org.eclipse.jdt.core.IClasspathAttribute.EXTERNAL_ANNOTATION_PATH;
 
 public abstract class AbstractAnnotateAssistTests extends QuickFixTest {
 

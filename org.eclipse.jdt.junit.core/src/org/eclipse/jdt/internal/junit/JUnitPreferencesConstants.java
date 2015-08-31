@@ -98,7 +98,7 @@ public class JUnitPreferencesConstants {
 	 *
 	 * @return list
 	 */
-	public static List createDefaultStackFiltersList() {
+	public static List<String> createDefaultStackFiltersList() {
 		return Arrays.asList(fgDefaultFilterPatterns);
 	}
 
@@ -129,11 +129,11 @@ public class JUnitPreferencesConstants {
 	 * @return an array of strings
 	 */
 	public static String[] parseList(String listString) {
-		List list= new ArrayList(10);
+		List<String> list= new ArrayList<>(10);
 		StringTokenizer tokenizer= new StringTokenizer(listString, ","); //$NON-NLS-1$
 		while (tokenizer.hasMoreTokens())
 			list.add(tokenizer.nextToken());
-		return (String[]) list.toArray(new String[list.size()]);
+		return list.toArray(new String[list.size()]);
 	}
 
 	public static String[] getFilterPatterns() {

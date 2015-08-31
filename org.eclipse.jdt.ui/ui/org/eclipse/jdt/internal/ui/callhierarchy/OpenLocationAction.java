@@ -38,6 +38,7 @@ class OpenLocationAction extends SelectionDispatchAction {
 		setEnabled(!fPart.getSelection().isEmpty());
 
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				setEnabled(!event.getSelection().isEmpty());
 			}
@@ -64,17 +65,11 @@ class OpenLocationAction extends SelectionDispatchAction {
         return true;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#getSelection()
-     */
     @Override
 	public ISelection getSelection() {
         return fPart.getSelection();
     }
 
-    /* (non-Javadoc)
-     * Method declared on SelectionDispatchAction.
-     */
     @Override
 	public void run(IStructuredSelection selection) {
         if (!checkEnabled(selection))

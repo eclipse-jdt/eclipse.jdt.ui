@@ -66,14 +66,12 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getAdapter(java.lang.Class)
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> key) {
 		if (key == IShowInTargetList.class) {
 			return (T) new IShowInTargetList() {
+				@Override
 				public String[] getShowInTargetIds() {
 					return new String[] { JavaUI.ID_PACKAGES };
 				}
@@ -112,9 +110,6 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 		return PreferenceConstants.LINK_BROWSING_MEMBERS_TO_EDITOR;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createViewer(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected StructuredViewer createViewer(Composite parent) {
 		ProblemTreeViewer viewer= new ProblemTreeViewer(parent, SWT.MULTI);
@@ -305,6 +300,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	protected void hookViewerListeners() {
 		super.hookViewerListeners();
 		getViewer().addDoubleClickListener(new IDoubleClickListener() {
+			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				TreeViewer viewer= (TreeViewer)getViewer();
 				Object element= ((IStructuredSelection)event.getSelection()).getFirstElement();
@@ -331,9 +327,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 			setSelectionFromEditor(editor);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
-	 */
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (MembersOrderPreferenceCache.isMemberOrderProperty(event.getProperty())) {
 			getViewer().refresh();

@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IType;
 /**
  * @deprecated
  */
+@Deprecated
 public class LegacyTestRunListenerTest extends AbstractTestRunListenerTest {
 
 	private String[] runTest(String source) throws Exception {

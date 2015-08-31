@@ -82,7 +82,7 @@ public class SearchUtil {
 		for (int i= SearchUtil.LRU_WORKINGSET_LIST_SIZE - 1; i >= 0; i--) {
 			String[] lruWorkingSetNames= SearchUtil.fgSettingsStore.getArray(SearchUtil.STORE_LRU_WORKING_SET_NAMES + i);
 			if (lruWorkingSetNames != null) {
-				Set<IWorkingSet> workingSets= new HashSet<IWorkingSet>(2);
+				Set<IWorkingSet> workingSets= new HashSet<>(2);
 				for (int j= 0; j < lruWorkingSetNames.length; j++) {
 					IWorkingSet workingSet= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(lruWorkingSetNames[j]);
 					if (workingSet != null) {

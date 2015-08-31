@@ -64,7 +64,7 @@ class PackagesViewTableViewer extends ProblemTableViewer implements IPackagesVie
 	protected Object[] getFilteredChildren(Object parent) {
 
 		Object[] result= getRawChildren(parent);
-		List<Object> list= new ArrayList<Object>();
+		List<Object> list= new ArrayList<>();
 		if (result != null) {
 			Object[] toBeFiltered= new Object[1];
 			for (int i= 0; i < result.length; i++) {

@@ -155,9 +155,6 @@ public class ReferencesSearchGroup extends ActionGroup  {
 		return MENU_TEXT;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		Assert.isNotNull(actionBars);
@@ -184,9 +181,6 @@ public class ReferencesSearchGroup extends ActionGroup  {
 	}
 
 
-	/* (non-Javadoc)
-	 * Method declared on ActionGroup.
-	 */
 	@Override
 	public void fillContextMenu(IMenuManager manager) {
 		MenuManager javaSearchMM= new MenuManager(getName(), IContextMenuConstants.GROUP_SEARCH);

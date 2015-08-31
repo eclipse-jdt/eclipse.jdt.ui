@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  *
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
+@Deprecated
 public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 
 	/** The name attribute */
@@ -84,15 +85,13 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
-	public RenameResourceDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public RenameResourceDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.RENAME_RESOURCE, project, description, comment, arguments, flags);
 		fResourcePath= JavaRefactoringDescriptorUtil.getResourcePath(arguments, ATTRIBUTE_INPUT, project);
 		fName= JavaRefactoringDescriptorUtil.getString(arguments, ATTRIBUTE_NAME);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
 		JavaRefactoringDescriptorUtil.setResourcePath(fArguments, ATTRIBUTE_INPUT, getProject(), fResourcePath);
@@ -139,6 +138,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @see #getProject()
 	 */
+	@Override
 	public void setProject(final String project) {
 		super.setProject(project);
 	}
@@ -171,9 +171,7 @@ public final class RenameResourceDescriptor extends JavaRefactoringDescriptor {
 		return fResourcePath;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public RefactoringStatus validateDescriptor() {
 		RefactoringStatus status= super.validateDescriptor();
 		if (fResourcePath == null)

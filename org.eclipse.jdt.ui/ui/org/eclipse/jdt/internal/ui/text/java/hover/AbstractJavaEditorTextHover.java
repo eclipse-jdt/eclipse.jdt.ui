@@ -53,6 +53,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	/*
 	 * @see IJavaEditorTextHover#setEditor(IEditorPart)
 	 */
+	@Override
 	public void setEditor(IEditorPart editor) {
 		fEditor= editor;
 	}
@@ -80,6 +81,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	 * @see org.eclipse.jface.text.ITextHoverExtension2#getHoverInfo2(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
 	 * @since 3.4
 	 */
+	@Override
 	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
 		return getHoverInfo(textViewer, hoverRegion);
 	}
@@ -87,6 +89,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	/*
 	 * @see ITextHover#getHoverRegion(ITextViewer, int)
 	 */
+	@Override
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
 		return JavaWordFinder.findWord(textViewer.getDocument(), offset);
 	}
@@ -144,8 +147,10 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	 * @see ITextHoverExtension#getHoverControlCreator()
 	 * @since 3.0
 	 */
+	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		return new IInformationControlCreator() {
+			@Override
 			public IInformationControl createInformationControl(Shell parent) {
 				return new DefaultInformationControl(parent, EditorsUI.getTooltipAffordanceString());
 			}
@@ -160,6 +165,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		return new IInformationControlCreator() {
+			@Override
 			public IInformationControl createInformationControl(Shell shell) {
 				return new DefaultInformationControl(shell, true);
 			}

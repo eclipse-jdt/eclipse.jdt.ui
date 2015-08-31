@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2007 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,8 +31,9 @@ public class TrayContentProvider implements ITreeContentProvider {
 	/*
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(java.lang.Object)
 	 */
+	@Override
 	public Object[] getChildren(Object parentElement) {
-		ArrayList result= new ArrayList();
+		ArrayList<ExceptionAttribute> result= new ArrayList<>();
 		if (parentElement instanceof ExceptionAttribute)
 			return EMPTY;
 		
@@ -54,11 +55,12 @@ public class TrayContentProvider implements ITreeContentProvider {
 		return result.toArray();
 	}
 	
-	private void addObjectComparisons(ArrayList result, Object trayElement) {
+	private void addObjectComparisons(ArrayList<ExceptionAttribute> result, Object trayElement) {
 		class IdentityProperty extends DynamicAttributeProperty {
 			public IdentityProperty(Object parent) {
 				super(parent, "* == this: ");
 			}
+			@Override
 			protected String executeQuery(Object viewerObject, Object trayObject) {
 				return Boolean.toString(viewerObject == trayObject);
 			}
@@ -69,6 +71,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 			public EqualsProperty(Object parent) {
 				super(parent, "*.equals(this): ");
 			}
+			@Override
 			protected String executeQuery(Object viewerObject, Object trayObject) {
 				if (viewerObject != null)
 					return Boolean.toString(viewerObject.equals(trayObject));
@@ -79,14 +82,16 @@ public class TrayContentProvider implements ITreeContentProvider {
 		result.add(new EqualsProperty(trayElement));
 	}
 
-	private void addBindingComparisons(ArrayList result, Binding trayElement) {
+	private void addBindingComparisons(ArrayList<ExceptionAttribute> result, Binding trayElement) {
 		class IsEqualToProperty extends DynamicBindingProperty {
 			public IsEqualToProperty(Binding parent) {
 				super(parent);
 			}
+			@Override
 			protected String getName() {
 				return "*.isEqualTo(this): "; //$NON-NLS-1$
 			}
+			@Override
 			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
 				if (viewerBinding != null)
 					return Boolean.toString(viewerBinding.isEqualTo(trayBinding));
@@ -100,9 +105,11 @@ public class TrayContentProvider implements ITreeContentProvider {
 			public KeysEqualProperty(Binding parent) {
 				super(parent);
 			}
+			@Override
 			protected String getName() {
 				return "*.getKey().equals(this.getKey()): "; //$NON-NLS-1$
 			}
+			@Override
 			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
 				if (viewerBinding == null)
 					return "* is null"; //$NON-NLS-1$
@@ -117,14 +124,16 @@ public class TrayContentProvider implements ITreeContentProvider {
 		result.add(new KeysEqualProperty(trayElement));
 	}
 
-	private void addTypeBindingComparions(ArrayList result, Binding trayElement) {
+	private void addTypeBindingComparions(ArrayList<ExceptionAttribute> result, Binding trayElement) {
 		class IsSubTypeCompatibleProperty extends DynamicBindingProperty {
 			public IsSubTypeCompatibleProperty(Binding parent) {
 				super(parent);
 			}
+			@Override
 			protected String getName() {
 				return "*.isSubTypeCompatible(this): "; //$NON-NLS-1$
 			}
+			@Override
 			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
 				if (viewerBinding instanceof ITypeBinding) {
 					ITypeBinding viewerTB= (ITypeBinding) viewerBinding;
@@ -141,9 +150,11 @@ public class TrayContentProvider implements ITreeContentProvider {
 			public IsCastCompatibleProperty(Binding parent) {
 				super(parent);
 			}
+			@Override
 			protected String getName() {
 				return "*.isCastCompatible(this): "; //$NON-NLS-1$
 			}
+			@Override
 			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
 				if (viewerBinding instanceof ITypeBinding) {
 					ITypeBinding viewerTB= (ITypeBinding) viewerBinding;
@@ -160,9 +171,11 @@ public class TrayContentProvider implements ITreeContentProvider {
 			public IsAssignmentCompatibleProperty(Binding parent) {
 				super(parent);
 			}
+			@Override
 			protected String getName() {
 				return "*.isAssignmentCompatible(this): "; //$NON-NLS-1$
 			}
+			@Override
 			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
 				if (viewerBinding instanceof ITypeBinding) {
 					ITypeBinding viewerTB= (ITypeBinding) viewerBinding;
@@ -176,14 +189,16 @@ public class TrayContentProvider implements ITreeContentProvider {
 		result.add(new IsAssignmentCompatibleProperty(trayElement));
 	}
 
-	private void addMethodBindingComparions(ArrayList result, Binding trayElement) {
+	private void addMethodBindingComparions(ArrayList<ExceptionAttribute> result, Binding trayElement) {
 		class OverridesProperty extends DynamicBindingProperty {
 			public OverridesProperty(Binding parent) {
 				super(parent);
 			}
+			@Override
 			protected String getName() {
 				return "*.overrides(this): "; //$NON-NLS-1$
 			}
+			@Override
 			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
 				if (viewerBinding instanceof IMethodBinding) {
 					IMethodBinding viewerMB= (IMethodBinding) viewerBinding;
@@ -200,9 +215,11 @@ public class TrayContentProvider implements ITreeContentProvider {
 			public IsSubsignatureProperty(Binding parent) {
 				super(parent);
 			}
+			@Override
 			protected String getName() {
 				return "*.isSubsignature(this): "; //$NON-NLS-1$
 			}
+			@Override
 			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
 				if (viewerBinding instanceof IMethodBinding) {
 					IMethodBinding viewerMB= (IMethodBinding) viewerBinding;
@@ -219,6 +236,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 	/*
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(java.lang.Object)
 	 */
+	@Override
 	public Object getParent(Object element) {
 		if (element instanceof ASTAttribute) {
 			return ((ASTAttribute) element).getParent();
@@ -230,6 +248,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 	/*
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(java.lang.Object)
 	 */
+	@Override
 	public boolean hasChildren(Object element) {
 		return ! (element instanceof DynamicAttributeProperty || element instanceof DynamicBindingProperty);
 	}
@@ -237,15 +256,17 @@ public class TrayContentProvider implements ITreeContentProvider {
 	/*
 	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 	 */
+	@Override
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof ArrayList)
-			return ((ArrayList) inputElement).toArray();
+			return ((ArrayList<?>) inputElement).toArray();
 		return EMPTY;
 	}
 	
 	/*
 	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 	 */
+	@Override
 	public void dispose() {
 		// do nothing
 	}
@@ -253,6 +274,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 	/*
 	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		// do nothing
 	}

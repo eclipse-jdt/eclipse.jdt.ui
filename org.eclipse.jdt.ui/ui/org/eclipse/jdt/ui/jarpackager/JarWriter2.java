@@ -54,12 +54,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  *
  * @deprecated Use {@link JarWriter3} instead which leverages new {@link org.eclipse.core.filesystem.EFS EFS} support
  */
+@Deprecated
 public class JarWriter2 {
 
 	private JarOutputStream fJarOutputStream;
 	private JarPackageData fJarPackage;
 
-	private Set<String> fDirectories= new HashSet<String>();
+	private Set<String> fDirectories= new HashSet<>();
 
 	/**
 	 * Creates an instance which is used to create a JAR based
@@ -229,7 +230,7 @@ public class JarWriter2 {
 	protected void addDirectories(IPath destinationPath, File correspondingFile) throws IOException {
 		String path= destinationPath.toString().replace(File.separatorChar, '/');
 		int lastSlash= path.lastIndexOf('/');
-		List<JarEntry> directories= new ArrayList<JarEntry>(2);
+		List<JarEntry> directories= new ArrayList<>(2);
 		while(lastSlash != -1) {
 			path= path.substring(0, lastSlash + 1);
 			if (!fDirectories.add(path))

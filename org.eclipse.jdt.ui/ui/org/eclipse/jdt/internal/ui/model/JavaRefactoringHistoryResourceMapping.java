@@ -30,9 +30,6 @@ public final class JavaRefactoringHistoryResourceMapping extends AbstractRefacto
 		super(history);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getModelProviderId() {
 		return JavaModelProvider.JAVA_MODEL_PROVIDER_ID;

@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 public class OpenQuickOutlineTest extends OpenQuickControlTest {
 
-	private static final Class THIS= OpenQuickOutlineTest.class;
+	private static final Class<OpenQuickOutlineTest> THIS= OpenQuickOutlineTest.class;
 
 	private boolean fWasOutlineViewShown;
 
@@ -34,22 +34,26 @@ public class OpenQuickOutlineTest extends OpenQuickControlTest {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fWasOutlineViewShown= EditorTestHelper.showView(EditorTestHelper.OUTLINE_VIEW_ID, false);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (fWasOutlineViewShown)
 			EditorTestHelper.showView(EditorTestHelper.OUTLINE_VIEW_ID, true);
 	}
 
+	@Override
 	protected IAction setUpMeasurement(AbstractTextEditor editor) throws Exception {
 		EditorTestHelper.runEventQueue(100);
 		return editor.getAction(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
 	}
 
+	@Override
 	protected void tearDownMeasurement(AbstractTextEditor editor) throws Exception {
 		Shell shell= EditorTestHelper.getActiveDisplay().getActiveShell();
 		assertEquals("", shell.getText());

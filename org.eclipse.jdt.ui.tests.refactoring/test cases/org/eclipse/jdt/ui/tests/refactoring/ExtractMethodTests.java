@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,9 +22,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
@@ -38,6 +35,9 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
@@ -59,15 +59,18 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		return fgTestSetup;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fIsPreDeltaTest= true;
 	}
 
+	@Override
 	protected String getResourceLocation() {
 		return "ExtractMethodWorkSpace/ExtractMethodTests/";
 	}
 
+	@Override
 	protected String adaptName(String name) {
 		return name + "_" + getName() + ".java";
 	}
@@ -111,16 +114,16 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 			default:
 				break;
 		}
-		List parameters= refactoring.getParameterInfos();
+		List<ParameterInfo> parameters= refactoring.getParameterInfos();
 		if (newNames != null && newNames.length > 0) {
 			for (int i= 0; i < newNames.length; i++) {
 				if (newNames[i] != null)
-					((ParameterInfo)parameters.get(i)).setNewName(newNames[i]);
+					parameters.get(i).setNewName(newNames[i]);
 			}
 		}
 		if (newOrder != null && newOrder.length > 0) {
 			assertTrue(newOrder.length == parameters.size());
-			List current= new ArrayList(parameters);
+			List<ParameterInfo> current= new ArrayList<>(parameters);
 			for (int i= 0; i < newOrder.length; i++) {
 				parameters.set(newOrder[i], current.get(i));
 			}
@@ -134,10 +137,12 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		performTest(unit, refactoring, mode, out, true);
 	}
 
+	@Override
 	protected int getCheckingStyle() {
 		return CheckConditionsOperation.FINAL_CONDITIONS;
 	}
 
+	@Override
 	protected void clearPreDelta() {
 		// Do nothing. We clear the delta before
 		// initial condition checking

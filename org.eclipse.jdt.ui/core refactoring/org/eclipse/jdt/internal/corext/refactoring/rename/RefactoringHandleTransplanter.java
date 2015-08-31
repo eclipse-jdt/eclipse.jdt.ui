@@ -69,7 +69,7 @@ public class RefactoringHandleTransplanter {
 		/*
 		 * Create a list of handles from top-level type to the handle
 		 */
-		final LinkedList<IMember> oldElements= new LinkedList<IMember>();
+		final LinkedList<IMember> oldElements= new LinkedList<>();
 		addElements(handle, oldElements);
 
 		/*

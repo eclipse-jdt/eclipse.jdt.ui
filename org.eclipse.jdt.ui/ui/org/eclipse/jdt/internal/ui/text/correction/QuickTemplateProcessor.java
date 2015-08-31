@@ -76,9 +76,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 	public QuickTemplateProcessor() {
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#hasAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext)
-	 */
+	@Override
 	public boolean hasAssists(IInvocationContext context) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		IDocument document= getDocument(cu);
@@ -99,9 +97,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#getAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[])
-	 */
+	@Override
 	public IJavaCompletionProposal[] getAssists(IInvocationContext context, IProblemLocation[] locations) throws CoreException {
 		if (locations != null && locations.length > 0) {
 			return new IJavaCompletionProposal[0];
@@ -152,7 +148,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 				}
 			}
 
-			ArrayList<IJavaCompletionProposal> resultingCollections= new ArrayList<IJavaCompletionProposal>();
+			ArrayList<IJavaCompletionProposal> resultingCollections= new ArrayList<>();
 			collectSurroundTemplates(document, cu, offset, length, resultingCollections, contextId);
 			sort(resultingCollections);
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
@@ -163,6 +159,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 
 	private void sort(ArrayList<IJavaCompletionProposal> proposals) {
 		Collections.sort(proposals, new Comparator<IJavaCompletionProposal>() {
+			@Override
 			public int compare(IJavaCompletionProposal p1, IJavaCompletionProposal p2) {
 				return Collator.getInstance().compare(p1.getDisplayString(), p2.getDisplayString());
 			}
@@ -205,9 +202,6 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 					result.add(proposal);
 				} else {
 					TemplateProposal proposal= new TemplateProposal(currentTemplate, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)) {
-						/**
-						 * {@inheritDoc}
-						 */
 						@Override
 						public boolean validate(IDocument doc, int off, DocumentEvent event) {
 							return false;

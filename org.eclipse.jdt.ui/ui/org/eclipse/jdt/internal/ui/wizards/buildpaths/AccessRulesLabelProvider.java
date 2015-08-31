@@ -27,9 +27,7 @@ public class AccessRulesLabelProvider extends LabelProvider implements ITableLab
 	public AccessRulesLabelProvider() {
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
-	 */
+	@Override
 	public Image getColumnImage(Object element, int columnIndex) {
 		if (element instanceof IAccessRule) {
 			IAccessRule rule= (IAccessRule) element;
@@ -40,9 +38,7 @@ public class AccessRulesLabelProvider extends LabelProvider implements ITableLab
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
-	 */
+	@Override
 	public String getColumnText(Object element, int columnIndex) {
 		if (element instanceof IAccessRule) {
 			IAccessRule rule= (IAccessRule) element;

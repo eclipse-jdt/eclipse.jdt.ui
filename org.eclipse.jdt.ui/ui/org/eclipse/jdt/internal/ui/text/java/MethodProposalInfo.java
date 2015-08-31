@@ -113,7 +113,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 	 * @throws JavaModelException if accessing the java model fails
 	 */
 	private Map<String, char[]> computeTypeVariables(IType type) throws JavaModelException {
-		Map<String, char[]> map= new HashMap<String, char[]>();
+		Map<String, char[]> map= new HashMap<>();
 		char[] declarationSignature= fProposal.getDeclarationSignature();
 		if (declarationSignature == null) // array methods don't contain a declaration signature
 			return map;

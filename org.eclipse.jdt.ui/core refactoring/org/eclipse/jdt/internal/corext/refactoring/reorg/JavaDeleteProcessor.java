@@ -174,7 +174,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	private String[] getAffectedProjectNatures() throws CoreException {
 		String[] jNatures= JavaProcessors.computeAffectedNaturs(fJavaElements);
 		String[] rNatures= ResourceProcessors.computeAffectedNatures(fResources);
-		Set<String> result= new HashSet<String>();
+		Set<String> result= new HashSet<>();
 		result.addAll(Arrays.asList(jNatures));
 		result.addAll(Arrays.asList(rNatures));
 		return result.toArray(new String[result.size()]);
@@ -230,9 +230,6 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		return fResources;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		Assert.isNotNull(fDeleteQueries);//must be set before checking activation
@@ -250,9 +247,6 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.DeleteRefactoring_1, 1);
@@ -272,7 +266,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			TextChangeManager manager= new TextChangeManager();
 			fDeleteChange= DeleteChangeCreator.createDeleteChange(manager, fResources, fJavaElements, getProcessorName(), packageDeletes);
 
-			ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
+			ResourceChangeChecker checker= context.getChecker(ResourceChangeChecker.class);
 			IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
 			fDeleteModifications.buildDelta(deltaFactory);
 			IFile[] files= ResourceUtil.getFiles(manager.getAllCompilationUnits());
@@ -315,6 +309,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		for (int i= 0; i < fResources.length; i++) {
 			IResource resource= fResources[i];
 			resource.accept(new IResourceVisitor() {
+				@Override
 				public boolean visit(IResource visitedResource) throws CoreException {
 					if (visitedResource instanceof IFile) {
 						checkDirtyFile(result, (IFile)visitedResource);
@@ -378,7 +373,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	 */
 	private void addSubPackages() throws JavaModelException {
 
-		final Set<IJavaElement> javaElements= new HashSet<IJavaElement>();
+		final Set<IJavaElement> javaElements= new HashSet<>();
 		for (int i= 0; i < fJavaElements.length; i++) {
 			if (fJavaElements[i] instanceof IPackageFragment) {
 				javaElements.addAll(Arrays.asList(JavaElementUtil.getPackageAndSubpackages((IPackageFragment) fJavaElements[i])));
@@ -405,13 +400,14 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 
 		// Move from inner to outer packages
 		Collections.sort(initialPackagesToDelete, new Comparator<IPackageFragment>() {
+			@Override
 			public int compare(IPackageFragment one, IPackageFragment two) {
 				return two.getElementName().compareTo(one.getElementName());
 			}
 		});
 
 		// Get resources and java elements which will be deleted as well
-		final Set<IResource> deletedChildren= new HashSet<IResource>();
+		final Set<IResource> deletedChildren= new HashSet<>();
 		deletedChildren.addAll(Arrays.asList(fResources));
 		for (int i= 0; i < fJavaElements.length; i++) {
 			if (!ReorgUtils.isInsideCompilationUnit(fJavaElements[i]))
@@ -419,7 +415,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		}
 
 		// new package list in the right sequence
-		final List<IPackageFragment>allFragmentsToDelete= new ArrayList<IPackageFragment>();
+		final List<IPackageFragment>allFragmentsToDelete= new ArrayList<>();
 
 		for (Iterator<IPackageFragment> outerIter= initialPackagesToDelete.iterator(); outerIter.hasNext();) {
 			final IPackageFragment currentPackageFragment= outerIter.next();
@@ -432,7 +428,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 				final IPackageFragment parent= JavaElementUtil.getParentSubpackage(currentPackageFragment);
 				if (parent != null && !initialPackagesToDelete.contains(parent)) {
 
-					final List<IPackageFragment>emptyParents= new ArrayList<IPackageFragment>();
+					final List<IPackageFragment>emptyParents= new ArrayList<>();
 					addDeletableParentPackages(parent, initialPackagesToDelete, deletedChildren, emptyParents);
 
 					// Add parents in the right sequence (inner to outer)
@@ -442,7 +438,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		}
 
 		// Remove resources in deleted packages; and the packages as well
-		final List<IJavaElement>javaElements= new ArrayList<IJavaElement>();
+		final List<IJavaElement>javaElements= new ArrayList<>();
 		for (int i= 0; i < fJavaElements.length; i++) {
 			if (!(fJavaElements[i] instanceof IPackageFragment)) {
 				// remove children of deleted packages
@@ -455,7 +451,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		javaElements.addAll(allFragmentsToDelete);
 
 		// Remove resources in deleted folders
-		final List<IResource>resources= new ArrayList<IResource>();
+		final List<IResource>resources= new ArrayList<>();
 		for (int i= 0; i < fResources.length; i++) {
 			IResource resource= fResources[i];
 			IContainer parent= resource.getParent();
@@ -527,7 +523,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	}
 
 	private void removeUnconfirmedReferencedArchiveFiles(IConfirmQuery query) throws JavaModelException, OperationCanceledException {
-		List<IResource> filesToSkip= new ArrayList<IResource>(0);
+		List<IResource> filesToSkip= new ArrayList<>(0);
 		for (int i= 0; i < fResources.length; i++) {
 			IResource resource= fResources[i];
 			if (! (resource instanceof IFile))
@@ -547,13 +543,13 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	}
 
 	private void removeUnconfirmedReferencedPackageFragmentRoots(IConfirmQuery query) throws JavaModelException, OperationCanceledException {
-		List<IPackageFragmentRoot> rootsToSkip= new ArrayList<IPackageFragmentRoot>(0);
+		List<IPackageFragmentRoot> rootsToSkip= new ArrayList<>(0);
 		for (int i= 0; i < fJavaElements.length; i++) {
 			IJavaElement element= fJavaElements[i];
 			if (! (element instanceof IPackageFragmentRoot))
 				continue;
 			IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-			ArrayList<IJavaProject> referencingProjects= new ArrayList<IJavaProject>(Arrays.asList(JavaElementUtil.getReferencingProjects(root)));
+			ArrayList<IJavaProject> referencingProjects= new ArrayList<>(Arrays.asList(JavaElementUtil.getReferencingProjects(root)));
 			referencingProjects.remove(root.getJavaProject());
 			if (skipDeletingReferencedRoot(query, root, referencingProjects))
 				rootsToSkip.add(root);
@@ -573,7 +569,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	private void removeUnconfirmedFoldersThatContainSourceFolders() throws CoreException {
 		String queryTitle= RefactoringCoreMessages.DeleteRefactoring_4;
 		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_FOLDERS_CONTAINING_SOURCE_FOLDERS);
-		List<IFolder> foldersToSkip= new ArrayList<IFolder>(0);
+		List<IFolder> foldersToSkip= new ArrayList<>(0);
 		for (int i= 0; i < fResources.length; i++) {
 			IResource resource= fResources[i];
 			if (resource instanceof IFolder){
@@ -621,7 +617,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.JavaDeleteProcessor_creating_change, 1);
-			final Map<String, String> arguments= new HashMap<String, String>();
+			final Map<String, String> arguments= new HashMap<>();
 			final String description= fElements.length == 1 ? RefactoringCoreMessages.JavaDeleteProcessor_description_singular : RefactoringCoreMessages.JavaDeleteProcessor_description_plural;
 			final IProject resource= getSingleProject();
 			final String project= resource != null ? resource.getName() : null;
@@ -696,7 +692,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	}
 
 	private List<IMethod> getGettersSettersToDelete(Map<IField, IMethod[]> getterSetterMapping) {
-		List<IMethod> gettersSettersToAdd= new ArrayList<IMethod>(getterSetterMapping.size());
+		List<IMethod> gettersSettersToAdd= new ArrayList<>(getterSetterMapping.size());
 		String queryTitle= RefactoringCoreMessages.DeleteRefactoring_8;
 		IConfirmQuery getterSetterQuery= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_GETTER_SETTER);
 		for (Iterator<IField> iter= getterSetterMapping.keySet().iterator(); iter.hasNext();) {
@@ -738,7 +734,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	 * IField -> IMethod[] (array of 2 - [getter, setter], one of which can be null)
 	 */
 	private static Map<IField, IMethod[]> createGetterSetterMapping(IField[] fields) throws JavaModelException {
-		Map<IField, IMethod[]> result= new HashMap<IField, IMethod[]>();
+		Map<IField, IMethod[]> result= new HashMap<>();
 		for (int i= 0; i < fields.length; i++) {
 			IField field= fields[i];
 			IMethod[] getterSetter= getGetterSetter(field);
@@ -768,7 +764,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		return getterSetterMapping.get(field)[1];
 	}
 	private static IField[] getFields(IJavaElement[] elements){
-		List<IJavaElement> fields= new ArrayList<IJavaElement>(3);
+		List<IJavaElement> fields= new ArrayList<>(3);
 		for (int i= 0; i < elements.length; i++) {
 			if (elements[i] instanceof IField)
 				fields.add(elements[i]);
@@ -801,7 +797,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	}
 
 	private Set<ICompilationUnit> getCusToEmpty() throws JavaModelException {
-		Set<ICompilationUnit> result= new HashSet<ICompilationUnit>();
+		Set<ICompilationUnit> result= new HashSet<>();
 		for (int i= 0; i < fJavaElements.length; i++) {
 			IJavaElement element= fJavaElements[i];
 			ICompilationUnit cu= ReorgUtils.getCompilationUnit(element);
@@ -812,7 +808,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	}
 
 	private boolean willHaveAllTopLevelTypesDeleted(ICompilationUnit cu) throws JavaModelException {
-		Set<IJavaElement> elementSet= new HashSet<IJavaElement>(Arrays.asList(fJavaElements));
+		Set<IJavaElement> elementSet= new HashSet<>(Arrays.asList(fJavaElements));
 		IType[] topLevelTypes= cu.getTypes();
 		for (int i= 0; i < topLevelTypes.length; i++) {
 			if (! elementSet.contains(topLevelTypes[i]))
@@ -855,7 +851,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ELEMENTS));
 		String handle= null;
-		List<IAdaptable> elements= new ArrayList<IAdaptable>();
+		List<IAdaptable> elements= new ArrayList<>();
 		for (int index= 0; index < resourceCount; index++) {
 			final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (index + 1);
 			handle= extended.getAttribute(attribute);
@@ -869,7 +865,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
 		}
 		fResources= elements.toArray(new IResource[elements.size()]);
-		elements= new ArrayList<IAdaptable>();
+		elements= new ArrayList<>();
 		for (int index= 0; index < elementCount; index++) {
 			final String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + (resourceCount + index + 1);
 			handle= extended.getAttribute(attribute);

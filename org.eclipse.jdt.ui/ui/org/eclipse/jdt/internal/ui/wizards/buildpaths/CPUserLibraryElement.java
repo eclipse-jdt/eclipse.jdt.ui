@@ -26,9 +26,7 @@ public class CPUserLibraryElement {
 
 	private  class UpdatedClasspathContainer implements IClasspathContainer {
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.core.IClasspathContainer#getClasspathEntries()
-		 */
+		@Override
 		public IClasspathEntry[] getClasspathEntries() {
 			CPListElement[] children= getChildren();
 			IClasspathEntry[] entries= new IClasspathEntry[children.length];
@@ -38,23 +36,17 @@ public class CPUserLibraryElement {
 			return entries;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.core.IClasspathContainer#getDescription()
-		 */
+		@Override
 		public String getDescription() {
 			return getName();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.core.IClasspathContainer#getKind()
-		 */
+		@Override
 		public int getKind() {
 			return isSystemLibrary() ? IClasspathContainer.K_SYSTEM : K_APPLICATION;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.core.IClasspathContainer#getPath()
-		 */
+		@Override
 		public IPath getPath() {
 			return CPUserLibraryElement.this.getPath();
 		}
@@ -67,7 +59,7 @@ public class CPUserLibraryElement {
 
 	public CPUserLibraryElement(String name, IClasspathContainer container, IJavaProject project) {
 		fName= name;
-		fChildren= new ArrayList<CPListElement>();
+		fChildren= new ArrayList<>();
 		if (container != null) {
 			IClasspathEntry[] entries= container.getClasspathEntries();
 			CPListElement[] res= new CPListElement[entries.length];
@@ -95,7 +87,7 @@ public class CPUserLibraryElement {
 	 */
 	public CPUserLibraryElement(String name, boolean isSystemLibrary, CPListElement[] children) {
 		fName= name;
-		fChildren= new ArrayList<CPListElement>();
+		fChildren= new ArrayList<>();
 		if (children != null) {
 			for (int i= 0; i < children.length; i++) {
 				children[i].setParentContainer(this);
@@ -129,7 +121,7 @@ public class CPUserLibraryElement {
 
 	private List<CPListElement> moveUp(List<CPListElement> elements, List<CPListElement> move) {
 		int nElements= elements.size();
-		List<CPListElement> res= new ArrayList<CPListElement>(nElements);
+		List<CPListElement> res= new ArrayList<>(nElements);
 		CPListElement floating= null;
 		for (int i= 0; i < nElements; i++) {
 			CPListElement curr= elements.get(i);

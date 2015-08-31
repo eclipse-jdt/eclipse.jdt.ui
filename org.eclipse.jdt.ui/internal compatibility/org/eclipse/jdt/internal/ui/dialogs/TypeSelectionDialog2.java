@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * DO NOT REMOVE, used in a product.
  * @deprecated As of 3.5, replaced by {@link org.eclipse.ui.dialogs.FilteredItemsSelectionDialog}
  */
+@Deprecated
 @SuppressWarnings("all")
 public class TypeSelectionDialog2 extends SelectionStatusDialog {
 
@@ -93,6 +94,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	private static boolean fgFirstTime= true; 
 	
 	private class TitleLabel implements TypeSelectionComponent.ITitleLabel {
+		@Override
 		public void setText(String text) {
 			if (text == null || text.length() == 0) {
 				getShell().setText(fTitle);
@@ -165,9 +167,11 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		fContent.setLayoutData(gd);
 		fContent.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				handleDefaultSelected(fContent.getSelection());
 			}
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleWidgetSelected(fContent.getSelection());
 			}
@@ -296,6 +300,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		// we only have to ensure history consistency here since the search engine
 		// takes care of working copies.
 		class ConsistencyRunnable implements IRunnableWithProgress {
+			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				if (fgFirstTime) {
 					// Join the initialize after load job.

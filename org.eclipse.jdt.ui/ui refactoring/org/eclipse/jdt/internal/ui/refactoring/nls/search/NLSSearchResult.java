@@ -56,8 +56,8 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 
 	public NLSSearchResult(NLSSearchQuery query) {
 		fQuery= query;
-		fFileEntryGroups= new ArrayList<FileEntry>();
-		fCompilationUnitGroups= new ArrayList<CompilationUnitEntry>();
+		fFileEntryGroups= new ArrayList<>();
+		fCompilationUnitGroups= new ArrayList<>();
 	}
 
 	public void addFileEntryGroup(FileEntry group) {
@@ -71,6 +71,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#findContainedMatches(org.eclipse.ui.IEditorPart)
 	 */
+	@Override
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
 		//TODO: copied from JavaSearchResult:
 		IEditorInput editorInput= editor.getEditorInput();
@@ -79,7 +80,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 			return computeContainedMatches(result, fileEditorInput.getFile());
 		} else if (editorInput instanceof IClassFileEditorInput) {
 			IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) editorInput;
-			Set<Match> matches= new HashSet<Match>();
+			Set<Match> matches= new HashSet<>();
 			collectMatches(matches, classFileEditorInput.getClassFile());
 			return matches.toArray(new Match[matches.size()]);
 		}
@@ -89,8 +90,9 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#findContainedMatches(org.eclipse.core.resources.IFile)
 	 */
+	@Override
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IFile file) {
-		Set<Match> matches= new HashSet<Match>();
+		Set<Match> matches= new HashSet<>();
 		for (Iterator<FileEntry> iter= fFileEntryGroups.iterator(); iter.hasNext();) {
 			FileEntry element= iter.next();
 			if (element.getPropertiesFile().equals(file)) {
@@ -143,6 +145,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#getFile(java.lang.Object)
 	 */
+	@Override
 	public IFile getFile(Object element) {
 		if (element instanceof FileEntry) {
 			return ((FileEntry) element).getPropertiesFile();
@@ -169,6 +172,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	/*
 	 * @see org.eclipse.search.ui.text.AbstractTextSearchResult#isShownInEditor(org.eclipse.search.ui.text.Match, org.eclipse.ui.IEditorPart)
 	 */
+	@Override
 	public boolean isShownInEditor(Match match, IEditorPart editor) {
 		IEditorInput editorInput= editor.getEditorInput();
 		if (match.getElement() instanceof FileEntry) {
@@ -203,6 +207,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	/*
 	 * @see org.eclipse.search.ui.ISearchResult#getLabel()
 	 */
+	@Override
 	public String getLabel() {
 		return fQuery.getResultLabel(getMatchCount());
 	}
@@ -210,6 +215,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	/*
 	 * @see org.eclipse.search.ui.ISearchResult#getTooltip()
 	 */
+	@Override
 	public String getTooltip() {
 		return getLabel();
 	}
@@ -217,6 +223,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	/*
 	 * @see org.eclipse.search.ui.ISearchResult#getImageDescriptor()
 	 */
+	@Override
 	public ImageDescriptor getImageDescriptor() {
 		return JavaPluginImages.DESC_OBJS_SEARCH_REF;
 	}
@@ -224,6 +231,7 @@ public class NLSSearchResult extends AbstractTextSearchResult implements IEditor
 	/*
 	 * @see org.eclipse.search.ui.ISearchResult#getQuery()
 	 */
+	@Override
 	public ISearchQuery getQuery() {
 		return fQuery;
 	}

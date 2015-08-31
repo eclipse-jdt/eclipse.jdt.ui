@@ -30,9 +30,6 @@ class MethodReferencesSearchRequestor extends SearchRequestor {
         return fSearchResults.getCallers();
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)
-     */
     @Override
 	public void acceptSearchMatch(SearchMatch match) {
         if (fRequireExactMatch && (match.getAccuracy() != SearchMatch.A_ACCURATE)) {

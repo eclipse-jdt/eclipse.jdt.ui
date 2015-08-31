@@ -54,11 +54,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  *
  * @deprecated use {@link org.eclipse.jdt.ui.jarpackager.JarWriter3 JarWriter3} instead.
  */
+@Deprecated
 public class JarWriter {
 	private JarOutputStream fJarOutputStream;
 	private JarPackageData fJarPackage;
 
-	private Set<String> fDirectories= new HashSet<String>();
+	private Set<String> fDirectories= new HashSet<>();
 
 	/**
 	 * Creates an instance which is used to create a JAR based
@@ -213,7 +214,7 @@ public class JarWriter {
 	private void addDirectories(IPath destinationPath, File correspondingFile) throws IOException {
 		String path= destinationPath.toString().replace(File.separatorChar, '/');
 		int lastSlash= path.lastIndexOf('/');
-		List<JarEntry> directories= new ArrayList<JarEntry>(2);
+		List<JarEntry> directories= new ArrayList<>(2);
 		while(lastSlash != -1) {
 			path= path.substring(0, lastSlash + 1);
 			if (!fDirectories.add(path))

@@ -69,9 +69,6 @@ public class CallerMethodWrapper extends MethodWrapper {
         return CallHierarchyMessages.CallerMethodWrapper_taskname;
     }
 
-    /* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#createMethodWrapper(org.eclipse.jdt.internal.corext.callhierarchy.MethodCall)
-	 */
 	@Override
 	public MethodWrapper createMethodWrapper(MethodCall methodCall) {
         return new CallerMethodWrapper(this, methodCall);
@@ -144,7 +141,7 @@ public class CallerMethodWrapper extends MethodWrapper {
 				pattern= SearchPattern.createPattern(member, limitTo, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 			}
 			if (pattern == null) { // e.g. for initializers
-				return new HashMap<String, MethodCall>(0);
+				return new HashMap<>(0);
 			}
 
 			SearchEngine searchEngine= new SearchEngine();
@@ -158,7 +155,7 @@ public class CallerMethodWrapper extends MethodWrapper {
 
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			return new HashMap<String, MethodCall>(0);
+			return new HashMap<>(0);
 		}
 	}
 

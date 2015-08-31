@@ -49,8 +49,8 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 		fViewer= viewer;
 		fCompoundState= isInCompoundState();
 		fInputIsProject= true;
-		fMapToLogicalPackage= new HashMap<String, LogicalPackage>();
-		fMapToPackageFragments= new HashMap<String, IPackageFragment>();
+		fMapToLogicalPackage= new HashMap<>();
+		fMapToPackageFragments= new HashMap<>();
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 	}
 
@@ -100,7 +100,7 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 		if (!fCompoundState)
 			return packageFragments;
 
-		List<IAdaptable> newChildren= new ArrayList<IAdaptable>();
+		List<IAdaptable> newChildren= new ArrayList<>();
 
 		for (int i= 0; i < packageFragments.length; i++) {
 			IPackageFragment fragment=  packageFragments[i];
@@ -139,6 +139,7 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 	/**
 	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 	 */
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (fCompoundState == isInCompoundState())
 			return;
@@ -207,6 +208,7 @@ abstract class LogicalPackagesProvider implements IPropertyChangeListener, IElem
 	/*
 	 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
 	 */
+	@Override
 	public void elementChanged(ElementChangedEvent event) {
 		try {
 			processDelta(event.getDelta());

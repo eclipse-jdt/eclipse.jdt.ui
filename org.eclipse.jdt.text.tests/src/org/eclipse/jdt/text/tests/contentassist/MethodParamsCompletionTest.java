@@ -20,7 +20,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  * @since 3.2
  */
 public class MethodParamsCompletionTest extends AbstractCompletionTest {
-	private static final Class THIS= MethodParamsCompletionTest.class;
+	private static final Class<MethodParamsCompletionTest> THIS= MethodParamsCompletionTest.class;
 
 	public static Test setUpTest(Test test) {
 		return new CompletionTestSetup(test);
@@ -33,6 +33,7 @@ public class MethodParamsCompletionTest extends AbstractCompletionTest {
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);

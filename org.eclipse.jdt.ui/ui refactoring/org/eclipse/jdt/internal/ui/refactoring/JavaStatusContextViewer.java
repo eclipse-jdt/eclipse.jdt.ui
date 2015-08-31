@@ -57,9 +57,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 
 public class JavaStatusContextViewer extends TextStatusContextViewer {
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.refactoring.IStatusContextViewer#createControl(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
@@ -85,6 +82,7 @@ public class JavaStatusContextViewer extends TextStatusContextViewer {
 		return (IPackageFragmentRoot) element;
 	}
 
+	@Override
 	public void setInput(RefactoringStatusContext context) {
 		if (context instanceof JavaStatusContext) {
 			JavaStatusContext jsc= (JavaStatusContext)context;

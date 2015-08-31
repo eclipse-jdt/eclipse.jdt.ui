@@ -456,7 +456,7 @@ public class UnresolvedElementsSubProcessor {
 			ITypeBinding objectBinding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			String identifier= node.getIdentifier();
 			boolean isInStaticContext= ASTResolving.isInStaticContext(node);
-			ArrayList<CUCorrectionProposal> newProposals= new ArrayList<CUCorrectionProposal>(51);
+			ArrayList<CUCorrectionProposal> newProposals= new ArrayList<>(51);
 
 			loop: for (int i= 0; i < varsAndMethodsInScope.length && newProposals.size() <= 50; i++) {
 				IBinding varOrMeth= varsAndMethodsInScope[i];
@@ -1021,7 +1021,7 @@ public class UnresolvedElementsSubProcessor {
 		// corrections
 		IBinding[] bindings= (new ScopeAnalyzer(astRoot)).getDeclarationsInScope(nameNode, ScopeAnalyzer.METHODS);
 
-		HashSet<String> suggestedRenames= new HashSet<String>();
+		HashSet<String> suggestedRenames= new HashSet<>();
 		for (int i= 0; i < bindings.length; i++) {
 			IMethodBinding binding= (IMethodBinding) bindings[i];
 			String curr= binding.getName();
@@ -1033,7 +1033,7 @@ public class UnresolvedElementsSubProcessor {
 		suggestedRenames= null;
 
 		if (isOnlyParameterMismatch) {
-			ArrayList<IMethodBinding> parameterMismatchs= new ArrayList<IMethodBinding>();
+			ArrayList<IMethodBinding> parameterMismatchs= new ArrayList<>();
 			for (int i= 0; i < bindings.length; i++) {
 				IMethodBinding binding= (IMethodBinding) bindings[i];
 				if (binding.getName().equals(methodName)) {
@@ -1763,7 +1763,7 @@ public class UnresolvedElementsSubProcessor {
 			return;
 		}
 		IMethodBinding[] methods= targetBinding.getDeclaredMethods();
-		ArrayList<IMethodBinding> similarElements= new ArrayList<IMethodBinding>();
+		ArrayList<IMethodBinding> similarElements= new ArrayList<>();
 		for (int i= 0; i < methods.length; i++) {
 			IMethodBinding curr= methods[i];
 			if (curr.isConstructor() && recursiveConstructor != curr) {

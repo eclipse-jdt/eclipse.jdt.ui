@@ -16,9 +16,11 @@ public class DefaultElementComparer implements IElementComparer {
 
 	public static final DefaultElementComparer INSTANCE= new DefaultElementComparer();
 
+	@Override
 	public boolean equals(Object a, Object b) {
 		return a.equals(b);
 	}
+	@Override
 	public int hashCode(Object element) {
 		return element.hashCode();
 	}

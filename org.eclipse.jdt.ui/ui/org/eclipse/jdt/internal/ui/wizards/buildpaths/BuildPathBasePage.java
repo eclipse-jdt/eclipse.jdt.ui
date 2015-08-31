@@ -95,7 +95,7 @@ public abstract class BuildPathBasePage {
 	public abstract boolean isEntryKind(int kind);
 
 	protected void filterAndSetSelection(List<?> list) {
-		ArrayList<Object> res= new ArrayList<Object>(list.size());
+		ArrayList<Object> res= new ArrayList<>(list.size());
 		for (int i= list.size()-1; i >= 0; i--) {
 			Object curr= list.get(i);
 			if (curr instanceof CPListElement) {

@@ -21,30 +21,22 @@ public abstract class AbstractFix implements IProposableFix, ILinkedFix {
 		fDisplayString= displayString;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getAdditionalProposalInfo() {
 		return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getDisplayString() {
 		return fDisplayString;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public LinkedProposalModel getLinkedPositions() {
 		return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public IStatus getStatus() {
 		return null;
 	}

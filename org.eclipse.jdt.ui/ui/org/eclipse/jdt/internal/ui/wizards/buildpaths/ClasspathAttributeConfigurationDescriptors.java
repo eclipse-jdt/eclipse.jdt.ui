@@ -95,11 +95,13 @@ public class ClasspathAttributeConfigurationDescriptors {
 		final ClasspathAttributeConfiguration[] res= { null };
 		SafeRunner.run(new ISafeRunnable() {
 
+			@Override
 			public void handleException(Throwable exception) {
 				JavaPlugin.log(exception);
 				getDescriptors().remove(attributeKey); // remove from list
 			}
 
+			@Override
 			public void run() throws Exception {
 				res[0]= desc.getInstance();
 			}
@@ -109,7 +111,7 @@ public class ClasspathAttributeConfigurationDescriptors {
 
 	private static HashMap<String, Descriptor> readExtensions() {
 		IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, ATT_EXTENSION);
-		HashMap<String, Descriptor> descriptors= new HashMap<String, Descriptor>(elements.length * 2);
+		HashMap<String, Descriptor> descriptors= new HashMap<>(elements.length * 2);
 		for (int i= 0; i < elements.length; i++) {
 			try {
 				Descriptor curr= new Descriptor(elements[i]);

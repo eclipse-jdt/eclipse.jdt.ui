@@ -74,7 +74,7 @@ public class PullUpAction extends SelectionDispatchAction {
 			if (!(iter.next() instanceof IMember))
 				return null;
 		}
-		Set<Object> memberSet= new HashSet<Object>();
+		Set<Object> memberSet= new HashSet<>();
 		memberSet.addAll(Arrays.asList(selection.toArray()));
 		return memberSet.toArray(new IMember[memberSet.size()]);
 	}
@@ -117,9 +117,6 @@ public class PullUpAction extends SelectionDispatchAction {
 		return (IMember) element;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		try {
@@ -131,9 +128,6 @@ public class PullUpAction extends SelectionDispatchAction {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		try {
@@ -151,9 +145,6 @@ public class PullUpAction extends SelectionDispatchAction {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
@@ -166,9 +157,6 @@ public class PullUpAction extends SelectionDispatchAction {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);

@@ -56,11 +56,12 @@ public class ClasspathContainerDefaultPage extends NewElementWizardPage implemen
 		setDescription(NewWizardMessages.ClasspathContainerDefaultPage_description);
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
 
-		fUsedPaths= new ArrayList<IPath>();
+		fUsedPaths= new ArrayList<>();
 
 		fEntryField= new StringDialogField();
 		fEntryField.setLabelText(NewWizardMessages.ClasspathContainerDefaultPage_path_label);
 		fEntryField.setDialogFieldListener(new IDialogFieldListener() {
+			@Override
 			public void dialogFieldChanged(DialogField field) {
 				validatePath();
 			}
@@ -86,9 +87,7 @@ public class ClasspathContainerDefaultPage extends NewElementWizardPage implemen
 		updateStatus(status);
 	}
 
-	/* (non-Javadoc)
-	 * @see IDialogPage#createControl(Composite)
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -105,23 +104,17 @@ public class ClasspathContainerDefaultPage extends NewElementWizardPage implemen
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.CLASSPATH_CONTAINER_DEFAULT_PAGE);
 	}
 
-	/* (non-Javadoc)
-	 * @see IClasspathContainerPage#finish()
-	 */
+	@Override
 	public boolean finish() {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see IClasspathContainerPage#getSelection()
-	 */
+	@Override
 	public IClasspathEntry getSelection() {
 		return JavaCore.newContainerEntry(new Path(fEntryField.getText()));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension#initialize(org.eclipse.jdt.core.IJavaProject, org.eclipse.jdt.core.IClasspathEntry)
-	 */
+	@Override
 	public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
 		for (int i= 0; i < currentEntries.length; i++) {
 			IClasspathEntry curr= currentEntries[i];
@@ -131,9 +124,7 @@ public class ClasspathContainerDefaultPage extends NewElementWizardPage implemen
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see IClasspathContainerPage#setSelection(IClasspathEntry)
-	 */
+	@Override
 	public void setSelection(IClasspathEntry containerEntry) {
 		if (containerEntry != null) {
 			fUsedPaths.remove(containerEntry.getPath());

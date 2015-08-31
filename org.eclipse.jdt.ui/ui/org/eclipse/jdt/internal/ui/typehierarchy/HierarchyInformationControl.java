@@ -105,9 +105,6 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		return fKeyAdapter;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean hasHeader() {
 		return true;
@@ -122,9 +119,6 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl#createTreeViewer(org.eclipse.swt.widgets.Composite, int)
-	 */
 	@Override
 	protected TreeViewer createTreeViewer(Composite parent, int style) {
 		Tree tree= new Tree(parent, SWT.SINGLE | (style & ~SWT.MULTI));
@@ -209,9 +203,6 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setInput(Object information) {
 		if (!(information instanceof IJavaElement)) {
@@ -383,9 +374,6 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		return "org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy"; //$NON-NLS-1$
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Object getSelectedElement() {
 		Object selectedElement= super.getSelectedElement();

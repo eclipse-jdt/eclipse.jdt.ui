@@ -52,6 +52,7 @@ public class AbstractSemanticHighlightingTest extends TestCase {
 			fTestFilename= testFilename;
 		}
 
+		@Override
 		protected void setUp() throws Exception {
 			super.setUp();
 			fJavaProject= EditorTestHelper.createJavaProject(PROJECT, LINKED_FOLDER);
@@ -67,6 +68,7 @@ public class AbstractSemanticHighlightingTest extends TestCase {
 			return "/SHTest/src/SHTest.java";
 		}
 
+		@Override
 		protected void tearDown () throws Exception {
 			EditorTestHelper.closeEditor(fEditor);
 			fEditor= null;
@@ -96,6 +98,7 @@ public class AbstractSemanticHighlightingTest extends TestCase {
 
 	private static SourceViewer fSourceViewer;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		disableAllSemanticHighlightings();

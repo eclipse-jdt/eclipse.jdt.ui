@@ -94,15 +94,14 @@ public class VariablePathDialogField extends StringButtonDialogField {
 		/*
 		 * @see IDoubleClickListener#doubleClick(DoubleClickEvent)
 		 */
+		@Override
 		public void doubleClick(DoubleClickEvent event) {
 			if (getStatus().isOK()) {
 				okPressed();
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
-		 */
+		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			List<CPVariableElement> elements= fVariableBlock.getSelectedElements();
 			StatusInfo status= new StatusInfo();
@@ -161,9 +160,11 @@ public class VariablePathDialogField extends StringButtonDialogField {
 			fBrowseVariableButton.setText(fVariableButtonLabel);
 			fBrowseVariableButton.setEnabled(isEnabled());
 			fBrowseVariableButton.addSelectionListener(new SelectionListener() {
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					chooseVariablePressed();
 				}
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					chooseVariablePressed();
 				}

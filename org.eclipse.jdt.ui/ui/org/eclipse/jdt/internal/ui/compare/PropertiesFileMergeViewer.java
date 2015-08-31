@@ -69,9 +69,10 @@ public class PropertiesFileMergeViewer extends TextMergeViewer {
 			return;
 
 		if (fPreferenceStore == null) {
-			fSourceViewerConfigurations= new ArrayList<SourceViewerConfiguration>(3);
+			fSourceViewerConfigurations= new ArrayList<>(3);
 			fPreferenceStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
 			fPreferenceChangeListener= new IPropertyChangeListener() {
+				@Override
 				public void propertyChange(PropertyChangeEvent event) {
 					Iterator<SourceViewerConfiguration> iter= fSourceViewerConfigurations.iterator();
 					while (iter.hasNext())

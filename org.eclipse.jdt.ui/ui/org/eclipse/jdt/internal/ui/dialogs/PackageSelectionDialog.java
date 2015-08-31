@@ -104,9 +104,10 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 	 */
 	@Override
 	public int open() {
-		final ArrayList<IJavaElement> packageList= new ArrayList<IJavaElement>();
+		final ArrayList<IJavaElement> packageList= new ArrayList<>();
 
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				if (monitor == null) {
 					monitor= new NullProgressMonitor();
@@ -115,7 +116,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 				monitor.beginTask(JavaUIMessages.PackageSelectionDialog_progress_search, hideEmpty ? 2 : 1);
 				try {
 					SearchRequestor requestor= new SearchRequestor() {
-						private HashSet<String> fSet= new HashSet<String>();
+						private HashSet<String> fSet= new HashSet<>();
 						private final boolean fAddDefault= (fFlags & F_HIDE_DEFAULT_PACKAGE) == 0;
 						private final boolean fDuplicates= (fFlags & F_REMOVE_DUPLICATES) == 0;
 						private final boolean fIncludeParents= (fFlags & F_SHOW_PARENTS) != 0;
@@ -170,7 +171,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 			private void removeEmptyPackages(IProgressMonitor monitor) throws JavaModelException, InterruptedException {
 				monitor.beginTask(JavaUIMessages.PackageSelectionDialog_progress_findEmpty, packageList.size());
 				try {
-					ArrayList<IPackageFragment> res= new ArrayList<IPackageFragment>(packageList.size());
+					ArrayList<IPackageFragment> res= new ArrayList<>(packageList.size());
 					for (int i= 0; i < packageList.size(); i++) {
 						IPackageFragment pkg= (IPackageFragment) packageList.get(i);
 						if (pkg.hasChildren() || !pkg.hasSubpackages()) {
@@ -240,9 +241,6 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 		return control;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.window.Window#getInitialSize()
-	 */
 	@Override
 	protected Point getInitialSize() {
 		Point result= super.getInitialSize();
@@ -256,9 +254,6 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.window.Window#getInitialLocation(org.eclipse.swt.graphics.Point)
-	 */
 	@Override
 	protected Point getInitialLocation(Point initialSize) {
 		Point result= super.getInitialLocation(initialSize);

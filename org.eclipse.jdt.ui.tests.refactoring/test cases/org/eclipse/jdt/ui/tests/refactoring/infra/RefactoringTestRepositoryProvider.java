@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import java.util.HashMap;
 import org.eclipse.team.core.RepositoryProvider;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -33,18 +34,18 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 
 	public static final String PROVIDER_ID= "org.eclipse.jdt.ui.tests.refactoring.refactoringTestRepositoryProvider";
 
-	private static HashMap/*IProject, RefactoringTestFileModificationValidator*/ fgValidators= new HashMap();
+	private static HashMap<IProject, RefactoringTestFileModificationValidator> fgValidators= new HashMap<>();
 
-	public static Collection getValidatedEditPaths(IProject project) {
-		RefactoringTestFileModificationValidator validator= (RefactoringTestFileModificationValidator) fgValidators.get(project);
+	public static Collection<IPath> getValidatedEditPaths(IProject project) {
+		RefactoringTestFileModificationValidator validator= fgValidators.get(project);
 		if (validator != null) {
 			return validator.getValidatedEditPaths();
 		}
 		return null;
 	}
 
-	public static Collection getValidatedSavePaths(IProject project) {
-		RefactoringTestFileModificationValidator validator= (RefactoringTestFileModificationValidator) fgValidators.get(project);
+	public static Collection<IPath> getValidatedSavePaths(IProject project) {
+		RefactoringTestFileModificationValidator validator= fgValidators.get(project);
 		if (validator != null) {
 			return validator.getValidatedSavePaths();
 		}
@@ -53,22 +54,23 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 
 	private static class RefactoringTestFileModificationValidator extends FileModificationValidator {
 
-		private ArrayList fValidatedEditPaths;
-		private ArrayList fValidatedSavePaths;
+		private ArrayList<IPath> fValidatedEditPaths;
+		private ArrayList<IPath> fValidatedSavePaths;
 
 		public RefactoringTestFileModificationValidator() {
-			fValidatedEditPaths= new ArrayList();
-			fValidatedSavePaths= new ArrayList();
+			fValidatedEditPaths= new ArrayList<>();
+			fValidatedSavePaths= new ArrayList<>();
 		}
 
-		public Collection/*IPath*/ getValidatedEditPaths() {
+		public Collection<IPath> getValidatedEditPaths() {
 			return fValidatedEditPaths;
 		}
 
-		public Collection/*IPath*/ getValidatedSavePaths() {
+		public Collection<IPath> getValidatedSavePaths() {
 			return fValidatedSavePaths;
 		}
 
+		@Override
 		public IStatus validateEdit(IFile[] files, FileModificationValidationContext context) {
 			for (int i= 0; i < files.length; i++) {
 				fValidatedEditPaths.add(files[i].getFullPath());
@@ -76,6 +78,7 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 			return makeWritable(files);
 		}
 
+		@Override
 		public IStatus validateSave(IFile file) {
 			fValidatedSavePaths.add(file.getFullPath());
 			return makeWritable(new IFile[] { file });
@@ -85,6 +88,7 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 			try {
 				ResourcesPlugin.getWorkspace().run(
 					new IWorkspaceRunnable() {
+						@Override
 						public void run(IProgressMonitor monitor) throws CoreException	{
 							for (int i= 0; i < resources.length; i++) {
 								IFile resource= resources[i];
@@ -111,18 +115,22 @@ public class RefactoringTestRepositoryProvider extends RepositoryProvider {
 		fValidator= new RefactoringTestFileModificationValidator();
 	}
 
+	@Override
 	public String getID() {
 		return PROVIDER_ID;
 	}
 
+	@Override
 	public FileModificationValidator getFileModificationValidator2() {
 		return fValidator;
 	}
 
+	@Override
 	public void configureProject() throws CoreException {
 		fgValidators.put(getProject(), fValidator);
 	}
 
+	@Override
 	public void deconfigure() throws CoreException {
 		fgValidators.remove(getProject());
 	}

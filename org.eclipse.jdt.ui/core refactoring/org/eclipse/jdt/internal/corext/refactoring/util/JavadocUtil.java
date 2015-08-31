@@ -91,7 +91,7 @@ public class JavadocUtil {
 			return;
 
 		ListRewrite tagsRewrite= astRewrite.getListRewrite(methodDeclaration.getJavadoc(), Javadoc.TAGS_PROPERTY);
-		HashSet<String> leadingNames= new HashSet<String>();
+		HashSet<String> leadingNames= new HashSet<>();
 		for (Iterator<SingleVariableDeclaration> iter= methodDeclaration.parameters().iterator(); iter.hasNext();) {
 			SingleVariableDeclaration curr= iter.next();
 			leadingNames.add(curr.getName().getIdentifier());

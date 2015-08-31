@@ -35,13 +35,14 @@ public class AbstractRefactoringTestSetup extends TestSetup {
 		super(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fWasAutobuild= CoreUtility.setAutoBuilding(false);
 		if (JavaPlugin.getActivePage() != null)
 			JavaPlugin.getActivePage().close();
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "0");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -58,6 +59,7 @@ public class AbstractRefactoringTestSetup extends TestSetup {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, comment.toString(), null);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		CoreUtility.setAutoBuilding(fWasAutobuild);
 		/*

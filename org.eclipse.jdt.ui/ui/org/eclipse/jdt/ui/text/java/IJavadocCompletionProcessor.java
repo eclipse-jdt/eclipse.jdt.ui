@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
  * @since 2.1
  * @deprecated As of 3.2, replaced by <code>org.eclipse.jdt.ui.javaCompletionProposalComputer</code> extension-point</p>.
  */
+@Deprecated
 public interface IJavadocCompletionProcessor {
 
 	/**

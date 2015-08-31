@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,10 +16,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 
@@ -54,10 +52,13 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class RenameTypeTests extends RefactoringTest {
 
 	private static final boolean BUG_54948= false;
-	private static final Class clazz= RenameTypeTests.class;
+	private static final Class<RenameTypeTests> clazz= RenameTypeTests.class;
 	private static final String REFACTORING_PATH= "RenameType/";
 
 	public RenameTypeTests(String name) {
@@ -72,6 +73,7 @@ public class RenameTypeTests extends RefactoringTest {
 		return new RefactoringTestSetup(someTest);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -121,7 +123,7 @@ public class RenameTypeTests extends RefactoringTest {
 		assertTrue("cu " + newcu.getElementName()+ " does not exist", newcu.exists());
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName(newCUName)), newcu.getSource());
 
-		INameUpdating nameUpdating= ((INameUpdating)refactoring.getAdapter(INameUpdating.class));
+		INameUpdating nameUpdating= refactoring.getAdapter(INameUpdating.class);
 		IType newElement = (IType) nameUpdating.getNewElement();
 		assertTrue("new element does not exist:\n" + newElement.toString(), newElement.exists());
 
@@ -144,6 +146,7 @@ public class RenameTypeTests extends RefactoringTest {
 
 	// <--------------------- Similarly named elements ---------------------------->
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		setSomeFieldOptions(getPackageP().getJavaProject(), "f", "Suf1", false);
@@ -1384,12 +1387,12 @@ public class RenameTypeTests extends RefactoringTest {
 		IType someClass= getType(cu, "SomeClass");
 		IType other= getClassFromTestFile(getPackageP(), "SomeOtherClass");
 
-		List handleList= new ArrayList();
-		List argumentList= new ArrayList();
+		List<IAdaptable> handleList= new ArrayList<>();
+		List<RenameArguments> argumentList= new ArrayList<>();
 
-		List similarOldHandleList= new ArrayList();
-		List similarNewNameList= new ArrayList();
-		List similarNewHandleList= new ArrayList();
+		List<String> similarOldHandleList= new ArrayList<>();
+		List<String> similarNewNameList= new ArrayList<>();
+		List<String> similarNewHandleList= new ArrayList<>();
 
 		final String newName= "SomeNewClass";
 
@@ -1437,7 +1440,7 @@ public class RenameTypeTests extends RefactoringTest {
 		argumentList.add(new RenameArguments(newName + ".java", true));
 
 		String[] handles= ParticipantTesting.createHandles(handleList.toArray());
-		RenameArguments[] arguments= (RenameArguments[])argumentList.toArray(new RenameArguments[0]);
+		RenameArguments[] arguments= argumentList.toArray(new RenameArguments[0]);
 
 		RenameJavaElementDescriptor descriptor= createRefactoringDescriptor(someClass, newName);
 		setTheOptions(descriptor, true, false, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
@@ -1513,12 +1516,12 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "SomeClass");
 		IType someClass= getType(cu, "SomeClass");
 
-		List handleList= new ArrayList();
-		List argumentList= new ArrayList();
+		List<IAdaptable> handleList= new ArrayList<>();
+		List<RenameArguments> argumentList= new ArrayList<>();
 
-		List similarOldHandleList= new ArrayList();
-		List similarNewNameList= new ArrayList();
-		List similarNewHandleList= new ArrayList();
+		List<String> similarOldHandleList= new ArrayList<>();
+		List<String> similarNewNameList= new ArrayList<>();
+		List<String> similarNewHandleList= new ArrayList<>();
 
 		final String newName= "SomeNewClass";
 
@@ -1537,7 +1540,7 @@ public class RenameTypeTests extends RefactoringTest {
 		argumentList.add(new RenameArguments(newName + ".java", true));
 
 		String[] handles= ParticipantTesting.createHandles(handleList.toArray());
-		RenameArguments[] arguments= (RenameArguments[])argumentList.toArray(new RenameArguments[0]);
+		RenameArguments[] arguments= argumentList.toArray(new RenameArguments[0]);
 
 		RenameJavaElementDescriptor descriptor= createRefactoringDescriptor(someClass, newName);
 		setTheOptions(descriptor, true, false, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
@@ -1558,12 +1561,12 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "SomeClass");
 		IType someClass= getType(cu, "SomeClass");
 
-		List handleList= new ArrayList();
-		List argumentList= new ArrayList();
+		List<IAdaptable> handleList= new ArrayList<>();
+		List<RenameArguments> argumentList= new ArrayList<>();
 
-		List similarOldHandleList= new ArrayList();
-		List similarNewNameList= new ArrayList();
-		List similarNewHandleList= new ArrayList();
+		List<String> similarOldHandleList= new ArrayList<>();
+		List<String> similarNewNameList= new ArrayList<>();
+		List<String> similarNewHandleList= new ArrayList<>();
 
 		final String newName= "SomeNewClass";
 
@@ -1588,7 +1591,7 @@ public class RenameTypeTests extends RefactoringTest {
 		argumentList.add(new RenameArguments(newName + ".java", true));
 
 		String[] handles= ParticipantTesting.createHandles(handleList.toArray());
-		RenameArguments[] arguments= (RenameArguments[])argumentList.toArray(new RenameArguments[0]);
+		RenameArguments[] arguments= argumentList.toArray(new RenameArguments[0]);
 
 		RenameJavaElementDescriptor descriptor= createRefactoringDescriptor(someClass, newName);
 		setTheOptions(descriptor, true, false, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);

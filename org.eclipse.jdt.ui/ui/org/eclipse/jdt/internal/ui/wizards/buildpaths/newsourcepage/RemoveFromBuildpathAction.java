@@ -83,9 +83,6 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_RemoveFromCP_tooltip);
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getDetailedDescription() {
 		if (!isEnabled())
@@ -109,9 +106,6 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
         return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
 		try {
@@ -128,11 +122,12 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 				project= container.getJavaProject();
 			}
 
-			final List<Object> elementsToRemove= new ArrayList<Object>();
-			final List<IFolder> foldersToDelete= new ArrayList<IFolder>();
+			final List<Object> elementsToRemove= new ArrayList<>();
+			final List<IFolder> foldersToDelete= new ArrayList<>();
 			queryToRemoveLinkedFolders(elementsToRemove, foldersToDelete);
 
 			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemoveFromBuildpath, foldersToDelete.size() + 10);
@@ -162,7 +157,7 @@ public class RemoveFromBuildpathAction extends BuildpathModifierAction {
 						if (delta.getDeletedResources().length == foldersToDelete.size()) {
 							selectAndReveal(new StructuredSelection(project));
 						} else {
-							List<IResource> result= new ArrayList<IResource>(Arrays.asList(delta.getDeletedResources()));
+							List<IResource> result= new ArrayList<>(Arrays.asList(delta.getDeletedResources()));
 							result.removeAll(foldersToDelete);
 							selectAndReveal(new StructuredSelection(result));
 						}

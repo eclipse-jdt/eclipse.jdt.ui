@@ -373,7 +373,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			}
 			change.addTextEditGroup(description);
 		}
-		final Map<String, String> arguments= new HashMap<String, String>();
+		final Map<String, String> arguments= new HashMap<>();
 		String project= null;
 		IJavaProject javaProject= fInitialTypeRoot.getJavaProject();
 		if (javaProject != null)
@@ -435,7 +435,7 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 
 	private IFile[] getFilesToBeModified(ICompilationUnit[] units) {
-		List<IFile> result= new ArrayList<IFile>(units.length + 1);
+		List<IFile> result= new ArrayList<>(units.length + 1);
 		IFile file;
 		for (int i= 0; i < units.length; i++) {
 			file= getFile(units[i]);
@@ -518,7 +518,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		for (int i= 0; i < invocations.length; i++) {
 			removeNestedCalls(status, unit, parents, invocations, i);
 		}
-		List<ASTNode> result= new ArrayList<ASTNode>();
+		List<ASTNode> result= new ArrayList<>();
 		for (int i= 0; i < invocations.length; i++) {
 			if (invocations[i] != null)
 				result.add(invocations[i]);

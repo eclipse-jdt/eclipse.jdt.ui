@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,9 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -26,9 +23,12 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class CleanUpTest18 extends CleanUpTestCase {
 
-	private static final Class THIS= CleanUpTest18.class;
+	private static final Class<CleanUpTest18> THIS= CleanUpTest18.class;
 
 	public CleanUpTest18(String name) {
 		super(name);
@@ -48,10 +48,12 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, "", null);
 	}
 
+	@Override
 	protected IJavaProject getProject() {
 		return Java18ProjectTestSetup.getProject();
 	}
 
+	@Override
 	protected IClasspathEntry[] getDefaultClasspath() throws CoreException {
 		return Java18ProjectTestSetup.getDefaultClasspath();
 	}
@@ -846,6 +848,54 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		disable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 		enable(CleanUpConstants.USE_LAMBDA);
 	
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
+	}
+
+	public void testConvertToLambdaWithNonFunctionalTargetType() throws Exception {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=468457
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public class Snippet {\n");
+		buf.append("    void test(Interface context) {\n");
+		buf.append("        context.set(\"bar\", new Runnable() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public void run() {}\n");
+		buf.append("        });\n");
+		buf.append("        \n");
+		buf.append("    }    \n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("interface Interface {\n");
+		buf.append("    public void set(String name, Object value);\n");
+		buf.append("}\n");
+		String original= buf.toString();
+		ICompilationUnit cu1= pack1.createCompilationUnit("Snippet.java", original, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public class Snippet {\n");
+		buf.append("    void test(Interface context) {\n");
+		buf.append("        context.set(\"bar\", (Runnable) () -> {});\n");
+		buf.append("        \n");
+		buf.append("    }    \n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("interface Interface {\n");
+		buf.append("    public void set(String name, Object value);\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+
+		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
+		disable(CleanUpConstants.USE_LAMBDA);
+
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original });
 	}
 

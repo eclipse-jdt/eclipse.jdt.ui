@@ -57,12 +57,14 @@ public class TypeFilterInputDialog extends StatusDialog {
 		/*
 		 * @see IDialogFieldListener#dialogFieldChanged(DialogField)
 		 */
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			doValidation();
 		}
 		/*
 		 * @see IStringButtonAdapter#changeControlPressed(DialogField)
 		 */
+		@Override
 		public void changeControlPressed(DialogField field) {
 			doButtonPressed();
 		}

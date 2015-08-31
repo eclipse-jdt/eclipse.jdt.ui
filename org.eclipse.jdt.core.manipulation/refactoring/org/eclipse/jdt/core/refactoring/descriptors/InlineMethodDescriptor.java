@@ -64,7 +64,7 @@ public final class InlineMethodDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
-	public InlineMethodDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public InlineMethodDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.INLINE_METHOD, project, description, comment, arguments, flags);
 	}
 }

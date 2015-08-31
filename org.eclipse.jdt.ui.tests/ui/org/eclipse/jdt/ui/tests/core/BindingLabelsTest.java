@@ -40,7 +40,7 @@ import junit.framework.TestSuite;
  */
 public class BindingLabelsTest extends AbstractBindingLabelsTest {
 
-	private static final Class THIS= BindingLabelsTest.class;
+	private static final Class<BindingLabelsTest> THIS= BindingLabelsTest.class;
 
 
 	public BindingLabelsTest(String name) {

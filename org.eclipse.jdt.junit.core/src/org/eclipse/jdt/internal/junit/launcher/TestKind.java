@@ -32,6 +32,7 @@ public class TestKind implements ITestKind {
 	/*
 	 * @see org.eclipse.jdt.internal.junit.launcher.ITestKind#createFinder()
 	 */
+	@Override
 	public ITestFinder getFinder() {
 		if (fFinder == null) {
 			try {
@@ -47,6 +48,7 @@ public class TestKind implements ITestKind {
 	/*
 	 * @see org.eclipse.jdt.internal.junit.launcher.ITestKind#getDisplayName()
 	 */
+	@Override
 	public String getDisplayName() {
 		return getAttribute(DISPLAY_NAME);
 	}
@@ -54,6 +56,7 @@ public class TestKind implements ITestKind {
 	/*
 	 * @see org.eclipse.jdt.internal.junit.launcher.ITestKind#getFinderClassName()
 	 */
+	@Override
 	public String getFinderClassName() {
 		return getAttribute(FINDER_CLASS_NAME);
 	}
@@ -61,6 +64,7 @@ public class TestKind implements ITestKind {
 	/*
 	 * @see org.eclipse.jdt.internal.junit.launcher.ITestKind#getId()
 	 */
+	@Override
 	public String getId() {
 		return getAttribute(ID);
 	}
@@ -68,10 +72,12 @@ public class TestKind implements ITestKind {
 	/*
 	 * @see org.eclipse.jdt.internal.junit.launcher.ITestKind#getLoaderClassName()
 	 */
+	@Override
 	public String getLoaderClassName() {
 		return getAttribute(LOADER_CLASS_NAME);
 	}
 
+	@Override
 	public String getLoaderPluginId() {
 		return getAttribute(LOADER_PLUGIN_ID);
 	}
@@ -79,6 +85,7 @@ public class TestKind implements ITestKind {
 	/*
 	 * @see org.eclipse.jdt.internal.junit.launcher.ITestKind#getPrecededKindId()
 	 */
+	@Override
 	public String getPrecededKindId() {
 		String attribute= getAttribute(PRECEDES);
 		return attribute == null ? "" : attribute; //$NON-NLS-1$
@@ -87,6 +94,7 @@ public class TestKind implements ITestKind {
 	/*
 	 * @see org.eclipse.jdt.internal.junit.launcher.ITestKind#isNull()
 	 */
+	@Override
 	public boolean isNull() {
 		return false;
 	}
@@ -108,6 +116,7 @@ public class TestKind implements ITestKind {
 	/*
 	 * @see org.eclipse.jdt.internal.junit.launcher.ITestKind#getClasspathEntries()
 	 */
+	@Override
 	public JUnitRuntimeClasspathEntry[] getClasspathEntries() {
 		IConfigurationElement[] children= fElement.getChildren(ITestKind.RUNTIME_CLASSPATH_ENTRY);
 		JUnitRuntimeClasspathEntry[] returnThis= new JUnitRuntimeClasspathEntry[children.length];
@@ -123,6 +132,7 @@ public class TestKind implements ITestKind {
 	/*
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return getDisplayName() + " (id: " + getId() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}

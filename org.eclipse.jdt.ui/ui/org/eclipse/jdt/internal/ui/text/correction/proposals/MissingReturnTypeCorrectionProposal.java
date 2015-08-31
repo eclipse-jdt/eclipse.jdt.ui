@@ -58,9 +58,6 @@ public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposa
 		}
 	}
 
-	/*(non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
-	 */
 	@Override
 	protected ASTRewrite getRewrite() {
 		AST ast= getAST();

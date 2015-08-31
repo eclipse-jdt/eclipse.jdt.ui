@@ -63,9 +63,9 @@ public class RenameModifications extends RefactoringModifications {
 	private List<IParticipantDescriptorFilter> fParticipantDescriptorFilter;
 
 	public RenameModifications() {
-		fRename= new ArrayList<Object>();
-		fRenameArguments= new ArrayList<RefactoringArguments>();
-		fParticipantDescriptorFilter= new ArrayList<IParticipantDescriptorFilter>();
+		fRename= new ArrayList<>();
+		fRenameArguments= new ArrayList<>();
+		fParticipantDescriptorFilter= new ArrayList<>();
 	}
 
 	public void rename(IResource resource, RenameArguments args) {
@@ -188,7 +188,7 @@ public class RenameModifications extends RefactoringModifications {
 
 	@Override
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {
-		List<RefactoringParticipant> result= new ArrayList<RefactoringParticipant>();
+		List<RefactoringParticipant> result= new ArrayList<>();
 		for (int i= 0; i < fRename.size(); i++) {
 			result.addAll(Arrays.asList(ParticipantManager.loadRenameParticipants(status,
 				owner, fRename.get(i),
@@ -235,7 +235,7 @@ public class RenameModifications extends RefactoringModifications {
 		createIncludingParents(target);
 		MoveArguments arguments= new MoveArguments(target, args.getUpdateReferences());
 		IResource[] resourcesToMove= collectResourcesOfInterest(pack);
-		Set<IResource> allMembers= new HashSet<IResource>(Arrays.asList(container.members()));
+		Set<IResource> allMembers= new HashSet<>(Arrays.asList(container.members()));
 		for (int i= 0; i < resourcesToMove.length; i++) {
 			IResource toMove= resourcesToMove[i];
 			getResourceModifications().addMove(toMove, arguments);
@@ -263,7 +263,7 @@ public class RenameModifications extends RefactoringModifications {
 		IJavaElement[] allPackages= root.getChildren();
 		if (pack.isDefaultPackage())
 			return new IPackageFragment[0];
-		ArrayList<IPackageFragment> result= new ArrayList<IPackageFragment>();
+		ArrayList<IPackageFragment> result= new ArrayList<>();
 		String prefix= pack.getElementName() + '.';
 		for (int i= 0; i < allPackages.length; i++) {
 			IPackageFragment currentPackage= (IPackageFragment) allPackages[i];

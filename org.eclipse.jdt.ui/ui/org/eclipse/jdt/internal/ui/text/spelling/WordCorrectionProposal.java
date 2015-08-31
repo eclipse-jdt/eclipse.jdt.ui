@@ -113,6 +113,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public final void apply(final IDocument document) {
 		try {
 			document.replace(fOffset, fLength, fWord);
@@ -124,6 +125,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
+	@Override
 	public String getAdditionalProposalInfo() {
 		return fLine;
 	}
@@ -131,6 +133,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
 	 */
+	@Override
 	public final IContextInformation getContextInformation() {
 		return null;
 	}
@@ -138,6 +141,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 	 */
+	@Override
 	public String getDisplayString() {
 		return Messages.format(JavaUIMessages.Spelling_correct_label, new String[] { fWord });
 	}
@@ -145,6 +149,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
 	 */
+	@Override
 	public Image getImage() {
 		return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME);
 	}
@@ -152,6 +157,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
 	 */
+	@Override
 	public final int getRelevance() {
 		return fRelevance;
 	}
@@ -159,6 +165,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public final Point getSelection(final IDocument document) {
 
 		int offset= fContext.getOffset();

@@ -43,6 +43,7 @@ public class JUnit4TestFinderTest extends TestCase {
 	private IJavaProject fProject;
 	private IPackageFragmentRoot fRoot;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProject= JavaProjectHelper.createJavaProject("TestProject", "bin");
@@ -54,6 +55,7 @@ public class JUnit4TestFinderTest extends TestCase {
 		fRoot= JavaProjectHelper.addSourceContainer(fProject, "src");
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
 		super.tearDown();
@@ -451,16 +453,16 @@ public class JUnit4TestFinderTest extends TestCase {
 			assertEquals(type.getFullyQualifiedName(), isTest, finder.isTest(type));
 		}
 
-		HashSet set= new HashSet();
+		HashSet<IType> set= new HashSet<>();
 //		finder.findTestsInContainer(container, set, null);
 		set.addAll(Arrays.asList(JUnitCore.findTestTypes(container, null)));
 
-		HashSet namesFound= new HashSet();
-		for (Iterator iterator= set.iterator(); iterator.hasNext();) {
-			IType curr= (IType) iterator.next();
+		HashSet<String> namesFound= new HashSet<>();
+		for (Iterator<IType> iterator= set.iterator(); iterator.hasNext();) {
+			IType curr= iterator.next();
 			namesFound.add(curr.getFullyQualifiedName('.'));
 		}
-		String[] actuals= (String[]) namesFound.toArray(new String[namesFound.size()]);
+		String[] actuals= namesFound.toArray(new String[namesFound.size()]);
 		StringAsserts.assertEqualStringsIgnoreOrder(actuals, expectedTypes);
 	}
 

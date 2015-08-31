@@ -55,7 +55,7 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 
 	private ISelectionProvider fProvider;
 
-	private static final List<IResource> EMPTY_LIST= new ArrayList<IResource>(0);
+	private static final List<IResource> EMPTY_LIST= new ArrayList<>(0);
 
 	/**
 	 * Creates a new ResourceTransferDragAdapter for the given selection
@@ -68,6 +68,7 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 		Assert.isNotNull(fProvider);
 	}
 
+	@Override
 	public Transfer getTransfer() {
 		return ResourceTransfer.getInstance();
 	}
@@ -98,7 +99,7 @@ public class ResourceTransferDragAdapter extends DragSourceAdapter implements Tr
 		if (!(s instanceof IStructuredSelection))
 			return EMPTY_LIST;
 		IStructuredSelection selection= (IStructuredSelection)s;
-		List<IResource> result= new ArrayList<IResource>(selection.size());
+		List<IResource> result= new ArrayList<>(selection.size());
 		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			IResource resource= null;

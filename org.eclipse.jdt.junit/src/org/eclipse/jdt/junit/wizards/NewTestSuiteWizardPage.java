@@ -135,9 +135,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		fClassesInSuiteStatus= new JUnitStatus();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -206,9 +204,6 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		fTypeNameStatus= typeNameChanged(); //set status on initialization for this dialog - user must know that suite method will be overridden
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.NewContainerWizardPage#handleFieldChanged(java.lang.String)
-	 */
 	@Override
 	protected void handleFieldChanged(String fieldName) {
 		super.handleFieldChanged(fieldName);
@@ -237,9 +232,6 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		updateStatus(status);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
-	 */
 	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
@@ -304,6 +296,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			fClassesInSuiteTable.setContentProvider(new SuiteClassesContentProvider(isJUnit4()));
 			fClassesInSuiteTable.setLabelProvider(new JavaElementLabelProvider());
 			fClassesInSuiteTable.addCheckStateListener(new ICheckStateListener() {
+				@Override
 				public void checkStateChanged(CheckStateChangedEvent event) {
 					handleFieldChanged(CLASSES_IN_SUITE);
 				}
@@ -354,9 +347,6 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#createTypeMembers(org.eclipse.jdt.core.IType, org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager, org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	protected void createTypeMembers(IType type, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		writeImports(imports);
@@ -379,9 +369,6 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		return UpdateTestSuite.getUpdatableString(fClassesInSuiteTable.getCheckedElements());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#createType(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		IPackageFragment pack= getPackageFragment();
@@ -470,9 +457,6 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.NewTypeWizardPage#typeNameChanged()
-	 */
 	@Override
 	protected IStatus typeNameChanged() {
 		super.typeNameChanged();

@@ -41,6 +41,7 @@ public class WorkspaceScopeTest extends TestCase {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fProject1= createStandardProject("Test", "test"); //$NON-NLS-1$ //$NON-NLS-2$
 		IPackageFragment pkg= fProject1.findPackageFragment(new Path("/Test/src/test")); //$NON-NLS-1$

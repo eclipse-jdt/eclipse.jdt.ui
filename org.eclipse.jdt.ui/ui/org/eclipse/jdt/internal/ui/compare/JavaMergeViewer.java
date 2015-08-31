@@ -160,7 +160,7 @@ public class JavaMergeViewer extends TextMergeViewer {
     }
 
     private ChainedPreferenceStore createChainedPreferenceStore(IJavaProject project) {
-    	ArrayList<IPreferenceStore> stores= new ArrayList<IPreferenceStore>(4);
+    	ArrayList<IPreferenceStore> stores= new ArrayList<>(4);
     	if (project != null)
     		stores.add(new EclipsePreferencesAdapter(new ProjectScope(project.getProject()), JavaCore.PLUGIN_ID));
 		stores.add(JavaPlugin.getDefault().getPreferenceStore());
@@ -208,7 +208,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 		if (viewer instanceof SourceViewer) {
 			SourceViewer sourceViewer= (SourceViewer)viewer;
 			if (fSourceViewer == null)
-				fSourceViewer= new ArrayList<SourceViewer>();
+				fSourceViewer= new ArrayList<>();
 			if (!fSourceViewer.contains(sourceViewer))
 				fSourceViewer.add(sourceViewer);
 			JavaTextTools tools= JavaCompareUtilities.getJavaTextTools();
@@ -270,7 +270,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 
 	private JavaSourceViewerConfiguration getSourceViewerConfiguration(SourceViewer sourceViewer, IEditorInput editorInput) {
 		if (fSourceViewerConfiguration == null) {
-			fSourceViewerConfiguration= new HashMap<SourceViewer, JavaSourceViewerConfiguration>(3);
+			fSourceViewerConfiguration= new HashMap<>(3);
 		}
 		if (fPreferenceStore == null)
 			getPreferenceStore();
@@ -467,6 +467,7 @@ public class JavaMergeViewer extends TextMergeViewer {
 		fPreferenceStore= ps;
 		if (fPreferenceStore != null) {
 			fPreferenceChangeListener= new IPropertyChangeListener() {
+				@Override
 				public void propertyChange(PropertyChangeEvent event) {
 					handlePropertyChange(event);
 				}
@@ -490,13 +491,13 @@ public class JavaMergeViewer extends TextMergeViewer {
 			Assert.isTrue(iSourceViewer instanceof SourceViewer);
 			sourceViewer= (SourceViewer)iSourceViewer;
 			if (fEditor == null)
-				fEditor= new HashMap<SourceViewer, CompilationUnitEditorAdapter>(3);
+				fEditor= new HashMap<>(3);
 			fEditor.put(sourceViewer, editor);
 		} else
 			sourceViewer= super.createSourceViewer(parent, textOrientation);
 
 		if (fSourceViewer == null)
-			fSourceViewer= new ArrayList<SourceViewer>();
+			fSourceViewer= new ArrayList<>();
 		fSourceViewer.add(sourceViewer);
 
 		return sourceViewer;

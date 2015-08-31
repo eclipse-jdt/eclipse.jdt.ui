@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.zip.ZipFile;
-
-import junit.framework.TestCase;
 
 import org.osgi.framework.Bundle;
 
@@ -65,6 +63,8 @@ import org.eclipse.jdt.core.search.TypeNameRequestor;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
+import junit.framework.TestCase;
+
 
 /**
  * Helper methods to set up a IJavaProject.
@@ -83,10 +83,12 @@ public class JavaProjectHelper {
 	/**
 	 * @deprecated use {@link #RT_STUBS_15}
 	 */
+	@Deprecated
 	public static final IPath RT_STUBS_13= new Path("testresources/rtstubs.jar");
 	/**
 	 * @deprecated use {@link #JUNIT_SRC_381}
 	 */
+	@Deprecated
 	public static final IPath JUNIT_SRC= new Path("testresources/junit37-noUI-src.zip");
 
 	public static final IPath RT_STUBS_15= new Path("testresources/rtstubs15.jar");
@@ -200,7 +202,7 @@ public class JavaProjectHelper {
 	 * @since 3.10
 	 */
 	public static void set18CompilerOptions(IJavaProject project) {
-		Map options= project.getOptions(false);
+		Map<String, String> options= project.getOptions(false);
 		set18CompilerOptions(options);
 		project.setOptions(options);
 	}
@@ -210,7 +212,7 @@ public class JavaProjectHelper {
 	 * @param project the java project
 	 */
 	public static void set17CompilerOptions(IJavaProject project) {
-		Map options= project.getOptions(false);
+		Map<String, String> options= project.getOptions(false);
 		JavaProjectHelper.set17CompilerOptions(options);
 		project.setOptions(options);
 	}
@@ -220,7 +222,7 @@ public class JavaProjectHelper {
 	 * @param project the java project
 	 */
 	public static void set16CompilerOptions(IJavaProject project) {
-		Map options= project.getOptions(false);
+		Map<String, String> options= project.getOptions(false);
 		JavaProjectHelper.set16CompilerOptions(options);
 		project.setOptions(options);
 	}
@@ -230,7 +232,7 @@ public class JavaProjectHelper {
 	 * @param project the java project
 	 */
 	public static void set15CompilerOptions(IJavaProject project) {
-		Map options= project.getOptions(false);
+		Map<String, String> options= project.getOptions(false);
 		JavaProjectHelper.set15CompilerOptions(options);
 		project.setOptions(options);
 	}
@@ -240,7 +242,7 @@ public class JavaProjectHelper {
 	 * @param project the java project
 	 */
 	public static void set14CompilerOptions(IJavaProject project) {
-		Map options= project.getOptions(false);
+		Map<String, String> options= project.getOptions(false);
 		JavaProjectHelper.set14CompilerOptions(options);
 		project.setOptions(options);
 	}
@@ -251,7 +253,7 @@ public class JavaProjectHelper {
 	 * @param options the compiler options to configure
 	 * @since 3.10
 	 */
-	public static void set18CompilerOptions(Map options) {
+	public static void set18CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options);
 	}
 
@@ -259,7 +261,7 @@ public class JavaProjectHelper {
 	 * Sets the compiler options to 1.7
 	 * @param options The compiler options to configure
 	 */
-	public static void set17CompilerOptions(Map options) {
+	public static void set17CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_7, options);
 	}
 	
@@ -267,7 +269,7 @@ public class JavaProjectHelper {
 	 * Sets the compiler options to 1.6
 	 * @param options The compiler options to configure
 	 */
-	public static void set16CompilerOptions(Map options) {
+	public static void set16CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_6, options);
 	}
 
@@ -275,7 +277,7 @@ public class JavaProjectHelper {
 	 * Sets the compiler options to 1.5
 	 * @param options The compiler options to configure
 	 */
-	public static void set15CompilerOptions(Map options) {
+	public static void set15CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_5, options);
 	}
 
@@ -283,7 +285,7 @@ public class JavaProjectHelper {
 	 * Sets the compiler options to 1.4
 	 * @param options The compiler options to configure
 	 */
-	public static void set14CompilerOptions(Map options) {
+	public static void set14CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_4, options);
 	}
 
@@ -291,7 +293,7 @@ public class JavaProjectHelper {
 	 * Sets the compiler options to 1.3
 	 * @param options The compiler options to configure
 	 */
-	public static void set13CompilerOptions(Map options) {
+	public static void set13CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_3, options);
 	}
 
@@ -308,6 +310,7 @@ public class JavaProjectHelper {
 			MixedLineDelimiterDetector.assertNoMixedLineDelimiters(elem);
 
 		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+			@Override
 			public void run(IProgressMonitor monitor) throws CoreException {
 				performDummySearch();
 				if (elem instanceof IJavaProject) {
@@ -382,6 +385,7 @@ public class JavaProjectHelper {
 	public static void clear(final IJavaProject jproject, final IClasspathEntry[] entries) throws Exception {
 		performDummySearch();
 		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+			@Override
 			public void run(IProgressMonitor monitor) throws CoreException {
 				jproject.setRawClasspath(entries, null);
 
@@ -692,7 +696,7 @@ public class JavaProjectHelper {
 	public static IPackageFragmentRoot addRTJar13(IJavaProject jproject) throws CoreException {
 		IPath[] rtJarPath= findRtJar(RT_STUBS_13);
 
-		Map options= jproject.getOptions(false);
+		Map<String, String> options= jproject.getOptions(false);
 		JavaProjectHelper.set13CompilerOptions(options);
 		jproject.setOptions(options);
 
@@ -810,14 +814,14 @@ public class JavaProjectHelper {
 	public static void removeFromClasspath(IJavaProject jproject, IPath path) throws JavaModelException {
 		IClasspathEntry[] oldEntries= jproject.getRawClasspath();
 		int nEntries= oldEntries.length;
-		ArrayList list= new ArrayList(nEntries);
+		ArrayList<IClasspathEntry> list= new ArrayList<>(nEntries);
 		for (int i= 0 ; i < nEntries ; i++) {
 			IClasspathEntry curr= oldEntries[i];
 			if (!path.equals(curr.getPath())) {
 				list.add(curr);
 			}
 		}
-		IClasspathEntry[] newEntries= (IClasspathEntry[])list.toArray(new IClasspathEntry[list.size()]);
+		IClasspathEntry[] newEntries= list.toArray(new IClasspathEntry[list.size()]);
 		jproject.setRawClasspath(newEntries, null);
 	}
 
@@ -882,9 +886,9 @@ public class JavaProjectHelper {
 	 * @throws IOException import failed
 	 */
 	public static void importResources(IContainer importTarget, Bundle bundle, String bundleSourcePath) throws CoreException, IOException {
-		Enumeration entryPaths= bundle.getEntryPaths(bundleSourcePath);
+		Enumeration<String> entryPaths= bundle.getEntryPaths(bundleSourcePath);
 		while (entryPaths.hasMoreElements()) {
-			String path= (String) entryPaths.nextElement();
+			String path= entryPaths.nextElement();
 			IPath name= new Path(path.substring(bundleSourcePath.length()));
 			if (path.endsWith("/")) {
 				IFolder folder= importTarget.getFolder(name);
@@ -899,6 +903,7 @@ public class JavaProjectHelper {
 	}
 
 	private static class ImportOverwriteQuery implements IOverwriteQuery {
+		@Override
 		public String queryOverwrite(String file) {
 			return ALL;
 		}

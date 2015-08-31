@@ -547,7 +547,7 @@ public class ASTResolving {
    	 */
 	public static ITypeBinding[] getQualifierGuess(ASTNode searchRoot, final String selector, List<Expression> arguments, final IBinding context) {
 		final int nArgs= arguments.size();
-		final ArrayList<ITypeBinding> result= new ArrayList<ITypeBinding>();
+		final ArrayList<ITypeBinding> result= new ArrayList<>();
 
 		// test if selector is a object method
 		ITypeBinding binding= searchRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
@@ -560,8 +560,9 @@ public class ASTResolving {
 		}
 
 		visitAllBindings(searchRoot, new TypeBindingVisitor() {
-			private HashSet<String> fVisitedBindings= new HashSet<String>(100);
+			private HashSet<String> fVisitedBindings= new HashSet<>(100);
 
+			@Override
 			public boolean visit(ITypeBinding node) {
 				node= Bindings.normalizeTypeBinding(node);
 				if (node == null) {
@@ -1003,7 +1004,7 @@ public class ASTResolving {
 	private static final Code[] CODE_ORDER= { PrimitiveType.CHAR, PrimitiveType.SHORT, PrimitiveType.INT, PrimitiveType.LONG, PrimitiveType.FLOAT, PrimitiveType.DOUBLE };
 
 	public static ITypeBinding[] getNarrowingTypes(AST ast, ITypeBinding type) {
-		ArrayList<ITypeBinding> res= new ArrayList<ITypeBinding>();
+		ArrayList<ITypeBinding> res= new ArrayList<>();
 		res.add(type);
 		if (type.isPrimitive()) {
 			Code code= PrimitiveType.toCode(type.getName());
@@ -1016,7 +1017,7 @@ public class ASTResolving {
 	}
 
 	public static ITypeBinding[] getRelaxingTypes(AST ast, ITypeBinding type) {
-		ArrayList<ITypeBinding> res= new ArrayList<ITypeBinding>();
+		ArrayList<ITypeBinding> res= new ArrayList<>();
 		res.add(type);
 		if (type.isArray()) {
 			res.add(ast.resolveWellKnownType("java.lang.Object")); //$NON-NLS-1$

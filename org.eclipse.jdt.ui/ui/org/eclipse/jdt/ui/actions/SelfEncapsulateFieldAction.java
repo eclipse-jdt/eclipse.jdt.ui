@@ -83,9 +83,6 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 
 	//---- text selection -------------------------------------------------------
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
@@ -109,9 +106,6 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		try {
@@ -137,9 +131,6 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 
 	//---- structured selection -------------------------------------------------
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
@@ -152,10 +143,6 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		try {

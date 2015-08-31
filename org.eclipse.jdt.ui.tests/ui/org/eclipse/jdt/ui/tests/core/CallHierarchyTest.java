@@ -32,7 +32,7 @@ import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyTestHelper;
 
 public class CallHierarchyTest extends TestCase {
     private static final String[] EMPTY= new String[0];
-    private static final Class THIS= CallHierarchyTest.class;
+    private static final Class<CallHierarchyTest> THIS= CallHierarchyTest.class;
 
     private CallHierarchyTestHelper helper;
 
@@ -44,12 +44,14 @@ public class CallHierarchyTest extends TestCase {
 		return new TestSuite(THIS);
     }
 
-    protected void setUp() throws Exception {
+    @Override
+	protected void setUp() throws Exception {
         helper= new CallHierarchyTestHelper();
         helper.setUp();
     }
 
-    protected void tearDown() throws Exception {
+    @Override
+	protected void tearDown() throws Exception {
         helper.tearDown();
         helper= null;
     }
@@ -71,7 +73,7 @@ public class CallHierarchyTest extends TestCase {
         IMethod method= helper.getMethod1();
         IMethod secondLevelMethod= helper.getMethod3();
 
-        Collection expectedMethods= new ArrayList();
+        Collection<IMember> expectedMethods= new ArrayList<>();
         expectedMethods.add(helper.getMethod2());
         expectedMethods.add(secondLevelMethod);
 
@@ -85,7 +87,7 @@ public class CallHierarchyTest extends TestCase {
 
         MethodWrapper wrapper2= helper.findMethodWrapper(secondLevelMethod, cachedCalls);
 
-        Collection expectedSecondLevelMethods= new ArrayList();
+        Collection<IMember> expectedSecondLevelMethods= new ArrayList<>();
         expectedSecondLevelMethods.add(helper.getMethod4());
         helper.assertCalls(expectedSecondLevelMethods, wrapper2.getCalls(new NullProgressMonitor()));
     }
@@ -95,7 +97,7 @@ public class CallHierarchyTest extends TestCase {
 
         IMethod method= helper.getMethod4();
 
-        Collection expectedMethods= new ArrayList();
+        Collection<IMember> expectedMethods= new ArrayList<>();
 
         MethodWrapper wrapper= getSingleCallerRoot(method);
 
@@ -112,7 +114,7 @@ public class CallHierarchyTest extends TestCase {
         IMethod method= helper.getMethod4();
         IMethod secondLevelMethod= helper.getMethod3();
 
-        Collection expectedMethods= new ArrayList();
+        Collection<IMember> expectedMethods= new ArrayList<>();
         expectedMethods.add(secondLevelMethod);
 
         MethodWrapper wrapper= getSingleCalleeRoot(method);
@@ -125,7 +127,7 @@ public class CallHierarchyTest extends TestCase {
 
         MethodWrapper wrapper2= helper.findMethodWrapper(secondLevelMethod, cachedCalls);
 
-        Collection expectedMethodsTo3= new ArrayList();
+        Collection<IMember> expectedMethodsTo3= new ArrayList<>();
         expectedMethodsTo3.add(helper.getMethod1());
         expectedMethodsTo3.add(helper.getMethod2());
 
@@ -137,7 +139,7 @@ public class CallHierarchyTest extends TestCase {
 
         IMethod method= helper.getMethod1();
 
-        Collection expectedMethods= new ArrayList();
+        Collection<IMember> expectedMethods= new ArrayList<>();
 
         MethodWrapper wrapper= getSingleCalleeRoot(method);
 
@@ -154,10 +156,10 @@ public class CallHierarchyTest extends TestCase {
         IMethod method1= helper.getRecursiveMethod1();
         IMethod method2= helper.getRecursiveMethod2();
 
-        Collection expectedMethodsTo1= new ArrayList();
+        Collection<IMember> expectedMethodsTo1= new ArrayList<>();
         expectedMethodsTo1.add(method2);
 
-        Collection expectedMethodsTo2= new ArrayList();
+        Collection<IMember> expectedMethodsTo2= new ArrayList<>();
         expectedMethodsTo2.add(method1);
 
         MethodWrapper wrapper= getSingleCallerRoot(method1);
@@ -185,10 +187,10 @@ public class CallHierarchyTest extends TestCase {
         IMethod method1= helper.getRecursiveMethod1();
         IMethod method2= helper.getRecursiveMethod2();
 
-        Collection expectedMethodsFrom1= new ArrayList();
+        Collection<IMember> expectedMethodsFrom1= new ArrayList<>();
         expectedMethodsFrom1.add(method2);
 
-        Collection expectedMethodsFrom2= new ArrayList();
+        Collection<IMember> expectedMethodsFrom2= new ArrayList<>();
         expectedMethodsFrom2.add(method1);
 
         MethodWrapper wrapper= getSingleCalleeRoot(method1);
@@ -222,7 +224,7 @@ public class CallHierarchyTest extends TestCase {
         IMethod innerMethod1= helper.getType1().getType("Inner").getMethod("innerMethod1", EMPTY);
         IMethod innerMethod2= helper.getType1().getType("Inner").getMethod("innerMethod2", EMPTY);
 
-        Collection expectedCallers= new ArrayList();
+        Collection<IMember> expectedCallers= new ArrayList<>();
         expectedCallers.add(innerMethod1);
 
         MethodWrapper wrapper= getSingleCallerRoot(someMethod);
@@ -230,7 +232,7 @@ public class CallHierarchyTest extends TestCase {
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
 
-        Collection expectedCallersSecondLevel= new ArrayList();
+        Collection<IMember> expectedCallersSecondLevel= new ArrayList<>();
         expectedCallersSecondLevel.add(innerMethod2);
         MethodWrapper innerMethod1Wrapper= helper.findMethodWrapper(innerMethod1, callers);
         helper.assertCalls(expectedCallersSecondLevel, innerMethod1Wrapper.getCalls(new NullProgressMonitor()));
@@ -248,7 +250,7 @@ public class CallHierarchyTest extends TestCase {
         IMethod innerMethod1= helper.getType1().getType("Inner").getMethod("innerMethod1", EMPTY);
         IMethod innerMethod2= helper.getType1().getType("Inner").getMethod("innerMethod2", EMPTY);
 
-        Collection expectedCallers= new ArrayList();
+        Collection<IMember> expectedCallers= new ArrayList<>();
         expectedCallers.add(innerMethod2);
 
         MethodWrapper wrapper= getSingleCalleeRoot(someMethod);
@@ -256,7 +258,7 @@ public class CallHierarchyTest extends TestCase {
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
 
-        Collection expectedCallersSecondLevel= new ArrayList();
+        Collection<IMember> expectedCallersSecondLevel= new ArrayList<>();
         expectedCallersSecondLevel.add(innerMethod1);
         MethodWrapper innerMethod2Wrapper= helper.findMethodWrapper(innerMethod2, callers);
         helper.assertCalls(expectedCallersSecondLevel, innerMethod2Wrapper.getCalls(new NullProgressMonitor()));
@@ -274,7 +276,7 @@ public class CallHierarchyTest extends TestCase {
         IMethod innerMethod1= helper.getType1().getType("Inner").getMethod("innerMethod1", EMPTY);
         IMethod innerMethod2= helper.getType1().getType("Inner").getMethod("innerMethod2", EMPTY);
 
-        Collection expectedCallers= new ArrayList();
+        Collection<IMember> expectedCallers= new ArrayList<>();
         expectedCallers.add(innerMethod1);
 
         MethodWrapper wrapper= getSingleCalleeRoot(innerMethod2);
@@ -282,7 +284,7 @@ public class CallHierarchyTest extends TestCase {
         assertRecursive(callers, false);
         helper.assertCalls(expectedCallers, callers);
 
-        Collection expectedCallersSecondLevel= new ArrayList();
+        Collection<IMember> expectedCallersSecondLevel= new ArrayList<>();
         expectedCallersSecondLevel.add(someMethod);
         MethodWrapper innerMethod1Wrapper= helper.findMethodWrapper(innerMethod1, callers);
         helper.assertCalls(expectedCallersSecondLevel, innerMethod1Wrapper.getCalls(new NullProgressMonitor()));
@@ -298,7 +300,7 @@ public class CallHierarchyTest extends TestCase {
         IMethod someMethod= helper.getType1().getMethod("someMethod", EMPTY);
 
         IMethod result= helper.getType1().getField("anonClass").getType("", 1).getMethod("anotherMethod", EMPTY);
-        Collection expectedCallers= new ArrayList();
+        Collection<IMember> expectedCallers= new ArrayList<>();
         expectedCallers.add(result);
 
         MethodWrapper wrapper= getSingleCallerRoot(someMethod);
@@ -385,7 +387,7 @@ public class CallHierarchyTest extends TestCase {
 
         IInitializer initializer= helper.getType1().getInitializer(1);
 
-        Collection expectedCallers= new ArrayList();
+        Collection<IMember> expectedCallers= new ArrayList<>();
         expectedCallers.add(initializer);
 
         MethodWrapper wrapper= getSingleCallerRoot(someMethod);
@@ -399,7 +401,7 @@ public class CallHierarchyTest extends TestCase {
 
         IMethod constructorA= helper.getType1().getMethod("A", EMPTY);
 
-        Collection expectedCallers= new ArrayList();
+        Collection<IMember> expectedCallers= new ArrayList<>();
         expectedCallers.add(helper.getType2());
 
         MethodWrapper wrapper= getSingleCallerRoot(constructorA);
@@ -413,7 +415,7 @@ public class CallHierarchyTest extends TestCase {
 
         IMethod constructorB= helper.getType2().getMethods()[0];
 
-        Collection expectedCallers= new ArrayList();
+        Collection<IMember> expectedCallers= new ArrayList<>();
         expectedCallers.add(helper.getType1());
 
         MethodWrapper wrapper= getSingleCalleeRoot(constructorB);

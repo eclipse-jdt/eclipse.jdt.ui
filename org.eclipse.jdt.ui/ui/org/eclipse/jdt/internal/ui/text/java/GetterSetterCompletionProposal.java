@@ -115,9 +115,6 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal i
 		return buf;
 	}
 
-	/* (non-Javadoc)
-	 * @see JavaTypeCompletionProposal#updateReplacementString(IDocument, char, int, ImportRewrite)
-	 */
 	@Override
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportRewrite impRewrite) throws CoreException, BadLocationException {
 
@@ -154,6 +151,7 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal i
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension4#isAutoInsertable()
 	 */
+	@Override
 	public boolean isAutoInsertable() {
 		return false;
 	}

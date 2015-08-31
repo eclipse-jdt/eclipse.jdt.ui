@@ -50,12 +50,14 @@ public class RenameTypePerfAcceptanceTests extends RefactoringPerformanceTestCas
 		super(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProject= (IJavaProject)JavaCore.create(
 			ResourcesPlugin.getWorkspace().getRoot().findMember(SWTTestProject.PROJECT));
 	}
 
+	@Override
 	protected void finishMeasurements() {
 		stopMeasuring();
 		commitMeasurements();

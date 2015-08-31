@@ -42,9 +42,6 @@ public class EditFilterWizard extends BuildPathWizard {
 		addPage(fFilterPage);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
-	 */
 	@Override
 	public boolean performFinish() {
 		CPListElement entryToEdit= getEntryToEdit();
@@ -54,9 +51,6 @@ public class EditFilterWizard extends BuildPathWizard {
 		return super.performFinish();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void cancel() {
 		CPListElement entryToEdit= getEntryToEdit();

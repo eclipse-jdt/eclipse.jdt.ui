@@ -18,7 +18,7 @@ import junit.framework.TestSuite;
  */
 public class WorkspaceReferenceTest extends TestCase {
 
-	private static final Class THIS= WorkspaceReferenceTest.class;
+	private static final Class<WorkspaceReferenceTest> THIS= WorkspaceReferenceTest.class;
 
 	public static Test suite() {
 		return setUpTest(new TestSuite(THIS));

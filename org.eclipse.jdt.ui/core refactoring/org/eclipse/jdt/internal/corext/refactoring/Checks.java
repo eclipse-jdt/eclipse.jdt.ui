@@ -574,7 +574,7 @@ public class Checks {
 	 * @throws JavaModelException
 	 */
 	public static SearchResultGroup[] excludeCompilationUnits(SearchResultGroup[] grouped, RefactoringStatus status) throws JavaModelException{
-		List<SearchResultGroup> result= new ArrayList<SearchResultGroup>();
+		List<SearchResultGroup> result= new ArrayList<>();
 		boolean wasEmpty= grouped.length == 0;
 		for (int i= 0; i < grouped.length; i++){
 			IResource resource= grouped[i].getResource();
@@ -704,7 +704,7 @@ public class Checks {
 	}
 
 	public static void addModifiedFilesToChecker(IFile[] filesToModify, CheckConditionsContext context) {
-		ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
+		ResourceChangeChecker checker= context.getChecker(ResourceChangeChecker.class);
 		IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
 
 		for (int i= 0; i < filesToModify.length; i++) {

@@ -42,6 +42,7 @@ public class AllPerformanceTestSuite extends TestSuite {
 	 * @return the test suite
 	 * @deprecated since INVOCATION_COUNT dimension is no longer supported.
 	 */
+	@Deprecated
 	private Test getDebuggingPerformanceTestSuite() {
 		return DebuggingPerformanceTestSuite.suite();
 	}

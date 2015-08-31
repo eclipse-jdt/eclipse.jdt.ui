@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,9 +16,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -54,9 +51,12 @@ import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class CleanUpTest extends CleanUpTestCase {
 
-	private static final Class THIS= CleanUpTest.class;
+	private static final Class<CleanUpTest> THIS= CleanUpTest.class;
 
 	public CleanUpTest(String name) {
 		super(name);
@@ -1413,7 +1413,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		HashMap map= new HashMap();
+		HashMap<String, String> map= new HashMap<>();
 		map.put(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES, CleanUpOptions.TRUE);
 		Java50CleanUp cleanUp= new Java50CleanUp(map);
 
@@ -1421,15 +1421,13 @@ public class CleanUpTest extends CleanUpTestCase {
 		parser.setResolveBindings(true);
 		parser.setProject(fJProject1);
 
-		Map options= RefactoringASTParser.getCompilerOptions(fJProject1);
+		Map<String, String> options= RefactoringASTParser.getCompilerOptions(fJProject1);
 		options.putAll(cleanUp.getRequirements().getCompilerOptions());
 		parser.setCompilerOptions(options);
 
 		final CompilationUnit[] roots= new CompilationUnit[1];
 		parser.createASTs(new ICompilationUnit[] { cu1 }, new String[0], new ASTRequestor() {
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.core.dom.ASTRequestor#acceptAST(org.eclipse.jdt.core.ICompilationUnit, org.eclipse.jdt.core.dom.CompilationUnit)
-			 */
+			@Override
 			public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
 				roots[0]= ast;
 			}
@@ -5097,11 +5095,11 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		enable(CleanUpConstants.FORMAT_SOURCE_CODE);
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 
-		Map eclipse21Settings= DefaultCodeFormatterConstants.getEclipseDefaultSettings();
-		for (Iterator iterator= eclipse21Settings.keySet().iterator(); iterator.hasNext();) {
-			String key= (String)iterator.next();
+		Map<String, String> eclipse21Settings= DefaultCodeFormatterConstants.getEclipseDefaultSettings();
+		for (Iterator<String> iterator= eclipse21Settings.keySet().iterator(); iterator.hasNext();) {
+			String key= iterator.next();
 			options.put(key, eclipse21Settings.get(key));
 		}
 

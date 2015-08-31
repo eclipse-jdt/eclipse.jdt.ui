@@ -62,9 +62,6 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 		       isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 
@@ -77,9 +74,6 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 				isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
@@ -91,19 +85,16 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 	}
 
 	private Map<String, String> getRequiredOptions() {
-		Map<String, String> result= new Hashtable<String, String>();
+		Map<String, String> result= new Hashtable<>();
 		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) ||
 				(isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_DEFAULT)))
 			result.put(JavaCore.COMPILER_PB_MISSING_SERIAL_VERSION, JavaCore.WARNING);
 		return result;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String[] getStepDescriptions() {
-		List<String> result= new ArrayList<String>();
+		List<String> result= new ArrayList<>();
 
 		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)))
 			result.add(MultiFixMessages.SerialVersionCleanUp_Generated_description);
@@ -113,9 +104,6 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 		return result.toArray(new String[result.size()]);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();
@@ -131,9 +119,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 		return buf.toString();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		if (problem.getProblemId() == IProblem.MissingSerialVersion)
 			return (isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED))
@@ -142,9 +128,6 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 		return false;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public RefactoringStatus checkPreConditions(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 		RefactoringStatus superStatus= super.checkPreConditions(project, compilationUnits, monitor);
@@ -157,17 +140,11 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractMultiFix {
 				false);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public RefactoringStatus checkPostConditions(IProgressMonitor monitor) throws CoreException {
 		return PotentialProgrammingProblemsFix.checkPostConditions(monitor);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		if ((isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID) && isEnabled(CleanUpConstants.ADD_MISSING_SERIAL_VERSION_ID_GENERATED)) ||

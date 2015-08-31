@@ -105,18 +105,12 @@ public class BlankLinesTabPage extends FormatterTabPage {
 		createNumberPref(composite, numColumns, message, key, MIN_NUMBER_LINES, MAX_NUMBER_LINES);
 	}
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
-     */
     @Override
 	protected JavaPreview doCreateJavaPreview(Composite parent) {
         fPreview= new CompilationUnitPreview(fWorkingValues, parent);
         return fPreview;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doUpdatePreview()
-     */
     @Override
 	protected void doUpdatePreview() {
     	super.doUpdatePreview();

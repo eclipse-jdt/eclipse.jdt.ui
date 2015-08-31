@@ -28,9 +28,10 @@ import org.eclipse.jface.text.presentation.PresentationReconciler;
  * @since 3.1
  * @deprecated since INVOCATION_COUNT dimension is no longer supported.
  */
+@Deprecated
 public class OpenJavaEditorInvocationCountTest extends OpenEditorTest {
 
-	private static final Class THIS= OpenJavaEditorInvocationCountTest.class;
+	private static final Class<OpenJavaEditorInvocationCountTest> THIS= OpenJavaEditorInvocationCountTest.class;
 
 	private static final String FILE= PerformanceTestSetup.TEXT_LAYOUT;
 
@@ -41,6 +42,7 @@ public class OpenJavaEditorInvocationCountTest extends OpenEditorTest {
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();

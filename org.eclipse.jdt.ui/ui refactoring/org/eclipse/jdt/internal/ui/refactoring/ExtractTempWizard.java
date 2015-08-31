@@ -75,6 +75,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 			fInitialValid= tempNameProposals.length > 0;
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			loadSettings();
 			Composite result= new Composite(parent, SWT.NONE);

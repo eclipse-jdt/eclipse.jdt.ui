@@ -36,6 +36,7 @@ public class NativeLibrariesDialog extends StatusDialog {
 		setTitle(NewWizardMessages.NativeLibrariesDialog_title);
 
 		IStatusChangeListener listener= new IStatusChangeListener() {
+			@Override
 			public void statusChanged(IStatus status) {
 				updateStatus(status);
 			}
@@ -45,19 +46,12 @@ public class NativeLibrariesDialog extends StatusDialog {
 		setHelpAvailable(false);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
-	 * @since 3.4
-	 */
 	@Override
 	protected boolean isResizable() {
 		// TODO Auto-generated method stub
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);

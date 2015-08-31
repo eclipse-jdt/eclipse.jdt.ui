@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -248,7 +248,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	/**
 	 * The argument map (key type: {@link String}, value type: {@link String}).
 	 */
-	protected final Map fArguments;
+	protected final Map<String, String> fArguments;
 
 	/**
 	 * Creates a new java refactoring descriptor.
@@ -257,7 +257,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 *            the unique id of the refactoring
 	 */
 	protected JavaRefactoringDescriptor(final String id) {
-		this(id, null, DescriptorMessages.JavaRefactoringDescriptor_not_available, null, new HashMap(), RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+		this(id, null, DescriptorMessages.JavaRefactoringDescriptor_not_available, null, new HashMap<String, String>(), RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 	}
 
 	/**
@@ -283,15 +283,13 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
-	public JavaRefactoringDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
+	public JavaRefactoringDescriptor(final String id, final String project, final String description, final String comment, final Map<String, String> arguments, final int flags) {
 		super(id,project,description,comment,flags);
 		fArguments= arguments;
 		fArguments.put(ATTRIBUTE_VERSION, VALUE_VERSION_1_0);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Refactoring createRefactoring(final RefactoringStatus status) throws CoreException {
 		Refactoring refactoring= null;
 		final String id= getID();
@@ -319,9 +317,9 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 *
 	 * @return the argument map (key type: {@link String}, value type: {@link String})
 	 */
-	protected Map getArguments() {
+	protected Map<String, String> getArguments() {
 		populateArgumentMap();
-		return new HashMap(fArguments);
+		return new HashMap<>(fArguments);
 	}
 
 	/**
@@ -348,6 +346,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 *
 	 * @see #getComment()
 	 */
+	@Override
 	public void setComment(final String comment) {
 		super.setComment(comment);
 	}
@@ -364,6 +363,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 *
 	 * @see #getDescription()
 	 */
+	@Override
 	public void setDescription(final String description) {
 		super.setDescription(description);
 	}
@@ -392,6 +392,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * @see #JAR_REFACTORING
 	 * @see #JAR_SOURCE_ATTACHMENT
 	 */
+	@Override
 	public void setFlags(final int flags) {
 		super.setFlags(flags);
 	}
@@ -410,6 +411,7 @@ public abstract class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 *
 	 * @see #getProject()
 	 */
+	@Override
 	public void setProject(final String project) {
 		super.setProject(project);
 	}

@@ -56,9 +56,6 @@ public class TemplateCompletionProposalComputer extends AbstractTemplateCompleti
 		return new TemplateEngine(contextType);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.java.TemplateCompletionProposalComputer#computeCompletionEngine(org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
-	 */
 	@Override
 	protected TemplateEngine computeCompletionEngine(JavaContentAssistInvocationContext context) {
 		try {

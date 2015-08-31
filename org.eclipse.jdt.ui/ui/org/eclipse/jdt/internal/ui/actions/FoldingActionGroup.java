@@ -58,6 +58,7 @@ public class FoldingActionGroup extends ActionGroup {
 			super(bundle, prefix, IAction.AS_PUSH_BUTTON);
 		}
 
+		@Override
 		public void update() {
 			setEnabled(FoldingActionGroup.this.isEnabled() && fViewer.isProjectionMode());
 		}
@@ -105,10 +106,12 @@ public class FoldingActionGroup extends ActionGroup {
 
 		fProjectionListener= new IProjectionListener() {
 
+			@Override
 			public void projectionEnabled() {
 				update();
 			}
 
+			@Override
 			public void projectionDisabled() {
 				update();
 			}
@@ -124,6 +127,7 @@ public class FoldingActionGroup extends ActionGroup {
 				store.setValue(PreferenceConstants.EDITOR_FOLDING_ENABLED, !current);
 			}
 
+			@Override
 			public void update() {
 				ITextOperationTarget target= editor.getAdapter(ITextOperationTarget.class);
 

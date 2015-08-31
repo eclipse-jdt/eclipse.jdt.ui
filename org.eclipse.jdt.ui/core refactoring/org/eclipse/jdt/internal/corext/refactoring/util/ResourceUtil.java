@@ -27,7 +27,7 @@ public class ResourceUtil {
 	}
 
 	public static IFile[] getFiles(ICompilationUnit[] cus) {
-		List<IResource> files= new ArrayList<IResource>(cus.length);
+		List<IResource> files= new ArrayList<>(cus.length);
 		for (int i= 0; i < cus.length; i++) {
 			IResource resource= cus[i].getResource();
 			if (resource != null && resource.getType() == IResource.FILE)

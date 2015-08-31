@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,9 +55,10 @@ import org.eclipse.jdt.internal.corext.CorextMessages;
 /**
  * History for the open type dialog. Object and keys are both {@link TypeNameMatch}s.
  */
-public class OpenTypeHistory extends History {
+public class OpenTypeHistory extends History<TypeNameMatch, TypeNameMatch> {
 
 	private static class TypeHistoryDeltaListener implements IElementChangedListener {
+		@Override
 		public void elementChanged(ElementChangedEvent event) {
 			if (processDelta(event.getDelta())) {
 				OpenTypeHistory.getInstance().markAsInconsistent();
@@ -194,7 +195,7 @@ public class OpenTypeHistory extends History {
 
 	private OpenTypeHistory() {
 		super(FILENAME, NODE_ROOT, NODE_TYPE_INFO);
-		fTimestampMapping= new HashMap<TypeNameMatch, Long>();
+		fTimestampMapping= new HashMap<>();
 		fNeedsConsistencyCheck= true;
 		load();
 		fDeltaListener= new TypeHistoryDeltaListener();
@@ -238,10 +239,12 @@ public class OpenTypeHistory extends History {
 		internalCheckConsistency(monitor);
 	}
 
+	@Override
 	public synchronized boolean contains(TypeNameMatch type) {
 		return super.contains(type);
 	}
 
+	@Override
 	public synchronized void accessed(TypeNameMatch info) {
 		// Fetching the timestamp might not be cheap (remote file system
 		// external Jars. So check if we alreay have one.
@@ -251,6 +254,7 @@ public class OpenTypeHistory extends History {
 		super.accessed(info);
 	}
 
+	@Override
 	public synchronized TypeNameMatch remove(TypeNameMatch info) {
 		fTimestampMapping.remove(info);
 		return (TypeNameMatch)super.remove(info);
@@ -264,22 +268,22 @@ public class OpenTypeHistory extends History {
 	}
 
 	public synchronized TypeNameMatch[] getTypeInfos() {
-		Collection<Object> values= getValues();
+		Collection<TypeNameMatch> values= getValues();
 		int size= values.size();
 		TypeNameMatch[] result= new TypeNameMatch[size];
 		int i= size - 1;
-		for (Iterator<Object> iter= values.iterator(); iter.hasNext();) {
-			result[i]= (TypeNameMatch)iter.next();
+		for (Iterator<TypeNameMatch> iter= values.iterator(); iter.hasNext();) {
+			result[i]= iter.next();
 			i--;
 		}
 		return result;
 	}
 
 	public synchronized TypeNameMatch[] getFilteredTypeInfos(TypeInfoFilter filter) {
-		Collection<Object> values= getValues();
-		List<TypeNameMatch> result= new ArrayList<TypeNameMatch>();
-		for (Iterator<Object> iter= values.iterator(); iter.hasNext();) {
-			TypeNameMatch type= (TypeNameMatch)iter.next();
+		Collection<TypeNameMatch> values= getValues();
+		List<TypeNameMatch> result= new ArrayList<>();
+		for (Iterator<TypeNameMatch> iter= values.iterator(); iter.hasNext();) {
+			TypeNameMatch type= iter.next();
 			if ((filter == null || filter.matchesHistoryElement(type)) && !TypeFilter.isFiltered(type.getFullyQualifiedName()))
 				result.add(type);
 		}
@@ -289,7 +293,7 @@ public class OpenTypeHistory extends History {
 	}
 
 	@Override
-	protected Object getKey(Object object) {
+	protected TypeNameMatch getKey(TypeNameMatch object) {
 		return object;
 	}
 
@@ -297,11 +301,11 @@ public class OpenTypeHistory extends History {
 		// Setting fNeedsConsistencyCheck is necessary here since
 		// markAsInconsistent isn't synchronized.
 		fNeedsConsistencyCheck= true;
-		List<Object> typesToCheck= new ArrayList<Object>(getKeys());
+		List<TypeNameMatch> typesToCheck= new ArrayList<>(getKeys());
 		monitor.beginTask(CorextMessages.TypeInfoHistory_consistency_check, typesToCheck.size());
 		monitor.setTaskName(CorextMessages.TypeInfoHistory_consistency_check);
-		for (Iterator<Object> iter= typesToCheck.iterator(); iter.hasNext();) {
-			TypeNameMatch type= (TypeNameMatch)iter.next();
+		for (Iterator<TypeNameMatch> iter= typesToCheck.iterator(); iter.hasNext();) {
+			TypeNameMatch type= iter.next();
 			long currentTimestamp= getContainerTimestamp(type);
 			Long lastTested= fTimestampMapping.get(type);
 			if (lastTested != null && currentTimestamp != IResource.NULL_STAMP && currentTimestamp == lastTested.longValue() && !isContainerDirty(type))
@@ -383,7 +387,7 @@ public class OpenTypeHistory extends History {
 	}
 
 	@Override
-	protected Object createFromElement(Element type) {
+	protected TypeNameMatch createFromElement(Element type) {
 		String handle= type.getAttribute(NODE_HANDLE);
 		if (handle == null )
 			return null;

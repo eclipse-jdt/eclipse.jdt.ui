@@ -30,16 +30,20 @@ public class TestRunListeners {
 		public SequenceTest(TestRunLog log) {
 			fLog= log;
 		}
+		@Override
 		public void sessionStarted(ITestRunSession session) {
 			fLog.add("sessionStarted-" + asString(session, 0));
 		}
+		@Override
 		public void sessionFinished(ITestRunSession session) {
 			fLog.add("sessionFinished-" + asString(session, 0));
 			fLog.setDone();
 		}
+		@Override
 		public void testCaseStarted(ITestCaseElement testCaseElement) {
 			fLog.add("testCaseStarted-" + asString(testCaseElement, 0));
 		}
+		@Override
 		public void testCaseFinished(ITestCaseElement testCaseElement) {
 			fLog.add("testCaseFinished-" + asString(testCaseElement, 0));
 		}
@@ -69,9 +73,11 @@ public class TestRunListeners {
 		}
 
 
+		@Override
 		public void sessionStarted(ITestRunSession session) {
 			process(session);
 		}
+		@Override
 		public void sessionFinished(ITestRunSession session) {
 			process(session);
 			if (fLog.getLog().length == 0) {
@@ -81,9 +87,11 @@ public class TestRunListeners {
 			}
 			fLog.setDone();
 		}
+		@Override
 		public void testCaseStarted(ITestCaseElement testCaseElement) {
 			process(testCaseElement);
 		}
+		@Override
 		public void testCaseFinished(ITestCaseElement testCaseElement) {
 			process(testCaseElement);
 		}

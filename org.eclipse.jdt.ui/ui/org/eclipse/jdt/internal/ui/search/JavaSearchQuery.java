@@ -67,6 +67,7 @@ public class JavaSearchQuery implements ISearchQuery {
 	private static class SearchRequestor implements ISearchRequestor {
 		private IQueryParticipant fParticipant;
 		private JavaSearchResult fSearchResult;
+		@Override
 		public void reportMatch(Match match) {
 			IMatchPresentation participant= fParticipant.getUIParticipant();
 			if (participant == null || match.getElement() instanceof IJavaElement || match.getElement() instanceof IResource) {
@@ -83,6 +84,7 @@ public class JavaSearchQuery implements ISearchQuery {
 		}
 	}
 
+	@Override
 	public IStatus run(IProgressMonitor monitor) {
 		final JavaSearchResult textResult= (JavaSearchResult) getSearchResult();
 		textResult.removeAll();
@@ -97,12 +99,14 @@ public class JavaSearchQuery implements ISearchQuery {
 			for (int i= 0; i < participantDescriptors.length; i++) {
 				final int iPrime= i;
 				ISafeRunnable runnable= new ISafeRunnable() {
+					@Override
 					public void handleException(Throwable exception) {
 						ticks[iPrime]= 0;
 						String message= SearchMessages.JavaSearchQuery_error_participant_estimate;
 						JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, message, exception));
 					}
 
+					@Override
 					public void run() throws Exception {
 						ticks[iPrime]= participantDescriptors[iPrime].getParticipant().estimateTicks(fPatternData);
 					}
@@ -148,12 +152,14 @@ public class JavaSearchQuery implements ISearchQuery {
 
 				final int iPrime= i;
 				ISafeRunnable runnable= new ISafeRunnable() {
+					@Override
 					public void handleException(Throwable exception) {
 						participantDescriptors[iPrime].getDescriptor().disable();
 						String message= SearchMessages.JavaSearchQuery_error_participant_search;
 						JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, message, exception));
 					}
 
+					@Override
 					public void run() throws Exception {
 
 						final IQueryParticipant participant= participantDescriptors[iPrime].getParticipant();
@@ -186,6 +192,7 @@ public class JavaSearchQuery implements ISearchQuery {
 		return SearchPattern.R_EXACT_MATCH;
 	}
 
+	@Override
 	public String getLabel() {
 		return SearchMessages.JavaSearchQuery_label;
 	}
@@ -254,14 +261,17 @@ public class JavaSearchQuery implements ISearchQuery {
 			return JavaPluginImages.DESC_OBJS_SEARCH_REF;
 	}
 
+	@Override
 	public boolean canRerun() {
 		return true;
 	}
 
+	@Override
 	public boolean canRunInBackground() {
 		return true;
 	}
 
+	@Override
 	public ISearchResult getSearchResult() {
 		if (fResult == null) {
 			JavaSearchResult result= new JavaSearchResult(this);

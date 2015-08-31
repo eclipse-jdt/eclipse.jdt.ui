@@ -18,6 +18,7 @@ import junit.framework.TestSuite;
  * @since 3.1
  * @deprecated since INVOCATION_COUNT dimension is no longer supported.
  */
+@Deprecated
 public class DebuggingPerformanceTestSuite extends TestSuite {
 
 	public static Test suite() {

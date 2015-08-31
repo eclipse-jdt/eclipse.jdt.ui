@@ -64,7 +64,7 @@ public final class ConvertAnonymousDescriptor extends JavaRefactoringDescriptor 
 	 *
 	 * @since 1.2
 	 */
-	public ConvertAnonymousDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public ConvertAnonymousDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.CONVERT_ANONYMOUS, project, description, comment, arguments, flags);
 	}
 

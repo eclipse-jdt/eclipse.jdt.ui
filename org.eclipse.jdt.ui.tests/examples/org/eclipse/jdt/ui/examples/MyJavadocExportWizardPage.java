@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,8 +55,10 @@ public class MyJavadocExportWizardPage extends JavadocExportWizardPage {
 	public MyJavadocExportWizardPage() {
 	}
 
+	@Override
 	public Control createContents(Composite parent) {
 		ModifyListener modifyListener= new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				validateInputs();
 			}
@@ -70,10 +72,12 @@ public class MyJavadocExportWizardPage extends JavadocExportWizardPage {
 		fButton.setLayoutData(new GridData(SWT.LEAD, SWT.TOP, false, false, 2, 1));
 		fButton.setText("Use taglet");
 		fButton.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				validateInputs();
 			}
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				validateInputs();
 			}
@@ -130,7 +134,8 @@ public class MyJavadocExportWizardPage extends JavadocExportWizardPage {
 		setStatus(status);
 	}
 
-	public void updateArguments(List vmOptions, List toolOptions) {
+	@Override
+	public void updateArguments(List<String> vmOptions, List<String> toolOptions) {
 		if (fButton.getSelection()) {
 			String tag= fText.getText().trim();
 			String description= fText2.getText().trim();
@@ -140,6 +145,7 @@ public class MyJavadocExportWizardPage extends JavadocExportWizardPage {
 		}
 	}
 
+	@Override
 	public void updateAntScript(Element javadocXMLElement) {
 		if (fButton.getSelection()) {
 			String tag= fText.getText().trim();

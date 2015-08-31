@@ -66,13 +66,12 @@ public class TestMoveDescriptorAction extends Action implements IActionDelegate 
 	private ICompilationUnit fCU;
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
-	 */
+	@Override
 	public void run(IAction action) {
 		try {
 			if (fCU != null) {
 				PlatformUI.getWorkbench().getProgressService().run(true, true, new IRunnableWithProgress() {
+					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						try {
 							performAction(monitor);
@@ -108,9 +107,7 @@ public class TestMoveDescriptorAction extends Action implements IActionDelegate 
 		op.run(monitor);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction, org.eclipse.jface.viewers.ISelection)
-	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		fCU= null;
 		if (selection instanceof IStructuredSelection) {

@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 
 public class NameProposerTest extends TestCase {
 
-	private static final Class THIS= NameProposerTest.class;
+	private static final Class<NameProposerTest> THIS= NameProposerTest.class;
 
 	private IJavaProject fJProject1;
 
@@ -41,12 +41,14 @@ public class NameProposerTest extends TestCase {
 		return new TestSuite(THIS);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 	}

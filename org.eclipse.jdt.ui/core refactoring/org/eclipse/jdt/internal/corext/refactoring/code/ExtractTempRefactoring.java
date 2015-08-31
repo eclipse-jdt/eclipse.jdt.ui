@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -174,7 +174,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 
 
-	private static boolean allArraysEqual(Object[][] arrays, int position) {
+	private static boolean allArraysEqual(ASTNode[][] arrays, int position) {
 		Object element= arrays[0][position];
 		for (int i= 0; i < arrays.length; i++) {
 			Object[] array= arrays[i];
@@ -211,10 +211,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		return true;
 	}
 
-	private static Object[] getArrayPrefix(Object[] array, int prefixLength) {
+	private static ASTNode[] getArrayPrefix(ASTNode[] array, int prefixLength) {
 		Assert.isTrue(prefixLength <= array.length);
 		Assert.isTrue(prefixLength >= 0);
-		Object[] prefix= new Object[prefixLength];
+		ASTNode[] prefix= new ASTNode[prefixLength];
 		for (int i= 0; i < prefix.length; i++) {
 			prefix[i]= array[i];
 		}
@@ -223,7 +223,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	// return List<IVariableBinding>
 	private static List<IVariableBinding> getForInitializedVariables(VariableDeclarationExpression variableDeclarations) {
-		List<IVariableBinding> forInitializerVariables= new ArrayList<IVariableBinding>(1);
+		List<IVariableBinding> forInitializerVariables= new ArrayList<>(1);
 		for (Iterator<VariableDeclarationFragment> iter= variableDeclarations.fragments().iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment= iter.next();
 			IVariableBinding binding= fragment.resolveBinding();
@@ -233,10 +233,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		return forInitializerVariables;
 	}
 
-	private static Object[] getLongestArrayPrefix(Object[][] arrays) {
+	private static ASTNode[] getLongestArrayPrefix(ASTNode[][] arrays) {
 		int length= -1;
 		if (arrays.length == 0)
-			return new Object[0];
+			return new ASTNode[0];
 		int minArrayLength= arrays[0].length;
 		for (int i= 1; i < arrays.length; i++)
 			minArrayLength= Math.min(minArrayLength, arrays[i].length);
@@ -247,13 +247,13 @@ public class ExtractTempRefactoring extends Refactoring {
 			length++;
 		}
 		if (length == -1)
-			return new Object[0];
+			return new ASTNode[0];
 		return getArrayPrefix(arrays[0], length + 1);
 	}
 
 	private static ASTNode[] getParents(ASTNode node) {
 		ASTNode current= node;
-		List<ASTNode> parents= new ArrayList<ASTNode>();
+		List<ASTNode> parents= new ArrayList<>();
 		do {
 			parents.add(current.getParent());
 			current= current.getParent();
@@ -323,7 +323,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private static IASTFragment[] retainOnlyReplacableMatches(IASTFragment[] allMatches) {
-		List<IASTFragment> result= new ArrayList<IASTFragment>(allMatches.length);
+		List<IASTFragment> result= new ArrayList<>(allMatches.length);
 		for (int i= 0; i < allMatches.length; i++) {
 			if (canReplace(allMatches[i]))
 				result.add(allMatches[i]);
@@ -422,7 +422,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		IASTFragment[] fragmentsToReplace= retainOnlyReplacableMatches(getMatchingFragments());
 		//TODO: should not have to prune duplicates here...
 		ASTRewrite rewrite= fCURewrite.getASTRewrite();
-		HashSet<IASTFragment> seen= new HashSet<IASTFragment>();
+		HashSet<IASTFragment> seen= new HashSet<>();
 		for (int i= 0; i < fragmentsToReplace.length; i++) {
 			IASTFragment fragment= fragmentsToReplace[i];
 			if (! seen.add(fragment))
@@ -517,7 +517,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private final ExtractLocalDescriptor createRefactoringDescriptor() {
-		final Map<String, String> arguments= new HashMap<String, String>();
+		final Map<String, String> arguments= new HashMap<>();
 		String project= null;
 		IJavaProject javaProject= fCu.getJavaProject();
 		if (javaProject != null)
@@ -796,7 +796,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		for (int i= 0; i < matchNodes.length; i++) {
 			matchingNodesParents[i]= getParents(matchNodes[i]);
 		}
-		List<Object> l= Arrays.asList(getLongestArrayPrefix(matchingNodesParents));
+		List<ASTNode> l= Arrays.asList(getLongestArrayPrefix(matchingNodesParents));
 		return l.toArray(new ASTNode[l.size()]);
 	}
 
@@ -844,6 +844,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			return getSelectedExpression();
 		Comparator<IASTFragment> comparator= new Comparator<IASTFragment>() {
 
+			@Override
 			public int compare(IASTFragment o1, IASTFragment o2) {
 				return o1.getStartPosition() - o2.getStartPosition();
 			}

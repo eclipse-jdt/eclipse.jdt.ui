@@ -24,14 +24,16 @@ public class TTypes {
 		private final Stack<TType> fWorklist;
 
 		public AllSupertypesIterator(TType type) {
-			fWorklist= new Stack<TType>();
+			fWorklist= new Stack<>();
 			pushSupertypes(type);
 		}
 
+		@Override
 		public boolean hasNext() {
 			return ! fWorklist.empty();
 		}
 
+		@Override
 		public TType next() {
 			TType result= fWorklist.pop();
 			pushSupertypes(result);
@@ -61,6 +63,7 @@ public class TTypes {
 			}
 		}
 
+		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}
@@ -70,14 +73,16 @@ public class TTypes {
 		private final Stack<TType> fWorklist;
 
 		public AllSubtypesIterator(TType type) {
-			fWorklist= new Stack<TType>();
+			fWorklist= new Stack<>();
 			fWorklist.push(type.getTypeDeclaration());
 		}
 
+		@Override
 		public boolean hasNext() {
 			return ! fWorklist.empty();
 		}
 
+		@Override
 		public TType next() {
 			TType result= fWorklist.pop();
 			TType[] subTypes= result.getSubTypes();
@@ -87,6 +92,7 @@ public class TTypes {
 			return result;
 		}
 
+		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
 		}

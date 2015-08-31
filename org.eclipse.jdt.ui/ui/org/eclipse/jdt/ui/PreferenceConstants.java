@@ -100,6 +100,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @deprecated Override Indicator is now controlled on the platform's decorator preference page
 	 */
+	@Deprecated
 	public static final String APPEARANCE_OVERRIDE_INDICATOR= "org.eclipse.jdt.ui.overrideindicator";//$NON-NLS-1$
 
 	/**
@@ -244,6 +245,7 @@ public class PreferenceConstants {
 	 * @deprecated Use JavaCore preference store (key JavaCore.
 	 * CODEASSIST_FIELD_PREFIXES and CODEASSIST_STATIC_FIELD_PREFIXES)
 	 */
+	@Deprecated
 	public static final String CODEGEN_USE_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui.gettersetter.prefix.enable";//$NON-NLS-1$
 
 	/**
@@ -256,6 +258,7 @@ public class PreferenceConstants {
 	 * @deprecated Use JavaCore preference store (key JavaCore.
 	 * CODEASSIST_FIELD_PREFIXES and CODEASSIST_STATIC_FIELD_PREFIXES)
 	 */
+	@Deprecated
 	public static final String CODEGEN_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui.gettersetter.prefix.list";//$NON-NLS-1$
 
 	/**
@@ -266,6 +269,7 @@ public class PreferenceConstants {
 	 * @deprecated Use JavaCore preference store (key JavaCore.
 	 * CODEASSIST_FIELD_PREFIXES and CODEASSIST_STATIC_FIELD_PREFIXES)
 	 */
+	@Deprecated
 	public static final String CODEGEN_USE_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui.gettersetter.suffix.enable";//$NON-NLS-1$
 
 	/**
@@ -277,6 +281,7 @@ public class PreferenceConstants {
 	 * @deprecated Use setting from JavaCore preference store (key JavaCore.
 	 * CODEASSIST_FIELD_SUFFIXES and CODEASSIST_STATIC_FIELD_SUFFIXES)
 	 */
+	@Deprecated
 	public static final String CODEGEN_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui.gettersetter.suffix.list"; //$NON-NLS-1$
 
 	/**
@@ -333,6 +338,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @deprecated Use CODEGEN_ADD_COMMENTS instead (Name is more precise).
 	 */
+	@Deprecated
 	public static final String CODEGEN__JAVADOC_STUBS= CODEGEN_ADD_COMMENTS;
 
 	/**
@@ -344,6 +350,7 @@ public class PreferenceConstants {
 	 * @deprecated New code template story: user can
 	 * specify the overriding method comment.
 	 */
+	@Deprecated
 	public static final String CODEGEN__NON_JAVADOC_COMMENTS= "org.eclipse.jdt.ui.seecomments"; //$NON-NLS-1$
 
 	/**
@@ -354,6 +361,7 @@ public class PreferenceConstants {
 	 * @deprecated New code template story: user can
 	 * specify the new file code template.
 	 */
+	@Deprecated
 	public static final String CODEGEN__FILE_COMMENTS= "org.eclipse.jdt.ui.filecomments"; //$NON-NLS-1$
 
 	/**
@@ -429,6 +437,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @deprecated Since 3.3. Not used anymore. Package view always restores with the last recently used setting.
 	 */
+	@Deprecated
 	public static final String LINK_PACKAGES_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktoeditor"; //$NON-NLS-1$
 
 	/**
@@ -438,6 +447,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @deprecated Since 3.3. Not used anymore. Type hierarchy view always restores with the last recently used setting.
 	 */
+	@Deprecated
 	public static final String LINK_TYPEHIERARCHY_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktypehierarchytoeditor"; //$NON-NLS-1$
 
 	/**
@@ -610,6 +620,7 @@ public class PreferenceConstants {
 	 * @see #UPDATE_WHILE_EDITING
 	 * @deprecated Since 3.0, views now always update while editing
 	 */
+	@Deprecated
 	public static final String UPDATE_JAVA_VIEWS= "JavaUI.update"; //$NON-NLS-1$
 
 	/**
@@ -618,6 +629,7 @@ public class PreferenceConstants {
 	 * @see #UPDATE_JAVA_VIEWS
 	 * @deprecated Since 3.0, views now always update while editing
 	 */
+	@Deprecated
 	public static final String UPDATE_ON_SAVE= "JavaUI.update.onSave"; //$NON-NLS-1$
 
 	/**
@@ -626,6 +638,7 @@ public class PreferenceConstants {
 	 * @see #UPDATE_JAVA_VIEWS
 	 * @deprecated Since 3.0, views now always update while editing
 	 */
+	@Deprecated
 	public static final String UPDATE_WHILE_EDITING= "JavaUI.update.whileEditing"; //$NON-NLS-1$
 
 	/**
@@ -643,6 +656,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 * @deprecated As of 3.3, replaced by {@link AbstractDecoratedTextEditorPreferenceConstants#EDITOR_SHOW_TEXT_HOVER_AFFORDANCE}
 	 */
+	@Deprecated
 	public static final String EDITOR_SHOW_TEXT_HOVER_AFFORDANCE= "PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE"; //$NON-NLS-1$
 
 	/**
@@ -695,6 +709,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0, this hover is no longer available
 	 */
+	@Deprecated
 	public static final String ID_PROBLEM_HOVER= "org.eclipse.jdt.ui.ProblemHover"; //$NON-NLS-1$
 
 	/**
@@ -745,6 +760,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants}
 	 */
+	@Deprecated
 	public final static String EDITOR_CURRENT_LINE= "currentLine"; //$NON-NLS-1$
 
 	/**
@@ -758,6 +774,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants}
 	 */
+	@Deprecated
 	public final static String EDITOR_CURRENT_LINE_COLOR= "currentLineColor"; //$NON-NLS-1$
 
 	/**
@@ -767,6 +784,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants}
 	 */
+	@Deprecated
 	public final static String EDITOR_PRINT_MARGIN= "printMargin"; //$NON-NLS-1$
 
 	/**
@@ -780,12 +798,14 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants}
 	 */
+	@Deprecated
 	public final static String EDITOR_PRINT_MARGIN_COLOR= "printMarginColor"; //$NON-NLS-1$
 
 	/**
 	 * Print margin column. Integer value.
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants}
 	 */
+	@Deprecated
 	public final static String EDITOR_PRINT_MARGIN_COLUMN= "printMarginColumn"; //$NON-NLS-1$
 
 	/**
@@ -799,6 +819,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @deprecated As of 3.2, use {@link AbstractTextEditor#PREFERENCE_COLOR_FIND_SCOPE} instead}
 	 */
+	@Deprecated
 	public final static String EDITOR_FIND_SCOPE_COLOR= AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE;
 
 	/**
@@ -810,6 +831,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @deprecated As of 3.1 replaced by the formatter setting defined in {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_TAB_CHAR}
 	 */
+	@Deprecated
 	public final static String EDITOR_SPACES_FOR_TABS= "spacesForTabs"; //$NON-NLS-1$
 
 	/**
@@ -820,6 +842,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @deprecated As of 3.0 replaced by {@link AbstractDecoratedTextEditorPreferenceConstants#EDITOR_TAB_WIDTH}
 	 */
+	@Deprecated
 	public final static String EDITOR_TAB_WIDTH= "org.eclipse.jdt.ui.editor.tab.width"; //$NON-NLS-1$
 
 	/**
@@ -848,6 +871,7 @@ public class PreferenceConstants {
 	 *
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_PROBLEM_INDICATION= "problemIndication"; //$NON-NLS-1$
 
 	/**
@@ -862,6 +886,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_PROBLEM_INDICATION_COLOR= "problemIndicationColor"; //$NON-NLS-1$
 
 	/**
@@ -872,6 +897,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_WARNING_INDICATION= "warningIndication"; //$NON-NLS-1$
 
 	/**
@@ -887,6 +913,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_WARNING_INDICATION_COLOR= "warningIndicationColor"; //$NON-NLS-1$
 
 	/**
@@ -897,6 +924,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_TASK_INDICATION= "taskIndication"; //$NON-NLS-1$
 
 	/**
@@ -912,6 +940,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_TASK_INDICATION_COLOR= "taskIndicationColor"; //$NON-NLS-1$
 
 	/**
@@ -923,6 +952,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_BOOKMARK_INDICATION= "bookmarkIndication"; //$NON-NLS-1$
 
 	/**
@@ -938,6 +968,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_BOOKMARK_INDICATION_COLOR= "bookmarkIndicationColor"; //$NON-NLS-1$
 
 	/**
@@ -949,6 +980,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_SEARCH_RESULT_INDICATION= "searchResultIndication"; //$NON-NLS-1$
 
 	/**
@@ -964,6 +996,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_SEARCH_RESULT_INDICATION_COLOR= "searchResultIndicationColor"; //$NON-NLS-1$
 
 	/**
@@ -975,6 +1008,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_UNKNOWN_INDICATION= "othersIndication"; //$NON-NLS-1$
 
 	/**
@@ -991,6 +1025,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_UNKNOWN_INDICATION_COLOR= "othersIndicationColor"; //$NON-NLS-1$
 
 	/**
@@ -1002,6 +1037,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER= "errorIndicationInOverviewRuler"; //$NON-NLS-1$
 
 	/**
@@ -1013,6 +1049,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_WARNING_INDICATION_IN_OVERVIEW_RULER= "warningIndicationInOverviewRuler"; //$NON-NLS-1$
 
 	/**
@@ -1024,6 +1061,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_TASK_INDICATION_IN_OVERVIEW_RULER= "taskIndicationInOverviewRuler"; //$NON-NLS-1$
 
 	/**
@@ -1035,6 +1073,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_BOOKMARK_INDICATION_IN_OVERVIEW_RULER= "bookmarkIndicationInOverviewRuler"; //$NON-NLS-1$
 
 	/**
@@ -1046,6 +1085,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER= "searchResultIndicationInOverviewRuler"; //$NON-NLS-1$
 
 	/**
@@ -1057,6 +1097,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.MarkerAnnotationPreferences}
 	 */
+	@Deprecated
 	public final static String EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER= "othersIndicationInOverviewRuler"; //$NON-NLS-1$
 
 	/**
@@ -1176,6 +1217,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.3 replaced by {@link org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants#EDITOR_SMART_HOME_END}
 	 */
+	@Deprecated
 	public final static String EDITOR_SMART_HOME_END= AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END;
 
 	/**
@@ -1203,6 +1245,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants}
 	 */
+	@Deprecated
 	public final static String EDITOR_OVERVIEW_RULER= "overviewRuler"; //$NON-NLS-1$
 
 	/**
@@ -1212,6 +1255,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants}
 	 */
+	@Deprecated
 	public final static String EDITOR_LINE_NUMBER_RULER= "lineNumberRuler"; //$NON-NLS-1$
 
 	/**
@@ -1226,6 +1270,7 @@ public class PreferenceConstants {
 	 * @see #EDITOR_LINE_NUMBER_RULER
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants}
 	 */
+	@Deprecated
 	public final static String EDITOR_LINE_NUMBER_RULER_COLOR= "lineNumberColor"; //$NON-NLS-1$
 
 	/**
@@ -1240,6 +1285,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 */
+	@Deprecated
 	public final static String EDITOR_LINKED_POSITION_COLOR= "linkedPositionColor"; //$NON-NLS-1$
 
 	/**
@@ -1254,6 +1300,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @deprecated As of 3.1, replaced by {@link AbstractTextEditor#PREFERENCE_COLOR_FOREGROUND}
 	 */
+	@Deprecated
 	public final static String EDITOR_FOREGROUND_COLOR= AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND;
 
 	/**
@@ -1264,6 +1311,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @deprecated As of 3.1, replaced by {@link AbstractTextEditor#PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT}
 	 */
+	@Deprecated
 	public final static String EDITOR_FOREGROUND_DEFAULT_COLOR= AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT;
 
 	/**
@@ -1278,6 +1326,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @deprecated As of 3.1, replaced by {@link AbstractTextEditor#PREFERENCE_COLOR_BACKGROUND}
 	 */
+	@Deprecated
 	public final static String EDITOR_BACKGROUND_COLOR= AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND;
 
 	/**
@@ -1288,6 +1337,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @deprecated As of 3.1, replaced by {@link AbstractTextEditor#PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT}
 	 */
+	@Deprecated
 	public final static String EDITOR_BACKGROUND_DEFAULT_COLOR= AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT;
 
 	/**
@@ -1546,6 +1596,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 * @deprecated the method name highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#METHOD}
 	 */
+	@Deprecated
 	public final static String EDITOR_JAVA_METHOD_NAME_COLOR= IJavaColorConstants.JAVA_METHOD_NAME;
 
 	/**
@@ -1557,6 +1608,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 * @deprecated the method name highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#METHOD}
 	 */
+	@Deprecated
 	public final static String EDITOR_JAVA_METHOD_NAME_BOLD= IJavaColorConstants.JAVA_METHOD_NAME + EDITOR_BOLD_SUFFIX;
 
 	/**
@@ -1568,6 +1620,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 * @deprecated the method name highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#METHOD}
 	 */
+	@Deprecated
 	public final static String EDITOR_JAVA_METHOD_NAME_ITALIC= IJavaColorConstants.JAVA_METHOD_NAME + EDITOR_ITALIC_SUFFIX;
 
 	/**
@@ -1741,6 +1794,7 @@ public class PreferenceConstants {
 	 * @since 3.1
 	 * @deprecated the annotation highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#ANNOTATION}
 	 */
+	@Deprecated
 	public final static String EDITOR_JAVA_ANNOTATION_COLOR= IJavaColorConstants.JAVA_ANNOTATION;
 
 	/**
@@ -1752,6 +1806,7 @@ public class PreferenceConstants {
 	 * @since 3.1
 	 * @deprecated the annotation highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#ANNOTATION}
 	 */
+	@Deprecated
 	public final static String EDITOR_JAVA_ANNOTATION_BOLD= IJavaColorConstants.JAVA_ANNOTATION + EDITOR_BOLD_SUFFIX;
 
 	/**
@@ -1763,6 +1818,7 @@ public class PreferenceConstants {
 	 * @since 3.1
 	 * @deprecated the annotation highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#ANNOTATION}
 	 */
+	@Deprecated
 	public final static String EDITOR_JAVA_ANNOTATION_ITALIC= IJavaColorConstants.JAVA_ANNOTATION + EDITOR_ITALIC_SUFFIX;
 
 	/**
@@ -1774,6 +1830,7 @@ public class PreferenceConstants {
 	 * @since 3.1
 	 * @deprecated the annotation highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#ANNOTATION}
 	 */
+	@Deprecated
 	public final static String EDITOR_JAVA_ANNOTATION_STRIKETHROUGH= IJavaColorConstants.JAVA_ANNOTATION + EDITOR_STRIKETHROUGH_SUFFIX;
 
 	/**
@@ -1785,6 +1842,7 @@ public class PreferenceConstants {
 	 * @since 3.1
 	 * @deprecated the annotation highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#ANNOTATION}
 	 */
+	@Deprecated
 	public final static String EDITOR_JAVA_ANNOTATION_UNDERLINE= IJavaColorConstants.JAVA_ANNOTATION + EDITOR_UNDERLINE_SUFFIX;
 
 	/**
@@ -2099,6 +2157,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated As of 3.1, replaced by {@link AbstractDecoratedTextEditorPreferenceConstants#EDITOR_HYPERLINK_COLOR}
 	 */
+	@Deprecated
 	public final static String EDITOR_LINK_COLOR= "linkColor"; //$NON-NLS-1$
 
 	/**
@@ -2124,6 +2183,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
+	@Deprecated
 	public static final String EDITOR_NONE_HOVER= "noneHover"; //$NON-NLS-1$
 
 	/**
@@ -2140,6 +2200,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
+	@Deprecated
 	public static final String EDITOR_CTRL_HOVER= "ctrlHover"; //$NON-NLS-1$
 
 	/**
@@ -2156,6 +2217,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
+	@Deprecated
 	public static final String EDITOR_SHIFT_HOVER= "shiftHover"; //$NON-NLS-1$
 
 	/**
@@ -2172,6 +2234,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
+	@Deprecated
 	public static final String EDITOR_CTRL_ALT_HOVER= "ctrlAltHover"; //$NON-NLS-1$
 
 	/**
@@ -2188,6 +2251,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
+	@Deprecated
 	public static final String EDITOR_CTRL_ALT_SHIFT_HOVER= "ctrlAltShiftHover"; //$NON-NLS-1$
 
 	/**
@@ -2204,6 +2268,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
+	@Deprecated
 	public static final String EDITOR_CTRL_SHIFT_HOVER= "ctrlShiftHover"; //$NON-NLS-1$
 
 	/**
@@ -2220,6 +2285,7 @@ public class PreferenceConstants {
 	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 * @since 2.1
 	 */
+	@Deprecated
 	public static final String EDITOR_ALT_SHIFT_HOVER= "altShiftHover"; //$NON-NLS-1$
 
 	/**
@@ -2228,6 +2294,7 @@ public class PreferenceConstants {
 	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 * @since 2.1
 	 */
+	@Deprecated
 	public static final String EDITOR_NO_HOVER_CONFIGURED_ID= "noHoverConfiguredId"; //$NON-NLS-1$
 
 	/**
@@ -2238,6 +2305,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
+	@Deprecated
 	public static final String EDITOR_DEFAULT_HOVER_CONFIGURED_ID= "defaultHoverConfiguredId"; //$NON-NLS-1$
 
 	/**
@@ -2249,6 +2317,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated As of 3.0, replaced by {@link #EDITOR_TEXT_HOVER_MODIFIERS}
 	 */
+	@Deprecated
 	public static final String EDITOR_DEFAULT_HOVER= "defaultHover"; //$NON-NLS-1$
 
 	/**
@@ -2268,6 +2337,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated As of 3.1, replaced by {@link AbstractDecoratedTextEditorPreferenceConstants#EDITOR_HYPERLINKS_ENABLED}
 	 */
+	@Deprecated
 	public static final String EDITOR_BROWSER_LIKE_LINKS= "browserLikeLinks"; //$NON-NLS-1$
 
 	/**
@@ -2279,6 +2349,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated As of 3.1, replaced by {@link AbstractDecoratedTextEditorPreferenceConstants#EDITOR_HYPERLINK_KEY_MODIFIER}
 	 */
+	@Deprecated
 	public static final String EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER= "browserLikeLinksKeyModifier"; //$NON-NLS-1$
 
 	/**
@@ -2293,6 +2364,7 @@ public class PreferenceConstants {
 	 * @since 2.1.1
 	 * @deprecated As of 3.1, replaced by {@link AbstractDecoratedTextEditorPreferenceConstants#EDITOR_HYPERLINK_KEY_MODIFIER_MASK}
 	 */
+	@Deprecated
 	public static final String EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK= "browserLikeLinksKeyModifierMask"; //$NON-NLS-1$
 
 	/**
@@ -2429,6 +2501,7 @@ public class PreferenceConstants {
 	 * @deprecated As of 3.1, this preference is not used or set any longer; see
 	 *             {@link SemanticHighlightings#affectsEnablement(IPreferenceStore, org.eclipse.jface.util.PropertyChangeEvent)}
 	 */
+	@Deprecated
 	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED=EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + "enabled"; //$NON-NLS-1$
 
 	/**
@@ -2503,6 +2576,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 * @deprecated as of 3.1 replaced by {@link AbstractDecoratedTextEditorPreferenceConstants#EDITOR_DISABLE_OVERWRITE_MODE}
 	 */
+	@Deprecated
 	public static final String EDITOR_DISABLE_OVERWRITE_MODE= "disable_overwrite_mode"; //$NON-NLS-1$
 
 	/**
@@ -2554,6 +2628,7 @@ public class PreferenceConstants {
 	 *             and {@link org.eclipse.ui.texteditor.spelling.SpellingService#PREFERENCE_SPELLING_ENGINE}
 	 * @since 3.0
 	 */
+	@Deprecated
 	public final static String SPELLING_CHECK_SPELLING= "spelling_check_spelling"; //$NON-NLS-1$
 
 	/**
@@ -2729,6 +2804,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_SOURCE}
 	 */
+	@Deprecated
 	public final static String FORMATTER_COMMENT_FORMATSOURCE= "comment_format_source_code"; //$NON-NLS-1$
 
 	/**
@@ -2741,6 +2817,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION}
 	 */
+	@Deprecated
 	public final static String FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION= "comment_indent_parameter_description"; //$NON-NLS-1$
 
 	/**
@@ -2753,6 +2830,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_HEADER}
 	 */
+	@Deprecated
 	public final static String FORMATTER_COMMENT_FORMATHEADER= "comment_format_header"; //$NON-NLS-1$
 
 	/**
@@ -2765,6 +2843,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INDENT_ROOT_TAGS}
 	 */
+	@Deprecated
 	public final static String FORMATTER_COMMENT_INDENTROOTTAGS= "comment_indent_root_tags"; //$NON-NLS-1$
 
 	/**
@@ -2777,6 +2856,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT}
 	 */
+	@Deprecated
 	public final static String FORMATTER_COMMENT_FORMAT= "comment_format_comments"; //$NON-NLS-1$
 
 	/**
@@ -2789,6 +2869,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER}
 	 */
+	@Deprecated
 	public final static String FORMATTER_COMMENT_NEWLINEFORPARAMETER= "comment_new_line_for_parameter"; //$NON-NLS-1$
 
 	/**
@@ -2801,6 +2882,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS}
 	 */
+	@Deprecated
 	public final static String FORMATTER_COMMENT_SEPARATEROOTTAGS= "comment_separate_root_tags"; //$NON-NLS-1$
 
 	/**
@@ -2812,6 +2894,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_CLEAR_BLANK_LINES}
 	 */
+	@Deprecated
 	public final static String FORMATTER_COMMENT_CLEARBLANKLINES= "comment_clear_blank_lines"; //$NON-NLS-1$
 
 	/**
@@ -2823,6 +2906,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_LINE_LENGTH}
 	 */
+	@Deprecated
 	public final static String FORMATTER_COMMENT_LINELENGTH= "comment_line_length"; //$NON-NLS-1$
 
 	/**
@@ -2834,6 +2918,7 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 * @deprecated As of 3.1, replaced by {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_COMMENT_FORMAT_HTML}
 	 */
+	@Deprecated
 	public final static String FORMATTER_COMMENT_FORMATHTML= "comment_format_html"; //$NON-NLS-1$
 
 	/**
@@ -2907,6 +2992,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @deprecated use {@link #CODEASSIST_SORTER} instead
 	 */
+	@Deprecated
 	public final static String CODEASSIST_ORDER_PROPOSALS= "content_assist_order_proposals"; //$NON-NLS-1$
 
 	/**
@@ -2955,6 +3041,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @deprecated As of 3.4, replaced by {@link JFacePreferences#CONTENT_ASSIST_BACKGROUND_COLOR},
 	 */
+	@Deprecated
 	public final static String CODEASSIST_PROPOSALS_BACKGROUND= "content_assist_proposals_background"; //$NON-NLS-1$
 
 	/**
@@ -2968,6 +3055,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @deprecated As of 3.4, replaced by {@link JFacePreferences#CONTENT_ASSIST_FOREGROUND_COLOR},
 	 */
+	@Deprecated
 	public final static String CODEASSIST_PROPOSALS_FOREGROUND= "content_assist_proposals_foreground"; //$NON-NLS-1$
 
 	/**
@@ -3054,6 +3142,7 @@ public class PreferenceConstants {
 	 *
 	 * @deprecated Use method {@link org.eclipse.ltk.core.refactoring.RefactoringCore#getConditionCheckingFailedSeverity()}.
 	 */
+	@Deprecated
 	public static final String REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD= "Refactoring.ErrorPage.severityThreshold"; //$NON-NLS-1$
 
 	/**
@@ -3062,6 +3151,7 @@ public class PreferenceConstants {
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
 	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#FATAL}
 	 */
+	@Deprecated
 	public static final String REFACTOR_FATAL_SEVERITY= "4"; //$NON-NLS-1$
 
 	/**
@@ -3070,6 +3160,7 @@ public class PreferenceConstants {
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
 	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#ERROR}
 	 */
+	@Deprecated
 	public static final String REFACTOR_ERROR_SEVERITY= "3"; //$NON-NLS-1$
 
 	/**
@@ -3078,6 +3169,7 @@ public class PreferenceConstants {
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
 	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#WARNING}
 	 */
+	@Deprecated
 	public static final String REFACTOR_WARNING_SEVERITY= "2"; //$NON-NLS-1$
 
 	/**
@@ -3086,6 +3178,7 @@ public class PreferenceConstants {
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
 	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#INFO}
 	 */
+	@Deprecated
 	public static final String REFACTOR_INFO_SEVERITY= "1"; //$NON-NLS-1$
 
 	/**
@@ -3094,6 +3187,7 @@ public class PreferenceConstants {
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
 	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#OK}
 	 */
+	@Deprecated
 	public static final String REFACTOR_OK_SEVERITY= "0"; //$NON-NLS-1$
 
 	/**

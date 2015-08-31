@@ -84,6 +84,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	 * Since 3.0 compilation unit children are always provided as working copies. The Java Model
 	 * does not support the 'original' mode anymore.
 	 */
+	@Deprecated
 	public StandardJavaElementContentProvider(boolean provideMembers, boolean provideWorkingCopy) {
 		this(provideMembers);
 	}
@@ -129,6 +130,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	 * @deprecated Since 3.0 compilation unit children are always provided as working copies. The Java model
 	 * does not support the 'original' mode anymore.
 	 */
+	@Deprecated
 	public boolean getProvideWorkingCopy() {
 		return fProvideWorkingCopy;
 	}
@@ -138,39 +140,30 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	 * @deprecated Since 3.0 compilation unit children are always provided from the working copy. The Java model
 	 * offers a unified world and does not support the 'original' mode anymore.
 	 */
+	@Deprecated
 	public void setProvideWorkingCopy(boolean b) {
 		fProvideWorkingCopy= b;
 	}
 
-	/* (non-Javadoc)
-	 * @see IWorkingCopyProvider#providesWorkingCopies()
-	 */
+	@Override
 	public boolean providesWorkingCopies() {
 		return getProvideWorkingCopy();
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on IStructuredContentProvider.
-	 */
+	@Override
 	public Object[] getElements(Object parent) {
 		return getChildren(parent);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on IContentProvider.
-	 */
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on IContentProvider.
-	 */
+	@Override
 	public void dispose() {
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on ITreeContentProvider.
-	 */
+	@Override
 	public Object[] getChildren(Object element) {
 		if (!exists(element))
 			return NO_CHILDREN;
@@ -204,9 +197,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		return NO_CHILDREN;
 	}
 
-	/* (non-Javadoc)
-	 * @see ITreeContentProvider
-	 */
+	@Override
 	public boolean hasChildren(Object element) {
 		if (getProvideMembers()) {
 			// assume CUs and class files are never empty
@@ -242,9 +233,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		return (children != null) && children.length > 0;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on ITreeContentProvider.
-	 */
+	@Override
 	public Object getParent(Object element) {
 		if (!exists(element))
 			return null;
@@ -283,7 +272,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			return NO_CHILDREN;
 
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-		List<Object> list= new ArrayList<Object>(roots.length);
+		List<Object> list= new ArrayList<>(roots.length);
 		// filter out package fragments that correspond to projects and
 		// replace them with the package fragments directly
 		for (int i= 0; i < roots.length; i++) {
@@ -345,7 +334,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		if (javaProject == null || !javaProject.exists())
 			return members;
 		boolean isFolderOnClasspath = javaProject.isOnClasspath(folder);
-		List<IResource> nonJavaResources= new ArrayList<IResource>();
+		List<IResource> nonJavaResources= new ArrayList<>();
 		// Can be on classpath but as a member of non-java resource folder
 		for (int i= 0; i < members.length; i++) {
 			IResource member= members[i];

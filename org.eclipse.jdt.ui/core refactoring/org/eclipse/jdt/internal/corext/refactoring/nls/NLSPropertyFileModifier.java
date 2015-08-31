@@ -127,7 +127,7 @@ public class NLSPropertyFileModifier {
 	 * @return the map containing the substitutions
 	 */
 	static HashMap<String, NLSSubstitution> getNewKeyToSubstitutionMap(NLSSubstitution[] substitutions) {
-		HashMap<String, NLSSubstitution> keyToSubstMap= new HashMap<String, NLSSubstitution>(substitutions.length);
+		HashMap<String, NLSSubstitution> keyToSubstMap= new HashMap<>(substitutions.length);
 		// find all duplicates
 		for (int i= 0; i < substitutions.length; i++) {
 			NLSSubstitution curr= substitutions[i];
@@ -148,7 +148,7 @@ public class NLSPropertyFileModifier {
 	 * @return the map containing the substitutions
 	 */
 	static HashMap<String, NLSSubstitution> getOldKeyToSubstitutionMap(NLSSubstitution[] substitutions) {
-		HashMap<String, NLSSubstitution> keyToSubstMap= new HashMap<String, NLSSubstitution>(substitutions.length);
+		HashMap<String, NLSSubstitution> keyToSubstMap= new HashMap<>(substitutions.length);
 		// find all duplicates
 		for (int i= 0; i < substitutions.length; i++) {
 			NLSSubstitution curr= substitutions[i];
@@ -213,7 +213,7 @@ public class NLSPropertyFileModifier {
 	}
 
 	private static void addInsertEdits(TextChange textChange, NLSSubstitution[] substitutions, Map<String, NLSSubstitution> newKeyToSubstMap, Map<String, NLSSubstitution> oldKeyToSubstMap, PropertyFileDocumentModel model) {
-		ArrayList<KeyValuePair> keyValuePairsToAdd= new ArrayList<KeyValuePair>();
+		ArrayList<KeyValuePair> keyValuePairsToAdd= new ArrayList<>();
 
 		for (int i= 0; i < substitutions.length; i++) {
 			NLSSubstitution substitution= substitutions[i];

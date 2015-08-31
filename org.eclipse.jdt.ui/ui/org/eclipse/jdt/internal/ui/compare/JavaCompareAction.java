@@ -54,18 +54,22 @@ public class JavaCompareAction implements IActionDelegate {
 			fContents= contents;
 		}
 
+		@Override
 		public String getName() {
 			return fJavaElementLabelProvider.getText(fSource);
 		}
 
+		@Override
 		public String getType() {
 			return "JAVA"; //$NON-NLS-1$
 		}
 
+		@Override
 		public Image getImage() {
 			return fJavaElementLabelProvider.getImage(fSource);
 		}
 
+		@Override
 		public InputStream getContents() throws CoreException {
 			byte[] bytes;
 			try {
@@ -76,6 +80,7 @@ public class JavaCompareAction implements IActionDelegate {
 			return new ByteArrayInputStream(bytes);
 		}
 
+		@Override
 		public String getCharset() {
 			return "UTF-16"; //$NON-NLS-1$
 		}
@@ -89,10 +94,12 @@ public class JavaCompareAction implements IActionDelegate {
 	private JavaElementLabelProvider fJavaElementLabelProvider;
 
 
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		action.setEnabled(isEnabled(selection));
 	}
 
+	@Override
 	public void run(IAction action) {
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);

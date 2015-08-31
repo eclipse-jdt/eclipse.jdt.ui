@@ -58,10 +58,12 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 
 	class GenerateConstructorUsingFieldsTreeViewerAdapter implements ISelectionChangedListener, IDoubleClickListener {
 
+		@Override
 		public void doubleClick(DoubleClickEvent event) {
 			// Do nothing
 		}
 
+		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			IStructuredSelection selection= (IStructuredSelection) getTreeViewer().getSelection();
 
@@ -287,10 +289,12 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 
 		fOmitSuperButton.addSelectionListener(new SelectionListener() {
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				widgetSelected(e);
 			}
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean isSelected= (((Button) e.widget).getSelection());
 				setOmitSuper(isSelected);
@@ -355,7 +359,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 	List<?> getElementList() {
 		IStructuredSelection selection= (IStructuredSelection) getTreeViewer().getSelection();
 		List<?> elements= selection.toList();
-		ArrayList<Object> elementList= new ArrayList<Object>();
+		ArrayList<Object> elementList= new ArrayList<>();
 
 		for (int i= 0; i < elements.size(); i++) {
 			elementList.add(elements.get(i));

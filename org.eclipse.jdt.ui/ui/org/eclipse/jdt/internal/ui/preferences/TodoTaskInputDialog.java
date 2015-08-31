@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 public class TodoTaskInputDialog extends StatusDialog {
 
 	private class CompilerTodoTaskInputAdapter implements IDialogFieldListener {
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			doValidation();
 		}
@@ -53,7 +54,7 @@ public class TodoTaskInputDialog extends StatusDialog {
 	public TodoTaskInputDialog(Shell parent, TodoTask task, List<TodoTask> existingEntries) {
 		super(parent);
 
-		fExistingNames= new ArrayList<String>(existingEntries.size());
+		fExistingNames= new ArrayList<>(existingEntries.size());
 		for (int i= 0; i < existingEntries.size(); i++) {
 			TodoTask curr= existingEntries.get(i);
 			if (!curr.equals(task)) {

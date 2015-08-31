@@ -35,6 +35,7 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		super();
 	}
 
+	@Override
 	public void createInitialLayout(IPageLayout layout) {
  		String editorArea = layout.getEditorArea();
 

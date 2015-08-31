@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,6 @@
 package org.eclipse.jdt.ui.tests.packageview;
 
 import java.io.ByteArrayInputStream;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -45,8 +41,12 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 public class PackageExplorerShowInTests extends TestCase {
-	private static final Class clazz= PackageExplorerShowInTests.class;
+	private static final Class<PackageExplorerShowInTests> clazz= PackageExplorerShowInTests.class;
 
 	public PackageExplorerShowInTests(String name) {
 		super(name);
@@ -64,6 +64,7 @@ public class PackageExplorerShowInTests extends TestCase {
 	private PackageExplorerPart fPackageExplorer;
 	private IWorkbenchPage fPage;
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject= ProjectTestSetup.getProject();
 		fPage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
@@ -71,6 +72,7 @@ public class PackageExplorerShowInTests extends TestCase {
 		fPackageExplorer.selectAndReveal(new StructuredSelection());
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject, ProjectTestSetup.getDefaultClasspath());
 		fPage.hideView(fPackageExplorer);
@@ -127,9 +129,11 @@ public class PackageExplorerShowInTests extends TestCase {
 		final ICompilationUnit cu= pack.createCompilationUnit("A.java", "package p;\nclass A {\n\n}", true, null);
 
 		IAdaptable adaptable= new IAdaptable() {
-			public Object getAdapter(Class adapter) {
+			@SuppressWarnings("unchecked")
+			@Override
+			public <T> T getAdapter(Class<T> adapter) {
 				if (adapter == IJavaElement.class)
-					return cu;
+					return (T) cu;
 				else
 					return null;
 			}
@@ -147,9 +151,11 @@ public class PackageExplorerShowInTests extends TestCase {
 		final ICompilationUnit cu= pack.createCompilationUnit("A.java", "package p;\nclass A {\n\n}", true, null);
 
 		IAdaptable adaptable= new IAdaptable() {
-			public Object getAdapter(Class adapter) {
+			@SuppressWarnings("unchecked")
+			@Override
+			public <T> T getAdapter(Class<T> adapter) {
 				if (adapter == IResource.class)
-					return cu.getResource();
+					return (T) cu.getResource();
 				else
 					return null;
 			}

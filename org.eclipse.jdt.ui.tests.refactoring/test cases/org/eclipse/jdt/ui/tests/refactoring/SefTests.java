@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,9 +16,6 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -33,6 +30,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class SefTests extends AbstractSelectionTestCase {
 
@@ -52,15 +52,18 @@ public class SefTests extends AbstractSelectionTestCase {
 		return fgTestSetup;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fIsPreDeltaTest= true;
 	}
 
+	@Override
 	protected String getResourceLocation() {
 		return "SefWorkSpace/SefTests/";
 	}
 
+	@Override
 	protected String adaptName(String name) {
 		return Character.toUpperCase(name.charAt(0)) + name.substring(1) + ".java";
 	}
@@ -91,7 +94,7 @@ public class SefTests extends AbstractSelectionTestCase {
 	}
 
 	private void initializePreferences() {
-		Hashtable options= new Hashtable();
+		Hashtable<String, String> options= new Hashtable<>();
 		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
 		options.put(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
 		options.put(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");

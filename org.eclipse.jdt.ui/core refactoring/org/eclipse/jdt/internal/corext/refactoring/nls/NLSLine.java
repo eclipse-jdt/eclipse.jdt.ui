@@ -25,7 +25,7 @@ public class NLSLine {
 	public NLSLine(int lineNumber) {
 		fLineNumber= lineNumber;
 		Assert.isTrue(fLineNumber >= 0);
-		fElements= new ArrayList<NLSElement>();
+		fElements= new ArrayList<>();
 	}
 
 	public int getLineNumber() {

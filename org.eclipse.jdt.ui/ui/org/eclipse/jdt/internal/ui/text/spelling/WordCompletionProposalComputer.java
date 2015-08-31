@@ -56,6 +56,7 @@ public final class WordCompletionProposalComputer implements IJavaCompletionProp
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (contributes()) {
 			try {
@@ -79,8 +80,8 @@ public final class WordCompletionProposalComputer implements IJavaCompletionProp
 
 					if (checker != null) {
 
-						final List<RankedWordProposal> proposals= new ArrayList<RankedWordProposal>(checker.getProposals(candidate, Character.isUpperCase(candidate.charAt(0))));
-						final List<ICompletionProposal> result= new ArrayList<ICompletionProposal>(proposals.size());
+						final List<RankedWordProposal> proposals= new ArrayList<>(checker.getProposals(candidate, Character.isUpperCase(candidate.charAt(0))));
+						final List<ICompletionProposal> result= new ArrayList<>(proposals.size());
 
 						for (Iterator<RankedWordProposal> it= proposals.iterator(); it.hasNext();) {
 							RankedWordProposal word= it.next();
@@ -117,6 +118,7 @@ public final class WordCompletionProposalComputer implements IJavaCompletionProp
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public List<IContextInformation> computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		return Collections.emptyList();
 	}
@@ -124,6 +126,7 @@ public final class WordCompletionProposalComputer implements IJavaCompletionProp
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#getErrorMessage()
 	 */
+	@Override
 	public String getErrorMessage() {
 		return null; // no error message available
 	}
@@ -131,12 +134,14 @@ public final class WordCompletionProposalComputer implements IJavaCompletionProp
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionStarted()
 	 */
+	@Override
 	public void sessionStarted() {
 	}
 
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionEnded()
 	 */
+	@Override
 	public void sessionEnded() {
 	}
 }

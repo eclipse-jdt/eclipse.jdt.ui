@@ -209,7 +209,7 @@ public abstract class AbstractToStringGenerator {
 	}
 
 	public List<MethodDeclaration> generateHelperMethods() {
-		List<MethodDeclaration> result= new ArrayList<MethodDeclaration>();
+		List<MethodDeclaration> result= new ArrayList<>();
 		if (needCollectionToStringMethod)
 			result.add(createHelperToStringMethod(false));
 
@@ -460,7 +460,7 @@ public abstract class AbstractToStringGenerator {
 	protected void initialize() {
 		needMaxLenVariable= false;
 		needCollectionToStringMethod= false;
-		typesThatNeedArrayToStringMethod= new ArrayList<ITypeBinding>();
+		typesThatNeedArrayToStringMethod= new ArrayList<>();
 
 		checkNeedForHelperMethods();
 
@@ -858,7 +858,7 @@ public abstract class AbstractToStringGenerator {
 	private Set<String> excluded;
 	protected String createNameSuggestion(String baseName, int variableKind) {
 		if (excluded == null) {
-			excluded= new HashSet<String>();
+			excluded= new HashSet<>();
 			IVariableBinding[] fields= fContext.getTypeBinding().getDeclaredFields();
 			for (int i= 0; i < fields.length; i++) {
 				excluded.add(fields[i].getName());

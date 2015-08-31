@@ -111,6 +111,7 @@ public abstract class OpenEditorAction extends Action {
 		final String dottedName= className.replace('$', '.'); // for nested classes...
 		try {
 			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						if (project != null) {

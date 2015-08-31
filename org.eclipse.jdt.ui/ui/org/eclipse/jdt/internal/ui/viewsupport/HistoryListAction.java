@@ -74,20 +74,23 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 		private void createHistoryList() {
 			IListAdapter<E> adapter= new IListAdapter<E>() {
+				@Override
 				public void customButtonPressed(ListDialogField<E> field, int index) {
 					doCustomButtonPressed(index);
 				}
+				@Override
 				public void selectionChanged(ListDialogField<E> field) {
 					doSelectionChanged();
 				}
 
+				@Override
 				public void doubleClicked(ListDialogField<E> field) {
 					doDoubleClicked();
 				}
 			};
 			String[] buttonLabels= new String[] { JavaUIMessages.HistoryListAction_remove, JavaUIMessages.HistoryListAction_remove_all };
 			LabelProvider labelProvider= new TestRunLabelProvider();
-			fHistoryList= new ListDialogField<E>(adapter, buttonLabels, labelProvider);
+			fHistoryList= new ListDialogField<>(adapter, buttonLabels, labelProvider);
 			fHistoryList.setLabelText(fHistory.getHistoryListDialogMessage());
 
 			List<E> historyEntries= fHistory.getHistoryEntries();
@@ -107,6 +110,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 			fMaxEntriesField= new StringDialogField();
 			fMaxEntriesField.setLabelText(fHistory.getMaxEntriesMessage());
 			fMaxEntriesField.setDialogFieldListener(new IDialogFieldListener() {
+				@Override
 				public void dialogFieldChanged(DialogField field) {
 					String maxString= fMaxEntriesField.getText();
 					boolean valid;
@@ -195,7 +199,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 	}
 
 	private final class TestRunLabelProvider extends LabelProvider {
-		private final HashMap<ImageDescriptor, Image> fImages= new HashMap<ImageDescriptor, Image>();
+		private final HashMap<ImageDescriptor, Image> fImages= new HashMap<>();
 
 		@SuppressWarnings("unchecked")
 		@Override

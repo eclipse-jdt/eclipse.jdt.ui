@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
  */
 public class FileAdapterTest extends TestCase {
 
-	private static final Class THIS= FileAdapterTest.class;
+	private static final Class<FileAdapterTest> THIS= FileAdapterTest.class;
 
 	public static Test suite() {
 		return setUpTest(new TestSuite(THIS));

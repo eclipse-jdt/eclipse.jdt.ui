@@ -99,7 +99,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 
 		private IType fFirstType;
 		private boolean fHasHeaderComment;
-		private LinkedHashMap<JavaProjectionAnnotation, Position> fMap= new LinkedHashMap<JavaProjectionAnnotation, Position>();
+		private LinkedHashMap<JavaProjectionAnnotation, Position> fMap= new LinkedHashMap<>();
 		private IScanner fScanner;
 
 		private FoldingStructureComputationContext(IDocument document, ProjectionAnnotationModel model, boolean allowCollapsing, IScanner scanner) {
@@ -295,6 +295,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * Matches comments.
 	 */
 	private static final class CommentFilter implements Filter {
+		@Override
 		public boolean match(JavaProjectionAnnotation annotation) {
 			if (annotation.isComment() && !annotation.isMarkedDeleted()) {
 				return true;
@@ -307,6 +308,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * Matches members.
 	 */
 	private static final class MemberFilter implements Filter {
+		@Override
 		public boolean match(JavaProjectionAnnotation annotation) {
 			if (!annotation.isComment() && !annotation.isMarkedDeleted()) {
 				IJavaElement element= annotation.getElement();
@@ -332,6 +334,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			fMatchCollapsed= matchCollapsed;
 		}
 
+		@Override
 		public boolean match(JavaProjectionAnnotation annotation) {
 			boolean stateMatch= fMatchCollapsed == annotation.isCollapsed();
 			if (stateMatch && !annotation.isComment() && !annotation.isMarkedDeleted()) {
@@ -349,6 +352,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		/*
 		 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
 		 */
+		@Override
 		public void elementChanged(ElementChangedEvent e) {
 			IJavaElementDelta delta= findElement(fInput, e.getDelta());
 			if (delta != null && (delta.getFlags() & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN)) != 0) {
@@ -456,6 +460,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		/*
 		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeFoldingRegions(org.eclipse.jface.text.IDocument)
 		 */
+		@Override
 		public IRegion[] computeProjectionRegions(IDocument document) throws BadLocationException {
 			DocumentCharacterIterator sequence= new DocumentCharacterIterator(document, offset, offset + length);
 			int prefixEnd= 0;
@@ -544,6 +549,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		/*
 		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeCaptionOffset(org.eclipse.jface.text.IDocument)
 		 */
+		@Override
 		public int computeCaptionOffset(IDocument document) throws BadLocationException {
 			DocumentCharacterIterator sequence= new DocumentCharacterIterator(document, offset, offset + length);
 			return findFirstContent(sequence, 0);
@@ -573,6 +579,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		/*
 		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeFoldingRegions(org.eclipse.jface.text.IDocument)
 		 */
+		@Override
 		public IRegion[] computeProjectionRegions(IDocument document) throws BadLocationException {
 			int nameStart= offset;
 			try {
@@ -631,6 +638,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		/*
 		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeCaptionOffset(org.eclipse.jface.text.IDocument)
 		 */
+		@Override
 		public int computeCaptionOffset(IDocument document) throws BadLocationException {
 			int nameStart= offset;
 			try {
@@ -677,6 +685,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		/*
 		 * @see org.eclipse.jface.text.source.projection.IProjectionListener#projectionEnabled()
 		 */
+		@Override
 		public void projectionEnabled() {
 			handleProjectionEnabled();
 		}
@@ -684,6 +693,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		/*
 		 * @see org.eclipse.jface.text.source.projection.IProjectionListener#projectionDisabled()
 		 */
+		@Override
 		public void projectionDisabled() {
 			handleProjectionDisabled();
 		}
@@ -736,6 +746,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * @param editor {@inheritDoc}
 	 * @param viewer {@inheritDoc}
 	 */
+	@Override
 	public void install(ITextEditor editor, ProjectionViewer viewer) {
 		Assert.isLegal(editor != null);
 		Assert.isLegal(viewer != null);
@@ -754,6 +765,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * Subclasses may extend.
 	 * </p>
 	 */
+	@Override
 	public void uninstall() {
 		internalUninstall();
 	}
@@ -823,6 +835,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	/*
 	 * @see org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider#initialize()
 	 */
+	@Override
 	public final void initialize() {
 		fUpdatingCount++;
 		try {
@@ -877,9 +890,9 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		if (ctx == null)
 			return;
 
-		Map<JavaProjectionAnnotation, Position> additions= new HashMap<JavaProjectionAnnotation, Position>();
-		List<JavaProjectionAnnotation> deletions= new ArrayList<JavaProjectionAnnotation>();
-		List<JavaProjectionAnnotation> updates= new ArrayList<JavaProjectionAnnotation>();
+		Map<JavaProjectionAnnotation, Position> additions= new HashMap<>();
+		List<JavaProjectionAnnotation> deletions= new ArrayList<>();
+		List<JavaProjectionAnnotation> updates= new ArrayList<>();
 
 		computeFoldingStructure(ctx);
 		Map<JavaProjectionAnnotation, Position> newStructure= ctx.fMap;
@@ -1103,7 +1116,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				if (contents == null)
 					return new IRegion[0];
 
-				List<IRegion> regions= new ArrayList<IRegion>();
+				List<IRegion> regions= new ArrayList<>();
 				if (!ctx.hasFirstType() && reference instanceof IType) {
 					ctx.setFirstType((IType) reference);
 					IRegion headerComment= computeHeaderComment(ctx);
@@ -1293,8 +1306,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		if (deletions.isEmpty() || (additions.isEmpty() && changes.isEmpty()))
 			return;
 
-		List<JavaProjectionAnnotation> newDeletions= new ArrayList<JavaProjectionAnnotation>();
-		List<JavaProjectionAnnotation> newChanges= new ArrayList<JavaProjectionAnnotation>();
+		List<JavaProjectionAnnotation> newDeletions= new ArrayList<>();
+		List<JavaProjectionAnnotation> newChanges= new ArrayList<>();
 
 		Iterator<JavaProjectionAnnotation> deletionIterator= deletions.iterator();
 		while (deletionIterator.hasNext()) {
@@ -1377,7 +1390,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private Map<IJavaElement, List<Tuple>> computeCurrentStructure(FoldingStructureComputationContext ctx) {
-		Map<IJavaElement, List<Tuple>> map= new HashMap<IJavaElement, List<Tuple>>();
+		Map<IJavaElement, List<Tuple>> map= new HashMap<>();
 		ProjectionAnnotationModel model= ctx.getModel();
 		Iterator<Annotation> e= model.getAnnotationIterator();
 		while (e.hasNext()) {
@@ -1388,7 +1401,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				Assert.isNotNull(position);
 				List<Tuple> list= map.get(java.getElement());
 				if (list == null) {
-					list= new ArrayList<Tuple>(2);
+					list= new ArrayList<>(2);
 					map.put(java.getElement(), list);
 				}
 				list.add(new Tuple(java, position));
@@ -1396,6 +1409,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		}
 
 		Comparator<Tuple> comparator= new Comparator<Tuple>() {
+			@Override
 			public int compare(Tuple o1, Tuple o2) {
 				return o1.position.getOffset() - o2.position.getOffset();
 			}
@@ -1411,6 +1425,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * @see IJavaFoldingStructureProviderExtension#collapseMembers()
 	 * @since 3.2
 	 */
+	@Override
 	public final void collapseMembers() {
 		modifyFiltered(fMemberFilter, false);
 	}
@@ -1419,6 +1434,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * @see IJavaFoldingStructureProviderExtension#collapseComments()
 	 * @since 3.2
 	 */
+	@Override
 	public final void collapseComments() {
 		modifyFiltered(fCommentFilter, false);
 	}
@@ -1426,16 +1442,18 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	/*
 	 * @see org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProviderExtension#collapseElements(org.eclipse.jdt.core.IJavaElement[])
 	 */
+	@Override
 	public final void collapseElements(IJavaElement[] elements) {
-		Set<IJavaElement> set= new HashSet<IJavaElement>(Arrays.asList(elements));
+		Set<IJavaElement> set= new HashSet<>(Arrays.asList(elements));
 		modifyFiltered(new JavaElementSetFilter(set, false), false);
 	}
 
 	/*
 	 * @see org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProviderExtension#expandElements(org.eclipse.jdt.core.IJavaElement[])
 	 */
+	@Override
 	public final void expandElements(IJavaElement[] elements) {
-		Set<IJavaElement> set= new HashSet<IJavaElement>(Arrays.asList(elements));
+		Set<IJavaElement> set= new HashSet<>(Arrays.asList(elements));
 		modifyFiltered(new JavaElementSetFilter(set, true), true);
 	}
 
@@ -1454,7 +1472,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		if (model == null)
 			return;
 
-		List<JavaProjectionAnnotation> modified= new ArrayList<JavaProjectionAnnotation>();
+		List<JavaProjectionAnnotation> modified= new ArrayList<>();
 		Iterator<Annotation> iter= model.getAnnotationIterator();
 		while (iter.hasNext()) {
 			Object annotation= iter.next();

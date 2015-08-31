@@ -358,7 +358,7 @@ public final class BuildPathDialogAccess {
 		Class<?>[] acceptedClasses= new Class[] { IFile.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 
-		ArrayList<IResource> usedJars= new ArrayList<IResource>(usedEntries.length);
+		ArrayList<IResource> usedJars= new ArrayList<>(usedEntries.length);
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		for (int i= 0; i < usedEntries.length; i++) {
 			IPath curr= usedEntries[i];
@@ -408,7 +408,7 @@ public final class BuildPathDialogAccess {
 
 		Class<?>[] acceptedClasses= new Class[] { IFile.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
-		ArrayList<IResource> usedJars= new ArrayList<IResource>(usedEntries.length);
+		ArrayList<IResource> usedJars= new ArrayList<>(usedEntries.length);
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		for (int i= 0; i < usedEntries.length; i++) {
 			IResource resource= root.findMember(usedEntries[i]);
@@ -618,7 +618,7 @@ public final class BuildPathDialogAccess {
 	private static IPath[] internalChooseFolderEntry(Shell shell, IPath initialSelection, IPath[] usedEntries, String title, String message) {
 		Class<?>[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
 
-		ArrayList<IResource> usedContainers= new ArrayList<IResource>(usedEntries.length);
+		ArrayList<IResource> usedContainers= new ArrayList<>(usedEntries.length);
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		for (int i= 0; i < usedEntries.length; i++) {
 			IResource resource= root.findMember(usedEntries[i]);

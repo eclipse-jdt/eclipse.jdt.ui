@@ -39,6 +39,7 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 	 * DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/297529 .
 	 * @deprecated As of 3.5, replaced by {@link IWorkingSetIDs#JAVA}
 	 */
+	@Deprecated
 	public static final String ID= IWorkingSetIDs.JAVA;
 	
 
@@ -50,7 +51,7 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 		private boolean fChanged;
 		public WorkingSetDelta(IWorkingSet workingSet) {
 			fWorkingSet= workingSet;
-			fElements= new ArrayList<IAdaptable>(Arrays.asList(workingSet.getElements()));
+			fElements= new ArrayList<>(Arrays.asList(workingSet.getElements()));
 		}
 		public int indexOf(Object element) {
 			return fElements.indexOf(element);
@@ -72,13 +73,11 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 	}
 
 	public JavaWorkingSetUpdater() {
-		fWorkingSets= new ArrayList<IWorkingSet>();
+		fWorkingSets= new ArrayList<>();
 		JavaCore.addElementChangedListener(this);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void add(IWorkingSet workingSet) {
 		checkElementExistence(workingSet);
 		synchronized (fWorkingSets) {
@@ -86,9 +85,7 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean remove(IWorkingSet workingSet) {
 		boolean result;
 		synchronized(fWorkingSets) {
@@ -97,18 +94,14 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 		return result;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean contains(IWorkingSet workingSet) {
 		synchronized(fWorkingSets) {
 			return fWorkingSets.contains(workingSet);
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void dispose() {
 		synchronized(fWorkingSets) {
 			fWorkingSets.clear();
@@ -116,9 +109,7 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 		JavaCore.removeElementChangedListener(this);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void elementChanged(ElementChangedEvent event) {
 		IWorkingSet[] workingSets;
 		synchronized(fWorkingSets) {
@@ -210,7 +201,7 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 	}
 
 	private void checkElementExistence(IWorkingSet workingSet) {
-		List<IAdaptable> elements= new ArrayList<IAdaptable>(Arrays.asList(workingSet.getElements()));
+		List<IAdaptable> elements= new ArrayList<>(Arrays.asList(workingSet.getElements()));
 		boolean changed= false;
 		for (Iterator<IAdaptable> iter= elements.iterator(); iter.hasNext();) {
 			IAdaptable element= iter.next();

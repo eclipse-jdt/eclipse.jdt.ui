@@ -52,6 +52,7 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 		/*
 		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#accept(org.eclipse.ui.texteditor.spelling.SpellingProblem)
 		 */
+		@Override
 		public void accept(SpellingProblem problem) {
 			IProblemRequestor requestor= fRequestor;
 			if (requestor != null) {
@@ -79,6 +80,7 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 		/*
 		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#beginCollecting()
 		 */
+		@Override
 		public void beginCollecting() {
 			if (fRequestor != null)
 				fRequestor.beginReporting();
@@ -87,6 +89,7 @@ public class JavaSpellingReconcileStrategy extends SpellingReconcileStrategy {
 		/*
 		 * @see org.eclipse.ui.texteditor.spelling.ISpellingProblemCollector#endCollecting()
 		 */
+		@Override
 		public void endCollecting() {
 			if (fRequestor != null)
 				fRequestor.endReporting();

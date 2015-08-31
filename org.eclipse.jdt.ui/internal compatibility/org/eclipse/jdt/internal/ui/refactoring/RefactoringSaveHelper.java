@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * DO NOT REMOVE, used in a product.
  * @deprecated As of 3.5, replaced by {@link org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper}
  */
+@Deprecated
 @SuppressWarnings("all")
 public class RefactoringSaveHelper {
 
@@ -146,6 +147,7 @@ public class RefactoringSaveHelper {
 						return false;
 				} else {
 					IRunnableWithProgress runnable= new IRunnableWithProgress() {
+						@Override
 						public void run(IProgressMonitor pm) throws InterruptedException {
 							int count= dirtyEditors.length;
 							pm.beginTask("", count); //$NON-NLS-1$

@@ -488,7 +488,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			/* 1 */ null,
 			NewWizardMessages.NewTypeWizardPage_interfaces_remove
 		};
-		fSuperInterfacesDialogField= new ListDialogField<InterfaceWrapper>(adapter, addButtons, new InterfacesListLabelProvider());
+		fSuperInterfacesDialogField= new ListDialogField<>(adapter, addButtons, new InterfacesListLabelProvider());
 		fSuperInterfacesDialogField.setDialogFieldListener(adapter);
 		fSuperInterfacesDialogField.setTableColumns(new ListDialogField.ColumnsDescription(1, false));
 		fSuperInterfacesDialogField.setLabelText(getSuperInterfacesLabel());
@@ -564,7 +564,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	protected void initTypePage(IJavaElement elem) {
 		String initSuperclass= "java.lang.Object"; //$NON-NLS-1$
-		ArrayList<String> initSuperinterfaces= new ArrayList<String>(5);
+		ArrayList<String> initSuperinterfaces= new ArrayList<>(5);
 
 		IJavaProject project= null;
 		IPackageFragment pack= null;
@@ -837,6 +837,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		TextFieldNavigationHandler.install(text);
 		
 		text.addVerifyListener(new VerifyListener() {
+			@Override
 			public void verifyText(VerifyEvent e) {
 				if (fCanModifyPackage && ! fEnclosingTypeSelection.isSelected() && e.start == 0 && e.end == ((Text) e.widget).getCharCount()) {
 					String typeNameWithoutParameters= getTypeNameWithoutParameters(e.text);
@@ -956,6 +957,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 		tableViewer.setCellEditors(new CellEditor[] { cellEditor });
 		tableViewer.setCellModifier(new ICellModifier() {
+			@Override
 			public void modify(Object element, String property, Object value) {
 				if (element instanceof Item)
 					element = ((Item) element).getData();
@@ -963,9 +965,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				((InterfaceWrapper) element).interfaceName= (String) value;
 				fSuperInterfacesDialogField.elementChanged((InterfaceWrapper) element);
 			}
+			@Override
 			public Object getValue(Object element, String property) {
 				return ((InterfaceWrapper) element).interfaceName;
 			}
+			@Override
 			public boolean canModify(Object element, String property) {
 				return true;
 			}
@@ -1028,30 +1032,37 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private class TypeFieldsAdapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter<InterfaceWrapper>, SelectionListener {
 
 		// -------- IStringButtonAdapter
+		@Override
 		public void changeControlPressed(DialogField field) {
 			typePageChangeControlPressed(field);
 		}
 
 		// -------- IListAdapter
+		@Override
 		public void customButtonPressed(ListDialogField<InterfaceWrapper> field, int index) {
 			typePageCustomButtonPressed(field, index);
 		}
 
+		@Override
 		public void selectionChanged(ListDialogField<InterfaceWrapper> field) {}
 
 		// -------- IDialogFieldListener
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			typePageDialogFieldChanged(field);
 		}
 
+		@Override
 		public void doubleClicked(ListDialogField<InterfaceWrapper> field) {
 		}
 
 
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 			typePageLinkActivated();
 		}
 
+		@Override
 		public void widgetDefaultSelected(SelectionEvent e) {
 			typePageLinkActivated();
 		}
@@ -1388,7 +1399,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	public List<String> getSuperInterfaces() {
 		List<InterfaceWrapper> interfaces= fSuperInterfacesDialogField.getElements();
-		ArrayList<String> result= new ArrayList<String>(interfaces.size());
+		ArrayList<String> result= new ArrayList<>(interfaces.size());
 		for (Iterator<InterfaceWrapper> iter= interfaces.iterator(); iter.hasNext();) {
 			InterfaceWrapper wrapper= iter.next();
 			result.add(wrapper.interfaceName);
@@ -1405,7 +1416,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * editable; otherwise it is read-only.
 	 */
 	public void setSuperInterfaces(List<String> interfacesNames, boolean canBeModified) {
-		ArrayList<InterfaceWrapper> interfaces= new ArrayList<InterfaceWrapper>(interfacesNames.size());
+		ArrayList<InterfaceWrapper> interfaces= new ArrayList<>(interfacesNames.size());
 		for (Iterator<String> iter= interfacesNames.iterator(); iter.hasNext();) {
 			interfaces.add(new InterfaceWrapper(iter.next()));
 		}
@@ -2254,7 +2265,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	private Set<String> getExistingImports(CompilationUnit root) {
 		List<ImportDeclaration> imports= root.imports();
-		Set<String> res= new HashSet<String>(imports.size());
+		Set<String> res= new HashSet<>(imports.size());
 		for (int i= 0; i < imports.size(); i++) {
 			res.add(ASTNodes.asString(imports.get(i)));
 		}
@@ -2499,6 +2510,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @deprecated Instead of file templates, the new type code template
 	 * specifies the stub for a compilation unit.
 	 */
+	@Deprecated
 	protected String getFileComment(ICompilationUnit parentCU) {
 		return null;
 	}
@@ -2575,6 +2587,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @return returns the template or <code>null</code>
 	 * @deprecated Use getTypeComment(ICompilationUnit, String)
 	 */
+	@Deprecated
 	protected String getTypeComment(ICompilationUnit parentCU) {
 		if (StubUtility.doAddComments(parentCU.getJavaProject()))
 			return getTypeComment(parentCU, StubUtility.getLineDelimiterUsed(parentCU));
@@ -2587,6 +2600,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @return returns the template or <code>null</code>
 	 * @deprecated Use getTemplate(String,ICompilationUnit,int)
 	 */
+	@Deprecated
 	protected String getTemplate(String name, ICompilationUnit parentCU) {
 		return getTemplate(name, parentCU, 0);
 	}
@@ -2639,10 +2653,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		final ICompilationUnit cu= type.getCompilationUnit();
 		JavaModelUtil.reconcile(cu);
 		IMethod[] typeMethods= type.getMethods();
-		Set<String> handleIds= new HashSet<String>(typeMethods.length);
+		Set<String> handleIds= new HashSet<>(typeMethods.length);
 		for (int index= 0; index < typeMethods.length; index++)
 			handleIds.add(typeMethods[index].getHandleIdentifier());
-		ArrayList<IMethod> newMethods= new ArrayList<IMethod>();
+		ArrayList<IMethod> newMethods= new ArrayList<>();
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 		settings.createComments= isAddComments();
 		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
@@ -2691,6 +2705,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	public IRunnableWithProgress getRunnable() {
 		return new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
 					if (monitor == null) {

@@ -68,13 +68,15 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	private List<ITypeBinding> fCaughtExceptions;
 
 	public ExceptionOccurrencesFinder() {
-		fResult= new ArrayList<OccurrenceLocation>();
+		fResult= new ArrayList<>();
 	}
 
+	@Override
 	public String initialize(CompilationUnit root, int offset, int length) {
 		return initialize(root, NodeFinder.perform(root, offset, length));
 	}
 
+	@Override
 	public String initialize(CompilationUnit root, ASTNode node) {
 		fASTRoot= root;
 		if (node == null)
@@ -136,7 +138,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	}
 
 	private void performSearch() {
-		fCaughtExceptions= new ArrayList<ITypeBinding>();
+		fCaughtExceptions= new ArrayList<>();
 		fStart.accept(this);
 		if (fTryStatement != null) {
 			handleResourceDeclarations(fTryStatement);
@@ -180,6 +182,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		}
 	}
 
+	@Override
 	public OccurrenceLocation[] getOccurrences() {
 		performSearch();
 		if (fResult.isEmpty())
@@ -188,19 +191,23 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return fResult.toArray(new OccurrenceLocation[fResult.size()]);
 	}
 
+	@Override
 	public int getSearchKind() {
 		return K_EXCEPTION_OCCURRENCE;
 	}
 
 
+	@Override
 	public CompilationUnit getASTRoot() {
 		return fASTRoot;
 	}
 
+	@Override
 	public String getJobLabel() {
 		return SearchMessages.ExceptionOccurrencesFinder_searchfor ;
 	}
 
+	@Override
 	public String getElementName() {
 		if (fSelectedNode != null) {
 			return ASTNodes.asString(fSelectedNode);
@@ -208,10 +215,12 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return null;
 	}
 
+	@Override
 	public String getUnformattedPluralLabel() {
 		return SearchMessages.ExceptionOccurrencesFinder_label_plural;
 	}
 
+	@Override
 	public String getUnformattedSingularLabel() {
 		return SearchMessages.ExceptionOccurrencesFinder_label_singular;
 	}
@@ -416,6 +425,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 		return new ExceptionOccurrencesFinder();
 	}
 
+	@Override
 	public String getID() {
 		return ID;
 	}

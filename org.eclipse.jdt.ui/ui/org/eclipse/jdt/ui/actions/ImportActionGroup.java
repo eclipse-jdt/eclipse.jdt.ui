@@ -53,9 +53,6 @@ public class ImportActionGroup extends ActionGroup {
 		fExportAction= new ExportResourcesAction(workbenchWindow);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new Separator(GROUP_IMPORT));
@@ -64,9 +61,6 @@ public class ImportActionGroup extends ActionGroup {
 		super.fillContextMenu(menu);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void dispose() {
 		fImportAction.dispose();

@@ -92,9 +92,6 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see ICompletionProposalExtension#apply(IDocument, char, int)
-	 */
 	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 		try {

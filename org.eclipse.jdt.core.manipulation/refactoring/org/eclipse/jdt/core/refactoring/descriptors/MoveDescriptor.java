@@ -158,7 +158,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
-	public MoveDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public MoveDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.MOVE, project, description, comment, arguments, flags);
 		fMovePolicy= JavaRefactoringDescriptorUtil.getString(fArguments, ATTRIBUTE_POLICY);
 
@@ -185,9 +185,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
 		JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_POLICY, fMovePolicy);
@@ -385,9 +383,7 @@ public final class MoveDescriptor extends JavaRefactoringDescriptor {
 		fReferences= update;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public RefactoringStatus validateDescriptor() {
 		RefactoringStatus status= super.validateDescriptor();
 		if (!status.hasFatalError()) {

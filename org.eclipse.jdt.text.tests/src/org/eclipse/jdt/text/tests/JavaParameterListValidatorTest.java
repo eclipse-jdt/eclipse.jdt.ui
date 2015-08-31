@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,10 +15,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 
@@ -31,6 +27,10 @@ import org.eclipse.jface.text.tests.TestTextViewer;
 
 import org.eclipse.jdt.internal.ui.text.java.JavaParameterListValidator;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 
 public class JavaParameterListValidatorTest extends TestCase {
 
@@ -42,6 +42,7 @@ public class JavaParameterListValidatorTest extends TestCase {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() {
 		fTextViewer= new TestTextViewer();
 		fDocument= new Document();
@@ -52,6 +53,7 @@ public class JavaParameterListValidatorTest extends TestCase {
 		return new TestSuite(JavaParameterListValidatorTest.class);
 	}
 
+	@Override
 	protected void tearDown () {
 		fTextViewer= null;
 		fDocument= null;
@@ -120,7 +122,7 @@ public class JavaParameterListValidatorTest extends TestCase {
 	private int[] computeCommaPositions(String code) {
 	    int angleLevel= 0;
 	    int pos= 0;
-		List positions= new ArrayList();
+		List<Integer> positions= new ArrayList<>();
 		while (pos < code.length() && pos != -1) {
 			char ch= code.charAt(pos);
 			switch (ch) {
@@ -162,7 +164,7 @@ public class JavaParameterListValidatorTest extends TestCase {
 
 		int[] fields= new int[positions.size()];
 		for (int i= 0; i < fields.length; i++)
-	        fields[i]= ((Integer) positions.get(i)).intValue();
+	        fields[i]= positions.get(i).intValue();
 	    return fields;
     }
 
@@ -230,8 +232,8 @@ public class JavaParameterListValidatorTest extends TestCase {
 		// check default range
 		assertEquals(expected.getDefaultStyleRange(), actual.getDefaultStyleRange());
 		// check rest
-		Iterator e1= expected.getAllStyleRangeIterator();
-		Iterator e2= actual.getAllStyleRangeIterator();
+		Iterator<StyleRange> e1= expected.getAllStyleRangeIterator();
+		Iterator<StyleRange> e2= actual.getAllStyleRangeIterator();
 		while (e1.hasNext())
 			assertEquals(e1.next(), e2.next());
 	}
@@ -246,7 +248,7 @@ public class JavaParameterListValidatorTest extends TestCase {
 				buf.append(range.toString());
 			buf.append('\n');
 			// rest
-			Iterator e= presentation.getAllStyleRangeIterator();
+			Iterator<StyleRange> e= presentation.getAllStyleRangeIterator();
 			while (e.hasNext()) {
 				buf.append(e.next().toString());
 				buf.append('\n');

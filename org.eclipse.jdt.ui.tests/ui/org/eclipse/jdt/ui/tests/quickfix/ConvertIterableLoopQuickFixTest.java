@@ -13,9 +13,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.Hashtable;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -32,15 +29,19 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
-	private static final Class THIS= ConvertIterableLoopQuickFixTest.class;
+	private static final Class<ConvertIterableLoopQuickFixTest> THIS= ConvertIterableLoopQuickFixTest.class;
 
 	public static Test suite() {
 		return setUpTest(new TestSuite(THIS));
@@ -60,16 +61,17 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		super(name);
 	}
 
-	private List fetchConvertingProposal(StringBuffer buf, ICompilationUnit cu) throws Exception {
+	private List<IJavaCompletionProposal> fetchConvertingProposal(StringBuffer buf, ICompilationUnit cu) throws Exception {
 		int offset= buf.toString().indexOf("for");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
-		List proposals= collectAssists(context, false);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 		fConvertLoopProposal= (FixCorrectionProposal)findProposalByCommandId(QuickAssistProcessor.CONVERT_FOR_LOOP_ID, proposals);
 		return proposals;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);
@@ -83,6 +85,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		fConvertLoopProposal= null;
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fProject, ProjectTestSetup.getDefaultClasspath());
 		fConvertLoopProposal= null;
@@ -106,7 +109,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}");
 		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -146,7 +149,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}");
 		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -187,7 +190,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}");
 		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -229,7 +232,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}");
 		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -274,7 +277,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}");
 		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -322,7 +325,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}");
 		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -368,7 +371,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}");
 		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -415,7 +418,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}");
 		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -447,7 +450,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}");
 		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -492,7 +495,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}");
 		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNull(fConvertLoopProposal);
 
@@ -518,7 +521,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}");
 		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNull(fConvertLoopProposal);
 
@@ -539,7 +542,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -574,7 +577,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -611,7 +614,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 		assertNull(fConvertLoopProposal);
 		assertCorrectLabels(proposals);
 	}
@@ -632,7 +635,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 		assertNull(fConvertLoopProposal);
 		assertCorrectLabels(proposals);
 	}
@@ -653,7 +656,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 		assertNull(fConvertLoopProposal);
 		assertCorrectLabels(proposals);
 	}
@@ -674,7 +677,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 		assertNull(fConvertLoopProposal);
 		assertCorrectLabels(proposals);
 	}
@@ -696,7 +699,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -756,7 +759,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -798,7 +801,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -839,7 +842,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertNotNull(fConvertLoopProposal);
 
@@ -884,7 +887,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertTrue(fConvertLoopProposal.getFixStatus() != null && fConvertLoopProposal.getFixStatus().getCode() == IStatus.WARNING);
 
@@ -943,7 +946,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		ICompilationUnit unit= pack.createCompilationUnit("TestSaveActionConvertToEnhancedForLoop.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertTrue(fConvertLoopProposal.getFixStatus() != null && fConvertLoopProposal.getFixStatus().getCode() == IStatus.WARNING);
 
@@ -1003,7 +1006,7 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		List proposals= fetchConvertingProposal(buf, unit);
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
 
 		assertTrue(fConvertLoopProposal.getFixStatus() != null && fConvertLoopProposal.getFixStatus().isOK());
 

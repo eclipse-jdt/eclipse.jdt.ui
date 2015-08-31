@@ -96,7 +96,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		IPackageFragment pack= getPackage();
 		if (pack == null)
 			return new NullChange();
-		Map<IResource, Long> stamps= new HashMap<IResource, Long>();
+		Map<IResource, Long> stamps= new HashMap<>();
 		if (!fRenameSubpackages) {
 			addStamps(stamps, pack.getCompilationUnits());
 		} else {
@@ -123,6 +123,7 @@ public final class RenamePackageChange extends AbstractJavaElementRenameChange {
 		} else {
 			IPackageFragment[] allPackages= JavaElementUtil.getPackageAndSubpackages(pack);
 			Arrays.sort(allPackages, new Comparator<IPackageFragment>() {
+				@Override
 				public int compare(IPackageFragment o1, IPackageFragment o2) {
 					String p1= o1.getElementName();
 					String p2= o2.getElementName();

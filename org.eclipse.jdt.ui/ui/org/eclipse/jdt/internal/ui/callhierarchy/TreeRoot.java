@@ -36,7 +36,7 @@ public class TreeRoot {
 	 * @since 3.7
 	 */
     void addRoots(MethodWrapper[] roots){
-		List<MethodWrapper>newRoots= new ArrayList<MethodWrapper>();
+		List<MethodWrapper>newRoots= new ArrayList<>();
 		newRoots.addAll(Arrays.asList(fRoots));
 		newRoots.addAll(Arrays.asList(roots));
 

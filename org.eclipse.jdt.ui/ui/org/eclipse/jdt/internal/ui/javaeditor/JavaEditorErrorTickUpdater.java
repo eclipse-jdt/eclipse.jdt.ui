@@ -50,6 +50,7 @@ public class JavaEditorErrorTickUpdater implements IProblemChangedListener {
 	/*
 	 * @see IProblemChangedListener#problemsChanged(IResource[], boolean)
 	 */
+	@Override
 	public void problemsChanged(IResource[] changedResources, boolean isMarkerChange) {
 		if (!isMarkerChange)
 			return;
@@ -87,6 +88,7 @@ public class JavaEditorErrorTickUpdater implements IProblemChangedListener {
 		Shell shell= fJavaEditor.getEditorSite().getShell();
 		if (shell != null && !shell.isDisposed()) {
 			shell.getDisplay().syncExec(new Runnable() {
+				@Override
 				public void run() {
 					fJavaEditor.updatedTitleImage(newImage);
 				}

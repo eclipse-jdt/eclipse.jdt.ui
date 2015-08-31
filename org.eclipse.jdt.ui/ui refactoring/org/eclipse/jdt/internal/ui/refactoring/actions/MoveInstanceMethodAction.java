@@ -119,9 +119,6 @@ public final class MoveInstanceMethodAction extends SelectionDispatchAction {
 		}
  	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		try {

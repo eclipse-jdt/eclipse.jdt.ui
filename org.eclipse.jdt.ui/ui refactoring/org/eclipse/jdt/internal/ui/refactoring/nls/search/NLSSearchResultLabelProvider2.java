@@ -36,14 +36,12 @@ class NLSSearchResultLabelProvider2 extends TextSearchLabelProvider implements I
 		fLabelProvider= new AppearanceAwareLabelProvider(JavaElementLabels.ALL_POST_QUALIFIED, 0);
 	}
 
+	@Override
 	public StyledString getStyledText(Object element) {
 		return getColoredLabelWithCounts(element, internalGetText(element));
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
-	 */
 	@Override
 	public String getText(Object element) {
 		return getLabelWithCounts(element, internalGetText(element).getString());

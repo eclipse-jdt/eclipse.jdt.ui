@@ -69,6 +69,7 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 	public JavaNavigatorLabelProvider() {
 
 	}
+	@Override
 	public void init(ICommonContentExtensionSite commonContentExtensionSite) {
 		fStateModel = commonContentExtensionSite.getExtensionStateModel();
 		fContentProvider = (PackageExplorerContentProvider) commonContentExtensionSite.getExtension().getContentProvider();
@@ -77,6 +78,7 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 		delegeteLabelProvider.setIsFlatLayout(fStateModel
 				.getBooleanProperty(Values.IS_LAYOUT_FLAT));
 		fLayoutPropertyListener = new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (Values.IS_LAYOUT_FLAT.equals(event.getProperty())) {
 					if (event.getNewValue() != null) {
@@ -91,6 +93,7 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 		fStateModel.addPropertyChangeListener(fLayoutPropertyListener);
 	}
 
+	@Override
 	public String getDescription(Object element) {
 		return formatMessage(element);
 	}
@@ -99,6 +102,7 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 		return new PackageExplorerLabelProvider(fContentProvider);
 	}
 
+	@Override
 	public void dispose() {
 		delegeteLabelProvider.dispose();
 		fStateModel.removePropertyChangeListener(fLayoutPropertyListener);
@@ -112,6 +116,7 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 		delegeteLabelProvider.addLabelDecorator(decorator);
 	}
 
+	@Override
 	public void addListener(ILabelProviderListener listener) {
 		delegeteLabelProvider.addListener(listener);
 	}
@@ -124,14 +129,17 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 		return delegeteLabelProvider.getForeground(element);
 	}
 
+	@Override
 	public Image getImage(Object element) {
 		return delegeteLabelProvider.getImage(element);
 	}
 
+	@Override
 	public boolean isLabelProperty(Object element, String property) {
 		return delegeteLabelProvider.isLabelProperty(element, property);
 	}
 
+	@Override
 	public void removeListener(ILabelProviderListener listener) {
 		delegeteLabelProvider.removeListener(listener);
 	}
@@ -151,10 +159,12 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 		return delegeteLabelProvider.toString();
 	}
 
+	@Override
 	public String getText(Object element) {
 		return delegeteLabelProvider.getText(element);
 	}
 
+	@Override
 	public StyledString getStyledText(Object element) {
 		return delegeteLabelProvider.getStyledText(element);
 	}
@@ -187,10 +197,12 @@ public class JavaNavigatorLabelProvider implements ICommonLabelProvider, IStyled
 			return BasicElementLabels.getResourceName(element.getName());
 	}
 
+	@Override
 	public void restoreState(IMemento memento) {
 
 	}
 
+	@Override
 	public void saveState(IMemento memento) {
 
 	}

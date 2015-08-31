@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.ui.wizards.ClassPathDetector;
 
 public class ClassPathDetectorTest extends TestCase {
 
-	private static final Class THIS= ClassPathDetectorTest.class;
+	private static final Class<ClassPathDetectorTest> THIS= ClassPathDetectorTest.class;
 
 	private IJavaProject fJProject1;
 
@@ -60,6 +60,7 @@ public class ClassPathDetectorTest extends TestCase {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 
 		IWorkspace workspace= JavaTestPlugin.getWorkspace();
@@ -78,6 +79,7 @@ public class ClassPathDetectorTest extends TestCase {
 		fJProject1= null;
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		if (fJProject1 != null) {
 			JavaProjectHelper.delete(fJProject1);

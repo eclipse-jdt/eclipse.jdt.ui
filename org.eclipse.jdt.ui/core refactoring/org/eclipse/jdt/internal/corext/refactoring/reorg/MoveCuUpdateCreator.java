@@ -85,7 +85,7 @@ public class MoveCuUpdateCreator {
 		Assert.isNotNull(pack);
 		fCus= cus;
 		fDestination= pack;
-		fImportRewrites= new HashMap<ICompilationUnit, ImportRewrite>();
+		fImportRewrites= new HashMap<>();
 		fNewPackage= fDestination.isDefaultPackage() ? "" : fDestination.getElementName() + '.'; //$NON-NLS-1$
 	}
 
@@ -228,7 +228,7 @@ public class MoveCuUpdateCreator {
 	}
 
 	private IType[] getDestinationPackageTypes() throws JavaModelException {
-		List<IType> types= new ArrayList<IType>();
+		List<IType> types= new ArrayList<>();
 		if (fDestination.exists()) {
 			ICompilationUnit[] cus= fDestination.getCompilationUnits();
 			for (int i= 0; i < cus.length; i++) {
@@ -325,9 +325,6 @@ public class MoveCuUpdateCreator {
 			fScanner= ToolFactory.createScanner(false, false, false, false);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor#acceptSearchMatch(SearchMatch)
-		 */
 		@Override
 		public void acceptSearchMatch(SearchMatch match) throws CoreException {
 			if (filterMatch(match))

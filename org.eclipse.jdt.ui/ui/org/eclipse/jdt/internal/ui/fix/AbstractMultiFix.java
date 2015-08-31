@@ -51,9 +51,7 @@ public abstract class AbstractMultiFix extends AbstractCleanUp implements IMulti
 
 	protected abstract ICleanUpFix createFix(CompilationUnit unit, IProblemLocation[] problems) throws CoreException;
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		return -1;
 	}
@@ -97,7 +95,7 @@ public abstract class AbstractMultiFix extends AbstractCleanUp implements IMulti
 	 * @return problem locations
 	 */
 	protected static IProblemLocation[] filter(IProblemLocation[] problems, int[] problemIds) {
-		ArrayList<IProblemLocation> result= new ArrayList<IProblemLocation>();
+		ArrayList<IProblemLocation> result= new ArrayList<>();
 
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= problems[i];

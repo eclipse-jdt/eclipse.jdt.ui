@@ -85,16 +85,14 @@ public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
-	public UseSupertypeDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public UseSupertypeDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.USE_SUPER_TYPE, project, description, comment, arguments, flags);
 		fInstanceof= JavaRefactoringDescriptorUtil.getBoolean(arguments, ATTRIBUTE_INSTANCEOF, fInstanceof);
 		fSubType= (IType) JavaRefactoringDescriptorUtil.getJavaElement(arguments, ATTRIBUTE_INPUT, project);
 		fSupertype= (IType) JavaRefactoringDescriptorUtil.getJavaElement(arguments, JavaRefactoringDescriptorUtil.getAttributeName(ATTRIBUTE_ELEMENT, 1), project);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
 		JavaRefactoringDescriptorUtil.setBoolean(fArguments, ATTRIBUTE_INSTANCEOF, fInstanceof);
@@ -147,9 +145,7 @@ public final class UseSupertypeDescriptor extends JavaRefactoringDescriptor {
 		fSupertype= type;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public RefactoringStatus validateDescriptor() {
 		RefactoringStatus status= super.validateDescriptor();
 		if (fSubType == null)

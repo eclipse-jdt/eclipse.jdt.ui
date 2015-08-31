@@ -45,6 +45,7 @@ public class CommentsTabPage extends FormatterTabPage {
 			}
 		}
 
+		@Override
 		public void update(Observable o, Object arg) {
 			boolean enabled= areSlavesEnabled();
 
@@ -72,9 +73,6 @@ public class CommentsTabPage extends FormatterTabPage {
 			update(null, null);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		protected boolean areSlavesEnabled() {
 			for (final Iterator<CheckboxPreference> iter= getMasters().iterator(); iter.hasNext();) {
@@ -177,10 +175,10 @@ public class CommentsTabPage extends FormatterTabPage {
 		final NumberPreference lineWidth= createNumberPref(widthGroup, numColumns, FormatterMessages.CommentsTabPage_line_width, DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH, 0, 9999);
 
 
-		ArrayList<CheckboxPreference> lineFirstColumnMasters= new ArrayList<CheckboxPreference>();
+		ArrayList<CheckboxPreference> lineFirstColumnMasters= new ArrayList<>();
 		lineFirstColumnMasters.add(singleLineComments);
 
-		ArrayList<Object> lineFirstColumnSlaves= new ArrayList<Object>();
+		ArrayList<Object> lineFirstColumnSlaves= new ArrayList<>();
 		lineFirstColumnSlaves.add(singleLineCommentsOnFirstColumn);
 
 		new Controller(lineFirstColumnMasters, lineFirstColumnSlaves) {
@@ -191,11 +189,11 @@ public class CommentsTabPage extends FormatterTabPage {
 		}.update(null, null);
 
 
-		ArrayList<CheckboxPreference> javaDocMaster= new ArrayList<CheckboxPreference>();
+		ArrayList<CheckboxPreference> javaDocMaster= new ArrayList<>();
 		javaDocMaster.add(javadoc);
 		javaDocMaster.add(header);
 
-		ArrayList<Object> javaDocSlaves= new ArrayList<Object>();
+		ArrayList<Object> javaDocSlaves= new ArrayList<>();
 		javaDocSlaves.add(settingsGroup);
 		javaDocSlaves.add(html);
 		javaDocSlaves.add(code);
@@ -208,12 +206,12 @@ public class CommentsTabPage extends FormatterTabPage {
 		new OrController(javaDocMaster, javaDocSlaves);
 
 
-		ArrayList<CheckboxPreference> indentMasters= new ArrayList<CheckboxPreference>();
+		ArrayList<CheckboxPreference> indentMasters= new ArrayList<>();
 		indentMasters.add(javadoc);
 		indentMasters.add(header);
 		indentMasters.add(indentJavadoc);
 
-		ArrayList<Object> indentSlaves= new ArrayList<Object>();
+		ArrayList<Object> indentSlaves= new ArrayList<>();
 		indentSlaves.add(indentDesc);
 
 		new Controller(indentMasters, indentSlaves) {
@@ -224,11 +222,11 @@ public class CommentsTabPage extends FormatterTabPage {
 		}.update(null, null);
 
 
-		ArrayList<CheckboxPreference> blockMasters= new ArrayList<CheckboxPreference>();
+		ArrayList<CheckboxPreference> blockMasters= new ArrayList<>();
 		blockMasters.add(blockComment);
 		blockMasters.add(header);
 
-		ArrayList<Object> blockSlaves= new ArrayList<Object>();
+		ArrayList<Object> blockSlaves= new ArrayList<>();
 		blockSlaves.add(blockSettingsGroup);
 		blockSlaves.add(nlBoundariesBlock);
 		blockSlaves.add(blankLinesBlock);
@@ -236,13 +234,13 @@ public class CommentsTabPage extends FormatterTabPage {
 		new OrController(blockMasters, blockSlaves);
 
 
-		ArrayList<CheckboxPreference> lineWidthMasters= new ArrayList<CheckboxPreference>();
+		ArrayList<CheckboxPreference> lineWidthMasters= new ArrayList<>();
 		lineWidthMasters.add(javadoc);
 		lineWidthMasters.add(blockComment);
 		lineWidthMasters.add(singleLineComments);
 		lineWidthMasters.add(header);
 
-		ArrayList<Object> lineWidthSlaves= new ArrayList<Object>();
+		ArrayList<Object> lineWidthSlaves= new ArrayList<>();
 		lineWidthSlaves.add(widthGroup);
 		lineWidthSlaves.add(lineWidth);
 
@@ -254,18 +252,12 @@ public class CommentsTabPage extends FormatterTabPage {
 		fPreview.setPreviewText(PREVIEW);
 	}
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
-     */
     @Override
 	protected JavaPreview doCreateJavaPreview(Composite parent) {
         fPreview= new CompilationUnitPreview(fWorkingValues, parent);
         return fPreview;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doUpdatePreview()
-     */
     @Override
 	protected void doUpdatePreview() {
     	super.doUpdatePreview();

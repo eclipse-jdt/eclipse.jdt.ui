@@ -155,6 +155,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 	private static final String[] SHOW_IN_TARGETS= new String[] { JavaUI.ID_PACKAGES , JavaPlugin.ID_RES_NAV };
 	public static final IShowInTargetList SHOW_IN_TARGET_LIST= new IShowInTargetList() {
+		@Override
 		public String[] getShowInTargetIds() {
 			return SHOW_IN_TARGETS;
 		}
@@ -219,7 +220,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	private void showWithMarker(IEditorPart editor, IFile file, int offset, int length) throws PartInitException {
 		try {
 			IMarker marker= file.createMarker(NewSearchUI.SEARCH_MARKER);
-			HashMap<String, Integer> attributes= new HashMap<String, Integer>(4);
+			HashMap<String, Integer> attributes= new HashMap<>(4);
 			attributes.put(IMarker.CHAR_START, new Integer(offset));
 			attributes.put(IMarker.CHAR_END, new Integer(offset + length));
 			marker.setAttributes(attributes);
@@ -411,9 +412,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		return super.getViewer();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#restoreState(org.eclipse.ui.IMemento)
-	 */
 	@Override
 	public void restoreState(IMemento memento) {
 		super.restoreState(memento);
@@ -456,9 +454,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		setElementLimit(new Integer(elementLimit));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#saveState(org.eclipse.ui.IMemento)
-	 */
 	@Override
 	public void saveState(IMemento memento) {
 		super.saveState(memento);
@@ -548,6 +543,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		return count;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Class<T> adapter) {
 		if (IShowInTargetList.class.equals(adapter)) {

@@ -32,8 +32,10 @@ public class MonitoringNewNameQueries implements INewNameQueries {
 		fDelegate= delegate;
 		fExecutionLog= log;
 	}
+	@Override
 	public INewNameQuery createNewCompilationUnitNameQuery(final ICompilationUnit cu, final String initialSuggestedName) {
 		return new INewNameQuery() {
+			@Override
 			public String getNewName() throws OperationCanceledException {
 				String result= fDelegate.createNewCompilationUnitNameQuery(cu, initialSuggestedName).getNewName();
 				String newName= JavaModelUtil.getRenamedCUName(cu, result);
@@ -46,8 +48,10 @@ public class MonitoringNewNameQueries implements INewNameQueries {
 			}
 		};
 	}
+	@Override
 	public INewNameQuery createNewPackageFragmentRootNameQuery(final IPackageFragmentRoot root, final String initialSuggestedName) {
 		return new INewNameQuery() {
+			@Override
 			public String getNewName() throws OperationCanceledException {
 				String result= fDelegate.createNewPackageFragmentRootNameQuery(root, initialSuggestedName).getNewName();
 				fExecutionLog.setNewName(root, result);
@@ -59,8 +63,10 @@ public class MonitoringNewNameQueries implements INewNameQueries {
 			}
 		};
 	}
+	@Override
 	public INewNameQuery createNewPackageNameQuery(final IPackageFragment pack, final String initialSuggestedName) {
 		return new INewNameQuery() {
+			@Override
 			public String getNewName() throws OperationCanceledException {
 				String result= fDelegate.createNewPackageNameQuery(pack, initialSuggestedName).getNewName();
 				fExecutionLog.setNewName(pack, result);
@@ -74,8 +80,10 @@ public class MonitoringNewNameQueries implements INewNameQueries {
 			}
 		};
 	}
+	@Override
 	public INewNameQuery createNewResourceNameQuery(final IResource res, final String initialSuggestedName) {
 		return new INewNameQuery() {
+			@Override
 			public String getNewName() throws OperationCanceledException {
 				String result= fDelegate.createNewResourceNameQuery(res, initialSuggestedName).getNewName();
 				fExecutionLog.setNewName(res, result);
@@ -83,9 +91,11 @@ public class MonitoringNewNameQueries implements INewNameQueries {
 			}
 		};
 	}
+	@Override
 	public INewNameQuery createNullQuery() {
 		return fDelegate.createNullQuery();
 	}
+	@Override
 	public INewNameQuery createStaticQuery(String newName) {
 		return fDelegate.createStaticQuery(newName);
 	}

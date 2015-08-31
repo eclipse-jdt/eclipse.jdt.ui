@@ -67,7 +67,7 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 	private IColorManager fColorManager;
 	private IPreferenceStore fPreferenceStore;
 
-	private Map<String, Token> fTokenMap= new HashMap<String, Token>();
+	private Map<String, Token> fTokenMap= new HashMap<>();
 	private String[] fPropertyNamesColor;
 	/**
 	 * Preference keys for boolean preferences which are <code>true</code>,

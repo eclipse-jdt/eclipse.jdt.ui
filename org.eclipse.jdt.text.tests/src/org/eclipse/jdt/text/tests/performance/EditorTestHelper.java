@@ -98,6 +98,7 @@ import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 public class EditorTestHelper {
 
 	private static class ImportOverwriteQuery implements IOverwriteQuery {
+		@Override
 		public String queryOverwrite(String file) {
 			return ALL;
 		}
@@ -297,6 +298,7 @@ public class EditorTestHelper {
 		runEventQueue(minTime);
 
 		DisplayHelper helper= new DisplayHelper() {
+			@Override
 			public boolean condition() {
 				return allJobsQuiet();
 			}
@@ -368,6 +370,7 @@ public class EditorTestHelper {
 			javaReconcilerAccessor= null;
 
 		DisplayHelper helper= new DisplayHelper() {
+			@Override
 			public boolean condition() {
 				return !isRunning(javaReconcilerAccessor, backgroundThreadAccessor);
 			}
@@ -419,6 +422,7 @@ public class EditorTestHelper {
 
 	public static void closeAllPopUps(SourceViewer sourceViewer) {
 		IWidgetTokenKeeper tokenKeeper= new IWidgetTokenKeeper() {
+			@Override
 			public boolean requestWidgetToken(IWidgetTokenOwner owner) {
 				return true;
 			}
@@ -460,12 +464,12 @@ public class EditorTestHelper {
 	}
 
 	public static IFile[] findFiles(IResource resource) throws CoreException {
-		List files= new ArrayList();
+		List<IResource> files= new ArrayList<>();
 		findFiles(resource, files);
-		return (IFile[]) files.toArray(new IFile[files.size()]);
+		return files.toArray(new IFile[files.size()]);
 	}
 
-	private static void findFiles(IResource resource, List files) throws CoreException {
+	private static void findFiles(IResource resource, List<IResource> files) throws CoreException {
 		if (resource instanceof IFile) {
 			files.add(resource);
 			return;
@@ -487,7 +491,7 @@ public class EditorTestHelper {
 	public static void importFilesFromDirectory(File rootDir, IPath destPath, IProgressMonitor monitor) throws CoreException {
 		try {
 			IImportStructureProvider structureProvider= FileSystemStructureProvider.INSTANCE;
-			List files= new ArrayList(100);
+			List<File> files= new ArrayList<>(100);
 			addJavaFiles(rootDir, files);
 			ImportOperation op= new ImportOperation(destPath, rootDir, structureProvider, new ImportOverwriteQuery(), files);
 			op.setCreateContainerStructure(false);
@@ -501,9 +505,9 @@ public class EditorTestHelper {
 		return new CoreException(new Status(IStatus.ERROR, JdtTextTestPlugin.PLUGIN_ID, -1, "", x));
 	}
 
-	private static void addJavaFiles(File dir, List collection) throws IOException {
+	private static void addJavaFiles(File dir, List<File> collection) throws IOException {
 		File[] files= dir.listFiles();
-		List subDirs= new ArrayList(2);
+		List<File> subDirs= new ArrayList<>(2);
 		for (int i= 0; i < files.length; i++) {
 			if (files[i].isFile()) {
 				collection.add(files[i]);
@@ -511,9 +515,9 @@ public class EditorTestHelper {
 				subDirs.add(files[i]);
 			}
 		}
-		Iterator iter= subDirs.iterator();
+		Iterator<File> iter= subDirs.iterator();
 		while (iter.hasNext()) {
-			File subDir= (File)iter.next();
+			File subDir= iter.next();
 			addJavaFiles(subDir, collection);
 		}
 	}

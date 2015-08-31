@@ -64,7 +64,7 @@ public final class PullUpDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
-	public PullUpDescriptor( String project, String description, String comment, Map arguments, int flags) {
+	public PullUpDescriptor( String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.PULL_UP, project, description, comment, arguments, flags);
 	}
 

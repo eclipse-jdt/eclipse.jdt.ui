@@ -107,6 +107,7 @@ public abstract class DisplayHelper {
 	 */
 	public static void sleep(Display display, long millis) {
 		new DisplayHelper() {
+			@Override
 			public boolean condition() {
 				return false;
 			}
@@ -395,6 +396,7 @@ final class DisplayWaiter {
 			/*
 			 * @see java.lang.Runnable#run()
 			 */
+			@Override
 			public void run() {
 				try {
 					run2();

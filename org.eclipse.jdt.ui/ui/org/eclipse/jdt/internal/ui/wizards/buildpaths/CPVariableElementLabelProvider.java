@@ -85,7 +85,7 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 			IPath path= curr.getPath();
 
 			String result= name;
-			ArrayList<String> restrictions= new ArrayList<String>(2);
+			ArrayList<String> restrictions= new ArrayList<>(2);
 
 			if (curr.isReadOnly() && fHighlightReadOnly) {
 				restrictions.add(NewWizardMessages.CPVariableElementLabelProvider_read_only);
@@ -116,9 +116,7 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 		return super.getText(element);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
-	 */
+	@Override
 	public Color getForeground(Object element) {
 		if (isUnmodifiable(element)) {
 			Display display= Display.getCurrent();
@@ -127,9 +125,7 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
-	 */
+	@Override
 	public Color getBackground(Object element) {
 		if (isUnmodifiable(element)) {
 			Display display= Display.getCurrent();
@@ -148,9 +144,6 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
-	 */
 	@Override
 	public void dispose() {
 		super.dispose();

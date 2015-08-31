@@ -149,10 +149,10 @@ public class JavaFormatter {
 		}
 
 		private List<TypedPosition> createRangeMarkers(TemplateVariable[] variables, IDocument document) throws MalformedTreeException, BadLocationException {
-			Map<ReplaceEdit, String> markerToOriginal= new HashMap<ReplaceEdit, String>();
+			Map<ReplaceEdit, String> markerToOriginal= new HashMap<>();
 
 			MultiTextEdit root= new MultiTextEdit(0, document.getLength());
-			List<TextEdit> edits= new ArrayList<TextEdit>();
+			List<TextEdit> edits= new ArrayList<>();
 			boolean hasModifications= false;
 			for (int i= 0; i != variables.length; i++) {
 				final TemplateVariable variable= variables[i];
@@ -183,7 +183,7 @@ public class JavaFormatter {
 				root.apply(document, TextEdit.UPDATE_REGIONS);
 			}
 
-			List<TypedPosition> positions= new ArrayList<TypedPosition>();
+			List<TypedPosition> positions= new ArrayList<>();
 			for (Iterator<TextEdit> it= edits.iterator(); it.hasNext();) {
 				TextEdit edit= it.next();
 				try {

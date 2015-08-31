@@ -42,10 +42,12 @@ public class WordRulePerformanceTest extends TextPerformanceTestCase2 {
 	}
 
 	private final class MyWordDetector implements IWordDetector {
+		@Override
 		public boolean isWordPart(char c) {
 			return Character.isLetterOrDigit(c);
 		}
 
+		@Override
 		public boolean isWordStart(char c) {
 			return Character.isLetterOrDigit(c);
 		}
@@ -56,6 +58,7 @@ public class WordRulePerformanceTest extends TextPerformanceTestCase2 {
 	private WordRule fWordRule;
 
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		StringBuffer sb= new StringBuffer();

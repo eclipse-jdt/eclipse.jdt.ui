@@ -42,6 +42,7 @@ public final class HippieProposalComputer implements IJavaCompletionProposalComp
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		return Arrays.asList(fProcessor.computeCompletionProposals(context.getViewer(), context.getInvocationOffset()));
 	}
@@ -49,6 +50,7 @@ public final class HippieProposalComputer implements IJavaCompletionProposalComp
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public List<IContextInformation> computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		return Arrays.asList(fProcessor.computeContextInformation(context.getViewer(), context.getInvocationOffset()));
 	}
@@ -56,6 +58,7 @@ public final class HippieProposalComputer implements IJavaCompletionProposalComp
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#getErrorMessage()
 	 */
+	@Override
 	public String getErrorMessage() {
 		return fProcessor.getErrorMessage();
 	}
@@ -63,12 +66,14 @@ public final class HippieProposalComputer implements IJavaCompletionProposalComp
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionStarted()
 	 */
+	@Override
 	public void sessionStarted() {
 	}
 
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionEnded()
 	 */
+	@Override
 	public void sessionEnded() {
 	}
 }

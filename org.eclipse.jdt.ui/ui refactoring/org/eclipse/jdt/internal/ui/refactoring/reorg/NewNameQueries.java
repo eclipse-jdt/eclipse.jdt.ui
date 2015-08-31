@@ -79,6 +79,7 @@ public class NewNameQueries implements INewNameQueries {
 		return JavaPlugin.getActiveWorkbenchShell();
 	}
 
+	@Override
 	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String initialSuggestedName) {
 		String[] keys= { BasicElementLabels.getJavaElementName(JavaCore.removeJavaLikeExtension(cu.getElementName()))};
 		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys);
@@ -86,6 +87,7 @@ public class NewNameQueries implements INewNameQueries {
 	}
 
 
+	@Override
 	public INewNameQuery createNewResourceNameQuery(IResource res, String initialSuggestedName) {
 		String[] keys= { BasicElementLabels.getResourceName(res)};
 		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys);
@@ -93,12 +95,14 @@ public class NewNameQueries implements INewNameQueries {
 	}
 
 
+	@Override
 	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String initialSuggestedName) {
 		String[] keys= {JavaElementLabels.getElementLabel(pack, JavaElementLabels.ALL_DEFAULT)};
 		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys);
 		return createStaticQuery(createPackageNameValidator(pack), message, initialSuggestedName, false, getShell());
 	}
 
+	@Override
 	public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName) {
 		String[] keys= {JavaElementLabels.getElementLabel(root, JavaElementLabels.ALL_DEFAULT)};
 		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys);
@@ -106,13 +110,16 @@ public class NewNameQueries implements INewNameQueries {
 	}
 
 
+	@Override
 	public INewNameQuery createNullQuery(){
 		return createStaticQuery(null);
 	}
 
 
+	@Override
 	public INewNameQuery createStaticQuery(final String newName){
 		return new INewNameQuery(){
+			@Override
 			public String getNewName() {
 				return newName;
 			}
@@ -121,6 +128,7 @@ public class NewNameQueries implements INewNameQueries {
 
 	private static INewNameQuery createStaticQuery(final IInputValidator validator, final String message, final String initial, final boolean isFile, final Shell shell) {
 		return new INewNameQuery(){
+			@Override
 			public String getNewName() throws OperationCanceledException {
 				InputDialog dialog= new InputDialog(shell, ReorgMessages.ReorgQueries_nameConflictMessage, message, initial, validator) {
 					@Override
@@ -149,6 +157,7 @@ public class NewNameQueries implements INewNameQueries {
 
 	private static IInputValidator createResourceNameValidator(final IResource res){
 		IInputValidator validator= new IInputValidator(){
+			@Override
 			public String isValid(String newText) {
 				if (newText == null || "".equals(newText) || res.getParent() == null) //$NON-NLS-1$
 					return INVALID_NAME_NO_MESSAGE;
@@ -171,6 +180,7 @@ public class NewNameQueries implements INewNameQueries {
 
 	private static IInputValidator createCompilationUnitNameValidator(final ICompilationUnit cu) {
 		IInputValidator validator= new IInputValidator(){
+			@Override
 			public String isValid(String newText) {
 				if (newText == null || "".equals(newText)) //$NON-NLS-1$
 					return INVALID_NAME_NO_MESSAGE;
@@ -196,6 +206,7 @@ public class NewNameQueries implements INewNameQueries {
 	private static IInputValidator createPackageFragmentRootNameValidator(final IPackageFragmentRoot root) {
 		return new IInputValidator() {
 			IInputValidator resourceNameValidator= createResourceNameValidator(root.getResource());
+			@Override
 			public String isValid(String newText) {
 				return resourceNameValidator.isValid(newText);
 			}
@@ -204,6 +215,7 @@ public class NewNameQueries implements INewNameQueries {
 
 	private static IInputValidator createPackageNameValidator(final IPackageFragment pack) {
 		IInputValidator validator= new IInputValidator(){
+			@Override
 			public String isValid(String newText) {
 				if (newText == null || "".equals(newText)) //$NON-NLS-1$
 					return INVALID_NAME_NO_MESSAGE;

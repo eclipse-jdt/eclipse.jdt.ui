@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,11 +12,10 @@ package org.eclipse.jdt.internal.junit.launcher;
 
 import java.util.Comparator;
 
-public class ContainerComparator implements Comparator {
+public class ContainerComparator implements Comparator<String> {
 
-    public int compare(Object o1, Object o2) {
-		String container1= (String)o1;
-		String container2= (String)o2;
+	@Override
+	public int compare(String container1, String container2) {
 		if (container1 == null)
 			container1= ""; //$NON-NLS-1$
 		if (container2 == null)

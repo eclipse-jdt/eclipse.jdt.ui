@@ -54,6 +54,7 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 			fMenu= menu;
         }
 
+		@Override
 		public void menuAboutToShow(IMenuManager manager) {
 	    	for (int i= 0; i < fSpecificAssistActions.length; i++) {
 	            fSpecificAssistActions[i].update();
@@ -117,7 +118,7 @@ public class BasicCompilationUnitEditorActionContributor extends BasicJavaEditor
 
 			caMenu.add(fRetargetContentAssist);
 			Collection<CompletionProposalCategory> descriptors= CompletionProposalComputerRegistry.getDefault().getProposalCategories();
-			List<IAction> specificAssistActions= new ArrayList<IAction>(descriptors.size());
+			List<IAction> specificAssistActions= new ArrayList<>(descriptors.size());
 			for (Iterator<CompletionProposalCategory> it= descriptors.iterator(); it.hasNext();) {
 				final CompletionProposalCategory cat= it.next();
 				if (cat.hasComputers()) {

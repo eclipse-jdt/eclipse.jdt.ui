@@ -27,6 +27,7 @@ public class PropertiesFileDocumentSetupParticipant  implements IDocumentSetupPa
 	/*
 	 * @see org.eclipse.core.filebuffers.IDocumentSetupParticipant#setup(org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public void setup(IDocument document) {
 		setupDocument(document);
 	}

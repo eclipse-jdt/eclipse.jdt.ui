@@ -52,6 +52,7 @@ public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyMana
 	/*
 	 * @see org.eclipse.jdt.ui.IWorkingCopyManager#connect(org.eclipse.ui.IEditorInput)
 	 */
+	@Override
 	public void connect(IEditorInput input) throws CoreException {
 		fDocumentProvider.connect(input);
 	}
@@ -59,6 +60,7 @@ public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyMana
 	/*
 	 * @see org.eclipse.jdt.ui.IWorkingCopyManager#disconnect(org.eclipse.ui.IEditorInput)
 	 */
+	@Override
 	public void disconnect(IEditorInput input) {
 		fDocumentProvider.disconnect(input);
 	}
@@ -66,6 +68,7 @@ public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyMana
 	/*
 	 * @see org.eclipse.jdt.ui.IWorkingCopyManager#shutdown()
 	 */
+	@Override
 	public void shutdown() {
 		if (!fIsShuttingDown) {
 			fIsShuttingDown= true;
@@ -84,6 +87,7 @@ public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyMana
 	/*
 	 * @see org.eclipse.jdt.ui.IWorkingCopyManager#getWorkingCopy(org.eclipse.ui.IEditorInput)
 	 */
+	@Override
 	public ICompilationUnit getWorkingCopy(IEditorInput input) {
 		return getWorkingCopy(input, true);
 	}
@@ -114,10 +118,11 @@ public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyMana
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IWorkingCopyManagerExtension#setWorkingCopy(org.eclipse.ui.IEditorInput, org.eclipse.jdt.core.ICompilationUnit)
 	 */
+	@Override
 	public void setWorkingCopy(IEditorInput input, ICompilationUnit workingCopy) {
 		if (fDocumentProvider.getDocument(input) != null) {
 			if (fMap == null)
-				fMap= new HashMap<IEditorInput, ICompilationUnit>();
+				fMap= new HashMap<>();
 			fMap.put(input, workingCopy);
 		}
 	}
@@ -125,6 +130,7 @@ public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyMana
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IWorkingCopyManagerExtension#removeWorkingCopy(org.eclipse.ui.IEditorInput)
 	 */
+	@Override
 	public void removeWorkingCopy(IEditorInput input) {
 		fMap.remove(input);
 		if (fMap.isEmpty())

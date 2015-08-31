@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,15 +25,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipInputStream;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.junit.Assert;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -85,13 +83,16 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.ZipTools;
 
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 
 public class RenamePackageTests extends RefactoringTest {
 	private static final boolean BUG_PACKAGE_CANT_BE_RENAMED_TO_A_PACKAGE_THAT_ALREADY_EXISTS= true;
 	private static final boolean BUG_6054= false;
 	private static final boolean BUG_54962_71267= false;
 
-	private static final Class clazz= RenamePackageTests.class;
+	private static final Class<RenamePackageTests> clazz= RenamePackageTests.class;
 	private static final String REFACTORING_PATH= "RenamePackage/";
 
 	private boolean fUpdateReferences;
@@ -116,6 +117,7 @@ public class RenamePackageTests extends RefactoringTest {
 //		super.run(result);
 //	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fUpdateReferences= true;
@@ -125,6 +127,7 @@ public class RenamePackageTests extends RefactoringTest {
 		// fIsPreDeltaTest= true;
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -191,16 +194,16 @@ public class RenamePackageTests extends RefactoringTest {
 			} else {
 				renameHandles= ParticipantTesting.createHandles(thisPackage);
 				IContainer loop= target;
-				List handles= new ArrayList();
+				List<String> handles= new ArrayList<>();
 				while (loop != null && !loop.exists()) {
 					handles.add(ParticipantTesting.createHandles(loop)[0]);
 					loop= loop.getParent();
 				}
-				createHandles= (String[]) handles.toArray(new String[handles.size()]);
+				createHandles= handles.toArray(new String[handles.size()]);
 				IFolder source= (IFolder)thisPackage.getResource();
 				deleteHandles= ParticipantTesting.createHandles(source);
 				IResource members[]= source.members();
-				List movedObjects= new ArrayList();
+				List<IResource> movedObjects= new ArrayList<>();
 				for (int i= 0; i < members.length; i++) {
 					if (members[i] instanceof IFolder) {
 						doDelete= false;
@@ -232,11 +235,11 @@ public class RenamePackageTests extends RefactoringTest {
 
 				ParticipantTesting.testCreate(createHandles);
 
-				List args= new ArrayList();
+				List<MoveArguments> args= new ArrayList<>();
 				for (int i= 0; i < packageFileNames[0].length; i++) {
 					args.add(new MoveArguments(target, fUpdateReferences));
 				}
-				ParticipantTesting.testMove(moveHandles, (MoveArguments[]) args.toArray(new MoveArguments[args.size()]));
+				ParticipantTesting.testMove(moveHandles, args.toArray(new MoveArguments[args.size()]));
 
 				if (doDelete) {
 					ParticipantTesting.testDelete(deleteHandles);
@@ -380,7 +383,7 @@ public class RenamePackageTests extends RefactoringTest {
 
 		public void checkOriginalState() throws Exception {
 			IJavaElement[] rootChildren= getRoot().getChildren();
-			ArrayList existingPacks= new ArrayList();
+			ArrayList<String> existingPacks= new ArrayList<>();
 			for (int i= 0; i < rootChildren.length; i++) {
 				existingPacks.add(rootChildren[i].getElementName());
 			}
@@ -392,7 +395,7 @@ public class RenamePackageTests extends RefactoringTest {
 				IPackageFragment pack= getRoot().getPackageFragment(packageName);
 
 				IJavaElement[] packChildren= pack.getChildren();
-				ArrayList existingCUs= new ArrayList();
+				ArrayList<String> existingCUs= new ArrayList<>();
 				for (int j= 0; j < packChildren.length; j++) {
 					String cuName= packChildren[j].getElementName();
 					existingCUs.add(cuName.substring(0, cuName.length() - 5));
@@ -414,12 +417,12 @@ public class RenamePackageTests extends RefactoringTest {
 
 		}
 
-		private void assertEqualSets(Collection expected, Collection actual) {
-			HashSet expectedSet= new HashSet(expected);
+		private void assertEqualSets(Collection<String> expected, Collection<String> actual) {
+			HashSet<String> expectedSet= new HashSet<>(expected);
 			expectedSet.removeAll(actual);
 			assertEquals("not all expected in actual", "[]", expectedSet.toString());
 
-			HashSet actualSet= new HashSet(actual);
+			HashSet<String> actualSet= new HashSet<>(actual);
 			actualSet.removeAll(expected);
 			assertEquals("not all actual in expected", "[]", actualSet.toString());
 		}
@@ -509,14 +512,14 @@ public class RenamePackageTests extends RefactoringTest {
 			projectPrg= JavaProjectHelper.createJavaProject("RenamePack1", "bin");
 			assertNotNull(JavaProjectHelper.addRTJar(projectPrg));
 			IPackageFragmentRoot srcPrg= JavaProjectHelper.addSourceContainer(projectPrg, "srcPrg");
-			Map optionsPrg= projectPrg.getOptions(false);
+			Map<String, String> optionsPrg= projectPrg.getOptions(false);
 			JavaProjectHelper.set15CompilerOptions(optionsPrg);
 			projectPrg.setOptions(optionsPrg);
 
 			projectTest= JavaProjectHelper.createJavaProject("RenamePack2", "bin");
 			assertNotNull(JavaProjectHelper.addRTJar(projectTest));
 			IPackageFragmentRoot srcTest= JavaProjectHelper.addSourceContainer(projectTest, "srcTest");
-			Map optionsTest= projectTest.getOptions(false);
+			Map<String, String> optionsTest= projectTest.getOptions(false);
 			JavaProjectHelper.set15CompilerOptions(optionsTest);
 			projectTest.setOptions(optionsTest);
 
@@ -697,7 +700,7 @@ public class RenamePackageTests extends RefactoringTest {
 		IPackageFragment thisPackage= rename.fPackages[0];
 
 		ParticipantTesting.reset();
-		List toRename= new ArrayList(Arrays.asList(JavaElementUtil.getPackageAndSubpackages(thisPackage)));
+		List<IAdaptable> toRename= new ArrayList<IAdaptable>(Arrays.asList(JavaElementUtil.getPackageAndSubpackages(thisPackage)));
 		toRename.add(thisPackage.getResource());
 		String[] renameHandles= ParticipantTesting.createHandles(toRename.toArray());
 
@@ -758,7 +761,7 @@ public class RenamePackageTests extends RefactoringTest {
 
 		ParticipantTesting.reset();
 
-		List toRename= new ArrayList(Arrays.asList(JavaElementUtil.getPackageAndSubpackages(thisPackage)));
+		List<IAdaptable> toRename= new ArrayList<IAdaptable>(Arrays.asList(JavaElementUtil.getPackageAndSubpackages(thisPackage)));
 		toRename.add(thisPackage.getResource());
 		String[] createHandles= {};
 		String[] deleteHandles= {};
@@ -932,7 +935,7 @@ public class RenamePackageTests extends RefactoringTest {
 
 		ParticipantTesting.reset();
 
-		List toRename= new ArrayList(Arrays.asList(JavaElementUtil.getPackageAndSubpackages(thisPackage)));
+		List<IAdaptable> toRename= new ArrayList<IAdaptable>(Arrays.asList(JavaElementUtil.getPackageAndSubpackages(thisPackage)));
 		toRename.add(thisPackage.getResource());
 		String[] renameHandles= ParticipantTesting.createHandles(toRename.toArray());
 
@@ -1311,8 +1314,8 @@ public class RenamePackageTests extends RefactoringTest {
 		//circular buildpath references
 		IJavaProject projectPrg= null;
 		IJavaProject projectTest= null;
-		Hashtable options= JavaCore.getOptions();
-		Object cyclicPref= JavaCore.getOption(JavaCore.CORE_CIRCULAR_CLASSPATH);
+		Hashtable<String, String> options= JavaCore.getOptions();
+		String cyclicPref= JavaCore.getOption(JavaCore.CORE_CIRCULAR_CLASSPATH);
 		try {
 			projectPrg= JavaProjectHelper.createJavaProject("RenamePack1", "bin");
 			assertNotNull(JavaProjectHelper.addRTJar(projectPrg));

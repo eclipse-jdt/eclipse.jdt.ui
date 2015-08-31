@@ -75,7 +75,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  */
 public class JarWriter3 {
 
-	private Set<String> fDirectories= new HashSet<String>();
+	private Set<String> fDirectories= new HashSet<>();
 
 	private JarOutputStream fJarOutputStream;
 
@@ -142,7 +142,7 @@ public class JarWriter3 {
 	protected void addDirectories(String destPath) throws IOException {
 		String path= destPath.replace(File.separatorChar, '/');
 		int lastSlash= path.lastIndexOf('/');
-		List<JarEntry> directories= new ArrayList<JarEntry>(2);
+		List<JarEntry> directories= new ArrayList<>(2);
 		while (lastSlash != -1) {
 			path= path.substring(0, lastSlash + 1);
 			if (!fDirectories.add(path))
@@ -181,7 +181,7 @@ public class JarWriter3 {
 		IContainer parent= null;
 		String path= destinationPath.toString().replace(File.separatorChar, '/');
 		int lastSlash= path.lastIndexOf('/');
-		List<JarEntry> directories= new ArrayList<JarEntry>(2);
+		List<JarEntry> directories= new ArrayList<>(2);
 		while (lastSlash != -1) {
 			path= path.substring(0, lastSlash + 1);
 			if (!fDirectories.add(path))
@@ -302,6 +302,7 @@ public class JarWriter3 {
 		final RefactoringDescriptorProxy[] proxies= data.getRefactoringDescriptors();
 		Arrays.sort(proxies, new Comparator<RefactoringDescriptorProxy>() {
 
+			@Override
 			public final int compare(final RefactoringDescriptorProxy first, final RefactoringDescriptorProxy second) {
 				final long delta= first.getTimeStamp() - second.getTimeStamp();
 				if (delta > 0)

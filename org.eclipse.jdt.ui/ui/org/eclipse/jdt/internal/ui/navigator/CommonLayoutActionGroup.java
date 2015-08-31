@@ -86,11 +86,6 @@ public class CommonLayoutActionGroup extends MultiActionGroup {
 		fStructuredViewer = structuredViewer;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see ActionGroup#fillActionBars(IActionBars)
-	 */
 	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		if (!fHasContributedToViewMenu) {

@@ -13,9 +13,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.Hashtable;
 import java.util.Map;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchPartSite;
@@ -31,12 +28,15 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.actions.MultiSortMembersAction;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 /**
  * @since 3.4
  */
 public class CleanUpActionTest extends CleanUpTestCase {
 
-	private static final Class THIS= CleanUpActionTest.class;
+	private static final Class<CleanUpActionTest> THIS= CleanUpActionTest.class;
 
 	public CleanUpActionTest(String name) {
 		super(name);
@@ -65,11 +65,9 @@ public class CleanUpActionTest extends CleanUpTestCase {
 
 		IWorkbenchPartSite site= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getSite();
 		MultiSortMembersAction action= new MultiSortMembersAction(site) {
-			/**
-			 * {@inheritDoc}
-			 */
-			protected Map getSettings() {
-				Hashtable result= new Hashtable();
+			@Override
+			protected Map<String, String> getSettings() {
+				Hashtable<String, String> result= new Hashtable<>();
 				result.put(CleanUpConstants.SORT_MEMBERS, CleanUpOptions.TRUE);
 				result.put(CleanUpConstants.SORT_MEMBERS_ALL, CleanUpOptions.TRUE);
 				return result;

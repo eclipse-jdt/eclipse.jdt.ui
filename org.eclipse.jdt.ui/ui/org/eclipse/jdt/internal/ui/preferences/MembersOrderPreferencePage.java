@@ -100,7 +100,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 
 		// category sort
 
-		fSortOrderList= new ListDialogField<String>(null,  new String[] { upLabel, downLabel }, new MemberSortLabelProvider());
+		fSortOrderList= new ListDialogField<>(null,  new String[] { upLabel, downLabel }, new MemberSortLabelProvider());
 		fSortOrderList.setDownButtonIndex(1);
 		fSortOrderList.setUpButtonIndex(0);
 
@@ -122,7 +122,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		upLabel= PreferencesMessages.MembersOrderPreferencePage_visibility_button_up;
 		downLabel= PreferencesMessages.MembersOrderPreferencePage_visibility_button_down;
 
-		fVisibilityOrderList= new ListDialogField<String>(null, new String[] { upLabel, downLabel }, new VisibilitySortLabelProvider());
+		fVisibilityOrderList= new ListDialogField<>(null, new String[] { upLabel, downLabel }, new VisibilitySortLabelProvider());
 		fVisibilityOrderList.setDownButtonIndex(1);
 		fVisibilityOrderList.setUpButtonIndex(0);
 
@@ -137,7 +137,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 
 	private static List<String> parseList(String string) {
 		StringTokenizer tokenizer= new StringTokenizer(string, ","); //$NON-NLS-1$
-		List<String> entries= new ArrayList<String>();
+		List<String> entries= new ArrayList<>();
 		while (tokenizer.hasMoreTokens()) {
 			String token= tokenizer.nextToken();
 			entries.add(token);
@@ -178,6 +178,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 
 		fUseVisibilitySortField= new SelectionButtonDialogField(SWT.CHECK);
 		fUseVisibilitySortField.setDialogFieldListener(new IDialogFieldListener() {
+			@Override
 			public void dialogFieldChanged(DialogField field) {
 				fVisibilityOrderList.setEnabled(fUseVisibilitySortField.isSelected());
 			}
@@ -219,6 +220,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(IWorkbench)
 	 */
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 

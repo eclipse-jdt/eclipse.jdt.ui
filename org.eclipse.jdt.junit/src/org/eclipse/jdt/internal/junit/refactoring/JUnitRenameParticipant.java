@@ -99,7 +99,7 @@ public abstract class JUnitRenameParticipant extends RenameParticipant implement
 
 		ILaunchManager manager= getLaunchManager();
 		List<String> launchConfigTypes= getLaunchConfigTypes();
-		List<Change> changes= new ArrayList<Change>();
+		List<Change> changes= new ArrayList<>();
 		for (String typeId : launchConfigTypes) {
 			ILaunchConfigurationType type= manager.getLaunchConfigurationType(typeId);
 			ILaunchConfiguration configs[]= manager.getLaunchConfigurations(type);
@@ -115,6 +115,7 @@ public abstract class JUnitRenameParticipant extends RenameParticipant implement
 	// @see
 	// org.eclipse.jdt.internal.junit.refactoring.IChangeAdder#createChangeForConfig(org.eclipse.jdt.internal.junit.refactoring.JUnitRenameParticipant.ChangeList,
 	// org.eclipse.debug.core.ILaunchConfiguration)
+	@Override
 	public abstract void createChangeForConfig(ChangeList list, LaunchConfigurationContainer config) throws CoreException;
 
 	protected String getChangeName() {
@@ -133,9 +134,6 @@ public abstract class JUnitRenameParticipant extends RenameParticipant implement
 		return getArguments().getNewName();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getName() {
 		return JUnitMessages.TypeRenameParticipant_name;

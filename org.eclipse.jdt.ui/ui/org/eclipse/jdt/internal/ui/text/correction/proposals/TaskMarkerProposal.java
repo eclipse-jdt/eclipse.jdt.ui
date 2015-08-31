@@ -48,9 +48,6 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
-	 */
 	@Override
 	protected void addEdits(IDocument document, TextEdit rootEdit) throws CoreException {
 		super.addEdits(document, rootEdit);

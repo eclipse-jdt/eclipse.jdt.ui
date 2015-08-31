@@ -58,17 +58,11 @@ public class NewPackageCreationWizard extends NewElementWizard {
 		addPage(fPage);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {
 		fPage.createPackage(monitor); // use the full progress monitor
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
-	 */
 	@Override
 	public boolean performFinish() {
 		boolean res= super.performFinish();
@@ -82,9 +76,6 @@ public class NewPackageCreationWizard extends NewElementWizard {
 		return res;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getCreatedElement()
-	 */
 	@Override
 	public IJavaElement getCreatedElement() {
 		return fPage.getNewPackageFragment();

@@ -21,9 +21,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 public class ToggleJspBreakpointRulerActionDelegate extends AbstractRulerActionDelegate {
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.AbstractRulerActionDelegate#createAction(org.eclipse.ui.texteditor.ITextEditor, org.eclipse.jface.text.source.IVerticalRulerInfo)
-	 */
 	protected IAction createAction(ITextEditor editor, IVerticalRulerInfo rulerInfo) {
 		return new ToggleJspBreakpointAction(editor, rulerInfo);
 	}

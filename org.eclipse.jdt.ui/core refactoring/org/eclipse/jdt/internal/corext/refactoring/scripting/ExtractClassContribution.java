@@ -36,7 +36,7 @@ public class ExtractClassContribution extends JavaUIRefactoringContribution {
 	}
 
 	@Override
-	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) throws IllegalArgumentException {
+	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map<String, String> arguments, int flags) throws IllegalArgumentException {
 		return RefactoringSignatureDescriptorFactory.createExtractClassDescriptor(project, description, comment, arguments, flags);
 	}
 

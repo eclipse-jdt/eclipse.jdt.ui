@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.osgi.util.TextProcessor;
@@ -48,10 +49,13 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.PopupDialog;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ITreePathContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -98,11 +102,33 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		public NamePatternFilter() {
 		}
 
-		/*
-		 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-		 */
+		@Override
+		public Object[] filter(Viewer viewer, TreePath parentPath, Object[] elements) {
+			int size = elements.length;
+			ArrayList<Object> out = new ArrayList<>(size);
+			for (int i = 0; i < size; ++i) {
+				Object element = elements[i];
+				if (selectTreePath(viewer, parentPath, element)) {
+					out.add(element);
+				}
+			}
+			return out.toArray();
+		}
+		
 		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
+			return selectTreePath(viewer, new TreePath(new Object[] { parentElement }), element);
+		}
+		
+		public boolean selectTreePath(Viewer viewer, TreePath parentPath, Object element) {
+			// Avoid endless loops, see https://bugs.eclipse.org/395202 :
+			// Cut off children of elements that are shown repeatedly.
+			for (int i= 0; i < parentPath.getSegmentCount() - 1; i++) {
+				if (element.equals(parentPath.getSegment(i))) {
+					return false;
+				}
+			}
+			
 			JavaElementPrefixPatternMatcher matcher= getMatcher();
 			if (matcher == null || !(viewer instanceof TreeViewer))
 				return true;
@@ -113,14 +139,18 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			if (matchName != null && matcher.matches(matchName))
 				return true;
 
-			return hasUnfilteredChild(treeViewer, element);
+			return hasUnfilteredChild(treeViewer, parentPath, element);
 		}
 
-		private boolean hasUnfilteredChild(TreeViewer viewer, Object element) {
+		private boolean hasUnfilteredChild(TreeViewer viewer, TreePath parentPath, Object element) {
 			if (element instanceof IParent) {
-				Object[] children=  ((ITreeContentProvider) viewer.getContentProvider()).getChildren(element);
+				TreePath elementPath= parentPath.createChildPath(element);
+				IContentProvider contentProvider= viewer.getContentProvider();
+				Object[] children= contentProvider instanceof ITreePathContentProvider
+						? ((ITreePathContentProvider) contentProvider).getChildren(elementPath)
+						: ((ITreeContentProvider) contentProvider).getChildren(element);
 				for (int i= 0; i < children.length; i++)
-					if (select(viewer, element, children[i]))
+					if (selectTreePath(viewer, elementPath, children[i]))
 						return true;
 			}
 			return false;
@@ -210,19 +240,23 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 		final Tree tree= fTreeViewer.getTree();
 		tree.addKeyListener(new KeyListener() {
+			@Override
 			public void keyPressed(KeyEvent e)  {
 				if (e.character == 0x1B) // ESC
 					dispose();
 			}
+			@Override
 			public void keyReleased(KeyEvent e) {
 				// do nothing
 			}
 		});
 
 		tree.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				// do nothing
 			}
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				gotoSelectedElement();
 			}
@@ -230,6 +264,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 		tree.addMouseMoveListener(new MouseMoveListener()	 {
 			TreeItem fLastItem= null;
+			@Override
 			public void mouseMove(MouseEvent e) {
 				if (tree.equals(e.getSource())) {
 					Object o= tree.getItem(new Point(e.x, e.y));
@@ -342,6 +377,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		fFilterText.setLayoutData(data);
 
 		fFilterText.addKeyListener(new KeyListener() {
+			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == 0x0D || e.keyCode == SWT.KEYPAD_CR) // Enter key
 					gotoSelectedElement();
@@ -352,6 +388,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 				if (e.character == 0x1B) // ESC
 					dispose();
 			}
+			@Override
 			public void keyReleased(KeyEvent e) {
 				// do nothing
 			}
@@ -377,6 +414,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		fFilterText.setText(""); //$NON-NLS-1$
 
 		fFilterText.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				String text= ((Text) e.widget).getText();
 				setMatcherString(text, true);
@@ -537,16 +575,12 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	}
 
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setInformation(String information) {
 		// this method is ignored, see IInformationControlExtension2
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public abstract void setInput(Object information);
 
 	/**
@@ -587,9 +621,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			fTreeViewer.setSelection(new StructuredSelection(newSelection));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
 			open();
@@ -610,9 +642,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		return super.open();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public final void dispose() {
 		close();
 	}
@@ -624,6 +654,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * Subclasses may extend.
 	 * </p>
 	 */
+	@Override
 	public void widgetDisposed(DisposeEvent event) {
 		removeHandlerAndKeyBindingSupport();
 		fTreeViewer= null;
@@ -655,32 +686,24 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean hasContents() {
 		return fTreeViewer != null && fTreeViewer.getInput() != null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setSizeConstraints(int maxWidth, int maxHeight) {
 		// ignore
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Point computeSizeHint() {
 		// return the shell's size - note that it already has the persisted size if persisting
 		// is enabled.
 		return getShell().getSize();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setLocation(Point location) {
 		/*
 		 * If the location is persisted, it gets managed by PopupDialog - fine. Otherwise, the location is
@@ -697,66 +720,48 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			getShell().setLocation(location);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setSize(int width, int height) {
 		getShell().setSize(width, height);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void addDisposeListener(DisposeListener listener) {
 		getShell().addDisposeListener(listener);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void removeDisposeListener(DisposeListener listener) {
 		getShell().removeDisposeListener(listener);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setForegroundColor(Color foreground) {
 		applyForegroundColor(foreground, getContents());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setBackgroundColor(Color background) {
 		applyBackgroundColor(background, getContents());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean isFocusControl() {
 		return getShell().getDisplay().getActiveShell() == getShell();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setFocus() {
 		getShell().forceFocus();
 		fFilterText.setFocus();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void addFocusListener(FocusListener listener) {
 		getShell().addFocusListener(listener);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void removeFocusListener(FocusListener listener) {
 		getShell().removeFocusListener(listener);
 	}

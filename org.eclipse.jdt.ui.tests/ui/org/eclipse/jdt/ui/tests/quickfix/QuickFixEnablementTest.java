@@ -13,9 +13,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -29,10 +26,14 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class QuickFixEnablementTest extends QuickFixTest {
 
-	private static final Class THIS= QuickFixEnablementTest.class;
+	private static final Class<QuickFixEnablementTest> THIS= QuickFixEnablementTest.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -49,6 +50,7 @@ public class QuickFixEnablementTest extends QuickFixTest {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
 
@@ -56,6 +58,7 @@ public class QuickFixEnablementTest extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		TestOptions.initializeProjectOptions(fJProject1);
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
@@ -64,7 +67,7 @@ public class QuickFixEnablementTest extends QuickFixTest {
 
 	public void testContributedQuickFix1() throws Exception {
 
-		HashMap options= new HashMap();
+		HashMap<String, String> options= new HashMap<>();
 		JavaModelUtil.setComplianceOptions(options, JavaCore.VERSION_1_5);
 		fJProject1.setOptions(options);
 
@@ -80,7 +83,7 @@ public class QuickFixEnablementTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -110,13 +113,13 @@ public class QuickFixEnablementTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
 
-		HashMap options= new HashMap();
+		HashMap<String, String> options= new HashMap<>();
 		JavaModelUtil.setComplianceOptions(options, JavaCore.VERSION_1_6);
 		fJProject1.setOptions(options);
 
 		assertNumberOfProposals(collectCorrections(cu, getASTRoot(cu)), 1); // ok
 
-		options= new HashMap();
+		options= new HashMap<>();
 		JavaModelUtil.setComplianceOptions(options, JavaCore.VERSION_1_4);
 		fJProject1.setOptions(options);
 
@@ -131,7 +134,7 @@ public class QuickFixEnablementTest extends QuickFixTest {
 		buf.append("}\n");
 		cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
 
-		options= new HashMap();
+		options= new HashMap<>();
 		JavaModelUtil.setComplianceOptions(options, JavaCore.VERSION_1_5);
 		fJProject1.setOptions(options);
 

@@ -63,9 +63,6 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 			fTypeDeclaration= typeDeclaration;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedProposalPositions) throws CoreException {
 			AST ast= cuRewrite.getAST();
@@ -88,7 +85,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 		if (problems.length == 0)
 			return null;
 
-		ArrayList<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
+		ArrayList<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= problems[i];
@@ -130,6 +127,7 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 			return new UnimplementedCodeFix(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, root, new CompilationUnitRewriteOperation[] { operation });
 		} else {
 			return new IProposableFix() {
+				@Override
 				public CompilationUnitChange createChange(IProgressMonitor progressMonitor) throws CoreException {
 					CompilationUnitChange change= new CompilationUnitChange(CorrectionMessages.UnimplementedMethodsCorrectionProposal_description, (ICompilationUnit) root.getJavaElement()) {
 						@Override
@@ -146,14 +144,17 @@ public class UnimplementedCodeFix extends CompilationUnitRewriteOperationsFix {
 					return change;
 				}
 
+				@Override
 				public String getAdditionalProposalInfo() {
 					return new String();
 				}
 
+				@Override
 				public String getDisplayString() {
 					return CorrectionMessages.UnimplementedMethodsCorrectionProposal_description;
 				}
 
+				@Override
 				public IStatus getStatus() {
 					return new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, CorrectionMessages.UnimplementedCodeFix_DependenciesStatusMessage);
 				}

@@ -59,6 +59,7 @@ public class TestRunSessionSerializer implements XMLReader {
 		fTestRunSession= testRunSession;
 	}
 
+	@Override
 	public void parse(InputSource input) throws IOException, SAXException {
 		if (fHandler == null)
 			throw new SAXException("ContentHandler missing"); //$NON-NLS-1$
@@ -219,51 +220,64 @@ public class TestRunSessionSerializer implements XMLReader {
 		return string;
 	}
 
+	@Override
 	public void setContentHandler(ContentHandler handler) {
 		this.fHandler= handler;
 	}
 
+	@Override
 	public ContentHandler getContentHandler() {
 		return fHandler;
 	}
 
+	@Override
 	public void setErrorHandler(ErrorHandler handler) {
 		fErrorHandler= handler;
 	}
 
+	@Override
 	public ErrorHandler getErrorHandler() {
 		return fErrorHandler;
 	}
 
 	// ignored:
 
+	@Override
 	public void parse(String systemId) throws IOException, SAXException {
 	}
 
+	@Override
 	public void setDTDHandler(DTDHandler handler) {
 	}
 
+	@Override
 	public DTDHandler getDTDHandler() {
 		return null;
 	}
 
+	@Override
 	public void setEntityResolver(EntityResolver resolver) {
 	}
 
+	@Override
 	public EntityResolver getEntityResolver() {
 		return null;
 	}
 
+	@Override
 	public void setProperty(java.lang.String name, java.lang.Object value) {
 	}
 
+	@Override
 	public Object getProperty(java.lang.String name) {
 		return null;
 	}
 
+	@Override
 	public void setFeature(java.lang.String name, boolean value) {
 	}
 
+	@Override
 	public boolean getFeature(java.lang.String name) {
 		return false;
 	}

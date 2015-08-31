@@ -26,6 +26,7 @@ public class JavaReplaceAllTest extends AbstractJavaReplaceAllTest {
 		return new PerformanceTestSetup(new TestSuite(JavaReplaceAllTest.class));
 	}
 
+	@Override
 	protected boolean isQuickDiffEnabled() {
 		return false;
 	}

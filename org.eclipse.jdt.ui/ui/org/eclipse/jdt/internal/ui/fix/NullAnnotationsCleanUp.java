@@ -43,9 +43,6 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 		this.handledProblemID= handledProblemID;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public CleanUpRequirements getRequirements() {
 		Map<String, String> requiredOptions= getRequiredOptions();
@@ -53,23 +50,17 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	}
 
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		return this.createFix(compilationUnit, null);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		IProblemLocation[] locations= null;
-		ArrayList<IProblemLocation> filteredLocations= new ArrayList<IProblemLocation>();
+		ArrayList<IProblemLocation> filteredLocations= new ArrayList<>();
 		if (problems != null) {
 			for (int i= 0; i < problems.length; i++) {
 				if (problems[i].getProblemId() == this.handledProblemID)
@@ -81,7 +72,7 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	}
 
 	private Map<String, String> getRequiredOptions() {
-		Map<String, String> result= new Hashtable<String, String>();
+		Map<String, String> result= new Hashtable<>();
 		// TODO(SH): might set depending on this.handledProblemID, not sure about the benefit
 		result.put(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION, JavaCore.WARNING);
 		result.put(JavaCore.COMPILER_PB_REDUNDANT_NULL_CHECK, JavaCore.WARNING);
@@ -93,12 +84,9 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 		return result;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String[] getStepDescriptions() {
-		List<String> result= new ArrayList<String>();
+		List<String> result= new ArrayList<>();
 		switch (this.handledProblemID) {
 			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
@@ -124,18 +112,13 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 		return result.toArray(new String[result.size()]);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getPreview() {
 		// not used when not provided as a true cleanup(?)
 		return "No preview available"; //$NON-NLS-1$
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		int id= problem.getProblemId();
 		if (id == this.handledProblemID) {
@@ -148,9 +131,6 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	}
 
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;

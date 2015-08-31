@@ -137,7 +137,7 @@ public class ListDialogField<E> extends DialogField {
 		fListViewerAdapter= new ListViewerAdapter();
 		fParentElement= this;
 
-		fElements= new ArrayList<E>(10);
+		fElements= new ArrayList<>(10);
 
 		fButtonLabels= buttonLabels;
 		if (fButtonLabels != null) {
@@ -433,9 +433,11 @@ public class ListDialogField<E> extends DialogField {
 			assertCompositeNotNull(parent);
 
 			SelectionListener listener= new SelectionListener() {
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					doButtonSelected(e);
 				}
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					doButtonSelected(e);
 				}
@@ -576,7 +578,7 @@ public class ListDialogField<E> extends DialogField {
 	 * Sets the elements shown in the list.
 	 */
 	public void setElements(Collection<E> elements) {
-		fElements= new ArrayList<E>(elements);
+		fElements= new ArrayList<>(elements);
 		if (isOkToUse(fTableControl)) {
 			fTable.refresh();
 		}
@@ -588,7 +590,7 @@ public class ListDialogField<E> extends DialogField {
 	 * The list returned is a copy, so it can be modified by the user.
 	 */
 	public List<E> getElements() {
-		return new ArrayList<E>(fElements);
+		return new ArrayList<>(fElements);
 	}
 
 	/**
@@ -673,7 +675,7 @@ public class ListDialogField<E> extends DialogField {
 
 		if (nElements > 0 && index >= 0 && index <= fElements.size()) {
 			// filter duplicated
-			ArrayList<E> elementsToAdd= new ArrayList<E>(nElements);
+			ArrayList<E> elementsToAdd= new ArrayList<>(nElements);
 
 			for (int i= 0; i < nElements; i++) {
 				E elem= elements.get(i);
@@ -794,6 +796,7 @@ public class ListDialogField<E> extends DialogField {
 		if (isOkToUse(fTableControl)) {
 			Display d= fTableControl.getDisplay();
 			d.asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					if (isOkToUse(fTableControl)) {
 						selectElements(selection);
@@ -818,7 +821,7 @@ public class ListDialogField<E> extends DialogField {
 
 	private List<E> moveUp(List<E> elements, List<E> move) {
 		int nElements= elements.size();
-		List<E> res= new ArrayList<E>(nElements);
+		List<E> res= new ArrayList<>(nElements);
 		E floating= null;
 		for (int i= 0; i < nElements; i++) {
 			E curr= elements.get(i);
@@ -852,7 +855,7 @@ public class ListDialogField<E> extends DialogField {
 	}
 
 	private List<E> reverse(List<E> p) {
-		List<E> reverse= new ArrayList<E>(p.size());
+		List<E> reverse= new ArrayList<>(p.size());
 		for (int i= p.size()-1; i >= 0; i--) {
 			reverse.add(p.get(i));
 		}
@@ -901,7 +904,7 @@ public class ListDialogField<E> extends DialogField {
 	 * Returns the selected elements.
 	 */
 	public List<E> getSelectedElements() {
-		List<E> result= new ArrayList<E>();
+		List<E> result= new ArrayList<>();
 		if (isOkToUse(fTableControl)) {
 			ISelection selection= fTable.getSelection();
 			if (selection instanceof IStructuredSelection) {
@@ -922,26 +925,28 @@ public class ListDialogField<E> extends DialogField {
 
 		// ------- ITableContentProvider Interface ------------
 
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			// will never happen
 		}
 
+		@Override
 		public void dispose() {
 		}
 
+		@Override
 		public Object[] getElements(Object obj) {
 			return fElements.toArray();
 		}
 
 		// ------- ISelectionChangedListener Interface ------------
 
+		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			doListSelected(event);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.IDoubleClickListener#doubleClick(org.eclipse.jface.viewers.DoubleClickEvent)
-		 */
+		@Override
 		public void doubleClick(DoubleClickEvent event) {
 			doDoubleClick(event);
 		}
@@ -965,6 +970,7 @@ public class ListDialogField<E> extends DialogField {
 	/**
 	 * @deprecated Use {@link #setViewerComparator(ViewerComparator)} instead}
 	 */
+	@Deprecated
 	public void setViewerSorter(ViewerSorter sorter) {
 		setViewerComparator(sorter);
 	}

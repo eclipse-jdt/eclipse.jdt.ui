@@ -86,6 +86,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	 * @deprecated Use {@link #setSpecialSelectionProvider(ISelectionProvider)} instead. This constructor will be
 	 * removed after 3.2 M5.
 	 */
+	@Deprecated
 	protected SelectionDispatchAction(IWorkbenchSite site, ISelectionProvider provider) {
 		this(site);
 		setSpecialSelectionProvider(provider);
@@ -243,17 +244,12 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	public void run(ISelection selection) {
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on IAction.
-	 */
 	@Override
 	public void run() {
 		dispatchRun(getSelection());
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on ISelectionChangedListener.
-	 */
+	@Override
 	public void selectionChanged(SelectionChangedEvent event) {
 		dispatchSelectionChanged(event.getSelection());
 	}

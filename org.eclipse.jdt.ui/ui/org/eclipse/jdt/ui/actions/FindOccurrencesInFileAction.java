@@ -125,17 +125,11 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 
 	//---- Structured Selection -------------------------------------------------------------
 
-	/* (non-JavaDoc)
-	 * Method declared in SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(getMember(selection) != null);
 	}
 
-	/* (non-JavaDoc)
-	 * Method declared in SelectionDispatchAction.
-	 */
 	private IMember getMember(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return null;
@@ -190,9 +184,6 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 
 	//---- Text Selection ----------------------------------------------------------------------
 
-	/* (non-JavaDoc)
-	 * Method declared in SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
@@ -210,9 +201,6 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		setEnabled(astRoot != null && new OccurrencesFinder().initialize(astRoot, selection.getOffset(), selection.getLength()) == null);
 	}
 
-	/* (non-JavaDoc)
-	 * Method declared in SelectionDispatchAction.
-	 */
 	@Override
 	public final void run(ITextSelection ts) {
 		ITypeRoot input= getEditorInput(fEditor);

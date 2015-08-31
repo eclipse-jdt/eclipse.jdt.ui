@@ -44,6 +44,7 @@ public class OpenJarExportWizardEditorLauncher implements IEditorLauncher {
 	/*
 	 * @see org.eclipse.ui.IEditorLauncher#open(org.eclipse.core.runtime.IPath)
 	 */
+	@Override
 	public void open(IPath filePath) {
 
 		IJarDescriptionReader reader= null;

@@ -159,6 +159,7 @@ public class IndentAction extends TextEditorAction {
 			}
 
 			Runnable runnable= new Runnable() {
+				@Override
 				public void run() {
 					IRewriteTarget target= getTextEditor().getAdapter(IRewriteTarget.class);
 					if (target != null)
@@ -255,7 +256,7 @@ public class IndentAction extends TextEditorAction {
 		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 		JavaIndenter indenter= new JavaIndenter(document, scanner, project);
 
-		ArrayList<ReplaceEdit> edits= new ArrayList<ReplaceEdit>();
+		ArrayList<ReplaceEdit> edits= new ArrayList<>();
 
 		int firstLine= document.getLineOfOffset(offset);
 		// check for marginal (zero-length) lines

@@ -135,6 +135,7 @@ public class JavaTokenComparator implements ITokenComparator {
 	 *
 	 * @return number of token in the string
 	 */
+	@Override
 	public int getRangeCount() {
 		return fCount;
 	}
@@ -142,6 +143,7 @@ public class JavaTokenComparator implements ITokenComparator {
 	/* (non Javadoc)
 	 * see ITokenComparator.getTokenStart
 	 */
+	@Override
 	public int getTokenStart(int index) {
 		if (index >= 0 && index < fCount)
 			return fStarts[index];
@@ -153,6 +155,7 @@ public class JavaTokenComparator implements ITokenComparator {
 	/* (non Javadoc)
 	 * see ITokenComparator.getTokenLength
 	 */
+	@Override
 	public int getTokenLength(int index) {
 		if (index < fCount)
 			return fLengths[index];
@@ -168,6 +171,7 @@ public class JavaTokenComparator implements ITokenComparator {
 	 * @param otherIndex the number of the token within the other comparator
 	 * @return <code>true</code> if the token are equal
 	 */
+	@Override
 	public boolean rangesEqual(int thisIndex, IRangeComparator other, int otherIndex) {
 		if (other != null && getClass() == other.getClass()) {
 			JavaTokenComparator tc= (JavaTokenComparator) other;	// safe cast
@@ -189,6 +193,7 @@ public class JavaTokenComparator implements ITokenComparator {
 	 * @param other the other <code>IRangeComparator</code> to compare with
 	 * @return <code>true</code> to abort a token comparison
 	 */
+	@Override
 	public boolean skipRangeComparison(int length, int maxLength, IRangeComparator other) {
 
 		if (getRangeCount() < 50 || other.getRangeCount() < 50)

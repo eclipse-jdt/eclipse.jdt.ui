@@ -101,6 +101,7 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 		return new Object[] {fProject};
 	}
 
+	@Override
 	public Object getNewElement() {
 		IPath newPath= fProject.getPath().removeLastSegments(1).append(getNewElementName());
 		return JavaCore.create(ResourcesPlugin.getWorkspace().getRoot().findMember(newPath));
@@ -129,16 +130,19 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 
 	//---- IReferenceUpdating --------------------------------------
 
+	@Override
 	public void setUpdateReferences(boolean update) {
 		fUpdateReferences= update;
 	}
 
+	@Override
 	public boolean getUpdateReferences() {
 		return fUpdateReferences;
 	}
 
 	//---- IRenameProcessor ----------------------------------------------
 
+	@Override
 	public String getCurrentElementName() {
 		return fProject.getElementName();
 	}
@@ -148,6 +152,7 @@ public final class RenameJavaProjectProcessor extends JavaRenameProcessor implem
 		return new RefactoringStatus();
 	}
 
+	@Override
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		RefactoringStatus result= RefactoringStatus.create(ResourcesPlugin.getWorkspace().validateName(newName, IResource.PROJECT));

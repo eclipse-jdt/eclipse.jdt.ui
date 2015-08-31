@@ -28,6 +28,7 @@ public class Java17Setup extends RefactoringTestSetup {
 	/*
 	 * @see org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup#addRTJar(org.eclipse.jdt.core.IJavaProject)
 	 */
+	@Override
 	protected IPackageFragmentRoot addRTJar(IJavaProject project) throws CoreException {
 		return JavaProjectHelper.addRTJar17(project);
 	}

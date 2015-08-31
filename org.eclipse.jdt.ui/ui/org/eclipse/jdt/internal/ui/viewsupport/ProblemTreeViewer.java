@@ -66,9 +66,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		initMapper();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.ResourceToItemsMapper.IContentViewerAccessor#doUpdateItem(org.eclipse.swt.widgets.Widget)
-	 */
+	@Override
 	public void doUpdateItem(Widget item) {
 		doUpdateItem(item, item.getData(), true);
 	}
@@ -112,9 +110,6 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 
 	// ---------------- filter sessions ----------------------------
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.StructuredViewer#addFilter(org.eclipse.jface.viewers.ViewerFilter)
-	 */
 	@Override
 	public void addFilter(ViewerFilter filter) {
 		if (filter instanceof JavaViewerFilter) {
@@ -123,9 +118,6 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		super.addFilter(filter);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.StructuredViewer#removeFilter(org.eclipse.jface.viewers.ViewerFilter)
-	 */
 	@Override
 	public void removeFilter(ViewerFilter filter) {
 		super.removeFilter(filter);
@@ -134,9 +126,6 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.StructuredViewer#setFilters(org.eclipse.jface.viewers.ViewerFilter[])
-	 */
 	@Override
 	public void setFilters(ViewerFilter[] filters) {
 		ViewerFilter[] oldFilters= getFilters();
@@ -150,9 +139,6 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		super.setFilters(filters);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.StructuredViewer#resetFilters()
-	 */
 	@Override
 	public void resetFilters() {
     	endFilterSessions(getFilters());
@@ -178,9 +164,6 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.StructuredViewer#handleDispose(org.eclipse.swt.events.DisposeEvent)
-	 */
     @Override
 	protected void handleDispose(DisposeEvent event) {
     	endFilterSessions(getFilters());
@@ -202,7 +185,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		Object[] changed= addAditionalProblemParents(event.getElements());
 
 		if (changed != null && !fResourceToItemsMapper.isEmpty()) {
-			ArrayList<Object> others= new ArrayList<Object>();
+			ArrayList<Object> others= new ArrayList<>();
 			for (int i= 0; i < changed.length; i++) {
 				Object curr= changed[i];
 				if (curr instanceof IResource) {
@@ -244,9 +227,6 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		return parent instanceof IMember;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#isExpandable(java.lang.Object)
-	 */
 	@Override
 	public boolean isExpandable(Object parent) {
 		if (hasFilters() && evaluateExpandableWithFilters(parent)) {
@@ -266,9 +246,6 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		return containsNonFiltered(rawChildren, parent);
     }
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.AbstractTreeViewer#getFilteredChildren(java.lang.Object)
-	 */
 	@Override
 	protected final Object[] getFilteredChildren(Object parent) {
 		return filter(getRawChildren(parent), parent);
@@ -278,7 +255,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		if (!hasFilters() || elements.length == 0) {
 			return elements;
 		}
-		List<Object> list= new ArrayList<Object>(elements.length);
+		List<Object> list= new ArrayList<>(elements.length);
 		ViewerFilter[] filters = getFilters();
 		for (int i = 0; i < elements.length; i++) {
 			Object object = elements[i];
@@ -324,9 +301,6 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object[])
-	 */
 	@Override
 	protected final Object[] filter(Object[] elements) {
 		return filter(elements, getRoot());

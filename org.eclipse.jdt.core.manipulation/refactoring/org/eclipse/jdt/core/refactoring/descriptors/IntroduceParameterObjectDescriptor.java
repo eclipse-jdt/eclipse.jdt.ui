@@ -232,7 +232,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 	 *            the flags of the refactoring descriptor
 	 * @throws IllegalArgumentException if the argument map contains invalid keys/values
 	 */
-	public IntroduceParameterObjectDescriptor(final String project, final String description, final String comment, final Map arguments, final int flags) throws IllegalArgumentException {
+	public IntroduceParameterObjectDescriptor(final String project, final String description, final String comment, final Map<String, String> arguments, final int flags) throws IllegalArgumentException {
 		super(IJavaRefactorings.INTRODUCE_PARAMETER_OBJECT, project, description, comment, arguments, flags);
 		initializeFromMap(arguments);
 	}
@@ -339,9 +339,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 		return fTopLevel;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor#populateArgumentMap()
-	 */
+	@Override
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
 		JavaRefactoringDescriptorUtil.setJavaElement(fArguments, ATTRIBUTE_INPUT, getProject(), fMethod);
@@ -367,7 +365,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 		JavaRefactoringDescriptorUtil.setBoolean(fArguments, TOP_LEVEL, fTopLevel);
 	}
 
-	private void initializeFromMap(Map map) throws IllegalArgumentException {
+	private void initializeFromMap(Map<String, String> map) throws IllegalArgumentException {
 		IMethod method= (IMethod) JavaRefactoringDescriptorUtil.getJavaElement(map, ATTRIBUTE_INPUT, getProject());
 		setMethod(method);
 		initializeParameter(map);
@@ -381,7 +379,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 		setTopLevel(JavaRefactoringDescriptorUtil.getBoolean(map, TOP_LEVEL, fTopLevel));
 	}
 
-	private void initializeParameter(Map map) throws IllegalArgumentException {
+	private void initializeParameter(Map<String, String> map) throws IllegalArgumentException {
 		int[] idx= JavaRefactoringDescriptorUtil.getIntArray(map, PARAMETER_COUNT, PARAMETER_IDX);
 		boolean[] createField= JavaRefactoringDescriptorUtil.getBooleanArray(map, PARAMETER_COUNT, PARAMETER_CREATE_FIELD, 0);
 		Parameter[] result=new Parameter[idx.length];
@@ -506,9 +504,7 @@ public class IntroduceParameterObjectDescriptor extends JavaRefactoringDescripto
 		fTopLevel= topLevel;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public RefactoringStatus validateDescriptor() {
 		RefactoringStatus result= super.validateDescriptor();
 		if (!result.isOK())

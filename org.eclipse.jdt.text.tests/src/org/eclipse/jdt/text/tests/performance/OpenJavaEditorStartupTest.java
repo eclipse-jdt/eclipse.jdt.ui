@@ -41,18 +41,20 @@ public class OpenJavaEditorStartupTest extends StartupPerformanceTestCase {
 			fTearDown= tearDown;
 		}
 
+		@Override
 		protected void setUp() throws Exception {
 			if (fSetUp)
 				EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
 		}
 
+		@Override
 		protected void tearDown() throws Exception {
 			if (fTearDown)
 				EditorTestHelper.closeAllEditors();
 		}
 	}
 
-	private static final Class THIS= OpenJavaEditorStartupTest.class;
+	private static final Class<OpenJavaEditorStartupTest> THIS= OpenJavaEditorStartupTest.class;
 
 	private static final String SHORT_NAME= "Eclipse SDK startup with Java editor open in Java perspective";
 

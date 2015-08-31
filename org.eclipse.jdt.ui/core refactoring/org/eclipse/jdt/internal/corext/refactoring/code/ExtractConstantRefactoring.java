@@ -578,7 +578,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private ExtractConstantDescriptor createRefactoringDescriptor() {
-		final Map<String, String> arguments= new HashMap<String, String>();
+		final Map<String, String> arguments= new HashMap<>();
 		String project= null;
 		IJavaProject javaProject= fCu.getJavaProject();
 		if (javaProject != null)
@@ -750,7 +750,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	private Iterator<ASTNode> getReplacementScope() throws JavaModelException {
 		boolean declPredecessorReached= false;
 
-		Collection<ASTNode> scope= new ArrayList<ASTNode>();
+		Collection<ASTNode> scope= new ArrayList<>();
 
 		AbstractTypeDeclaration containingType= getContainingTypeDeclarationNode();
 		if (containingType instanceof EnumDeclaration) {
@@ -779,7 +779,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private IASTFragment[] getFragmentsToReplace() throws JavaModelException {
-		List<IASTFragment> toReplace = new ArrayList<IASTFragment>();
+		List<IASTFragment> toReplace = new ArrayList<>();
 		if (fReplaceAllOccurrences) {
 			Iterator<ASTNode> replacementScope = getReplacementScope();
 			while(replacementScope.hasNext()) {
@@ -796,7 +796,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 
 	// !! - like one in ExtractTempRefactoring
 	private static IASTFragment[] retainOnlyReplacableMatches(IASTFragment[] allMatches) {
-		List<IASTFragment> result= new ArrayList<IASTFragment>(allMatches.length);
+		List<IASTFragment> result= new ArrayList<>(allMatches.length);
 		for (int i= 0; i < allMatches.length; i++) {
 			if (canReplace(allMatches[i]))
 				result.add(allMatches[i]);

@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  *
  * @deprecated As of 3.0, replaced by {@link org.eclipse.jface.text.templates.persistence.TemplateStore}
  */
+@Deprecated
 public class Templates extends org.eclipse.jdt.internal.corext.template.java.TemplateSet {
 
 	private static final String TEMPLATE_FILE= "templates.xml"; //$NON-NLS-1$
@@ -36,6 +37,7 @@ public class Templates extends org.eclipse.jdt.internal.corext.template.java.Tem
 	 * @deprecated As of 3.0, replaced by
 	 *             {@link org.eclipse.jdt.internal.ui.JavaPlugin#getTemplateStore()}
 	 */
+	@Deprecated
 	public static Templates getInstance() {
 		if (fgTemplates == null)
 			fgTemplates= new Templates();

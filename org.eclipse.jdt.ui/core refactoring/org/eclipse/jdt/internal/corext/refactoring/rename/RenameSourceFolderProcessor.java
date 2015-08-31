@@ -98,6 +98,7 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 		return new Object[] {fSourceFolder};
 	}
 
+	@Override
 	public Object getNewElement() throws CoreException {
 		IPackageFragmentRoot[] roots= fSourceFolder.getJavaProject().getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
@@ -126,6 +127,7 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 
 	//---- IRenameProcessor ----------------------------------------------
 
+	@Override
 	public String getCurrentElementName() {
 		return fSourceFolder.getElementName();
 	}
@@ -135,6 +137,7 @@ public final class RenameSourceFolderProcessor extends JavaRenameProcessor {
 		return new RefactoringStatus();
 	}
 
+	@Override
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		if (! newName.trim().equals(newName))

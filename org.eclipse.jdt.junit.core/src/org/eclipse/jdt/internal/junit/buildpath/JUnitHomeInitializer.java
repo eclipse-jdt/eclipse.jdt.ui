@@ -24,6 +24,7 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 	/*
 	 * @see ClasspathVariableInitializer#initialize(String)
 	 */
+	@Override
 	public void initialize(String variable) {
 		if (JUnitCorePlugin.JUNIT_HOME.equals(variable)) {
 			initializeHome();

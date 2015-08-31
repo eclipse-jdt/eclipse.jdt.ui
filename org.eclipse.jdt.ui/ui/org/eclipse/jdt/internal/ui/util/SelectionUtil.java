@@ -81,7 +81,7 @@ public class SelectionUtil {
 		}
 
 		// get all the view and editor parts
-		List<IWorkbenchPart> parts= new ArrayList<IWorkbenchPart>();
+		List<IWorkbenchPart> parts= new ArrayList<>();
 		IWorkbenchPartReference refs[]= page.getViewReferences();
 		for (int i= 0; i < refs.length; i++) {
 			IWorkbenchPart part= refs[i].getPart(false);
@@ -113,6 +113,7 @@ public class SelectionUtil {
 				// select and reveal resource
 				final ISetSelectionTarget finalTarget= target;
 				window.getShell().getDisplay().asyncExec(new Runnable() {
+					@Override
 					public void run() {
 						finalTarget.selectReveal(selection);
 					}

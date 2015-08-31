@@ -31,9 +31,6 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 		super(page);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
-	 */
 	@Override
 	public String getText(Object element) {
 		return getLabelWithCounts(element, internalGetText(element));
@@ -92,9 +89,7 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 		return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_OCCURRENCE);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider#getStyledText(java.lang.Object)
-	 */
+	@Override
 	public StyledString getStyledText(Object element) {
 		return getColoredLabelWithCounts(element, internalGetRichText(element));
 	}

@@ -17,9 +17,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
@@ -39,15 +36,19 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 
 public class CleanUpStressTest extends CleanUpTestCase {
 
-	private static final Class THIS= CleanUpStressTest.class;
+	private static final Class<CleanUpStressTest> THIS= CleanUpStressTest.class;
 
 	private static final String SRC_CONTAINER= "src";
 
 	protected static IPackageFragmentRoot fJunitSrcRoot;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -67,7 +68,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 		return new ProjectTestSetup(test);
 	}
 
-	private void addAllCUs(IJavaElement[] children, List result) throws JavaModelException {
+	private void addAllCUs(IJavaElement[] children, List<IJavaElement> result) throws JavaModelException {
 		for (int i= 0; i < children.length; i++) {
 			IJavaElement element= children[i];
 			if (element instanceof ICompilationUnit) {
@@ -82,9 +83,9 @@ public class CleanUpStressTest extends CleanUpTestCase {
 		}
 	}
 
-    private Hashtable fExpectedChangesAllTests;
+    private Hashtable<String, String> fExpectedChangesAllTests;
     {
-        fExpectedChangesAllTests= new Hashtable();
+        fExpectedChangesAllTests= new Hashtable<>();
         StringBuffer buf= null;
         buf= new StringBuffer();
         buf.append("package junit.runner;\n");
@@ -5254,7 +5255,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
     }
 
 	public void testAllCleanUps() throws Exception {
-		List cus= new ArrayList();
+		List<IJavaElement> cus= new ArrayList<>();
 		addAllCUs(fJProject1.getChildren(), cus);
 
 		enable(CleanUpConstants.MEMBER_ACCESSES_NON_STATIC_FIELD_USE_THIS);
@@ -5307,7 +5308,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 		enable(CleanUpConstants.SORT_MEMBERS);
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 
-		ICompilationUnit[] units= (ICompilationUnit[])cus.toArray(new ICompilationUnit[cus.size()]);
+		ICompilationUnit[] units= cus.toArray(new ICompilationUnit[cus.size()]);
 		performRefactoring(units);
 
 
@@ -5318,7 +5319,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 			String previewContent= getNormalizedContent(new Document(cu.getBuffer().getContents()));
 	       	String compilationUnitName= getCompilationUnitName(cu);
 
-	       	String expected= (String)fExpectedChangesAllTests.get(compilationUnitName);
+	       	String expected= fExpectedChangesAllTests.get(compilationUnitName);
 
 	       	assertTrue("No expected value in table for " + compilationUnitName, expected != null);
 	       	assertEquals("Content not as expected for " + compilationUnitName, expected, previewContent);

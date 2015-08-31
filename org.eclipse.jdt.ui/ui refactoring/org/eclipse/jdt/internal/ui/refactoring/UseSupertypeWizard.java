@@ -81,6 +81,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 
 			private ITypeHierarchy fHierarchy;
 
+			@Override
 			public Object[] getChildren(Object element) {
 				if (element instanceof ITypeHierarchy)
 					return getElements(element);
@@ -88,7 +89,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			}
 
 			public Set<IType> getDirectSuperTypes(IType type){
-				Set<IType> result= new HashSet<IType>();
+				Set<IType> result= new HashSet<>();
 				final IType superclass= fHierarchy.getSuperclass(type);
 				if (superclass != null) {
 					result.add(superclass);
@@ -108,24 +109,29 @@ public class UseSupertypeWizard extends RefactoringWizard{
 				return result;
 			}
 
+			@Override
 			public Object[] getElements(Object element) {
 				if (element instanceof ITypeHierarchy)
 					return getChildren(((ITypeHierarchy) element).getType());
 				return new Object[0];
 			}
 
+			@Override
 			public boolean hasChildren(Object element) {
 				return getChildren(element).length > 0;
 			}
 
+			@Override
 			public Object getParent(Object element) {
 				return null;
 			}
 
+			@Override
 			public void dispose() {
 				// Do nothing
 			}
 
+			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 				if (newInput instanceof ITypeHierarchy)
 					fHierarchy= (ITypeHierarchy) newInput;
@@ -145,7 +151,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 
 		public UseSupertypeInputPage(UseSuperTypeProcessor processor) {
 			super(PAGE_NAME);
-			fFileCount= new HashMap<IType, Integer>(2);
+			fFileCount= new HashMap<>(2);
 			fProcessor= processor;
 			setMessage(MESSAGE);
 		}
@@ -163,6 +169,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			return fProcessor;
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			initializeDialogUnits(parent);
 			loadSettings();
@@ -230,6 +237,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 				}
 			});
 			fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener(){
+				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
 					IStructuredSelection ss= (IStructuredSelection)event.getSelection();
 					if (new Integer(0).equals(fFileCount.get(ss.getFirstElement()))){

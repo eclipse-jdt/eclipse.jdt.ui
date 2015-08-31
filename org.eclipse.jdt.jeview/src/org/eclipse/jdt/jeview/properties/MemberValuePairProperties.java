@@ -29,7 +29,7 @@ public class MemberValuePairProperties implements IPropertySource {
 	
 	protected IMemberValuePair fMemberValuePair;
 	
-	private static final ArrayList<IPropertyDescriptor> MEMBER_VALUE_PAIR_PROPERTY_DESCRIPTORS= new ArrayList<IPropertyDescriptor>();
+	private static final ArrayList<IPropertyDescriptor> MEMBER_VALUE_PAIR_PROPERTY_DESCRIPTORS= new ArrayList<>();
 	static {
 		addResourceDescriptor(new PropertyDescriptor(P_MEMBER_NAME, "memberName"));
 		addResourceDescriptor(new PropertyDescriptor(P_VALUE_KIND, "valueKind"));
@@ -46,11 +46,13 @@ public class MemberValuePairProperties implements IPropertySource {
 		fMemberValuePair= memberValuePair;
 	}
 	
+	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		ArrayList<IPropertyDescriptor> result= new ArrayList<IPropertyDescriptor>(MEMBER_VALUE_PAIR_PROPERTY_DESCRIPTORS);
+		ArrayList<IPropertyDescriptor> result= new ArrayList<>(MEMBER_VALUE_PAIR_PROPERTY_DESCRIPTORS);
 		return result.toArray(new IPropertyDescriptor[result.size()]);
 	}
 	
+	@Override
 	public Object getPropertyValue(Object name) {
 		if (name.equals(P_MEMBER_NAME)) {
 			return fMemberValuePair.getMemberName();
@@ -61,18 +63,22 @@ public class MemberValuePairProperties implements IPropertySource {
 		return null;
 	}
 	
+	@Override
 	public void setPropertyValue(Object name, Object value) {
 		// do nothing
 	}
 	
+	@Override
 	public Object getEditableValue() {
 		return this;
 	}
 	
+	@Override
 	public boolean isPropertySet(Object property) {
 		return false;
 	}
 	
+	@Override
 	public void resetPropertyValue(Object property) {
 		// do nothing
 	}

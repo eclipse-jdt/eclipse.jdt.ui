@@ -68,7 +68,6 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
@@ -94,7 +93,6 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
@@ -127,6 +125,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
  * @since 2.1
  */
 public class JavadocHover extends AbstractJavaEditorTextHover {
+
+	public static final String CONSTANT_VALUE_SEPARATOR= " : "; //$NON-NLS-1$
 
 	public static class FallbackInformationPresenter extends HTMLTextPresenter {
 		public FallbackInformationPresenter() {
@@ -341,6 +341,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				}
 
 				IInputChangedListener inputChangeListener= new IInputChangedListener() {
+					@Override
 					public void inputChanged(Object newInput) {
 						backAction.update();
 						forwardAction.update();
@@ -428,6 +429,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					@Override
 					public IInformationControlCreator getInformationPresenterControlCreator() {
 						return new IInformationControlCreator() {
+							@Override
 							public IInformationControl createInformationControl(Shell parentShell) {
 								return new DefaultInformationControl(parentShell, (ToolBarManager) null, new FallbackInformationPresenter());
 							}
@@ -554,9 +556,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	
 	private static void addLinkListener(final BrowserInformationControl control) {
 		control.addLocationListener(JavaElementLinks.createLocationListener(new JavaElementLinks.ILinkHandler() {
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleJavadocViewLink(org.eclipse.jdt.core.IJavaElement)
-			 */
+			@Override
 			public void handleJavadocViewLink(IJavaElement linkTarget) {
 				control.notifyDelayedInputChange(null);
 				control.setVisible(false);
@@ -569,9 +569,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				}
 			}
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleInlineJavadocLink(org.eclipse.jdt.core.IJavaElement)
-			 */
+			@Override
 			public void handleInlineJavadocLink(IJavaElement linkTarget) {
 				JavadocBrowserInformationControlInput hoverInfo= getHoverInfo(new IJavaElement[] { linkTarget }, null, null, (JavadocBrowserInformationControlInput) control.getInput());
 				if (control.hasDelayedInputChangeListener())
@@ -580,9 +578,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					control.setInput(hoverInfo);
 			}
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleDeclarationLink(org.eclipse.jdt.core.IJavaElement)
-			 */
+			@Override
 			public void handleDeclarationLink(IJavaElement linkTarget) {
 				control.notifyDelayedInputChange(null);
 				control.dispose(); //FIXME: should have protocol to hide, rather than dispose
@@ -596,9 +592,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				}
 			}
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks.ILinkHandler#handleExternalLink(java.net.URL, org.eclipse.swt.widgets.Display)
-			 */
+			@Override
 			public boolean handleExternalLink(URL url, Display display) {
 				control.notifyDelayedInputChange(null);
 				control.dispose(); //FIXME: should have protocol to hide, rather than dispose
@@ -609,6 +603,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				return true;
 			}
 
+			@Override
 			public void handleTextSet() {
 			}
 		}));
@@ -617,6 +612,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	/**
 	 * @deprecated see {@link org.eclipse.jface.text.ITextHover#getHoverInfo(ITextViewer, IRegion)}
 	 */
+	@Override
 	@Deprecated
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 		JavadocBrowserInformationControlInput info= (JavadocBrowserInformationControlInput) getHoverInfo2(textViewer, hoverRegion);
@@ -778,8 +774,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			String constantValue= getConstantValue((IField) element, editorInputElement, hoverRegion);
 			if (constantValue != null) {
 				constantValue= HTMLPrinter.convertToHTMLContentWithWhitespace(constantValue);
-				IJavaProject javaProject= element.getJavaProject();
-				label.append(getFormattedAssignmentOperator(javaProject));
+				label.append(CONSTANT_VALUE_SEPARATOR);
 				label.append(constantValue);
 			}
 		}
@@ -1218,26 +1213,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	private static StringBuffer addLink(StringBuffer buf, String uri, String label) {
 		return buf.append(JavaElementLinks.createLink(uri, label));
 	}
-		
-	/**
-	 * Returns the assignment operator string with the project's formatting applied to it.
-	 * 
-	 * @param javaProject the Java project whose formatting options will be used.
-	 * @return the formatted assignment operator string.
-	 * @since 3.4
-	 */
-	public static String getFormattedAssignmentOperator(IJavaProject javaProject) {
-		StringBuffer buffer= new StringBuffer();
-		if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, true)))
-			buffer.append(' ');
-		buffer.append('=');
-		if (JavaCore.INSERT.equals(javaProject.getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR, true)))
-			buffer.append(' ');
-		return buffer.toString();
-	}
 
-	
-	
 	public static String getHexConstantValue(Object constantValue) {
 		if (constantValue instanceof Character) {
 			String constantResult= '\'' + constantValue.toString() + '\'';

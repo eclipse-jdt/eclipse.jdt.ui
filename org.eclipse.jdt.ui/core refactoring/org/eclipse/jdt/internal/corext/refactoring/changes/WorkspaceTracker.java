@@ -33,6 +33,7 @@ public class WorkspaceTracker {
 	}
 
 	private class ResourceListener implements IResourceChangeListener {
+		@Override
 		public void resourceChanged(IResourceChangeEvent event) {
 			workspaceChanged();
 		}

@@ -78,6 +78,7 @@ public class SelectionListenerWithASTManager {
 			fAstListeners= new ListenerList(ListenerList.IDENTITY);
 
 			fSelectionListener= new ISelectionChangedListener() {
+				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
 					ISelection selection= event.getSelection();
 					if (selection instanceof ITextSelection) {
@@ -87,6 +88,7 @@ public class SelectionListenerWithASTManager {
 			};
 
 			fPostSelectionListener= new ISelectionListener() {
+				@Override
 				public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 					if (part == fPart && selection instanceof ITextSelection)
 						firePostSelectionChanged((ITextSelection) selection);
@@ -193,7 +195,7 @@ public class SelectionListenerWithASTManager {
 	private Map<ITextEditor, PartListenerGroup> fListenerGroups;
 
 	private SelectionListenerWithASTManager() {
-		fListenerGroups= new HashMap<ITextEditor, PartListenerGroup>();
+		fListenerGroups= new HashMap<>();
 	}
 
 	/**

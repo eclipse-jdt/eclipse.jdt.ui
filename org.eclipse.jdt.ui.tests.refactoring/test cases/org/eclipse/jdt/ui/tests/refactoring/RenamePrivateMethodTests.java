@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethod
 
 public class RenamePrivateMethodTests extends RefactoringTest {
 
-	private static final Class clazz= RenamePrivateMethodTests.class;
+	private static final Class<RenamePrivateMethodTests> clazz= RenamePrivateMethodTests.class;
 	private static final String REFACTORING_PATH= "RenamePrivateMethod/";
 
 	public RenamePrivateMethodTests(String name) {
@@ -44,6 +44,7 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		return new RefactoringTestSetup(test);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}

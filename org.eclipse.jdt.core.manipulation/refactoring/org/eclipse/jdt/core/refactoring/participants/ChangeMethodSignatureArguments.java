@@ -96,9 +96,7 @@ public class ChangeMethodSignatureArguments extends RefactoringArguments {
 			return fDefaultValue;
 		}
 
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
+		@Override
 		public String toString() {
 			return "name: " + fNewName + ", type: " + fNewSignature + ", oldIndex: " + fOldIndex + ", defaultValue: " + fDefaultValue; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
@@ -147,9 +145,7 @@ public class ChangeMethodSignatureArguments extends RefactoringArguments {
 			return fType;
 		}
 
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
+		@Override
 		public String toString() {
 			return "type: " + fType + ", oldIndex: " + fOldIndex; //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -245,9 +241,7 @@ public class ChangeMethodSignatureArguments extends RefactoringArguments {
 		return fKeepOriginal;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String toString() {
 		StringBuffer buf= new StringBuffer("change signature to "); //$NON-NLS-1$
 		buf.append("\n\tvisibility: ").append(Flags.toString(fNewVisibility)); //$NON-NLS-1$

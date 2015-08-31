@@ -111,7 +111,7 @@ public class NLSUtil {
 	 * @throws CoreException if scanning fails
 	 */
 	public static TextEdit[] createNLSEdits(ICompilationUnit cu, int[] positions) throws CoreException {
-		List<InsertEdit> result= new ArrayList<InsertEdit>();
+		List<InsertEdit> result= new ArrayList<>();
 		try {
 			NLSLine[] allLines= NLSScanner.scan(cu);
 			for (int i= 0; i < allLines.length; i++) {

@@ -64,7 +64,7 @@ public final class GeneralizeTypeDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
-	public GeneralizeTypeDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public GeneralizeTypeDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.GENERALIZE_TYPE, project, description, comment, arguments, flags);
 	}
 

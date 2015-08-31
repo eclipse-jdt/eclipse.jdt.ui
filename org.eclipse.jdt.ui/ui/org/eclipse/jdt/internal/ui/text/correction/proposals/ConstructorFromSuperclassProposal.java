@@ -65,9 +65,6 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		fSuperConstructor= superConstructor;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
-	 */
 	@Override
 	public Image getImage() {
 		return JavaPlugin.getImageDescriptorRegistry().get(
@@ -75,9 +72,6 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeCorrectionProposal#getName()
-	 */
 	@Override
 	public String getName() {
 		StringBuffer buf= new StringBuffer();
@@ -96,9 +90,6 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		return Messages.format(CorrectionMessages.ConstructorFromSuperclassProposal_description, BasicElementLabels.getJavaElementName(buf.toString()));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
-	 */
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		AST ast= fTypeNode.getAST();

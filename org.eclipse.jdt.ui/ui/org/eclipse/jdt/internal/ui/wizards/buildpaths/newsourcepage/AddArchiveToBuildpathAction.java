@@ -71,17 +71,11 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddJarCP_tooltip);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getDetailedDescription() {
 		return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_toBuildpath_archives;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
 
@@ -103,7 +97,8 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
             }
 
         	final IRunnableWithProgress runnable= new IRunnableWithProgress() {
-        		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+        		@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
         			try {
         				List<IJavaElement> result= addExternalJars(selected, javaProject, monitor);
         				if (result.size() > 0)
@@ -140,7 +135,7 @@ public class AddArchiveToBuildpathAction extends BuildpathModifierAction {
     		informListeners(delta);
 
     		List<CPListElement> addedEntries= delta.getAddedEntries();
-			List<IJavaElement> result= new ArrayList<IJavaElement>(addedEntries.size());
+			List<IJavaElement> result= new ArrayList<>(addedEntries.size());
 			for (int i= 0; i < addedEntries.size(); i++) {
 				IClasspathEntry entry= addedEntries.get(i).getClasspathEntry();
 				IJavaElement elem= project.findPackageFragmentRoot(entry.getPath());

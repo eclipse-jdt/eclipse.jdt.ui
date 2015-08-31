@@ -57,8 +57,10 @@ public class CreateTargetQueries implements ICreateTargetQueries {
 			return JavaPlugin.getActiveWorkbenchShell();
 	}
 
+	@Override
 	public ICreateTargetQuery createNewPackageQuery() {
 		return new ICreateTargetQuery() {
+			@Override
 			public Object getCreatedTarget(Object selection) {
 				IWorkbenchWizard packageCreationWizard= new NewPackageCreationWizard();
 
@@ -68,6 +70,7 @@ public class CreateTargetQueries implements ICreateTargetQueries {
 				return page.getNewPackageFragment();
 			}
 
+			@Override
 			public String getNewButtonLabel() {
 				return ReorgMessages.ReorgMoveWizard_newPackage;
 			}

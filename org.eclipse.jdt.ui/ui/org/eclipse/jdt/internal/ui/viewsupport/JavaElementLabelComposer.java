@@ -1548,7 +1548,7 @@ public class JavaElementLabelComposer {
 	public static PackageNameAbbreviation[] parseAbbreviationPattern(String pattern) {
 		String[] parts= pattern.split("\\s*(?:\r\n?|\n)\\s*"); //$NON-NLS-1$
 
-		ArrayList<PackageNameAbbreviation> result= new ArrayList<PackageNameAbbreviation>();
+		ArrayList<PackageNameAbbreviation> result= new ArrayList<>();
 
 		for (int i= 0; i < parts.length; i++) {
 			String part= parts[i].trim();
@@ -1573,6 +1573,7 @@ public class JavaElementLabelComposer {
 		}
 
 		Collections.sort(result, new Comparator<PackageNameAbbreviation>() {
+			@Override
 			public int compare(PackageNameAbbreviation a1, PackageNameAbbreviation a2) {
 				return a2.getPackagePrefix().length() - a1.getPackagePrefix().length();
 			}

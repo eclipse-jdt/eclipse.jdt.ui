@@ -159,6 +159,7 @@ public abstract class ProfileManager extends Observable {
 			return fID;
 		}
 
+		@Override
 		public final int compareTo(Profile o) {
 			if (o instanceof BuiltInProfile) {
 				return fOrder - ((BuiltInProfile)o).fOrder;
@@ -255,6 +256,7 @@ public abstract class ProfileManager extends Observable {
 			fVersion= version;
 		}
 
+		@Override
 		public int compareTo(Profile o) {
 			if (o instanceof SharedProfile) {
 				return -1;
@@ -381,8 +383,8 @@ public abstract class ProfileManager extends Observable {
 		fProfileKey= profileKey;
 		fProfileVersionKey= profileVersionKey;
 
-		fProfiles= new HashMap<String, Profile>();
-		fProfilesByName= new ArrayList<Profile>();
+		fProfiles= new HashMap<>();
+		fProfilesByName= new ArrayList<>();
 
 		for (final Iterator<Profile> iter = profiles.iterator(); iter.hasNext();) {
 			final Profile profile= iter.next();
@@ -407,7 +409,7 @@ public abstract class ProfileManager extends Observable {
 			Map<String, String> map= readFromPreferenceStore(context, profile);
 			if (map != null) {
 
-				List<String> allKeys= new ArrayList<String>();
+				List<String> allKeys= new ArrayList<>();
 				for (int i= 0; i < fKeySets.length; i++) {
 			        allKeys.addAll(fKeySets[i].getKeys());
 		        }
@@ -498,12 +500,12 @@ public abstract class ProfileManager extends Observable {
 	 * @param context The project context
 	 */
 	private Map<String, String> readFromPreferenceStore(IScopeContext context, Profile workspaceProfile) {
-		final Map<String, String> profileOptions= new HashMap<String, String>();
+		final Map<String, String> profileOptions= new HashMap<>();
 		IEclipsePreferences uiPrefs= context.getNode(JavaUI.ID_PLUGIN);
 
 		int version= uiPrefs.getInt(fProfileVersionKey, fProfileVersioner.getFirstVersion());
 		if (version != fProfileVersioner.getCurrentVersion()) {
-			Map<String, String> allOptions= new HashMap<String, String>();
+			Map<String, String> allOptions= new HashMap<>();
 			for (int i= 0; i < fKeySets.length; i++) {
 	            addAll(context.getNode(fKeySets[i].getNodeName()), allOptions);
             }

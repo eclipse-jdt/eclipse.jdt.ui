@@ -20,6 +20,7 @@ public class JavaBreakIteratorTest extends BreakIteratorTest {
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		fBreakIterator= new JavaBreakIterator();
 	}

@@ -60,9 +60,11 @@ public class JavaTextTools {
 	 * This tools' preference listener.
 	 */
 	private class PreferenceListener implements IPropertyChangeListener, Preferences.IPropertyChangeListener {
+		@Override
 		public void propertyChange(PropertyChangeEvent event) {
 			adaptToPreferenceChange(event);
 		}
+		@Override
 		public void propertyChange(Preferences.PropertyChangeEvent event) {
 			adaptToPreferenceChange(new PropertyChangeEvent(event.getSource(), event.getProperty(), event.getOldValue(), event.getNewValue()));
 		}
@@ -220,6 +222,7 @@ public class JavaTextTools {
 	 * @return a Java source code scanner
 	 * @deprecated As of 3.0, replaced by {@link JavaSourceViewerConfiguration#getCodeScanner()}
 	 */
+	@Deprecated
 	public RuleBasedScanner getCodeScanner() {
 		return fCodeScanner;
 	}
@@ -231,6 +234,7 @@ public class JavaTextTools {
 	 * @since 2.0
 	 * @deprecated As of 3.0, replaced by {@link JavaSourceViewerConfiguration#getMultilineCommentScanner()}
 	 */
+	@Deprecated
 	public RuleBasedScanner getMultilineCommentScanner() {
 		return fMultilineCommentScanner;
 	}
@@ -242,6 +246,7 @@ public class JavaTextTools {
 	 * @since 2.0
 	 * @deprecated As of 3.0, replaced by {@link JavaSourceViewerConfiguration#getSinglelineCommentScanner()}
 	 */
+	@Deprecated
 	public RuleBasedScanner getSinglelineCommentScanner() {
 		return fSinglelineCommentScanner;
 	}
@@ -253,6 +258,7 @@ public class JavaTextTools {
 	 * @since 2.0
 	 * @deprecated As of 3.0, replaced by {@link JavaSourceViewerConfiguration#getStringScanner()}
 	 */
+	@Deprecated
 	public RuleBasedScanner getStringScanner() {
 		return fStringScanner;
 	}
@@ -266,6 +272,7 @@ public class JavaTextTools {
 	 * @return a Javadoc scanner
 	 * @deprecated As of 3.0, replaced by {@link JavaSourceViewerConfiguration#getJavaDocScanner()}
 	 */
+	@Deprecated
 	public RuleBasedScanner getJavaDocScanner() {
 		return fJavaDocScanner;
 	}
@@ -302,6 +309,7 @@ public class JavaTextTools {
 	 * @return the partition managing position categories or <code>null</code> if there is none
 	 * @deprecated As of 3.0, replaced by {@link org.eclipse.jface.text.TextUtilities#computePartitionManagingCategories(IDocument)}
 	 */
+	@Deprecated
 	public String[] getPartitionManagingPositionCategories() {
 		return new String[] { org.eclipse.jface.text.rules.DefaultPartitioner.CONTENT_TYPES_CATEGORY };
 	}
@@ -315,6 +323,7 @@ public class JavaTextTools {
 	 * @since 2.0
 	 * @deprecated As of 3.0, replaced by {@link org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration#affectsTextPresentation(PropertyChangeEvent)}
 	 */
+	@Deprecated
 	public boolean affectsBehavior(PropertyChangeEvent event) {
 		return  fCodeScanner.affectsBehavior(event) ||
 					fMultilineCommentScanner.affectsBehavior(event) ||
@@ -331,6 +340,7 @@ public class JavaTextTools {
 	 * @since 2.0
 	 * @deprecated As of 3.0, no replacement
 	 */
+	@Deprecated
 	protected void adaptToPreferenceChange(PropertyChangeEvent event) {
 		if (fCodeScanner.affectsBehavior(event))
 			fCodeScanner.adaptToPreferenceChange(event);

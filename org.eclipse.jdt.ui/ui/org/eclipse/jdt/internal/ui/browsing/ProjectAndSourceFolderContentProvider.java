@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,9 +28,6 @@ class ProjectAndSourceFolderContentProvider extends JavaBrowsingContentProvider 
 		super(false, browsingPart);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on ITreeContentProvider.
-	 */
 	@Override
 	public Object[] getChildren(Object element) {
 		if (!exists(element))
@@ -41,7 +38,7 @@ class ProjectAndSourceFolderContentProvider extends JavaBrowsingContentProvider 
 			if (element instanceof IStructuredSelection) {
 				Assert.isLegal(false);
 				Object[] result= new Object[0];
-				Class<? extends Object> clazz= null;
+				Class<?> clazz= null;
 				Iterator<?> iter= ((IStructuredSelection)element).iterator();
 				while (iter.hasNext()) {
 					Object item=  iter.next();
@@ -82,7 +79,7 @@ class ProjectAndSourceFolderContentProvider extends JavaBrowsingContentProvider 
 			return NO_CHILDREN;
 
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-		List<IPackageFragmentRoot> list= new ArrayList<IPackageFragmentRoot>(roots.length);
+		List<IPackageFragmentRoot> list= new ArrayList<>(roots.length);
 		// filter out package fragments that correspond to projects and
 		// replace them with the package fragments directly
 		for (int i= 0; i < roots.length; i++) {

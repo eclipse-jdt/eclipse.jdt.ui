@@ -23,7 +23,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer;
 
 public class DocumentLineDifferInitializationTest extends AbstractDocumentLineDifferTest {
-	private static final Class THIS= DocumentLineDifferInitializationTest.class;
+	private static final Class<DocumentLineDifferInitializationTest> THIS= DocumentLineDifferInitializationTest.class;
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
@@ -48,6 +48,7 @@ public class DocumentLineDifferInitializationTest extends AbstractDocumentLineDi
 		runInitializationMeasurements(createDocument(SMALL_FAUST_MANY_CHANGES_SAME_SIZE));
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		commitAllMeasurements();
 		assertAllPerformance();
@@ -75,6 +76,7 @@ public class DocumentLineDifferInitializationTest extends AbstractDocumentLineDi
 		final DocumentLineDiffer differ= new DocumentLineDiffer();
 		setUpDiffer(differ);
 		DisplayHelper helper= new DisplayHelper() {
+			@Override
 			public boolean condition() {
 				return differ.isSynchronized();
 			}

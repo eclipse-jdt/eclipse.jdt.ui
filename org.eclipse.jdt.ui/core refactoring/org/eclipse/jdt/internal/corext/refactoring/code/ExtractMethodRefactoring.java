@@ -172,8 +172,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private static final String KEY_NAME= "name"; //$NON-NLS-1$
 
 	private static class UsedNamesCollector extends ASTVisitor {
-		private Set<String> result= new HashSet<String>();
-		private Set<SimpleName> fIgnore= new HashSet<SimpleName>();
+		private Set<String> result= new HashSet<>();
+		private Set<SimpleName> fIgnore= new HashSet<>();
 		public static Set<String> perform(ASTNode[] nodes) {
 			UsedNamesCollector collector= new UsedNamesCollector();
 			for (int i= 0; i < nodes.length; i++) {
@@ -456,9 +456,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return fUsedNames;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in Refactoring
-	 */
 	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.ExtractMethodRefactoring_checking_new_name, 2);
@@ -480,9 +477,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in IRefactoring
-	 */
 	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		if (fMethodName == null)
@@ -562,7 +556,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		for (int i= 0; i < selectedNodes.length; i++) {
 			ASTNode astNode= selectedNodes[i];
 			astNode.accept(new ASTVisitor() {
-				private LinkedList<String> fOpenLoopLabels= new LinkedList<String>();
+				private LinkedList<String> fOpenLoopLabels= new LinkedList<>();
 
 				private void registerLoopLabel(Statement node) {
 					String identifier;
@@ -640,7 +634,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 
 	private ExtractMethodDescriptor getRefactoringDescriptor() {
-		final Map<String, String> arguments= new HashMap<String, String>();
+		final Map<String, String> arguments= new HashMap<>();
 		String project= null;
 		IJavaProject javaProject= fCUnit.getJavaProject();
 		if (javaProject != null)
@@ -750,7 +744,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 	private void initializeParameterInfos() {
 		IVariableBinding[] arguments= fAnalyzer.getArguments();
-		fParameterInfos= new ArrayList<ParameterInfo>(arguments.length);
+		fParameterInfos= new ArrayList<>(arguments.length);
 		ASTNode root= fAnalyzer.getEnclosingBodyDeclaration();
 		ParameterInfo vararg= null;
 		for (int i= 0; i < arguments.length; i++) {
@@ -792,7 +786,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 
 	private void initializeDestinations() {
-		List<ASTNode> result= new ArrayList<ASTNode>();
+		List<ASTNode> result= new ArrayList<>();
 		BodyDeclaration decl= fAnalyzer.getEnclosingBodyDeclaration();
 		ASTNode current= ASTResolving.findParentType(decl.getParent());
 		if (fAnalyzer.isValidDestination(current)) {
@@ -830,7 +824,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	//---- Code generation -----------------------------------------------------------------------
 
 	private ASTNode[] createCallNodes(SnippetFinder.Match duplicate, int modifiers) {
-		List<ASTNode> result= new ArrayList<ASTNode>(2);
+		List<ASTNode> result= new ArrayList<>(2);
 
 		IVariableBinding[] locals= fAnalyzer.getCallerLocals();
 		for (int i= 0; i < locals.length; i++) {
@@ -1052,7 +1046,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 
 	private ITypeBinding[] computeLocalTypeVariables(int modifier) {
-		List<ITypeBinding> result= new ArrayList<ITypeBinding>(Arrays.asList(fAnalyzer.getTypeVariables()));
+		List<ITypeBinding> result= new ArrayList<>(Arrays.asList(fAnalyzer.getTypeVariables()));
 		for (int i= 0; i < fParameterInfos.size(); i++) {
 			ParameterInfo info= fParameterInfos.get(i);
 			processVariable(result, info.getOldBinding(), modifier);

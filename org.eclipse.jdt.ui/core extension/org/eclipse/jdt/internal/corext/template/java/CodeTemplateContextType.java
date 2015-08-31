@@ -283,7 +283,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 	 */
 	@Override
 	protected void validateVariables(TemplateVariable[] variables) throws TemplateException {
-		ArrayList<String> required=  new ArrayList<String>(5);
+		ArrayList<String> required=  new ArrayList<>(5);
 		String contextName= getId();
 		if (NEWTYPE_CONTEXTTYPE.equals(contextName)) {
 			required.add(PACKAGE_DECLARATION);
@@ -304,9 +304,6 @@ public class CodeTemplateContextType extends TemplateContextType {
 		super.validateVariables(variables);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.template.ContextType#createContext()
-	 */
 	public TemplateContext createContext() {
 		return null;
 	}

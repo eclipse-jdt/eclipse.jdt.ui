@@ -93,11 +93,11 @@ public class InferTypeArgumentsTCModel {
 
 
 	public InferTypeArgumentsTCModel() {
-		fTypeConstraints= new HashMap<ITypeConstraint2, ITypeConstraint2>();
-		fConstraintVariables= new LinkedHashMap<ConstraintVariable2, ConstraintVariable2>(); // make iteration independent of hashCode() implementation
-		fCastVariables= new ArrayList<CastVariable2>();
+		fTypeConstraints= new HashMap<>();
+		fConstraintVariables= new LinkedHashMap<>(); // make iteration independent of hashCode() implementation
+		fCastVariables= new ArrayList<>();
 
-		fCuScopedConstraintVariables= new HashSet<ConstraintVariable2>();
+		fCuScopedConstraintVariables= new HashSet<>();
 
 		fTypeEnvironment= new TypeEnvironment(true);
 	}
@@ -244,7 +244,7 @@ public class InferTypeArgumentsTCModel {
 			ArrayList<ITypeConstraint2> usedInList= (ArrayList<ITypeConstraint2>) usedIn;
 			usedInList.add(typeConstraint);
 		} else {
-			ArrayList<ITypeConstraint2> usedInList= new ArrayList<ITypeConstraint2>(2);
+			ArrayList<ITypeConstraint2> usedInList= new ArrayList<>(2);
 			usedInList.add((ITypeConstraint2) usedIn);
 			usedInList.add(typeConstraint);
 			storedCv.setData(USED_IN, usedInList);
@@ -784,7 +784,7 @@ public class InferTypeArgumentsTCModel {
 		HashMap<String, CollectionElementVariable2> keyToElementVar= getIndexedCollectionElements(typeConstraintVariable);
 		String key= typeVariable.getBindingKey();
 		if (keyToElementVar == null) {
-			keyToElementVar= new HashMap<String, CollectionElementVariable2>();
+			keyToElementVar= new HashMap<>();
 			typeConstraintVariable.setData(INDEXED_COLLECTION_ELEMENTS, keyToElementVar);
 		} else {
 			Object existingElementVar= keyToElementVar.get(key);

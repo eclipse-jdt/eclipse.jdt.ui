@@ -62,7 +62,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	protected int fPrevious= 0;
 
 	/** The sentence breaks */
-	private final LinkedList<Integer> fSentenceBreaks= new LinkedList<Integer>();
+	private final LinkedList<Integer> fSentenceBreaks= new LinkedList<>();
 
 	/** Does the current word start a sentence? */
 	private boolean fStartsSentence= false;
@@ -130,6 +130,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckIterator#setIgnoreSingleLetters(boolean)
 	 * @since 3.3
 	 */
+	@Override
 	public void setIgnoreSingleLetters(boolean state) {
 		fIsIgnoringSingleLetters= state;
 	}
@@ -137,6 +138,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	/*
 	 * @see org.eclipse.spelling.done.ISpellCheckIterator#getBegin()
 	 */
+	@Override
 	public final int getBegin() {
 		return fPrevious + fOffset;
 	}
@@ -144,6 +146,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	/*
 	 * @see org.eclipse.spelling.done.ISpellCheckIterator#getEnd()
 	 */
+	@Override
 	public final int getEnd() {
 		return fNext + fOffset - 1;
 	}
@@ -151,6 +154,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	/*
 	 * @see java.util.Iterator#hasNext()
 	 */
+	@Override
 	public final boolean hasNext() {
 		return fSuccessor != BreakIterator.DONE;
 	}
@@ -271,6 +275,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	/*
 	 * @see java.util.Iterator#next()
 	 */
+	@Override
 	public String next() {
 
 		String token= nextToken();
@@ -389,6 +394,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	/*
 	 * @see java.util.Iterator#remove()
 	 */
+	@Override
 	public final void remove() {
 		throw new UnsupportedOperationException();
 	}
@@ -422,6 +428,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 	/*
 	 * @see org.eclipse.spelling.done.ISpellCheckIterator#startsSentence()
 	 */
+	@Override
 	public final boolean startsSentence() {
 		return fStartsSentence;
 	}

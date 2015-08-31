@@ -50,23 +50,17 @@ import org.eclipse.jdt.internal.core.manipulation.Messages;
 		return file;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Object getModifiedElement() {
 		return fCUnit;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected Change createUndoChange(UndoEdit edit, ContentStamp stampToRestore) throws CoreException {
 		return new UndoCompilationUnitChange(getName(), fCUnit, edit, stampToRestore, getSaveMode());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		fCUnit.becomeWorkingCopy(new SubProgressMonitor(pm,1));

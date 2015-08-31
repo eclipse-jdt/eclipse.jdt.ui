@@ -206,6 +206,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	/**
 	 * @deprecated to avoid deprecation warning
 	 */
+	@Deprecated
 	private org.eclipse.jdt.core.IBufferFactory fBufferFactory;
 	private ICompilationUnitDocumentProvider fCompilationUnitDocumentProvider;
 	private ClassFileDocumentProvider fClassFileDocumentProvider;
@@ -382,7 +383,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		fBundleContext= context;
 
 		// register debug options listener
-		Hashtable<String, String> properties= new Hashtable<String, String>(2);
+		Hashtable<String, String> properties= new Hashtable<>(2);
 		properties.put(DebugOptions.LISTENER_SYMBOLICNAME, getPluginId());
 		fDebugRegistration= context.registerService(DebugOptionsListener.class, this, properties);
 
@@ -408,6 +409,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			getASTProvider();
 
 			fThemeListener= new IPropertyChangeListener() {
+				@Override
 				public void propertyChange(PropertyChangeEvent event) {
 					if (IThemeManager.CHANGE_CURRENT_THEME.equals(event.getProperty()))
 						JavaUIPreferenceInitializer.setThemeBasedPreferences(PreferenceConstants.getPreferenceStore(), true);
@@ -428,17 +430,21 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @return the deprecated preference store
 	 * @deprecated to avoid deprecation warnings
 	 */
+	@Deprecated
 	private static IPreferenceStore getDeprecatedWorkbenchPreferenceStore() {
 		return PlatformUI.getWorkbench().getPreferenceStore();
 	}
 
 	/** @deprecated to avoid deprecation warnings */
+	@Deprecated
 	private static final String DEPRECATED_EDITOR_TAB_WIDTH= PreferenceConstants.EDITOR_TAB_WIDTH;
 
 	/** @deprecated to avoid deprecation warnings */
+	@Deprecated
 	private static final String DEPRECATED_REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD= PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD;
 
 	/** @deprecated to avoid deprecation warnings */
+	@Deprecated
 	private static final String DEPRECATED_CODEASSIST_ORDER_PROPOSALS= PreferenceConstants.CODEASSIST_ORDER_PROPOSALS;
 
 	/**
@@ -475,6 +481,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		PreferenceConverter.putValue(store, JFaceResources.TEXT_FONT, JFaceResources.getFontRegistry().getFontData(PreferenceConstants.EDITOR_TEXT_FONT));
 
 		fFontPropertyChangeListener= new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (PreferenceConstants.EDITOR_TEXT_FONT.equals(event.getProperty()))
 					PreferenceConverter.putValue(getPreferenceStore(), JFaceResources.TEXT_FONT, JFaceResources.getFontRegistry().getFontData(PreferenceConstants.EDITOR_TEXT_FONT));
@@ -504,6 +511,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		store.putValue(oldTabWidthKey, store.getString(newTabWidthKey));
 
 		fPropertyChangeListener= new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (newTabWidthKey.equals(event.getProperty())) {
 					IPreferenceStore prefStore= getPreferenceStore();
@@ -669,6 +677,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @return the deprecated buffer factory
 	 * @deprecated to avoid deprecation warnings
 	 */
+	@Deprecated
 	public synchronized org.eclipse.jdt.core.IBufferFactory getBufferFactory() {
 		if (fBufferFactory == null)
 			fBufferFactory= new org.eclipse.jdt.internal.ui.javaeditor.CustomBufferFactory();
@@ -914,6 +923,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @return the deprecated template store
 	 * @deprecated to avoid deprecation warnings
 	 */
+	@Deprecated
 	private org.eclipse.jdt.internal.corext.template.java.Templates getOldTemplateStoreInstance() {
 		return org.eclipse.jdt.internal.corext.template.java.Templates.getInstance();
 	}
@@ -976,6 +986,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @return the deprecated code template store
 	 * @deprecated to avoid deprecation warnings
 	 */
+	@Deprecated
 	private org.eclipse.jdt.internal.corext.template.java.CodeTemplates getOldCodeTemplateStoreInstance() {
 		return org.eclipse.jdt.internal.corext.template.java.CodeTemplates.getInstance();
 	}
@@ -1147,6 +1158,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		return null;
 	}
 
+	@Override
 	public void optionsChanged(DebugOptions options) {
 		DEBUG_AST_PROVIDER= options.getBooleanOption("org.eclipse.jdt.ui/debug/ASTProvider", false); //$NON-NLS-1$
 		DEBUG_BREADCRUMB_ITEM_DROP_DOWN= options.getBooleanOption("org.eclipse.jdt.ui/debug/BreadcrumbItemDropDown", false); //$NON-NLS-1$

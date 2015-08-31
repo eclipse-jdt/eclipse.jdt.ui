@@ -66,11 +66,13 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
         setMenuCreator(this);
     }
 
-    public Menu getMenu(Menu parent) {
+    @Override
+	public Menu getMenu(Menu parent) {
         return null;
     }
 
-    public Menu getMenu(Control parent) {
+    @Override
+	public Menu getMenu(Control parent) {
         if (fMenu != null) {
             fMenu.dispose();
         }
@@ -83,7 +85,8 @@ class HistoryDropDownAction extends Action implements IMenuCreator {
         return fMenu;
     }
 
-    public void dispose() {
+    @Override
+	public void dispose() {
         fView = null;
 
         if (fMenu != null) {

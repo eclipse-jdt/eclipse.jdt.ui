@@ -126,6 +126,7 @@ public class JavaDocLocations {
 			protected IStatus run(IProgressMonitor monitor) {
 				try {
 					IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+						@Override
 						public void run(IProgressMonitor pm) throws CoreException {
 							updateClasspathEntries(oldLocations, pm);
 							IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
@@ -330,7 +331,7 @@ public class JavaDocLocations {
 	}
 
 	private static Map<IPath, String> loadOldForCompatibility() {
-		HashMap<IPath, String> resultingOldLocations= new HashMap<IPath, String>();
+		HashMap<IPath, String> resultingOldLocations= new HashMap<>();
 
 		// in 3.0, the javadoc locations were stored as one big string in the preferences
 		String string= PreferenceConstants.getPreferenceStore().getString(PREF_JAVADOCLOCATIONS);

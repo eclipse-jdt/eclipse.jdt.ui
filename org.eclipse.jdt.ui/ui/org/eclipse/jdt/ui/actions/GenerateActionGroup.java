@@ -383,7 +383,7 @@ public class GenerateActionGroup extends ActionGroup {
 
 	private void registerSelectionListener(ISelectionProvider provider, ISelectionChangedListener listener) {
 		if (fRegisteredSelectionListeners == null)
-			fRegisteredSelectionListeners= new ArrayList<ISelectionChangedListener>(20);
+			fRegisteredSelectionListeners= new ArrayList<>(20);
 		provider.addSelectionChangedListener(listener);
 		fRegisteredSelectionListeners.add(listener);
 	}
@@ -399,22 +399,17 @@ public class GenerateActionGroup extends ActionGroup {
 	 * @noreference This method is not intended to be referenced by clients.
 	 * @deprecated As of 3.5, this method is no longer called
 	 */
+	@Deprecated
 	public void editorStateChanged() {
 		Assert.isTrue(isEditorOwner());
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillActionBars(IActionBars actionBar) {
 		super.fillActionBars(actionBar);
 		setGlobalActionHandlers(actionBar);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
@@ -495,9 +490,6 @@ public class GenerateActionGroup extends ActionGroup {
 		return added;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void dispose() {
 		if (fRegisteredSelectionListeners != null) {

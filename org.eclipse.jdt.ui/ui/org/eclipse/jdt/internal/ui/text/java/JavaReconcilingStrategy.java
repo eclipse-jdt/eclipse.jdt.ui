@@ -85,9 +85,11 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 		final ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput(), false);
 		if (unit != null) {
 			SafeRunner.run(new ISafeRunnable() {
+				@Override
 				public void run() throws JavaModelException {
 					fAST= reconcile(unit, initialReconcile);
 				}
+				@Override
 				public void handleException(Throwable ex) {
 					IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during reconcile", ex);  //$NON-NLS-1$
 					JavaPlugin.getDefault().getLog().log(status);
@@ -147,6 +149,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	/*
 	 * @see IReconcilingStrategy#reconcile(IRegion)
 	 */
+	@Override
 	public void reconcile(IRegion partition) {
 		reconcile(false);
 	}
@@ -154,6 +157,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	/*
 	 * @see IReconcilingStrategy#reconcile(DirtyRegion, IRegion)
 	 */
+	@Override
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
 		reconcile(false);
 	}
@@ -161,12 +165,14 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	/*
 	 * @see IReconcilingStrategy#setDocument(IDocument)
 	 */
+	@Override
 	public void setDocument(IDocument document) {
 	}
 
 	/*
 	 * @see IReconcilingStrategyExtension#setProgressMonitor(IProgressMonitor)
 	 */
+	@Override
 	public void setProgressMonitor(IProgressMonitor monitor) {
 		fProgressMonitor= monitor;
 	}
@@ -174,6 +180,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	/*
 	 * @see IReconcilingStrategyExtension#initialReconcile()
 	 */
+	@Override
 	public void initialReconcile() {
 		reconcile(true);
 	}

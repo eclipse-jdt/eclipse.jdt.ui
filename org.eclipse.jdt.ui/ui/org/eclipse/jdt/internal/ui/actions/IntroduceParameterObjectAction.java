@@ -83,9 +83,6 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 		setEnabled(true);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection)
-	 */
 	@Override
 	public void selectionChanged(JavaTextSelection selection) {
 		try {
@@ -112,9 +109,6 @@ public class IntroduceParameterObjectAction extends SelectionDispatchAction {
 		}
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		try {

@@ -108,6 +108,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			fVariables= new SelectionButtonDialogField(SWT.PUSH);
 			fVariables.setLabelText(NewWizardMessages.LinkFolderDialog_dependenciesGroup_variables_desc);
 			fVariables.setDialogFieldListener(new IDialogFieldListener() {
+				@Override
 				public void dialogFieldChanged(DialogField field) {
 					handleVariablesButtonPressed();
 				}
@@ -136,9 +137,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			fLinkLocation.setText(path.toOSString());
 		}
 
-		/*(non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter#changeControlPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
-		 */
+		@Override
 		public void changeControlPressed(DialogField field) {
 			final DirectoryDialog dialog= new DirectoryDialog(getShell());
 			dialog.setMessage(NewWizardMessages.AddSourceFolderWizardPage_directory_message);
@@ -185,6 +184,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			}
 		}
 
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			if (fAdapter != null) {
 				fAdapter.dialogFieldChanged(fLinkLocation);
@@ -230,10 +230,10 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		fAllowAddExclusionPatterns= allowAddExclusionPatterns;
 		fParent= parent;
 
-		fOrginalExlusionFilters= new Hashtable<CPListElement, IPath[]>();
-		fOrginalInclusionFilters= new Hashtable<CPListElement, IPath[]>();
-		fOrginalExlusionFiltersCopy= new Hashtable<CPListElement, IPath[]>();
-		fOrginalInclusionFiltersCopy= new Hashtable<CPListElement, IPath[]>();
+		fOrginalExlusionFilters= new Hashtable<>();
+		fOrginalInclusionFilters= new Hashtable<>();
+		fOrginalExlusionFiltersCopy= new Hashtable<>();
+		fOrginalInclusionFiltersCopy= new Hashtable<>();
 		for (Iterator<CPListElement> iter= existingEntries.iterator(); iter.hasNext();) {
 			CPListElement element= iter.next();
 			IPath[] exlusions= (IPath[])element.getAttribute(CPListElement.EXCLUSION);
@@ -270,8 +270,8 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 		fNewElement= newElement;
 		fExistingEntries= existingEntries;
-		fModifiedElements= new ArrayList<CPListElement>();
-		fRemovedElements= new ArrayList<CPListElement>();
+		fModifiedElements= new ArrayList<>();
+		fRemovedElements= new ArrayList<>();
 		fOutputLocation= outputLocation;
 
 		RootFieldAdapter adapter= new RootFieldAdapter();
@@ -323,6 +323,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	/*
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -372,11 +373,13 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	private class RootFieldAdapter implements IStringButtonAdapter, IDialogFieldListener {
 
 		// -------- IStringButtonAdapter
+		@Override
 		public void changeControlPressed(DialogField field) {
 			packRootChangeControlPressed(field);
 		}
 
 		// -------- IDialogFieldListener
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			packRootDialogFieldChanged();
 		}
@@ -464,7 +467,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			fNewElement.setLinkTarget(fLinkFields.getLinkTarget());
 		}
 		fRemovedElements.clear();
-		Set<CPListElement> modified= new HashSet<CPListElement>();
+		Set<CPListElement> modified= new HashSet<>();
 		boolean isProjectSourceFolderReplaced= false;
 		if (fAddExclusionPatterns.isSelected()) {
 			if (fOrginalPath == null) {

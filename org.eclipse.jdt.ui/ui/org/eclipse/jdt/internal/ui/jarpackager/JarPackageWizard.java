@@ -126,9 +126,6 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		return root != null && (root.isArchive() || root.isExternal());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void addPages() {
 		super.addPages();
@@ -208,7 +205,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		ISelection currentSelection= JavaPlugin.getActiveWorkbenchWindow().getSelectionService().getSelection();
 		if (currentSelection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) currentSelection;
-			List<Object> selectedElements= new ArrayList<Object>(structuredSelection.size());
+			List<Object> selectedElements= new ArrayList<>(structuredSelection.size());
 			Iterator<?> iter= structuredSelection.iterator();
 			while (iter.hasNext()) {
 				Object selectedElement= iter.next();
@@ -224,9 +221,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 			return StructuredSelection.EMPTY;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		// ignore the selection argument since the main export wizard changed it
 		fSelection= getValidSelection();
@@ -260,9 +255,6 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		return fInitializeFromJarPackage;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean performFinish() {
 		fJarPackage.setElements(fJarPackageWizardPage.getSelectedElementsWithoutContainedChildren());

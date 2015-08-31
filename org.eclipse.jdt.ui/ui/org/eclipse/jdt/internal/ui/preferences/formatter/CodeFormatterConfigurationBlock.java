@@ -63,6 +63,7 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
 			fJavaPreview.update();
 		}
 
+		@Override
 		public void update(Observable o, Object arg) {
 			if (o instanceof ProfileManager) {
 				final int value= ((Integer) arg).intValue();

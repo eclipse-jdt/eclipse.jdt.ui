@@ -33,6 +33,7 @@ public abstract class AbstractMoveCompilationUnitPrefTest extends RepeatingRefac
 		super(name);
 	}
 
+	@Override
 	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
 		ICompilationUnit cunit= generateSources(numberOfCus, numberOfRefs);
 		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy((new IResource[0]), (new IJavaElement[] {cunit}));

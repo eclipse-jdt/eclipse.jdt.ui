@@ -118,7 +118,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	}
 
 	/** The current method declarations being processed (element type: <code>MethodDeclaration</code>) */
-	private final Stack<MethodDeclaration> fCurrentMethods= new Stack<MethodDeclaration>();
+	private final Stack<MethodDeclaration> fCurrentMethods= new Stack<>();
 
 	/** Should instanceof expressions be rewritten? */
 	private final boolean fInstanceOf;
@@ -769,7 +769,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 * @return the original methods (element type: <code>IMethodBinding</code>)
 	 */
 	private Collection<IMethodBinding> getOriginalMethods(final IMethodBinding binding) {
-		final Collection<IMethodBinding> originals= new ArrayList<IMethodBinding>();
+		final Collection<IMethodBinding> originals= new ArrayList<>();
 		final ITypeBinding type= binding.getDeclaringClass();
 		getOriginalMethods(binding, type, originals, false);
 		getOriginalMethods(binding, type, originals, true);

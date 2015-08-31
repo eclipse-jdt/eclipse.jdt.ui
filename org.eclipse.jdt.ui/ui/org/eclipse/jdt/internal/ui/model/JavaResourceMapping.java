@@ -40,33 +40,21 @@ public final class JavaResourceMapping extends ResourceMapping {
 		fResource= resource;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Object getModelObject() {
 		return fResource;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getModelProviderId() {
 		return JavaModelProvider.JAVA_MODEL_PROVIDER_ID;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public IProject[] getProjects() {
 		return new IProject[] { fResource.getProject() };
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public ResourceTraversal[] getTraversals(final ResourceMappingContext context, final IProgressMonitor monitor) {
 		return new ResourceTraversal[] { new ResourceTraversal(new IResource[] { fResource }, IResource.DEPTH_INFINITE, IResource.NONE) };

@@ -133,9 +133,6 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 
 	//---- text selection ------------------------------------------------------------
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);
@@ -156,9 +153,6 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 		}
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))

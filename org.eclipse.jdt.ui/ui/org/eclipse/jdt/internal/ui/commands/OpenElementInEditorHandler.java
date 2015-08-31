@@ -31,6 +31,7 @@ public class OpenElementInEditorHandler extends AbstractHandler {
 
 	private static final String PARAM_ID_ELEMENT_REF= "elementRef"; //$NON-NLS-1$
 
+	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
 		IJavaElement javaElement= (IJavaElement) event.getObjectParameterForExecution(PARAM_ID_ELEMENT_REF);

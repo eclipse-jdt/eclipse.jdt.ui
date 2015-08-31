@@ -38,12 +38,14 @@ public class TestDelta implements IJavaElementDelta {
 	/**
 		* @see org.eclipse.jdt.core.IJavaElementDelta#getAddedChildren()
 		*/
+	@Override
 	public IJavaElementDelta[] getAddedChildren() {
 		return null;
 	}
 	/**
 		* @see org.eclipse.jdt.core.IJavaElementDelta#getAffectedChildren()
 		*/
+	@Override
 	public IJavaElementDelta[] getAffectedChildren() {
 		if (fAffectedChildren == null)
 			return new IJavaElementDelta[0];
@@ -53,48 +55,56 @@ public class TestDelta implements IJavaElementDelta {
 	/**
 		* @see org.eclipse.jdt.core.IJavaElementDelta#getChangedChildren()
 		*/
+	@Override
 	public IJavaElementDelta[] getChangedChildren() {
 		return null;
 	}
 	/**
 		* @see org.eclipse.jdt.core.IJavaElementDelta#getElement()
 		*/
+	@Override
 	public IJavaElement getElement() {
 		return fElement;
 	}
 	/**
 		* @see org.eclipse.jdt.core.IJavaElementDelta#getFlags()
 		*/
+	@Override
 	public int getFlags() {
 		return 0;
 	}
 	/**
 		* @see org.eclipse.jdt.core.IJavaElementDelta#getKind()
 		*/
+	@Override
 	public int getKind() {
 		return fKind;
 	}
 	/**
 		* @see org.eclipse.jdt.core.IJavaElementDelta#getMovedFromElement()
 		*/
+	@Override
 	public IJavaElement getMovedFromElement() {
 		return null;
 	}
 	/**
 		* @see org.eclipse.jdt.core.IJavaElementDelta#getMovedToElement()
 		*/
+	@Override
 	public IJavaElement getMovedToElement() {
 		return null;
 	}
 	/**
 		* @see org.eclipse.jdt.core.IJavaElementDelta#getRemovedChildren()
 		*/
+	@Override
 	public IJavaElementDelta[] getRemovedChildren() {
 		return null;
 	}
 	/**
 		* @see org.eclipse.jdt.core.IJavaElementDelta#getResourceDeltas()
 		*/
+	@Override
 	public IResourceDelta[] getResourceDeltas() {
 		return null;
 	}
@@ -137,13 +147,12 @@ public class TestDelta implements IJavaElementDelta {
 		return createParentDeltas(frag, delta);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.IJavaElementDelta#getCompilationUnitAST()
-	 */
+	@Override
 	public CompilationUnit getCompilationUnitAST() {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	@Override
 	public IJavaElementDelta[] getAnnotationDeltas() {
 		return null;
 	}

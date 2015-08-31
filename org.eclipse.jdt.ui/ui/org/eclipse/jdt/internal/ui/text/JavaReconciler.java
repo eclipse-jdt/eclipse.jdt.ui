@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.spelling.SpellingService;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.ITypeRoot;
@@ -69,6 +70,7 @@ public class JavaReconciler extends MonoReconciler {
 		/*
 		 * @see org.eclipse.ui.IPartListener#partActivated(org.eclipse.ui.IWorkbenchPart)
 		 */
+		@Override
 		public void partActivated(IWorkbenchPart part) {
 			if (part == fTextEditor) {
 				if (hasJavaModelChanged())
@@ -80,18 +82,21 @@ public class JavaReconciler extends MonoReconciler {
 		/*
 		 * @see org.eclipse.ui.IPartListener#partBroughtToTop(org.eclipse.ui.IWorkbenchPart)
 		 */
+		@Override
 		public void partBroughtToTop(IWorkbenchPart part) {
 		}
 
 		/*
 		 * @see org.eclipse.ui.IPartListener#partClosed(org.eclipse.ui.IWorkbenchPart)
 		 */
+		@Override
 		public void partClosed(IWorkbenchPart part) {
 		}
 
 		/*
 		 * @see org.eclipse.ui.IPartListener#partDeactivated(org.eclipse.ui.IWorkbenchPart)
 		 */
+		@Override
 		public void partDeactivated(IWorkbenchPart part) {
 			if (part == fTextEditor) {
 				setJavaModelChanged(false);
@@ -102,6 +107,7 @@ public class JavaReconciler extends MonoReconciler {
 		/*
 		 * @see org.eclipse.ui.IPartListener#partOpened(org.eclipse.ui.IWorkbenchPart)
 		 */
+		@Override
 		public void partOpened(IWorkbenchPart part) {
 		}
 	}
@@ -151,6 +157,7 @@ public class JavaReconciler extends MonoReconciler {
 		/*
 		 * @see org.eclipse.jdt.core.IElementChangedListener#elementChanged(org.eclipse.jdt.core.ElementChangedEvent)
 		 */
+		@Override
 		public void elementChanged(ElementChangedEvent event) {
 			if (isRunningInReconcilerThread())
 				return;
@@ -174,6 +181,11 @@ public class JavaReconciler extends MonoReconciler {
 		private boolean canIgnore(IJavaElementDelta[] delta) {
 			if (delta.length != 1)
 				return false;
+
+			// affects non-shared working copy
+			if (delta[0].getElement() instanceof ICompilationUnit
+					&& ((ICompilationUnit) delta[0].getElement()).getOwner() != null)
+				return true;
 
 			// become working copy
 			if (delta[0].getFlags() == IJavaElementDelta.F_PRIMARY_WORKING_COPY)
@@ -207,6 +219,7 @@ public class JavaReconciler extends MonoReconciler {
 		/*
 		 * @see IResourceChangeListener#resourceChanged(org.eclipse.core.resources.IResourceChangeEvent)
 		 */
+		@Override
 		public void resourceChanged(IResourceChangeEvent e) {
 			if (isRunningInReconcilerThread())
 				return;
@@ -325,6 +338,7 @@ public class JavaReconciler extends MonoReconciler {
 		workspace.addResourceChangeListener(fResourceChangeListener);
 
 		fPropertyChangeListener= new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (SpellingService.PREFERENCE_SPELLING_ENABLED.equals(event.getProperty()) || SpellingService.PREFERENCE_SPELLING_ENGINE.equals(event.getProperty()))
 					forceReconciling();

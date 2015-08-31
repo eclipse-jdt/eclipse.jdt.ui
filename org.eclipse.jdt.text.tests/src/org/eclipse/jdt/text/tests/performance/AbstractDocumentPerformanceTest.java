@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,8 +44,8 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 	protected static final String FAUST1;
 	protected static final String FAUST100;
 	protected static final String FAUST500;
-	protected static final Map LOCAL_FINGERPRINTS= new HashMap();
-	protected static final Map DEGRADATION_COMMENTS= new HashMap();
+	protected static final Map<String, String> LOCAL_FINGERPRINTS= new HashMap<>();
+	protected static final Map<String, String> DEGRADATION_COMMENTS= new HashMap<>();
 
 
 	static {
@@ -77,22 +77,26 @@ public abstract class AbstractDocumentPerformanceTest extends TextPerformanceTes
 	/*
 	 * @see org.eclipse.jdt.text.tests.performance.PerformanceTestCase2#getLocalFingerprints()
 	 */
-	protected final Map getLocalFingerprints() {
+	@Override
+	protected final Map<String, String> getLocalFingerprints() {
 		return LOCAL_FINGERPRINTS;
 	}
 
 	/*
 	 * @see org.eclipse.jdt.text.tests.performance.PerformanceTestCase2#getDegradations()
 	 */
-	protected Map getDegradationComments() {
+	@Override
+	protected Map<String, String> getDegradationComments() {
 		return DEGRADATION_COMMENTS;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fDocument = createDocument();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		fDocument= null;
 		super.tearDown();

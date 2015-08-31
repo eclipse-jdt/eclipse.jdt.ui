@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
  * @noextend This class is not intended to be subclassed by clients.
  * @deprecated As of 3.5, got replaced by generic Navigate &gt; Show In &gt;
  */
+@Deprecated
 public class ShowInPackageViewAction extends SelectionDispatchAction {
 
 	private JavaEditor fEditor;
@@ -73,16 +74,10 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
@@ -94,9 +89,6 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 		return selection.getFirstElement() instanceof IJavaElement;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		try {
@@ -110,9 +102,6 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		if (!checkEnabled(selection))

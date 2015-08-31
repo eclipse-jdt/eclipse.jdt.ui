@@ -45,7 +45,7 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class NLSSearchTest extends TestCase {
 
-	private static final Class THIS= NLSSearchTest.class;
+	private static final Class<NLSSearchTest> THIS= NLSSearchTest.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -62,6 +62,7 @@ public class NLSSearchTest extends TestCase {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	public void setUp() throws CoreException {
 		fJProject1= ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -74,6 +75,7 @@ public class NLSSearchTest extends TestCase {
 		pack.createCompilationUnit("NLS.java", buf.toString(), false, null);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 		ISearchResultViewPart searchResultView= NewSearchUI.getSearchResultView();
@@ -85,6 +87,7 @@ public class NLSSearchTest extends TestCase {
 	private IFile write(IFolder folder, final String content, final String fileName) throws CoreException {
 		InputStream stream= new InputStream() {
 			private final Reader fReader= new StringReader(content);
+			@Override
 			public int read() throws IOException {
 				return fReader.read();
 			}

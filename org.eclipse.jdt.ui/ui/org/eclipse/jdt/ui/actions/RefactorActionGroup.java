@@ -177,7 +177,7 @@ public class RefactorActionGroup extends ActionGroup {
 
 	private UndoRedoActionGroup fUndoRedoActionGroup;
 
-	private final List<SelectionDispatchAction> fActions= new ArrayList<SelectionDispatchAction>();
+	private final List<SelectionDispatchAction> fActions= new ArrayList<>();
 
 	private static final String QUICK_MENU_ID= "org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"; //$NON-NLS-1$
 
@@ -463,9 +463,6 @@ public class RefactorActionGroup extends ActionGroup {
 		fActions.add(action);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
@@ -510,9 +507,6 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(ActionFactory.MOVE.getId(), fMoveAction);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
@@ -571,6 +565,7 @@ public class RefactorActionGroup extends ActionGroup {
 			final ITypeRoot element= getEditorInput();
 			if (element != null && ActionUtil.isOnBuildPath(element)) {
 				refactorSubmenu.addMenuListener(new IMenuListener() {
+					@Override
 					public void menuAboutToShow(IMenuManager manager) {
 						refactorMenuShown(manager);
 					}

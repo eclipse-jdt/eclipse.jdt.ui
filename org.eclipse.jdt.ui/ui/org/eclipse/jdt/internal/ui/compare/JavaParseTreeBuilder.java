@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 class JavaParseTreeBuilder extends ASTVisitor {
 
     private char[] fBuffer;
-    private Stack<JavaNode> fStack= new Stack<JavaNode>();
+    private Stack<JavaNode> fStack= new Stack<>();
     private JavaNode fImportContainer;
     private boolean fShowCU;
 

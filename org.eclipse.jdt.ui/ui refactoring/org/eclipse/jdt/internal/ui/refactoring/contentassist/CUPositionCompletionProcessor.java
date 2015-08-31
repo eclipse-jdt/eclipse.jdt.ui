@@ -102,6 +102,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 	 * @see #computeCompletionProposals(IContentAssistSubjectControl, int)
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
+	@Override
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
 		return null;
@@ -112,35 +113,28 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 	 * @see #computeContextInformation(IContentAssistSubjectControl, int)
 	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
 	 */
+	@Override
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
 		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
-	 */
+	@Override
 	public char[] getCompletionProposalAutoActivationCharacters() {
 		return fProposalAutoActivationSet;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationAutoActivationCharacters()
-	 */
+	@Override
 	public char[] getContextInformationAutoActivationCharacters() {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
-	 */
+	@Override
 	public String getErrorMessage() {
 		return fErrorMessage;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationValidator()
-	 */
+	@Override
 	public IContextInformationValidator getContextInformationValidator() {
 		return null; //no context
 	}
@@ -148,6 +142,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 	/*
 	 * @see ISubjectControlContentAssistProcessor#computeContextInformation(IContentAssistSubjectControl, int)
 	 */
+	@Override
 	public IContextInformation[] computeContextInformation(IContentAssistSubjectControl contentAssistSubjectControl, int documentOffset) {
 		return null;
 	}
@@ -155,6 +150,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 	/*
 	 * @see ISubjectControlContentAssistProcessor#computeCompletionProposals(IContentAssistSubjectControl, int)
 	 */
+	@Override
 	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubjectControl, int documentOffset) {
 		if (fCompletionContextRequestor == null || fCompletionContextRequestor.getOriginalCu() == null)
 			return null;
@@ -217,7 +213,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 
 		private void setOffsetReduction(int offsetReduction) {
 			fOffsetReduction= offsetReduction;
-			fProposals= new ArrayList<JavaCompletionProposal>();
+			fProposals= new ArrayList<>();
 		}
 
 		@Override

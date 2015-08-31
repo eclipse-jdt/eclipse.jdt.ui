@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
@@ -33,10 +30,13 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 
 public class SaveParticipantTest extends CleanUpTestCase {
 
-	private static final Class THIS= SaveParticipantTest.class;
+	private static final Class<SaveParticipantTest> THIS= SaveParticipantTest.class;
 
 	public SaveParticipantTest(String name) {
 		super(name);
@@ -50,6 +50,7 @@ public class SaveParticipantTest extends CleanUpTestCase {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 

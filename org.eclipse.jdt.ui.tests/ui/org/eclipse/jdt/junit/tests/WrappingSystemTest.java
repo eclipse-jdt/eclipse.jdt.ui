@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,8 +12,6 @@ package org.eclipse.jdt.junit.tests;
 
 import java.util.Iterator;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -48,23 +46,29 @@ import org.eclipse.jdt.internal.junit.ui.FailureTableDisplay;
 import org.eclipse.jdt.internal.junit.ui.FailureTrace;
 import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
 
+import junit.framework.TestCase;
+
 public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 	private boolean fLaunchHasTerminated = false;
 
 	private IJavaProject fProject;
 
+	@Override
 	public void launchesAdded(ILaunch[] launches) {
 		// nothing
 	}
 
+	@Override
 	public void launchesChanged(ILaunch[] launches) {
 		// nothing
 	}
 
+	@Override
 	public void launchesRemoved(ILaunch[] launches) {
 		// nothing
 	}
 
+	@Override
 	public void launchesTerminated(ILaunch[] launches) {
 		fLaunchHasTerminated = true;
 	}
@@ -168,10 +172,10 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 
 		LaunchConfigurationManager manager = DebugUIPlugin.getDefault()
 				.getLaunchConfigurationManager();
-		List launchShortcuts = manager.getLaunchShortcuts();
+		List<LaunchShortcutExtension> launchShortcuts = manager.getLaunchShortcuts();
 		LaunchShortcutExtension ext = null;
-		for (Iterator iter = launchShortcuts.iterator(); iter.hasNext();) {
-			ext = (LaunchShortcutExtension) iter.next();
+		for (Iterator<LaunchShortcutExtension> iter = launchShortcuts.iterator(); iter.hasNext();) {
+			ext = iter.next();
 			if (ext.getLabel().equals("JUnit Test"))
 				break;
 		}
@@ -203,11 +207,13 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 		return getTable().getItemCount();
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProject = JavaProjectHelper.createJavaProject("a", "bin");
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
 	}

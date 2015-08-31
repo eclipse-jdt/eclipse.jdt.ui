@@ -81,9 +81,6 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 
 	//---- Structured selection -----------------------------------------------------
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
@@ -95,9 +92,6 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		IType type= getElement(selection);
@@ -130,17 +124,11 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 
 	//---- Text selection -----------------------------------------------------------
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		run(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null);

@@ -59,6 +59,7 @@ public class LexicalSortingAction extends Action {
 	private void valueChanged(final boolean on, boolean store) {
 		setChecked(on);
 		BusyIndicator.showWhile(fViewer.getControl().getDisplay(), new Runnable() {
+			@Override
 			public void run() {
 				if (on) {
 					fViewer.setComparator(fComparator);

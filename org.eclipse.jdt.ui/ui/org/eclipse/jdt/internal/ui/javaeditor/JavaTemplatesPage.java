@@ -148,25 +148,16 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 		endCompoundChange(contextViewer);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.templates.AbstractTemplatesPage#getContextTypeRegistry()
-	 */
 	@Override
 	protected ContextTypeRegistry getContextTypeRegistry() {
 		return TEMPLATE_CONTEXT_REGISTRY;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.templates.AbstractTemplatesPage#getTemplatePreferenceStore()
-	 */
 	@Override
 	protected IPreferenceStore getTemplatePreferenceStore() {
 		return PREFERENCE_STORE;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.templates.AbstractTemplatesPage#getTemplateStore()
-	 */
 	@Override
 	public TemplateStore getTemplateStore() {
 		return TEMPLATE_STORE;
@@ -187,9 +178,6 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.templates.TextEditorTemplatesPage#createPatternViewer(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected SourceViewer createPatternViewer(Composite parent) {
 		IDocument document= new Document();
@@ -214,9 +202,6 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 		return viewer;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.templates.AbstractTemplatesPage#getImageForTemplate(org.eclipse.jface.text.templates.Template)
-	 */
 	@Override
 	protected Image getImage(Template template) {
 		String contextId= template.getContextTypeId();
@@ -262,9 +247,6 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 		getPatternViewer().setDocument(doc, startLen, doc.getLength() - startLen);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.templates.AbstractTemplatesPage#getPreferencePageId()
-	 */
 	@Override
 	protected String getPreferencePageId() {
 		return PREFERENCE_PAGE_ID;

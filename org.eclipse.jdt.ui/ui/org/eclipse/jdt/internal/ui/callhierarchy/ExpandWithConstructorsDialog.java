@@ -63,6 +63,7 @@ class ExpandWithConstructorsDialog extends TrayDialog {
 	@Override
 	protected Control createDialogArea(Composite composite) {
 		fConfigurationBlock= new ExpandWithConstructorsConfigurationBlock(new IStatusChangeListener() {
+			@Override
 			public void statusChanged(IStatus status) {
 				//Do nothing
 

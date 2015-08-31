@@ -137,9 +137,7 @@ public class LinkedProposalModelPresenter {
 			fLinkedPositionModel= model;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
-		 */
+		@Override
 		public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 			IDocument doc= viewer.getDocument();
 			LinkedPosition position= fLinkedPositionModel.findPosition(new LinkedPosition(doc, offset, 0));
@@ -161,49 +159,44 @@ public class LinkedProposalModelPresenter {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
-		 */
+		@Override
 		public String getDisplayString() {
 			return fProposal.getDisplayString();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
-		 */
+		@Override
 		public Image getImage() {
 			return fProposal.getImage();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
-		 */
+		@Override
 		public int getRelevance() {
 			return fProposal.getRelevance();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
-		 */
+		@Override
 		public void apply(IDocument document) {
 			// not called
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
-		 */
+		@Override
 		public String getAdditionalProposalInfo() {
 			return fProposal.getAdditionalProposalInfo();
 		}
 
+		@Override
 		public Point getSelection(IDocument document) { return null; }
+		@Override
 		public IContextInformation getContextInformation() { return null; }
+		@Override
 		public void selected(ITextViewer viewer, boolean smartToggle) {}
+		@Override
 		public void unselected(ITextViewer viewer) {}
 
 		/*
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
 		 */
+		@Override
 		public boolean validate(IDocument document, int offset, DocumentEvent event) {
 			// ignore event
 			String insert= getDisplayString();
@@ -232,6 +225,7 @@ public class LinkedProposalModelPresenter {
 	}
 
 	private static class LinkedModeExitPolicy implements LinkedModeUI.IExitPolicy {
+		@Override
 		public ExitFlags doExit(LinkedModeModel model, VerifyEvent event, int offset, int length) {
 			if (event.character  == '=') {
 				return new ExitFlags(ILinkedModeListener.EXIT_ALL, true);

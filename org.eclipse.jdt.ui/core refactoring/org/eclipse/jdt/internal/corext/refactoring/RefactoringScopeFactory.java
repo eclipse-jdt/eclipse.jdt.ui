@@ -184,7 +184,7 @@ public class RefactoringScopeFactory {
 	 * @return the search scope
 	 */
 	public static IJavaSearchScope createReferencedScope(IJavaElement[] javaElements) {
-		Set<IJavaProject> projects= new HashSet<IJavaProject>();
+		Set<IJavaProject> projects= new HashSet<>();
 		for (int i= 0; i < javaElements.length; i++) {
 			projects.add(javaElements[i].getJavaProject());
 		}
@@ -201,7 +201,7 @@ public class RefactoringScopeFactory {
 	 * @return the search scope
 	 */
 	public static IJavaSearchScope createReferencedScope(IJavaElement[] javaElements, int includeMask) {
-		Set<IJavaProject> projects= new HashSet<IJavaProject>();
+		Set<IJavaProject> projects= new HashSet<>();
 		for (int i= 0; i < javaElements.length; i++) {
 			projects.add(javaElements[i].getJavaProject());
 		}
@@ -228,7 +228,7 @@ public class RefactoringScopeFactory {
 	 */
 	private static IPackageFragmentRoot[] getAllScopeElements(IJavaProject project, boolean onlySourceRoots) throws JavaModelException {
 		Collection<IJavaProject> referencingProjects= getReferencingProjects(project);
-		List<IPackageFragmentRoot> result= new ArrayList<IPackageFragmentRoot>();
+		List<IPackageFragmentRoot> result= new ArrayList<>();
 		for (Iterator<IJavaProject> it= referencingProjects.iterator(); it.hasNext();) {
 			IJavaProject javaProject= it.next();
 			IPackageFragmentRoot[] roots= javaProject.getPackageFragmentRoots();
@@ -263,7 +263,7 @@ public class RefactoringScopeFactory {
 	}
 
 	private static IJavaProject[] getRelatedProjects(IJavaProject focus) throws CoreException {
-		final Set<IJavaProject> projects= new HashSet<IJavaProject>();
+		final Set<IJavaProject> projects= new HashSet<>();
 
 		addRelatedReferencing(focus, projects);
 		addRelatedReferenced(focus, projects);
@@ -273,7 +273,7 @@ public class RefactoringScopeFactory {
 	}
 
 	private static Collection<IJavaProject> getReferencingProjects(IJavaProject focus) throws JavaModelException {
-		Set<IJavaProject> projects= new HashSet<IJavaProject>();
+		Set<IJavaProject> projects= new HashSet<>();
 
 		addReferencingProjects(focus, projects);
 		projects.add(focus);

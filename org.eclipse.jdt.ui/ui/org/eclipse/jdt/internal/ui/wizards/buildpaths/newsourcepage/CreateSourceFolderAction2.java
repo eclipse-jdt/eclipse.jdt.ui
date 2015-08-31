@@ -26,9 +26,6 @@ public class CreateSourceFolderAction2 extends CreateSourceFolderAction {
 		fProvider= provider;
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void selectAndReveal(ISelection selection) {
 	    fProvider.handleFolderCreation(((StructuredSelection)selection).toList());

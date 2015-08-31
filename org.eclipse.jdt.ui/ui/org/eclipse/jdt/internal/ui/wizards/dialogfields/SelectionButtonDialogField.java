@@ -121,9 +121,11 @@ public class SelectionButtonDialogField extends DialogField {
 			fButton.setEnabled(isEnabled());
 			fButton.setSelection(fIsSelected);
 			fButton.addSelectionListener(new SelectionListener() {
+				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
 					doWidgetSelected(e);
 				}
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					doWidgetSelected(e);
 				}
@@ -156,9 +158,6 @@ public class SelectionButtonDialogField extends DialogField {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#setLabelText(java.lang.String)
-	 */
 	@Override
 	public void setLabelText(String labeltext) {
 		fLabelText= labeltext;
@@ -200,9 +199,6 @@ public class SelectionButtonDialogField extends DialogField {
 		}
 	}
 
-	/*(non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#refresh()
-	 */
 	@Override
 	public void refresh() {
 		super.refresh();

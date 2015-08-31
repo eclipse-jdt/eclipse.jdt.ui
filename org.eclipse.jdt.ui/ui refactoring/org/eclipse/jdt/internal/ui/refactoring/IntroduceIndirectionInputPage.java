@@ -63,7 +63,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 
 	private Combo fIntermediaryTypeName;
 	private static final int INTERMEDIARY_TYPE_COUNT= 10;
-	private static List<String> fgIntermediaryTypes= new ArrayList<String>(INTERMEDIARY_TYPE_COUNT);
+	private static List<String> fgIntermediaryTypes= new ArrayList<>(INTERMEDIARY_TYPE_COUNT);
 
 	/**
 	 * Constructor for IntroduceIndirectionInputPage.
@@ -96,6 +96,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 	/**
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		Composite result= new Composite(parent, SWT.NONE);
 
@@ -142,6 +143,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		fIntermediaryTypeName.setText(getIntroduceIndirectionRefactoring().getIntermediaryTypeName());
 
 		fIntermediaryMethodName.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				validateInput();
 			}
@@ -155,6 +157,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		});
 
 		fIntermediaryTypeName.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				validateInput();
 			}

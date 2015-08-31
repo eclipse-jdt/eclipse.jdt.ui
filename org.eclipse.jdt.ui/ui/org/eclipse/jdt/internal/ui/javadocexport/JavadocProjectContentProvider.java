@@ -32,6 +32,7 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 	/*
 	 * @see ITreeContentProvider#getChildren(Object)
 	 */
+	@Override
 	public Object[] getChildren(Object parentElement) {
 		try {
 			if (parentElement instanceof IJavaProject) {
@@ -48,6 +49,7 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 	/*
 	 * @see IStructuredContentProvider#getElements(Object)
 	 */
+	@Override
 	public Object[] getElements(Object inputElement) {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		try {
@@ -61,6 +63,7 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 	/*
 	 * @see ITreeContentProvider#getParent(Object)
 	 */
+	@Override
 	public Object getParent(Object element) {
 
 		IJavaElement parent= ((IJavaElement)element).getParent();
@@ -76,6 +79,7 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 	/*
 	 * @see ITreeContentProvider#hasChildren(Object)
 	 */
+	@Override
 	public boolean hasChildren(Object element) {
 		return (getChildren(element).length > 0);
 	}
@@ -83,17 +87,19 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 	/*
 	 * @see IContentProvider#dispose()
 	 */
+	@Override
 	public void dispose() {
 	}
 
 	/*
 	 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 	 */
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 	}
 
 	private Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
-		ArrayList<Object> result= new ArrayList<Object>();
+		ArrayList<Object> result= new ArrayList<>();
 
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
@@ -113,7 +119,7 @@ public class JavadocProjectContentProvider implements ITreeContentProvider {
 	}
 
 	private Object[] getPackageFragments(IPackageFragmentRoot root) throws JavaModelException {
-		ArrayList<IJavaElement> packageFragments= new ArrayList<IJavaElement>();
+		ArrayList<IJavaElement> packageFragments= new ArrayList<>();
 
 		IJavaElement[] children= root.getChildren();
 		for (int i= 0; i < children.length; i++) {

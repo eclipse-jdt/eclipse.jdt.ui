@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,6 @@
 package org.eclipse.jdt.text.tests;
 
 import java.util.Iterator;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.text.tests.performance.DisplayHelper;
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
@@ -61,6 +57,10 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 
 /**
  * Tests the Java Editor's occurrence marking feature.
@@ -93,6 +93,7 @@ public class MarkOccurrenceTest extends TestCase {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
 		assertNotNull(fgHighlightRGB);
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
@@ -115,24 +116,27 @@ public class MarkOccurrenceTest extends TestCase {
 			 * @see org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST#selectionChanged(org.eclipse.ui.IEditorPart, org.eclipse.jface.text.ITextSelection, org.eclipse.jdt.core.dom.CompilationUnit)
 			 * @since 3.1
 			 */
+			@Override
 			public void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot) {
 				if (fMatch != null && selection != null && selection.getOffset() == fMatch.getOffset() && selection.getLength() == fMatch.getLength()) {
 					countOccurrences();
 				}
 			}
 
-			private synchronized void countOccurrences() {
-				int occurrences= 0;
-				Iterator iter= fAnnotationModel.getAnnotationIterator();
-				while (iter.hasNext()) {
-					Annotation annotation= (Annotation)iter.next();
-					if (OCCURRENCE_ANNOTATION.equals(annotation.getType()))
-						occurrences++;
-					if (OCCURRENCE_WRITE_ANNOTATION.equals(annotation.getType()))
-						occurrences++;
+			private void countOccurrences() {
+				synchronized (MarkOccurrenceTest.this) {
+					int occurrences= 0;
+					Iterator<Annotation> iter= fAnnotationModel.getAnnotationIterator();
+					while (iter.hasNext()) {
+						Annotation annotation= iter.next();
+						if (OCCURRENCE_ANNOTATION.equals(annotation.getType()))
+							occurrences++;
+						if (OCCURRENCE_WRITE_ANNOTATION.equals(annotation.getType()))
+							occurrences++;
 
+					}
+					fOccurrences= occurrences;
 				}
-				fOccurrences= occurrences;
 			}
 		};
 		SelectionListenerWithASTManager.getDefault().addListener(fEditor, fSelWASTListener);
@@ -142,6 +146,7 @@ public class MarkOccurrenceTest extends TestCase {
 	 * @see junit.framework.TestCase#tearDown()
 	 * @since 3.1
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		SelectionListenerWithASTManager.getDefault().removeListener(fEditor, fSelWASTListener);
 		EditorTestHelper.closeAllEditors();
@@ -220,6 +225,7 @@ public class MarkOccurrenceTest extends TestCase {
 	 * @since 3.4
 	 * @deprecated to get rid of deprecation warning in this file
 	 */
+	@Deprecated
 	private IPreferenceStore getPlatformUIStore() {
 		IPreferenceStore store= PlatformUI.getWorkbench().getPreferenceStore();
 		return store;
@@ -358,9 +364,9 @@ public class MarkOccurrenceTest extends TestCase {
 	private void assertOccurrencesInWidget() {
 		EditorTestHelper.runEventQueue(500);
 
-		Iterator iter= fAnnotationModel.getAnnotationIterator();
+		Iterator<Annotation> iter= fAnnotationModel.getAnnotationIterator();
 		while (iter.hasNext()) {
-			Annotation annotation= (Annotation)iter.next();
+			Annotation annotation= iter.next();
 			if (OCCURRENCE_ANNOTATION.equals(annotation.getType()))
 				assertOccurrenceInWidget(fAnnotationModel.getPosition(annotation));
 		}
@@ -395,12 +401,15 @@ public class MarkOccurrenceTest extends TestCase {
 
 	private void assertOccurrences(final int expected) {
 		DisplayHelper helper= new DisplayHelper() {
+			@Override
 			protected boolean condition() {
-				if (fOccurrences != -1) {
-					assertEquals(expected, fOccurrences);
-					return true;
+				synchronized (MarkOccurrenceTest.this) {
+					if (fOccurrences != -1) {
+						assertEquals(expected, fOccurrences);
+						return true;
+					}
+					return false;
 				}
-				return false;
 			}
 		};
 		assertTrue(helper.waitForCondition(EditorTestHelper.getActiveDisplay(), 80000));

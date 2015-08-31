@@ -255,6 +255,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 
 				Control label= super.addLabel(firstLine);
 				label.addTraverseListener(new TraverseListener() {
+					@Override
 					public void keyTraversed(TraverseEvent e) {
 						if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit) {
 							e.detail= SWT.TRAVERSE_NONE;

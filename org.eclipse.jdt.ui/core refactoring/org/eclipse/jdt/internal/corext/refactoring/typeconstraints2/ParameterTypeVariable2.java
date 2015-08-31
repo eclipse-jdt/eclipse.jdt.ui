@@ -35,10 +35,12 @@ public final class ParameterTypeVariable2 extends ConstraintVariable2 implements
 		fKey= binding.getKey();
 	}
 
+	@Override
 	public void setCompilationUnit(ICompilationUnit cu) {
 		fCompilationUnit= cu;
 	}
 
+	@Override
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}

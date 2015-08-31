@@ -113,6 +113,7 @@ class LocationViewer extends TableViewer {
 
         getTable().addFocusListener(new FocusListener() {
         	IAction fViewCopyHandler;
+			@Override
 			public void focusLost(FocusEvent e) {
 				if (fViewCopyHandler != null) {
 					IActionBars actionBars= viewSite.getActionBars();
@@ -122,6 +123,7 @@ class LocationViewer extends TableViewer {
 				}
 			}
 
+			@Override
 			public void focusGained(FocusEvent e) {
 				IActionBars actionBars= viewSite.getActionBars();
 				fViewCopyHandler= actionBars.getGlobalActionHandler(ActionFactory.COPY.getId());

@@ -64,18 +64,22 @@ public class OpenTypeInHierarchyAction extends Action implements IWorkbenchWindo
 
 	//---- IWorkbenchWindowActionDelegate ------------------------------------------------
 
+	@Override
 	public void run(IAction action) {
 		run();
 	}
 
+	@Override
 	public void dispose() {
 		fWindow= null;
 	}
 
+	@Override
 	public void init(IWorkbenchWindow window) {
 		fWindow= window;
 	}
 
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		// do nothing. Action doesn't depend on selection.
 	}

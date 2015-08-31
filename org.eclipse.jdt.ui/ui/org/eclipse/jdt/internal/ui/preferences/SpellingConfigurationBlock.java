@@ -120,10 +120,12 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 		master.addSelectionListener(new SelectionListener() {
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
 				// Do nothing
 			}
 
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				slave.setEnabled(master.getSelection());
 			}
@@ -335,7 +337,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 
-		List<Control> allControls= new ArrayList<Control>();
+		List<Control> allControls= new ArrayList<>();
 		final PixelConverter converter= new PixelConverter(parent);
 
 		final String[] trueFalse= new String[] { IPreferenceStore.TRUE, IPreferenceStore.FALSE };
@@ -527,6 +529,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 		// Redirect status messages from the field editor to the status change listener
 		DialogPage fakePage= new DialogPage() {
+			@Override
 			public void createControl(Composite c) {
 			}
 			@Override
@@ -676,7 +679,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 			fEnabledControls= null;
 		}
 		if (!enabled && fEnabledControls == null) {
-			List<Control> enabledControls= new ArrayList<Control>();
+			List<Control> enabledControls= new ArrayList<>();
 			for (int i= fAllControls.length - 1; i >= 0; i--) {
 				Control control= fAllControls[i];
 				if (control.isEnabled()) {

@@ -80,11 +80,13 @@ public class TextPerformanceTestCase2 extends PerformanceTestCase2 {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		EditorsUI.getPreferenceStore().putValue(SpellingService.PREFERENCE_SPELLING_ENABLED, IPreferenceStore.FALSE);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		EditorsUI.getPreferenceStore().setToDefault(SpellingService.PREFERENCE_SPELLING_ENABLED);
 		super.tearDown();
@@ -93,6 +95,7 @@ public class TextPerformanceTestCase2 extends PerformanceTestCase2 {
 	/**
 	 * @return number of warm-up runs, must have been set before
 	 */
+	@Override
 	protected final int getWarmUpRuns() {
 		if (OVERRIDE_RUNS)
 			return OVERRIDE_WARM_UP_RUNS;
@@ -112,6 +115,7 @@ public class TextPerformanceTestCase2 extends PerformanceTestCase2 {
 	/**
 	 * @return number of measured runs, must have been set before
 	 */
+	@Override
 	protected final int getMeasuredRuns() {
 		if (OVERRIDE_RUNS)
 			return OVERRIDE_MEASURED_RUNS;

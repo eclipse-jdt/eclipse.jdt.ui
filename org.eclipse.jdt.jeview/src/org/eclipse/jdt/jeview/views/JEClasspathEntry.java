@@ -84,7 +84,7 @@ public class JEClasspathEntry extends JEAttribute {
 	
 	@Override
 	public JEAttribute[] getChildren() {
-		ArrayList<JEAttribute> result= new ArrayList<JEAttribute>();
+		ArrayList<JEAttribute> result= new ArrayList<>();
 		
 		result.add(new JavaElementChildrenProperty(this, "ACCESS RULES") {
 			@Override protected JEAttribute[] computeChildren() throws CoreException {

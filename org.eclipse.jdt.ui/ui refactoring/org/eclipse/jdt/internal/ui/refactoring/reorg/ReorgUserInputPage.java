@@ -57,9 +57,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 	public ReorgUserInputPage(String pageName) {
 		super(pageName);
 	}
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 		Composite result= new Composite(parent, SWT.NONE);
@@ -74,6 +72,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		fViewer= createViewer(result);
 		fViewer.setSelection(new StructuredSelection(initialSelection), true);
 		fViewer.addSelectionChangedListener(new ISelectionChangedListener(){
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				ReorgUserInputPage.this.viewerSelectionChanged(event);
 			}
@@ -164,6 +163,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 	}
 
 	private final class TreeViewerDoubleClickListener implements IDoubleClickListener {
+		@Override
 		public void doubleClick(DoubleClickEvent event) {
 			IStructuredSelection selection= (IStructuredSelection) event.getSelection();
 			Object element= selection.getFirstElement();

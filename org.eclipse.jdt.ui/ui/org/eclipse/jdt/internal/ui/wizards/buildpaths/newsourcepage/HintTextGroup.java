@@ -68,8 +68,8 @@ public final class HintTextGroup implements ISelectionChangedListener {
     private HashMap<String, Image> fImageMap;
 
     public HintTextGroup() {
-        fNewFolders= new ArrayList<IResource>();
-        fImageMap= new HashMap<String, Image>();
+        fNewFolders= new ArrayList<>();
+        fImageMap= new HashMap<>();
     }
 
     public Composite createControl(Composite parent) {
@@ -87,7 +87,8 @@ public final class HintTextGroup implements ISelectionChangedListener {
         fTopComposite.setLayoutData(gridData);
         fTopComposite.setData(null);
         fTopComposite.addDisposeListener(new DisposeListener() {
-            public void widgetDisposed(DisposeEvent e) {
+            @Override
+			public void widgetDisposed(DisposeEvent e) {
                 Collection<Image> collection= fImageMap.values();
                 Iterator<Image> iterator= collection.iterator();
                 while(iterator.hasNext()) {
@@ -211,10 +212,8 @@ public final class HintTextGroup implements ISelectionChangedListener {
 		fNewFolders.clear();
 	}
 
-	/**
-     * {@inheritDoc}
-     */
-    public void selectionChanged(SelectionChangedEvent event) {
+    @Override
+	public void selectionChanged(SelectionChangedEvent event) {
     	if (event.getSelection() instanceof StructuredSelection) {
     		handlePostSelectionChange((StructuredSelection)event.getSelection());
     	} else {

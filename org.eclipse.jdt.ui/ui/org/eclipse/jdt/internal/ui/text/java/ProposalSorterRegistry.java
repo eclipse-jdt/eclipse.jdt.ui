@@ -75,9 +75,9 @@ public final class ProposalSorterRegistry {
 		if (fSorters != null)
 			return;
 
-		Map<String, ProposalSorterHandle> sorters= new LinkedHashMap<String, ProposalSorterHandle>();
+		Map<String, ProposalSorterHandle> sorters= new LinkedHashMap<>();
 		IExtensionRegistry registry= Platform.getExtensionRegistry();
-		List<IConfigurationElement> elements= new ArrayList<IConfigurationElement>(Arrays.asList(registry.getConfigurationElementsFor(JavaPlugin.getPluginId(), EXTENSION_POINT)));
+		List<IConfigurationElement> elements= new ArrayList<>(Arrays.asList(registry.getConfigurationElementsFor(JavaPlugin.getPluginId(), EXTENSION_POINT)));
 
 		for (Iterator<IConfigurationElement> iter= elements.iterator(); iter.hasNext();) {
 			IConfigurationElement element= iter.next();

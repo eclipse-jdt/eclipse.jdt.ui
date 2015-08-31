@@ -45,7 +45,7 @@ public class IntroduceParameterObjectContribution extends JavaUIRefactoringContr
 	}
 
 	@Override
-	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
+	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createIntroduceParameterObjectDescriptor(project, description, comment, arguments, flags);
 	}
 

@@ -74,7 +74,7 @@ class SourceAnalyzer  {
 		private List<SimpleName> fReferences;
 		public NameData(String n) {
 			fName= n;
-			fReferences= new ArrayList<SimpleName>(2);
+			fReferences= new ArrayList<>(2);
 		}
 		public String getName() {
 			return fName;
@@ -420,7 +420,7 @@ class SourceAnalyzer  {
 		result.merge(analyzer.status);
 		if (!result.hasFatalError()) {
 			List<SingleVariableDeclaration> parameters= fDeclaration.parameters();
-			fParameters= new HashMap<IVariableBinding, ParameterData>(parameters.size() * 2);
+			fParameters= new HashMap<>(parameters.size() * 2);
 			for (Iterator<SingleVariableDeclaration> iter= parameters.iterator(); iter.hasNext();) {
 				SingleVariableDeclaration element= iter.next();
 				IVariableBinding binding= element.resolveBinding();
@@ -432,11 +432,11 @@ class SourceAnalyzer  {
 				}
 				fParameters.put(binding, (ParameterData) element.getProperty(ParameterData.PROPERTY));
 			}
-			fNames= new HashMap<IBinding, NameData>();
-			fImplicitReceivers= new ArrayList<Expression>(2);
+			fNames= new HashMap<>();
+			fImplicitReceivers= new ArrayList<>(2);
 
-			fTypeParameterReferences= new ArrayList<NameData>(0);
-			fTypeParameterMapping= new HashMap<ITypeBinding, NameData>();
+			fTypeParameterReferences= new ArrayList<>(0);
+			fTypeParameterMapping= new HashMap<>();
 			ITypeBinding declaringType= declarationBinding.getDeclaringClass();
 			if (declaringType == null) {
 				result.addFatalError(
@@ -451,8 +451,8 @@ class SourceAnalyzer  {
 				fTypeParameterMapping.put(typeParameters[i], data);
 			}
 
-			fMethodTypeParameterReferences= new ArrayList<NameData>(0);
-			fMethodTypeParameterMapping= new HashMap<ITypeBinding, NameData>();
+			fMethodTypeParameterReferences= new ArrayList<>(0);
+			fMethodTypeParameterMapping= new HashMap<>();
 			IMethodBinding method= declarationBinding;
 			typeParameters= method.getTypeParameters();
 			for (int i= 0; i < typeParameters.length; i++) {
@@ -475,8 +475,8 @@ class SourceAnalyzer  {
 		Block body= fDeclaration.getBody();
 		// first collect the static imports. This is necessary to not mark
 		// static imported fields and methods as implicit visible.
-		fTypesToImport= new ArrayList<SimpleName>();
-		fStaticsToImport= new ArrayList<SimpleName>();
+		fTypesToImport= new ArrayList<>();
+		fStaticsToImport= new ArrayList<>();
 		ImportReferencesCollector.collect(body, fTypeRoot.getJavaProject(), null, fTypesToImport, fStaticsToImport);
 
 		// Now collect implicit references and name references

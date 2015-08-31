@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,6 @@ package org.eclipse.jdt.ui.tests.buildpath;
 
 import java.util.Iterator;
 import java.util.List;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -39,6 +35,10 @@ import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 public class BuildpathModifierActionTest extends TestCase {
 
     private static final String DEFAULT_OUTPUT_FOLDER_NAME= "bin";
@@ -54,9 +54,11 @@ public class BuildpathModifierActionTest extends TestCase {
 		return new TestSuite(BuildpathModifierActionTest.class);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		if (fJavaProject != null) {
 			JavaProjectHelper.delete(fJavaProject);
@@ -128,12 +130,12 @@ public class BuildpathModifierActionTest extends TestCase {
     }
 
     private static void assertDeltaRemovedEntries(BuildpathDelta delta, IPath[] paths) {
-    	List removedEntries= delta.getRemovedEntries();
+    	List<CPListElement> removedEntries= delta.getRemovedEntries();
     	assertTrue("Expected " + paths.length + " is " + removedEntries.size(), removedEntries.size() == paths.length);
     	IPath[] removed= new IPath[removedEntries.size()];
     	int i= 0;
-    	for (Iterator iterator= removedEntries.iterator(); iterator.hasNext();) {
-	        CPListElement element= (CPListElement)iterator.next();
+    	for (Iterator<CPListElement> iterator= removedEntries.iterator(); iterator.hasNext();) {
+	        CPListElement element= iterator.next();
 	        removed[i]= element.getPath();
 	        i++;
         }
@@ -146,12 +148,12 @@ public class BuildpathModifierActionTest extends TestCase {
     }
 
     private static void assertDeltaAddedEntries(BuildpathDelta delta, IPath[] paths) {
-    	List addedEntries= delta.getAddedEntries();
+    	List<CPListElement> addedEntries= delta.getAddedEntries();
     	assertTrue("Expected " + paths.length + " is " + addedEntries.size(), addedEntries.size() == paths.length);
     	IPath[] added= new IPath[addedEntries.size()];
     	int i= 0;
-    	for (Iterator iterator= addedEntries.iterator(); iterator.hasNext();) {
-	        CPListElement element= (CPListElement)iterator.next();
+    	for (Iterator<CPListElement> iterator= addedEntries.iterator(); iterator.hasNext();) {
+	        CPListElement element= iterator.next();
 	        added[i]= element.getPath();
 	        i++;
         }

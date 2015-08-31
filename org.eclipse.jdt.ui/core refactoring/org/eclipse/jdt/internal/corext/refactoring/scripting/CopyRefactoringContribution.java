@@ -32,9 +32,6 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
  */
 public final class CopyRefactoringContribution extends JavaUIRefactoringContribution {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public final Refactoring createRefactoring(final JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
@@ -48,7 +45,7 @@ public final class CopyRefactoringContribution extends JavaUIRefactoringContribu
 	}
 
 	@Override
-	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
+	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createCopyDescriptor(project, description, comment, arguments, flags);
 	}
 

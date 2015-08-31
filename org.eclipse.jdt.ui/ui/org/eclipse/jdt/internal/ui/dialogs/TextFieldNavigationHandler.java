@@ -293,16 +293,19 @@ public class TextFieldNavigationHandler {
 			if (control.isFocusControl())
 				activate();
 			control.addDisposeListener(new DisposeListener() {
+				@Override
 				public void widgetDisposed(DisposeEvent e) {
 					deactivate();
 				}
 			});
 		}
 
+		@Override
 		public void focusGained(FocusEvent e) {
 			activate();
 		}
 
+		@Override
 		public void focusLost(FocusEvent e) {
 			deactivate();
 		}
@@ -376,7 +379,7 @@ public class TextFieldNavigationHandler {
 						if (fSubmissions != null)
 							return fSubmissions;
 
-						fSubmissions= new ArrayList<Submission>();
+						fSubmissions= new ArrayList<>();
 
 						ICommandService commandService= PlatformUI.getWorkbench().getAdapter(ICommandService.class);
 						IBindingService bindingService= PlatformUI.getWorkbench().getAdapter(IBindingService.class);

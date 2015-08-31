@@ -158,10 +158,12 @@ public class OutputLocationDialog extends StatusDialog {
 
 		// -------- IDialogFieldListener
 
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			doStatusLineUpdate();
 		}
 
+		@Override
 		public void changeControlPressed(DialogField field) {
 			doChangeControlPressed();
 		}
@@ -225,7 +227,7 @@ public class OutputLocationDialog extends StatusDialog {
 		IWorkspaceRoot root= fCurrProject.getWorkspace().getRoot();
 		final Class<?>[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
 		IProject[] allProjects= root.getProjects();
-		ArrayList<IProject> rejectedElements= new ArrayList<IProject>(allProjects.length);
+		ArrayList<IProject> rejectedElements= new ArrayList<>(allProjects.length);
 		for (int i= 0; i < allProjects.length; i++) {
 			if (!allProjects[i].equals(fCurrProject)) {
 				rejectedElements.add(allProjects[i]);
@@ -246,7 +248,8 @@ public class OutputLocationDialog extends StatusDialog {
 
         dialog.setValidator(new ISelectionStatusValidator() {
             ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
-            public IStatus validate(Object[] selection) {
+            @Override
+			public IStatus validate(Object[] selection) {
                 IStatus typedStatus= validator.validate(selection);
                 if (!typedStatus.isOK())
                     return typedStatus;

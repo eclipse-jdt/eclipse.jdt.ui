@@ -178,6 +178,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		/*
 		 * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
 		 */
+		@Override
 		public void widgetDisposed(DisposeEvent e) {
 			Item item= (Item) ((Widget) e.getSource()).getData();
 			item.deselect();
@@ -196,6 +197,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		/*
 		 * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
 		 */
+		@Override
 		public void handleEvent(Event event) {
 			if (event.type == SWT.MenuDetect) {
 				// TODO: show per-item menu
@@ -208,10 +210,12 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 							menu.setLocation(event.x, event.y);
 							menu.addMenuListener(new MenuListener() {
 
+								@Override
 								public void menuHidden(MenuEvent e) {
 									dispose();
 								}
 
+								@Override
 								public void menuShown(MenuEvent e) {
 								}
 
@@ -275,6 +279,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		/*
 		 * @see org.eclipse.swt.events.MouseTrackListener#mouseEnter(org.eclipse.swt.events.MouseEvent)
 		 */
+		@Override
 		public void mouseEnter(MouseEvent e) {
 			Item item= (Item) ((Widget) e.getSource()).getData();
 			if (item != null)
@@ -284,6 +289,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		/*
 		 * @see org.eclipse.swt.events.MouseTrackListener#mouseExit(org.eclipse.swt.events.MouseEvent)
 		 */
+		@Override
 		public void mouseExit(MouseEvent e) {
 
 			Item item= (Item) ((Widget) e.getSource()).getData();
@@ -311,6 +317,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		/*
 		 * @see org.eclipse.swt.events.MouseTrackListener#mouseHover(org.eclipse.swt.events.MouseEvent)
 		 */
+		@Override
 		public void mouseHover(MouseEvent e) {
 			if (fHoverManager == null) {
 				fHoverManager= new HoverManager();
@@ -376,6 +383,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		/*
 		 * @see org.eclipse.swt.events.PaintListener#paintControl(org.eclipse.swt.events.PaintEvent)
 		 */
+		@Override
 		public void paintControl(PaintEvent e) {
 			Canvas can= (Canvas) e.getSource();
 			Annotation a= ((Item) can.getData()).fAnnotation;
@@ -397,6 +405,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		 */
 		public HoverManager() {
 			super(new IInformationControlCreator() {
+				@Override
 				public IInformationControl createInformationControl(Shell parent) {
 					return new DefaultInformationControl(parent);
 				}
@@ -467,6 +476,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		fDisposeListener= new MyDisposeListener();
 		fViewportListener= new IViewportListener() {
 
+			@Override
 			public void viewportChanged(int verticalOffset) {
 				dispose();
 			}
@@ -541,6 +551,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see org.eclipse.jface.text.IInformationControl#setInformation(java.lang.String)
 	 */
+	@Override
 	public void setInformation(String information) {
 		setInput(null);
 	}
@@ -549,6 +560,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlExtension2#setInput(java.lang.Object)
 	 */
+	@Override
 	public void setInput(Object input) {
 		if (fInput != null && fInput.fViewer != null)
 			fInput.fViewer.removeViewportListener(fViewportListener);
@@ -641,6 +653,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see IInformationControl#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		fShell.setVisible(visible);
 	}
@@ -648,6 +661,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see IInformationControl#dispose()
 	 */
+	@Override
 	public void dispose() {
 		if (fShell != null) {
 			if (!fShell.isDisposed())
@@ -664,6 +678,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlExtension#hasContents()
 	 */
+	@Override
 	public boolean hasContents() {
 		return fInput.fAnnotations != null && fInput.fAnnotations.length > 0;
 	}
@@ -671,6 +686,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see org.eclipse.jface.text.IInformationControl#setSizeConstraints(int, int)
 	 */
+	@Override
 	public void setSizeConstraints(int maxWidth, int maxHeight) {
 		//fMaxWidth= maxWidth;
 		//fMaxHeight= maxHeight;
@@ -679,6 +695,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see org.eclipse.jface.text.IInformationControl#computeSizeHint()
 	 */
+	@Override
 	public Point computeSizeHint() {
 		return fShell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 	}
@@ -686,6 +703,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see IInformationControl#setLocation(Point)
 	 */
+	@Override
 	public void setLocation(Point location) {
 		fShell.setLocation(location);
 	}
@@ -693,6 +711,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see IInformationControl#setSize(int, int)
 	 */
+	@Override
 	public void setSize(int width, int height) {
 		fShell.setSize(width, height);
 	}
@@ -700,6 +719,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see IInformationControl#addDisposeListener(DisposeListener)
 	 */
+	@Override
 	public void addDisposeListener(DisposeListener listener) {
 		fShell.addDisposeListener(listener);
 	}
@@ -707,6 +727,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see IInformationControl#removeDisposeListener(DisposeListener)
 	 */
+	@Override
 	public void removeDisposeListener(DisposeListener listener) {
 		fShell.removeDisposeListener(listener);
 	}
@@ -714,6 +735,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see IInformationControl#setForegroundColor(Color)
 	 */
+	@Override
 	public void setForegroundColor(Color foreground) {
 		fComposite.setForeground(foreground);
 	}
@@ -721,6 +743,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see IInformationControl#setBackgroundColor(Color)
 	 */
+	@Override
 	public void setBackgroundColor(Color background) {
 		fComposite.setBackground(background);
 	}
@@ -728,6 +751,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see IInformationControl#isFocusControl()
 	 */
+	@Override
 	public boolean isFocusControl() {
 		return fShell.getDisplay().getActiveShell() == fShell;
 	}
@@ -735,6 +759,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see IInformationControl#setFocus()
 	 */
+	@Override
 	public void setFocus() {
 		fShell.forceFocus();
 	}
@@ -742,6 +767,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see IInformationControl#addFocusListener(FocusListener)
 	 */
+	@Override
 	public void addFocusListener(FocusListener listener) {
 		fShell.addFocusListener(listener);
 	}
@@ -749,6 +775,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see IInformationControl#removeFocusListener(FocusListener)
 	 */
+	@Override
 	public void removeFocusListener(FocusListener listener) {
 		fShell.removeFocusListener(listener);
 	}
@@ -770,7 +797,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 
 		StyleRange[] ranges= text.getStyleRanges(region.getOffset(), region.getLength());
 
-		List<StyleRange> undoRanges= new ArrayList<StyleRange>(ranges.length);
+		List<StyleRange> undoRanges= new ArrayList<>(ranges.length);
 		for (int i= 0; i < ranges.length; i++) {
 			undoRanges.add((StyleRange)ranges[i].clone());
 		}
@@ -808,7 +835,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 		}
 
 		// create modified styles (with background)
-		List<StyleRange> shadedRanges= new ArrayList<StyleRange>(undoRanges.size());
+		List<StyleRange> shadedRanges= new ArrayList<>(undoRanges.size());
 		for (Iterator<StyleRange> it= undoRanges.iterator(); it.hasNext(); ) {
 			StyleRange range= (StyleRange) it.next().clone();
 			shadedRanges.add(range);
@@ -858,6 +885,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	 * @see org.eclipse.jface.text.IInformationControlExtension5#computeSizeConstraints(int, int)
 	 * @since 3.4
 	 */
+	@Override
 	public Point computeSizeConstraints(int widthInChars, int heightInChars) {
 		return null;
 	}
@@ -866,6 +894,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	 * @see org.eclipse.jface.text.IInformationControlExtension5#containsControl(org.eclipse.swt.widgets.Control)
 	 * @since 3.4
 	 */
+	@Override
 	public boolean containsControl(Control control) {
 		do {
 			if (control == fShell)
@@ -881,6 +910,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	 * @see org.eclipse.jface.text.IInformationControlExtension5#getInformationPresenterControlCreator()
 	 * @since 3.4
 	 */
+	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		return null;
 	}
@@ -888,6 +918,7 @@ public class AnnotationExpansionControl implements IInformationControl, IInforma
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlExtension5#isVisible()
 	 */
+	@Override
 	public boolean isVisible() {
 		return fShell != null && !fShell.isDisposed() && fShell.isVisible();
 	}

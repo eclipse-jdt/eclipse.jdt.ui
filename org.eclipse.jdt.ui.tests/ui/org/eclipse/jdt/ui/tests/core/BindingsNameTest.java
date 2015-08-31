@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,10 +11,6 @@
 package org.eclipse.jdt.ui.tests.core;
 
 import java.util.List;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -34,11 +30,15 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 /**
   */
 public class BindingsNameTest extends TestCase {
 
-	private static final Class THIS= BindingsNameTest.class;
+	private static final Class<BindingsNameTest> THIS= BindingsNameTest.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -56,6 +56,7 @@ public class BindingsNameTest extends TestCase {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.addRTJar13(fJProject1);
@@ -84,6 +85,7 @@ public class BindingsNameTest extends TestCase {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 	}
@@ -96,11 +98,11 @@ public class BindingsNameTest extends TestCase {
 		TypeDeclaration typeDeclaration= (TypeDeclaration) astRoot.types().get(0);
 		MethodDeclaration methodDeclaration= typeDeclaration.getMethods()[0];
 
-		List params= methodDeclaration.parameters();
+		List<SingleVariableDeclaration> params= methodDeclaration.parameters();
 		String[] fullNames= new String[params.size()];
 
 		for (int i= 0; i < params.size(); i++) {
-			SingleVariableDeclaration elem= (SingleVariableDeclaration) params.get(i);
+			SingleVariableDeclaration elem= params.get(i);
 			IVariableBinding varBinding= elem.resolveBinding();
 			fullNames[i]= Bindings.getFullyQualifiedName(varBinding.getType());
 		}
@@ -123,11 +125,11 @@ public class BindingsNameTest extends TestCase {
 		TypeDeclaration typeDeclaration= (TypeDeclaration) astRoot.types().get(0);
 		MethodDeclaration methodDeclaration= typeDeclaration.getMethods()[0];
 
-		List params= methodDeclaration.parameters();
+		List<SingleVariableDeclaration> params= methodDeclaration.parameters();
 		String[] fullNames= new String[params.size()];
 
 		for (int i= 0; i < params.size(); i++) {
-			SingleVariableDeclaration elem= (SingleVariableDeclaration) params.get(i);
+			SingleVariableDeclaration elem= params.get(i);
 			IVariableBinding varBinding= elem.resolveBinding();
 			fullNames[i]= Bindings.getTypeQualifiedName(varBinding.getType());
 		}
@@ -150,11 +152,11 @@ public class BindingsNameTest extends TestCase {
 		TypeDeclaration typeDeclaration= (TypeDeclaration) astRoot.types().get(0);
 		MethodDeclaration methodDeclaration= typeDeclaration.getMethods()[0];
 
-		List params= methodDeclaration.parameters();
+		List<SingleVariableDeclaration> params= methodDeclaration.parameters();
 		String[][] fullNames= new String[params.size()][];
 
 		for (int i= 0; i < params.size(); i++) {
-			SingleVariableDeclaration elem= (SingleVariableDeclaration) params.get(i);
+			SingleVariableDeclaration elem= params.get(i);
 			IVariableBinding varBinding= elem.resolveBinding();
 			fullNames[i]= Bindings.getAllNameComponents(varBinding.getType());
 		}
@@ -177,11 +179,11 @@ public class BindingsNameTest extends TestCase {
 		TypeDeclaration typeDeclaration= (TypeDeclaration) astRoot.types().get(0);
 		MethodDeclaration methodDeclaration= typeDeclaration.getMethods()[0];
 
-		List params= methodDeclaration.parameters();
+		List<SingleVariableDeclaration> params= methodDeclaration.parameters();
 		String[][] fullNames= new String[params.size()][];
 
 		for (int i= 0; i < params.size(); i++) {
-			SingleVariableDeclaration elem= (SingleVariableDeclaration) params.get(i);
+			SingleVariableDeclaration elem= params.get(i);
 			IVariableBinding varBinding= elem.resolveBinding();
 			fullNames[i]= Bindings.getNameComponents(varBinding.getType());
 		}

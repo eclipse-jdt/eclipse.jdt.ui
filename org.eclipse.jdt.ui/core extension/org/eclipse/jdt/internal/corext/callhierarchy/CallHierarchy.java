@@ -82,7 +82,7 @@ public class CallHierarchy {
             }
         }
 
-        return new ArrayList<IJavaElement>(0);
+        return new ArrayList<>(0);
     }
 
     public Collection<IJavaElement> getInterfaceMethods(IMethod method) {
@@ -96,7 +96,7 @@ public class CallHierarchy {
             }
         }
 
-        return new ArrayList<IJavaElement>(0);
+        return new ArrayList<>(0);
     }
 
     public MethodWrapper[] getCallerRoots(IMember[] members) {
@@ -108,7 +108,7 @@ public class CallHierarchy {
     }
 
 	private MethodWrapper[] getRoots(IMember[] members, boolean callers) {
-		ArrayList<MethodWrapper> roots= new ArrayList<MethodWrapper>();
+		ArrayList<MethodWrapper> roots= new ArrayList<>();
     	for (int i= 0; i < members.length; i++) {
 			IMember member= members[i];
 			if (member instanceof IType) {
@@ -269,7 +269,7 @@ public class CallHierarchy {
 	 * @return an array of {@link StringMatcher} objects
 	 */
     private static StringMatcher[] parseList(String listString) {
-        List<StringMatcher> list = new ArrayList<StringMatcher>(10);
+        List<StringMatcher> list = new ArrayList<>(10);
         StringTokenizer tokenizer = new StringTokenizer(listString, ","); //$NON-NLS-1$
 
         while (tokenizer.hasMoreTokens()) {

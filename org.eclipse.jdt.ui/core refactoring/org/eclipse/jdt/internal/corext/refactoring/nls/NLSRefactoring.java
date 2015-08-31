@@ -267,7 +267,7 @@ public class NLSRefactoring extends Refactoring {
 
 	private IFile[] getAllFilesToModify() {
 
-		List<IResource> files= new ArrayList<IResource>(2);
+		List<IResource> files= new ArrayList<>(2);
 		if (willModifySource()) {
 			IResource resource= fCu.getResource();
 			if (resource.exists()) {

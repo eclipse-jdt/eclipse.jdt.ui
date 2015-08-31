@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 
 public class AddImportTest extends CoreTests {
 
-	private static final Class THIS= AddImportTest.class;
+	private static final Class<AddImportTest> THIS= AddImportTest.class;
 
 	private IJavaProject fJProject1;
 
@@ -69,16 +69,18 @@ public class AddImportTest extends CoreTests {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
 		JavaProjectHelper.set15CompilerOptions(fJProject1);
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
 		JavaCore.setOptions(options);
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}

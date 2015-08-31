@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class TypeHierarchyTest extends TestCase {
 
-	private static final Class THIS= TypeHierarchyTest.class;
+	private static final Class<TypeHierarchyTest> THIS= TypeHierarchyTest.class;
 
 	private IJavaProject fJavaProject1;
 	private IJavaProject fJavaProject2;
@@ -55,11 +55,13 @@ public class TypeHierarchyTest extends TestCase {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJavaProject1= ProjectTestSetup.getProject();
 		fJavaProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
 	}
 
+	@Override
 	protected void tearDown () throws Exception {
 		JavaProjectHelper.clear(fJavaProject1, ProjectTestSetup.getDefaultClasspath());
 		JavaProjectHelper.delete(fJavaProject2);
@@ -108,6 +110,7 @@ public class TypeHierarchyTest extends TestCase {
 
 		ITypeHierarchy hierarchy= type2.newSupertypeHierarchy(null);
 		hierarchy.addTypeHierarchyChangedListener(new ITypeHierarchyChangedListener() {
+			@Override
 			public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
 				updateCount[0]++;
 			}
@@ -177,6 +180,7 @@ public class TypeHierarchyTest extends TestCase {
 		// create on type in working copy
 		ITypeHierarchy hierarchy= type2.newSupertypeHierarchy(null);
 		hierarchy.addTypeHierarchyChangedListener(new ITypeHierarchyChangedListener() {
+			@Override
 			public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
 				updateCount[0]++;
 			}
@@ -246,6 +250,7 @@ public class TypeHierarchyTest extends TestCase {
 		// create on type in primary working copy
 		ITypeHierarchy hierarchy= type2.newSupertypeHierarchy(null);
 		hierarchy.addTypeHierarchyChangedListener(new ITypeHierarchyChangedListener() {
+			@Override
 			public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
 				updateCount[0]++;
 			}

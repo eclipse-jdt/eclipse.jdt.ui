@@ -48,7 +48,7 @@ public class OptionsConfigurationBlockTest extends TestCase {
 	 */
 	public void testKeysForOptions() throws Exception {
 		Field[] coreFields= JavaCore.class.getDeclaredFields();
-		HashMap coreFieldLookup= new HashMap();
+		HashMap<String, String> coreFieldLookup= new HashMap<>();
 		for (int i= 0; i < coreFields.length; i++) {
 			Field field= coreFields[i];
 			String name= field.getName();
@@ -65,9 +65,9 @@ public class OptionsConfigurationBlockTest extends TestCase {
 		}
 
 		// default visible classes:
-		Class codeAssistAdvancedConfigurationBlock= Class.forName("org.eclipse.jdt.internal.ui.preferences.CodeAssistAdvancedConfigurationBlock");
+		Class<?> codeAssistAdvancedConfigurationBlock= Class.forName("org.eclipse.jdt.internal.ui.preferences.CodeAssistAdvancedConfigurationBlock");
 		checkConfigurationBlock(codeAssistAdvancedConfigurationBlock, coreFieldLookup);
-		Class codeAssistConfigurationBlock= Class.forName("org.eclipse.jdt.internal.ui.preferences.CodeAssistConfigurationBlock");
+		Class<?> codeAssistConfigurationBlock= Class.forName("org.eclipse.jdt.internal.ui.preferences.CodeAssistConfigurationBlock");
 		checkConfigurationBlock(codeAssistConfigurationBlock, coreFieldLookup);
 
 		checkConfigurationBlock(ComplianceConfigurationBlock.class, coreFieldLookup);
@@ -88,7 +88,8 @@ public class OptionsConfigurationBlockTest extends TestCase {
 	 * @deprecated to hide deprecation warnings
 	 * @param coreFieldLookup lookup
 	 */
-	private void removeUnusedOptions(HashMap coreFieldLookup) {
+	@Deprecated
+	private void removeUnusedOptions(HashMap<String, String> coreFieldLookup) {
 		coreFieldLookup.keySet().removeAll(Arrays.asList(new String[] {
 				JavaCore.COMPILER_PB_INCONSISTENT_NULL_CHECK,
 				JavaCore.COMPILER_PB_INVALID_IMPORT,
@@ -113,7 +114,7 @@ public class OptionsConfigurationBlockTest extends TestCase {
 		}));
 	}
 
-	private void checkConfigurationBlock(Class configurationBlock, HashMap coreFieldLookup) throws Exception {
+	private void checkConfigurationBlock(Class<?> configurationBlock, HashMap<String, String> coreFieldLookup) throws Exception {
 		Method keysMethod;
 		try {
 			keysMethod= configurationBlock.getDeclaredMethod("getKeys");
@@ -126,7 +127,7 @@ public class OptionsConfigurationBlockTest extends TestCase {
 		}
 		keysMethod.setAccessible(true);
 		Key[] keys= (Key[]) (keysMethod.getParameterTypes().length > 0 ? keysMethod.invoke(null, Boolean.FALSE) : keysMethod.invoke(null));
-		HashSet<Key> keySet= new HashSet<Key>(Arrays.asList(keys));
+		HashSet<Key> keySet= new HashSet<>(Arrays.asList(keys));
 		
 		Field[] prefFields= configurationBlock.getDeclaredFields();
 		for (int i= 0; i < prefFields.length; i++) {

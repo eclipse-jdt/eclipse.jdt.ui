@@ -29,6 +29,7 @@ public class GapTextStorePerformanceTest extends TextStorePerformanceTest {
 		return new PerformanceTestSetup(test);
 	}
 
+	@Override
 	protected ITextStore createTextStore() {
 		return new GapTextStore(256, 4096, 0.1f); // watermark values from Document ctor
 	}

@@ -17,6 +17,7 @@ public class RootReference extends ReferencedObject {
 		super(object);
 	}
 
+	@Override
 	public ReferencedObject getReferenceHolder() {
 		return null;
 	}

@@ -46,6 +46,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		super();
 	}
 
+	@Override
 	public void createInitialLayout(IPageLayout layout) {
 		if (stackBrowsingViewsVertically())
 			createVerticalLayout(layout);

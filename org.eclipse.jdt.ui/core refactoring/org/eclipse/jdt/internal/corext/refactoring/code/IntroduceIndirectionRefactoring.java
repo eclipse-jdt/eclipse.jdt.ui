@@ -379,7 +379,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.IntroduceIndirectionRefactoring_checking_activation, 1);
-			fRewrites= new HashMap<ICompilationUnit, CompilationUnitRewrite>();
+			fRewrites= new HashMap<>();
 
 			// This refactoring has been invoked on
 			// (1) a TextSelection inside an ICompilationUnit or inside an IClassFile (definitely with source), or
@@ -506,7 +506,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		fIntermediaryTypeBinding= typeToBinding(fIntermediaryType, imRewrite.getRoot());
 
 		fAdjustor= new MemberVisibilityAdjustor(fIntermediaryType, fIntermediaryType);
-		fIntermediaryAdjustments= new HashMap<IMember, IncomingMemberVisibilityAdjustment>();
+		fIntermediaryAdjustments= new HashMap<>();
 
 		// check static method in non-static nested type
 		if (fIntermediaryTypeBinding.isNested() && !Modifier.isStatic(fIntermediaryTypeBinding.getModifiers()))
@@ -745,7 +745,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		final Map<String, String> arguments= new HashMap<String, String>();
+		final Map<String, String> arguments= new HashMap<>();
 		String project= null;
 		IJavaProject javaProject= fTargetMethod.getJavaProject();
 		if (javaProject != null)
@@ -784,7 +784,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	 */
 	private RefactoringStatus checkCanCreateIntermediaryMethod() throws JavaModelException {
 		// check if method already exists:
-		List<ITypeBinding> parameterBindings= new ArrayList<ITypeBinding>();
+		List<ITypeBinding> parameterBindings= new ArrayList<>();
 		if (!isStaticTarget())
 			parameterBindings.add(fIntermediaryFirstParameterType);
 		parameterBindings.addAll(Arrays.asList(fTargetMethodBinding.getParameterTypes()));
@@ -1113,7 +1113,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	 * Helper method for retrieving a *bottom-up* list of super type bindings
 	 */
 	private ITypeBinding[] getTypeAndAllSuperTypes(ITypeBinding type) {
-		List<ITypeBinding> result= new ArrayList<ITypeBinding>();
+		List<ITypeBinding> result= new ArrayList<>();
 		collectSuperTypes(type, result);
 		return result.toArray(new ITypeBinding[result.size()]);
 	}
@@ -1259,7 +1259,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	}
 
 	private IFile[] getAllFilesToModify() {
-		List<ICompilationUnit> cus= new ArrayList<ICompilationUnit>();
+		List<ICompilationUnit> cus= new ArrayList<>();
 		cus.addAll(Arrays.asList(fTextChangeManager.getAllCompilationUnits()));
 		return ResourceUtil.getFiles(cus.toArray(new ICompilationUnit[cus.size()]));
 	}
@@ -1324,7 +1324,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		if (isRewriteKept(whoToAdjust.getCompilationUnit()))
 			adjustments= fIntermediaryAdjustments;
 		else
-			adjustments= new HashMap<IMember, IncomingMemberVisibilityAdjustment>();
+			adjustments= new HashMap<>();
 
 		int existingAdjustments= adjustments.size();
 		addAdjustment(whoToAdjust, neededVisibility, adjustments);
@@ -1352,7 +1352,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			if (!isRewriteKept(whoToAdjust.getCompilationUnit())) {
 				CompilationUnitRewrite rewrite= new CompilationUnitRewrite(whoToAdjust.getCompilationUnit());
 				rewrite.setResolveBindings(false);
-				rewrites= new HashMap<ICompilationUnit, CompilationUnitRewrite>();
+				rewrites= new HashMap<>();
 				rewrites.put(whoToAdjust.getCompilationUnit(), rewrite);
 				status.merge(rewriteVisibility(adjustments, rewrites, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
 				rewrite.attachChange((CompilationUnitChange) fTextChangeManager.get(whoToAdjust.getCompilationUnit()), true, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));

@@ -37,9 +37,6 @@ public abstract class ViewerInputDropAdapter extends SelectionTransferDropAdapte
 
 	protected abstract void doInputView(Object inputElement);
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected int determineOperation(Object target, int operation, TransferData transferType, int operations) {
 
@@ -59,9 +56,6 @@ public abstract class ViewerInputDropAdapter extends SelectionTransferDropAdapte
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean performDrop(Object data) {
 		setSelectionFeedbackEnabled(true);
@@ -80,17 +74,11 @@ public abstract class ViewerInputDropAdapter extends SelectionTransferDropAdapte
 		return false;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean isEnabled(DropTargetEvent event) {
 		return true;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Object determineTarget(DropTargetEvent event) {
 		if (event.item == null)

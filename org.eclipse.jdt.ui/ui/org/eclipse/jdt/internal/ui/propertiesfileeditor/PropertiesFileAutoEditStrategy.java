@@ -68,10 +68,7 @@ public class PropertiesFileAutoEditStrategy implements IAutoEditStrategy {
 		fSourceViewer= sourceViewer;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jface.text.IAutoEditStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.DocumentCommand)
-	 */
+	@Override
 	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
 		showProposal(escape(command), document);
 	}
@@ -121,6 +118,7 @@ public class PropertiesFileAutoEditStrategy implements IAutoEditStrategy {
 			job.schedule(500);
 			final StyledText textWidget= fSourceViewer.getTextWidget();
 			textWidget.addVerifyKeyListener(new VerifyKeyListener() {
+				@Override
 				public void verifyKey(VerifyEvent event) {
 					job.cancel();
 					textWidget.removeVerifyKeyListener(this);
@@ -129,8 +127,10 @@ public class PropertiesFileAutoEditStrategy implements IAutoEditStrategy {
 
 			final IDocumentListener documentListener= new IDocumentListener() {
 				private boolean pasteComplete= false;
+				@Override
 				public void documentAboutToBeChanged(DocumentEvent event) {
 				}
+				@Override
 				public void documentChanged(DocumentEvent event) {
 					if (pasteComplete) {
 						job.cancel();

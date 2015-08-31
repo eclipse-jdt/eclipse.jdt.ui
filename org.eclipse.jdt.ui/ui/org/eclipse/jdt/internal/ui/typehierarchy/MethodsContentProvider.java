@@ -58,9 +58,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see IStructuredContentProvider#providesWorkingCopies()
-	 */
+	@Override
 	public boolean providesWorkingCopies() {
 		return true;
 	}
@@ -85,11 +83,12 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 	/*
 	 * @see IStructuredContentProvider#getElements
 	 */
+	@Override
 	public Object[] getElements(Object element) {
 		if (element instanceof IType) {
 			IType type= (IType)element;
 
-			List<Object> res= new ArrayList<Object>();
+			List<Object> res= new ArrayList<>();
 			try {
 				ITypeHierarchy hierarchy= fHierarchyLifeCycle.getHierarchy();
 				if (fShowInheritedMethods && hierarchy != null) {
@@ -122,6 +121,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 	/*
 	 * @see IContentProvider#inputChanged
 	 */
+	@Override
 	public void inputChanged(Viewer input, Object oldInput, Object newInput) {
 		Assert.isTrue(input instanceof TableViewer);
 
@@ -131,6 +131,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 	/*
 	 * @see IContentProvider#dispose
 	 */
+	@Override
 	public void dispose() {
 	}
 

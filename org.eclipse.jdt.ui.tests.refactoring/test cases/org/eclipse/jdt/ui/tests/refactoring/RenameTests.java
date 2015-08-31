@@ -16,7 +16,7 @@ import junit.framework.TestSuite;
 
 public class RenameTests {
 
-	private static final Class clazz= RenameTests.class;
+	private static final Class<RenameTests> clazz= RenameTests.class;
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite(clazz.getName());

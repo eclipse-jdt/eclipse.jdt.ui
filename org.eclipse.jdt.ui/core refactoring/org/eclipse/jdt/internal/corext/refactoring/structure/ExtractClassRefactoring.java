@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -174,7 +174,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		public RefactoringStatus validateFields() {
 			RefactoringStatus status= new RefactoringStatus();
 			Field[] fields= fDescriptor.getFields();
-			Set<String> names= new HashSet<String>();
+			Set<String> names= new HashSet<>();
 			for (int i= 0; i < fields.length; i++) {
 				Field field= fields[i];
 				if (field.isCreateField()) {
@@ -313,7 +313,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			pm.worked(1);
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
-			fVariables= new LinkedHashMap<String, FieldInfo>();
+			fVariables= new LinkedHashMap<>();
 			if (fields.length == 0) {
 				result.addFatalError(RefactoringCoreMessages.ExtractClassRefactoring_error_no_usable_fields, JavaStatusContext.create(type));
 				return result;
@@ -384,7 +384,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		try {
 			ICompilationUnit typeCU= fDescriptor.getType().getCompilationUnit();
 			IPackageFragmentRoot packageRoot= (IPackageFragmentRoot) typeCU.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-			ArrayList<Change> changes= new ArrayList<Change>();
+			ArrayList<Change> changes= new ArrayList<>();
 
 			changes.addAll(createParameterObject(fParameterObjectFactory, packageRoot));
 			fChangeManager.manage(typeCU, fBaseCURewrite.createChange(true, pm));
@@ -411,7 +411,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractClassRefactoring_comment_package, BasicElementLabels.getJavaElementName(fDescriptor.getPackage())));
 
 		Field[] fields= fDescriptor.getFields();
-		ArrayList<String> strings= new ArrayList<String>();
+		ArrayList<String> strings= new ArrayList<>();
 		for (int i= 0; i < fields.length; i++) {
 			Field field= fields[i];
 			if (field.isCreateField()) {
@@ -487,7 +487,7 @@ public class ExtractClassRefactoring extends Refactoring {
 				paramClass.modifiers().add(rewrite.getAST().newModifier(ModifierKeyword.STATIC_KEYWORD));
 			}
 			listRewrite.insertFirst(paramClass, fBaseCURewrite.createGroupDescription(RefactoringCoreMessages.ExtractClassRefactoring_group_insert_parameter));
-			return new ArrayList<ResourceChange>(); //Change will be generated later for fBaseCURewrite
+			return new ArrayList<>(); //Change will be generated later for fBaseCURewrite
 		}
 
 	}
@@ -508,7 +508,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		pof.setEnclosingType(fDescriptor.getType().getFullyQualifiedName('.'));
 		pof.setCreateGetter(fDescriptor.isCreateGetterSetter());
 		pof.setCreateSetter(fDescriptor.isCreateGetterSetter());
-		List<ParameterInfo> variables= new ArrayList<ParameterInfo>();
+		List<ParameterInfo> variables= new ArrayList<>();
 		for (Iterator<FieldInfo> iterator= fVariables.values().iterator(); iterator.hasNext();) {
 			FieldInfo info= iterator.next();
 			boolean createField= isCreateField(info);
@@ -541,7 +541,7 @@ public class ExtractClassRefactoring extends Refactoring {
 			pm.worked(10);
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
-			List<IField> validIFields= new ArrayList<IField>();
+			List<IField> validIFields= new ArrayList<>();
 			for (Iterator<FieldInfo> iterator= fVariables.values().iterator(); iterator.hasNext();) {
 				FieldInfo info= iterator.next();
 				if (isCreateField(info))
@@ -857,6 +857,7 @@ public class ExtractClassRefactoring extends Refactoring {
 
 	private void importNodeTypes(ASTNode node, final CompilationUnitRewrite cuRewrite) {
 		ASTResolving.visitAllBindings(node, new TypeBindingVisitor() {
+			@Override
 			public boolean visit(ITypeBinding nodeBinding) {
 				ParameterObjectFactory.importBinding(nodeBinding, cuRewrite);
 				return false;
@@ -874,13 +875,11 @@ public class ExtractClassRefactoring extends Refactoring {
 		return RefactoringCoreMessages.ExtractClassRefactoring_refactoring_name;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ltk.core.refactoring.Refactoring#getAdapter(java.lang.Class)
-	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		if (adapter == ExtractClassDescriptorVerification.class) {
-			return fVerification;
+			return (T) fVerification;
 		}
 		return super.getAdapter(adapter);
 	}

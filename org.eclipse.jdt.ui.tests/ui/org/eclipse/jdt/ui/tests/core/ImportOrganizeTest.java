@@ -46,7 +46,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 public class ImportOrganizeTest extends CoreTests {
 
-	private static final Class THIS= ImportOrganizeTest.class;
+	private static final Class<ImportOrganizeTest> THIS= ImportOrganizeTest.class;
 
 	private IJavaProject fJProject1;
 
@@ -63,15 +63,17 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
 		JavaCore.setOptions(options);
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		setOrganizeImportSettings(null, 99, 99, fJProject1);
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
@@ -79,6 +81,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 	protected IChooseImportQuery createQuery(final String name, final String[] choices, final int[] nEntries) {
 		return new IChooseImportQuery() {
+			@Override
 			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
 				assertTrue(name + "-query-nchoices1", choices.length == openChoices.length);
 				assertTrue(name + "-query-nchoices2", nEntries.length == openChoices.length);

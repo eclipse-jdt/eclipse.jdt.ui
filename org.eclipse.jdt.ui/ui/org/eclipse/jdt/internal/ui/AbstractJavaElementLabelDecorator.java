@@ -30,11 +30,9 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 
 	private class DecoratorElementChangeListener implements IElementChangedListener {
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void elementChanged(ElementChangedEvent event) {
-			List<IJavaElement> changed= new ArrayList<IJavaElement>();
+			List<IJavaElement> changed= new ArrayList<>();
 			processDelta(event.getDelta(), changed);
 			if (changed.size() == 0)
 				return;
@@ -47,9 +45,7 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 	private ListenerList fListeners;
 	private IElementChangedListener fChangeListener;
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void addListener(ILabelProviderListener listener) {
 		if (fChangeListener == null) {
 			fChangeListener= new DecoratorElementChangeListener();
@@ -63,9 +59,7 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 		fListeners.add(listener);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void dispose() {
 		if (fChangeListener != null) {
 			JavaCore.removeElementChangedListener(fChangeListener);
@@ -80,16 +74,12 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean isLabelProperty(Object element, String property) {
 		return false;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void removeListener(ILabelProviderListener listener) {
 		if (fListeners == null)
 			return;
@@ -112,9 +102,7 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public abstract void decorate(Object element, IDecoration decoration);
 
 	protected abstract void processDelta(IJavaElementDelta delta, List<IJavaElement> result);

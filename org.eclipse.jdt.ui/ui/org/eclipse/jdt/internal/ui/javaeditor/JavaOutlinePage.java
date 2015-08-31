@@ -161,6 +161,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			 */
 			protected class ElementChangedListener implements IElementChangedListener {
 
+				@Override
 				public void elementChanged(final ElementChangedEvent e) {
 
 					if (getControl() == null)
@@ -169,6 +170,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					Display d= getControl().getDisplay();
 					if (d != null) {
 						d.asyncExec(new Runnable() {
+							@Override
 							public void run() {
 								ICompilationUnit cu= (ICompilationUnit) fInput;
 								IJavaElement base= cu;
@@ -241,6 +243,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					return JavaEditorMessages.JavaOutlinePage_error_NoTopLevelType;
 				}
 
+				@Override
 				@SuppressWarnings("unchecked")
 				public <T> T getAdapter(Class<T> clas) {
 					if (clas == IWorkbenchAdapter.class)
@@ -279,7 +282,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					if (!initializers)
 						return children;
 
-					Vector<IJavaElement> v= new Vector<IJavaElement>();
+					Vector<IJavaElement> v= new Vector<>();
 					for (int i= 0; i < children.length; i++) {
 						if (matches(children[i]))
 							continue;
@@ -291,6 +294,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					return result;
 				}
 
+				@Override
 				public Object[] getChildren(Object parent) {
 					if (parent instanceof IParent) {
 						IParent c= (IParent) parent;
@@ -308,6 +312,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					return NO_CHILDREN;
 				}
 
+				@Override
 				public Object[] getElements(Object parent) {
 					if (fTopLevelTypeOnly) {
 						if (parent instanceof ITypeRoot) {
@@ -322,6 +327,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					return getChildren(parent);
 				}
 
+				@Override
 				public Object getParent(Object child) {
 					if (child instanceof IJavaElement) {
 						IJavaElement e= (IJavaElement) child;
@@ -330,6 +336,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					return null;
 				}
 
+				@Override
 				public boolean hasChildren(Object parent) {
 					if (parent instanceof IParent) {
 						IParent c= (IParent) parent;
@@ -348,6 +355,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					return false;
 				}
 
+				@Override
 				public void dispose() {
 					if (fListener != null) {
 						JavaCore.removeElementChangedListener(fListener);
@@ -358,6 +366,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				/*
 				 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 				 */
+				@Override
 				public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 					boolean isCU= (newInput instanceof ICompilationUnit);
 
@@ -492,6 +501,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				private void valueChanged(final boolean on, boolean store) {
 					setChecked(on);
 					BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
+						@Override
 						public void run() {
 							if (on) {
 								fOutlineViewer.setComparator(fComparator);
@@ -578,13 +588,17 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		 * @since 3.2
 		 */
 		private static final class EmptySelectionProvider implements ISelectionProvider {
+			@Override
 			public void addSelectionChangedListener(ISelectionChangedListener listener) {
 			}
+			@Override
 			public ISelection getSelection() {
 				return StructuredSelection.EMPTY;
 			}
+			@Override
 			public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 			}
+			@Override
 			public void setSelection(ISelection selection) {
 			}
 		}
@@ -625,7 +639,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				try {
 					IDocument document= javaSourceViewer.getDocument();
 					IRegion[] regions= getOrderedRegionsForNonOverlappingElements(selection, document);
-					Map<String, String> formatterSettings= new HashMap<String, String>(compilationUnit.getJavaProject().getOptions(true));
+					Map<String, String> formatterSettings= new HashMap<>(compilationUnit.getJavaProject().getOptions(true));
 					String content= compilationUnit.getBuffer().getContents();
 					String lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
 
@@ -656,7 +670,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		private IRegion[] getOrderedRegionsForNonOverlappingElements(IStructuredSelection selection, IDocument document) {
 			List<?> allElements= selection.toList();
 			Iterator<?> iterator= selection.iterator();
-			ArrayList<IRegion> regions= new ArrayList<IRegion>(selection.size());
+			ArrayList<IRegion> regions= new ArrayList<>(selection.size());
 			while (iterator.hasNext()) {
 				Object element= iterator.next();
 				if (!isElementOverlapping((IJavaElement)element, allElements)) {
@@ -664,6 +678,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				}
 			}
 			Comparator<IRegion> comparator= new Comparator<IRegion>() {
+				@Override
 				public int compare(IRegion region0, IRegion region1) {
 					int region1Offset= region0.getOffset();
 					int region2Offset= region1.getOffset();
@@ -760,7 +775,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 	private ListenerList fSelectionChangedListeners= new ListenerList(ListenerList.IDENTITY);
 	private ListenerList fPostSelectionChangedListeners= new ListenerList(ListenerList.IDENTITY);
-	private Hashtable<String, IAction> fActions= new Hashtable<String, IAction>();
+	private Hashtable<String, IAction> fActions= new Hashtable<>();
 
 	private TogglePresentationAction fTogglePresentation;
 
@@ -815,6 +830,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		fTogglePresentation.setEditor(editor);
 
 		fPropertyChangeListener= new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				doPropertyChange(event);
 			}
@@ -841,6 +857,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	/*
 	 * @see ISelectionProvider#addSelectionChangedListener(ISelectionChangedListener)
 	 */
+	@Override
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 		if (fOutlineViewer != null)
 			fOutlineViewer.addSelectionChangedListener(listener);
@@ -851,6 +868,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	/*
 	 * @see ISelectionProvider#removeSelectionChangedListener(ISelectionChangedListener)
 	 */
+	@Override
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 		if (fOutlineViewer != null)
 			fOutlineViewer.removeSelectionChangedListener(listener);
@@ -861,6 +879,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	/*
 	 * @see ISelectionProvider#setSelection(ISelection)
 	 */
+	@Override
 	public void setSelection(ISelection selection) {
 		if (fOutlineViewer != null)
 			fOutlineViewer.setSelection(selection);
@@ -869,6 +888,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	/*
 	 * @see ISelectionProvider#getSelection()
 	 */
+	@Override
 	public ISelection getSelection() {
 		if (fOutlineViewer == null)
 			return StructuredSelection.EMPTY;
@@ -878,6 +898,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	/*
 	 * @see org.eclipse.jface.text.IPostSelectionProvider#addPostSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
 	 */
+	@Override
 	public void addPostSelectionChangedListener(ISelectionChangedListener listener) {
 		if (fOutlineViewer != null)
 			fOutlineViewer.addPostSelectionChangedListener(listener);
@@ -888,6 +909,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	/*
 	 * @see org.eclipse.jface.text.IPostSelectionProvider#removePostSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
 	 */
+	@Override
 	public void removePostSelectionChangedListener(ISelectionChangedListener listener) {
 		if (fOutlineViewer != null)
 			fOutlineViewer.removePostSelectionChangedListener(listener);
@@ -954,6 +976,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		MenuManager manager= new MenuManager(fContextMenuID, fContextMenuID);
 		manager.setRemoveAllWhenShown(true);
 		manager.addMenuListener(new IMenuListener() {
+			@Override
 			public void menuAboutToShow(IMenuManager m) {
 				contextMenuAboutToShow(m);
 			}
@@ -1146,6 +1169,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		return fActions.get(actionID);
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Class<T> key) {
 		if (key == IShowInSource.class) {
@@ -1153,6 +1177,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		}
 		if (key == IShowInTargetList.class) {
 			return (T) new IShowInTargetList() {
+				@Override
 				public String[] getShowInTargetIds() {
 					return new String[] { JavaUI.ID_PACKAGES };
 				}
@@ -1239,6 +1264,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	 */
 	protected IShowInSource getShowInSource() {
 		return new IShowInSource() {
+			@Override
 			public ShowInContext getShowInContext() {
 				return new ShowInContext(
 					null,
@@ -1254,6 +1280,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	 */
 	protected IShowInTarget getShowInTarget() {
 		return new IShowInTarget() {
+			@Override
 			public boolean show(ShowInContext context) {
 				ISelection sel= context.getSelection();
 				if (sel instanceof ITextSelection) {

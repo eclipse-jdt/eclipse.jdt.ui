@@ -262,7 +262,7 @@ public class MethodsViewer extends ProblemTableViewer {
 		List<?> oldSelections= SelectionUtil.toList(invalidSelection);
 		List<?> newSelections= SelectionUtil.toList(newSelection);
 		if (!oldSelections.isEmpty()) {
-			ArrayList<Object> newSelectionElements= new ArrayList<Object>(newSelections);
+			ArrayList<Object> newSelectionElements= new ArrayList<>(newSelections);
 			try {
 				Object[] currElements= getFilteredChildren(getInput());
 				for (int i= 0; i < oldSelections.size(); i++) {

@@ -67,9 +67,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 	private IPartService fPartService;
 	private RetargetAction[] fRetargetActions;
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Menu getMenu(Menu parent) {
 		setMenu(new Menu(parent));
 		fillMenu(fMenu);
@@ -77,9 +75,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 		return fMenu;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Menu getMenu(Control parent) {
 		setMenu(new Menu(parent));
 		fillMenu(fMenu);
@@ -101,9 +97,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 		});
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void dispose() {
 		setMenu(null);
 		disposeSubmenuActions();
@@ -132,9 +126,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 		fPartService= null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void init(IWorkbenchWindow window) {
 		disposeSubmenuActions(); // paranoia code: double initialization should not happen
 		if (window != null) {
@@ -151,9 +143,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void run(IAction a) {
 		if (fRetargetActions == null)
 			return;
@@ -177,7 +167,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 			selection= activePart.getSite().getSelectionProvider().getSelection();
 		}
 
-		final ArrayList<IAction> activeActions= new ArrayList<IAction>(fRetargetActions.length);
+		final ArrayList<IAction> activeActions= new ArrayList<>(fRetargetActions.length);
 		for (int i= 0; i < fRetargetActions.length; i++) {
 			RetargetAction action= fRetargetActions[i];
 			IAction actionHandler= action.getActionHandler();
@@ -233,9 +223,7 @@ public class OccurrencesSearchMenuAction implements IWorkbenchWindowPulldownDele
 	}
 
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 	}
 

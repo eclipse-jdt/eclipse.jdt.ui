@@ -25,10 +25,12 @@ public class RefactoringAdapterFactory implements IAdapterFactory {
 		TextEditChangeNode.class
 	};
 
+	@Override
 	public Class<?>[] getAdapterList() {
 		return ADAPTER_LIST;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Object object, Class<T> key) {
 		if (!TextEditChangeNode.class.equals(key))

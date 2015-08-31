@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class AddUnimplementedConstructorsTest extends CoreTests {
 
-	private static final Class THIS= AddUnimplementedConstructorsTest.class;
+	private static final Class<AddUnimplementedConstructorsTest> THIS= AddUnimplementedConstructorsTest.class;
 
 	public static Test suite() {
 		return setUpTest(new TestSuite(THIS));
@@ -119,7 +119,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	}
 
 	private void initCodeTemplates() {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "999");
@@ -148,10 +148,12 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	/**
 	 * Creates a new test Java project.
 	 */
+	@Override
 	protected void setUp() {
 		initCodeTemplates();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJavaProject);
 		fJavaProject= null;

@@ -93,7 +93,7 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	}
 
 	private INameUpdating getNameUpdating() {
-		return (INameUpdating)getRefactoring().getAdapter(INameUpdating.class);
+		return getRefactoring().getAdapter(INameUpdating.class);
 	}
 
 	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {

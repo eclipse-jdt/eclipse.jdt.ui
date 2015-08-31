@@ -27,8 +27,8 @@ import org.eclipse.jdt.ui.text.IColorManagerExtension;
  */
 public class JavaColorManager implements IColorManager, IColorManagerExtension {
 
-	protected Map<String, RGB> fKeyTable= new HashMap<String, RGB>(10);
-	protected Map<Display, Map<RGB, Color>> fDisplayTable= new HashMap<Display, Map<RGB, Color>>(2);
+	protected Map<String, RGB> fKeyTable= new HashMap<>(10);
+	protected Map<Display, Map<RGB, Color>> fDisplayTable= new HashMap<>(2);
 
 	/**
 	 * Flag which tells if the colors are automatically disposed when
@@ -74,6 +74,7 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 	/*
 	 * @see IColorManager#getColor(RGB)
 	 */
+	@Override
 	public Color getColor(RGB rgb) {
 
 		if (rgb == null)
@@ -82,10 +83,11 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 		final Display display= Display.getCurrent();
 		Map<RGB, Color> colorTable= fDisplayTable.get(display);
 		if (colorTable == null) {
-			colorTable= new HashMap<RGB, Color>(10);
+			colorTable= new HashMap<>(10);
 			fDisplayTable.put(display, colorTable);
 			if (fAutoDisposeOnDisplayDispose) {
 				display.disposeExec(new Runnable() {
+					@Override
 					public void run() {
 						dispose(display);
 					}
@@ -105,6 +107,7 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 	/*
 	 * @see IColorManager#dispose
 	 */
+	@Override
 	public void dispose() {
 		if (!fAutoDisposeOnDisplayDispose)
 			dispose(Display.getCurrent());
@@ -113,6 +116,7 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 	/*
 	 * @see IColorManager#getColor(String)
 	 */
+	@Override
 	public Color getColor(String key) {
 
 		if (key == null)
@@ -125,6 +129,7 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 	/*
 	 * @see IColorManagerExtension#bindColor(String, RGB)
 	 */
+	@Override
 	public void bindColor(String key, RGB rgb) {
 		Object value= fKeyTable.get(key);
 		if (value != null)
@@ -136,6 +141,7 @@ public class JavaColorManager implements IColorManager, IColorManagerExtension {
 	/*
 	 * @see IColorManagerExtension#unbindColor(String)
 	 */
+	@Override
 	public void unbindColor(String key) {
 		fKeyTable.remove(key);
 	}

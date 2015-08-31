@@ -35,7 +35,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 public class JavaElementLabelsTest18 extends CoreTests {
 
-	private static final Class THIS= JavaElementLabelsTest18.class;
+	private static final Class<JavaElementLabelsTest18> THIS= JavaElementLabelsTest18.class;
 
 	private IJavaProject fJProject1;
 
@@ -51,6 +51,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		return new Java18ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= Java18ProjectTestSetup.getProject();
 
@@ -58,6 +59,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}

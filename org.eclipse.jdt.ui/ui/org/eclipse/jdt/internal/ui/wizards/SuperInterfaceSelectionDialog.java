@@ -79,26 +79,17 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 		setStatusLineAboveButtons(true);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.dialogs.SelectionDialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, ADD_ID, NewWizardMessages.SuperInterfaceSelectionDialog_addButton_label, true);
 		super.createButtonsForButtonBar(parent);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#getDialogBoundsSettings()
-	 */
 	@Override
 	protected IDialogSettings getDialogBoundsSettings() {
 		return JavaPlugin.getDefault().getDialogSettingsSection("DialogBounds_SuperInterfaceSelectionDialog"); //$NON-NLS-1$
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.dialogs.SelectionStatusDialog#updateButtonsEnableState(org.eclipse.core.runtime.IStatus)
-	 */
 	@Override
 	protected void updateButtonsEnableState(IStatus status) {
 		super.updateButtonsEnableState(status);
@@ -107,9 +98,6 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 			addButton.setEnabled(!status.matches(IStatus.ERROR));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.window.Window#handleShellCloseEvent()
-	 */
 	@Override
 	protected void handleShellCloseEvent() {
 		super.handleShellCloseEvent();
@@ -117,18 +105,12 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 		fTypeWizardPage.setSuperInterfaces(fOldContent, true);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#cancelPressed()
-	 */
 	@Override
 	protected void cancelPressed() {
 		fTypeWizardPage.setSuperInterfaces(fOldContent, true);
 		super.cancelPressed();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
-	 */
 	@Override
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == ADD_ID) {
@@ -138,9 +120,6 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.dialogs.SelectionStatusDialog#okPressed()
-	 */
 	@Override
 	protected void okPressed() {
 		addSelectedInterfaces();
@@ -179,17 +158,11 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 		return SearchEngine.createJavaSearchScope(new IJavaProject[] { p });
 	}
 
-	/*(non-Javadoc)
-	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#handleDoubleClick()
-	 */
 	@Override
 	protected void handleDoubleClick() {
 		buttonPressed(ADD_ID);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.dialogs.FilteredItemsSelectionDialog#handleSelected(org.eclipse.jface.viewers.StructuredSelection)
-	 */
 	@Override
 	protected void handleSelected(StructuredSelection selection) {
 		super.handleSelected(selection);
@@ -212,9 +185,6 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog2#configureShell(org.eclipse.swt.widgets.Shell)
-	 */
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);

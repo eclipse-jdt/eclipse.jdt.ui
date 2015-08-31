@@ -104,7 +104,7 @@ public class HTMLTidyTest extends TestCase {
 	}
 
 	private StringMatcher[] getIgnores() throws IOException {
-		ArrayList matchers= new ArrayList();
+		ArrayList<StringMatcher> matchers= new ArrayList<>();
 		InputStream is= getClass().getResourceAsStream("ignoreFiles.txt");
 		BufferedReader reader= new BufferedReader(new InputStreamReader(is));
 		while (reader.ready()) {
@@ -123,7 +123,7 @@ public class HTMLTidyTest extends TestCase {
 				matchers.add(new StringMatcher(line, true, false));
 			}
 		}
-		return (StringMatcher[]) matchers.toArray(new StringMatcher[matchers.size()]);
+		return matchers.toArray(new StringMatcher[matchers.size()]);
 	}
 
 	private boolean isIgnored(File file) {

@@ -33,11 +33,12 @@ import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
 public class TestCopyParticipantSingle extends CopyParticipant {
 
-	static List fgInstances= new ArrayList();
+	static List<TestCopyParticipantSingle> fgInstances= new ArrayList<>();
 
 	private Object fElement;
 	private String fHandle;
 
+	@Override
 	public boolean initialize(Object element) {
 		fgInstances.add(this);
 		fElement= element;
@@ -52,14 +53,17 @@ public class TestCopyParticipantSingle extends CopyParticipant {
 		return true;
 	}
 
+	@Override
 	public String getName() {
 		return getClass().getName();
 	}
 
+	@Override
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) {
 		return new RefactoringStatus();
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		return null;
 	}
@@ -70,7 +74,7 @@ public class TestCopyParticipantSingle extends CopyParticipant {
 
 	public static void testElements(String[] handles) {
 		testNumberOfInstances(handles.length);
-		List l1= new ArrayList(Arrays.asList(handles));
+		List<String> l1= new ArrayList<>(Arrays.asList(handles));
 		for (int i= 0; i < l1.size(); i++) {
 			Assert.assertTrue(l1.contains(getInstance(i).fHandle));
 		}
@@ -86,10 +90,10 @@ public class TestCopyParticipantSingle extends CopyParticipant {
 	}
 
 	public static void reset() {
-		fgInstances= new ArrayList();
+		fgInstances= new ArrayList<>();
 	}
 
 	private static TestCopyParticipantSingle getInstance(int i) {
-		return ((TestCopyParticipantSingle)fgInstances.get(i));
+		return fgInstances.get(i);
 	}
 }

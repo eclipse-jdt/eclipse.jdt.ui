@@ -25,10 +25,8 @@ class CalleeMethodWrapper extends MethodWrapper {
     private Comparator<MethodWrapper> fMethodWrapperComparator = new MethodWrapperComparator();
 
     private static class MethodWrapperComparator implements Comparator<MethodWrapper> {
-        /* (non-Javadoc)
-         * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-         */
-        public int compare(MethodWrapper m1, MethodWrapper m2) {
+        @Override
+		public int compare(MethodWrapper m1, MethodWrapper m2) {
             CallLocation callLocation1 = m1.getMethodCall().getFirstCallLocation();
             CallLocation callLocation2 = m2.getMethodCall().getFirstCallLocation();
 
@@ -59,9 +57,6 @@ class CalleeMethodWrapper extends MethodWrapper {
         return result;
     }
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper#getTaskName()
-     */
     @Override
 	protected String getTaskName() {
         return CallHierarchyMessages.CalleeMethodWrapper_taskname;
@@ -103,6 +98,6 @@ class CalleeMethodWrapper extends MethodWrapper {
 				return visitor.getCallees();
 			}
 		}
-        return new HashMap<String, MethodCall>(0);
+        return new HashMap<>(0);
     }
 }

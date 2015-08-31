@@ -14,7 +14,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 public class AllChangeTests {
-	private static final Class clazz= AllChangeTests.class;
+	private static final Class<AllChangeTests> clazz= AllChangeTests.class;
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite(clazz.getName());

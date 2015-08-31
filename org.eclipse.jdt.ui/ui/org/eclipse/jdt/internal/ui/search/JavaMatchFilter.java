@@ -50,9 +50,6 @@ abstract class JavaMatchFilter extends MatchFilter {
 	 */
 	public abstract boolean isApplicable(JavaSearchQuery query);
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.text.MatchFilter#filters(org.eclipse.search.ui.text.Match)
-	 */
 	@Override
 	public boolean filters(Match match) {
 		if (match instanceof JavaElementMatch) {
@@ -92,7 +89,7 @@ abstract class JavaMatchFilter extends MatchFilter {
 
 	private static JavaMatchFilter[] decodeFiltersString(String encodedString) {
 		StringTokenizer tokenizer= new StringTokenizer(encodedString, String.valueOf(';'));
-		HashSet<JavaMatchFilter> result= new HashSet<JavaMatchFilter>();
+		HashSet<JavaMatchFilter> result= new HashSet<>();
 		while (tokenizer.hasMoreTokens()) {
 			JavaMatchFilter curr= findMatchFilter(tokenizer.nextToken());
 			if (curr != null) {
@@ -141,7 +138,7 @@ abstract class JavaMatchFilter extends MatchFilter {
 	}
 
 	public static JavaMatchFilter[] allFilters(JavaSearchQuery query) {
-		ArrayList<JavaMatchFilter> res= new ArrayList<JavaMatchFilter>();
+		ArrayList<JavaMatchFilter> res= new ArrayList<>();
 		for (int i= 0; i < ALL_FILTERS.length; i++) {
 			JavaMatchFilter curr= ALL_FILTERS[i];
 			if (curr.isApplicable(query)) {

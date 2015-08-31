@@ -26,23 +26,17 @@ public final class ShowRefactoringHistoryAction implements IWorkbenchWindowActio
 	/** The workbench window, or <code>null</code> */
 	private IWorkbenchWindow fWindow= null;
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void dispose() {
 		// Do nothing
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void init(final IWorkbenchWindow window) {
 		fWindow= window;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void run(final IAction a) {
 		if (fWindow != null) {
 			org.eclipse.ltk.ui.refactoring.actions.ShowRefactoringHistoryAction action= new org.eclipse.ltk.ui.refactoring.actions.ShowRefactoringHistoryAction();
@@ -51,9 +45,7 @@ public final class ShowRefactoringHistoryAction implements IWorkbenchWindowActio
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void selectionChanged(final IAction action, final ISelection selection) {
 		// Do nothing
 	}

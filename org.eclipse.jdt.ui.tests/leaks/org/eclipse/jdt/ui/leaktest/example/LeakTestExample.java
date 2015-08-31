@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,16 +12,16 @@ package org.eclipse.jdt.ui.leaktest.example;
 
 import java.util.ArrayList;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.ui.leaktest.LeakTestCase;
 import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 public class LeakTestExample extends LeakTestCase {
 
-	private static final Class THIS= LeakTestExample.class;
+	private static final Class<LeakTestExample> THIS= LeakTestExample.class;
 
 	private static class MyClass {
 	}
@@ -33,7 +33,7 @@ public class LeakTestExample extends LeakTestCase {
 
 	private Object fGlobalReference;
 
-	private ArrayList fGlobalList= new ArrayList();
+	private ArrayList<Object> fGlobalList= new ArrayList<>();
 
 	public LeakTestExample(String name) {
 		super(name);
@@ -42,7 +42,7 @@ public class LeakTestExample extends LeakTestCase {
 	public void testLeakGlobalReference() throws Exception {
 		fGlobalList.clear();
 
-		Class cl= MyClass.class;
+		Class<MyClass> cl= MyClass.class;
 
 		// get the count before creating the instance
 		int count1= getInstanceCount(cl);
@@ -64,7 +64,7 @@ public class LeakTestExample extends LeakTestCase {
 
 	public void testNoLeakGlobalReference() throws Exception {
 		fGlobalList.clear();
-		Class cl= MyClass.class;
+		Class<MyClass> cl= MyClass.class;
 
 		// get the count before creating my instance
 		int count1= getInstanceCount(cl);

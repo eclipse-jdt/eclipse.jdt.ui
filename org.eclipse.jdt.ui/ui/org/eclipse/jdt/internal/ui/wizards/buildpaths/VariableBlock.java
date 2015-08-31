@@ -78,7 +78,7 @@ public class VariableBlock {
 
 	public VariableBlock(boolean inPreferencePage, String initSelection) {
 
-		fSelectedElements= new ArrayList<CPVariableElement>(0);
+		fSelectedElements= new ArrayList<>(0);
 		fEditOnDoubleclick= inPreferencePage;
 		fAskToBuild= true;
 
@@ -92,7 +92,7 @@ public class VariableBlock {
 
 		CPVariableElementLabelProvider labelProvider= new CPVariableElementLabelProvider(inPreferencePage);
 
-		fVariablesList= new ListDialogField<CPVariableElement>(adapter, buttonLabels, labelProvider);
+		fVariablesList= new ListDialogField<>(adapter, buttonLabels, labelProvider);
 		fVariablesList.setDialogFieldListener(adapter);
 		fVariablesList.setLabelText(NewWizardMessages.VariableBlock_vars_label);
 		fVariablesList.setRemoveButtonIndex(2);
@@ -155,6 +155,7 @@ public class VariableBlock {
 
 		// -------- IListAdapter --------
 
+		@Override
 		public void customButtonPressed(ListDialogField<CPVariableElement> field, int index) {
 			switch (index) {
 			case 0: /* add */
@@ -167,10 +168,12 @@ public class VariableBlock {
 			}
 		}
 
+		@Override
 		public void selectionChanged(ListDialogField<CPVariableElement> field) {
 			doSelectionChanged(field);
 		}
 
+		@Override
 		public void doubleClicked(ListDialogField<CPVariableElement> field) {
 			if (fEditOnDoubleclick) {
 				List<CPVariableElement> selected= field.getSelectedElements();
@@ -182,6 +185,7 @@ public class VariableBlock {
 
 		// ---------- IDialogFieldListener --------
 
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 		}
 
@@ -262,8 +266,8 @@ public class VariableBlock {
 	}
 
 	public boolean performOk() {
-		ArrayList<String> removedVariables= new ArrayList<String>();
-		ArrayList<String> changedVariables= new ArrayList<String>();
+		ArrayList<String> removedVariables= new ArrayList<>();
+		ArrayList<String> changedVariables= new ArrayList<>();
 		removedVariables.addAll(Arrays.asList(JavaCore.getClasspathVariableNames()));
 
 		// remove all unchanged
@@ -351,6 +355,7 @@ public class VariableBlock {
 		/*
 	 	 * @see IRunnableWithProgress#run(IProgressMonitor)
 		 */
+		@Override
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 			monitor.beginTask(NewWizardMessages.VariableBlock_operation_desc, 1);
 			try {
@@ -402,7 +407,7 @@ public class VariableBlock {
 		CPVariableElement initSelectedElement= null;
 
 		String[] entries= JavaCore.getClasspathVariableNames();
-		ArrayList<CPVariableElement> elements= new ArrayList<CPVariableElement>(entries.length);
+		ArrayList<CPVariableElement> elements= new ArrayList<>(entries.length);
 		for (int i= 0; i < entries.length; i++) {
 			String name= entries[i];
 			CPVariableElement elem;

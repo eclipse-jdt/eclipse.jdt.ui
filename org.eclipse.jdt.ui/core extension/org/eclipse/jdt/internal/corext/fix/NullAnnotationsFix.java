@@ -146,7 +146,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
 			return null;
 
-		List<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
+		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 		if (locations == null) {
 			org.eclipse.jdt.core.compiler.IProblem[] problems= compilationUnit.getProblems();
 			locations= new IProblemLocation[problems.length];
@@ -167,7 +167,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 	private static void createAddNullAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {
 		String nullableAnnotationName= getNullableAnnotationName(compilationUnit.getJavaElement(), false);
 		String nonNullAnnotationName= getNonNullAnnotationName(compilationUnit.getJavaElement(), false);
-		Set<String> handledPositions= new HashSet<String>();
+		Set<String> handledPositions= new HashSet<>();
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
 			if (problem == null)

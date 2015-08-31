@@ -96,7 +96,7 @@ class AccessAnalyzer extends ASTVisitor {
 		fDeclaringClassBinding= declaringClass;
 		fRewriter= rewriter;
 		fImportRewriter= importRewrite;
-		fGroupDescriptions= new ArrayList<TextEditGroup>();
+		fGroupDescriptions= new ArrayList<>();
 		fGetter= refactoring.getGetterName();
 		fSetter= refactoring.getSetterName();
 		fEncapsulateDeclaringClass= refactoring.getEncapsulateDeclaringClass();

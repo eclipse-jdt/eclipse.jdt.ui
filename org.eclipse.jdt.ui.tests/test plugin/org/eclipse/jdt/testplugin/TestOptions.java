@@ -29,8 +29,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class TestOptions {
 
-	public static Hashtable getDefaultOptions() {
-		Hashtable result= JavaCore.getDefaultOptions();
+	public static Hashtable<String, String> getDefaultOptions() {
+		Hashtable<String, String> result= JavaCore.getDefaultOptions();
 		result.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.IGNORE);
 		result.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.IGNORE);
 		result.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.IGNORE);
@@ -55,7 +55,7 @@ public class TestOptions {
 	}
 
 	public static void initializeProjectOptions(IJavaProject project) {
-		Map options= new HashMap();
+		Map<String, String> options= new HashMap<>();
 		JavaProjectHelper.set15CompilerOptions(options);
 		project.setOptions(options);
 	}
@@ -64,7 +64,7 @@ public class TestOptions {
 
 class TestFormatterOptions {
 
-	public static Hashtable getSettings() {
+	public static Hashtable<String, String> getSettings() {
 		TestFormatterOptions options = new TestFormatterOptions();
 		options.setDefaultSettings();
 		return options.getMap();
@@ -267,8 +267,8 @@ class TestFormatterOptions {
 		return Integer.toString(alignment);
 	}
 
-	private Hashtable getMap() {
-		Hashtable options = new Hashtable();
+	private Hashtable<String, String> getMap() {
+		Hashtable<String, String> options = new Hashtable<>();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ALLOCATION_EXPRESSION, getAlignment(this.alignment_for_arguments_in_allocation_expression));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_EXPLICIT_CONSTRUCTOR_CALL, getAlignment(this.alignment_for_arguments_in_explicit_constructor_call));
 		options.put(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION, getAlignment(this.alignment_for_arguments_in_method_invocation));

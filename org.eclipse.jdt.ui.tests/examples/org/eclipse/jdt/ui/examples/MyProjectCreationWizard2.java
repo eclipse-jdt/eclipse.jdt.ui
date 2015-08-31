@@ -79,28 +79,23 @@ public class MyProjectCreationWizard2 extends Wizard implements IExecutableExten
 		setWindowTitle("New ZZ Project");
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IExecutableExtension#setInitializationData(org.eclipse.core.runtime.IConfigurationElement, java.lang.String, java.lang.Object)
-	 */
+	@Override
 	public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
 		//  The config element will be used in <code>finishPage</code> to set the result perspective.
 		fConfigElement= cfig;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)
-	 */
+	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 	}
 
-	/* (non-Javadoc)
-	 * @see Wizard#addPages
-	 */
+	@Override
 	public void addPages() {
 		super.addPages();
 
 		// simplified main page: no extrenal laoctaion, no src/bin selection always create our own layout
 		fMainPage= new NewJavaProjectWizardPageOne() {
+			@Override
 			public void createControl(Composite parent) {
 				initializeDialogUnits(parent);
 
@@ -125,12 +120,14 @@ public class MyProjectCreationWizard2 extends Wizard implements IExecutableExten
 				setControl(composite);
 			}
 
+			@Override
 			public IClasspathEntry[] getSourceClasspathEntries() {
 				IPath path1= new Path(getProjectName()).append("src").makeAbsolute();
 				IPath path2= new Path(getProjectName()).append("tests").makeAbsolute();
 				return new IClasspathEntry[] { JavaCore.newSourceEntry(path1), JavaCore.newSourceEntry(path2) };
 			}
 
+			@Override
 			public IPath getOutputLocation() {
 				IPath path1= new Path(getProjectName()).append("classes").makeAbsolute();
 				return path1;
@@ -148,6 +145,7 @@ public class MyProjectCreationWizard2 extends Wizard implements IExecutableExten
 
 		fExtraPage= new WizardPage("My Page") {
 
+			@Override
 			public void createControl(Composite parent) {
 				initializeDialogUnits(parent);
 
@@ -164,11 +162,10 @@ public class MyProjectCreationWizard2 extends Wizard implements IExecutableExten
 	}
 
 
-	/* (non-Javadoc)
-	 * @see Wizard#performFinish
-	 */
+	@Override
 	public boolean performFinish() {
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
+			@Override
 			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException, InterruptedException {
 				fJavaPage.performFinish(monitor);
 				// use the result from the extra page
@@ -195,6 +192,7 @@ public class MyProjectCreationWizard2 extends Wizard implements IExecutableExten
 		return true;
 	}
 
+	@Override
 	public boolean performCancel() {
 		fJavaPage.performCancel();
 		return true;

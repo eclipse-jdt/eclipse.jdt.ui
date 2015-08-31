@@ -52,6 +52,7 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 	 * For example, include the name of the type enclosing a field.
 	 * @deprecated Use SHOW_QUALIFIED or SHOW_ROOT instead
 	 */
+	@Deprecated
 	public final static int SHOW_CONTAINER=				0x004;
 
 	/**
@@ -59,6 +60,7 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 	 * For example, include the fully qualified name of the type enclosing a type.
 	 * @deprecated Use SHOW_QUALIFIED instead
 	 */
+	@Deprecated
 	public final static int SHOW_CONTAINER_QUALIFICATION=	0x008;
 
 	/**
@@ -83,6 +85,7 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 	 * be shown after the name.
 	 * @deprecated SHOW_POST_QUALIFIED instead
 	 */
+	@Deprecated
 	public final static int SHOW_POSTIFIX_QUALIFICATION=		0x080;
 
 	/**
@@ -231,9 +234,6 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see ILabelProvider#getImage
-	 */
 	@Override
 	public Image getImage(Object element) {
 		Image result= fImageLabelProvider.getImageLabel(element, fImageFlags);
@@ -247,9 +247,6 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see ILabelProvider#getText
-	 */
 	@Override
 	public String getText(Object element) {
 		return JavaElementLabels.getTextLabel(element, fTextFlags);
@@ -265,13 +262,11 @@ public class JavaElementLabelProvider extends LabelProvider implements IStyledLa
 	 *
 	 * @since 3.4
 	 */
+	@Override
 	public StyledString getStyledText(Object element) {
 		return JavaElementLabels.getStyledTextLabel(element, fTextFlags);
 	}
 
-	/* (non-Javadoc)
-	 * @see IBaseLabelProvider#dispose
-	 */
 	@Override
 	public void dispose() {
 		fStorageLabelProvider.dispose();

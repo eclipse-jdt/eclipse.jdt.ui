@@ -78,7 +78,7 @@ public class NLSHint {
 
 		if (accessClassRef == null) {
 			// Look for Eclipse NLS approach
-			List<NLSLine> eclipseNLSLines= new ArrayList<NLSLine>();
+			List<NLSLine> eclipseNLSLines= new ArrayList<>();
 			accessClassRef= createEclipseNLSLines(getDocument(cu), astRoot, eclipseNLSLines);
 			if (!eclipseNLSLines.isEmpty()) {
 				NLSLine[] rawLines= lines;
@@ -129,7 +129,7 @@ public class NLSHint {
 	private AccessorClassReference createEclipseNLSLines(final IDocument document, CompilationUnit astRoot, List<NLSLine> nlsLines) {
 
 		final AccessorClassReference[] firstAccessor= new AccessorClassReference[1];
-		final SortedMap<Integer, NLSLine> lineToNLSLine= new TreeMap<Integer, NLSLine>();
+		final SortedMap<Integer, NLSLine> lineToNLSLine= new TreeMap<>();
 
 		astRoot.accept(new ASTVisitor() {
 
@@ -206,7 +206,7 @@ public class NLSHint {
 	}
 
 	private NLSSubstitution[] createSubstitutions(NLSLine[] lines, Properties props, CompilationUnit astRoot) {
-		List<NLSSubstitution> result= new ArrayList<NLSSubstitution>();
+		List<NLSSubstitution> result= new ArrayList<>();
 
 		for (int i= 0; i < lines.length; i++) {
 			NLSElement[] elements= lines[i].getElements();

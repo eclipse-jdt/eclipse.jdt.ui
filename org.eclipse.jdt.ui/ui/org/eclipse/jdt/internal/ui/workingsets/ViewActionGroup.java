@@ -56,6 +56,7 @@ public class ViewActionGroup extends ActionGroup {
 		fSite= site;
 		if (fChangeListener == null) {
 			fChangeListener = new IPropertyChangeListener() {
+				@Override
 				public void propertyChange(PropertyChangeEvent event) {}
 			};
 		}
@@ -94,9 +95,6 @@ public class ViewActionGroup extends ActionGroup {
 			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fWorkingSetAssignementAction);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);

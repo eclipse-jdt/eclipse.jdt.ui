@@ -77,6 +77,7 @@ public class JavaChangeHover extends LineChangeHover  {
 	@Override
 	public IInformationControlCreator getHoverControlCreator() {
 		return new IInformationControlCreator() {
+			@Override
 			public IInformationControl createInformationControl(Shell parent) {
 				fInformationControl= new ChangeHoverInformationControl(parent, false, fOrientation, fPartition, EditorsUI.getTooltipAffordanceString());
 				fInformationControl.setHorizontalScrollPixel(fLastScrollIndex);
@@ -92,6 +93,7 @@ public class JavaChangeHover extends LineChangeHover  {
 	@Override
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		return new IInformationControlCreator() {
+			@Override
 			public IInformationControl createInformationControl(Shell parent) {
 				fInformationControl= new ChangeHoverInformationControl(parent, true, fOrientation, fPartition, null);
 				fInformationControl.setHorizontalScrollPixel(fLastScrollIndex);

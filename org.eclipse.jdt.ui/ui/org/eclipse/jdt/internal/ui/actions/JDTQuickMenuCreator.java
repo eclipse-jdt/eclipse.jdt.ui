@@ -98,6 +98,7 @@ public abstract class JDTQuickMenuCreator extends QuickMenuCreator {
 	 */
 	public IHandler createHandler() {
 		return new AbstractHandler() {
+			@Override
 			public Object execute(ExecutionEvent event) throws ExecutionException {
 				createMenu();
 				return null;

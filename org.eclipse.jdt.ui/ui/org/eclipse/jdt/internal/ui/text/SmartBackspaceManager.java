@@ -108,6 +108,7 @@ public class SmartBackspaceManager {
 		/*
 		 * @see org.eclipse.swt.custom.VerifyKeyListener#verifyKey(org.eclipse.swt.events.VerifyEvent)
 		 */
+		@Override
 		public void verifyKey(VerifyEvent event) {
 			if (fViewer != null && isBackspace(event)) {
 				int offset= getCaretOffset();
@@ -230,7 +231,7 @@ public class SmartBackspaceManager {
 		Assert.isLegal(viewer != null);
 
 		fViewer= viewer;
-		fSpecs= new HashMap<Integer, UndoSpec>();
+		fSpecs= new HashMap<>();
 		fRunDetector= new TypingRunDetector();
 		fRunDetector.install(viewer);
 		fRunListener= new ITypingRunListener() {
@@ -238,12 +239,14 @@ public class SmartBackspaceManager {
 			/*
 			 * @see org.eclipse.jface.text.TypingRunDetector.ITypingRunListener#typingRunStarted(org.eclipse.jface.text.TypingRunDetector.TypingRun)
 			 */
+			@Override
 			public void typingRunStarted(TypingRun run) {
 			}
 
 			/*
 			 * @see org.eclipse.jface.text.TypingRunDetector.ITypingRunListener#typingRunEnded(org.eclipse.jface.text.TypingRunDetector.TypingRun)
 			 */
+			@Override
 			public void typingRunEnded(TypingRun run, ChangeType reason) {
 				if (reason == TypingRun.SELECTION)
 					fSpecs.clear();

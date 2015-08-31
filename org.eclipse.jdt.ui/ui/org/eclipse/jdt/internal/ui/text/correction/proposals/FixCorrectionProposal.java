@@ -83,9 +83,6 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		return fCleanUp;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#getImage()
-	 */
 	@Override
 	public Image getImage() {
 		IStatus status= getFixStatus();
@@ -108,9 +105,6 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		return fFix.getStatus();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getAdditionalProposalInfo()
-	 */
 	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
 		StringBuffer result= new StringBuffer();
@@ -138,9 +132,6 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		return result.toString();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#getRelevance()
-	 */
 	@Override
 	public int getRelevance() {
 		IStatus status= getFixStatus();
@@ -151,9 +142,6 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createTextChange()
-	 */
 	@Override
 	protected TextChange createTextChange() throws CoreException {
 		CompilationUnitChange createChange= fFix.createChange(null);
@@ -166,9 +154,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		return createChange;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
-	 */
+	@Override
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 		if (stateMask == SWT.CONTROL && fCleanUp != null){
 			CleanUpRefactoring refactoring= new CleanUpRefactoring();
@@ -214,6 +200,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		refactoring.addCleanUp(fCleanUp);
 
 		IRunnableContext context= new IRunnableContext() {
+			@Override
 			public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable) throws InvocationTargetException, InterruptedException {
 				runnable.run(monitor == null ? new NullProgressMonitor() : monitor);
 			}
@@ -234,19 +221,20 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		}
 	}
 
+	@Override
 	public void selected(ITextViewer viewer, boolean smartToggle) {
 	}
 
+	@Override
 	public void unselected(ITextViewer viewer) {
 	}
 
+	@Override
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 		return false;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getStatusMessage() {
 		if (fCleanUp == null)
 			return null;

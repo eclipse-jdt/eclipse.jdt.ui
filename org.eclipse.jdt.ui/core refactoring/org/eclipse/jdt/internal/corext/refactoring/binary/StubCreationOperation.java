@@ -65,9 +65,6 @@ public class StubCreationOperation extends AbstractCodeCreationOperation {
 		fStubInvisible= stub;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected String getOperationLabel() {
 		return RefactoringCoreMessages.StubCreationOperation_creating_type_stubs;

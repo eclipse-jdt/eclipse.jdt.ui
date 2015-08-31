@@ -468,7 +468,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	}
 
 	protected static List<ASTNode> getDeclarationNodes(final CompilationUnit cuNode, final List<IMember> members) throws JavaModelException {
-		final List<ASTNode> result= new ArrayList<ASTNode>(members.size());
+		final List<ASTNode> result= new ArrayList<>(members.size());
 		for (final Iterator<IMember> iterator= members.iterator(); iterator.hasNext();) {
 			final IMember member= iterator.next();
 			ASTNode node= null;
@@ -505,7 +505,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	protected IType fCachedDeclaringType;
 
 	/** The cached member references */
-	protected final Map<IMember, Object[]> fCachedMembersReferences= new HashMap<IMember, Object[]>(2);
+	protected final Map<IMember, Object[]> fCachedMembersReferences= new HashMap<>(2);
 
 	/** The cached type references */
 	protected IType[] fCachedReferencedTypes;
@@ -667,7 +667,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 	protected IType[] getTypesReferencedInMovedMembers(final IProgressMonitor monitor) throws JavaModelException {
 		if (fCachedReferencedTypes == null) {
 			final IType[] types= ReferenceFinderUtil.getTypesReferencedIn(fMembersToMove, fOwner, monitor);
-			final List<IType> result= new ArrayList<IType>(types.length);
+			final List<IType> result= new ArrayList<>(types.length);
 			final List<IMember> members= Arrays.asList(fMembersToMove);
 			for (int index= 0; index < types.length; index++) {
 				if (!members.contains(types[index]) && !types[index].equals(getDeclaringType()))

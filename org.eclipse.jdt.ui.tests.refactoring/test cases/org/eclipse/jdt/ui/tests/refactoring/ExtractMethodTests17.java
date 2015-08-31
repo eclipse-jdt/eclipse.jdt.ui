@@ -33,6 +33,7 @@ public class ExtractMethodTests17 extends ExtractMethodTests {
 		performTest(fgTestSetup.getTry17Package(), "A", COMPARE_WITH_OUTPUT, "try17_out");
 	}
 
+	@Override
 	protected void invalidSelectionTest() throws Exception {
 		performTest(fgTestSetup.getInvalidSelectionPackage(), "A", INVALID_SELECTION, null);
 	}
@@ -43,18 +44,22 @@ public class ExtractMethodTests17 extends ExtractMethodTests {
 
 	//---- Test Try / catch block
 
+	@Override
 	public void test1() throws Exception {
 		try17Test();
 	}
 
+	@Override
 	public void test2() throws Exception {
 		try17Test();
 	}
 
+	@Override
 	public void test3() throws Exception {
 		try17Test();
 	}
 
+	@Override
 	public void test4() throws Exception {
 		try17Test();
 	}
@@ -79,6 +84,7 @@ public class ExtractMethodTests17 extends ExtractMethodTests {
 	// Testing invalid selections
 	//=====================================================================================
 
+	@Override
 	public void test010() throws Exception {
 		invalidSelectionTest();
 	}

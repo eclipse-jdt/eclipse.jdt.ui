@@ -27,8 +27,9 @@ import org.eclipse.jdt.core.JavaCore;
 
 public class JavaWorkingSetElementAdapter implements IWorkingSetElementAdapter {
 
+	@Override
 	public IAdaptable[] adaptElements(IWorkingSet ws, IAdaptable[] elements) {
-		ArrayList<Object> result= new ArrayList<Object>(elements.length);
+		ArrayList<Object> result= new ArrayList<>(elements.length);
 
 		for (int i= 0; i < elements.length; i++) {
 			IAdaptable curr= elements[i];
@@ -70,6 +71,7 @@ public class JavaWorkingSetElementAdapter implements IWorkingSetElementAdapter {
 	}
 
 
+	@Override
 	public void dispose() {
 	}
 

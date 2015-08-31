@@ -68,17 +68,13 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 		fProposalAutoActivationSet = triggers.toCharArray();
 	}
 
-	/*(non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeCompletionProposals(org.eclipse.jface.text.ITextViewer, int)
-	 */
+	@Override
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
-	 */
+	@Override
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
 		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
 		return null;
@@ -87,6 +83,7 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
 	 */
+	@Override
 	public char[] getCompletionProposalAutoActivationCharacters() {
 		return fProposalAutoActivationSet;
 	}
@@ -94,6 +91,7 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationAutoActivationCharacters()
 	 */
+	@Override
 	public char[] getContextInformationAutoActivationCharacters() {
 		return null;
 	}
@@ -101,6 +99,7 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
 	 */
+	@Override
 	public String getErrorMessage() {
 		return null;
 	}
@@ -108,6 +107,7 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationValidator()
 	 */
+	@Override
 	public IContextInformationValidator getContextInformationValidator() {
 		return null; //no context
 	}
@@ -115,6 +115,7 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 	/*
 	 * @see ISubjectControlContentAssistProcessor#computeContextInformation(IContentAssistSubjectControl, int)
 	 */
+	@Override
 	public IContextInformation[] computeContextInformation(IContentAssistSubjectControl contentAssistSubject,
 			int documentOffset) {
 		return null;
@@ -123,6 +124,7 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 	/*
 	 * @see ISubjectControlContentAssistProcessor#computeCompletionProposals(IContentAssistSubjectControl, int)
 	 */
+	@Override
 	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubjectControl, int documentOffset) {
 		String input= contentAssistSubjectControl.getDocument().get();
 		ICompletionProposal[] proposals= createPackagesProposals(documentOffset, input);
@@ -131,7 +133,7 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 	}
 
 	private ICompletionProposal[] createPackagesProposals(int documentOffset, String input) {
-		ArrayList<JavaCompletionProposal> proposals= new ArrayList<JavaCompletionProposal>();
+		ArrayList<JavaCompletionProposal> proposals= new ArrayList<>();
 		String prefix= input.substring(0, documentOffset);
 		try {
 			IJavaElement[] packageFragments= fPackageFragmentRoot.getChildren();

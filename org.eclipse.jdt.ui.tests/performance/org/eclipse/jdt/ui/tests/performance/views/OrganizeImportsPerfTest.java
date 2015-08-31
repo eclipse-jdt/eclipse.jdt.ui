@@ -49,6 +49,7 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 			super(test);
 		}
 
+		@Override
 		protected void setUp() throws Exception {
 			fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 			assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
@@ -56,6 +57,7 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 			JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		}
 
+		@Override
 		protected void tearDown() throws Exception {
 			if (fJProject1 != null && fJProject1.exists())
 				JavaProjectHelper.delete(fJProject1);
@@ -72,7 +74,7 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 		return new MyTestSetup(someTest);
 	}
 
-	private void addAllCUs(IJavaElement[] children, List result) throws JavaModelException {
+	private void addAllCUs(IJavaElement[] children, List<IJavaElement> result) throws JavaModelException {
 		for (int i= 0; i < children.length; i++) {
 			IJavaElement element= children[i];
 			if (element instanceof ICompilationUnit) {
@@ -108,9 +110,9 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 
 	private void measure(PerformanceMeter performanceMeter, int runs) throws Exception {
 		for (int j= 0; j < runs; j++) {
-			List cusList= new ArrayList();
+			List<IJavaElement> cusList= new ArrayList<>();
 			addAllCUs(MyTestSetup.fJProject1.getChildren(), cusList);
-			ICompilationUnit[] cus= (ICompilationUnit[])cusList.toArray(new ICompilationUnit[cusList.size()]);
+			ICompilationUnit[] cus= cusList.toArray(new ICompilationUnit[cusList.size()]);
 			CompilationUnit[] roots= createASTs(cus);
 
 			joinBackgroudActivities();

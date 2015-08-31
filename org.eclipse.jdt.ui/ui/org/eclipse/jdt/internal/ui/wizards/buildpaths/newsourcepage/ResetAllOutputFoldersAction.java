@@ -60,20 +60,15 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Reset_tooltip);
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getDetailedDescription() {
 		return NewWizardMessages.PackageExplorerActionGroup_FormText_Default_ResetAllOutputFolders;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
 		final IRunnableWithProgress runnable= new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				try {
 					resetOutputFolders(fJavaProject, monitor);
@@ -100,7 +95,7 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
 		try {
 			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ResetOutputFolder, roots.length + 10);
-			List<CPListElementAttribute> entries= new ArrayList<CPListElementAttribute>();
+			List<CPListElementAttribute> entries= new ArrayList<>();
 			for (int i= 0; i < roots.length; i++) {
 				monitor.worked(1);
 				IPackageFragmentRoot root= roots[i];
@@ -123,7 +118,7 @@ public class ResetAllOutputFoldersAction extends BuildpathModifierAction {
         try {
         	monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Resetting, selection.size());
         	List<CPListElement> entries= ClasspathModifier.getExistingEntries(project);
-        	List<Object> result= new ArrayList<Object>();
+        	List<Object> result= new ArrayList<>();
         	for (int i= 0; i < selection.size(); i++) {
         		Object element= selection.get(i);
         		if (element instanceof IJavaElement) {

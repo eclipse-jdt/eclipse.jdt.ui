@@ -32,9 +32,7 @@ public class FilterUpdater implements IResourceChangeListener {
 		fViewer= viewer;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.resources.IResourceChangeListener#resourceChanged(org.eclipse.core.resources.IResourceChangeEvent)
-	 */
+	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
 		if (fViewer.getInput() == null) {
 			return;
@@ -52,6 +50,7 @@ public class FilterUpdater implements IResourceChangeListener {
 					if (ctrl != null && !ctrl.isDisposed()) {
 						// async is needed due to bug 33783
 						ctrl.getDisplay().asyncExec(new Runnable() {
+							@Override
 							public void run() {
 								if (!ctrl.isDisposed())
 									fViewer.refresh(false);

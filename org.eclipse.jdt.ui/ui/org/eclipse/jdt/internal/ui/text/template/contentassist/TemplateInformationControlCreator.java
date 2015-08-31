@@ -47,9 +47,11 @@ public final class TemplateInformationControlCreator implements IInformationCont
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlCreator#createInformationControl(org.eclipse.swt.widgets.Shell)
 	 */
+	@Override
 	public IInformationControl createInformationControl(Shell parent) {
 		fControl= new SourceViewerInformationControl(parent, false, fOrientation, JavaPlugin.getAdditionalInfoAffordanceString());
 		fControl.addDisposeListener(new DisposeListener() {
+			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				fControl= null;
 			}
@@ -60,6 +62,7 @@ public final class TemplateInformationControlCreator implements IInformationCont
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlCreatorExtension#canReuse(org.eclipse.jface.text.IInformationControl)
 	 */
+	@Override
 	public boolean canReuse(IInformationControl control) {
 		return fControl == control && fControl != null;
 	}
@@ -67,6 +70,7 @@ public final class TemplateInformationControlCreator implements IInformationCont
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlCreatorExtension#canReplace(org.eclipse.jface.text.IInformationControlCreator)
 	 */
+	@Override
 	public boolean canReplace(IInformationControlCreator creator) {
 		return (creator != null && getClass() == creator.getClass());
 	}

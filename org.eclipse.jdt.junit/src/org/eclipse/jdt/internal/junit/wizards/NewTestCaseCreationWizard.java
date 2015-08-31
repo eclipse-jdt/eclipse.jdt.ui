@@ -143,6 +143,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 		if (fix != null) {
 			return new IRunnableWithProgress() {
 
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					if (monitor == null) {
 						monitor= new NullProgressMonitor();
@@ -281,7 +282,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 					// nothing to do
 				} else if (fOpenBuildPathRadio.getSelection()) {
 					String id= BUILD_PATH_PAGE_ID;
-					Map<String, Boolean> input= new HashMap<String, Boolean>();
+					Map<String, Boolean> input= new HashMap<>();
 					input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
 					if (PreferencesUtil.createPropertyDialogOn(getShell(), fProject, id, new String[] { id }, input).open() != Window.OK) {
 						return;
@@ -301,14 +302,17 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 			return fSelectedFix;
 		}
 
+		@Override
 		public void widgetDefaultSelected(SelectionEvent e) {
 			updateEnableStates();
 		}
 
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 			updateEnableStates();
 		}
 
+		@Override
 		public void doubleClick(DoubleClickEvent event) {
 			okPressed();
 

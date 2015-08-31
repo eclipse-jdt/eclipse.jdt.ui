@@ -58,9 +58,6 @@ public class NewWizardsActionGroup extends ActionGroup {
 	}
 
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);

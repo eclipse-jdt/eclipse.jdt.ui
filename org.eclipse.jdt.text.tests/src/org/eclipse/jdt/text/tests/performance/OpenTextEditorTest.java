@@ -44,12 +44,14 @@ public class OpenTextEditorTest extends OpenEditorTest {
 			fTearDown= tearDown;
 		}
 
+		@Override
 		protected void setUp() throws Exception {
 			ResourceTestHelper.replicate("/" + PerformanceTestSetup.PROJECT + ORIG_FILE, PREFIX, FILE_SUFFIX, WARM_UP_RUNS + MEASURED_RUNS, ResourceTestHelper.SKIP_IF_EXISTS);
 			ResourceTestHelper.copy(ORIG_LARGE_FILE, LARGE_FILE, ResourceTestHelper.SKIP_IF_EXISTS);
 			EditorTestHelper.showPerspective(EditorTestHelper.RESOURCE_PERSPECTIVE_ID);
 		}
 
+		@Override
 		protected void tearDown() throws Exception {
 			if (fTearDown) {
 				EditorTestHelper.showPerspective(EditorTestHelper.JAVA_PERSPECTIVE_ID);
@@ -59,7 +61,7 @@ public class OpenTextEditorTest extends OpenEditorTest {
 		}
 	}
 
-	private static final Class THIS= OpenTextEditorTest.class;
+	private static final Class<OpenTextEditorTest> THIS= OpenTextEditorTest.class;
 
 	private static final String SHORT_NAME_FIRST_RUN= "Open text editor (first in session)";
 
@@ -110,6 +112,7 @@ public class OpenTextEditorTest extends OpenEditorTest {
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		EditorTestHelper.runEventQueue();
@@ -120,6 +123,7 @@ public class OpenTextEditorTest extends OpenEditorTest {
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Tom Eicher <eclipse@tom.eicher.name> - [formatting] 'Format Element' in JavaDoc does also format method body - https://bugs.eclipse.org/bugs/show_bug.cgi?id=238746
  *     Tom Eicher (Avaloq Evolution AG) - block selection mode
+ *     Stefan Xenos (sxenos@gmail.com) - bug 306646, make editor margins follow the java formatter preference 
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
@@ -295,6 +296,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		/*
 		 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 		 */
+		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			// XXX: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=56161
 			JavaEditor.this.selectionChanged();
@@ -320,12 +322,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 */
 		private class PreferenceChangeListener implements IEclipsePreferences.IPreferenceChangeListener {
 
-			/**
-			 * {@inheritDoc}
-			 */
+			@Override
 			public void preferenceChange(final IEclipsePreferences.PreferenceChangeEvent event) {
 				if (Display.getCurrent() == null) {
 					Display.getDefault().asyncExec(new Runnable() {
+						@Override
 						public void run() {
 							firePropertyChangeEvent(event.getKey(), event.getOldValue(), event.getNewValue());
 						}
@@ -361,18 +362,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return fContext.getNode(fQualifier);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void addPropertyChangeListener(IPropertyChangeListener listener) {
 			if (fListeners.size() == 0)
 				getNode().addPreferenceChangeListener(fListener);
 			fListeners.add(listener);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void removePropertyChangeListener(IPropertyChangeListener listener) {
 			fListeners.remove(listener);
 			if (fListeners.size() == 0) {
@@ -380,16 +377,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public boolean contains(String name) {
 			return getNode().get(name, null) != null;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void firePropertyChangeEvent(String name, Object oldValue, Object newValue) {
 			PropertyChangeEvent event= new PropertyChangeEvent(this, name, oldValue, newValue);
 			Object[] listeners= fListeners.getListeners();
@@ -397,100 +390,72 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				((IPropertyChangeListener) listeners[i]).propertyChange(event);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public boolean getBoolean(String name) {
 			return getNode().getBoolean(name, BOOLEAN_DEFAULT_DEFAULT);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public boolean getDefaultBoolean(String name) {
 			return BOOLEAN_DEFAULT_DEFAULT;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public double getDefaultDouble(String name) {
 			return DOUBLE_DEFAULT_DEFAULT;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public float getDefaultFloat(String name) {
 			return FLOAT_DEFAULT_DEFAULT;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public int getDefaultInt(String name) {
 			return INT_DEFAULT_DEFAULT;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public long getDefaultLong(String name) {
 			return LONG_DEFAULT_DEFAULT;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public String getDefaultString(String name) {
 			return STRING_DEFAULT_DEFAULT;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public double getDouble(String name) {
 			return getNode().getDouble(name, DOUBLE_DEFAULT_DEFAULT);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public float getFloat(String name) {
 			return getNode().getFloat(name, FLOAT_DEFAULT_DEFAULT);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public int getInt(String name) {
 			return getNode().getInt(name, INT_DEFAULT_DEFAULT);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public long getLong(String name) {
 			return getNode().getLong(name, LONG_DEFAULT_DEFAULT);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public String getString(String name) {
 			return getNode().get(name, STRING_DEFAULT_DEFAULT);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public boolean isDefault(String name) {
 			return false;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public boolean needsSaving() {
 			try {
 				return getNode().keys().length > 0;
@@ -500,100 +465,72 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return true;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void putValue(String name, String value) {
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void setDefault(String name, double value) {
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void setDefault(String name, float value) {
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void setDefault(String name, int value) {
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void setDefault(String name, long value) {
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void setDefault(String name, String defaultObject) {
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void setDefault(String name, boolean value) {
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void setToDefault(String name) {
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void setValue(String name, double value) {
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void setValue(String name, float value) {
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void setValue(String name, int value) {
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void setValue(String name, long value) {
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void setValue(String name, String value) {
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void setValue(String name, boolean value) {
 			throw new UnsupportedOperationException();
 		}
@@ -641,6 +578,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		/*
 		 * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
 		 */
+		@Override
 		public void documentAboutToBeChanged(DocumentEvent event) {
 			if (fOccurrencesFinderJob != null)
 				fOccurrencesFinderJob.doCancel();
@@ -649,12 +587,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		/*
 		 * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
 		 */
+		@Override
 		public void documentChanged(DocumentEvent event) {
 		}
 
 		/*
 		 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentAboutToBeChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
 		 */
+		@Override
 		public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
 			if (oldInput == null)
 				return;
@@ -665,6 +605,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		/*
 		 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
 		 */
+		@Override
 		public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
 			if (newInput == null)
 				return;
@@ -902,6 +843,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		/*
 		 * @see org.eclipse.ui.texteditor.IUpdate#update()
 		 */
+		@Override
 		public void update() {
 			setEnabled(isEditorInputModifiable());
 		}
@@ -1118,6 +1060,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		/*
 		 * @see org.eclipse.ui.texteditor.IUpdate#update()
 		 */
+		@Override
 		public void update() {
 			setEnabled(isEditorInputModifiable());
 		}
@@ -1244,6 +1187,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @see org.eclipse.ui.texteditor.IUpdate#update()
 		 * @since 3.2
 		 */
+		@Override
 		public void update() {
 			setEnabled(isEditorInputModifiable());
 		}
@@ -1259,6 +1203,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @see org.eclipse.ui.IWindowListener#windowActivated(org.eclipse.ui.IWorkbenchWindow)
 		 * @since 3.1
 		 */
+		@Override
 		public void windowActivated(IWorkbenchWindow window) {
 			if (window == getEditorSite().getWorkbenchWindow() && fMarkOccurrenceAnnotations && isActivePart()) {
 				fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
@@ -1272,6 +1217,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @see org.eclipse.ui.IWindowListener#windowDeactivated(org.eclipse.ui.IWorkbenchWindow)
 		 * @since 3.1
 		 */
+		@Override
 		public void windowDeactivated(IWorkbenchWindow window) {
 			if (window == getEditorSite().getWorkbenchWindow() && fMarkOccurrenceAnnotations && isActivePart())
 				removeOccurrenceAnnotations();
@@ -1281,6 +1227,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @see org.eclipse.ui.IWindowListener#windowClosed(org.eclipse.ui.IWorkbenchWindow)
 		 * @since 3.1
 		 */
+		@Override
 		public void windowClosed(IWorkbenchWindow window) {
 		}
 
@@ -1288,6 +1235,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @see org.eclipse.ui.IWindowListener#windowOpened(org.eclipse.ui.IWorkbenchWindow)
 		 * @since 3.1
 		 */
+		@Override
 		public void windowOpened(IWorkbenchWindow window) {
 		}
 	}
@@ -1368,6 +1316,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		/*
 		 * @see org.eclipse.ui.IPartListener2#partVisible(org.eclipse.ui.IWorkbenchPartReference)
 		 */
+		@Override
 		public void partVisible(IWorkbenchPartReference partRef) {
 			if (JavaEditor.this.equals(partRef.getPart(false))) {
 				cancel();
@@ -1378,17 +1327,24 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		/*
 		 * @see org.eclipse.ui.IPartListener2#partClosed(org.eclipse.ui.IWorkbenchPartReference)
 		 */
+		@Override
 		public void partClosed(IWorkbenchPartReference partRef) {
 			if (JavaEditor.this.equals(partRef.getPart(false))) {
 				cancel();
 			}
 		}
 
+		@Override
 		public void partActivated(IWorkbenchPartReference partRef) {}
+		@Override
 		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
+		@Override
 		public void partDeactivated(IWorkbenchPartReference partRef) {}
+		@Override
 		public void partOpened(IWorkbenchPartReference partRef) {}
+		@Override
 		public void partHidden(IWorkbenchPartReference partRef) {}
+		@Override
 		public void partInputChanged(IWorkbenchPartReference partRef) {}
 	}
 
@@ -1573,7 +1529,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * DO NOT REMOVE, used in a product.
 	 * @deprecated As of 3.5
 	 */
+	@Deprecated
 	protected AbstractSelectionChangedListener fOutlineSelectionChangedListener= new AbstractSelectionChangedListener() {
+		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 		}
 		@Override
@@ -1912,11 +1870,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
 			}
 			fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
+				@Override
 				public IInformationControl createInformationControl(Shell shell) {
 					return new SourceViewerInformationControl(shell, false, getOrientation(), EditorsUI.getTooltipAffordanceString());
 				}
 			});
 			fProjectionSupport.setInformationPresenterControlCreator(new IInformationControlCreator() {
+				@Override
 				public IInformationControl createInformationControl(Shell shell) {
 					return new SourceViewerInformationControl(shell, true, getOrientation(), null);
 				}
@@ -2078,7 +2038,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	private IPreferenceStore createCombinedPreferenceStore(IEditorInput input) {
-		List<IPreferenceStore> stores= new ArrayList<IPreferenceStore>(3);
+		List<IPreferenceStore> stores= new ArrayList<>(3);
 
 		IJavaProject project= EditorUtility.getJavaProject(input);
 		if (project != null) {
@@ -2213,6 +2173,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		if (required == IShowInTargetList.class) {
 			return new IShowInTargetList() {
+				@Override
 				public String[] getShowInTargetIds() {
 					return new String[] { JavaUI.ID_PACKAGES, IPageLayout.ID_OUTLINE, JavaPlugin.ID_RES_NAV };
 				}
@@ -2226,6 +2187,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				return null;
 
 			return new IShowInSource() {
+				@Override
 				public ShowInContext getShowInContext() {
 					return new ShowInContext(null, null) {
 						/*
@@ -2382,9 +2344,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#setFocus()
-	 */
 	@Override
 	public void setFocus() {
 		if (fBreadcrumb != null && fBreadcrumb.isActive()) {
@@ -2799,6 +2758,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	/**
 	 * @deprecated As of 3.5, got replaced by generic Navigate &gt; Show In &gt;
 	 */
+	@Deprecated
 	private void createDeprecatedShowInPackageExplorerAction() {
 		IAction action= new org.eclipse.jdt.ui.actions.ShowInPackageViewAction(this);
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_PACKAGE_VIEW);
@@ -3091,6 +3051,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider#getViewPartInput()
 	 */
+	@Override
 	public Object getViewPartInput() {
 		return getEditorInput().getAdapter(IJavaElement.class);
 	}
@@ -3146,6 +3107,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		support.setMatchingCharacterPainterPreferenceKeys(MATCHING_BRACKETS, MATCHING_BRACKETS_COLOR, HIGHLIGHT_BRACKET_AT_CARET_LOCATION, ENCLOSING_BRACKETS);
 
 		super.configureSourceViewerDecorationSupport(support);
+
+		// The base class will have already called setMarginPainterPreferenceKeys. We override it
+		// here with more specific values for the java editor. Note that this needs to go after the
+		// call to super since the last invocation wins.
+		support.setMarginPainterPreferenceKeys(
+				AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN,
+				AbstractDecoratedTextEditorPreferenceConstants.EDITOR_PRINT_MARGIN_COLOR,
+				DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT);
 	}
 
 	/**
@@ -3249,7 +3218,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			// Add occurrence annotations
 			int length= fLocations.length;
-			Map<Annotation, Position> annotationMap= new HashMap<Annotation, Position>(length);
+			Map<Annotation, Position> annotationMap= new HashMap<>(length);
 			for (int i= 0; i < length; i++) {
 
 				if (isCanceled(progressMonitor))
@@ -3382,6 +3351,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fMarkOccurrenceAnnotations= true;
 
 		fPostSelectionListenerWithAST= new ISelectionListenerWithAST() {
+			@Override
 			public void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot) {
 				updateOccurrenceAnnotations(selection, astRoot);
 			}
@@ -3738,7 +3708,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	private void initializePreviousSelectionList() {
-		fPreviousSelections= new ArrayList<IRegion>(3);
+		fPreviousSelections= new ArrayList<>(3);
 	}
 
 	private static boolean isOpeningBracket(char character) {
@@ -4067,6 +4037,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		AnnotationRulerColumn column= new AnnotationRulerColumn(VERTICAL_RULER_WIDTH, getAnnotationAccess());
 		column.setHover(new JavaExpandHover(ruler, getAnnotationAccess(), new IDoubleClickListener() {
 
+			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				// for now: just invoke ruler double click action
 				triggerAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK);

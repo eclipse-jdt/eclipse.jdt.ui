@@ -63,9 +63,6 @@ import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 
 	private final class FakeFolderBaseWorkbenchContentProvider extends BaseWorkbenchContentProvider {
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public Object getParent(Object element) {
 			Object object= fNonExistingFolders.get(element);
@@ -75,12 +72,9 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 			return super.getParent(element);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public Object[] getChildren(Object element) {
-			List<Object> result= new ArrayList<Object>();
+			List<Object> result= new ArrayList<>();
 			//all keys with value element
 			Set<IFolder> keys= fNonExistingFolders.keySet();
 			for (Iterator<IFolder> iter= keys.iterator(); iter.hasNext();) {
@@ -113,10 +107,10 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		fJavaProject= javaProject;
 		fExistingElements= existingElements;
 		fOutputLocation= outputLocation;
-		fRemovedElements= new HashSet<CPListElement>();
-		fModifiedElements= new HashSet<CPListElement>();
-		fInsertedElements= new HashSet<CPListElement>();
-		fNonExistingFolders= new Hashtable<IFolder, IContainer>();
+		fRemovedElements= new HashSet<>();
+		fModifiedElements= new HashSet<>();
+		fInsertedElements= new HashSet<>();
+		fNonExistingFolders= new Hashtable<>();
 
 		for (int i= 0; i < existingElements.length; i++) {
 			CPListElement cur= existingElements[i];
@@ -132,7 +126,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		List<IResource> existingContainers= getExistingContainers(fExistingElements);
 
 		IProject[] allProjects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		ArrayList<IProject> rejectedElements= new ArrayList<IProject>(allProjects.length);
+		ArrayList<IProject> rejectedElements= new ArrayList<>(allProjects.length);
 		IProject currProject= fJavaProject.getProject();
 		for (int i= 0; i < allProjects.length; i++) {
 			if (!allProjects[i].equals(currProject)) {
@@ -141,9 +135,6 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 		}
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, rejectedElements.toArray()){
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-			 */
 			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				if (element instanceof IFolder && ((IFolder)element).isVirtual()) {
@@ -180,6 +171,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 					}
 				};
 				action.addPropertyChangeListener(new IPropertyChangeListener() {
+					@Override
 					public void propertyChange(PropertyChangeEvent event) {
 						if (event.getProperty().equals(IAction.RESULT)) {
 							if (event.getNewValue().equals(Boolean.TRUE)) {
@@ -212,15 +204,15 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 				CPListElement existingElement= fExistingElements[0];
 				if (existingElement.getResource() instanceof IProject) {
 					if (!removeProjectFromBP(existingElement)) {
-						ArrayList<CPListElement> added= new ArrayList<CPListElement>(fInsertedElements);
-						HashSet<CPListElement> updatedEclusionPatterns= new HashSet<CPListElement>();
+						ArrayList<CPListElement> added= new ArrayList<>(fInsertedElements);
+						HashSet<CPListElement> updatedEclusionPatterns= new HashSet<>();
 						addExlusionPatterns(added, updatedEclusionPatterns);
 						fModifiedElements.addAll(updatedEclusionPatterns);
 					}
 				}
 			} else {
-				ArrayList<CPListElement> added= new ArrayList<CPListElement>(fInsertedElements);
-				HashSet<CPListElement> updatedEclusionPatterns= new HashSet<CPListElement>();
+				ArrayList<CPListElement> added= new ArrayList<>(fInsertedElements);
+				HashSet<CPListElement> updatedEclusionPatterns= new HashSet<>();
 				addExlusionPatterns(added, updatedEclusionPatterns);
 				fModifiedElements.addAll(updatedEclusionPatterns);
 			}
@@ -231,15 +223,15 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 	}
 
 	public List<CPListElement> getInsertedElements() {
-		return new ArrayList<CPListElement>(fInsertedElements);
+		return new ArrayList<>(fInsertedElements);
 	}
 
 	public List<CPListElement> getRemovedElements() {
-		return new ArrayList<CPListElement>(fRemovedElements);
+		return new ArrayList<>(fRemovedElements);
 	}
 
 	public List<CPListElement> getModifiedElements() {
-		return new ArrayList<CPListElement>(fModifiedElements);
+		return new ArrayList<>(fModifiedElements);
 	}
 
 	public IPath getOutputLocation() {
@@ -291,7 +283,7 @@ public class CreateMultipleSourceFoldersDialog extends TrayDialog {
 	}
 
 	private List<IResource> getExistingContainers(CPListElement[] existingElements) {
-		List<IResource> res= new ArrayList<IResource>();
+		List<IResource> res= new ArrayList<>();
 		for (int i= 0; i < existingElements.length; i++) {
 			IResource resource= existingElements[i].getResource();
 			if (resource instanceof IContainer) {

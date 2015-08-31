@@ -19,8 +19,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 public class TypeConstraintFactory implements ITypeConstraintFactory {
 
-	private Map<ConstraintVariable, Map<ConstraintVariable, Map<ConstraintOperator, SimpleTypeConstraint>>> fSimpleConstraints= new HashMap<ConstraintVariable, Map<ConstraintVariable, Map<ConstraintOperator, SimpleTypeConstraint>>>();
-	private Map<ConstraintVariable, Map<String, CompositeOrTypeConstraint>> fOrConstraints= new HashMap<ConstraintVariable, Map<String, CompositeOrTypeConstraint>>();
+	private Map<ConstraintVariable, Map<ConstraintVariable, Map<ConstraintOperator, SimpleTypeConstraint>>> fSimpleConstraints= new HashMap<>();
+	private Map<ConstraintVariable, Map<String, CompositeOrTypeConstraint>> fOrConstraints= new HashMap<>();
 
 	protected static final boolean PRINT_STATS= false;
 	protected int fNrCreated= 0;
@@ -41,14 +41,14 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 					return storeConstraint(v1, v2, operator, m3);
 				}
 			} else {
-				Map<ConstraintOperator, SimpleTypeConstraint> m3= new HashMap<ConstraintOperator, SimpleTypeConstraint>();
+				Map<ConstraintOperator, SimpleTypeConstraint> m3= new HashMap<>();
 				m2.put(v2, m3);
 				return storeConstraint(v1, v2, operator, m3);
 			}
 		} else {
-			Map<ConstraintVariable, Map<ConstraintOperator, SimpleTypeConstraint>> m2= new HashMap<ConstraintVariable, Map<ConstraintOperator, SimpleTypeConstraint>>();
+			Map<ConstraintVariable, Map<ConstraintOperator, SimpleTypeConstraint>> m2= new HashMap<>();
 			fSimpleConstraints.put(v1, m2);
-			Map<ConstraintOperator, SimpleTypeConstraint> m3= new HashMap<ConstraintOperator, SimpleTypeConstraint>();
+			Map<ConstraintOperator, SimpleTypeConstraint> m3= new HashMap<>();
 			m2.put(v2, m3);
 			return storeConstraint(v1, v2, operator, m3);
 		}
@@ -70,18 +70,22 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 		}
 	}
 
+	@Override
 	public ITypeConstraint[] createSubtypeConstraint(ConstraintVariable v1, ConstraintVariable v2){
 		return createConstraint(v1, v2, ConstraintOperator.createSubTypeOperator());
 	}
 
+	@Override
 	public ITypeConstraint[] createStrictSubtypeConstraint(ConstraintVariable v1, ConstraintVariable v2){
 		return createConstraint(v1, v2, ConstraintOperator.createStrictSubtypeOperator());
 	}
 
+	@Override
 	public ITypeConstraint[] createEqualsConstraint(ConstraintVariable v1, ConstraintVariable v2){
 		return createConstraint(v1, v2, ConstraintOperator.createEqualsOperator());
 	}
 
+	@Override
 	public ITypeConstraint[] createDefinesConstraint(ConstraintVariable v1, ConstraintVariable v2){
 		return createConstraint(v1, v2, ConstraintOperator.createDefinesOperator());
 	}
@@ -90,6 +94,7 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 	 * {@inheritDoc}
 	 * Avoid creating constraints involving primitive types and self-constraints.
 	 */
+	@Override
 	public boolean filter(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator operator) {
 		if ((v1.getBinding() != null && v1.getBinding().isPrimitive() &&
 				v2.getBinding() != null && v2.getBinding().isPrimitive()) ||
@@ -101,11 +106,7 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraintFactory#createCompositeOrTypeConstraint(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraint[])
-	 */
+	@Override
 	public CompositeOrTypeConstraint createCompositeOrTypeConstraint(ITypeConstraint[] constraints){
 		ConstraintVariable left= ((SimpleTypeConstraint)constraints[0]).getLeft();
 		String bounds= ""; //$NON-NLS-1$
@@ -130,7 +131,7 @@ public class TypeConstraintFactory implements ITypeConstraintFactory {
 				return constraint;
 			}
 		} else {
-			Map<String, CompositeOrTypeConstraint> m2= new HashMap<String, CompositeOrTypeConstraint>();
+			Map<String, CompositeOrTypeConstraint> m2= new HashMap<>();
 			fOrConstraints.put(left, m2);
 			CompositeOrTypeConstraint constraint= new CompositeOrTypeConstraint(constraints);
 			m2.put(bounds, constraint);

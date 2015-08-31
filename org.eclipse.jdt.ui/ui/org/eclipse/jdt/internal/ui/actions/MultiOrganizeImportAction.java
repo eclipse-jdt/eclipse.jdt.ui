@@ -51,7 +51,7 @@ public class MultiOrganizeImportAction extends CleanUpAction {
 
 	@Override
 	protected ICleanUp[] getCleanUps(ICompilationUnit[] units) {
-		Map<String, String> settings= new Hashtable<String, String>();
+		Map<String, String> settings= new Hashtable<>();
 		settings.put(CleanUpConstants.ORGANIZE_IMPORTS, CleanUpOptions.TRUE);
 		ImportsCleanUp importsCleanUp= new ImportsCleanUp(settings);
 

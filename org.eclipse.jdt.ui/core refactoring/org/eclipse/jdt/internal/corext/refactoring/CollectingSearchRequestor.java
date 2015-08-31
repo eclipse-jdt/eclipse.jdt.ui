@@ -40,7 +40,7 @@ public class CollectingSearchRequestor extends SearchRequestor {
 	}
 
 	public CollectingSearchRequestor(ReferencesInBinaryContext binaryRefs) {
-		fFound= new ArrayList<SearchMatch>();
+		fFound= new ArrayList<>();
 		fBinaryRefs= binaryRefs;
 	}
 

@@ -34,9 +34,10 @@ import org.eclipse.jdt.internal.ui.search.SearchParticipantsExtensionPoint;
  */
 public class ParticipantTest extends TestCase {
 
-	private static Class THIS= ParticipantTest.class;
+	private static Class<ParticipantTest> THIS= ParticipantTest.class;
 
 	static class TestExtensionPoint extends SearchParticipantsExtensionPoint {
+		@Override
 		public SearchParticipantRecord[] getSearchParticipants(IProject[] concernedProjects) {
 			return new SearchParticipantRecord[] { new SearchParticipantRecord(new TestParticipantRecord(), new TestParticipant()) };
 		}
@@ -48,18 +49,22 @@ public class ParticipantTest extends TestCase {
 			super(null);
 		}
 
+		@Override
 		protected IStatus checkSyntax() {
 			return Status.OK_STATUS;
 		}
 
+		@Override
 		protected IQueryParticipant create() throws CoreException {
 			return new TestParticipant();
 		}
 
+		@Override
 		public String getID() {
 			return "TestParticipant1 ID";
 		}
 
+		@Override
 		protected String getNature() {
 			return JavaCore.NATURE_ID;
 		}

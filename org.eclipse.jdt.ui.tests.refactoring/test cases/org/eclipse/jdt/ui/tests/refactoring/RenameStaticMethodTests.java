@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 
 public class RenameStaticMethodTests extends RefactoringTest {
-	private static final Class clazz= RenameStaticMethodTests.class;
+	private static final Class<RenameStaticMethodTests> clazz= RenameStaticMethodTests.class;
 	private static final String REFACTORING_PATH= "RenameStaticMethod/";
 
 	private static final boolean BUG_83332_SPLIT_SINGLE_IMPORT= true;
@@ -46,6 +46,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 		return new RefactoringTestSetup(test);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}

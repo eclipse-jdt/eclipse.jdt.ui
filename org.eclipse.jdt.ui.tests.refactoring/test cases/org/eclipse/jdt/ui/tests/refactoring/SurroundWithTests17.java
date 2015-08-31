@@ -36,6 +36,7 @@ public class SurroundWithTests17 extends SurroundWithTests {
 		return fgTestSetup;
 	}
 
+	@Override
 	protected IPackageFragmentRoot getRoot() {
 		return fgTestSetup.getRoot();
 	}
@@ -45,10 +46,12 @@ public class SurroundWithTests17 extends SurroundWithTests {
 		return SurroundWithTryCatchRefactoring.create(unit, getTextSelection(), true);
 	}
 
+	@Override
 	protected void tryCatchInvalidTest() throws Exception {
 		performTest(fgTestSetup.getTryCatchPackage(), getName(), "trycatch17_out", INVALID_SELECTION);
 	}
 
+	@Override
 	protected void tryCatchTest() throws Exception {
 		performTest(fgTestSetup.getTryCatchPackage(), getName(), "trycatch17_out", COMPARE_WITH_OUTPUT);
 	}

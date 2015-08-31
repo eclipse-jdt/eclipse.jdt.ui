@@ -93,7 +93,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			public UnresolvedTypeData(SimpleName ref) {
 				this.ref= ref;
 				this.typeKinds= ASTResolving.getPossibleTypeKinds(ref, true);
-				this.foundInfos= new ArrayList<TypeNameMatch>(3);
+				this.foundInfos= new ArrayList<>(3);
 			}
 
 			public void addInfo(TypeNameMatch info) {
@@ -135,7 +135,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 			ICompilationUnit cu= impStructure.getCompilationUnit();
 
-			fImplicitImports= new HashSet<String>(3);
+			fImplicitImports= new HashSet<>(3);
 			fImplicitImports.add(""); //$NON-NLS-1$
 			fImplicitImports.add("java.lang"); //$NON-NLS-1$
 			fImplicitImports.add(cu.getParent().getElementName());
@@ -146,8 +146,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 			fAllowDefaultPackageImports= cu.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true).equals(JavaCore.VERSION_1_3);
 
-			fImportsAdded= new HashSet<String>();
-			fUnresolvedTypes= new HashMap<String, UnresolvedTypeData>();
+			fImportsAdded= new HashSet<>();
+			fUnresolvedTypes= new HashMap<>();
 		}
 
 		private boolean needsImport(ITypeBinding typeBinding, SimpleName ref) {
@@ -238,7 +238,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				for (Iterator<String> iter= fUnresolvedTypes.keySet().iterator(); iter.hasNext();) {
 					allTypes[i++]= iter.next().toCharArray();
 				}
-				final ArrayList<TypeNameMatch> typesFound= new ArrayList<TypeNameMatch>();
+				final ArrayList<TypeNameMatch> typesFound= new ArrayList<>();
 				final IJavaProject project= fCurrPackage.getJavaProject();
 				IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { project });
 				TypeNameMatchCollector collector= new TypeNameMatchCollector(typesFound);
@@ -256,8 +256,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					}
 				}
 
-				ArrayList<TypeNameMatch[]> openChoices= new ArrayList<TypeNameMatch[]>(nUnresolved);
-				ArrayList<SourceRange> sourceRanges= new ArrayList<SourceRange>(nUnresolved);
+				ArrayList<TypeNameMatch[]> openChoices= new ArrayList<>(nUnresolved);
+				ArrayList<SourceRange> sourceRanges= new ArrayList<>(nUnresolved);
 				for (Iterator<UnresolvedTypeData> iter= fUnresolvedTypes.values().iterator(); iter.hasNext();) {
 					UnresolvedTypeData data= iter.next();
 					TypeNameMatch[] openChoice= processTypeInfo(data.foundInfos);
@@ -388,6 +388,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	 * @throws CoreException thrown when the operation failed
 	 * @throws OperationCanceledException Runtime error thrown when operation is canceled.
 	 */
+	@Override
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
@@ -426,10 +427,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 			ImportRewrite importsRewrite= StubUtility.createImportRewrite(astRoot, false);
 
-			Set<String> oldSingleImports= new HashSet<String>();
-			Set<String>  oldDemandImports= new HashSet<String>();
-			List<SimpleName> typeReferences= new ArrayList<SimpleName>();
-			List<SimpleName> staticReferences= new ArrayList<SimpleName>();
+			Set<String> oldSingleImports= new HashSet<>();
+			Set<String>  oldDemandImports= new HashSet<>();
+			List<SimpleName> typeReferences= new ArrayList<>();
+			List<SimpleName> staticReferences= new ArrayList<>();
 
 			if (!collectReferences(astRoot, typeReferences, staticReferences, oldSingleImports, oldDemandImports))
 				return null;
@@ -472,7 +473,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	}
 
 	private void determineImportDifferences(ImportRewrite importsStructure, Set<String> oldSingleImports, Set<String> oldDemandImports) {
-  		ArrayList<String> importsAdded= new ArrayList<String>();
+  		ArrayList<String> importsAdded= new ArrayList<>();
   		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedImports()));
   		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedStaticImports()));
 

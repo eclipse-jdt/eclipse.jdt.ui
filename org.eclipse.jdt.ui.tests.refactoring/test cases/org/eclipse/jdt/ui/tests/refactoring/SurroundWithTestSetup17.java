@@ -49,10 +49,11 @@ public class SurroundWithTestSetup17 extends TestSetup {
 		return fRoot;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "0");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -71,6 +72,7 @@ public class SurroundWithTestSetup17 extends TestSetup {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CATCHBLOCK_ID, "", null);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		JavaProjectHelper.delete(fJavaProject);

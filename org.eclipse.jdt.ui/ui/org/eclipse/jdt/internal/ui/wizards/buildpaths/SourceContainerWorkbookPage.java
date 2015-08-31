@@ -73,9 +73,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			fSelectedElements= fFoldersList.getSelectedElements();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		protected INewWizard createWizard() throws CoreException {
 			return fWizard;
@@ -90,9 +87,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			return SourceContainerWorkbookPage.this.getShell();
 		}
 		
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void propertyChange(PropertyChangeEvent event) {
 			if (event.getProperty().equals(IAction.RESULT)) {
 				if (event.getNewValue().equals(Boolean.TRUE)) {
@@ -169,7 +164,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			NewWizardMessages.SourceContainerWorkbookPage_folders_remove_button
 		};
 
-		fFoldersList= new TreeListDialogField<CPListElement>(adapter, buttonLabels, new CPListLabelProvider());
+		fFoldersList= new TreeListDialogField<>(adapter, buttonLabels, new CPListLabelProvider());
 		fFoldersList.setDialogFieldListener(adapter);
 		fFoldersList.setLabelText(NewWizardMessages.SourceContainerWorkbookPage_folders_label);
 
@@ -189,6 +184,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			updateFoldersList();
 		} else {
 			Display.getDefault().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					updateFoldersList();
 				}
@@ -201,7 +197,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			return;
 		}
 
-		ArrayList<CPListElement> folders= new ArrayList<CPListElement>();
+		ArrayList<CPListElement> folders= new ArrayList<>();
 
 		boolean useFolderOutputs= false;
 		List<CPListElement> cpelements= fClassPathList.getElements();
@@ -271,22 +267,27 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		private final Object[] EMPTY_ARR= new Object[0];
 
 		// -------- IListAdapter --------
+		@Override
 		public void customButtonPressed(TreeListDialogField<CPListElement> field, int index) {
 			sourcePageCustomButtonPressed(field, index);
 		}
 
+		@Override
 		public void selectionChanged(TreeListDialogField<CPListElement> field) {
 			sourcePageSelectionChanged(field);
 		}
 
+		@Override
 		public void doubleClicked(TreeListDialogField<CPListElement> field) {
 			sourcePageDoubleClicked(field);
 		}
 
+		@Override
 		public void keyPressed(TreeListDialogField<CPListElement> field, KeyEvent event) {
 			sourcePageKeyPressed(field, event);
 		}
 
+		@Override
 		public Object[] getChildren(TreeListDialogField<CPListElement> field, Object element) {
 			if (element instanceof CPListElement) {
 				return ((CPListElement) element).getChildren(!fUseFolderOutputs.isSelected());
@@ -294,6 +295,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			return EMPTY_ARR;
 		}
 
+		@Override
 		public Object getParent(TreeListDialogField<CPListElement> field, Object element) {
 			if (element instanceof CPListElementAttribute) {
 				return ((CPListElementAttribute) element).getParent();
@@ -301,11 +303,13 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			return null;
 		}
 
+		@Override
 		public boolean hasChildren(TreeListDialogField<CPListElement> field, Object element) {
 			return (element instanceof CPListElement);
 		}
 
 		// ---------- IDialogFieldListener --------
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			sourcePageDialogFieldChanged(field);
 		}
@@ -631,9 +635,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#isEntryKind(int)
-	 */
 	@Override
 	public boolean isEntryKind(int kind) {
 		return kind == IClasspathEntry.CPE_SOURCE;
@@ -662,9 +663,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fOutputLocationField.setText(outputLocation.makeRelative().toOSString());
 	}
 
-	/**
-     * {@inheritDoc}
-     */
     @Override
 	public void setFocus() {
     	fFoldersList.setFocus();

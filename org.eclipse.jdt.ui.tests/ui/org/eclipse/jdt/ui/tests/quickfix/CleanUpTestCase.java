@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,9 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -65,7 +62,11 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.preferences.cleanup.CleanUpProfileVersioner;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class CleanUpTestCase extends QuickFixTest {
 
@@ -97,8 +98,9 @@ public class CleanUpTestCase extends QuickFixTest {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 
@@ -122,7 +124,7 @@ public class CleanUpTestCase extends QuickFixTest {
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-		Map settings= new Hashtable();
+		Map<String, String> settings= new Hashtable<>();
 		fProfile= new ProfileManager.CustomProfile("testProfile", settings, CleanUpProfileVersioner.CURRENT_VERSION, CleanUpProfileVersioner.PROFILE_KIND);
 		InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).put(CleanUpConstants.CLEANUP_PROFILE, fProfile.getID());
 		InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).put(CleanUpConstants.SAVE_PARTICIPANT_PROFILE, fProfile.getID());
@@ -130,6 +132,7 @@ public class CleanUpTestCase extends QuickFixTest {
 		disableAll();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, getDefaultClasspath());
 		disableAll();
@@ -147,11 +150,11 @@ public class CleanUpTestCase extends QuickFixTest {
 	}
 
 	private void disableAll() throws CoreException {
-		Map settings= fProfile.getSettings();
+		Map<String, String> settings= fProfile.getSettings();
 		CleanUpOptions options= JavaPlugin.getDefault().getCleanUpRegistry().getDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
-		Set keys= options.getKeys();
-		for (Iterator iterator= keys.iterator(); iterator.hasNext();) {
-			String key= (String)iterator.next();
+		Set<String> keys= options.getKeys();
+		for (Iterator<String> iterator= keys.iterator(); iterator.hasNext();) {
+			String key= iterator.next();
 			settings.put(key, CleanUpOptions.FALSE);
 		}
 		commitProfile();
@@ -168,7 +171,7 @@ public class CleanUpTestCase extends QuickFixTest {
 	}
 
 	private void commitProfile() throws CoreException {
-		List profiles= CleanUpPreferenceUtil.getBuiltInProfiles();
+		List<Profile> profiles= CleanUpPreferenceUtil.getBuiltInProfiles();
 		profiles.add(fProfile);
 
 		CleanUpProfileVersioner versioner= new CleanUpProfileVersioner();

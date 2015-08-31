@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,10 +17,6 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -61,11 +57,15 @@ import org.eclipse.jdt.ui.tests.refactoring.ParticipantTesting;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 
 public class DeleteTest extends RefactoringTest {
 
 	private static final boolean BUG_55221= true;
-	private static final Class clazz= DeleteTest.class;
+	private static final Class<DeleteTest> clazz= DeleteTest.class;
 	private static final String REFACTORING_PATH= "Delete/";
 
 	public DeleteTest(String name) {
@@ -76,9 +76,9 @@ public class DeleteTest extends RefactoringTest {
 		TestSuite classSuite= new TestSuite(clazz);
 
 		// Last tests need to delete package p. Make sure they are really last to run:
-		TreeMap lastTests= new TreeMap(); // sorted by name
+		TreeMap<String, TestCase> lastTests= new TreeMap<>(); // sorted by name
 		TestSuite suite= new TestSuite(classSuite.getName());
-		for (Enumeration e= classSuite.tests(); e.hasMoreElements(); ) {
+		for (Enumeration<Test> e= classSuite.tests(); e.hasMoreElements(); ) {
 			TestCase test= (TestCase) e.nextElement();
 			String name= test.getName();
 			if (name.startsWith("test_END_DeletePackageSub")) {
@@ -87,8 +87,8 @@ public class DeleteTest extends RefactoringTest {
 				suite.addTest(test);
 			}
 		}
-		for (Iterator iter= lastTests.values().iterator(); iter.hasNext();) {
-			suite.addTest((Test) iter.next());
+		for (Iterator<TestCase> iter= lastTests.values().iterator(); iter.hasNext();) {
+			suite.addTest(iter.next());
 		}
 		return new RefactoringTestSetup(suite);
 	}
@@ -97,11 +97,13 @@ public class DeleteTest extends RefactoringTest {
 		return new RefactoringTestSetup(someTest);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fIsPreDeltaTest= true;
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -192,7 +194,7 @@ public class DeleteTest extends RefactoringTest {
 	 */
 	private void executeDeletePackage(Object[] markedForDelete, IPackageFragment[] packsToBeDeleted, Object[] othersToBeDeleted, boolean deleteSubs) throws CoreException, Exception {
 
-		List allList= new ArrayList();
+		List<Object> allList= new ArrayList<>();
 		allList.addAll(Arrays.asList(packsToBeDeleted));
 		allList.addAll(Arrays.asList(othersToBeDeleted));
 

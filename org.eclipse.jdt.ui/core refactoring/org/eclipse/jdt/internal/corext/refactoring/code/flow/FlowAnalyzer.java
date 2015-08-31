@@ -119,8 +119,8 @@ abstract class FlowAnalyzer extends GenericVisitor {
 
 	static protected class SwitchData {
 		private boolean fHasDefaultCase;
-		private List<IRegion> fRanges= new ArrayList<IRegion>(4);
-		private List<FlowInfo> fInfos= new ArrayList<FlowInfo>(4);
+		private List<IRegion> fRanges= new ArrayList<>(4);
+		private List<FlowInfo> fInfos= new ArrayList<>(4);
 		public void setHasDefaultCase() {
 			fHasDefaultCase= true;
 		}
@@ -142,7 +142,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 		}
 	}
 
-	private HashMap<ASTNode, FlowInfo> fData = new HashMap<ASTNode, FlowInfo>(100);
+	private HashMap<ASTNode, FlowInfo> fData = new HashMap<>(100);
 	/* package */ FlowContext fFlowContext= null;
 
 	public FlowAnalyzer(FlowContext context) {

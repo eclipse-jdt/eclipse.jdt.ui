@@ -63,7 +63,7 @@ public class CompilationUnitPreview extends JavaPreview {
 				final IContentFormatterExtension extension = (IContentFormatterExtension) formatter;
 				Map<String, String> prefs= fWorkingValues;
 				if (fFormatterId != null) {
-					prefs= new HashMap<String, String>(fWorkingValues);
+					prefs= new HashMap<>(fWorkingValues);
 					prefs.put(JavaCore.JAVA_FORMATTER, fFormatterId);
 				}
 				context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, prefs);

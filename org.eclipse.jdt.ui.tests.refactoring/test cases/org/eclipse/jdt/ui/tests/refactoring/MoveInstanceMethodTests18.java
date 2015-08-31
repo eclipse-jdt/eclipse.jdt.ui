@@ -14,7 +14,7 @@ import junit.framework.Test;
 
 public class MoveInstanceMethodTests18 extends MoveInstanceMethodTests {
 
-	private static final Class clazz= MoveInstanceMethodTests18.class;
+	private static final Class<MoveInstanceMethodTests18> clazz= MoveInstanceMethodTests18.class;
 
 	public MoveInstanceMethodTests18(String name) {
 		super(name);

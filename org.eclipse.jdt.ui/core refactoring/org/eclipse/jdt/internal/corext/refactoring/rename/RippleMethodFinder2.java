@@ -63,12 +63,12 @@ public class RippleMethodFinder2 {
 	private Map<IMethod, SearchMatch> fDeclarationToMatch;
 
 	private static class MultiMap<K, V> {
-		HashMap<K, Collection<V>> fImplementation= new HashMap<K, Collection<V>>();
+		HashMap<K, Collection<V>> fImplementation= new HashMap<>();
 
 		public void put(K key, V value) {
 			Collection<V> collection= fImplementation.get(key);
 			if (collection == null) {
-				collection= new HashSet<V>();
+				collection= new HashSet<>();
 				fImplementation.put(key, collection);
 			}
 			collection.add(value);
@@ -79,7 +79,7 @@ public class RippleMethodFinder2 {
 		}
 	}
 	private static class UnionFind {
-		HashMap<IType, IType> fElementToRepresentative= new HashMap<IType, IType>();
+		HashMap<IType, IType> fElementToRepresentative= new HashMap<>();
 
 		public void init(IType type) {
 			fElementToRepresentative.put(type, type);
@@ -135,7 +135,7 @@ public class RippleMethodFinder2 {
 	private RippleMethodFinder2(IMethod method, ReferencesInBinaryContext binaryRefs) {
 		fMethod= method;
 		fExcludeBinaries= true;
-		fDeclarationToMatch= new HashMap<IMethod, SearchMatch>();
+		fDeclarationToMatch= new HashMap<>();
 		fBinaryRefs= binaryRefs;
 	}
 
@@ -169,7 +169,7 @@ public class RippleMethodFinder2 {
 		if (fDeclarationToMatch == null)
 			return rippleMethods;
 
-		List<IMethod> rippleMethodsList= new ArrayList<IMethod>(Arrays.asList(rippleMethods));
+		List<IMethod> rippleMethodsList= new ArrayList<>(Arrays.asList(rippleMethods));
 		for (Iterator<IMethod> iter= rippleMethodsList.iterator(); iter.hasNext(); ) {
 			Object match= fDeclarationToMatch.get(iter.next());
 			if (match != null) {
@@ -200,13 +200,13 @@ public class RippleMethodFinder2 {
 		fHierarchy= null;
 		fRootTypes= null;
 
-		Map<IType, List<IType>> partitioning= new HashMap<IType, List<IType>>();
+		Map<IType, List<IType>> partitioning= new HashMap<>();
 		for (Iterator<IType> iter= fTypeToMethod.keySet().iterator(); iter.hasNext();) {
 			IType type= iter.next();
 			IType rep= fUnionFind.find(type);
 			List<IType> types= partitioning.get(rep);
 			if (types == null)
-				types= new ArrayList<IType>();
+				types= new ArrayList<>();
 			types.add(type);
 			partitioning.put(rep, types);
 		}
@@ -219,7 +219,7 @@ public class RippleMethodFinder2 {
 		IType methodTypeRep= fUnionFind.find(fMethod.getDeclaringType());
 		List<IType> relatedTypes= partitioning.get(methodTypeRep);
 		boolean hasRelatedInterfaces= false;
-		List<IMethod> relatedMethods= new ArrayList<IMethod>();
+		List<IMethod> relatedMethods= new ArrayList<>();
 		for (Iterator<IType> iter= relatedTypes.iterator(); iter.hasNext();) {
 			IType relatedType= iter.next();
 			relatedMethods.add(fTypeToMethod.get(relatedType));
@@ -230,10 +230,10 @@ public class RippleMethodFinder2 {
 		//Definition: An alien type is a type that is not a related type. The set of
 		// alien types diminishes as new types become related (a.k.a marry a relatedType).
 
-		List<IMethod> alienDeclarations= new ArrayList<IMethod>(fDeclarations);
+		List<IMethod> alienDeclarations= new ArrayList<>(fDeclarations);
 		fDeclarations= null;
 		alienDeclarations.removeAll(relatedMethods);
-		List<IType> alienTypes= new ArrayList<IType>();
+		List<IType> alienTypes= new ArrayList<>();
 		boolean hasAlienInterfaces= false;
 		for (Iterator<IMethod> iter= alienDeclarations.iterator(); iter.hasNext();) {
 			IMethod alienDeclaration= iter.next();
@@ -248,8 +248,8 @@ public class RippleMethodFinder2 {
 			return relatedMethods.toArray(new IMethod[relatedMethods.size()]);
 
 		//find all subtypes of related types:
-		HashSet<IType> relatedSubTypes= new HashSet<IType>();
-		List<IType> relatedTypesToProcess= new ArrayList<IType>(relatedTypes);
+		HashSet<IType> relatedSubTypes= new HashSet<>();
+		List<IType> relatedTypesToProcess= new ArrayList<>(relatedTypes);
 		while (relatedTypesToProcess.size() > 0) {
 			//TODO: would only need subtype hierarchies of all top-of-ripple relatedTypesToProcess
 			for (Iterator<IType> iter= relatedTypesToProcess.iterator(); iter.hasNext();) {
@@ -265,7 +265,7 @@ public class RippleMethodFinder2 {
 			}
 			relatedTypesToProcess.clear(); //processed; make sure loop terminates
 
-			HashSet<IType> marriedAlienTypeReps= new HashSet<IType>();
+			HashSet<IType> marriedAlienTypeReps= new HashSet<>();
 			for (Iterator<IType> iter= alienTypes.iterator(); iter.hasNext();) {
 				if (pm.isCanceled())
 					throw new OperationCanceledException();
@@ -329,7 +329,7 @@ public class RippleMethodFinder2 {
 	}
 
 	private void findAllDeclarations(IProgressMonitor monitor, WorkingCopyOwner owner) throws CoreException {
-		fDeclarations= new ArrayList<IMethod>();
+		fDeclarations= new ArrayList<>();
 
 		class MethodRequestor extends SearchRequestor {
 			@Override
@@ -366,7 +366,7 @@ public class RippleMethodFinder2 {
 	}
 
 	private void createTypeToMethod() {
-		fTypeToMethod= new HashMap<IType, IMethod>();
+		fTypeToMethod= new HashMap<>();
 		for (Iterator<IMethod> iter= fDeclarations.iterator(); iter.hasNext();) {
 			IMethod declaration= iter.next();
 			fTypeToMethod.put(declaration.getDeclaringType(), declaration);
@@ -374,7 +374,7 @@ public class RippleMethodFinder2 {
 	}
 
 	private void createUnionFind() throws JavaModelException {
-		fRootTypes= new HashSet<IType>(fTypeToMethod.keySet());
+		fRootTypes= new HashSet<>(fTypeToMethod.keySet());
 		fUnionFind= new UnionFind();
 		for (Iterator<IType> iter= fTypeToMethod.keySet().iterator(); iter.hasNext();) {
 			IType type= iter.next();
@@ -384,14 +384,14 @@ public class RippleMethodFinder2 {
 			IType type= iter.next();
 			uniteWithSupertypes(type, type);
 		}
-		fRootReps= new MultiMap<IType, IType>();
+		fRootReps= new MultiMap<>();
 		for (Iterator<IType> iter= fRootTypes.iterator(); iter.hasNext();) {
 			IType type= iter.next();
 			IType rep= fUnionFind.find(type);
 			if (rep != null)
 				fRootReps.put(rep, type);
 		}
-		fRootHierarchies= new HashMap<IType, ITypeHierarchy>();
+		fRootHierarchies= new HashMap<>();
 	}
 
 	private void uniteWithSupertypes(IType anchor, IType type) throws JavaModelException {

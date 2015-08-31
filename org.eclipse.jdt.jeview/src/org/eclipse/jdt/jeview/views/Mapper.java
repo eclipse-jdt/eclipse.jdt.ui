@@ -19,13 +19,13 @@ public abstract class Mapper<I, O> {
 	public abstract O map(I element);
 
 	public static <I, O> List<O> build(Collection<? extends I> elements, Mapper<I, O> mapper) {
-		ArrayList<O> result = new ArrayList<O>(elements.size());
+		ArrayList<O> result = new ArrayList<>(elements.size());
 		for (I element : elements)
 			result.add(mapper.map(element));
 		return result;
 	}
 	public List<O> mapToList(Collection<? extends I> elements) {
-		ArrayList<O> result = new ArrayList<O>(elements.size());
+		ArrayList<O> result = new ArrayList<>(elements.size());
 		for (I element : elements)
 			result.add(map(element));
 		return result;

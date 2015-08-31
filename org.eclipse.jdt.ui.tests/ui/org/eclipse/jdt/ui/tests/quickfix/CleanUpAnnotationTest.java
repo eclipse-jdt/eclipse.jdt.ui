@@ -12,9 +12,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFile;
@@ -38,9 +35,12 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class CleanUpAnnotationTest extends CleanUpTestCase {
 
-	private static final Class THIS= CleanUpAnnotationTest.class;
+	private static final Class<CleanUpAnnotationTest> THIS= CleanUpAnnotationTest.class;
 
 	public CleanUpAnnotationTest(String name) {
 		super(name);
@@ -211,7 +211,7 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 

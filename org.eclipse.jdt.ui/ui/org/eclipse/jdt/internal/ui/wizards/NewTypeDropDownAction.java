@@ -97,9 +97,6 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 			return null;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.wizards.AbstractOpenWizardAction#createWizard()
-		 */
 		@Override
 		protected INewWizard createWizard() throws CoreException {
 			return (INewWizard) CoreUtility.createExtension(fConfigurationElement, ATT_CLASS);
@@ -128,6 +125,7 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_CLASS_WIZARD_ACTION);
 	}
 
+	@Override
 	public void dispose() {
 		if (fMenu != null) {
 			fMenu.dispose();
@@ -135,10 +133,12 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 		}
 	}
 
+	@Override
 	public Menu getMenu(Menu parent) {
 		return null;
 	}
 
+	@Override
 	public Menu getMenu(Control parent) {
 		if (fMenu == null) {
 			fMenu= new Menu(parent);
@@ -160,7 +160,7 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 	}
 
 	public static OpenTypeWizardAction[] getActionFromDescriptors() {
-		ArrayList<OpenTypeWizardAction> containers= new ArrayList<OpenTypeWizardAction>();
+		ArrayList<OpenTypeWizardAction> containers= new ArrayList<>();
 
 		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(PlatformUI.PLUGIN_ID, PL_NEW);
 		if (extensionPoint != null) {
@@ -196,23 +196,17 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#init(org.eclipse.ui.IWorkbenchWindow)
-	 */
+	@Override
 	public void init(IWorkbenchWindow window) {
 		fWizardShell= window.getShell();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
-	 */
+	@Override
 	public void run(IAction action) {
 		run();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction, org.eclipse.jface.viewers.ISelection)
-	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 	}
 

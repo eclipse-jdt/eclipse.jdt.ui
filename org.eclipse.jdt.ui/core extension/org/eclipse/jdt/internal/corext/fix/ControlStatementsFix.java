@@ -57,9 +57,6 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 			fResult= resultingCollection;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.DoStatement)
-		 */
 		@Override
 		public boolean visit(DoStatement node) {
 			handle(node.getBody(), DoStatement.BODY_PROPERTY);
@@ -67,9 +64,6 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 			return super.visit(node);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.ForStatement)
-		 */
 		@Override
 		public boolean visit(ForStatement node) {
 			handle(node.getBody(), ForStatement.BODY_PROPERTY);
@@ -77,9 +71,6 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 			return super.visit(node);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public boolean visit(EnhancedForStatement node) {
 			handle(node.getBody(), EnhancedForStatement.BODY_PROPERTY);
@@ -87,9 +78,6 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 			return super.visit(node);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.IfStatement)
-		 */
 		@Override
 		public boolean visit(IfStatement statement) {
 			handle(statement.getThenStatement(), IfStatement.THEN_STATEMENT_PROPERTY);
@@ -102,9 +90,6 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 			return super.visit(statement);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.WhileStatement)
-		 */
 		@Override
 		public boolean visit(WhileStatement node) {
 			handle(node.getBody(), WhileStatement.BODY_PROPERTY);
@@ -189,9 +174,6 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 			fControlStatement= controlStatement;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -223,9 +205,6 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 			fChild= child;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -375,9 +354,9 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		}
 
 		if (statement instanceof IfStatement) {
-			List<ControlStatementsFix> result= new ArrayList<ControlStatementsFix>();
+			List<ControlStatementsFix> result= new ArrayList<>();
 
-			List<RemoveBlockOperation> removeAllList= new ArrayList<RemoveBlockOperation>();
+			List<RemoveBlockOperation> removeAllList= new ArrayList<>();
 
 			IfElseIterator iter= new IfElseIterator((IfStatement)statement);
 			IfStatement item= null;
@@ -437,7 +416,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		if (!convertSingleStatementToBlock && !removeUnnecessaryBlock && !removeUnnecessaryBlockContainingReturnOrThrow)
 			return null;
 
-		List<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
+		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
 		ControlStatementFinder finder= new ControlStatementFinder(convertSingleStatementToBlock, removeUnnecessaryBlock, removeUnnecessaryBlockContainingReturnOrThrow, operations);
 		compilationUnit.accept(finder);
 

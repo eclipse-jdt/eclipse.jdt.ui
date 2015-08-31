@@ -14,7 +14,7 @@ import junit.framework.Test;
 
 public class MoveMembersTests18 extends MoveMembersTests {
 
-	private static final Class clazz= MoveMembersTests18.class;
+	private static final Class<MoveMembersTests18> clazz= MoveMembersTests18.class;
 
 	public MoveMembersTests18(String name) {
 		super(name);

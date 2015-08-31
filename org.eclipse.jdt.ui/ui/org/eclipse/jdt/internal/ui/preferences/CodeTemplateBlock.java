@@ -86,10 +86,12 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 		private final Object[] NO_CHILDREN= new Object[0];
 
+		@Override
 		public void customButtonPressed(TreeListDialogField<String> field, int index) {
 			doButtonPressed(index, field.getSelectedElements());
 		}
 
+		@Override
 		public void selectionChanged(TreeListDialogField<String> field) {
 			List<Object> selected= field.getSelectedElements();
 			field.enableButton(IDX_EDIT, canEdit(selected));
@@ -98,6 +100,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			updateSourceViewerInput(selected);
 		}
 
+		@Override
 		public void doubleClicked(TreeListDialogField<String> field) {
 			List<Object> selected= field.getSelectedElements();
 			if (canEdit(selected)) {
@@ -105,6 +108,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			}
 		}
 
+		@Override
 		public Object[] getChildren(TreeListDialogField<String> field, Object element) {
 			if (element == COMMENT_NODE || element == CODE_NODE) {
 				return getTemplateOfCategory(element == COMMENT_NODE);
@@ -112,6 +116,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			return NO_CHILDREN;
 		}
 
+		@Override
 		public Object getParent(TreeListDialogField<String> field, Object element) {
 			if (element instanceof TemplatePersistenceData) {
 				TemplatePersistenceData data= (TemplatePersistenceData) element;
@@ -123,22 +128,22 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			return null;
 		}
 
+		@Override
 		public boolean hasChildren(TreeListDialogField<String> field, Object element) {
 			return (element == COMMENT_NODE || element == CODE_NODE);
 		}
 
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			if (field == fGenerateComments) {
 				setValue(PREF_GENERATE_COMMENTS, fGenerateComments.isSelected());
 			}
 		}
 
+		@Override
 		public void keyPressed(TreeListDialogField<String> field, KeyEvent event) {
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ViewerSorter#category(java.lang.Object)
-		 */
 		@Override
 		public int category(Object element) {
 			if (element == COMMENT_NODE) {
@@ -195,18 +200,12 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 
 	private static class CodeTemplateLabelProvider extends LabelProvider {
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
-		 */
 		@Override
 		public Image getImage(Object element) {
 			return null;
 
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
-		 */
 		@Override
 		public String getText(Object element) {
 			if (element == COMMENT_NODE || element == CODE_NODE) {
@@ -305,7 +304,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.CodeTemplateBlock_templates_exportall_button
 
 		};
-		fCodeTemplateTree= new TreeListDialogField<String>(adapter, buttonLabels, new CodeTemplateLabelProvider());
+		fCodeTemplateTree= new TreeListDialogField<>(adapter, buttonLabels, new CodeTemplateLabelProvider());
 		fCodeTemplateTree.setDialogFieldListener(adapter);
 		fCodeTemplateTree.setLabelText(PreferencesMessages.CodeTemplateBlock_templates_label);
 		fCodeTemplateTree.setViewerComparator(adapter);
@@ -376,9 +375,6 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		return composite;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateControls()
-	 */
 	@Override
 	protected void updateControls() {
 		fGenerateComments.setSelection(getBooleanValue(PREF_GENERATE_COMMENTS));
@@ -422,7 +418,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	}
 
 	protected TemplatePersistenceData[] getTemplateOfCategory(boolean isComment) {
-		ArrayList<TemplatePersistenceData> res=  new ArrayList<TemplatePersistenceData>();
+		ArrayList<TemplatePersistenceData> res=  new ArrayList<>();
 		TemplatePersistenceData[] templates= fTemplateStore.getTemplateData();
 		for (int i= 0; i < templates.length; i++) {
 			TemplatePersistenceData curr= templates[i];
@@ -529,7 +525,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	}
 
 	private void export(List<Object> selected) {
-		Set<Object> datas= new HashSet<Object>();
+		Set<Object> datas= new HashSet<>();
 		for (int i= 0; i < selected.size(); i++) {
 			Object curr= selected.get(i);
 			if (curr instanceof TemplatePersistenceData) {
@@ -657,9 +653,6 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String, java.lang.String)
-	 */
 	@Override
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		// no validation here

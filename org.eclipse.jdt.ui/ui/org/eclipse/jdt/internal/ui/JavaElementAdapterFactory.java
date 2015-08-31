@@ -76,11 +76,13 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 	private static ITaskListResourceAdapter fgTaskListAdapter;
 	private static JavaElementContainmentAdapter fgJavaElementContainmentAdapter;
 
+	@Override
 	public Class<?>[] getAdapterList() {
 		updateLazyLoadedAdapters();
 		return ADAPTER_LIST;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Object element, Class<T> key) {
 		updateLazyLoadedAdapters();
@@ -142,7 +144,8 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
 		}
     }
 
-    public IResource getAdaptedResource(IAdaptable adaptable) {
+    @Override
+	public IResource getAdaptedResource(IAdaptable adaptable) {
     	IJavaElement je= getJavaElement(adaptable);
     	if (je != null)
     		return getResource(je);
@@ -150,7 +153,8 @@ public class JavaElementAdapterFactory implements IAdapterFactory, IContributorR
     	return null;
     }
 
-    public ResourceMapping getAdaptedResourceMapping(IAdaptable adaptable) {
+    @Override
+	public ResourceMapping getAdaptedResourceMapping(IAdaptable adaptable) {
     	IJavaElement je= getJavaElement(adaptable);
     	if (je != null)
     		return JavaElementResourceMapping.create(je);

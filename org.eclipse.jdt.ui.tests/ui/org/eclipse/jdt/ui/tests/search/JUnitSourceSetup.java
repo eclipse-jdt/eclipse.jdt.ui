@@ -38,6 +38,7 @@ public class JUnitSourceSetup extends TestSetup {
 	private SearchParticipantsExtensionPoint fExtensionPoint;
 
 	static class NullExtensionPoint extends SearchParticipantsExtensionPoint {
+		@Override
 		public SearchParticipantRecord[] getSearchParticipants(IProject[] concernedProjects) {
 			return new SearchParticipantRecord[0];
 		}
@@ -57,6 +58,7 @@ public class JUnitSourceSetup extends TestSetup {
 		this(test, new NullExtensionPoint());
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		SearchParticipantsExtensionPoint.debugSetInstance(fExtensionPoint);
 		fProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
@@ -68,9 +70,7 @@ public class JUnitSourceSetup extends TestSetup {
 		JavaPlugin.getDefault().getCodeTemplateStore().load();
 	}
 
-	/* (non-Javadoc)
-	 * @see junit.extensions.TestSetup#tearDown()
-	 */
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
 		SearchParticipantsExtensionPoint.debugSetInstance(null);

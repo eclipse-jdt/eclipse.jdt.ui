@@ -75,6 +75,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		setDescription(PreferencesMessages.AppearancePreferencePage_description);
 
 		IDialogFieldListener listener= new IDialogFieldListener() {
+			@Override
 			public void dialogFieldChanged(DialogField field) {
 				doDialogFieldChanged(field);
 			}
@@ -238,6 +239,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	/*
 	 * @see IWorkbenchPreferencePage#init(IWorkbench)
 	 */
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 

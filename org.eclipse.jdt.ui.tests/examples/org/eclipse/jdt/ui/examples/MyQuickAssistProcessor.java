@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  */
 public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 
-	private boolean getConvertProposal(IInvocationContext context, List result) {
+	private boolean getConvertProposal(IInvocationContext context, List<ChangeCorrectionProposal> result) {
 		ASTNode node= context.getCoveringNode();
 		if (!(node instanceof StringLiteral)) {
 			return false;
@@ -96,7 +96,7 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 		return buf.toString();
 	}
 
-	private boolean getStringWrappedProposal(final IInvocationContext context, List result) throws CoreException {
+	private boolean getStringWrappedProposal(final IInvocationContext context, List<ChangeCorrectionProposal> result) throws CoreException {
 		int selectionOffset= context.getSelectionOffset();
 		int selectionLength= context.getSelectionLength();
 
@@ -118,9 +118,7 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 			}
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			result.add(new ChangeCorrectionProposal("Wrap in buf.append() (to clipboard)", null, 3, image) {
-				/* (non-Javadoc)
-				 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.ui.IEditorPart, org.eclipse.jface.text.IDocument)
-				 */
+				@Override
 				protected void performChange(IEditorPart activeEditor, IDocument doc) throws CoreException {
 					wrapAndCopyToClipboard(context, doc);
 					super.performChange(activeEditor, doc);
@@ -134,7 +132,7 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private boolean getCreateQuickFixTestProposal(final IInvocationContext context, List result) throws CoreException {
+	private boolean getCreateQuickFixTestProposal(final IInvocationContext context, List<ChangeCorrectionProposal> result) throws CoreException {
 		final ICompilationUnit cu= context.getCompilationUnit();
 		if (context.getSelectionOffset() != 0 || context.getSelectionLength() != cu.getSourceRange().getLength()) {
 			return false;
@@ -149,9 +147,7 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		result.add(new ChangeCorrectionProposal("Create quick fix test", null, 3, image) {
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.ui.IEditorPart, org.eclipse.jface.text.IDocument)
-			 */
+			@Override
 			protected void performChange(IEditorPart activeEditor, IDocument doc) throws CoreException {
 				try {
 					String content= QuickFixTest.getPreviewsInBufAppend(cu);
@@ -206,22 +202,18 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.text.java.IQuickAssistProcessor#hasAssists(org.eclipse.jdt.ui.text.java.IInvocationContext)
-	 */
+	@Override
 	public boolean hasAssists(IInvocationContext context) throws CoreException {
 		return getConvertProposal(context, null) || getStringWrappedProposal(context, null) || getCreateQuickFixTestProposal(context, null);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.text.java.IQuickAssistProcessor#getAssists(org.eclipse.jdt.ui.text.java.IInvocationContext, org.eclipse.jdt.ui.text.java.IProblemLocation[])
-	 */
+	@Override
 	public IJavaCompletionProposal[] getAssists(IInvocationContext context, IProblemLocation[] locations) throws CoreException {
-		ArrayList resultingCollections= new ArrayList();
+		ArrayList<ChangeCorrectionProposal> resultingCollections= new ArrayList<>();
 		getConvertProposal(context, resultingCollections);
 		getStringWrappedProposal(context, resultingCollections);
 		getCreateQuickFixTestProposal(context, resultingCollections);
-		return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
+		return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 	}
 
 }

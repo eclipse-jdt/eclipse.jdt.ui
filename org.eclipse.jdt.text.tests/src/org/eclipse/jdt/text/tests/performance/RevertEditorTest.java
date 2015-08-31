@@ -33,6 +33,7 @@ public abstract class RevertEditorTest extends TextPerformanceTestCase {
 
 	private PerformanceMeter fPerformanceMeter;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		Performance performance= Performance.getDefault();
@@ -59,6 +60,7 @@ public abstract class RevertEditorTest extends TextPerformanceTestCase {
 		assertPerformance(fPerformanceMeter);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		fPerformanceMeter.dispose();

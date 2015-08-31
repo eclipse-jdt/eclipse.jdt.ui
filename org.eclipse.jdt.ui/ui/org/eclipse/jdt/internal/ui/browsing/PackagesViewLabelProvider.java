@@ -118,9 +118,6 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 			return super.getText(element);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getRichTextLabel(java.lang.Object)
-	 */
 	@Override
 	public StyledString getStyledText(Object element) {
 		if (element instanceof IPackageFragment || element instanceof LogicalPackage)

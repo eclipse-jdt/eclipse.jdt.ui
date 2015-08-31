@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * @noextend This class is not intended to be subclassed by clients.
  * @deprecated As of 3.6, replaced by {@link OpenAttachedJavadocAction}
  */
+@Deprecated
 public class OpenExternalJavadocAction extends OpenAttachedJavadocAction {
 
 	/**
@@ -62,7 +63,8 @@ public class OpenExternalJavadocAction extends OpenAttachedJavadocAction {
 	 * @since 3.2
 	 * @deprecated Use {@link #setSpecialSelectionProvider(ISelectionProvider)} instead.
 	 */
-    public OpenExternalJavadocAction(IWorkbenchSite site, ISelectionProvider provider) {
+    @Deprecated
+	public OpenExternalJavadocAction(IWorkbenchSite site, ISelectionProvider provider) {
         this(site);
         setSpecialSelectionProvider(provider);
     }

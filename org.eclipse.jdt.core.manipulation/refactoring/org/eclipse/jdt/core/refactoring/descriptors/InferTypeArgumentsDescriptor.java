@@ -64,7 +64,7 @@ public final class InferTypeArgumentsDescriptor extends JavaRefactoringDescripto
 	 *
 	 * @since 1.2
 	 */
-	public InferTypeArgumentsDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public InferTypeArgumentsDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.INFER_TYPE_ARGUMENTS, project, description, comment, arguments, flags);
 	}
 

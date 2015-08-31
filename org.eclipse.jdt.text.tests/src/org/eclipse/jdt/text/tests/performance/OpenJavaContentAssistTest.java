@@ -23,7 +23,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 public class OpenJavaContentAssistTest extends OpenQuickControlTest {
 
-	private static final Class THIS= OpenJavaContentAssistTest.class;
+	private static final Class<OpenJavaContentAssistTest> THIS= OpenJavaContentAssistTest.class;
 
 	private static final int LINE= 3897;
 
@@ -31,12 +31,14 @@ public class OpenJavaContentAssistTest extends OpenQuickControlTest {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected IAction setUpMeasurement(AbstractTextEditor editor) throws Exception {
 		editor.selectAndReveal(EditorTestHelper.getDocument(editor).getLineOffset(LINE), 0);
 		EditorTestHelper.runEventQueue(100);
 		return editor.getAction("ContentAssistProposal");
 	}
 
+	@Override
 	protected void tearDownMeasurement(AbstractTextEditor editor) throws Exception {
 		EditorTestHelper.closeAllPopUps(EditorTestHelper.getSourceViewer(editor));
 	}

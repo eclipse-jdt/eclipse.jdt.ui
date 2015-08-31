@@ -145,7 +145,7 @@ public class QualifiedNameFinder {
 	}
 
 	private static TextSearchScope createScope(String filePatterns, IProject root) {
-		HashSet<IProject> res= new HashSet<IProject>();
+		HashSet<IProject> res= new HashSet<>();
 		res.add(root);
 		addReferencingProjects(root, res);
 		IResource[] resArr= res.toArray(new IResource[res.size()]);

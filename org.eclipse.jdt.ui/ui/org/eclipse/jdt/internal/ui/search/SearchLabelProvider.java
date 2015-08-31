@@ -73,10 +73,11 @@ public abstract class SearchLabelProvider extends AppearanceAwareLabelProvider {
 		addLabelDecorator(new ProblemsLabelDecorator(null));
 
 		fPage= page;
-		fLabelProviderMap= new HashMap<IMatchPresentation, ILabelProvider>(5);
+		fLabelProviderMap= new HashMap<>(5);
 
 		fSearchPreferences= new ScopedPreferenceStore(InstanceScope.INSTANCE, NewSearchUI.PLUGIN_ID);
 		fSearchPropertyListener= new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				doSearchPropertyChange(event);
 			}

@@ -87,7 +87,7 @@ public final class InputPageUtil {
 	}
 
 	private static List<Integer> convertToIntegerList(int[] array) {
-		List<Integer> result= new ArrayList<Integer>(array.length);
+		List<Integer> result= new ArrayList<>(array.length);
 		for (int i= 0; i < array.length; i++) {
 			result.add(new Integer(array[i]));
 		}

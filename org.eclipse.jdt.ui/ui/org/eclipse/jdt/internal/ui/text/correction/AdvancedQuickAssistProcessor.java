@@ -124,9 +124,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		super();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#hasAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext)
-	 */
+	@Override
 	public boolean hasAssists(IInvocationContext context) throws CoreException {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null) {
@@ -163,14 +161,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#getAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[])
-	 */
+	@Override
 	public IJavaCompletionProposal[] getAssists(IInvocationContext context, IProblemLocation[] locations) throws CoreException {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null) {
 			ArrayList<ASTNode> coveredNodes= getFullyCoveredNodes(context, coveringNode);
-			ArrayList<ICommandAccess> resultingCollections= new ArrayList<ICommandAccess>();
+			ArrayList<ICommandAccess> resultingCollections= new ArrayList<>();
 
 			//quick assists that show up also if there is an error/warning
 			getReplaceConditionalWithIfElseProposals(context, coveringNode, resultingCollections);
@@ -543,7 +539,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	private static ArrayList<Statement> getUnwrappedStatements(Statement body) {
-		ArrayList<Statement> statements= new ArrayList<Statement>();
+		ArrayList<Statement> statements= new ArrayList<>();
 		if (body instanceof Block) {
 			for (Iterator<Statement> iter= ((Block) body).statements().iterator(); iter.hasNext();) {
 				Statement statement= iter.next();
@@ -755,7 +751,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	private static boolean getRemoveExtraParenthesesProposals(IInvocationContext context, ASTNode covering, ArrayList<ASTNode> coveredNodes, Collection<ICommandAccess> resultingCollections) {
 		ArrayList<ASTNode> nodes;
 		if (context.getSelectionLength() == 0 && covering instanceof ParenthesizedExpression) {
-			nodes= new ArrayList<ASTNode>();
+			nodes= new ArrayList<>();
 			nodes.add(covering);
 		} else {
 			nodes= coveredNodes;
@@ -771,7 +767,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
-		Map<String, String> options= new Hashtable<String, String>();
+		Map<String, String> options= new Hashtable<>();
 		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER, CleanUpOptions.TRUE);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(options), IProposalRelevance.REMOVE_EXTRA_PARENTHESES, image, context);
@@ -790,7 +786,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 		// add correction proposal
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
-		Map<String, String> options= new Hashtable<String, String>();
+		Map<String, String> options= new Hashtable<>();
 		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS, CleanUpOptions.TRUE);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(options), IProposalRelevance.ADD_PARANOIDAL_PARENTHESES, image, context);
@@ -844,7 +840,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	static ArrayList<ASTNode> getFullyCoveredNodes(IInvocationContext context, ASTNode coveringNode) {
-		final ArrayList<ASTNode> coveredNodes= new ArrayList<ASTNode>();
+		final ArrayList<ASTNode> coveredNodes= new ArrayList<>();
 		final int selectionBegin= context.getSelectionOffset();
 		final int selectionEnd= selectionBegin + context.getSelectionLength();
 		coveringNode.accept(new GenericVisitor() {
@@ -1504,7 +1500,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			if (expression instanceof InstanceofExpression) {
 				node= expression;
 			} else {
-				final ArrayList<InstanceofExpression> nodes= new ArrayList<InstanceofExpression>();
+				final ArrayList<InstanceofExpression> nodes= new ArrayList<>();
 				expression.accept(new ASTVisitor() {
 					@Override
 					public boolean visit(InstanceofExpression instanceofExpression) {
@@ -2107,7 +2103,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		proposal.addLinkedPositionProposal(KEY_NAME, newIdentifier, null);
 		proposal.addLinkedPositionProposal(KEY_NAME, oldIdentifier, null);
 		// iterate over linked nodes and replace variable references with negated reference
-		final HashSet<SimpleName> renamedNames= new HashSet<SimpleName>();
+		final HashSet<SimpleName> renamedNames= new HashSet<>();
 		for (int i= 0; i < linkedNodes.length; i++) {
 			SimpleName name= linkedNodes[i];
 			if (renamedNames.contains(name)) {
@@ -2127,7 +2123,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				int exStart= expression.getStartPosition();
 				int exEnd= exStart + expression.getLength();
 				// collect all names that are used in assignments
-				HashSet<SimpleName> overlapNames= new HashSet<SimpleName>();
+				HashSet<SimpleName> overlapNames= new HashSet<>();
 				for (int j= 0; j < linkedNodes.length; j++) {
 					SimpleName name2= linkedNodes[j];
 					if (name2 == null) {
@@ -2140,6 +2136,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				}
 				// prepare inverted expression
 				SimpleNameRenameProvider provider= new SimpleNameRenameProvider() {
+					@Override
 					public SimpleName getRenamed(SimpleName simpleName) {
 						if (simpleName.resolveBinding() == variableBinding) {
 							renamedNames.add(simpleName);
@@ -2419,7 +2416,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Expression currentCondition= null;
 		boolean defaultFound= false;
 
-		ArrayList<Block> allBlocks= new ArrayList<Block>();
+		ArrayList<Block> allBlocks= new ArrayList<>();
 		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(covering), importRewrite);
 
 		Expression switchExpression= switchStatement.getExpression();
@@ -2637,7 +2634,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 		while (currentStatement != null) {
 			Expression expression= null;
-			List<Expression> caseExpressions= new ArrayList<Expression>();
+			List<Expression> caseExpressions= new ArrayList<>();
 			if (currentIf != null) {
 				while (currentExpression != null) { // loop for fall through cases - multiple expressions with || operator
 					Expression leftOperand;

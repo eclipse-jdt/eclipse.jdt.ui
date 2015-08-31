@@ -32,25 +32,16 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 public class JavadocAttributeConfiguration extends ClasspathAttributeConfiguration {
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#getImageDescriptor(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
-	 */
 	@Override
 	public ImageDescriptor getImageDescriptor(ClasspathAttributeAccess attribute) {
 		return JavaPluginImages.DESC_OBJS_JAVADOC_LOCATION_ATTRIB;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#getNameLabel(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
-	 */
 	@Override
 	public String getNameLabel(ClasspathAttributeAccess attribute) {
 		return NewWizardMessages.CPListLabelProvider_javadoc_location_label;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#getValueLabel(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
-	 */
 	@Override
 	public String getValueLabel(ClasspathAttributeAccess access) {
 		String arg= null;
@@ -79,9 +70,6 @@ public class JavadocAttributeConfiguration extends ClasspathAttributeConfigurati
 		return arg;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#performEdit(org.eclipse.swt.widgets.Shell, org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
-	 */
 	@Override
 	public IClasspathAttribute performEdit(Shell shell, ClasspathAttributeAccess attribute) {
 		String initialLocation= attribute.getClasspathAttribute().getValue();
@@ -100,25 +88,16 @@ public class JavadocAttributeConfiguration extends ClasspathAttributeConfigurati
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#performRemove(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
-	 */
 	@Override
 	public IClasspathAttribute performRemove(ClasspathAttributeAccess attribute) {
 		return JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, null);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#canEdit(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
-	 */
 	@Override
 	public boolean canEdit(ClasspathAttributeAccess attribute) {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#canRemove(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
-	 */
 	@Override
 	public boolean canRemove(ClasspathAttributeAccess attribute) {
 		return attribute.getClasspathAttribute().getValue() != null;

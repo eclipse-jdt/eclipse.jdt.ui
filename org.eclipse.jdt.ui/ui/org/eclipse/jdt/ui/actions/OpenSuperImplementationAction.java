@@ -88,7 +88,8 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	 * @deprecated Use {@link #setSpecialSelectionProvider(ISelectionProvider)} instead. This API will be
 	 * removed after 3.2 M5.
      */
-    public OpenSuperImplementationAction(IWorkbenchSite site, ISelectionProvider provider) {
+    @Deprecated
+	public OpenSuperImplementationAction(IWorkbenchSite site, ISelectionProvider provider) {
         this(site);
         setSpecialSelectionProvider(provider);
     }
@@ -107,16 +108,10 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		IMethod method= getMethod(selection);
@@ -124,9 +119,6 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		setEnabled(method != null && checkMethod(method));
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(fEditor))
@@ -139,9 +131,6 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		run((IMethod) element);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction.
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		run(getMethod(selection));

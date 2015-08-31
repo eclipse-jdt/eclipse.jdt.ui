@@ -78,6 +78,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			return (IntroduceParameterRefactoring)getRefactoring();
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			Composite result= new Composite(parent, SWT.NONE);
 			setControl(result);
@@ -122,12 +123,15 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 		private ChangeParametersControl createParameterTableControl(Composite composite) {
 			String labelText= RefactoringMessages.IntroduceParameterWizard_parameters;
 			final ChangeParametersControl cp= new ChangeParametersControl(composite, SWT.NONE, labelText, new IParameterListChangeListener() {
+				@Override
 				public void parameterChanged(ParameterInfo parameter) {
 					update(true);
 				}
+				@Override
 				public void parameterListChanged() {
 					update(true);
 				}
+				@Override
 				public void parameterAdded(ParameterInfo parameter) {
 					update(true);
 				}
@@ -139,6 +143,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			 * Only set/reveal the table selection after the shell has been opened and laid out.
 			 */
 			composite.getDisplay().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					cp.editParameter(getIntroduceParameterRefactoring().getAddedParameterInfo());
 				}

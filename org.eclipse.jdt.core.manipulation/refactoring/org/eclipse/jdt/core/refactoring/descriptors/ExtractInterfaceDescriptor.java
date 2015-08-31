@@ -64,7 +64,7 @@ public final class ExtractInterfaceDescriptor extends JavaRefactoringDescriptor 
 	 *
 	 * @since 1.2
 	 */
-	public ExtractInterfaceDescriptor( String project, String description, String comment, Map arguments, int flags) {
+	public ExtractInterfaceDescriptor( String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.EXTRACT_INTERFACE, project, description, comment, arguments, flags);
 	}
 

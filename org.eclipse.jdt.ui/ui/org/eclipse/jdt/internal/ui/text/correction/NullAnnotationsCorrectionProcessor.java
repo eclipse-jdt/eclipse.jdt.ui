@@ -65,32 +65,38 @@ public class NullAnnotationsCorrectionProcessor {
 
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			Map<String, String> options= new Hashtable<String, String>();
+			Map<String, String> options= new Hashtable<>();
 			if (fix.getCu() != context.getASTRoot()) {
 				// workaround: adjust the unit to operate on, depending on the findings of RewriteOperations.createAddAnnotationOperation(..)
 				final CompilationUnit cu= fix.getCu();
 				final IInvocationContext originalContext= context;
 				context= new IInvocationContext() {
+					@Override
 					public int getSelectionOffset() {
 						return originalContext.getSelectionOffset();
 					}
 
+					@Override
 					public int getSelectionLength() {
 						return originalContext.getSelectionLength();
 					}
 
+					@Override
 					public ASTNode getCoveringNode() {
 						return originalContext.getCoveringNode();
 					}
 
+					@Override
 					public ASTNode getCoveredNode() {
 						return originalContext.getCoveredNode();
 					}
 
+					@Override
 					public ICompilationUnit getCompilationUnit() {
 						return (ICompilationUnit) cu.getJavaElement();
 					}
 
+					@Override
 					public CompilationUnit getASTRoot() {
 						return cu;
 					}
@@ -108,7 +114,7 @@ public class NullAnnotationsCorrectionProcessor {
 			return;
 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		Map<String, String> options= new Hashtable<String, String>();
+		Map<String, String> options= new Hashtable<>();
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, problem.getProblemId()), IProposalRelevance.REMOVE_REDUNDANT_NULLNESS_ANNOTATION, image, context);
 		proposals.add(proposal);
 	}

@@ -123,7 +123,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	private IPhoneticDistanceAlgorithm fDistanceAlgorithm= new DefaultPhoneticDistanceAlgorithm();
 
 	/** The mapping from phonetic hashes to word lists */
-	private final Map<ByteArrayWrapper, Object> fHashBuckets= new HashMap<ByteArrayWrapper, Object>(getInitialSize(), LOAD_FACTOR);
+	private final Map<ByteArrayWrapper, Object> fHashBuckets= new HashMap<>(getInitialSize(), LOAD_FACTOR);
 
 	/** The phonetic hash provider */
 	private IPhoneticHashProvider fHashProvider= new DefaultPhoneticHashProvider();
@@ -189,7 +189,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		String hash= null;
 
 		final StringBuffer buffer= new StringBuffer(BUFFER_CAPACITY);
-		final HashSet<RankedWordProposal> result= new HashSet<RankedWordProposal>(BUCKET_CAPACITY * hashs.size());
+		final HashSet<RankedWordProposal> result= new HashSet<>(BUCKET_CAPACITY * hashs.size());
 
 		for (int index= 0; index < hashs.size(); index++) {
 
@@ -287,7 +287,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 		@SuppressWarnings("unchecked")
 		final ArrayList<byte[]> candidateList= (ArrayList<byte[]>)candidates;
-		final ArrayList<RankedWordProposal> matches= new ArrayList<RankedWordProposal>(candidateList.size());
+		final ArrayList<RankedWordProposal> matches= new ArrayList<>(candidateList.size());
 
 		for (int index= 0; index < candidateList.size(); index++) {
 			String candidate;
@@ -349,6 +349,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#getProposals(java.lang.String,boolean)
 	 */
+	@Override
 	public Set<RankedWordProposal> getProposals(final String word, final boolean sentence) {
 
 		try {
@@ -368,7 +369,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		final String hash= fHashProvider.getHash(word);
 		final char[] mutators= fHashProvider.getMutators();
 
-		final ArrayList<String> neighborhood= new ArrayList<String>((word.length() + 1) * (mutators.length + 2));
+		final ArrayList<String> neighborhood= new ArrayList<>((word.length() + 1) * (mutators.length + 2));
 		neighborhood.add(hash);
 
 		final Set<RankedWordProposal> candidates= getCandidates(word, sentence, neighborhood);
@@ -496,7 +497,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			ArrayList<byte[]> bucketList= (ArrayList<byte[]>)bucket;
 			bucketList.add(wordBytes);
 		} else {
-			ArrayList<Object> list= new ArrayList<Object>(BUCKET_CAPACITY);
+			ArrayList<Object> list= new ArrayList<>(BUCKET_CAPACITY);
 			list.add(bucket);
 			list.add(wordBytes);
 			fHashBuckets.put(hashBytes, list);
@@ -506,6 +507,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#isCorrect(java.lang.String)
 	 */
+	@Override
 	public boolean isCorrect(String word) {
 		word= stripNonLetters(word);
 		try {
@@ -561,6 +563,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#setStripNonLetters(boolean)
 	 * @since 3.3
 	 */
+	@Override
 	public void setStripNonLetters(boolean state) {
 		fIsStrippingNonLetters= state;
 	}
@@ -595,6 +598,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellDictionary#isLoaded()
 	 */
+	@Override
 	public synchronized final boolean isLoaded() {
 		return fLoaded || fHashBuckets.size() > 0;
 	}
@@ -716,6 +720,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellDictionary#unload()
 	 */
+	@Override
 	public synchronized void unload() {
 		fLoaded= false;
 		fMustLoad= true;
@@ -725,6 +730,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellDictionary#acceptsWords()
 	 */
+	@Override
 	public boolean acceptsWords() {
 		return false;
 	}
@@ -732,6 +738,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#addWord(java.lang.String)
 	 */
+	@Override
 	public void addWord(final String word) {
 		// Do nothing
 	}

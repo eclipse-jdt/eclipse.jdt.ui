@@ -69,7 +69,7 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 				return concatenate(getJavaProjects((IJavaModel)element), getOpenNonJavaProjects((IJavaModel)element));
 			} else {
 				Object[] children= doGetChildren(element);
-				ArrayList<Object> result= new ArrayList<Object>(children.length);
+				ArrayList<Object> result= new ArrayList<>(children.length);
 				for (int i= 0; i < children.length; i++) {
 					IReorgDestination destination= ReorgDestinationFactory.createDestination(children[i]);
 					if (fValidator.canElementBeDestination(destination) || fValidator.canChildrenBeDestinations(destination))
@@ -99,7 +99,7 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 			if (javaProject == null || !javaProject.exists())
 				return members;
 			boolean isFolderOnClasspath = javaProject.isOnClasspath(container);
-			List<IResource> nonJavaResources= new ArrayList<IResource>();
+			List<IResource> nonJavaResources= new ArrayList<>();
 			// Can be on classpath but as a member of non-java resource folder
 			for (int i= 0; i < members.length; i++) {
 				IResource member= members[i];
@@ -123,7 +123,7 @@ public final class DestinationContentProvider extends StandardJavaElementContent
 
 	private static Object[] getOpenNonJavaProjects(IJavaModel model) throws JavaModelException {
 		Object[] nonJavaProjects= model.getNonJavaResources();
-		ArrayList<IProject> result= new ArrayList<IProject>(nonJavaProjects.length);
+		ArrayList<IProject> result= new ArrayList<>(nonJavaProjects.length);
 		for (int i= 0; i < nonJavaProjects.length; i++) {
 			IProject project = (IProject) nonJavaProjects[i];
 			if (project.isOpen())

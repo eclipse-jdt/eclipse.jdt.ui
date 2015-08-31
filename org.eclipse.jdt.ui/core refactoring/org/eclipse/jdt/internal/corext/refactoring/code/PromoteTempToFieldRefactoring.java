@@ -384,7 +384,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		final AbstractTypeDeclaration type= getEnclosingType();
 		if (type instanceof TypeDeclaration) {
 			FieldDeclaration[] fields= ((TypeDeclaration) type).getFields();
-			List<String> result= new ArrayList<String>(fields.length);
+			List<String> result= new ArrayList<>(fields.length);
 			for (int i= 0; i < fields.length; i++) {
 				for (Iterator<VariableDeclarationFragment> iter= fields[i].fragments().iterator(); iter.hasNext();) {
 					VariableDeclarationFragment field= iter.next();
@@ -514,7 +514,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 
     private FieldDeclaration[] getFieldDeclarations() {
     	List<BodyDeclaration> bodyDeclarations= ASTNodes.getBodyDeclarations(getMethodDeclaration().getParent());
-    	List<FieldDeclaration> fields= new ArrayList<FieldDeclaration>(1);
+    	List<FieldDeclaration> fields= new ArrayList<>(1);
     	for (Iterator<BodyDeclaration> iter= bodyDeclarations.iterator(); iter.hasNext();) {
 	        Object each= iter.next();
 	        if (each instanceof FieldDeclaration)
@@ -661,7 +661,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     private static MethodDeclaration[] getAllConstructors(AbstractTypeDeclaration typeDeclaration) {
 		if (typeDeclaration instanceof TypeDeclaration) {
 			MethodDeclaration[] allMethods= ((TypeDeclaration) typeDeclaration).getMethods();
-			List<MethodDeclaration> result= new ArrayList<MethodDeclaration>(Math.min(allMethods.length, 1));
+			List<MethodDeclaration> result= new ArrayList<>(Math.min(allMethods.length, 1));
 			for (int i= 0; i < allMethods.length; i++) {
 				MethodDeclaration declaration= allMethods[i];
 				if (declaration.isConstructor())
@@ -674,7 +674,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 
 
 	private ConvertLocalVariableDescriptor getRefactoringDescriptor() {
-		final Map<String, String> arguments= new HashMap<String, String>();
+		final Map<String, String> arguments= new HashMap<>();
 		String project= null;
 		IJavaProject javaProject= fCu.getJavaProject();
 		if (javaProject != null)
@@ -868,8 +868,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
 
     private static class LocalTypeAndVariableUsageAnalyzer extends HierarchicalASTVisitor{
-    	private final List<IBinding> fLocalDefinitions= new ArrayList<IBinding>(0); // List of IBinding (Variable and Type)
-    	private final List<SimpleName> fLocalReferencesToEnclosing= new ArrayList<SimpleName>(0); // List of ASTNodes
+    	private final List<IBinding> fLocalDefinitions= new ArrayList<>(0); // List of IBinding (Variable and Type)
+    	private final List<SimpleName> fLocalReferencesToEnclosing= new ArrayList<>(0); // List of ASTNodes
 		private final List<ITypeBinding> fMethodTypeVariables;
 		private boolean fClassTypeVariablesUsed= false;
     	public LocalTypeAndVariableUsageAnalyzer(ITypeBinding[] methodTypeVariables) {

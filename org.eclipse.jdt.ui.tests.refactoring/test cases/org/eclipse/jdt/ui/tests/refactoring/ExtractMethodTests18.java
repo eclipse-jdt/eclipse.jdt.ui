@@ -51,6 +51,7 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 	// Testing Default Methods
 	//====================================================================================
 
+	@Override
 	public void test1() throws Exception {
 		defaultMethodsTest(0, Modifier.PUBLIC);
 	}
@@ -59,6 +60,7 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 		defaultMethodsTest(0, Modifier.PUBLIC);
 	}
 
+	@Override
 	public void test2() throws Exception {
 		defaultMethodsTest(1, Modifier.PROTECTED);
 	}
@@ -67,6 +69,7 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 		defaultMethodsTest(1, Modifier.PROTECTED);
 	}
 
+	@Override
 	public void test3() throws Exception {
 		defaultMethodsTest(1, Modifier.PUBLIC);
 	}
@@ -75,6 +78,7 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 		defaultMethodsTest(1, Modifier.PUBLIC);
 	}
 
+	@Override
 	public void test4() throws Exception {
 		defaultMethodsTest(1, Modifier.PUBLIC);
 	}
@@ -91,30 +95,37 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 	// Testing Static Methods
 	//====================================================================================
 
+	@Override
 	public void test101() throws Exception {
 		staticMethodsTest(1, Modifier.PUBLIC);
 	}
 
+	@Override
 	public void test102() throws Exception {
 		staticMethodsTest(1, Modifier.PUBLIC);
 	}
 
+	@Override
 	public void test103() throws Exception {
 		staticMethodsTest(0, Modifier.PUBLIC);
 	}
 
+	@Override
 	public void test104() throws Exception {
 		staticMethodsTest(1, Modifier.PUBLIC);
 	}
 
+	@Override
 	public void test105() throws Exception {
 		staticMethodsTest(2, Modifier.PUBLIC);
 	}
 
+	@Override
 	public void test106() throws Exception {
 		staticMethodsTest(1, Modifier.PUBLIC);
 	}
 
+	@Override
 	public void test107() throws Exception {
 		staticMethodsTest(1, Modifier.PUBLIC);
 	}
@@ -123,14 +134,17 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 	// Testing Destination Types
 	//====================================================================================
 
+	@Override
 	public void test201() throws Exception {
 		destinationTest(0, Modifier.PUBLIC);
 	}
 
+	@Override
 	public void test202() throws Exception {
 		destinationTest(0, Modifier.PUBLIC);
 	}
 
+	@Override
 	public void test203() throws Exception {
 		destinationTest(1, Modifier.PROTECTED);
 	}
@@ -143,10 +157,12 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 	// Testing Lambda Expressions
 	//====================================================================================
 
+	@Override
 	public void test301() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
+	@Override
 	public void test302() throws Exception {
 		lambdaExpressionTest(1, Modifier.PRIVATE);
 	}
@@ -155,34 +171,42 @@ public class ExtractMethodTests18 extends ExtractMethodTests {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
+	@Override
 	public void test304() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
+	@Override
 	public void test305() throws Exception {
 		lambdaExpressionTest(0, Modifier.PUBLIC);
 	}
 
+	@Override
 	public void test306() throws Exception {
 		lambdaExpressionTest(0, Modifier.PUBLIC);
 	}
 
+	@Override
 	public void test307() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
+	@Override
 	public void test308() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
+	@Override
 	public void test309() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
+	@Override
 	public void test310() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}
 
+	@Override
 	public void test311() throws Exception {
 		lambdaExpressionTest(0, Modifier.PRIVATE);
 	}

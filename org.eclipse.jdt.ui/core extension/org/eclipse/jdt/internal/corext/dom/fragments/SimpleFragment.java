@@ -39,26 +39,32 @@ class SimpleFragment extends ASTFragment {
 		return new IASTFragment[] { match };
 	}
 
+	@Override
 	public boolean matches(IASTFragment other) {
 		return other.getClass().equals(getClass()) && JdtASTMatcher.doNodesMatch(other.getAssociatedNode(), getAssociatedNode());
 	}
 
+	@Override
 	public IASTFragment[] getSubFragmentsMatching(IASTFragment toMatch) {
 		return ASTMatchingFragmentFinder.findMatchingFragments(getAssociatedNode(), (ASTFragment) toMatch);
 	}
 
+	@Override
 	public int getStartPosition() {
 		return fNode.getStartPosition();
 	}
 
+	@Override
 	public int getLength() {
 		return fNode.getLength();
 	}
 
+	@Override
 	public ASTNode getAssociatedNode() {
 		return fNode;
 	}
 
+	@Override
 	public void replace(ASTRewrite rewrite, ASTNode replacement, TextEditGroup textEditGroup) {
 		if (replacement instanceof Name && fNode.getParent() instanceof ParenthesizedExpression) {
 			// replace including the parenthesized expression around it

@@ -243,17 +243,20 @@ public class KeyboardProbe {
 
 	private void addListeners(Text control) {
 		control.addListener(SWT.KeyDown, new Listener() {
+			@Override
 			public void handleEvent(Event event) {
 				onKeyDown(event);
 			}
 		});
 		control.addListener(SWT.KeyUp, new Listener() {
+			@Override
 			public void handleEvent(Event event) {
 				onKeyUp(event);
 			}
 		});
 		control.addListener(SWT.Modify, new Listener() {
 
+			@Override
 			public void handleEvent(Event event) {
 				onModify();
 			}

@@ -32,7 +32,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class InlineConstantTests extends RefactoringTest {
-	private static final Class clazz = InlineConstantTests.class;
+	private static final Class<InlineConstantTests> clazz = InlineConstantTests.class;
 	private static final String REFACTORING_PATH = "InlineConstant/";
 
 	protected boolean toSucceed;
@@ -41,6 +41,7 @@ public class InlineConstantTests extends RefactoringTest {
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH + successPath();
 	}

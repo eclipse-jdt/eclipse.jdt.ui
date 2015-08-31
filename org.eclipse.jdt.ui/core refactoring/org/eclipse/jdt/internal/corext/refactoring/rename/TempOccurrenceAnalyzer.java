@@ -42,8 +42,8 @@ public class TempOccurrenceAnalyzer extends ASTVisitor {
 
 	public TempOccurrenceAnalyzer(VariableDeclaration tempDeclaration, boolean analyzeJavadoc){
 		Assert.isNotNull(tempDeclaration);
-		fReferenceNodes= new HashSet<SimpleName>();
-		fJavadocNodes= new HashSet<SimpleName>();
+		fReferenceNodes= new HashSet<>();
+		fJavadocNodes= new HashSet<>();
 		fAnalyzeJavadoc= analyzeJavadoc;
 		fTempDeclaration= tempDeclaration;
 		fTempBinding= tempDeclaration.resolveBinding();

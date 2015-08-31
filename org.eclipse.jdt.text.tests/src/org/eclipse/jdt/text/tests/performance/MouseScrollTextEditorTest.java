@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 
 public class MouseScrollTextEditorTest extends MouseScrollEditorTest {
 
-	private static final Class THIS= MouseScrollTextEditorTest.class;
+	private static final Class<MouseScrollTextEditorTest> THIS= MouseScrollTextEditorTest.class;
 
 	private static final String THUMB_SCROLLING_FILE_PREFIX= "/org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText";
 
@@ -40,6 +40,7 @@ public class MouseScrollTextEditorTest extends MouseScrollEditorTest {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		setWarmUpRuns(WARM_UP_RUNS);

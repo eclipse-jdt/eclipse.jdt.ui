@@ -112,6 +112,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			}
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			Composite result= new Composite(parent, SWT.NONE);
 			setControl(result);
@@ -140,6 +141,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 			final Text classNameField= new Text(result, SWT.BORDER | SWT.SINGLE);
 			classNameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			classNameField.addModifyListener(new ModifyListener(){
+				@Override
 				public void modifyText(ModifyEvent e) {
 					ConvertAnonymousToNestedInputPage.this.getConvertRefactoring().setClassName(classNameField.getText());
 					ConvertAnonymousToNestedInputPage.this.updateStatus();
@@ -164,11 +166,13 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 				r.setVisibility(currectVisibility);
 			}
 			IVisibilityChangeListener visibilityChangeListener= new IVisibilityChangeListener(){
+				@Override
 				public void visibilityChanged(int newVisibility) {
 					r.setVisibility(newVisibility);
 					fSettings.put(VISIBILITY_CONTROL, newVisibility);
 				}
 
+				@Override
 				public void modifierChanged(int modifier, boolean isChecked) {
 				}
 			};

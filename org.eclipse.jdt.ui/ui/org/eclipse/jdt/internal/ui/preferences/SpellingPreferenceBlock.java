@@ -33,6 +33,7 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener#statusChanged(org.eclipse.core.runtime.IStatus)
 		 */
+		@Override
 		public void statusChanged(IStatus status) {
 		}
 	}
@@ -51,6 +52,7 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener#statusChanged(org.eclipse.core.runtime.IStatus)
 		 */
+		@Override
 		public void statusChanged(IStatus status) {
 			fStatus= status;
 			fMonitor.statusChanged(status);
@@ -68,6 +70,7 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#createControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public Control createControl(Composite parent) {
 		return fBlock.createContents(parent);
 	}
@@ -75,6 +78,7 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#initialize(org.eclipse.ui.texteditor.spelling.IPreferenceStatusMonitor)
 	 */
+	@Override
 	public void initialize(IPreferenceStatusMonitor statusMonitor) {
 		fStatusMonitor= new StatusChangeListenerAdapter(statusMonitor);
 		fBlock.fContext= fStatusMonitor;
@@ -83,6 +87,7 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#canPerformOk()
 	 */
+	@Override
 	public boolean canPerformOk() {
 		return fStatusMonitor == null || fStatusMonitor.getStatus() == null || !fStatusMonitor.getStatus().matches(IStatus.ERROR);
 	}
@@ -90,6 +95,7 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#performOk()
 	 */
+	@Override
 	public void performOk() {
 		fBlock.performOk();
 	}
@@ -97,6 +103,7 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#performDefaults()
 	 */
+	@Override
 	public void performDefaults() {
 		fBlock.performDefaults();
 	}
@@ -104,6 +111,7 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#performRevert()
 	 */
+	@Override
 	public void performRevert() {
 		fBlock.performRevert();
 	}
@@ -111,6 +119,7 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#dispose()
 	 */
+	@Override
 	public void dispose() {
 		fBlock.dispose();
 	}
@@ -118,6 +127,7 @@ public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 	/*
 	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#setEnabled(boolean)
 	 */
+	@Override
 	public void setEnabled(boolean enabled) {
 		fBlock.setEnabled(enabled);
 	}

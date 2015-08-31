@@ -20,7 +20,7 @@ import junit.framework.TestSuite;
  * @since 3.2
  */
 public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
-	private static final Class THIS= SpecialMethodsCompletionTest.class;
+	private static final Class<SpecialMethodsCompletionTest> THIS= SpecialMethodsCompletionTest.class;
 
 	public static Test setUpTest(Test test) {
 		return new CompletionTestSetup(test);
@@ -33,6 +33,7 @@ public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
@@ -40,7 +41,8 @@ public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
 	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#configureCoreOptions(java.util.Hashtable)
 	 */
-	protected void configureCoreOptions(Hashtable options) {
+	@Override
+	protected void configureCoreOptions(Hashtable<String, String> options) {
 		super.configureCoreOptions(options);
 	}
 

@@ -82,9 +82,6 @@ public abstract class AbstractSerialVersionOperation extends CompilationUnitRewr
 	 */
 	protected abstract void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment, final LinkedProposalModel positionGroups);
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel positionGroups) throws CoreException {
 		final ASTRewrite rewrite= cuRewrite.getASTRewrite();

@@ -45,7 +45,7 @@ import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 
 public class MultiMoveTest extends RefactoringTest {
 
-	private static final Class clazz= MultiMoveTest.class;
+	private static final Class<MultiMoveTest> clazz= MultiMoveTest.class;
 	private static final String REFACTORING_PATH= "MultiMove/";
 
 	public MultiMoveTest(String name) {
@@ -60,11 +60,13 @@ public class MultiMoveTest extends RefactoringTest {
 		return new RefactoringTestSetup(someTest);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fIsPreDeltaTest= true;
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}

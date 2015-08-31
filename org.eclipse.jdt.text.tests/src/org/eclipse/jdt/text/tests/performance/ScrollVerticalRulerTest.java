@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,9 +14,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
@@ -26,6 +23,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
@@ -38,6 +36,9 @@ import org.eclipse.ui.texteditor.spelling.SpellingService;
 import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 /**
@@ -55,13 +56,12 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 		return result;
 	}
 
+	@Override
 	protected String getEditor() {
 		return EditorTestHelper.TEXT_EDITOR_ID;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.text.tests.performance.ScrollEditorTest#setUp()
-	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -76,9 +76,9 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 		IEclipsePreferences editorsNode= InstanceScope.INSTANCE.getNode(EditorsUI.PLUGIN_ID);
 
 		MarkerAnnotationPreferences markerAnnotationPreferences= EditorsPlugin.getDefault().getMarkerAnnotationPreferences();
-		Iterator iterator= markerAnnotationPreferences.getAnnotationPreferences().iterator();
+		Iterator<AnnotationPreference> iterator= markerAnnotationPreferences.getAnnotationPreferences().iterator();
 		while (iterator.hasNext()) {
-			AnnotationPreference pref= (AnnotationPreference) iterator.next();
+			AnnotationPreference pref= iterator.next();
 			String preferenceKey= pref.getVerticalRulerPreferenceKey();
 			if ("spellingIndicationInVerticalRuler".equals(preferenceKey)) {
 				editorsNode.putBoolean(preferenceKey, true);
@@ -88,9 +88,7 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.text.tests.performance.ScrollEditorTest#tearDown()
-	 */
+	@Override
 	protected void tearDown() throws Exception {
 		PreferenceConstants.getPreferenceStore().setToDefault(PreferenceConstants.SPELLING_PROBLEMS_THRESHOLD);
 
@@ -100,9 +98,9 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 		IEclipsePreferences editorsNode= InstanceScope.INSTANCE.getNode(EditorsUI.PLUGIN_ID);
 
 		MarkerAnnotationPreferences markerAnnotationPreferences= EditorsPlugin.getDefault().getMarkerAnnotationPreferences();
-		Iterator iterator= markerAnnotationPreferences.getAnnotationPreferences().iterator();
+		Iterator<AnnotationPreference> iterator= markerAnnotationPreferences.getAnnotationPreferences().iterator();
 		while (iterator.hasNext()) {
-			AnnotationPreference pref= (AnnotationPreference) iterator.next();
+			AnnotationPreference pref= iterator.next();
 			String preferenceKey= pref.getVerticalRulerPreferenceKey();
 			if ("spellingIndicationInVerticalRuler".equals(preferenceKey)) {
 				editorsNode.putBoolean(preferenceKey, false);
@@ -115,9 +113,7 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 		super.tearDown();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.text.tests.performance.ScrollEditorTest#openEditor(org.eclipse.jdt.text.tests.performance.ScrollEditorTest.ScrollingMode)
-	 */
+	@Override
 	protected AbstractTextEditor openEditor(ScrollingMode mode) throws Exception {
 		IFile file= ResourceTestHelper.getProject(PerformanceTestSetup.PROJECT).getFile("faust.txt");
 		if (!file.exists()) {
@@ -149,6 +145,7 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 	/*
 	 * @see org.eclipse.jdt.text.tests.performance.ScrollEditorTest#assertEditor(org.eclipse.ui.texteditor.AbstractTextEditor)
 	 */
+	@Override
 	protected void assertEditor(AbstractTextEditor editor) throws Exception {
 		super.assertEditor(editor);
 
@@ -160,7 +157,7 @@ public abstract class ScrollVerticalRulerTest extends ScrollEditorTest {
 	private int getAnnotationCount(IAnnotationModel model) {
 		int result= 0;
 
-		Iterator iterator= model.getAnnotationIterator();
+		Iterator<Annotation> iterator= model.getAnnotationIterator();
 		while (iterator.hasNext()) {
 			iterator.next();
 			result++;

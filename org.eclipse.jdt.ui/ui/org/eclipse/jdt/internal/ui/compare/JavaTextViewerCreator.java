@@ -26,6 +26,7 @@ import org.eclipse.compare.IViewerCreator;
  */
 public class JavaTextViewerCreator implements IViewerCreator {
 
+	@Override
 	public Viewer createViewer(Composite parent, CompareConfiguration mp) {
 		return new JavaTextViewer(parent);
 	}

@@ -171,7 +171,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 		if (ast == null || progressMonitor.isCanceled())
 			return;
 
-		final Map<Annotation, Position> annotationMap= new HashMap<Annotation, Position>(50);
+		final Map<Annotation, Position> annotationMap= new HashMap<>(50);
 
 		ast.accept(new ASTVisitor(false) {
 			/*
@@ -246,12 +246,14 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#aboutToBeReconciled()
 	 */
+	@Override
 	public void aboutToBeReconciled() {
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(CompilationUnit, boolean, IProgressMonitor)
 	 */
+	@Override
 	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
 		updateAnnotations(ast, progressMonitor);
 	}

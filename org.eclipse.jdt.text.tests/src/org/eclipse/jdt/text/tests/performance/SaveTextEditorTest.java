@@ -19,12 +19,13 @@ import junit.framework.TestSuite;
  */
 public class SaveTextEditorTest extends SaveEditorTest {
 
-	private static final Class THIS= SaveTextEditorTest.class;
+	private static final Class<SaveTextEditorTest> THIS= SaveTextEditorTest.class;
 
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected String getEditorId() {
 		return EditorTestHelper.TEXT_EDITOR_ID;
 	}

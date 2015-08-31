@@ -142,7 +142,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 	}
 
 	private ISimilarDeclarationUpdating getSimilarElementUpdating() {
-		return (ISimilarDeclarationUpdating) getRefactoring().getAdapter(ISimilarDeclarationUpdating.class);
+		return getRefactoring().getAdapter(ISimilarDeclarationUpdating.class);
 	}
 
 	@Override
@@ -154,9 +154,6 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 		return returner;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ltk.ui.refactoring.UserInputWizardPage#getNextPage()
-	 */
 	@Override
 	public IWizardPage getNextPage() {
 		RenameTypeWizard wizard= (RenameTypeWizard) getWizard();
@@ -167,6 +164,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 			try {
 				getContainer().run(true, true, new IRunnableWithProgress() {
 
+					@Override
 					public void run(IProgressMonitor pm) throws InterruptedException {
 						try {
 							renameTypeProcessor.initializeReferences(pm);

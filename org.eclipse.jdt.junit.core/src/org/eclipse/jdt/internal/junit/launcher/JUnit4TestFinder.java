@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -106,14 +106,15 @@ public class JUnit4TestFinder implements ITestFinder {
 		}
 	}
 
-	public void findTestsInContainer(IJavaElement element, Set result, IProgressMonitor pm) throws CoreException {
+	@Override
+	public void findTestsInContainer(IJavaElement element, Set<IType> result, IProgressMonitor pm) throws CoreException {
 		if (element == null || result == null) {
 			throw new IllegalArgumentException();
 		}
 
 		if (element instanceof IType) {
 			if (internalIsTest((IType) element, pm)) {
-				result.add(element);
+				result.add((IType) element);
 				return;
 			}
 		}
@@ -129,7 +130,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			IType[] allClasses= hierarchy.getAllClasses();
 
 			// search for all types with references to RunWith and Test and all subclasses
-			HashSet candidates= new HashSet(allClasses.length);
+			HashSet<IType> candidates= new HashSet<>(allClasses.length);
 			SearchRequestor requestor= new AnnotationSearchRequestor(hierarchy, candidates);
 
 			IJavaSearchScope scope= SearchEngine.createJavaSearchScope(allClasses, IJavaSearchScope.SOURCES);
@@ -142,8 +143,8 @@ public class JUnit4TestFinder implements ITestFinder {
 			new SearchEngine().search(annotationsPattern, searchParticipants, scope, requestor, new SubProgressMonitor(pm, 2));
 
 			// find all classes in the region
-			for (Iterator iterator= candidates.iterator(); iterator.hasNext();) {
-				IType curr= (IType) iterator.next();
+			for (Iterator<IType> iterator= candidates.iterator(); iterator.hasNext();) {
+				IType curr= iterator.next();
 				if (CoreTestSearchEngine.isAccessibleClass(curr) && !Flags.isAbstract(curr.getFlags()) && region.contains(curr)) {
 					result.add(curr);
 				}
@@ -164,14 +165,15 @@ public class JUnit4TestFinder implements ITestFinder {
 
 	private static class AnnotationSearchRequestor extends SearchRequestor {
 
-		private final Collection fResult;
+		private final Collection<IType> fResult;
 		private final ITypeHierarchy fHierarchy;
 
-		public AnnotationSearchRequestor(ITypeHierarchy hierarchy, Collection result) {
+		public AnnotationSearchRequestor(ITypeHierarchy hierarchy, Collection<IType> result) {
 			fHierarchy= hierarchy;
 			fResult= result;
 		}
 
+		@Override
 		public void acceptSearchMatch(SearchMatch match) throws CoreException {
 			if (match.getAccuracy() == SearchMatch.A_ACCURATE && !match.isInsideDocComment()) {
 				Object element= match.getElement();
@@ -193,6 +195,7 @@ public class JUnit4TestFinder implements ITestFinder {
 		}
 	}
 
+	@Override
 	public boolean isTest(IType type) throws JavaModelException {
 		return internalIsTest(type, null);
 	}
@@ -202,7 +205,7 @@ public class JUnit4TestFinder implements ITestFinder {
 			if (CoreTestSearchEngine.hasSuiteMethod(type)) { // since JUnit 4.3.1
 				return true;
 			}
-			ASTParser parser= ASTParser.newParser(AST.JLS4);
+			ASTParser parser= ASTParser.newParser(AST.JLS8);
 			/* TODO: When bug 156352 is fixed:
 			parser.setProject(type.getJavaProject());
 			IBinding[] bindings= parser.createBindings(new IJavaElement[] { type }, monitor);

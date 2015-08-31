@@ -13,10 +13,6 @@ package org.eclipse.jdt.text.tests;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -36,8 +32,12 @@ import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 public class MarkOccurrenceTest18 extends TestCase {
-	private static final Class THIS= MarkOccurrenceTest18.class;
+	private static final Class<MarkOccurrenceTest18> THIS= MarkOccurrenceTest18.class;
 
 	public static Test suite() {
 		return new Java18ProjectTestSetup(new TestSuite(THIS));
@@ -58,6 +58,7 @@ public class MarkOccurrenceTest18 extends TestCase {
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		fParser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 
@@ -66,9 +67,7 @@ public class MarkOccurrenceTest18 extends TestCase {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
 	}
 
-	/* (non-Javadoc)
-	 * @see junit.framework.TestCase#tearDown()
-	 */
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
@@ -100,10 +99,9 @@ public class MarkOccurrenceTest18 extends TestCase {
 	}
 
 	private void sortByStartIndex(OccurrenceLocation[] OccurrenceLocations) {
-		Arrays.sort(OccurrenceLocations, new Comparator() {
-			public int compare(Object arg0, Object arg1) {
-				OccurrenceLocation node0= (OccurrenceLocation)arg0;
-				OccurrenceLocation node1= (OccurrenceLocation)arg1;
+		Arrays.sort(OccurrenceLocations, new Comparator<OccurrenceLocation>() {
+			@Override
+			public int compare(OccurrenceLocation node0, OccurrenceLocation node1) {
 				return node0.getOffset() - node1.getOffset();
 			}
 		});

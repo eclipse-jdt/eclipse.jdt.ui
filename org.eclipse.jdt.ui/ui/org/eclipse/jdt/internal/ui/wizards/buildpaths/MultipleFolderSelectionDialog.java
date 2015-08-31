@@ -80,7 +80,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 	}
 
 	public void setExisting(Object[] existing) {
-		fExisting= new HashSet<Object>();
+		fExisting= new HashSet<>();
 		for (int i= 0; i < existing.length; i++) {
 			fExisting.add(existing[i]);
 		}
@@ -100,7 +100,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 	 */
 	public void addFilter(ViewerFilter filter) {
 		if (fFilters == null)
-			fFilters = new ArrayList<ViewerFilter>(4);
+			fFilters = new ArrayList<>(4);
 
 		fFilters.add(filter);
 	}
@@ -125,7 +125,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 				checked= null;
 			}
 		} else {
-			ArrayList<Object> res= new ArrayList<Object>();
+			ArrayList<Object> res= new ArrayList<>();
 			for (int i= 0; i < checked.length; i++) {
 				Object elem= checked[i];
 				if (!fExisting.contains(elem)) {
@@ -152,6 +152,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 	public void create() {
 
 		BusyIndicator.showWhile(null, new Runnable() {
+			@Override
 			public void run() {
 				access$superCreate();
 
@@ -183,6 +184,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 		fViewer.setContentProvider(fContentProvider);
 		fViewer.setLabelProvider(fLabelProvider);
 		fViewer.addCheckStateListener(new ICheckStateListener() {
+			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				updateOKStatus();
 			}
@@ -213,9 +215,6 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea(parent);
@@ -253,6 +252,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 			treeViewer.setSelection(new StructuredSelection(fFocusElement), true);
 		}
 		treeViewer.addCheckStateListener(new ICheckStateListener() {
+			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				forceExistingChecked(event);
 			}
@@ -303,9 +303,7 @@ public class MultipleFolderSelectionDialog extends SelectionStatusDialog impleme
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
-	 */
+	@Override
 	public void selectionChanged(SelectionChangedEvent event) {
 		updateNewFolderButtonState();
 	}

@@ -78,6 +78,7 @@ public class JdtActionConstants {
 	 * <code>"org.eclipse.jdt.ui.actions.OpenExternalJavaDoc"</code>).
 	 * @deprecated As of 3.6, replaced by {@link #OPEN_ATTACHED_JAVA_DOC}
 	 */
+	@Deprecated
 	public static final String OPEN_EXTERNAL_JAVA_DOC= "org.eclipse.jdt.ui.actions.OpenExternalJavaDoc"; //$NON-NLS-1$
 
 	/**
@@ -106,6 +107,7 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.ShowJavaDoc"</code>).
 	 * @deprecated As of 3.3, replaced by {@link ITextEditorActionConstants#SHOW_INFORMATION}
 	 */
+	@Deprecated
 	public static final String SHOW_JAVA_DOC= "org.eclipse.jdt.ui.actions.ShowJavaDoc"; //$NON-NLS-1$
 
 	/**
@@ -274,6 +276,7 @@ public class JdtActionConstants {
 	 *
 	 * @deprecated Use {@link JdtActionConstants#EXTERNALIZE_STRINGS} instead
 	 */
+	@Deprecated
 	public static final String FIND_STRINGS_TO_EXTERNALIZE= "org.eclipse.jdt.ui.actions.FindStringsToExternalize"; //$NON-NLS-1$
 
 	/**
@@ -353,6 +356,7 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.InlineTemp"</code>).
 	 * @deprecated Use INLINE
 	 */
+	@Deprecated
 	public static final String INLINE_TEMP= "org.eclipse.jdt.ui.actions.InlineTemp"; //$NON-NLS-1$
 
 	/**

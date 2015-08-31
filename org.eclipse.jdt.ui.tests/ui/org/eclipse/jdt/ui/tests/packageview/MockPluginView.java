@@ -42,8 +42,8 @@ public class MockPluginView extends PackageExplorerPart {
 	private boolean fRemoveHappened;
 	private boolean fAddHappened;
 
-	private final List fRefreshedObjects;
-	private final List fRemovedObjects;
+	private final List<Object> fRefreshedObjects;
+	private final List<Object> fRemovedObjects;
 
 	private Object fAddedObject;
 	private Object fAddedParentObject;
@@ -53,8 +53,8 @@ public class MockPluginView extends PackageExplorerPart {
 	 */
 	public MockPluginView() {
 		super();
-		fRefreshedObjects= new ArrayList();
-		fRemovedObjects= new ArrayList();
+		fRefreshedObjects= new ArrayList<>();
+		fRemovedObjects= new ArrayList<>();
 	}
 
 	/**
@@ -62,6 +62,7 @@ public class MockPluginView extends PackageExplorerPart {
 	 *
 	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createPartControl(Composite parent) {
 
 		//create viewer
@@ -80,6 +81,7 @@ public class MockPluginView extends PackageExplorerPart {
 		return new TestProblemTreeViewer(parent, SWT.MULTI);
 	}
 
+	@Override
 	public void dispose() {
 		if (fViewer != null) {
 			IContentProvider p = fViewer.getContentProvider();
@@ -93,9 +95,11 @@ public class MockPluginView extends PackageExplorerPart {
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPart#setFocus()
 	 */
+	@Override
 	public void setFocus() {
 	}
 
+	@Override
 	public TreeViewer getTreeViewer(){
 		return fViewer;
 	}
@@ -106,21 +110,25 @@ public class MockPluginView extends PackageExplorerPart {
 			super(parent,flag);
 		}
 
+		@Override
 		public void refresh(Object object){
 			fRefreshHappened= true;
 			fRefreshedObjects.add(object);
 		}
 
+		@Override
 		public void refresh(final Object element, final boolean updateLabels) {
 			fRefreshHappened= true;
 			fRefreshedObjects.add(element);
 		}
 
+		@Override
 		public void remove(Object object) {
 			fRemoveHappened= true;
 			fRemovedObjects.add(object);
 		}
 
+		@Override
 		public void add(Object parentObject, Object object){
 			fAddHappened= true;
 			fAddedObject= object;
@@ -143,7 +151,7 @@ public class MockPluginView extends PackageExplorerPart {
 		return fRefreshedObjects.contains(c);
 	}
 
-	public List getRefreshedObject(){
+	public List<Object> getRefreshedObject(){
 		return fRefreshedObjects;
 	}
 
@@ -174,7 +182,7 @@ public class MockPluginView extends PackageExplorerPart {
 	 * Returns the object removed from the viewer
 	 * @return Object
 	 */
-	public List getRemovedObjects() {
+	public List<Object> getRemovedObjects() {
 		return fRemovedObjects;
 	}
 

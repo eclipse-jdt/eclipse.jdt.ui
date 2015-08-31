@@ -36,6 +36,7 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 		/*
 	 	 * @see ISelectionChangedListener#selectionChanged
 	 	 */
+		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			doSelectionChanged(event);
 		}
@@ -43,20 +44,23 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 	    /*
 	     * @see FocusListener#focusGained
 	     */
-	    public void focusGained(FocusEvent e) {
+	    @Override
+		public void focusGained(FocusEvent e) {
 	    	doFocusChanged(e.widget);
 	    }
 
 	    /*
 	     * @see FocusListener#focusLost
 	     */
-	    public void focusLost(FocusEvent e) {
+	    @Override
+		public void focusLost(FocusEvent e) {
 	    	// do not reset due to focus behavior on GTK
 	    	//fViewerInFocus= null;
 	    }
 	}
 
 	private class InternalPostSelectionListener implements ISelectionChangedListener {
+		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			doPostSelectionChanged(event);
 		}
@@ -148,6 +152,7 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 	/*
 	 * @see ISelectionProvider#addSelectionChangedListener
 	 */
+	@Override
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 		fSelectionChangedListeners.add(listener);
 	}
@@ -155,21 +160,18 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 	/*
 	 * @see ISelectionProvider#removeSelectionChangedListener
 	 */
+	@Override
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 		fSelectionChangedListeners.remove(listener);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IPostSelectionProvider#addPostSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
-	 */
+	@Override
 	public void addPostSelectionChangedListener(ISelectionChangedListener listener) {
 		fPostSelectionChangedListeners.add(listener);
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IPostSelectionProvider#removePostSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
-	 */
+	@Override
 	public void removePostSelectionChangedListener(ISelectionChangedListener listener) {
 		fPostSelectionChangedListeners.remove(listener);
 	}
@@ -177,6 +179,7 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 	/*
 	 * @see ISelectionProvider#getSelection
 	 */
+	@Override
 	public ISelection getSelection() {
 		if (fViewerInFocus != null) {
 			return fViewerInFocus.getSelection();
@@ -187,6 +190,7 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 	/*
 	 * @see ISelectionProvider#setSelection
 	 */
+	@Override
 	public void setSelection(ISelection selection) {
 		if (fViewerInFocus != null) {
 			fViewerInFocus.setSelection(selection);

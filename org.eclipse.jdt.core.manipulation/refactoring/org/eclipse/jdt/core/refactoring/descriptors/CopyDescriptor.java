@@ -65,7 +65,7 @@ public final class CopyDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
-	public CopyDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public CopyDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.COPY, project, description, comment, arguments, flags);
 	}
 

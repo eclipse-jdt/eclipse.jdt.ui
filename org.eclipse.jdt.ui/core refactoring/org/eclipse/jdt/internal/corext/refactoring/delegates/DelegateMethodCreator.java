@@ -142,9 +142,6 @@ public class DelegateMethodCreator extends DelegateCreator {
 		return statement;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected IBinding getDeclarationBinding() {
 		final MethodDeclaration declaration= (MethodDeclaration) getDeclaration();

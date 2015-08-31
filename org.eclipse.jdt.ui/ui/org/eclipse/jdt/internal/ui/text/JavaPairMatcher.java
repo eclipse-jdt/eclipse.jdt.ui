@@ -217,6 +217,7 @@ public final class JavaPairMatcher extends DefaultCharacterPairMatcher implement
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
 	 */
+	@Override
 	public void setSourceVersion(String version) {
 		if (JavaCore.VERSION_1_5.compareTo(version) <= 0)
 			fHighlightAngularBrackets= true;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,9 +45,6 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 		super();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setWorkingValues(Map<String, String> workingValues) {
 		super.setWorkingValues(workingValues);
@@ -81,6 +78,7 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 			final CheckboxPreference format= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_CheckboxName_FormatSourceCode, CleanUpConstants.FORMAT_SOURCE_CODE, CleanUpModifyDialog.FALSE_TRUE);
 			registerPreference(format);
 			format.addObserver(new Observer() {
+				@Override
 				public void update(Observable o, Object arg) {
 					fPreview.setFormat(format.getChecked());
 					fPreview.update();
@@ -97,6 +95,7 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 		final CheckboxPreference correctIndentation= createCheckboxPref(group, numColumns, CleanUpMessages.CodeFormatingTabPage_correctIndentation_checkbox_text, CleanUpConstants.FORMAT_CORRECT_INDENTATION, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(correctIndentation);
 		correctIndentation.addObserver(new Observer() {
+			@Override
 			public void update(Observable o, Object arg) {
 				fPreview.setCorrectIndentation(correctIndentation.getChecked());
 				fPreview.update();
@@ -115,13 +114,16 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 		Group sortMembersGroup= createGroup(numColumns, composite, CleanUpMessages.CodeFormatingTabPage_SortMembers_GroupName);
 
 		final CheckboxPreference sortMembersPref= createCheckboxPref(sortMembersGroup, numColumns, CleanUpMessages.CodeFormatingTabPage_SortMembers_CheckBoxLabel, CleanUpConstants.SORT_MEMBERS, CleanUpModifyDialog.FALSE_TRUE);
-		intent(sortMembersGroup);
-		final RadioPreference sortAllPref= createRadioPref(sortMembersGroup, numColumns - 1, CleanUpMessages.CodeFormatingTabPage_SortMembersFields_CheckBoxLabel, CleanUpConstants.SORT_MEMBERS_ALL, CleanUpModifyDialog.FALSE_TRUE);
+		
 		intent(sortMembersGroup);
 		final Button nullRadio= new Button(sortMembersGroup, SWT.RADIO);
 		nullRadio.setText(CleanUpMessages.CodeFormatingTabPage_SortMembersExclusive_radio0);
 		nullRadio.setLayoutData(createGridData(numColumns - 1, GridData.FILL_HORIZONTAL, SWT.DEFAULT));
 		nullRadio.setFont(composite.getFont());
+		
+		intent(sortMembersGroup);
+		final RadioPreference sortAllPref= createRadioPref(sortMembersGroup, numColumns - 1, CleanUpMessages.CodeFormatingTabPage_SortMembersFields_CheckBoxLabel, CleanUpConstants.SORT_MEMBERS_ALL, CleanUpModifyDialog.FALSE_TRUE);
+		
 		intent(sortMembersGroup);
 		final Label warningImage= new Label(sortMembersGroup, SWT.LEFT | SWT.WRAP);
 		warningImage.setImage(Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING));
@@ -130,6 +132,7 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 
 		registerSlavePreference(sortMembersPref, new RadioPreference[] {sortAllPref});
 		sortMembersPref.addObserver(new Observer() {
+			@Override
 			public void update(Observable o, Object arg) {
 				nullRadio.setEnabled(sortMembersPref.getChecked());
 
@@ -139,6 +142,7 @@ public final class CodeFormatingTabPage extends AbstractCleanUpTabPage {
 			}
 		});
 		sortAllPref.addObserver(new Observer() {
+			@Override
 			public void update(Observable o, Object arg) {
 				boolean warningEnabled= sortMembersPref.getChecked() && sortAllPref.getChecked();
 				warningImage.setEnabled(warningEnabled);

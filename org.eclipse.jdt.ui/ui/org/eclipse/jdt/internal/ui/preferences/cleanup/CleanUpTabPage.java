@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,9 +54,6 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		fIsSaveAction= kind == CleanUpConstants.DEFAULT_SAVE_ACTION_OPTIONS;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setWorkingValues(Map<String, String> workingValues) {
 		super.setWorkingValues(workingValues);
@@ -70,10 +67,12 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		return fIsSaveAction;
 	}
 
+	@Override
 	public int getCleanUpCount() {
 		return fCount;
 	}
 
+	@Override
 	public int getSelectedCleanUpCount() {
 		return fSelectedCount;
 	}
@@ -103,6 +102,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 	protected void registerPreference(final CheckboxPreference preference) {
 		fCount++;
 		preference.addObserver(new Observer() {
+			@Override
 			public void update(Observable o, Object arg) {
 				if (preference.getChecked()) {
 					setSelectedCleanUpCount(fSelectedCount + 1);
@@ -143,6 +143,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 				for (int j= 0; j < subSlaves[i].length; j++) {
 					final CheckboxPreference subSlave= subSlaves[i][j];
 					master.addObserver(new Observer() {
+						@Override
 						public void update(Observable o, Object arg) {
 							boolean enabled= master.getChecked() && slave.getChecked();
 							subSlave.setEnabled(enabled);
@@ -153,6 +154,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		}
 		
 		master.addObserver(new Observer() {
+			@Override
 			public void update(Observable o, Object arg) {
 				boolean masterChecked= master.getChecked();
 				for (int i= 0; i < slaves.length; i++) {
@@ -173,6 +175,7 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		for (int i= 0; i < slaves.length; i++) {
 			final CheckboxPreference slave= slaves[i];
 			slave.addObserver(new Observer() {
+				@Override
 				public void update(Observable o, Object arg) {
 					setSelectedCleanUpCount(fSelectedCount + (slave.getChecked() ? 1 : -1));
 				}
@@ -190,7 +193,8 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 
 	private void internalRegisterSlavePreference(final CheckboxPreference master, final ButtonPreference[] slaves) {
     	master.addObserver( new Observer() {
-    		public void update(Observable o, Object arg) {
+    		@Override
+			public void update(Observable o, Object arg) {
     			for (int i= 0; i < slaves.length; i++) {
 					slaves[i].setEnabled(master.getChecked());
 				}
@@ -202,8 +206,14 @@ public abstract class CleanUpTabPage extends ModifyDialogTabPage implements ICle
 		}
 	}
 
-	protected void intent(Composite group) {
-        Label l= new Label(group, SWT.NONE);
+	/**
+	 * Creates a spacer control with a pre-defined width.
+	 * 
+	 * @param parent the parent composite
+	 */
+	// should be called "createSpacer"
+	protected void intent(Composite parent) {
+        Label l= new Label(parent, SWT.NONE);
     	GridData gd= new GridData();
     	gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(4);
     	l.setLayoutData(gd);

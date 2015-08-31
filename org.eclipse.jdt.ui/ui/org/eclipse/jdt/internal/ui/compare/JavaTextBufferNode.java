@@ -50,28 +50,34 @@ class JavaTextBufferNode implements ITypedElement, IEncodedStreamContentAccessor
 		fInEditor= inEditor;
 	}
 
+	@Override
 	public String getName() {
 		if (fInEditor)
 			return CompareMessages.Editor_Buffer;
 		return CompareMessages.Workspace_File;
 	}
 
+	@Override
 	public String getType() {
 		return "java";	//$NON-NLS-1$
 	}
 
+	@Override
 	public Image getImage() {
 		return null;
 	}
 
+	@Override
 	public InputStream getContents() {
 		return new ByteArrayInputStream(JavaCompareUtilities.getBytes(fDocument.get(), "UTF-16")); //$NON-NLS-1$
 	}
 
+	@Override
 	public String getCharset() {
 		return "UTF-16"; //$NON-NLS-1$
 	}
 
+	@Override
 	public IResource getResource() {
 		return fFile;
 	}

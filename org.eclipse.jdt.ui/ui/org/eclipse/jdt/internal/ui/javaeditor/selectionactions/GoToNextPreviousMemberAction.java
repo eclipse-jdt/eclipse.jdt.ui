@@ -80,6 +80,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 		fIsGotoNext= isSelectNext;
 	}
 
+	@Override
 	public void update() {
 		boolean enabled= false;
 		ISourceReference ref= getSourceReference();
@@ -192,7 +193,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 	}
 
 	private static Integer[] createOffsetArray(IType[] types) throws JavaModelException {
-		List<Integer> result= new ArrayList<Integer>();
+		List<Integer> result= new ArrayList<>();
 		for (int i= 0; i < types.length; i++) {
 			IType iType= types[i];
 			addOffset(result, iType.getNameRange().getOffset());

@@ -73,9 +73,6 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_EXCLUDE_FROM_BUILDPATH);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getDetailedDescription() {
 		if (!isEnabled())
@@ -95,9 +92,6 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
         return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
         final IJavaProject project;
@@ -110,6 +104,7 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 
         try {
 			final IRunnableWithProgress runnable= new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 				        List<IResource> result= exclude(getSelectedElements(), project, monitor);
@@ -137,7 +132,7 @@ public class ExcludeFromBuildpathAction extends BuildpathModifierAction {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_Excluding, javaElements.size() + 4);
 
 			List<CPListElement> existingEntries= ClasspathModifier.getExistingEntries(project);
-			List<IResource> resources= new ArrayList<IResource>();
+			List<IResource> resources= new ArrayList<>();
 			for (int i= 0; i < javaElements.size(); i++) {
 				IJavaElement javaElement= (IJavaElement) javaElements.get(i);
 				IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);

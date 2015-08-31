@@ -33,7 +33,7 @@ public class RenameTempTests extends RefactoringTest{
 	private static final boolean BUG_checkDeclInNestedClass= true;
 	private static final boolean BUG_checkShadowing= true;
 
-	private static final Class clazz= RenameTempTests.class;
+	private static final Class<RenameTempTests> clazz= RenameTempTests.class;
 	private static final String REFACTORING_PATH= "RenameTemp/";
 
 
@@ -41,6 +41,7 @@ public class RenameTempTests extends RefactoringTest{
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}

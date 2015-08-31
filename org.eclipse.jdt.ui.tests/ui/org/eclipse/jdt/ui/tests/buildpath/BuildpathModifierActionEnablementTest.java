@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,10 +14,6 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -63,9 +59,13 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ExcludeFromB
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.IncludeToBuildpathAction;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.RemoveFromBuildpathAction;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 public class BuildpathModifierActionEnablementTest extends TestCase {
 
-    public static final Class THIS= BuildpathModifierActionEnablementTest.class;
+    public static final Class<BuildpathModifierActionEnablementTest> THIS= BuildpathModifierActionEnablementTest.class;
 
     private BuildpathModifierAction[] fActions;
 
@@ -107,7 +107,8 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         super(THIS.getName());
     }
 
-    protected void setUp() throws Exception {
+    @Override
+	protected void setUp() throws Exception {
     	fActions= createActions();
         fProject= createProject();
         assertFalse(fProject.isOnClasspath(fProject.getUnderlyingResource()));
@@ -115,7 +116,8 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
 
     private BuildpathModifierAction[] createActions() {
     	ISetSelectionTarget nullSelectionTarget= new ISetSelectionTarget() {
-    		public void selectReveal(ISelection selection) {}
+    		@Override
+			public void selectReveal(ISelection selection) {}
         };
 
         IRunnableContext context= PlatformUI.getWorkbench().getProgressService();
@@ -139,6 +141,7 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         };
     }
 
+	@Override
 	protected void tearDown() throws Exception {
         fProject.getProject().delete(true, true, null);
     }
@@ -617,14 +620,19 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
 
         final IPackageFragmentRoot[] addedZipArchive= {null};
         AddSelectedLibraryToBuildpathAction add= new AddSelectedLibraryToBuildpathAction(PlatformUI.getWorkbench().getProgressService(), new ISetSelectionTarget() {
+			@Override
 			public void selectReveal(ISelection selection) {
 				addedZipArchive[0]= (IPackageFragmentRoot)((StructuredSelection)selection).getFirstElement();
             }
         });
         add.selectionChanged(new SelectionChangedEvent(new ISelectionProvider() {
+			@Override
 			public void addSelectionChangedListener(ISelectionChangedListener listener) {}
+			@Override
 			public ISelection getSelection() {return new StructuredSelection(fExcludedLibrary);}
+			@Override
 			public void removeSelectionChangedListener(ISelectionChangedListener listener) {}
+			@Override
 			public void setSelection(ISelection selection) {}
         }, new StructuredSelection(fExcludedLibrary)));
         add.run();
@@ -651,10 +659,10 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         final IPath projectPath= fProject.getProject().getFullPath();
 
         // configure the classpath entries, including the default jre library.
-        List cpEntries= new ArrayList();
+        List<IClasspathEntry> cpEntries= new ArrayList<>();
         cpEntries.add(JavaCore.newSourceEntry(projectPath.append(srcPath)));
         cpEntries.addAll(Arrays.asList(PreferenceConstants.getDefaultJRELibrary()));
-        IClasspathEntry[] entries= (IClasspathEntry[]) cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
+        IClasspathEntry[] entries= cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
         fProject.setRawClasspath(entries, null);
 
         // one package in src folder
@@ -679,18 +687,23 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         final ICompilationUnit cuB= createICompilationUnit("B", pack1);
         ExcludeFromBuildpathAction exclude= new ExcludeFromBuildpathAction(PlatformUI.getWorkbench().getProgressService(), new ISetSelectionTarget() {
 
+			@Override
 			public void selectReveal(ISelection selection) {
 				StructuredSelection ss= (StructuredSelection)selection;
-				List list= ss.toList();
+				List<?> list= ss.toList();
 				excludedElements[0]= (IResource)list.get(0);
 				excludedElements[1]= (IResource)list.get(1);
             }
 
         });
         exclude.selectionChanged(new SelectionChangedEvent(new ISelectionProvider() {
+			@Override
 			public void addSelectionChangedListener(ISelectionChangedListener listener) {}
+			@Override
 			public ISelection getSelection() {return new StructuredSelection(new Object[] {cuB, pack2});}
+			@Override
 			public void removeSelectionChangedListener(ISelectionChangedListener listener) {}
+			@Override
 			public void setSelection(ISelection selection) {}
         }, new StructuredSelection(new Object[] {cuB, pack2})));
         exclude.run();
@@ -701,15 +714,20 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
         final IFile[] removedZipFile= {null};
         RemoveFromBuildpathAction remove= new RemoveFromBuildpathAction(PlatformUI.getWorkbench().getProgressService(), new ISetSelectionTarget() {
 
+			@Override
 			public void selectReveal(ISelection selection) {
 				removedZipFile[0]= (IFile)((StructuredSelection)selection).getFirstElement();
             }
 
         });
         remove.selectionChanged(new SelectionChangedEvent(new ISelectionProvider() {
+			@Override
 			public void addSelectionChangedListener(ISelectionChangedListener listener) {}
+			@Override
 			public ISelection getSelection() {return new StructuredSelection(zipRoot);}
+			@Override
 			public void removeSelectionChangedListener(ISelectionChangedListener listener) {}
+			@Override
 			public void setSelection(ISelection selection) {}
         }, new StructuredSelection(zipRoot)));
         remove.run();
@@ -735,11 +753,15 @@ public class BuildpathModifierActionEnablementTest extends TestCase {
 	private void select(final StructuredSelection selection) {
 	    for (int i= 0; i < fActions.length; i++) {
 	        fActions[i].selectionChanged(new SelectionChangedEvent(new ISelectionProvider(){
+				@Override
 				public void addSelectionChangedListener(ISelectionChangedListener listener) {}
+				@Override
 				public ISelection getSelection() {
 	                return selection;
                 }
+				@Override
 				public void removeSelectionChangedListener(ISelectionChangedListener listener) {}
+				@Override
 				public void setSelection(ISelection s) {}
 	        }, selection));
         }

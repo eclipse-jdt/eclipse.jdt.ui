@@ -17,6 +17,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -58,6 +59,9 @@ public class EditorUtility {
 	/**
 	 * Note: This is an inlined version of {@link JavaUI#getEditorInputJavaElement(IEditorInput)},
 	 * which is not available in 3.1.
+	 * 
+	 * @param editorInput the editor input
+	 * @return the Java element wrapped by <code>editorInput</code> or <code>null</code> if none
 	 */
 	private static IJavaElement javaUIgetEditorInputJavaElement(IEditorInput editorInput) {
 		Assert.isNotNull(editorInput);

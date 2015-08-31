@@ -117,9 +117,9 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 
 		fProfile= profile;
 		setTitle(Messages.format(FormatterMessages.ModifyDialog_dialog_title, profile.getName()));
-		fWorkingValues= new HashMap<String, String>(fProfile.getSettings());
+		fWorkingValues= new HashMap<>(fProfile.getSettings());
 		setStatusLineAboveButtons(false);
-		fTabPages= new ArrayList<IModifyDialogTabPage>();
+		fTabPages= new ArrayList<>();
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 	}
 
@@ -169,6 +169,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		fProfileNameField.getLabelControl(nameComposite).setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		fProfileNameField.getTextControl(nameComposite).setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		fProfileNameField.setDialogFieldListener(new IDialogFieldListener() {
+			@Override
 			public void dialogFieldChanged(DialogField field) {
 				doValidate();
             }
@@ -185,7 +186,9 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		applyDialogFont(composite);
 
 		fTabFolder.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				final TabItem tabItem= (TabItem)e.item;
 				final IModifyDialogTabPage page= (IModifyDialogTabPage)tabItem.getData();
@@ -219,9 +222,6 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.window.Window#getInitialSize()
-	 */
 	@Override
 	protected Point getInitialSize() {
 		Point initialSize= super.getInitialSize();
@@ -238,9 +238,6 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		return initialSize;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.window.Window#getInitialLocation(org.eclipse.swt.graphics.Point)
-	 */
 	@Override
 	protected Point getInitialLocation(Point initialSize) {
 		try {
@@ -262,9 +259,6 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		return super.close();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
-	 */
 	@Override
 	protected void okPressed() {
 		applyPressed();
@@ -287,13 +281,13 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		if (!fProfile.getName().equals(fProfileNameField.getText())) {
 			fProfile= fProfile.rename(fProfileNameField.getText(), fProfileManager);
 		}
-		fProfile.setSettings(new HashMap<String, String>(fWorkingValues));
+		fProfile.setSettings(new HashMap<>(fWorkingValues));
 		fProfileManager.setSelected(fProfile);
 		doValidate();
 	}
 
 	private void saveButtonPressed() {
-		Profile selected= new CustomProfile(fProfileNameField.getText(), new HashMap<String, String>(fWorkingValues), fProfile.getVersion(), fProfileManager.getProfileVersioner().getProfileKind());
+		Profile selected= new CustomProfile(fProfileNameField.getText(), new HashMap<>(fWorkingValues), fProfile.getVersion(), fProfileManager.getProfileVersioner().getProfileKind());
 
 		final FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
 		dialog.setText(FormatterMessages.CodingStyleConfigurationBlock_save_profile_dialog_title);
@@ -317,7 +311,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		final IContentType type= Platform.getContentTypeManager().getContentType("org.eclipse.core.runtime.xml"); //$NON-NLS-1$
 		if (type != null)
 			encoding= type.getDefaultCharset();
-		final Collection<Profile> profiles= new ArrayList<Profile>();
+		final Collection<Profile> profiles= new ArrayList<>();
 		profiles.add(selected);
 		try {
 			fProfileStore.writeProfilesToFile(profiles, file, encoding);
@@ -352,6 +346,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 		fTabPages.add(tabPage);
 	}
 
+	@Override
 	public void valuesModified() {
 		doValidate();
 	}

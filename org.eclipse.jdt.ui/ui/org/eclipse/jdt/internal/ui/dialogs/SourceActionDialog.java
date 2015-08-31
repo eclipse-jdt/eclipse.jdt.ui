@@ -152,8 +152,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fFinal= asBoolean(fSettings.get(SETTINGS_FINAL_MODIFIER), false);
 		fSynchronized= asBoolean(fSettings.get(SETTINGS_SYNCHRONIZED_MODIFIER), false);
 		fGenerateComment= asBoolean(fSettings.get(SETTINGS_COMMENTS), generateCommentsDefault);
-		fInsertPositions= new ArrayList<IJavaElement>();
-		fLabels= new ArrayList<String>();
+		fInsertPositions= new ArrayList<>();
+		fLabels= new ArrayList<>();
 
 		IJavaElement[] members= fType.getChildren();
 
@@ -231,9 +231,6 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return members.length;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#close()
-	 */
 	@Override
 	public boolean close() {
 		if (fAllowedVisibilities != null && fAllowedVisibilities.size() > 0 && fAllowedVisibilities.contains(new Integer(fVisibilityModifier)))
@@ -425,7 +422,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	}
 
 	protected void openCodeTempatePage(String id) {
-		HashMap<String, String> arg= new HashMap<String, String>();
+		HashMap<String, String> arg= new HashMap<>();
 		arg.put(CodeTemplatePreferencePage.DATA_SELECT_TEMPLATE, id);
 		PreferencesUtil.createPropertyDialogOn(getShell(), fType.getJavaProject().getProject(), CodeTemplatePreferencePage.PROP_ID, null, arg).open();
 	}
@@ -443,11 +440,13 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		commentButton.setText(fCommentString);
 
 		commentButton.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				boolean isSelected= (((Button) e.widget).getSelection());
 				setGenerateComment(isSelected);
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				widgetSelected(e);
 			}
@@ -464,9 +463,11 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		// Add visibility and modifiers buttons: http://bugs.eclipse.org/bugs/show_bug.cgi?id=35870
 		// Add persistence of options: http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
 		IVisibilityChangeListener visibilityChangeListener= new IVisibilityChangeListener(){
+			@Override
 			public void visibilityChanged(int newVisibility) {
 				setVisibility(newVisibility);
 			}
+			@Override
 			public void modifierChanged(int modifier, boolean isChecked) {
 				switch (modifier) {
 					case Modifier.FINAL:  {
@@ -490,16 +491,13 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	}
 
 	private List<Integer> convertToIntegerList(int[] array) {
-		List<Integer> result= new ArrayList<Integer>(array.length);
+		List<Integer> result= new ArrayList<>(array.length);
 		for (int i= 0; i < array.length; i++) {
 			result.add(new Integer(array[i]));
 		}
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.dialogs.CheckedTreeSelectionDialog#create()
-	 */
 	@Override
 	public void create() {
 		super.create();
@@ -576,10 +574,12 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		finalCheckboxButton.setEnabled(true);
 		finalCheckboxButton.setSelection(isFinal());
 		finalCheckboxButton.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				visibilityChangeListener.modifierChanged(((Integer)event.widget.getData()).intValue(), ((Button) event.widget).getSelection());
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
 				widgetSelected(event);
 			}
@@ -593,10 +593,12 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		syncCheckboxButton.setEnabled(true);
 		syncCheckboxButton.setSelection(isSynchronized());
 		syncCheckboxButton.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent event) {
 				visibilityChangeListener.modifierChanged(((Integer)event.widget.getData()).intValue(), ((Button) event.widget).getSelection());
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent event) {
 				widgetSelected(event);
 			}
@@ -694,10 +696,6 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		return fSettings;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#getDialogBoundsSettings()
-	 * @since 3.8
-	 */
 	@Override
 	protected IDialogSettings getDialogBoundsSettings() {
 		return JavaPlugin.getDefault().getDialogSettingsSection("DialogBounds_" + getClass().getSimpleName()); //$NON-NLS-1$

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,6 @@
 package org.eclipse.jdt.text.tests.contentassist;
 
 import java.util.Hashtable;
-
-import junit.framework.TestCase;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -60,8 +58,10 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 
+import junit.framework.TestCase;
+
 public class AbstractCompletionTest extends TestCase {
-	protected static String suiteName(Class fqn) {
+	protected static String suiteName(Class<?> fqn) {
 		String name= fqn.toString();
 		name= name.substring(name.lastIndexOf('.') + 1);
 		return name;
@@ -79,8 +79,9 @@ public class AbstractCompletionTest extends TestCase {
 	private char fTrigger;
 	private boolean fWaitBeforeCompleting;
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		configureCoreOptions(options);
 		JavaCore.setOptions(options);
 
@@ -109,7 +110,7 @@ public class AbstractCompletionTest extends TestCase {
 		return CompletionTestSetup.getAnonymousTestPackage();
 	}
 
-	protected void configureCoreOptions(Hashtable options) {
+	protected void configureCoreOptions(Hashtable<String, String> options) {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "1");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -118,7 +119,7 @@ public class AbstractCompletionTest extends TestCase {
 	}
 
 	protected void setCoreOption(String key, String value) {
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(key, value);
 		JavaCore.setOptions(options);
 	}
@@ -137,6 +138,7 @@ public class AbstractCompletionTest extends TestCase {
 		return cu;
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		IPreferenceStore store= getJDTUIPrefs();
 		store.setToDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS);

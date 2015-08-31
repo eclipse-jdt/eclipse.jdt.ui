@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
  */
 public class SearchLeakTestWrapper extends TestCase {
 
-	private static final Class THIS= SearchLeakTestWrapper.class;
+	private static final Class<SearchLeakTestWrapper> THIS= SearchLeakTestWrapper.class;
 
 	SearchLeakTest fTest;
 	private String fName;
@@ -44,11 +44,13 @@ public class SearchLeakTestWrapper extends TestCase {
 		return new LeakTestSetup(new JUnitSourceSetup(test));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fTest= new SearchLeakTest(fName);
 		fTest.setUp();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		fTest.tearDown();
 		fTest= null;

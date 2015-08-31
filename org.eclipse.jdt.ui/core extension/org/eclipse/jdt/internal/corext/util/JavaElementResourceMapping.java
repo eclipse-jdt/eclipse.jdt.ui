@@ -203,7 +203,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 	}
 
 	private static ResourceTraversal[] getPackageFragmentTraversals(IPackageFragment pack) throws CoreException {
-		ArrayList<ResourceTraversal> res= new ArrayList<ResourceTraversal>();
+		ArrayList<ResourceTraversal> res= new ArrayList<>();
 		IContainer container= (IContainer)pack.getResource();
 		
 		if (container != null) {
@@ -223,7 +223,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 	}
 
 	private static ResourceTraversal[] getRemotePackageFragmentTraversals(IPackageFragment pack, RemoteResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
-		ArrayList<ResourceTraversal> res= new ArrayList<ResourceTraversal>();
+		ArrayList<ResourceTraversal> res= new ArrayList<>();
 		IContainer container= (IContainer)pack.getResource();
 		
 		if (container != null) {
@@ -299,7 +299,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		}
 		@Override
 		public IProject[] getProjects() {
-			Set<IProject> result= new HashSet<IProject>();
+			Set<IProject> result= new HashSet<>();
 			for (int i= 0; i < fFragments.length; i++) {
 				result.add(fFragments[i].getJavaProject().getProject());
 			}
@@ -307,7 +307,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		}
 		@Override
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
-			List<ResourceTraversal> result= new ArrayList<ResourceTraversal>();
+			List<ResourceTraversal> result= new ArrayList<>();
 			if (context instanceof RemoteResourceMappingContext) {
 				for (int i= 0; i < fFragments.length; i++) {
 					result.addAll(Arrays.asList(getRemotePackageFragmentTraversals(fFragments[i], (RemoteResourceMappingContext)context, monitor)));
@@ -397,7 +397,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 
 	public static ResourceMapping create(LogicalPackage logicalPackage) {
 		IPackageFragment[] fragments= logicalPackage.getFragments();
-		List<IPackageFragment> toProcess= new ArrayList<IPackageFragment>(fragments.length);
+		List<IPackageFragment> toProcess= new ArrayList<>(fragments.length);
 		for (int i= 0; i < fragments.length; i++) {
 			// only add if not part of an archive
 			IPackageFragmentRoot root= (IPackageFragmentRoot)fragments[i].getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);

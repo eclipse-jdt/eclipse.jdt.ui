@@ -103,7 +103,7 @@ public class CPListElement {
 		fOrginalPath= newElement ? null : path;
 		fLinkTarget= linkTarget;
 		fOrginalLinkTarget= linkTarget;
-		fChildren= new ArrayList<Object>();
+		fChildren= new ArrayList<>();
 		fResource= res;
 		fIsExported= false;
 
@@ -171,7 +171,7 @@ public class CPListElement {
 
 
 	private IClasspathAttribute[] getClasspathAttributes() {
-		ArrayList<IClasspathAttribute> res= new ArrayList<IClasspathAttribute>();
+		ArrayList<IClasspathAttribute> res= new ArrayList<>();
 		for (int i= 0; i < fChildren.size(); i++) {
 			Object curr= fChildren.get(i);
 			if (curr instanceof CPListElementAttribute) {
@@ -308,7 +308,7 @@ public class CPListElement {
 
 		IPath toRemove= path.removeFirstSegments(getPath().segmentCount()).addTrailingSeparator();
 		if (JavaModelUtil.isExcludedPath(toRemove, filters)) {
-			List<IPath> l= new ArrayList<IPath>(Arrays.asList(filters));
+			List<IPath> l= new ArrayList<>(Arrays.asList(filters));
 			l.remove(toRemove);
 			IPath[] newFilters= l.toArray(new IPath[l.size()]);
 			setAttribute(key, newFilters);
@@ -340,7 +340,7 @@ public class CPListElement {
 	}
 
 	public CPListElementAttribute[] getAllAttributes() {
-		ArrayList<Object> res= new ArrayList<Object>();
+		ArrayList<Object> res= new ArrayList<>();
 		for (int i= 0; i < fChildren.size(); i++) {
 			Object curr= fChildren.get(i);
 			if (curr instanceof CPListElementAttribute) {
@@ -376,7 +376,7 @@ public class CPListElement {
 
 	private Object[] getFilteredChildren(String[] filteredKeys) {
 		int nChildren= fChildren.size();
-		ArrayList<Object> res= new ArrayList<Object>(nChildren);
+		ArrayList<Object> res= new ArrayList<>(nChildren);
 
 		for (int i= 0; i < nChildren; i++) {
 			Object curr= fChildren.get(i);
@@ -502,9 +502,6 @@ public class CPListElement {
 		return fPath.hashCode() + fEntryKind;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		return getClasspathEntry().toString();
@@ -839,7 +836,7 @@ public class CPListElement {
     	result.fIsMissing= fIsMissing;
     	result.fParentContainer= fParentContainer;
     	result.fCachedEntry= null;
-    	result.fChildren= new ArrayList<Object>(fChildren.size());
+    	result.fChildren= new ArrayList<>(fChildren.size());
     	for (Iterator<Object> iterator= fChildren.iterator(); iterator.hasNext();) {
     		Object child= iterator.next();
     		if (child instanceof CPListElement) {

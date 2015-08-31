@@ -11,12 +11,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.text.tests.contentassist.ContentAssistTestSuite;
 import org.eclipse.jdt.text.tests.spelling.SpellingTestSuite;
 import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 /**
@@ -51,7 +51,6 @@ public class JdtTextTestSuite {
 				new String[] {
 						"org.eclipse.core.filebuffers.tests",
 						"org.eclipse.core.variables",
-						"org.eclipse.jsch.core",
 						"org.eclipse.team.cvs.core",
 						"org.eclipse.test.performance"
 				});

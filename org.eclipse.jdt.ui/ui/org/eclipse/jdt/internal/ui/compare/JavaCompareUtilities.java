@@ -359,7 +359,7 @@ public class JavaCompareUtilities {
 		try {
 			reader= new BufferedReader(new InputStreamReader(is2, encoding));
 			StringBuffer sb= new StringBuffer();
-			List<String> list= new ArrayList<String>();
+			List<String> list= new ArrayList<>();
 			while (true) {
 				int c= reader.read();
 				if (c == -1)

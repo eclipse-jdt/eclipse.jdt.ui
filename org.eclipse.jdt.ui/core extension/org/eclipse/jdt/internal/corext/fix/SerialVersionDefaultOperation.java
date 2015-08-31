@@ -42,9 +42,6 @@ public final class SerialVersionDefaultOperation extends AbstractSerialVersionOp
 	}
 
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) {
 		Assert.isNotNull(fragment);
@@ -55,9 +52,6 @@ public final class SerialVersionDefaultOperation extends AbstractSerialVersionOp
 		return true;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment, final LinkedProposalModel positionGroups) {
 

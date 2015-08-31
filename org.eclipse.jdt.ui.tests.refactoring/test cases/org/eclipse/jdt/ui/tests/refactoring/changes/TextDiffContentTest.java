@@ -71,6 +71,7 @@ public class TextDiffContentTest extends TestCase {
 
 	private TextEditChangeGroup fChange3;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fDocument = new Document(MODIFIED_SOURCE_CONTENTS);

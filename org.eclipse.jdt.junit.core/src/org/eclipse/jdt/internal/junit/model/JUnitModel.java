@@ -75,11 +75,12 @@ public final class JUnitModel {
 		 * so that we only attach a TestRunner once to a launch.
 		 * Once a test runner is connected, it is removed from the set.
 		 */
-		private HashSet fTrackedLaunches= new HashSet(20);
+		private HashSet<ILaunch> fTrackedLaunches= new HashSet<>(20);
 
 		/*
 		 * @see ILaunchListener#launchAdded(ILaunch)
 		 */
+		@Override
 		public void launchAdded(ILaunch launch) {
 			fTrackedLaunches.add(launch);
 		}
@@ -87,6 +88,7 @@ public final class JUnitModel {
 		/*
 		 * @see ILaunchListener#launchRemoved(ILaunch)
 		 */
+		@Override
 		public void launchRemoved(final ILaunch launch) {
 			fTrackedLaunches.remove(launch);
 			//TODO: story for removing old test runs?
@@ -102,6 +104,7 @@ public final class JUnitModel {
 		/*
 		 * @see ILaunchListener#launchChanged(ILaunch)
 		 */
+		@Override
 		public void launchChanged(final ILaunch launch) {
 			if (!fTrackedLaunches.contains(launch))
 				return;
@@ -141,10 +144,12 @@ public final class JUnitModel {
 	/**
 	 * @deprecated to prevent deprecation warnings
 	 */
+	@Deprecated
 	private static final class LegacyTestRunSessionListener implements ITestRunSessionListener {
 		private TestRunSession fActiveTestRunSession;
 		private ITestSessionListener fTestSessionListener;
 
+		@Override
 		public void sessionAdded(TestRunSession testRunSession) {
 			// Only serve one legacy ITestRunListener at a time, since they cannot distinguish between different concurrent test sessions:
 			if (fActiveTestRunSession != null)
@@ -153,15 +158,18 @@ public final class JUnitModel {
 			fActiveTestRunSession= testRunSession;
 
 			fTestSessionListener= new ITestSessionListener() {
+				@Override
 				public void testAdded(TestElement testElement) {
 				}
 
+				@Override
 				public void sessionStarted() {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
 						testRunListeners[i].testRunStarted(fActiveTestRunSession.getTotalCount());
 					}
 				}
+				@Override
 				public void sessionTerminated() {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
@@ -169,6 +177,7 @@ public final class JUnitModel {
 					}
 					sessionRemoved(fActiveTestRunSession);
 				}
+				@Override
 				public void sessionStopped(long elapsedTime) {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
@@ -176,6 +185,7 @@ public final class JUnitModel {
 					}
 					sessionRemoved(fActiveTestRunSession);
 				}
+				@Override
 				public void sessionEnded(long elapsedTime) {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
@@ -183,9 +193,11 @@ public final class JUnitModel {
 					}
 					sessionRemoved(fActiveTestRunSession);
 				}
+				@Override
 				public void runningBegins() {
 					// ignore
 				}
+				@Override
 				public void testStarted(TestCaseElement testCaseElement) {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
@@ -193,6 +205,7 @@ public final class JUnitModel {
 					}
 				}
 
+				@Override
 				public void testFailed(TestElement testElement, Status status, String trace, String expected, String actual) {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
@@ -200,6 +213,7 @@ public final class JUnitModel {
 					}
 				}
 
+				@Override
 				public void testEnded(TestCaseElement testCaseElement) {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
@@ -207,6 +221,7 @@ public final class JUnitModel {
 					}
 				}
 
+				@Override
 				public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
 					org.eclipse.jdt.junit.ITestRunListener[] testRunListeners= JUnitCorePlugin.getDefault().getTestRunListeners();
 					for (int i= 0; i < testRunListeners.length; i++) {
@@ -214,6 +229,7 @@ public final class JUnitModel {
 					}
 				}
 
+				@Override
 				public boolean acceptsSwapToDisk() {
 					return true;
 				}
@@ -221,6 +237,7 @@ public final class JUnitModel {
 			fActiveTestRunSession.addTestSessionListener(fTestSessionListener);
 		}
 
+		@Override
 		public void sessionRemoved(TestRunSession testRunSession) {
 			if (fActiveTestRunSession == testRunSession) {
 				fActiveTestRunSession.removeTestSessionListener(fTestSessionListener);
@@ -234,7 +251,7 @@ public final class JUnitModel {
 	/**
 	 * Active test run sessions, youngest first.
 	 */
-	private final LinkedList/*<TestRunSession>*/ fTestRunSessions= new LinkedList();
+	private final LinkedList<TestRunSession> fTestRunSessions= new LinkedList<>();
 	private final ILaunchListener fLaunchListener= new JUnitLaunchListener();
 
 	/**
@@ -318,8 +335,8 @@ public final class JUnitModel {
 	 *         the internal data structure and modifications do not affect the
 	 *         global list of active sessions. The list is sorted by age, youngest first.
 	 */
-	public synchronized List getTestRunSessions() {
-		return new ArrayList(fTestRunSessions);
+	public synchronized List<TestRunSession> getTestRunSessions() {
+		return new ArrayList<>(fTestRunSessions);
 	}
 
 	/**
@@ -330,7 +347,7 @@ public final class JUnitModel {
 	 */
 	public void addTestRunSession(TestRunSession testRunSession) {
 		Assert.isNotNull(testRunSession);
-		ArrayList toRemove= new ArrayList();
+		ArrayList<TestRunSession> toRemove= new ArrayList<>();
 		
 		synchronized (this) {
 			Assert.isLegal(! fTestRunSessions.contains(testRunSession));
@@ -339,9 +356,9 @@ public final class JUnitModel {
 			int maxCount = Platform.getPreferencesService().getInt(JUnitCorePlugin.CORE_PLUGIN_ID, JUnitPreferencesConstants.MAX_TEST_RUNS, 10, null);
 			int size= fTestRunSessions.size();
 			if (size > maxCount) {
-				List excess= fTestRunSessions.subList(maxCount, size);
-				for (Iterator iter= excess.iterator(); iter.hasNext();) {
-					TestRunSession oldSession= (TestRunSession) iter.next();
+				List<TestRunSession> excess= fTestRunSessions.subList(maxCount, size);
+				for (Iterator<TestRunSession> iter= excess.iterator(); iter.hasNext();) {
+					TestRunSession oldSession= iter.next();
 					if (!(oldSession.isStarting() || oldSession.isRunning() || oldSession.isKeptAlive())) {
 						toRemove.add(oldSession);
 						iter.remove();
@@ -351,7 +368,7 @@ public final class JUnitModel {
 		}
 		
 		for (int i= 0; i < toRemove.size(); i++) {
-			TestRunSession oldSession= (TestRunSession) toRemove.get(i);
+			TestRunSession oldSession= toRemove.get(i);
 			notifyTestRunSessionRemoved(oldSession);
 		}
 		notifyTestRunSessionAdded(testRunSession);
@@ -406,6 +423,7 @@ public final class JUnitModel {
 		final TestRunSession[] session= { null };
 		
 		Thread importThread= new Thread("JUnit URL importer") { //$NON-NLS-1$
+			@Override
 			public void run() {
 				try {
 					SAXParserFactory parserFactory= SAXParserFactory.newInstance();

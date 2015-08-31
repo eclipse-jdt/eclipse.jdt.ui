@@ -448,7 +448,7 @@ public class RenamingNameSuggestor {
 	 *
 	 */
 	private String[] getSuffixes(String typeName) {
-		List<String> suffixes= new ArrayList<String>();
+		List<String> suffixes= new ArrayList<>();
 		JavaWordIterator iterator= new JavaWordIterator();
 		iterator.setText(typeName);
 		int lastmatch= 0;

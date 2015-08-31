@@ -87,9 +87,6 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getDetailedDescription() {
 		if (!isEnabled())
@@ -111,9 +108,6 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 		return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run() {
 
@@ -174,6 +168,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 
 			try {
 				final IRunnableWithProgress runnable= new IRunnableWithProgress() {
+					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						try {
 							List<IJavaElement> result= addToClasspath(getSelectedElements(), project, newDefaultOutputLocation.makeAbsolute(), removeProjectFromClasspath, removeOldClassFiles, monitor);
@@ -231,7 +226,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 				monitor.worked(1);
 			}
 
-			List<CPListElement> newEntries= new ArrayList<CPListElement>();
+			List<CPListElement> newEntries= new ArrayList<>();
 			for (int i= 0; i < elements.size(); i++) {
 				Object element= elements.get(i);
 				CPListElement entry;
@@ -242,7 +237,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
 				newEntries.add(entry);
 			}
 
-			Set<CPListElement> modifiedSourceEntries= new HashSet<CPListElement>();
+			Set<CPListElement> modifiedSourceEntries= new HashSet<>();
 			BuildPathBasePage.fixNestingConflicts(newEntries.toArray(new CPListElement[newEntries.size()]), existingEntries.toArray(new CPListElement[existingEntries.size()]), modifiedSourceEntries);
 
 			ClasspathModifier.setNewEntry(existingEntries, newEntries, project, new SubProgressMonitor(monitor, 1));
@@ -252,7 +247,7 @@ public class AddFolderToBuildpathAction extends BuildpathModifierAction {
         	delta.setNewEntries(existingEntries.toArray(new CPListElement[existingEntries.size()]));
         	informListeners(delta);
 
-			List<IJavaElement> result= new ArrayList<IJavaElement>();
+			List<IJavaElement> result= new ArrayList<>();
 			for (int i= 0; i < newEntries.size(); i++) {
 				IClasspathEntry entry= newEntries.get(i).getClasspathEntry();
 				IJavaElement root;

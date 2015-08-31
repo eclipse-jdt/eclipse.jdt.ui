@@ -81,7 +81,7 @@ public class PropertiesFileEditor extends TextEditor {
 	 */
 	private IPropertyChangeListener fPropertyChangeListener;
 
-	private Map<IEditorInput, IType> fAccessorTypes= new HashMap<IEditorInput, IType>();
+	private Map<IEditorInput, IType> fAccessorTypes= new HashMap<>();
 
 	private Job fJob;
 
@@ -106,6 +106,7 @@ public class PropertiesFileEditor extends TextEditor {
 
 		// Need to listen on Editors UI preference store because JDT disables this functionality in its preferences.
 		fPropertyChangeListener= new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SPACES_FOR_TABS.equals(event.getProperty()))
 					handlePreferenceStoreChanged(event);
@@ -218,6 +219,7 @@ public class PropertiesFileEditor extends TextEditor {
 	public Object getAdapter(Class adapter) {
 		if (adapter == IShowInTargetList.class) {
 			return new IShowInTargetList() {
+				@Override
 				public String[] getShowInTargetIds() {
 					return new String[] { JavaUI.ID_PACKAGES, JavaPlugin.ID_RES_NAV };
 				}

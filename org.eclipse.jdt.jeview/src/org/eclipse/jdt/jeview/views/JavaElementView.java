@@ -19,6 +19,24 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.jeview.EditorUtility;
+import org.eclipse.jdt.jeview.JEPluginImages;
+import org.eclipse.jdt.jeview.JEViewPlugin;
+import org.eclipse.jdt.jeview.properties.ClasspathEntryProperties;
+import org.eclipse.jdt.jeview.properties.JarEntryResourceProperties;
+import org.eclipse.jdt.jeview.properties.JavaElementProperties;
+import org.eclipse.jdt.jeview.properties.MarkerProperties;
+import org.eclipse.jdt.jeview.properties.MemberValuePairProperties;
+import org.eclipse.jdt.jeview.properties.ResourceProperties;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Tree;
+
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -36,14 +54,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BusyIndicator;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -90,20 +100,19 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ContributionItemFactory;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.handlers.IHandlerService;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.texteditor.ITextEditor;
-
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
-import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IAnnotatable;
@@ -126,16 +135,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.jeview.EditorUtility;
-import org.eclipse.jdt.jeview.JEPluginImages;
-import org.eclipse.jdt.jeview.JEViewPlugin;
-import org.eclipse.jdt.jeview.properties.ClasspathEntryProperties;
-import org.eclipse.jdt.jeview.properties.JarEntryResourceProperties;
-import org.eclipse.jdt.jeview.properties.JavaElementProperties;
-import org.eclipse.jdt.jeview.properties.MarkerProperties;
-import org.eclipse.jdt.jeview.properties.MemberValuePairProperties;
-import org.eclipse.jdt.jeview.properties.ResourceProperties;
 
 
 public class JavaElementView extends ViewPart implements IShowInSource, IShowInTarget {
@@ -180,6 +179,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		public JEViewSelectionProvider(TreeViewer viewer) {
 			fViewer= viewer;
 			fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
 					fireSelectionChanged();
 				}
@@ -222,13 +222,15 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		}
 		
+		@Override
 		public void addSelectionChangedListener(ISelectionChangedListener listener) {
 			fSelectionChangedListeners.add(listener);
 		}
 
+		@Override
 		public IStructuredSelection getSelection() {
 			IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
-			ArrayList<Object> externalSelection= new ArrayList<Object>();
+			ArrayList<Object> externalSelection= new ArrayList<>();
 			for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 				Object element= iter.next();
 				if (element instanceof JavaElement) {
@@ -249,10 +251,12 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			return new StructuredSelection(externalSelection);
 		}
 
+		@Override
 		public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 			fSelectionChangedListeners.remove(listener);
 		}
 
+		@Override
 		public void setSelection(ISelection selection) {
 			//not supported
 		}
@@ -286,6 +290,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		hookDoubleClickAction();
 		getSite().setSelectionProvider(new JEViewSelectionProvider(fViewer));
 		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				fCopyAction.setEnabled(! event.getSelection().isEmpty());
 			}
@@ -327,6 +332,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(new IMenuListener() {
+			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				JavaElementView.this.fillContextMenu(manager);
 			}
@@ -600,6 +606,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				
 				class Runner implements IRunnableWithProgress {
 					IType type;
+					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						try {
 							type= project.findType(fullyQualifiedName, monitor);
@@ -689,6 +696,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				
 				class Runner implements IRunnableWithProgress {
 					IJavaElement element;
+					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						try {
 							element= project.findElement(bindingKey, null);
@@ -721,6 +729,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		fRefreshAction= new Action("Re&fresh", JEPluginImages.IMG_REFRESH) {
 			@Override public void run() {
 				BusyIndicator.showWhile(getSite().getShell().getDisplay(), new Runnable() {
+					@Override
 					public void run() {
 						fViewer.refresh();
 					}
@@ -840,6 +849,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		fLogDeltasAction= new Action("Log Java element deltas", IAction.AS_CHECK_BOX) {
 			
 			private IElementChangedListener fListener= new IElementChangedListener() {
+				@Override
 				@SuppressWarnings("deprecation")
 				public void elementChanged(ElementChangedEvent event) {
 					String type= "\nEvent type: ";
@@ -929,6 +939,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 
 	private void hookDoubleClickAction() {
 		fViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				fDoubleClickAction.run();
 			}
@@ -961,16 +972,18 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		fViewer.getControl().setFocus();
 	}
 
+	@Override
 	public ShowInContext getShowInContext() {
 		return new ShowInContext(null, getSite().getSelectionProvider().getSelection());
 	}
 
+	@Override
 	public boolean show(ShowInContext context) {
 		ISelection selection= context.getSelection();
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= ((IStructuredSelection) selection);
 			if (structuredSelection.size() >= 1) {
-				List<Object> input= new ArrayList<Object>();
+				List<Object> input= new ArrayList<>();
 				for (Iterator<?> iter = structuredSelection.iterator(); iter.hasNext();) {
 					Object item= iter.next();
 					if (item instanceof IJavaElement || item instanceof IResource || item instanceof IJarEntryResource) {
@@ -1020,10 +1033,11 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		return null;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		if (adapter == IPropertySheetPage.class) {
-			return getPropertySheetPage();
+			return (T) getPropertySheetPage();
 		}
 		return super.getAdapter(adapter);
 	}
@@ -1032,6 +1046,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		if (fPropertySheetPage == null) {
 			final PropertySheetPage propertySheetPage= new PropertySheetPage();
 			propertySheetPage.setPropertySourceProvider(new IPropertySourceProvider() {
+				@Override
 				public IPropertySource getPropertySource(Object object) {
 					if (object instanceof IJavaElement)
 						return new JavaElementProperties((IJavaElement) object);

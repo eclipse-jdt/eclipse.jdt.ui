@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 
-	private static final Class THIS= NlsRefactoringCheckFinalConditionsTest.class;
+	private static final Class<NlsRefactoringCheckFinalConditionsTest> THIS= NlsRefactoringCheckFinalConditionsTest.class;
 
 	//private IPath fPropertyFilePath;
 	private IPackageFragment fAccessorPackage;
@@ -63,11 +63,13 @@ public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		javaProject= ProjectTestSetup.getProject();
 		fHelper= new NlsRefactoringTestHelper(javaProject);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());
 	}

@@ -64,7 +64,7 @@ public final class ExtractLocalDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
-	public ExtractLocalDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public ExtractLocalDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.EXTRACT_LOCAL_VARIABLE, project, description, comment, arguments, flags);
 	}
 

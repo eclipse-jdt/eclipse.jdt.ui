@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 public class JavaFileLinkHelper implements ILinkHelper {
 
+	@Override
 	public void activateEditor(IWorkbenchPage page, IStructuredSelection selection) {
 		if (selection == null || selection.isEmpty())
 			return;
@@ -44,6 +45,7 @@ public class JavaFileLinkHelper implements ILinkHelper {
 
 	}
 
+	@Override
 	public IStructuredSelection findSelection(IEditorInput input) {
 		IJavaElement element= JavaUI.getEditorInputJavaElement(input);
 		if (element == null) {

@@ -49,7 +49,7 @@ public class PropertiesFileSpellingEngine extends SpellingEngine {
 		SpellEventListener listener= new SpellEventListener(collector, document);
 		boolean isIgnoringAmpersand= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SPELLING_IGNORE_AMPERSAND_IN_PROPERTIES);
 		try {
-			List<ITypedRegion> partitionList= new ArrayList<ITypedRegion>();
+			List<ITypedRegion> partitionList= new ArrayList<>();
 			for (int i= 0; i < regions.length; i++)
 				partitionList.addAll(Arrays.asList(TextUtilities.computePartitioning(document, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, regions[i].getOffset(), regions[i].getLength(), false)));
 			ITypedRegion[] partitions= partitionList.toArray(new ITypedRegion[partitionList.size()]);

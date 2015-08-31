@@ -17,10 +17,12 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet;
 
 public abstract class TypeSet implements ITypeSet {
 
+	@Override
 	public TType chooseSingleType() {
 		return null;
 	}
 
+	@Override
 	public ITypeSet restrictedTo(ITypeSet restrictionSet) {
 		throw new UnsupportedOperationException();
 	}
@@ -182,6 +184,7 @@ public abstract class TypeSet implements ITypeSet {
 	/**
 	 * @return true iff the type set contains no types
 	 */
+	@Override
 	abstract public boolean isEmpty();
 
 	/**

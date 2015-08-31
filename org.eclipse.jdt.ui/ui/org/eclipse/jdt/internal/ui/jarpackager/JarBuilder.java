@@ -33,9 +33,7 @@ public abstract class JarBuilder implements IJarBuilder {
 
 	private MultiStatus fStatus;
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void open(JarPackageData jarPackage, Shell shell, MultiStatus status) throws CoreException {
 		fStatus= status;
 	}

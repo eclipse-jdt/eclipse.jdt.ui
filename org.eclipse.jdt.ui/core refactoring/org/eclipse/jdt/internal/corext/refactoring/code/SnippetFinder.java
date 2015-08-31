@@ -51,8 +51,8 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 		private Map<IVariableBinding, SimpleName> fLocalMappings;
 
 		public Match() {
-			fNodes= new ArrayList<ASTNode>(10);
-			fLocalMappings= new HashMap<IVariableBinding, SimpleName>();
+			fNodes= new ArrayList<>(10);
+			fLocalMappings= new HashMap<>();
 		}
 		public void add(ASTNode node) {
 			fNodes.add(node);
@@ -147,7 +147,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 		}
 	}
 
-	private List<Match> fResult= new ArrayList<Match>(2);
+	private List<Match> fResult= new ArrayList<>(2);
 	private Match fMatch;
 	private ASTNode[] fSnippet;
 	private int fIndex;

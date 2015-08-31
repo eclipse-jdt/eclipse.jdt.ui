@@ -12,6 +12,8 @@ package org.eclipse.jdt.astview.views;
 
 import java.util.ArrayList;
 
+import org.eclipse.jdt.astview.ASTViewPlugin;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -27,8 +29,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.StringLiteral;
-
-import org.eclipse.jdt.astview.ASTViewPlugin;
 
 /**
  *
@@ -47,9 +47,7 @@ public class Binding extends ASTAttribute {
 		fIsRelevant= isRelevant;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getParent()
-	 */
+	@Override
 	public Object getParent() {
 		return fParent;
 	}
@@ -72,9 +70,7 @@ public class Binding extends ASTAttribute {
 		return (typeKinds & kind) != 0;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getChildren()
-	 */
+	@Override
 	public Object[] getChildren() {
 		try {
 			if (fBinding != null) {
@@ -85,7 +81,7 @@ public class Binding extends ASTAttribute {
 			return new Object[] { new Error(this, "BrokenBinding: " + fBinding, null) };
 		}
 		if (fBinding != null) {
-			ArrayList res= new ArrayList();
+			ArrayList<ASTAttribute> res= new ArrayList<>();
 			res.add(new BindingProperty(this, "NAME", fBinding.getName(), true)); //$NON-NLS-1$
 			res.add(new BindingProperty(this, "KEY", fBinding.getKey(), true)); //$NON-NLS-1$
 			res.add(new BindingProperty(this, "IS RECOVERED", fBinding.isRecovered(), true)); //$NON-NLS-1$
@@ -300,9 +296,7 @@ public class Binding extends ASTAttribute {
 		return REF_TYPE;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getLabel()
-	 */
+	@Override
 	public String getLabel() {
 		StringBuffer buf= new StringBuffer(fLabel);
 		buf.append(": "); //$NON-NLS-1$
@@ -369,16 +363,12 @@ public class Binding extends ASTAttribute {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getImage()
-	 */
+	@Override
 	public Image getImage() {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
+	@Override
 	public String toString() {
 		return getLabel();
 	}
@@ -386,6 +376,7 @@ public class Binding extends ASTAttribute {
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -421,6 +412,7 @@ public class Binding extends ASTAttribute {
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		int result= fParent != null ? fParent.hashCode() : 0;
 		result+= (fBinding != null && fBinding.getKey() != null) ? fBinding.getKey().hashCode() : 0;
@@ -463,6 +455,11 @@ public class Binding extends ASTAttribute {
 	 * Creates an {@link ASTAttribute} for a value from
 	 * {@link IMemberValuePairBinding#getValue()} or from
 	 * {@link IMethodBinding#getDefaultValue()}.
+	 * 
+	 * @param parent the parent node
+	 * @param name the attribute name
+	 * @param value the attribute value
+	 * @return an ASTAttribute
 	 */
 	public static ASTAttribute createValueAttribute(ASTAttribute parent, String name, Object value) {
 		ASTAttribute res;

@@ -254,12 +254,12 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	 */
 	private String processSimpleTag() throws IOException {
 
-		fParameters= new ArrayList<String>();
-		fExceptions= new ArrayList<String>();
-		fAuthors= new ArrayList<String>();
-		fSees= new ArrayList<String>();
-		fSince= new ArrayList<String>();
-		fRest= new ArrayList<Pair>();
+		fParameters= new ArrayList<>();
+		fExceptions= new ArrayList<>();
+		fAuthors= new ArrayList<>();
+		fSees= new ArrayList<>();
+		fSince= new ArrayList<>();
+		fRest= new ArrayList<>();
 
 		StringBuffer buffer= new StringBuffer();
 		int c= '@';

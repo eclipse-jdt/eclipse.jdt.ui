@@ -99,6 +99,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		/*
 		 * Implements method from Listener
 		 */
+		@Override
 		public void handleEvent(Event e) {
 			if (getControl() == null)
 				return;
@@ -168,6 +169,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	/*
 	 * Method declared on IDialogPage.
 	 */
+	@Override
 	public void createControl(Composite parent) {
 
 		initializeDialogUnits(parent);
@@ -666,6 +668,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	/*
 	 * Implements method from IJarPackageWizardPage.
 	 */
+	@Override
 	public void finish() {
 		saveWidgetValues();
 	}
@@ -893,7 +896,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	 * @return a new selection dialog
 	 */
 	protected SelectionDialog createPackageDialog(Set<IJavaElement> packageFragments) {
-		List<IPackageFragment> packages= new ArrayList<IPackageFragment>(packageFragments.size());
+		List<IPackageFragment> packages= new ArrayList<>(packageFragments.size());
 		for (Iterator<IJavaElement> iter= packageFragments.iterator(); iter.hasNext();) {
 			IPackageFragment fragment= (IPackageFragment)iter.next();
 			boolean containsJavaElements= false;
@@ -924,6 +927,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		dialog.addFilter(new LibraryFilter());
 		dialog.addFilter(new SealPackagesFilter(packages));
 		dialog.setValidator(new ISelectionStatusValidator() {
+			@Override
 			public IStatus validate(Object[] selection) {
 				StatusInfo res= new StatusInfo();
 				for (int i= 0; i < selection.length; i++) {
@@ -966,6 +970,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		dialog.setComparator(new JavaElementComparator());
 		dialog.setAllowMultiple(false);
 		dialog.setValidator(new ISelectionStatusValidator() {
+			@Override
 			public IStatus validate(Object[] selection) {
 				StatusInfo res= new StatusInfo();
 				// only single selection
@@ -990,7 +995,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	 * @return	the Set of IPackageFragments which contain all the selected resources
 	 */
 	private Set<IJavaElement> getPackagesForSelectedResources() {
-		Set<IJavaElement> packages= new HashSet<IJavaElement>();
+		Set<IJavaElement> packages= new HashSet<>();
 		int n= fJarPackage.getElements().length;
 		for (int i= 0; i < n; i++) {
 			Object element= fJarPackage.getElements()[i];

@@ -62,23 +62,17 @@ public class JavaElementSuperImplementationHyperlink implements IHyperlink {
 		fQualify= qualify;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.hyperlink.IHyperlink#getHyperlinkRegion()
-	 */
+	@Override
 	public IRegion getHyperlinkRegion() {
 		return fRegion;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.hyperlink.IHyperlink#getTypeLabel()
-	 */
+	@Override
 	public String getTypeLabel() {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.hyperlink.IHyperlink#getHyperlinkText()
-	 */
+	@Override
 	public String getHyperlinkText() {
 		if (fQualify) {
 			String methodLabel= JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED);
@@ -88,9 +82,7 @@ public class JavaElementSuperImplementationHyperlink implements IHyperlink {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.hyperlink.IHyperlink#open()
-	 */
+	@Override
 	public void open() {
 		try {
 			IMethod method= findSuperImplementation(fMethod);

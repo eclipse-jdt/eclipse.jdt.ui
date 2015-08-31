@@ -28,41 +28,26 @@ public final class SaveParticipantPreferencePage extends AbstractConfigurationBl
 	public static final String PROPERTY_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.SaveParticipantPreferencePage"; //$NON-NLS-1$
 	public static final String PREFERENCE_PAGE_ID= "org.eclipse.jdt.ui.preferences.SaveParticipantPreferencePage"; //$NON-NLS-1$
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected String getHelpId() {
 		return IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected IPreferenceAndPropertyConfigurationBlock createConfigurationBlock(IScopeContext context) {
 		return new SaveParticipantConfigurationBlock(context, this);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected String getPreferencePageID() {
 		return PREFERENCE_PAGE_ID;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected String getPropertyPageID() {
 		return PROPERTY_PAGE_ID;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean hasProjectSpecificOptions(IProject project) {
 		return JavaPlugin.getDefault().getSaveParticipantRegistry().hasSettingsInScope(new ProjectScope(project));

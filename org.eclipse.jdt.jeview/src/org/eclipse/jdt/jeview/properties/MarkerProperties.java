@@ -38,6 +38,7 @@ public class MarkerProperties implements IPropertySource {
 		fMarker= marker;
 	}
 
+	@Override
 	public AttributeDescriptor[] getPropertyDescriptors() {
 		if (fPropertyDescriptors != null)
 			return fPropertyDescriptors;
@@ -102,6 +103,7 @@ public class MarkerProperties implements IPropertySource {
 		return fPropertyDescriptors;
 	}
 
+	@Override
 	public Object getPropertyValue(Object id) {
 		AttributeDescriptor[] propertyDescriptors= getPropertyDescriptors();
 		for (int i= 0; i < propertyDescriptors.length; i++) {
@@ -113,18 +115,22 @@ public class MarkerProperties implements IPropertySource {
 	}
 
 	
+	@Override
 	public void setPropertyValue(Object name, Object value) {
 		// do nothing
 	}
 	
+	@Override
 	public Object getEditableValue() {
 		return this;
 	}
 	
+	@Override
 	public boolean isPropertySet(Object property) {
 		return false;
 	}
 	
+	@Override
 	public void resetPropertyValue(Object property) {
 		// do nothing
 	}

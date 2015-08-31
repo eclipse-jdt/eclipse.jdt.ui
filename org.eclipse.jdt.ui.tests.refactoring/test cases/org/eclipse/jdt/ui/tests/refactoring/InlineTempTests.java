@@ -27,13 +27,14 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 public class InlineTempTests extends RefactoringTest {
 
-	private static final Class clazz= InlineTempTests.class;
+	private static final Class<InlineTempTests> clazz= InlineTempTests.class;
 	private static final String REFACTORING_PATH= "InlineTemp/";
 
 	public InlineTempTests(String name) {
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}

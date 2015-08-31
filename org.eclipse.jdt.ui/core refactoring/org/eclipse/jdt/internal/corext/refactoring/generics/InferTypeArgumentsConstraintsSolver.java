@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivale
 public class InferTypeArgumentsConstraintsSolver {
 
 	private static class TTypeComparator implements Comparator<TType> {
+		@Override
 		public int compare(TType o1, TType o2) {
 			return o1.getPrettySignature().compareTo(o2.getPrettySignature());
 		}
@@ -74,7 +75,7 @@ public class InferTypeArgumentsConstraintsSolver {
 
 	public InferTypeArgumentsConstraintsSolver(InferTypeArgumentsTCModel typeConstraintFactory) {
 		fTCModel= typeConstraintFactory;
-		fWorkList= new LinkedList<ConstraintVariable2>();
+		fWorkList= new LinkedList<>();
 	}
 
 	public InferTypeArgumentsUpdate solveConstraints(IProgressMonitor pm) {
@@ -89,14 +90,14 @@ public class InferTypeArgumentsConstraintsSolver {
 		ParametricStructureComputer parametricStructureComputer= new ParametricStructureComputer(allConstraintVariables, fTCModel);
 		Collection<CollectionElementVariable2> newVars= parametricStructureComputer.createElemConstraintVariables();
 
-		ArrayList<ConstraintVariable2> newAllConstraintVariables= new ArrayList<ConstraintVariable2>();
+		ArrayList<ConstraintVariable2> newAllConstraintVariables= new ArrayList<>();
 		newAllConstraintVariables.addAll(Arrays.asList(allConstraintVariables));
 		newAllConstraintVariables.addAll(newVars);
 		allConstraintVariables= newAllConstraintVariables.toArray(new ConstraintVariable2[newAllConstraintVariables.size()]);
 
 
 		//loop over all TypeEquivalenceSets and unify the elements from the fElemStructureEnv with the existing TypeEquivalenceSets
-		HashSet<TypeEquivalenceSet> allTypeEquivalenceSets= new HashSet<TypeEquivalenceSet>();
+		HashSet<TypeEquivalenceSet> allTypeEquivalenceSets= new HashSet<>();
 		for (int i= 0; i < allConstraintVariables.length; i++) {
 			TypeEquivalenceSet typeEquivalenceSet= allConstraintVariables[i].getTypeEquivalenceSet();
 			if (typeEquivalenceSet != null)
@@ -305,7 +306,7 @@ public class InferTypeArgumentsConstraintsSolver {
 					return type;
 				} else {
 					if (interfaceCandidates == null)
-						interfaceCandidates= new ArrayList<TType>(2);
+						interfaceCandidates= new ArrayList<>(2);
 					interfaceCandidates.add(type);
 				}
 			}
@@ -335,8 +336,8 @@ public class InferTypeArgumentsConstraintsSolver {
 	};
 
 	private ArrayList<TType> getNonTaggingInterfaces(ArrayList<TType> interfaceCandidates) {
-		ArrayList<TType> unresolvedTypes= new ArrayList<TType>();
-		ArrayList<TType> nonTagging= new ArrayList<TType>();
+		ArrayList<TType> unresolvedTypes= new ArrayList<>();
+		ArrayList<TType> nonTagging= new ArrayList<>();
 
 		for (int i= 0; i < interfaceCandidates.size(); i++) {
 			TType interf= interfaceCandidates.get(i);

@@ -254,13 +254,13 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		fViewer= viewer;
 		fPatternFilter= new NamePatternFilter();
 
-		fLRUFilterIdsStack= new Stack<String>();
+		fLRUFilterIdsStack= new Stack<>();
 
 		fUserDefinedPatterns= new String[0];
 		fUserDefinedPatternsEnabled= false;
 		fPreviousPatterns= new String[0];
 
-		fFilterItems= new HashMap<String, FilterItem>();
+		fFilterItems= new HashMap<>();
 		FilterDescriptor[] filterDescriptors= FilterDescriptor.getFilterDescriptors(fTargetId);
 		for (int i= 0; i < filterDescriptors.length; i++) {
 			FilterItem item= new FilterItem(filterDescriptors[i]);
@@ -298,7 +298,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 * @noreference This method is not intended to be referenced by clients.
 	 */
 	public String[] internalGetEnabledFilterIds() {
-		ArrayList<String> enabledFilterIds= new ArrayList<String>();
+		ArrayList<String> enabledFilterIds= new ArrayList<>();
 		for (Iterator<FilterItem> iterator= fFilterItems.values().iterator(); iterator.hasNext();) {
 			FilterItem item= iterator.next();
 			if (item.enabled) {
@@ -319,7 +319,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 * @return the array of new filter ids
 	 */
 	public String[] removeFiltersFor(Object parent, Object element, IContentProvider contentProvider) {
-		ArrayList<String> newFilters= new ArrayList<String>();
+		ArrayList<String> newFilters= new ArrayList<>();
 		for (Iterator<FilterItem> iterator= fFilterItems.values().iterator(); iterator.hasNext();) {
 			FilterItem item= iterator.next();
 			if (item.enabled) {
@@ -409,7 +409,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 * @since 3.0
 	 */
 	private void setRecentlyChangedFilters(Stack<FilterDescriptor> changeHistory) {
-		Stack<String> oldestFirstStack= new Stack<String>();
+		Stack<String> oldestFirstStack= new Stack<>();
 
 		int length= Math.min(changeHistory.size(), MAX_FILTER_MENU_ENTRIES);
 		for (int i= 0; i < length; i++)
@@ -451,6 +451,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 
 		fMenuManager= viewMenu;
 		fMenuListener= new IMenuListener() {
+			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				removePreviousLRUFilterActions(manager);
 				addLRUFilterActions(manager);
@@ -473,7 +474,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 			return;
 		}
 
-		SortedSet<String> sortedFilters= new TreeSet<String>(fLRUFilterIdsStack);
+		SortedSet<String> sortedFilters= new TreeSet<>(fLRUFilterIdsStack);
 		String[] recentlyChangedFilterIds= sortedFilters.toArray(new String[sortedFilters.size()]);
 
 		fFilterIdsUsedInLastViewMenu= new String[recentlyChangedFilterIds.length];
@@ -503,8 +504,8 @@ public class CustomFiltersActionGroup extends ActionGroup {
 
 	private boolean updateViewerFilters() {
 		ViewerFilter[] installedFilters= fViewer.getFilters();
-		ArrayList<ViewerFilter> viewerFilters= new ArrayList<ViewerFilter>(Arrays.asList(installedFilters));
-		HashSet<String> patterns= new HashSet<String>();
+		ArrayList<ViewerFilter> viewerFilters= new ArrayList<>(Arrays.asList(installedFilters));
+		HashSet<String> patterns= new HashSet<>();
 
 		boolean hasChange= false;
 		boolean patternChange= false;

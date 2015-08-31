@@ -89,9 +89,6 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 		/** The cached refactoring history delta */
 		private RefactoringDescriptorProxy[] fHistoryDelta= null;
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public RefactoringDescriptorProxy[] getDescriptors() {
 			if (fHistoryDelta != null)
@@ -144,9 +141,6 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 			return new RefactoringDescriptorProxy[0];
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public boolean isEmpty() {
 			final RefactoringDescriptorProxy[] proxies= getDescriptors();
@@ -155,9 +149,6 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 			return true;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public RefactoringHistory removeAll(final RefactoringHistory history) {
 			throw new UnsupportedOperationException();
@@ -260,26 +251,17 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 		setWindowTitle(JarImportMessages.JarImportWizard_replace_title);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void addUserDefinedPages() {
 		fImportPage= new JarImportWizardPage(this, fImportWizard);
 		addPage(fImportPage);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean canFinish() {
 		return super.canFinish() && fImportData.getPackageFragmentRoot() != null && fImportData.getRefactoringFileLocation() != null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean deconfigureClasspath(final IClasspathEntry[] entries, final IProgressMonitor monitor) throws CoreException {
 		final boolean rename= fImportData.isRenameJarFile();
@@ -310,9 +292,6 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 		return fImportData;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public IWizardPage getNextPage(final IWizardPage page) {
 		if (page == fImportPage && fImportData.getRefactoringHistory() == null)
@@ -320,17 +299,11 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 		return super.getNextPage(page);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected IPackageFragmentRoot getPackageFragmentRoot() {
 		return fImportData.getPackageFragmentRoot();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected RefactoringHistory getRefactoringHistory() {
 		return fHistoryProxy;
@@ -384,9 +357,7 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 		return uri;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void init(final IWorkbench workbench, final IStructuredSelection selection) {
 		if (selection != null && selection.size() == 1) {
 			final Object element= selection.getFirstElement();
@@ -404,9 +375,6 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean performFinish() {
 		if (fNewSettings) {

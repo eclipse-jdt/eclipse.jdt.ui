@@ -85,6 +85,7 @@ public class ControlStatementsTabPage extends FormatterTabPage {
 		fSimpleIfPref= createOption(ifElseGroup, numColumns - 1, FormatterMessages.ControlStatementsTabPage_if_else_group_keep_simple_if_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_IF_ON_ONE_LINE, FALSE_TRUE);
 
 		fThenStatementPref.addObserver( new Observer() {
+			@Override
 			public void update(Observable o, Object arg) {
 				fSimpleIfPref.setEnabled(!fThenStatementPref.getChecked());
 			}
@@ -103,18 +104,12 @@ public class ControlStatementsTabPage extends FormatterTabPage {
 	    fPreview.setPreviewText(PREVIEW);
 	}
 
-	/* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doCreateJavaPreview(org.eclipse.swt.widgets.Composite)
-     */
     @Override
 	protected JavaPreview doCreateJavaPreview(Composite parent) {
         fPreview= new CompilationUnitPreview(fWorkingValues, parent);
         return fPreview;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialogTabPage#doUpdatePreview()
-     */
     @Override
 	protected void doUpdatePreview() {
     	super.doUpdatePreview();

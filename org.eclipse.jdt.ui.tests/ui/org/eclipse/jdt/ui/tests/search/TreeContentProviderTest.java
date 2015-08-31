@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.ui.search.LevelTreeContentProvider;
  */
 public class TreeContentProviderTest extends TestCase {
 
-	private static final Class THIS= TreeContentProviderTest.class;
+	private static final Class<TreeContentProviderTest> THIS= TreeContentProviderTest.class;
 
 	private LevelTreeContentProvider fProvider;
 	private JavaSearchResult fResult;
@@ -57,62 +57,77 @@ public class TreeContentProviderTest extends TestCase {
 
 	static class MockTreeViewer extends AbstractTreeViewer {
 
+		@Override
 		protected void addTreeListener(Control control, TreeListener listener) {
 			// ignore
 		}
 
+		@Override
 		protected void doUpdateItem(Item item, Object element) {
 			// ignore
 		}
 
+		@Override
 		protected Item[] getChildren(Widget widget) {
 			return new Item[0];
 		}
 
+		@Override
 		protected boolean getExpanded(Item item) {
 			return false;
 		}
 
+		@Override
 		protected int getItemCount(Control control) {
 			return 0;
 		}
 
+		@Override
 		protected int getItemCount(Item item) {
 			return 0;
 		}
 
+		@Override
 		protected Item[] getItems(Item item) {
 			return new Item[0];
 		}
 
+		@Override
 		protected Item getParentItem(Item item) {
 			return null;
 		}
 
+		@Override
 		protected Item[] getSelection(Control control) {
 			return new Item[0];
 		}
 
+		@Override
 		protected Item newItem(Widget parent, int style, int index) {
 			return null;
 		}
 
+		@Override
 		protected void removeAll(Control control) {
 			// ignore
 		}
 
+		@Override
 		protected void setExpanded(Item item, boolean expand) {
 			// ignore
 		}
 
+		@Override
 		protected void setSelection(List items) {
 			// ignore
 		}
 
+		@Override
 		protected void showItem(Item item) {
 			// ignore
 		}
 
+		@Override
 		public Control getControl() {
 			return null;
 		}
@@ -124,14 +139,17 @@ public class TreeContentProviderTest extends TestCase {
 		// TODO Auto-generated constructor stub
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProvider= new LevelTreeContentProvider(new JavaSearchResultPage() {
 			StructuredViewer fViewer= new MockTreeViewer();
+			@Override
 			protected StructuredViewer getViewer() {
 				return fViewer;
 			}
 
+			@Override
 			public AbstractTextSearchResult getInput() {
 				return fResult;
 			}
@@ -140,6 +158,7 @@ public class TreeContentProviderTest extends TestCase {
 		fProvider.inputChanged(null, null, fResult);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}

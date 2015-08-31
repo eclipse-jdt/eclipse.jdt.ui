@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -174,7 +174,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the value of the attribute is not a {@link String} or allowNull is <code>false</code> and the attribute does not exist
 	 */
-	public static String getString(Map map, String attribute, boolean allowNull) throws IllegalArgumentException {
+	public static String getString(Map<String, String> map, String attribute, boolean allowNull) throws IllegalArgumentException {
 		Object object= map.get(attribute);
 		if (object == null) {
 			if (allowNull)
@@ -197,7 +197,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the value of the attribute is not a {@link String} or the attribute does not exist
 	 */
-	public static String getString(Map map, String attribute)  throws IllegalArgumentException {
+	public static String getString(Map<String, String> map, String attribute)  throws IllegalArgumentException {
 		return getString(map, attribute, false);
 	}
 
@@ -212,7 +212,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if any of the attribute does not exist or is not a number
 	 */
-	public static String[] getStringArray(Map map, String countAttribute, String arrayAttribute, int offset) throws IllegalArgumentException{
+	public static String[] getStringArray(Map<String, String> map, String countAttribute, String arrayAttribute, int offset) throws IllegalArgumentException{
 		int count= getInt(map, countAttribute);
 		String[] result= new String[count];
 		for (int i= 0; i < count; i++) {
@@ -230,7 +230,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the attribute does not exist or is not a number
 	 */
-	public static int getInt(Map map, String attribute)  throws IllegalArgumentException{
+	public static int getInt(Map<String, String> map, String attribute)  throws IllegalArgumentException{
 		String value= getString(map, attribute);
 		try {
 			return Integer.parseInt(value);
@@ -249,7 +249,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the attribute exists but is not a number
 	 */
-	public static int getInt(Map map, String attribute, int defaultValue)  throws IllegalArgumentException{
+	public static int getInt(Map<String, String> map, String attribute, int defaultValue)  throws IllegalArgumentException{
 		String value= getString(map, attribute, true);
 		if (value == null)
 			return defaultValue;
@@ -270,7 +270,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if any of the attribute does not exist or is not a number
 	 */
-	public static int[] getIntArray(Map map, String countAttribute, String arrayAttribute)  throws IllegalArgumentException {
+	public static int[] getIntArray(Map<String, String> map, String countAttribute, String arrayAttribute)  throws IllegalArgumentException {
 		int count= getInt(map, countAttribute);
 		int[] result= new int[count];
 		for (int i= 0; i < count; i++) {
@@ -301,7 +301,7 @@ public class JavaRefactoringDescriptorUtil {
 	 * @throws IllegalArgumentException if the attribute does not exist or is not a java element
 	 * @see #handleToElement(WorkingCopyOwner, String, String, boolean)
 	 */
-	public static IJavaElement getJavaElement(Map map, String attribute, String project)  throws IllegalArgumentException{
+	public static IJavaElement getJavaElement(Map<String, String> map, String attribute, String project)  throws IllegalArgumentException{
 		return getJavaElement(map, attribute, project, false);
 	}
 
@@ -317,7 +317,7 @@ public class JavaRefactoringDescriptorUtil {
 	 * @throws IllegalArgumentException if the attribute does not existt
 	 * @see #handleToElement(WorkingCopyOwner, String, String, boolean)
 	 */
-	public static IJavaElement getJavaElement(Map map, String attribute, String project, boolean allowNull)  throws IllegalArgumentException{
+	public static IJavaElement getJavaElement(Map<String, String> map, String attribute, String project, boolean allowNull)  throws IllegalArgumentException{
 		String handle= getString(map, attribute, allowNull);
 		if (handle != null)
 			return handleToElement(null, project, handle, false); //TODO: update Javadoc
@@ -332,12 +332,12 @@ public class JavaRefactoringDescriptorUtil {
 	 * @param arrayAttribute the attribute name where the values are stored. The index starting from offset is appended to this
 	 * @param offset the starting index for arrayAttribute
 	 * @param project the project for resolving the java element. Can be <code>null</code> for workspace
-	 * @param arrayClass the component type for the resulting array. The resulting array can then be safely casted to arrayClass[]
+	 * @param arrayClass the component type for the resulting array. The resulting array can then be safely cast to arrayClass[]
 	 * @return the <code>IJavaElement[]</code>
 	 *
 	 * @throws IllegalArgumentException if any of the attribute does not exist or is not a number
 	 */
-	public static IJavaElement[] getJavaElementArray(Map map, String countAttribute, String arrayAttribute, int offset, String project, Class arrayClass)  throws IllegalArgumentException{
+	public static IJavaElement[] getJavaElementArray(Map<String, String> map, String countAttribute, String arrayAttribute, int offset, String project, Class<? extends IJavaElement> arrayClass)  throws IllegalArgumentException{
 		if (countAttribute != null) {
 			int count= getInt(map, countAttribute);
 			IJavaElement[] result= (IJavaElement[]) Array.newInstance(arrayClass, count);
@@ -346,7 +346,7 @@ public class JavaRefactoringDescriptorUtil {
 			}
 			return result;
 		} else {
-			ArrayList result= new ArrayList();
+			ArrayList<IJavaElement> result= new ArrayList<>();
 			IJavaElement element= null;
 			while ((element= getJavaElement(map, arrayAttribute, project, true)) != null){
 				result.add(element);
@@ -366,7 +366,7 @@ public class JavaRefactoringDescriptorUtil {
 	 * @throws IllegalArgumentException if the attribute does not exist
 	 * @see #handleToResource(String, String)
 	 */
-	public static IPath getResourcePath(Map map, String attribute, String project)  throws IllegalArgumentException {
+	public static IPath getResourcePath(Map<String, String> map, String attribute, String project)  throws IllegalArgumentException {
 		String handle= getString(map, attribute);
 		return handleToResourcePath(project, handle);
 	}
@@ -383,7 +383,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if any of the attribute does not exist or is not a number
 	 */
-	public static IPath[] getResourcePathArray(Map map, String countAttribute, String arrayAttribute, int offset, String project)  throws IllegalArgumentException{
+	public static IPath[] getResourcePathArray(Map<String, String> map, String countAttribute, String arrayAttribute, int offset, String project)  throws IllegalArgumentException{
 		int count= getInt(map, countAttribute);
 		IPath[] result= new IPath[count];
 		for (int i= 0; i < count; i++) {
@@ -403,7 +403,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if any of the attribute does not exist or is not a boolean
 	 */
-	public static boolean[] getBooleanArray(Map map, String countAttribute, String arrayAttribute, int offset) throws IllegalArgumentException {
+	public static boolean[] getBooleanArray(Map<String, String> map, String countAttribute, String arrayAttribute, int offset) throws IllegalArgumentException {
 		int count= getInt(map, countAttribute);
 		boolean[] result= new boolean[count];
 		for (int i= 0; i < count; i++) {
@@ -421,7 +421,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the attribute does not exist or is not a boolean
 	 */
-	public static boolean getBoolean(Map map, String attribute)  throws IllegalArgumentException{
+	public static boolean getBoolean(Map<String, String> map, String attribute)  throws IllegalArgumentException{
 		String value= getString(map, attribute).toLowerCase();
 		//Boolean.valueOf(value) does not complain about wrong values
 		if (LOWER_CASE_TRUE.equals(value))
@@ -438,7 +438,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the attribute exists but is not a boolean
 	 */
-	public static boolean hasBoolean(Map map, String attribute)  throws IllegalArgumentException{
+	public static boolean hasBoolean(Map<String, String> map, String attribute)  throws IllegalArgumentException{
 		String string= getString(map, attribute, true);
 		if (string == null)
 			return false;
@@ -463,7 +463,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the attribute does not contain a valid value
 	 */
-	public static boolean getBoolean(Map map, String attribute, boolean defaultValue) throws IllegalArgumentException {
+	public static boolean getBoolean(Map<String, String> map, String attribute, boolean defaultValue) throws IllegalArgumentException {
 		String value= getString(map, attribute, true);
 		if (value == null)
 			return defaultValue;
@@ -487,7 +487,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the attribute name is invalid, or the element is <code>null</code>
 	 */
-	public static void setJavaElement(Map arguments, String attribute, String project, IJavaElement element)  throws IllegalArgumentException{
+	public static void setJavaElement(Map<String, String> arguments, String attribute, String project, IJavaElement element)  throws IllegalArgumentException{
 		if (element == null)
 			throw new IllegalArgumentException("The element for attribute '" + attribute + "' may not be null"); //$NON-NLS-1$ //$NON-NLS-2$
 		setString(arguments, attribute, elementToHandle(project, element));
@@ -504,7 +504,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the attribute name is invalid, or the resource is <code>null</code>
 	 */
-	public static void setResourcePath(Map arguments, String attribute, String project, IPath resourcePath)  throws IllegalArgumentException{
+	public static void setResourcePath(Map<String, String> arguments, String attribute, String project, IPath resourcePath)  throws IllegalArgumentException{
 		if (resourcePath == null)
 			throw new IllegalArgumentException("The resource for attribute '" + attribute + "' may not be null");  //$NON-NLS-1$//$NON-NLS-2$
 		setString(arguments, attribute, resourcePathToHandle(project, resourcePath));
@@ -519,7 +519,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the attribute name is invalid
 	 */
-	public static void setInt(Map arguments, String attribute, int value)  throws IllegalArgumentException{
+	public static void setInt(Map<String, String> arguments, String attribute, int value)  throws IllegalArgumentException{
 		setString(arguments, attribute, Integer.toString(value));
 	}
 
@@ -532,7 +532,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the attribute name is invalid
 	 */
-	public static void setBoolean(Map arguments, String attribute, boolean value)  throws IllegalArgumentException{
+	public static void setBoolean(Map<String, String> arguments, String attribute, boolean value)  throws IllegalArgumentException{
 		setString(arguments, attribute, value ? LOWER_CASE_TRUE : LOWER_CASE_FALSE);
 	}
 
@@ -547,7 +547,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the attribute name is invalid or any of the booleans are null
 	 */
-	public static void setBooleanArray(Map arguments, String countAttribute, String arrayAttribute, boolean[] value, int offset) {
+	public static void setBooleanArray(Map<String, String> arguments, String countAttribute, String arrayAttribute, boolean[] value, int offset) {
 		if (value == null)
 			throw new IllegalArgumentException("The values for arrayAttribute '" + arrayAttribute + "' may not be null"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (countAttribute != null)
@@ -566,7 +566,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the attribute name is invalid
 	 */
-	public static void setString(Map arguments, String attribute, String value)  throws IllegalArgumentException{
+	public static void setString(Map<String, String> arguments, String attribute, String value)  throws IllegalArgumentException{
 		if (attribute == null || "".equals(attribute) || attribute.indexOf(' ') != -1) //$NON-NLS-1$
 			throw new IllegalArgumentException("Attribute '" + attribute + "' is not valid: '" + value + "'"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		if (value != null)
@@ -586,7 +586,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the attribute name is invalid or any of the strings are null
 	 */
-	public static void setStringArray(Map arguments, String countAttribute, String arrayAttribute, String[] value, int offset) {
+	public static void setStringArray(Map<String, String> arguments, String countAttribute, String arrayAttribute, String[] value, int offset) {
 		if (value == null)
 			throw new IllegalArgumentException("The values for arrayAttribute '" + arrayAttribute + "' may not be null"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (countAttribute != null)
@@ -607,7 +607,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the attribute name is invalid
 	 */
-	public static void setSelection(Map arguments, String attribute, int offset, int length)  throws IllegalArgumentException{
+	public static void setSelection(Map<String, String> arguments, String attribute, int offset, int length)  throws IllegalArgumentException{
 		String value= Integer.toString(offset) + " " + Integer.toString(length); //$NON-NLS-1$
 		setString(arguments, attribute, value);
 	}
@@ -624,7 +624,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the attribute name is invalid or any of the resources are null
 	 */
-	public static void setResourcePathArray(Map arguments, String countAttribute, String arrayAttribute, String project, IPath[] resourcePaths, int offset)  throws IllegalArgumentException{
+	public static void setResourcePathArray(Map<String, String> arguments, String countAttribute, String arrayAttribute, String project, IPath[] resourcePaths, int offset)  throws IllegalArgumentException{
 		if (resourcePaths == null)
 			throw new IllegalArgumentException("The resources for arrayAttribute '" + arrayAttribute + "' may not be null"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (countAttribute != null)
@@ -647,7 +647,7 @@ public class JavaRefactoringDescriptorUtil {
 	 *
 	 * @throws IllegalArgumentException if the attribute name is invalid or any of the elements are null
 	 */
-	public static void setJavaElementArray(Map arguments, String countAttribute, String arrayAttributePrefix, String project, IJavaElement[] elements, int offset)  throws IllegalArgumentException{
+	public static void setJavaElementArray(Map<String, String> arguments, String countAttribute, String arrayAttributePrefix, String project, IJavaElement[] elements, int offset)  throws IllegalArgumentException{
 		if (elements == null)
 			throw new IllegalArgumentException("The elements for arrayAttribute '" + arrayAttributePrefix + "' may not be null"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (countAttribute != null)

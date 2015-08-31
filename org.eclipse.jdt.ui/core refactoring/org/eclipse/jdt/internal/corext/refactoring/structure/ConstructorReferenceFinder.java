@@ -99,7 +99,7 @@ class ConstructorReferenceFinder {
 
 	//XXX this method is a workaround for jdt core bug 27236
 	private SearchResultGroup[] removeUnrealReferences(SearchResultGroup[] groups) {
-		List<SearchResultGroup> result= new ArrayList<SearchResultGroup>(groups.length);
+		List<SearchResultGroup> result= new ArrayList<>(groups.length);
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
 			ICompilationUnit cu= group.getCompilationUnit();
@@ -107,7 +107,7 @@ class ConstructorReferenceFinder {
 				continue;
 			CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(cu, false);
 			SearchMatch[] allSearchResults= group.getSearchResults();
-			List<SearchMatch> realConstructorReferences= new ArrayList<SearchMatch>(Arrays.asList(allSearchResults));
+			List<SearchMatch> realConstructorReferences= new ArrayList<>(Arrays.asList(allSearchResults));
 			for (int j= 0; j < allSearchResults.length; j++) {
 				SearchMatch searchResult= allSearchResults[j];
 				if (! isRealConstructorReferenceNode(ASTNodeSearchUtil.getAstNode(searchResult, cuNode)))
@@ -170,7 +170,7 @@ class ConstructorReferenceFinder {
 
 	private SearchResultGroup[] getImplicitConstructorReferences(IProgressMonitor pm, WorkingCopyOwner owner, RefactoringStatus status) throws JavaModelException {
 		pm.beginTask("", 2); //$NON-NLS-1$
-		List<SearchMatch> searchMatches= new ArrayList<SearchMatch>();
+		List<SearchMatch> searchMatches= new ArrayList<>();
 		searchMatches.addAll(getImplicitConstructorReferencesFromHierarchy(owner, new SubProgressMonitor(pm, 1)));
 		searchMatches.addAll(getImplicitConstructorReferencesInClassCreations(owner, new SubProgressMonitor(pm, 1), status));
 		pm.done();
@@ -183,7 +183,7 @@ class ConstructorReferenceFinder {
 		SearchPattern pattern= SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
 		SearchResultGroup[] refs= RefactoringSearchEngine.search(pattern, owner, scope, pm, status);
-		List<SearchMatch> result= new ArrayList<SearchMatch>();
+		List<SearchMatch> result= new ArrayList<>();
 		for (int i= 0; i < refs.length; i++) {
 			SearchResultGroup group= refs[i];
 			ICompilationUnit cu= group.getCompilationUnit();
@@ -220,7 +220,7 @@ class ConstructorReferenceFinder {
 	//List of SearchResults
 	private List<SearchMatch> getImplicitConstructorReferencesFromHierarchy(WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException{
 		IType[] subTypes= getNonBinarySubtypes(owner, fType, pm);
-		List<SearchMatch> result= new ArrayList<SearchMatch>(subTypes.length);
+		List<SearchMatch> result= new ArrayList<>(subTypes.length);
 		for (int i= 0; i < subTypes.length; i++) {
 			result.addAll(getAllSuperConstructorInvocations(subTypes[i]));
 		}
@@ -234,7 +234,7 @@ class ConstructorReferenceFinder {
 		else
 			hierarchy= type.newSupertypeHierarchy(owner, monitor);
 		IType[] subTypes= hierarchy.getAllSubtypes(type);
-		List<IType> result= new ArrayList<IType>(subTypes.length);
+		List<IType> result= new ArrayList<>(subTypes.length);
 		for (int i= 0; i < subTypes.length; i++) {
 			if (! subTypes[i].isBinary()) {
 				result.add(subTypes[i]);
@@ -247,7 +247,7 @@ class ConstructorReferenceFinder {
 	private static Collection<SearchMatch> getAllSuperConstructorInvocations(IType type) throws JavaModelException {
 		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
 		CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(type.getCompilationUnit(), false);
-		List<SearchMatch> result= new ArrayList<SearchMatch>(constructors.length);
+		List<SearchMatch> result= new ArrayList<>(constructors.length);
 		for (int i= 0; i < constructors.length; i++) {
 			ASTNode superCall= getSuperConstructorCallNode(constructors[i], cuNode);
 			if (superCall != null)

@@ -54,6 +54,7 @@ public abstract class AbstractConfigurationBlockPreferencePage extends Preferenc
 	/*
 	 * @see IWorkbenchPreferencePage#init()
 	 */
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 

@@ -68,9 +68,6 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.REMOVE_FROM_CLASSPATH_ACTION);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(checkEnabled(selection));
@@ -86,13 +83,11 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in SelectionDispatchAction
-	 */
 	@Override
 	public void run(final IStructuredSelection selection) {
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(true, true, new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
+				@Override
 				public void run(IProgressMonitor pm) throws CoreException {
 					try{
 						IPackageFragmentRoot[] roots= getRootsToRemove(selection);
@@ -116,7 +111,7 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 	}
 
 	private static IPackageFragmentRoot[] getRootsToRemove(IStructuredSelection selection){
-		List<Object> result= new ArrayList<Object>(selection.size());
+		List<Object> result= new ArrayList<>(selection.size());
 		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (canRemove(element))

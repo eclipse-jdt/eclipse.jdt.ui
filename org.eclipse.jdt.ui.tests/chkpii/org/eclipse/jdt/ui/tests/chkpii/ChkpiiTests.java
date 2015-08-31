@@ -51,6 +51,7 @@ public class ChkpiiTests extends TestCase {
 			return "*." + fName.toLowerCase();
 		}
 
+		@Override
 		public String toString() {
 			return fName.toUpperCase();
 		}
@@ -76,6 +77,7 @@ public class ChkpiiTests extends TestCase {
 			fStrBuffer= new StringBuffer();
 		}
 
+		@Override
 		public void run() {
 			try {
 				char[] buf= new char[1024];
@@ -101,6 +103,7 @@ public class ChkpiiTests extends TestCase {
 	}
 
 	private final FileCategory HTML= new FileCategory("HTML") {
+		@Override
 		protected String getExtension() {
 			return "*.htm*";
 		}
@@ -365,6 +368,7 @@ public class ChkpiiTests extends TestCase {
 	/*
 	 * @see TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		new File(fLogDirectoryName).mkdirs();
@@ -373,6 +377,7 @@ public class ChkpiiTests extends TestCase {
 	/*
 	 * @see TestCase#tearDown()
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		fLogDirectoryName= null;

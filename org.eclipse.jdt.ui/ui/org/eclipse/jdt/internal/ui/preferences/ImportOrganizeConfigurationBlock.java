@@ -139,19 +139,23 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 			return selected.size() == 1;
 		}
 
-        public void customButtonPressed(ListDialogField<ImportOrderEntry> field, int index) {
+        @Override
+		public void customButtonPressed(ListDialogField<ImportOrderEntry> field, int index) {
         	doButtonPressed(index);
         }
 
-        public void selectionChanged(ListDialogField<ImportOrderEntry> field) {
+        @Override
+		public void selectionChanged(ListDialogField<ImportOrderEntry> field) {
 			fOrderListField.enableButton(IDX_EDIT, canEdit(field));
         }
 
-        public void dialogFieldChanged(DialogField field) {
+        @Override
+		public void dialogFieldChanged(DialogField field) {
         	doDialogFieldChanged(field);
         }
 
-        public void doubleClicked(ListDialogField<ImportOrderEntry> field) {
+        @Override
+		public void doubleClicked(ListDialogField<ImportOrderEntry> field) {
         	if (canEdit(field)) {
 				doButtonPressed(IDX_EDIT);
         	}
@@ -189,7 +193,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 
 		ImportOrganizeAdapter adapter= new ImportOrganizeAdapter();
 
-		fOrderListField= new ListDialogField<ImportOrderEntry>(adapter, buttonLabels, new ImportOrganizeLabelProvider());
+		fOrderListField= new ListDialogField<>(adapter, buttonLabels, new ImportOrganizeLabelProvider());
 		fOrderListField.setDialogFieldListener(adapter);
 		fOrderListField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_order_label);
 		fOrderListField.setUpButtonIndex(IDX_UP);
@@ -315,7 +319,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	 * "0", "1" ... last entry. The values must be valid package names.
 	 */
 	private List<ImportOrderEntry> loadFromProperties(Properties properties) {
-		ArrayList<ImportOrderEntry> res= new ArrayList<ImportOrderEntry>();
+		ArrayList<ImportOrderEntry> res= new ArrayList<>();
 		int nEntries= properties.size();
 		for (int i= 0 ; i < nEntries; i++) {
 			String curr= properties.getProperty(String.valueOf(i));
@@ -411,17 +415,11 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		fContext.statusChanged(status);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String, java.lang.String)
-	 */
 	@Override
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		// no validation
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateControls()
-	 */
 	@Override
 	protected void updateControls() {
 		ImportOrderEntry[] importOrder= getImportOrderPreference();
@@ -464,16 +462,13 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#getFullBuildDialogStrings(boolean)
-	 */
 	@Override
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
 		return null; // no build required
 	}
 
 	private static ImportOrderEntry[] unpackOrderList(String str) {
-		ArrayList<ImportOrderEntry> res= new ArrayList<ImportOrderEntry>();
+		ArrayList<ImportOrderEntry> res= new ArrayList<>();
 		int start= 0;
 		do {
 			int end= str.indexOf(';', start);

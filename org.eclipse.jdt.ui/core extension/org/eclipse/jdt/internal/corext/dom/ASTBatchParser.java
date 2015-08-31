@@ -124,13 +124,13 @@ public class ASTBatchParser {
 		if (hasOnlyOneProject(units))
 			return new ICompilationUnit[][] { units };
 
-		Hashtable<IJavaProject, ArrayList<ICompilationUnit>> projectTable= new Hashtable<IJavaProject, ArrayList<ICompilationUnit>>();
+		Hashtable<IJavaProject, ArrayList<ICompilationUnit>> projectTable= new Hashtable<>();
 
 		for (int i= 0; i < units.length; i++) {
 			ICompilationUnit unit= units[i];
 			ArrayList<ICompilationUnit> list= projectTable.get(unit.getJavaProject());
 			if (list == null) {
-				list= new ArrayList<ICompilationUnit>();
+				list= new ArrayList<>();
 				projectTable.put(unit.getJavaProject(), list);
 			}
 			list.add(unit);

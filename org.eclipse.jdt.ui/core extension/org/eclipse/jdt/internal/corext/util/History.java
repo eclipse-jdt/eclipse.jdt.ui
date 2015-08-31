@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,8 +60,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
  * from the list. An element can be added/renewed with a call to <code>accessed(Object)</code>.
  *
  * The history can be stored to/loaded from an xml file.
+ * 
+ * @param <K> key type
+ * @param <V> value type
  */
-public abstract class History {
+public abstract class History<K, V> {
 
 	private static final String DEFAULT_ROOT_NODE_NAME= "histroyRootNode"; //$NON-NLS-1$
 	private static final String DEFAULT_INFO_NODE_NAME= "infoNode"; //$NON-NLS-1$
@@ -71,40 +74,40 @@ public abstract class History {
 		return new JavaUIException(JavaUIStatus.createError(IStatus.ERROR, message, t));
 	}
 
-	private final Map<Object, Object> fHistory;
-	private final Hashtable<Object, Integer> fPositions;
+	private final Map<K, V> fHistory;
+	private final Hashtable<K, Integer> fPositions;
 	private final String fFileName;
 	private final String fRootNodeName;
 	private final String fInfoNodeName;
 
 	public History(String fileName, String rootNodeName, String infoNodeName) {
-		fHistory= new LinkedHashMap<Object, Object>(80, 0.75f, true) {
+		fHistory= new LinkedHashMap<K, V>(80, 0.75f, true) {
 			private static final long serialVersionUID= 1L;
 			@Override
-			protected boolean removeEldestEntry(Map.Entry<Object, Object> eldest) {
+			protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
 				return size() > MAX_HISTORY_SIZE;
 			}
 		};
 		fFileName= fileName;
 		fRootNodeName= rootNodeName;
 		fInfoNodeName= infoNodeName;
-		fPositions= new Hashtable<Object, Integer>(MAX_HISTORY_SIZE);
+		fPositions= new Hashtable<>(MAX_HISTORY_SIZE);
 	}
 
 	public History(String fileName) {
 		this(fileName, DEFAULT_ROOT_NODE_NAME, DEFAULT_INFO_NODE_NAME);
 	}
 
-	public synchronized void accessed(Object object) {
+	public synchronized void accessed(V object) {
 		fHistory.put(getKey(object), object);
 		rebuildPositions();
 	}
 
-	public synchronized boolean contains(Object object) {
+	public synchronized boolean contains(V object) {
 		return fHistory.containsKey(getKey(object));
 	}
 
-	public synchronized boolean containsKey(Object key) {
+	public synchronized boolean containsKey(K key) {
 		return fHistory.containsKey(key);
 	}
 
@@ -112,7 +115,7 @@ public abstract class History {
 		return fHistory.isEmpty();
 	}
 
-	public synchronized Object remove(Object object) {
+	public synchronized Object remove(V object) {
 		Object removed= fHistory.remove(getKey(object));
 		rebuildPositions();
 		return removed;
@@ -133,7 +136,7 @@ public abstract class History {
 	 * @param key The key of the object to inspect
 	 * @return value in [0.0, 1.0] the lower the older the element
 	 */
-	public synchronized float getNormalizedPosition(Object key) {
+	public synchronized float getNormalizedPosition(K key) {
 		if (!containsKey(key))
 			return 0.0f;
 
@@ -151,7 +154,7 @@ public abstract class History {
 	 * @param key The key of the object to inspect
 	 * @return value between 0 and MAX_HISTORY_SIZE - 1, or -1
 	 */
-	public synchronized int getPosition(Object key) {
+	public synchronized int getPosition(K key) {
 		if (!containsKey(key))
 			return -1;
 
@@ -207,11 +210,11 @@ public abstract class History {
 		}
 	}
 
-	protected Set<Object> getKeys() {
+	protected Set<K> getKeys() {
 		return fHistory.keySet();
 	}
 
-	protected Collection<Object> getValues() {
+	protected Collection<V> getValues() {
 		return fHistory.values();
 	}
 
@@ -229,7 +232,7 @@ public abstract class History {
 	 * @param element The element containing required information to create the Object
 	 * @return return a new instance of an Object given <code>element</code>
 	 */
-	protected abstract Object createFromElement(Element element);
+	protected abstract V createFromElement(Element element);
 
 	/**
 	 * Get key for object
@@ -237,14 +240,14 @@ public abstract class History {
 	 * @param object The object to calculate a key for, not null
 	 * @return The key for object, not null
 	 */
-	protected abstract Object getKey(Object object);
+	protected abstract K getKey(V object);
 
 	private void rebuildPositions() {
 		fPositions.clear();
-		Collection<Object> values= fHistory.values();
+		Collection<V> values= fHistory.values();
 		int pos=0;
-		for (Iterator<Object> iter= values.iterator(); iter.hasNext();) {
-			Object element= iter.next();
+		for (Iterator<V> iter= values.iterator(); iter.hasNext();) {
+			V element= iter.next();
 			fPositions.put(getKey(element), new Integer(pos));
 			pos++;
 		}
@@ -275,7 +278,7 @@ public abstract class History {
 			if (node.getNodeType() == Node.ELEMENT_NODE) {
 				Element type= (Element) node;
 				if (type.getNodeName().equalsIgnoreCase(fInfoNodeName)) {
-					Object object= createFromElement(type);
+					V object= createFromElement(type);
 					if (object != null) {
 						fHistory.put(getKey(object), object);
 					}
@@ -294,7 +297,7 @@ public abstract class History {
 			Element rootElement = document.createElement(fRootNodeName);
 			document.appendChild(rootElement);
 
-			Iterator<Object> values= getValues().iterator();
+			Iterator<V> values= getValues().iterator();
 			while (values.hasNext()) {
 				Object object= values.next();
 				Element element= document.createElement(fInfoNodeName);

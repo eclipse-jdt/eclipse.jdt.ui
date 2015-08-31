@@ -87,7 +87,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	@Override
 	public void beginReporting() {
 		loadProperties();
-		fUsedPropertyNames= new HashSet<String>(fProperties.size());
+		fUsedPropertyNames= new HashSet<>(fProperties.size());
 	}
 
 	/*
@@ -389,7 +389,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 	}
 
 	private void loadProperties() {
-		Set<Object> duplicateKeys= new HashSet<Object>();
+		Set<Object> duplicateKeys= new HashSet<>();
 		fProperties= new Properties(duplicateKeys);
 		InputStream stream;
 		try {

@@ -45,7 +45,7 @@ public final class CompatibilityTemplateStore extends ContributionTemplateStore 
 
 		if (fLegacySet != null) {
 
-			List<Template> legacyTemplates= new ArrayList<Template>(Arrays.asList(fLegacySet.getTemplates()));
+			List<Template> legacyTemplates= new ArrayList<>(Arrays.asList(fLegacySet.getTemplates()));
 			fLegacySet.clear();
 
 			TemplatePersistenceData[] datas= getTemplateData(true);

@@ -197,9 +197,6 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
             return text;
         }
 
-        /* (non-Javadoc)
-         * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getForeground(java.lang.Object)
-         */
         @Override
 		public Color getForeground(Object element) {
             try {
@@ -348,7 +345,8 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
         fPackageViewer.addFilter(new PackageFilter());
         fPackageViewer.setComparator(new ExtendedJavaElementSorter());
         fPackageViewer.addDoubleClickListener(new IDoubleClickListener() {
-            public void doubleClick(DoubleClickEvent event) {
+            @Override
+			public void doubleClick(DoubleClickEvent event) {
                 Object element= ((IStructuredSelection)event.getSelection()).getFirstElement();
                 if (fPackageViewer.isExpandable(element)) {
                     fPackageViewer.setExpandedState(element, !fPackageViewer.getExpandedState(element));
@@ -369,7 +367,8 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
         fContextMenu= menuMgr.createContextMenu(fPackageViewer.getTree());
         fPackageViewer.getTree().setMenu(fContextMenu);
         parent.addDisposeListener(new DisposeListener() {
-            public void widgetDisposed(DisposeEvent e) {
+            @Override
+			public void widgetDisposed(DisposeEvent e) {
                 fContextMenu.dispose();
             }
         });
@@ -398,7 +397,8 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
      *
      * @see org.eclipse.jface.action.IMenuListener#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
      */
-    public void menuAboutToShow(IMenuManager manager) {
+    @Override
+	public void menuAboutToShow(IMenuManager manager) {
         if (fActionGroup == null) // no context menu
             return;
         JavaPlugin.createStandardGroups(manager);
@@ -433,7 +433,7 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
         	fContentProvider.inputChanged(fPackageViewer, oldProject, fCurrJProject);
 		fPackageViewer.setInput(new Object[0]);
 
-        List<IJavaProject> selectedElements= new ArrayList<IJavaProject>();
+        List<IJavaProject> selectedElements= new ArrayList<>();
         selectedElements.add(fCurrJProject);
         setSelection(selectedElements);
     }
@@ -459,7 +459,8 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
             return;
 		try {
 	        ResourcesPlugin.getWorkspace().run(new IWorkspaceRunnable() {
-	        	public void run(IProgressMonitor monitor) throws CoreException {
+	        	@Override
+				public void run(IProgressMonitor monitor) throws CoreException {
 	        		fPackageViewer.refresh();
 	                IStructuredSelection selection= new StructuredSelection(elements);
 	                fPackageViewer.setSelection(selection, true);
@@ -480,7 +481,8 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
      *
      * @return the current selection
      */
-    public ISelection getSelection() {
+    @Override
+	public ISelection getSelection() {
         return fCurrentSelection;
     }
 
@@ -507,45 +509,33 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
         fPackageViewer.refresh();
     }
 
-	/**
-     * {@inheritDoc}
-     */
-    public void addSelectionChangedListener(ISelectionChangedListener listener) {
+    @Override
+	public void addSelectionChangedListener(ISelectionChangedListener listener) {
     	fPackageViewer.addSelectionChangedListener(listener);
     }
 
-	/**
-     * {@inheritDoc}
-     */
-    public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+    @Override
+	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
     	fPackageViewer.removeSelectionChangedListener(listener);
     }
 
-	/**
-     * {@inheritDoc}
-     */
-    public void setSelection(ISelection selection) {
+    @Override
+	public void setSelection(ISelection selection) {
     	setSelection(((StructuredSelection)selection).toList());
     }
 
-	/**
-     * {@inheritDoc}
-     */
-    public void addPostSelectionChangedListener(ISelectionChangedListener listener) {
+    @Override
+	public void addPostSelectionChangedListener(ISelectionChangedListener listener) {
     	fPackageViewer.addPostSelectionChangedListener(listener);
     }
 
-	/**
-     * {@inheritDoc}
-     */
-    public void removePostSelectionChangedListener(ISelectionChangedListener listener) {
+    @Override
+	public void removePostSelectionChangedListener(ISelectionChangedListener listener) {
     	fPackageViewer.removePostSelectionChangedListener(listener);
     }
 
-	/**
-     * {@inheritDoc}
-     */
-    public void selectReveal(ISelection selection) {
+    @Override
+	public void selectReveal(ISelection selection) {
     	setSelection(selection);
     }
 }

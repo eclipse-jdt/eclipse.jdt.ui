@@ -101,6 +101,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		/*
 		 * @see IElementChangedListener#elementChanged
 		 */
+		@Override
 		public void elementChanged(ElementChangedEvent e) {
 			check(fPackageFragmentRoot, e.getDelta());
 		}
@@ -189,7 +190,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	}
 
 	/** Input change listeners. */
-	private List<InputChangeListener> fInputListeners= new ArrayList<InputChangeListener>();
+	private List<InputChangeListener> fInputListeners= new ArrayList<>();
 
 	/**
 	 * Creates a new document provider.
@@ -396,7 +397,7 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	 * @param input the class file editor input
 	 */
 	protected void fireInputChanged(IClassFileEditorInput input) {
-		List<InputChangeListener> list= new ArrayList<InputChangeListener>(fInputListeners);
+		List<InputChangeListener> list= new ArrayList<>(fInputListeners);
 		for (Iterator<InputChangeListener> i = list.iterator(); i.hasNext();)
 			i.next().inputChanged(input);
 	}

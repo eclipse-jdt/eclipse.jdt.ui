@@ -41,7 +41,7 @@ public class ImagesOnFileSystemRegistry {
 	private int fImageCount;
 
 	public ImagesOnFileSystemRegistry() {
-		fURLMap= new HashMap<ImageDescriptor, URL>();
+		fURLMap= new HashMap<>();
 		fTempDir= getTempDir();
 		fImageProvider= new JavaElementImageProvider();
 		fImageCount= 0;

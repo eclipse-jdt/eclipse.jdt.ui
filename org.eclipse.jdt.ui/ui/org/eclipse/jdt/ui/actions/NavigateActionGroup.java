@@ -77,9 +77,6 @@ public class NavigateActionGroup extends ActionGroup {
 		return fOpenEditorActionGroup.getOpenAction();
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -87,9 +84,6 @@ public class NavigateActionGroup extends ActionGroup {
 		fOpenViewActionGroup.dispose();
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
@@ -97,9 +91,6 @@ public class NavigateActionGroup extends ActionGroup {
 		fOpenViewActionGroup.fillActionBars(actionBars);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
@@ -108,9 +99,6 @@ public class NavigateActionGroup extends ActionGroup {
 		fOpenViewActionGroup.fillContextMenu(menu);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void setContext(ActionContext context) {
 		super.setContext(context);
@@ -118,9 +106,6 @@ public class NavigateActionGroup extends ActionGroup {
 		fOpenViewActionGroup.setContext(context);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void updateActionBars() {
 		super.updateActionBars();

@@ -109,11 +109,8 @@ public final class SaveParticipantRegistry {
 	 * </p>
 	 */
 	private void reloadDescriptors() {
-		Map<String, SaveParticipantDescriptor> map= new HashMap<String, SaveParticipantDescriptor>();
+		Map<String, SaveParticipantDescriptor> map= new HashMap<>();
 		SaveParticipantDescriptor desc= new SaveParticipantDescriptor(new CleanUpPostSaveListener()) {
-			/**
-			 * {@inheritDoc}
-			 */
 			@Override
 			public ISaveParticipantPreferenceConfiguration createPreferenceConfiguration() {
 				return new CleanUpSaveParticipantPreferenceConfiguration();
@@ -164,7 +161,7 @@ public final class SaveParticipantRegistry {
 			SaveParticipantDescriptor descriptor= iterator.next();
 			if (descriptor.getPreferenceConfiguration().isEnabled(context)) {
 				if (result == null) {
-					result= new ArrayList<IPostSaveListener>();
+					result= new ArrayList<>();
 				}
 				result.add(descriptor.getPostSaveListener());
 			}
@@ -197,11 +194,13 @@ public final class SaveParticipantRegistry {
 				final IPostSaveListener listener= listeners[i];
 				SafeRunner.run(new ISafeRunnable() {
 
+					@Override
 					public void run() throws Exception {
 						if (listener.needsChangedRegions(unit))
 							result[0]= true;
 					}
 
+					@Override
 					public void handleException(Throwable ex) {
 						String msg= Messages.format("The save participant ''{0}'' caused an exception.", new String[] { listener.getId() }); //$NON-NLS-1$
 						JavaPlugin.log(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IJavaStatusConstants.EDITOR_POST_SAVE_NOTIFICATION, msg, ex));

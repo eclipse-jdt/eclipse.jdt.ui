@@ -77,9 +77,6 @@ abstract class CompilationUnitReorgChange extends ResourceChange {
 		return getCu();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
-	 */
 	@Override
 	protected IResource getModifiedResource() {
 		ICompilationUnit cu= getCu();
@@ -112,7 +109,7 @@ abstract class CompilationUnitReorgChange extends ResourceChange {
 	}
 
 	private void markAsExecuted(ICompilationUnit unit, ResourceMapping mapping) {
-		ReorgExecutionLog log= (ReorgExecutionLog)getAdapter(ReorgExecutionLog.class);
+		ReorgExecutionLog log= getAdapter(ReorgExecutionLog.class);
 		if (log != null) {
 			log.markAsProcessed(unit);
 			log.markAsProcessed(mapping);

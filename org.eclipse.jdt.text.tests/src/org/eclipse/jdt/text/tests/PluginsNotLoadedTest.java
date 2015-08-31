@@ -99,7 +99,6 @@ public class PluginsNotLoadedTest extends TestCase {
 			"org.eclipse.jface.databinding",
 			"org.eclipse.jface.text",
 			"org.eclipse.jface.text.tests",
-			"org.eclipse.jsch.core",
 			"org.eclipse.ltk.core.refactoring.tests",
 			"org.eclipse.ltk.ui.refactoring.tests",
 			"org.eclipse.osgi.services",
@@ -199,15 +198,16 @@ public class PluginsNotLoadedTest extends TestCase {
 	 */
 	public static void addLoadedPlugIns(String[] loadedPlugins) {
 		Assert.isLegal(loadedPlugins != null);
-		List l= new ArrayList(Arrays.asList(NOT_LOADED_BUNDLES));
+		List<String> l= new ArrayList<>(Arrays.asList(NOT_LOADED_BUNDLES));
 		l.removeAll(Arrays.asList(loadedPlugins));
-		NOT_LOADED_BUNDLES= (String[])l.toArray(new String[0]);
+		NOT_LOADED_BUNDLES= l.toArray(new String[0]);
 	}
 
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 * @since 3.1
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
 		fEditor= openJavaEditor(new Path("/" + JUnitProjectTestSetup.getProject().getElementName() + "/src/junit/framework/TestCase.java"));
@@ -218,6 +218,7 @@ public class PluginsNotLoadedTest extends TestCase {
 	 * @see junit.framework.TestCase#tearDown()
 	 * @since 3.1
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		EditorTestHelper.closeAllEditors();
 		fEditor= null;

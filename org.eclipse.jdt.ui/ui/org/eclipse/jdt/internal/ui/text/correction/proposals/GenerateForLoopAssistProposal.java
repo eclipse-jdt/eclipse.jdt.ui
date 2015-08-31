@@ -115,10 +115,6 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal#getRewrite()
-	 */
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 

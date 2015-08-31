@@ -24,7 +24,7 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 public class Changes {
 
 	public static IFile[] getModifiedFiles(Change[] changes) {
-		List<IFile> result= new ArrayList<IFile>();
+		List<IFile> result= new ArrayList<>();
 		getModifiedFiles(result, changes);
 		return result.toArray(new IFile[result.size()]);
 	}

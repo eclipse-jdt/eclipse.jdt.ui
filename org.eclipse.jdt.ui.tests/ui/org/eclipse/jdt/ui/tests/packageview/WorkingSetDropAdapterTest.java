@@ -55,6 +55,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 	private WorkingSetDropAdapter fAdapter;
 
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fProject= JavaProjectHelper.createJavaProject("Test", "bin");
@@ -64,6 +65,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		fAdapter= new WorkingSetDropAdapter(fPackageExplorer);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
 		IWorkbenchPage activePage= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
@@ -112,7 +114,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 	public void testMoveProject() throws Exception {
 		IWorkingSet source= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"Source", new IAdaptable[] {fProject});
-		List treePathes= new ArrayList();
+		List<TreePath> treePathes= new ArrayList<>();
 		treePathes.add(new TreePath(new Object[] {source, fProject}));
 		ITreeSelection selection= createSelection(fProject, treePathes);
 
@@ -129,7 +131,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 	public void testMoveToOthersProject() throws Exception {
 		IWorkingSet source= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"Source", new IAdaptable[] {fProject});
-		List treePathes= new ArrayList();
+		List<TreePath> treePathes= new ArrayList<>();
 		treePathes.add(new TreePath(new Object[] {source, fProject}));
 		ITreeSelection selection= createSelection(fProject, treePathes);
 
@@ -209,12 +211,12 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		fPackageExplorer.rootModeChanged(PackageExplorerPart.WORKING_SETS_AS_ROOTS);
 	}
 
-	private ITreeSelection createSelection(Object selectedElement, List treePathes) {
+	private ITreeSelection createSelection(Object selectedElement, List<TreePath> treePathes) {
 		if (treePathes == null) {
-			treePathes= new ArrayList();
+			treePathes= new ArrayList<>();
 			treePathes.add(new TreePath(new Object[] { selectedElement }));
 		}
-		return new TreeSelection((TreePath[])treePathes.toArray(new TreePath[treePathes.size()]),
+		return new TreeSelection(treePathes.toArray(new TreePath[treePathes.size()]),
 			fPackageExplorer.getTreeViewer().getComparer());
 	}
 

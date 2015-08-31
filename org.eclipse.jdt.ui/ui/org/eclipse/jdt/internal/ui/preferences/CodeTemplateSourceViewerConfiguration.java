@@ -59,9 +59,7 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 			fProcessor= processor;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.ITextHover#getHoverInfo(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
-		 */
+		@Override
 		public String getHoverInfo(ITextViewer textViewer, IRegion subject) {
 			try {
 				IDocument doc= textViewer.getDocument();
@@ -84,9 +82,7 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 			return null;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.ITextHover#getHoverRegion(org.eclipse.jface.text.ITextViewer, int)
-		 */
+		@Override
 		public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
 			if (textViewer != null) {
 				return JavaWordFinder.findWord(textViewer.getDocument(), offset);
@@ -129,6 +125,7 @@ public class CodeTemplateSourceViewerConfiguration extends SimpleJavaSourceViewe
 		assistant.setProposalPopupOrientation(IContentAssistant.PROPOSAL_OVERLAY);
 		assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
 		assistant.setInformationControlCreator(new IInformationControlCreator() {
+			@Override
 			public IInformationControl createInformationControl(Shell parent) {
 				return new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
 			}

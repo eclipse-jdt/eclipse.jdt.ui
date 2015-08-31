@@ -221,8 +221,8 @@ public class AccessorClassCreator {
 	}
 
 	private String createStaticFields() {
-		HashSet<String> added= new HashSet<String>();
-		List<NLSSubstitution> subs= new ArrayList<NLSSubstitution>();
+		HashSet<String> added= new HashSet<>();
+		List<NLSSubstitution> subs= new ArrayList<>();
 		for (int i= 0; i < fNLSSubstitutions.length; i++) {
 			NLSSubstitution substitution= fNLSSubstitutions[i];
 			int newState= substitution.getState();
@@ -233,6 +233,7 @@ public class AccessorClassCreator {
 		}
 		Collections.sort(subs, new Comparator<NLSSubstitution>() {
 			private Collator fCollator= Collator.getInstance();
+			@Override
 			public int compare(NLSSubstitution s0, NLSSubstitution s1) {
 				return fCollator.compare(s0.getKey(), s1.getKey());
 			}

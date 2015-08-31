@@ -28,11 +28,6 @@ class SelectWorkingSetAction extends Action {
 		setToolTipText(CallHierarchyMessages.SearchScopeActionGroup_workingset_select_tooltip);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_SEARCH_SCOPE_ACTION);
 	}
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run() {
 		try {

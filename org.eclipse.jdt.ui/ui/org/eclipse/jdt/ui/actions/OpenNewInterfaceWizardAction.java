@@ -79,9 +79,6 @@ public class OpenNewInterfaceWizardAction extends AbstractOpenWizardAction {
 		fOpenEditorOnFinish= openEditorOnFinish;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#createWizard()
-	 */
 	@Override
 	protected final INewWizard createWizard() throws CoreException {
 		return new NewInterfaceCreationWizard(fPage, fOpenEditorOnFinish);

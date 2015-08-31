@@ -77,7 +77,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		fLabelProvider= labelProvider;
 		fContentProvider= contentProvider;
 
-		setResult(new ArrayList<Object>(0));
+		setResult(new ArrayList<>(0));
 		setStatusLineAboveButtons(true);
 	}
 
@@ -104,7 +104,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	 */
 	public void addFilter(ViewerFilter filter) {
 		if (fFilters == null)
-			fFilters= new ArrayList<ViewerFilter>(4);
+			fFilters= new ArrayList<>(4);
 
 		fFilters.add(filter);
 	}
@@ -157,6 +157,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 	public int open() {
 		fIsEmpty= evaluateIfTableEmpty(fInput);
 		BusyIndicator.showWhile(null, new Runnable() {
+			@Override
 			public void run() {
 				access$superOpen();
 			}
@@ -231,6 +232,7 @@ public class CheckedTableSelectionDialog extends SelectionStatusDialog {
 		fViewer.setContentProvider(fContentProvider);
 		fViewer.setLabelProvider(fLabelProvider);
 		fViewer.addCheckStateListener(new ICheckStateListener() {
+			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				updateOKStatus();
 			}

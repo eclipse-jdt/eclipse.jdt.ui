@@ -42,6 +42,7 @@ public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 
 		private Point fThumb;
 
+		@Override
 		public void initializeFromForeground(StyledText text) {
 			fDisplay= text.getDisplay();
 			Rectangle textBounds= fDisplay.map(text.getParent(), null, text.getBounds());
@@ -50,11 +51,13 @@ public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 			fThumb= fDisplay.map(text, null, thumbX, thumbY);
 		}
 
+		@Override
 		public void initializeFromBackground() {
 			SWTEventHelper.mouseMoveEvent(fDisplay, fThumb.x, fThumb.y++, false);
 			SWTEventHelper.mouseDownEvent(fDisplay, 1, false);
 		}
 
+		@Override
 		public void driveFromBackground() {
 			SWTEventHelper.mouseMoveEvent(fDisplay, fThumb.x, fThumb.y++, false);
 		}
@@ -66,11 +69,13 @@ public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 
 		private Rectangle fTextBounds;
 
+		@Override
 		public void initializeFromForeground(StyledText text) {
 			fDisplay= text.getDisplay();
 			fTextBounds= fDisplay.map(text.getParent(), null, text.getBounds());
 		}
 
+		@Override
 		public void initializeFromBackground() {
 			SWTEventHelper.mouseMoveEvent(fDisplay, fTextBounds.x + 1, fTextBounds.y + 1, false);
 			SWTEventHelper.mouseDownEvent(fDisplay, 1, false);
@@ -78,6 +83,7 @@ public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 			SWTEventHelper.mouseMoveEvent(fDisplay, fTextBounds.x + 2, fTextBounds.y + fTextBounds.height + 1, false); // needed for GTK
 		}
 
+		@Override
 		public void driveFromBackground() {
 		}
 	}
@@ -100,16 +106,19 @@ public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 		private volatile int fTopPixel;
 		private int fOldTopPixel;
 		private Runnable fRunnable= new Runnable() {
+			@Override
 			public void run() {
 				fTopPixel= fText.getTopPixel();
 			}
 		};
 		private Condition fCondition= new Condition() {
+			@Override
 			public boolean isTrue() {
 				fDisplay.syncExec(fRunnable);
 				return fOldTopPixel != fTopPixel;
 			}
 		};
+		@Override
 		public void run() {
 			try {
 				fTopPixel= 0;
@@ -130,6 +139,7 @@ public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 		}
 	};
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		Performance performance= Performance.getDefault();
@@ -137,6 +147,7 @@ public abstract class MouseScrollEditorTest extends TextPerformanceTestCase {
 		EditorTestHelper.bringToTop();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		fPerformanceMeter.dispose();

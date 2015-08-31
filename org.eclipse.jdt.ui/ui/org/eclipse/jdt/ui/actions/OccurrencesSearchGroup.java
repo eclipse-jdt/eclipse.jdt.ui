@@ -181,6 +181,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 		javaSearchMM.add(new Action() {
 		});
 		javaSearchMM.addMenuListener(new IMenuListener() {
+			@Override
 			public void menuAboutToShow(IMenuManager mm) {
 				mm.removeAll();
 				updateActionsInJavaEditor();

@@ -87,10 +87,12 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	private static final int IDX_BUNDLE_PACKAGE= 4;
 
 	private class AccessorAdapter implements IDialogFieldListener, IStringButtonAdapter {
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			validateAll();
 		}
 
+		@Override
 		public void changeControlPressed(DialogField field) {
 			if (field == fResourceBundleFile) {
 				browseForPropertyFile();
@@ -270,7 +272,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 			IPackageFragment fPkgFragment= fResourceBundlePackage.getSelected();
 			if (fPkgFragment == null)
 				return new Object[0];
-			List<Object> result= new ArrayList<Object>(1);
+			List<Object> result= new ArrayList<>(1);
 			Object[] nonjava= fPkgFragment.getNonJavaResources();
 			for (int i= 0; i < nonjava.length; i++) {
 				if (isPropertyFile(nonjava[i]))
@@ -418,9 +420,6 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		fStati[idx]= StatusInfo.OK_STATUS;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#okPressed()
-	 */
 	@Override
 	protected void okPressed() {
 		updateRefactoring();

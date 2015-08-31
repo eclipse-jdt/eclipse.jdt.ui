@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,10 +16,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -30,11 +26,15 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory;
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory.RHSHistory;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 /**
  * @since 3.2
  */
 public class ContentAssistHistoryTest extends TestCase {
-	private static final Class THIS= ContentAssistHistoryTest.class;
+	private static final Class<ContentAssistHistoryTest> THIS= ContentAssistHistoryTest.class;
 
 	private static final String LINKED_LIST= "java.util.LinkedList";
 	private static final String ARRAY_LIST= "java.util.ArrayList";
@@ -67,6 +67,7 @@ public class ContentAssistHistoryTest extends TestCase {
 			/*
 			 * @see org.eclipse.jdt.ui.tests.core.ProjectTestSetup#setUp()
 			 */
+			@Override
 			protected void setUp() throws Exception {
 				super.setUp();
 
@@ -196,7 +197,7 @@ public class ContentAssistHistoryTest extends TestCase {
 		history.remember(fgListT, fgArrayListT);
 		history.remember(fgCollectionT, fgLinkedListT);
 
-		Map map= history.getEntireHistory();
+		Map<String, RHSHistory> map= history.getEntireHistory();
 		try {
 			map.clear();
 			fail();
@@ -204,7 +205,7 @@ public class ContentAssistHistoryTest extends TestCase {
 		}
 
 		try {
-			((RHSHistory) map.get(LIST)).getTypes().clear();
+			map.get(LIST).getTypes().clear();
 			fail();
 		} catch (UnsupportedOperationException x) {
 		}
@@ -216,7 +217,7 @@ public class ContentAssistHistoryTest extends TestCase {
 		history.remember(fgListT, fgArrayListT);
 		history.remember(fgCollectionT, fgLinkedListT);
 
-		List set= history.getHistory(LIST).getTypes();
+		List<String> set= history.getHistory(LIST).getTypes();
 		try {
 			set.clear();
 			fail();
@@ -239,50 +240,50 @@ public class ContentAssistHistoryTest extends TestCase {
 		assertEqualMap(map(LIST, list(ARRAY_LIST), COLLECTION, list(ARRAY_LIST), ITERABLE, list(ARRAY_LIST), CHAR_SEQUENCE, list(STRING)), loaded.getEntireHistory());
 	}
 
-	private static void assertEqualMap(Map expected, Map actual) {
+	private static void assertEqualMap(Map<String, List<String>> expected, Map<String, RHSHistory> actual) {
 		assertEqualMap("", expected, actual);
 	}
 
-	private static void assertEqualMap(String message, Map expected, Map actual) {
+	private static void assertEqualMap(String message, Map<String, List<String>> expected, Map<String, RHSHistory> actual) {
 		assertEquals(message, expected.size(), actual.size());
-		for (Iterator it= expected.keySet().iterator(); it.hasNext();) {
-			String type= (String) it.next();
-			assertEquals(message, expected.get(type), ((RHSHistory) actual.get(type)).getTypes());
+		for (Iterator<String> it= expected.keySet().iterator(); it.hasNext();) {
+			String type= it.next();
+			assertEquals(message, expected.get(type), actual.get(type).getTypes());
 		}
 	}
 
-	private Map map(String type, List set) {
-		Map map= new HashMap();
+	private Map<String, List<String>> map(String type, List<String> set) {
+		Map<String, List<String>> map= new HashMap<>();
 		map.put(type, set);
 		return map;
 	}
 
-	private Map map(String t1, List s1, String t2, List s2) {
-		Map map= map(t1, s1);
+	private Map<String, List<String>> map(String t1, List<String> s1, String t2, List<String> s2) {
+		Map<String, List<String>> map= map(t1, s1);
 		map.put(t2, s2);
 		return map;
 	}
 
-	private Map map(String t1, List s1, String t2, List s2, String t3, List s3) {
-		Map map= map(t1, s1, t2, s2);
+	private Map<String, List<String>> map(String t1, List<String> s1, String t2, List<String> s2, String t3, List<String> s3) {
+		Map<String, List<String>> map= map(t1, s1, t2, s2);
 		map.put(t3, s3);
 		return map;
 	}
 
-	private Map map(String t1, List s1, String t2, List s2, String t3, List s3, String t4, List s4) {
-		Map map= map(t1, s1, t2, s2, t3, s3);
+	private Map<String, List<String>> map(String t1, List<String> s1, String t2, List<String> s2, String t3, List<String> s3, String t4, List<String> s4) {
+		Map<String, List<String>> map= map(t1, s1, t2, s2, t3, s3);
 		map.put(t4, s4);
 		return map;
 	}
 
-	List list(String param) {
-		List list= new ArrayList();
+	List<String> list(String param) {
+		List<String> list= new ArrayList<>();
 		list.add(param);
 		return list;
 	}
 
-	List list(String p1, String p2) {
-		List list= list(p1);
+	List<String> list(String p1, String p2) {
+		List<String> list= list(p1);
 		list.add(p2);
 		return list;
 	}

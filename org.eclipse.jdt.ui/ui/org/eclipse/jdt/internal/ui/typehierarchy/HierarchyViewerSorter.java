@@ -28,9 +28,6 @@ public class HierarchyViewerSorter extends AbstractHierarchyViewerSorter {
 		fSortByDefiningType= sortByDefiningType;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter#getTypeKind(org.eclipse.jdt.core.IType)
-	 */
 	@Override
 	protected int getTypeFlags(IType type) {
 		ITypeHierarchy hierarchy= getHierarchy(type);
@@ -40,26 +37,16 @@ public class HierarchyViewerSorter extends AbstractHierarchyViewerSorter {
 		return 0;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter#isSortByDefiningType()
-	 */
 	@Override
 	public boolean isSortByDefiningType() {
 		return fSortByDefiningType;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter#isSortAlphabetically()
-	 */
 	@Override
 	public boolean isSortAlphabetically() {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter#getHierarchy(org.eclipse.jdt.core.IType)
-	 */
 	@Override
 	protected ITypeHierarchy getHierarchy(IType type) {
 		return fHierarchy.getHierarchy(); // hierarchy contains all types shown

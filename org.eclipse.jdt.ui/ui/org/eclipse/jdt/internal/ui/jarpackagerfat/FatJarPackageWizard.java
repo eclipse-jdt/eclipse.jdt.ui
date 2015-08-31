@@ -92,9 +92,6 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void addPages() {
 		super.addPages();
@@ -153,7 +150,7 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 		ISelection currentSelection= JavaPlugin.getActiveWorkbenchWindow().getSelectionService().getSelection();
 		if (currentSelection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= (IStructuredSelection) currentSelection;
-			HashSet<IJavaProject> selectedElements= new HashSet<IJavaProject>();
+			HashSet<IJavaProject> selectedElements= new HashSet<>();
 			Iterator<?> iter= structuredSelection.iterator();
 			while (iter.hasNext()) {
 				Object selectedElement= iter.next();
@@ -168,9 +165,7 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 			return StructuredSelection.EMPTY;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		fSelection= getSelectedJavaProjects();
 		fJarPackage= new JarPackageData();
@@ -203,9 +198,6 @@ public class FatJarPackageWizard extends Wizard implements IExportWizard {
 		return fInitializeFromJarPackage;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean performFinish() {
 		LibraryHandler libraryHandler= fJarPackageWizardPage.getLibraryHandler();

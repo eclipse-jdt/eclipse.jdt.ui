@@ -37,6 +37,7 @@ public class ImageDisposer implements DisposeListener {
 	/*
 	 * @see WidgetListener#widgetDisposed
 	 */
+	@Override
 	public void widgetDisposed(DisposeEvent e) {
 		if (fImages != null) {
 			for (int i= 0; i < fImages.length; i++) {

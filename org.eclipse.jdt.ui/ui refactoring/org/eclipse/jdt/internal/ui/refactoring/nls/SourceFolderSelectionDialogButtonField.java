@@ -47,9 +47,7 @@ class SourceFolderSelectionDialogButtonField extends StringButtonDialogField imp
 		setDialogFieldListener(this);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
-	 */
+	@Override
 	public void dialogFieldChanged(DialogField field) {
 		// propagate a textchange to the fragment root of this
 		setRoot(getRootFromString(getText()));

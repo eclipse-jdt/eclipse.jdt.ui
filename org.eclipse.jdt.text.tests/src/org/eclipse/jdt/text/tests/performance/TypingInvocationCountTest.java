@@ -70,6 +70,7 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 			super(test);
 		}
 
+		@Override
 		protected void setUp() throws Exception {
 			AnnotationPreference preference= EditorsPlugin.getDefault().getAnnotationPreferenceLookup().getAnnotationPreference(SEARCH_ANNOTATION_TYPE);
 			IPreferenceStore store= EditorsUI.getPreferenceStore();
@@ -102,10 +103,12 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 
 		protected abstract String getPerspectiveId();
 
+		@Override
 		protected String getFile() {
 			return "/" + PROJECT + "/src/" + FILE;
 		}
 
+		@Override
 		protected void tearDown () throws Exception {
 			super.tearDown();
 			if (!fWasSearchViewShown)
@@ -141,6 +144,7 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 		super(name);
 	}
 
+	@Override
 	public void setEditor(AbstractTextEditor editor) {
 		fEditor= editor;
 	}

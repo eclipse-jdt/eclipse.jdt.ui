@@ -111,6 +111,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkRegion()
 	 */
+	@Override
 	public IRegion getHyperlinkRegion() {
 		return fRegion;
 	}
@@ -118,6 +119,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkText()
 	 */
+	@Override
 	public String getHyperlinkText() {
 		if (fQualify) {
 			String methodLabel= JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED);
@@ -130,6 +132,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getTypeLabel()
 	 */
+	@Override
 	public String getTypeLabel() {
 		return null;
 	}
@@ -141,6 +144,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 * Quick Hierarchy is opened.
 	 * </p>
 	 */
+	@Override
 	public void open() {
 		openImplementations(fEditor, fRegion, fMethod, fOpenAction);
 	}
@@ -203,9 +207,10 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 
 		final boolean isMethodAbstract[]= new boolean[1];
 		final String dummyString= new String();
-		final ArrayList<IMethod> links= new ArrayList<IMethod>();
+		final ArrayList<IMethod> links= new ArrayList<>();
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
 
+			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				if (monitor == null) {
 					monitor= new NullProgressMonitor();

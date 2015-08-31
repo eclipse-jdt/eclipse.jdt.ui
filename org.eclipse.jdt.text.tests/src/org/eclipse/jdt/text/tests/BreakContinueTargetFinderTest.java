@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,6 @@ package org.eclipse.jdt.text.tests;
 
 import java.util.Arrays;
 import java.util.Comparator;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -33,13 +29,17 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
 import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 /**
  * Tests for the BreakContinueTargerFinder class.
  *
  * @since 3.2
  */
 public class BreakContinueTargetFinderTest extends TestCase{
-	private static final Class THIS= BreakContinueTargetFinderTest.class;
+	private static final Class<BreakContinueTargetFinderTest> THIS= BreakContinueTargetFinderTest.class;
 
 	public static Test suite() {
 		return new ProjectTestSetup(new TestSuite(THIS));
@@ -57,6 +57,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		fParser = ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		fFinder= new BreakContinueTargetFinder();
@@ -65,9 +66,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
-	/* (non-Javadoc)
-	 * @see junit.framework.TestCase#tearDown()
-	 */
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
@@ -98,10 +97,9 @@ public class BreakContinueTargetFinderTest extends TestCase{
 	}
 
 	private void sortByStartIndex(OccurrenceLocation[] OccurrenceLocations) {
-		Arrays.sort(OccurrenceLocations, new Comparator() {
-			public int compare(Object arg0, Object arg1) {
-				OccurrenceLocation node0= (OccurrenceLocation) arg0;
-				OccurrenceLocation node1= (OccurrenceLocation) arg1;
+		Arrays.sort(OccurrenceLocations, new Comparator<OccurrenceLocation>() {
+			@Override
+			public int compare(OccurrenceLocation node0, OccurrenceLocation node1) {
 				return node0.getOffset() - node1.getOffset();
 			}
 		});

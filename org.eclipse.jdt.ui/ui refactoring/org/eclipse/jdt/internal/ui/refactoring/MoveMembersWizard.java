@@ -93,7 +93,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 		private Button fLeaveDelegateCheckBox;
 		private Button fDeprecateDelegateCheckBox;
 		private static final int MRU_COUNT= 10;
-		private static List<String> fgMruDestinations= new ArrayList<String>(MRU_COUNT);
+		private static List<String> fgMruDestinations= new ArrayList<>(MRU_COUNT);
 		private final MoveStaticMembersProcessor fProcessor;
 
 		public MoveMembersInputPage(MoveStaticMembersProcessor processor) {
@@ -115,6 +115,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 			super.setVisible(visible);
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			Composite composite= new Composite(parent, SWT.NONE);
 			GridLayout layout= new GridLayout();
@@ -187,6 +188,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 			fDestinationField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fDestinationField.setItems(fgMruDestinations.toArray(new String[fgMruDestinations.size()]));
 			fDestinationField.addModifyListener(new ModifyListener(){
+				@Override
 				public void modifyText(ModifyEvent e) {
 					handleDestinationChanged();
 				}
@@ -280,6 +282,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 			dialog.setTitle(RefactoringMessages.MoveMembersInputPage_choose_Type);
 			dialog.setMessage(RefactoringMessages.MoveMembersInputPage_dialogMessage);
 			dialog.setValidator(new ISelectionStatusValidator(){
+				@Override
 				public IStatus validate(Object[] selection) {
 					Assert.isTrue(selection.length <= 1);
 					if (selection.length == 0)

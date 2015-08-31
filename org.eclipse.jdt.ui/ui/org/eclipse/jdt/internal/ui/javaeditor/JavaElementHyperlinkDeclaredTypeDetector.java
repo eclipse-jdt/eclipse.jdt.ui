@@ -36,9 +36,6 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 public class JavaElementHyperlinkDeclaredTypeDetector extends JavaElementHyperlinkDetector {
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkDetector#createHyperlink(org.eclipse.jface.text.IRegion, org.eclipse.jdt.ui.actions.SelectionDispatchAction, org.eclipse.jdt.core.IJavaElement, boolean, org.eclipse.jdt.internal.ui.javaeditor.JavaEditor)
-	 */
 	@Override
 	protected void addHyperlinks(List<IHyperlink> hyperlinksCollector, IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
 		try {

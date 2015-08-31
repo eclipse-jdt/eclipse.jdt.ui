@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
  */
 public class ActivateJavaEditorTest extends ActivateEditorTest {
 
-	private static final Class THIS= ActivateJavaEditorTest.class;
+	private static final Class<ActivateJavaEditorTest> THIS= ActivateJavaEditorTest.class;
 
 	private static final String SHORT_NAME= "Activate " + ActivateEditorTest.getNumberOfEditors() + " Java editors";
 
@@ -35,10 +35,12 @@ public class ActivateJavaEditorTest extends ActivateEditorTest {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected String getEditorId() {
 		return EditorTestHelper.COMPILATION_UNIT_EDITOR_ID;
 	}
 
+	@Override
 	public void testActivateEditor() {
 		setShortName(SHORT_NAME);
 		super.testActivateEditor();
@@ -48,6 +50,7 @@ public class ActivateJavaEditorTest extends ActivateEditorTest {
 	 * @see org.eclipse.jdt.text.tests.performance.ActivateEditorTest#waitUntilReady()
 	 * @since 3.4
 	 */
+	@Override
 	protected void waitUntilReady(AbstractTextEditor editor) {
 		ITypeRoot cu= EditorUtility.getEditorInputJavaElement(editor, false);
 		SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_ACTIVE_ONLY, null);

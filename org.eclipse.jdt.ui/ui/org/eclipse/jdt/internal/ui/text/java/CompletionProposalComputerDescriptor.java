@@ -90,7 +90,7 @@ final class CompletionProposalComputerDescriptor {
 	private static final String SESSION_ENDED= "sessionEnded()"; //$NON-NLS-1$
 
 	static {
-		Set<String> partitions= new HashSet<String>();
+		Set<String> partitions= new HashSet<>();
 		partitions.add(IDocument.DEFAULT_CONTENT_TYPE);
 		partitions.add(IJavaPartitions.JAVA_DOC);
 		partitions.add(IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
@@ -170,7 +170,7 @@ final class CompletionProposalComputerDescriptor {
 		else
 			fName= name;
 
-		Set<String> partitions= new HashSet<String>();
+		Set<String> partitions= new HashSet<>();
 		IConfigurationElement[] children= element.getChildren(PARTITION);
 		if (children.length == 0) {
 			fPartitions= PARTITION_SET; // add to all partition types if no partition is configured

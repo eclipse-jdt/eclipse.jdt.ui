@@ -61,13 +61,16 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 	/*
 	 * @see IEditorInput#getPersistable()
 	 */
+	@Override
 	public IPersistableElement getPersistable() {
 		if (fJarEntryFile instanceof IJarEntryResource) {
 			return new IPersistableElement() {
+				@Override
 				public void saveState(IMemento memento) {
 					JarEntryEditorInputFactory.saveState(memento, (IJarEntryResource) fJarEntryFile);
 				}
 
+				@Override
 				public String getFactoryId() {
 					return JarEntryEditorInputFactory.FACTORY_ID;
 				}
@@ -80,6 +83,7 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 	/*
 	 * @see IEditorInput#getName()
 	 */
+	@Override
 	public String getName() {
 		return fJarEntryFile.getName();
 	}
@@ -94,6 +98,7 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 	/*
 	 * @see IEditorInput#getToolTipText()
 	 */
+	@Override
 	public String getToolTipText() {
 		if (fJarEntryFile instanceof IJarEntryResource) {
 			IJarEntryResource jarEntry= (IJarEntryResource)fJarEntryFile;
@@ -111,6 +116,7 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 	/*
 	 * @see IEditorInput#getImageDescriptor()
 	 */
+	@Override
 	public ImageDescriptor getImageDescriptor() {
 		IEditorRegistry registry= PlatformUI.getWorkbench().getEditorRegistry();
 		return registry.getImageDescriptor(getContentType());
@@ -119,11 +125,13 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 	/*
 	 * @see IEditorInput#exists()
 	 */
+	@Override
 	public boolean exists() {
 		// JAR entries can't be deleted
 		return true;
 	}
 
+	@Override
 	public <T> T getAdapter(Class<T> adapter) {
 		return null;
 	}
@@ -131,7 +139,8 @@ public class JarEntryEditorInput implements IStorageEditorInput {
 	/*
 	 * see IStorageEditorInput#getStorage()
 	 */
-	 public IStorage getStorage() {
+	 @Override
+	public IStorage getStorage() {
 	 	return fJarEntryFile;
 	 }
 }

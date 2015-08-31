@@ -90,7 +90,7 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 			if (!(iterator.next() instanceof IMember))
 				return null;
 		}
-		final Set<IMember> set= new HashSet<IMember>();
+		final Set<IMember> set= new HashSet<>();
 		@SuppressWarnings("unchecked")
 		List<IMember> selectionList= (List<IMember>) (List<?>) Arrays.asList(selection.toArray());
 		set.addAll(selectionList);
@@ -134,9 +134,6 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 		return (IMember) element;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run(final IStructuredSelection selection) {
 		try {
@@ -148,9 +145,6 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void run(final ITextSelection selection) {
 		try {
@@ -168,9 +162,6 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void selectionChanged(final IStructuredSelection selection) {
 		try {
@@ -183,17 +174,11 @@ public class ExtractSuperClassAction extends SelectionDispatchAction {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void selectionChanged(final ITextSelection selection) {
 		setEnabled(true);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void selectionChanged(final JavaTextSelection selection) {
 		try {

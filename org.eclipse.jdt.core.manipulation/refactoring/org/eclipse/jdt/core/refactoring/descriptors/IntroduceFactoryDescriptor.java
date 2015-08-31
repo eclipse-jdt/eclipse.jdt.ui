@@ -64,7 +64,7 @@ public final class IntroduceFactoryDescriptor extends JavaRefactoringDescriptor 
 	 *
 	 * @since 1.2
 	 */
-	public IntroduceFactoryDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public IntroduceFactoryDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.INTRODUCE_FACTORY, project, description, comment, arguments, flags);
 	}
 

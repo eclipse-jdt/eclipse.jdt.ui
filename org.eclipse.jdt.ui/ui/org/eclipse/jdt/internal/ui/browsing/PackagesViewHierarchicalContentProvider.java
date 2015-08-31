@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 	/*
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getChildren(Object)
 	 */
+	@Override
 	public Object[] getChildren(Object parentElement) {
 		try {
 			if (parentElement instanceof IJavaElement) {
@@ -72,7 +73,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 							IJavaProject project= (IJavaProject) parentElement;
 
 							IPackageFragment[] topLevelChildren= getTopLevelChildrenByElementName(project.getPackageFragments());
-							List<IPackageFragment> list= new ArrayList<IPackageFragment>();
+							List<IPackageFragment> list= new ArrayList<>();
 							for (int i= 0; i < topLevelChildren.length; i++) {
 								IPackageFragment fragment= topLevelChildren[i];
 
@@ -85,7 +86,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 							}
 
 							IPackageFragmentRoot[] packageFragmentRoots= project.getPackageFragmentRoots();
-							List<Object> folders= new ArrayList<Object>();
+							List<Object> folders= new ArrayList<>();
 							for (int i= 0; i < packageFragmentRoots.length; i++) {
 								IPackageFragmentRoot root= packageFragmentRoots[i];
 								IResource resource= root.getUnderlyingResource();
@@ -148,7 +149,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 							if (nonJavaResources.length == 0) {
 								return fragments;
 							}
-							ArrayList<Object> combined= new ArrayList<Object>();
+							ArrayList<Object> combined= new ArrayList<>();
 							combined.addAll(Arrays.asList(fragments));
 							for (int i= 0; i < nonJavaResources.length; i++) {
 								Object curr= nonJavaResources[i];
@@ -163,7 +164,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 			//@Improve: rewrite using concatenate
 			} else if (parentElement instanceof LogicalPackage) {
 
-				List<IPackageFragment> children= new ArrayList<IPackageFragment>();
+				List<IPackageFragment> children= new ArrayList<>();
 				LogicalPackage logicalPackage= (LogicalPackage) parentElement;
 				IPackageFragment[] elements= logicalPackage.getFragments();
 				for (int i= 0; i < elements.length; i++) {
@@ -189,17 +190,17 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 	}
 
 	private void addFragmentsToMap(List<IAdaptable> elements) {
-		List<Object> packageFragments= new ArrayList<Object>();
+		List<IPackageFragment> packageFragments= new ArrayList<>();
 		for (Iterator<IAdaptable> iter= elements.iterator(); iter.hasNext();) {
 			Object elem= iter.next();
 			if (elem instanceof IPackageFragment)
-				packageFragments.add(elem);
+				packageFragments.add((IPackageFragment) elem);
 		}
 		addFragmentsToMap(packageFragments.toArray(new IPackageFragment[packageFragments.size()]));
 	}
 
 	private List<IAdaptable> getFoldersAndElements(IResource[] resources) {
-		List<IAdaptable> list= new ArrayList<IAdaptable>();
+		List<IAdaptable> list= new ArrayList<>();
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
 
@@ -218,7 +219,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 	}
 
 	private List<IFolder> getFolders(IResource[] resources) {
-		List<IFolder> list= new ArrayList<IFolder>();
+		List<IFolder> list= new ArrayList<>();
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
 
@@ -235,7 +236,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 	}
 
 	private IPackageFragment[] findNextLevelChildrenByElementName(IPackageFragmentRoot parent, IPackageFragment fragment) {
-		List<IPackageFragment> list= new ArrayList<IPackageFragment>();
+		List<IPackageFragment> list= new ArrayList<>();
 		try {
 
 			IJavaElement[] children= parent.getChildren();
@@ -262,7 +263,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 	}
 
 	private IPackageFragment[] getTopLevelChildrenByElementName(IJavaElement[] elements){
-		List<IJavaElement> topLevelElements= new ArrayList<IJavaElement>();
+		List<IJavaElement> topLevelElements= new ArrayList<>();
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement iJavaElement= elements[i];
 			//if the name of the PackageFragment is the top level package it will contain no "." separators
@@ -276,6 +277,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 	/*
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getParent(Object)
 	 */
+	@Override
 	public Object getParent(Object element) {
 
 		if (element instanceof IPackageFragment) {
@@ -338,7 +340,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		if(!fInputIsProject)
 			return null;
 
-		List<IPackageFragment> fragments= new ArrayList<IPackageFragment>();
+		List<IPackageFragment> fragments= new ArrayList<>();
 		try {
 			IPackageFragmentRoot[] roots= pkgFragment.getJavaProject().getPackageFragmentRoots();
 			for (int i= 0; i < roots.length; i++) {
@@ -412,6 +414,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 	/*
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#hasChildren(Object)
 	 */
+	@Override
 	public boolean hasChildren(Object element) {
 
 		if (element instanceof IPackageFragment) {
@@ -425,6 +428,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 	/*
 	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(Object)
 	 */
+	@Override
 	public Object[] getElements(Object inputElement) {
 		return getChildren(inputElement);
 	}
@@ -513,6 +517,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 
 	private void postAdd(final Object child, final Object parent) {
 		postRunnable(new Runnable() {
+			@Override
 			public void run() {
 				Control ctrl = fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
@@ -524,6 +529,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 
 	private void postRemove(final Object object) {
 		postRunnable(new Runnable() {
+			@Override
 			public void run() {
 				Control ctrl = fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {
@@ -535,6 +541,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 
 	private void postRefresh(final Object object) {
 		postRunnable(new Runnable() {
+			@Override
 			public void run() {
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()) {

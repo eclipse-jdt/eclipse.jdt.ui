@@ -140,9 +140,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 			super(viewers, null);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.typehierarchy.SelectionProviderMediator#getSelection()
-		 */
 		@Override
 		public ISelection getSelection() {
 			ISelection selection= super.getSelection();
@@ -489,7 +486,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         fCallHierarchyViewer.initContextMenu(
         		new IMenuListener() {
-		            public void menuAboutToShow(IMenuManager menu) {
+		            @Override
+					public void menuAboutToShow(IMenuManager menu) {
 		                fillCallHierarchyViewerContextMenu(menu);
 		            }
 		        }, getSite(), fSelectionProviderMediator);
@@ -547,19 +545,16 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	private void addPartListener() {
 		fPartListener= new IPartListener2() {
-			/* (non-Javadoc)
-			 * @see org.eclipse.ui.IPartListener2#partActivated(org.eclipse.ui.IWorkbenchPartReference)
-			 */
+			@Override
 			public void partActivated(IWorkbenchPartReference partRef) {
 				if (isThisView(partRef))
 					CallHierarchyUI.getDefault().callHierarchyViewActivated(CallHierarchyViewPart.this);
 			}
 
+			@Override
 			public void partBroughtToTop(IWorkbenchPartReference partRef) { }
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.ui.IPartListener2#partClosed(org.eclipse.ui.IWorkbenchPartReference)
-			 */
+			@Override
 			public void partClosed(IWorkbenchPartReference partRef) {
 				if (isThisView(partRef)) {
 					CallHierarchyUI.getDefault().callHierarchyViewClosed(CallHierarchyViewPart.this);
@@ -567,17 +562,19 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 				}
 			}
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.ui.IPartListener2#partDeactivated(org.eclipse.ui.IWorkbenchPartReference)
-			 */
+			@Override
 			public void partDeactivated(IWorkbenchPartReference partRef) {
 				if (isThisView(partRef))
 					saveViewSettings();
 			}
 
+			@Override
 			public void partOpened(IWorkbenchPartReference partRef) { }
+			@Override
 			public void partHidden(IWorkbenchPartReference partRef) { }
+			@Override
 			public void partVisible(IWorkbenchPartReference partRef) { }
+			@Override
 			public void partInputChanged(IWorkbenchPartReference partRef) { }
 		};
 		getViewSite().getPage().addPartListener(fPartListener);
@@ -590,8 +587,10 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 	private void addResizeListener(Composite parent) {
 		parent.addControlListener(new ControlListener() {
+			@Override
 			public void controlMoved(ControlEvent e) {
 			}
+			@Override
 			public void controlResized(ControlEvent e) {
 				computeOrientation();
 			}
@@ -758,9 +757,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		}
     }
 
-    /* (non-Javadoc)
-     * Method declared on IViewPart.
-     */
     @Override
 	public void init(IViewSite site, IMemento memento)
         throws PartInitException {
@@ -792,7 +788,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fSearchScopeActions.saveState(memento);
     }
 
-    public void selectionChanged(SelectionChangedEvent e) {
+    @Override
+	public void selectionChanged(SelectionChangedEvent e) {
         if (e.getSelectionProvider() == fCallHierarchyViewer) {
             methodSelectionChanged(e.getSelection());
         }
@@ -860,9 +857,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         }
     }
 
-    /**
-	 * {@inheritDoc}
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {
@@ -874,6 +868,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     	}
 		if (adapter == IShowInTargetList.class) {
 			return (T) new IShowInTargetList() {
+				@Override
 				public String[] getShowInTargetIds() {
 					return new String[] { JavaUI.ID_PACKAGES, JavaPlugin.ID_RES_NAV };
 				}
@@ -887,6 +882,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	 */
 	private IShowInSource getShowInSource() {
 		return new IShowInSource() {
+			@Override
 			public ShowInContext getShowInContext() {
 				return new ShowInContext(null, fSelectionProviderMediator.getSelection());
 			}
@@ -995,7 +991,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
 
         fLocationViewer.initContextMenu(new IMenuListener() {
-                public void menuAboutToShow(IMenuManager menu) {
+                @Override
+				public void menuAboutToShow(IMenuManager menu) {
                     fillLocationViewerContextMenu(menu);
                 }
             }, ID_CALL_HIERARCHY, getSite());
@@ -1378,7 +1375,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		// we have to consider the real Tree state, not only fInputElements.
 		
 		List<IMember> inputElements= Arrays.asList(fInputElements);
-		List<IMember> treeElements= new ArrayList<IMember>();
+		List<IMember> treeElements= new ArrayList<>();
 		TreeItem[] treeItems= fCallHierarchyViewer.getTree().getItems();
 		for (int i= 0; i < treeItems.length; i++) {
 			Object data= treeItems[i].getData();
@@ -1386,9 +1383,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 				treeElements.add(((MethodWrapper) data).getMember());
 		}
 		
-		List<IMember> newInput= new ArrayList<IMember>();
+		List<IMember> newInput= new ArrayList<>();
 		newInput.addAll(inputElements);
-		List<IMember> addedElements= new ArrayList<IMember>();
+		List<IMember> addedElements= new ArrayList<>();
 		
 		for (int i= 0; i < newElements.length; i++) {
 			IMember newElement= newElements[i];

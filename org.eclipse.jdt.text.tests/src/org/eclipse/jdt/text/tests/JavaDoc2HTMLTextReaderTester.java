@@ -234,95 +234,115 @@ class MockBuffer implements IBuffer{
 		fStringBuffer= new StringBuffer(string);
 	}
 
+	@Override
 	public void addBufferChangedListener(IBufferChangedListener listener) {
 	}
 
 
+	@Override
 	public void append(char[] text) {
 		fStringBuffer.append(text);
 	}
 
 
+	@Override
 	public void append(String text) {
 		fStringBuffer.append(text);
 	}
 
 
+	@Override
 	public void close() {
 	}
 
 
+	@Override
 	public char getChar(int position) {
 		return fStringBuffer.charAt(position);
 	}
 
 
+	@Override
 	public char[] getCharacters() {
 		return fStringBuffer.toString().toCharArray();
 	}
 
 
+	@Override
 	public String getContents() {
 		return fStringBuffer.toString();
 	}
 
 
+	@Override
 	public int getLength() {
 		return fStringBuffer.length();
 	}
 
 
+	@Override
 	public IOpenable getOwner() {
 		return null;
 	}
 
 
+	@Override
 	public String getText(int offset, int length) {
 		return fStringBuffer.toString().substring(offset, offset + length);
 	}
 
 
+	@Override
 	public IResource getUnderlyingResource() {
 		return null;
 	}
 
 
+	@Override
 	public boolean hasUnsavedChanges() {
 		return false;
 	}
 
 
+	@Override
 	public boolean isClosed() {
 		return false;
 	}
 
 
+	@Override
 	public boolean isReadOnly() {
 		return false;
 	}
 
 
+	@Override
 	public void removeBufferChangedListener(IBufferChangedListener listener) {
 	}
 
 
+	@Override
 	public void replace(int position, int length, char[] text) {
 	}
 
 
+	@Override
 	public void replace(int position, int length, String text) {
 	}
 
 
+	@Override
 	public void save(IProgressMonitor progress, boolean force)
 		throws JavaModelException {
 	}
 
 
+	@Override
 	public void setContents(char[] contents) {
 	}
 
 
+	@Override
 	public void setContents(String contents) {
 		fStringBuffer= new StringBuffer(contents);
 	}

@@ -124,7 +124,8 @@ public class CallLocation implements IAdaptable {
         return getCallText();
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Class<T> adapter) {
         if (IJavaElement.class.isAssignableFrom(adapter)) {
             return (T) getMember();

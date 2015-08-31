@@ -177,9 +177,6 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)
-	 */
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 
 	}

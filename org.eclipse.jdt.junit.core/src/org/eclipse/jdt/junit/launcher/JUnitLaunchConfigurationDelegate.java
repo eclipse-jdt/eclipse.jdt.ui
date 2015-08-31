@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,15 +82,13 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 	private int fPort;
 	private IMember[] fTestElements;
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.debug.core.model.ILaunchConfigurationDelegate#launch(org.eclipse.debug.core.ILaunchConfiguration, java.lang.String, org.eclipse.debug.core.ILaunch, org.eclipse.core.runtime.IProgressMonitor)
-	 */
+	@Override
 	public synchronized void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
 		if (monitor == null) {
 			monitor = new NullProgressMonitor();
 		}
 
-		monitor.beginTask(MessageFormat.format("{0}...", new String[]{configuration.getName()}), 5); //$NON-NLS-1$
+		monitor.beginTask(MessageFormat.format("{0}...", configuration.getName()), 5); //$NON-NLS-1$
 		// check for cancellation
 		if (monitor.isCanceled()) {
 			return;
@@ -136,20 +134,20 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			// Environment variables
 			String[] envp= getEnvironment(configuration);
 
-			ArrayList vmArguments= new ArrayList();
-			ArrayList programArguments= new ArrayList();
+			ArrayList<String> vmArguments= new ArrayList<>();
+			ArrayList<String> programArguments= new ArrayList<>();
 			collectExecutionArguments(configuration, vmArguments, programArguments);
 
 			// VM-specific attributes
-			Map vmAttributesMap= getVMSpecificAttributesMap(configuration);
+			Map<String, Object> vmAttributesMap= getVMSpecificAttributesMap(configuration);
 
 			// Classpath
 			String[] classpath= getClasspath(configuration);
 
 			// Create VM config
 			VMRunnerConfiguration runConfig= new VMRunnerConfiguration(mainTypeName, classpath);
-			runConfig.setVMArguments((String[]) vmArguments.toArray(new String[vmArguments.size()]));
-			runConfig.setProgramArguments((String[]) programArguments.toArray(new String[programArguments.size()]));
+			runConfig.setVMArguments(vmArguments.toArray(new String[vmArguments.size()]));
+			runConfig.setProgramArguments(programArguments.toArray(new String[programArguments.size()]));
 			runConfig.setEnvironment(envp);
 			runConfig.setWorkingDirectory(workingDirName);
 			runConfig.setVMSpecificAttributesMap(vmAttributesMap);
@@ -228,9 +226,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		return testKind;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate#verifyMainTypeName(org.eclipse.debug.core.ILaunchConfiguration)
-	 */
+	@Override
 	public String verifyMainTypeName(ILaunchConfiguration configuration) throws CoreException {
 		return "org.eclipse.jdt.internal.junit.runner.RemoteTestRunner"; //$NON-NLS-1$
 	}
@@ -255,14 +251,14 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 				return new IMember[] { ((IType) testTarget).getMethod(testMethodName, new String[0]) };
 			}
 		}
-		HashSet result= new HashSet();
+		HashSet<IType> result= new HashSet<>();
 		ITestKind testKind= getTestRunnerKind(configuration);
 		testKind.getFinder().findTestsInContainer(testTarget, result, monitor);
 		if (result.isEmpty()) {
 			String msg= Messages.format(JUnitMessages.JUnitLaunchConfigurationDelegate_error_notests_kind, testKind.getDisplayName());
 			abort(msg, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
 		}
-		return (IMember[]) result.toArray(new IMember[result.size()]);
+		return result.toArray(new IMember[result.size()]);
 	}
 
 	/**
@@ -273,7 +269,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 	 * @param programArguments a {@link List} of {@link String} representing the resulting program arguments
 	 * @exception CoreException if unable to collect the execution arguments
 	 */
-	protected void collectExecutionArguments(ILaunchConfiguration configuration, List/*String*/ vmArguments, List/*String*/ programArguments) throws CoreException {
+	protected void collectExecutionArguments(ILaunchConfiguration configuration, List<String> vmArguments, List<String> programArguments) throws CoreException {
 
 		// add program & VM arguments provided by getProgramArguments and getVMArguments
 		String pgmArgs= getProgramArguments(configuration);
@@ -363,14 +359,12 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate#getClasspath(org.eclipse.debug.core.ILaunchConfiguration)
-	 */
+	@Override
 	public String[] getClasspath(ILaunchConfiguration configuration) throws CoreException {
 		String[] cp= super.getClasspath(configuration);
 
 		ITestKind kind= getTestRunnerKind(configuration);
-		List junitEntries = new ClasspathLocalizer(Platform.inDevelopmentMode()).localizeClasspath(kind);
+		List<String> junitEntries = new ClasspathLocalizer(Platform.inDevelopmentMode()).localizeClasspath(kind);
 
 		String[] classPath= new String[cp.length + junitEntries.size()];
 		Object[] jea= junitEntries.toArray();
@@ -387,9 +381,9 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			fInDevelopmentMode = inDevelopmentMode;
 		}
 
-		public List localizeClasspath(ITestKind kind) {
+		public List<String> localizeClasspath(ITestKind kind) {
 			JUnitRuntimeClasspathEntry[] entries= kind.getClasspathEntries();
-			List junitEntries= new ArrayList();
+			List<String> junitEntries= new ArrayList<>();
 
 			for (int i= 0; i < entries.length; i++) {
 				try {
@@ -401,7 +395,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			return junitEntries;
 		}
 
-		private void addEntry(List junitEntries, final JUnitRuntimeClasspathEntry entry) throws IOException, MalformedURLException {
+		private void addEntry(List<String> junitEntries, final JUnitRuntimeClasspathEntry entry) throws IOException, MalformedURLException {
 			String entryString= entryString(entry);
 			if (entryString != null)
 				junitEntries.add(entryString);
@@ -455,9 +449,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		return null; // not reachable
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.junit.launcher.ITestFindingAbortHandler#abort(java.lang.String, java.lang.Throwable, int)
-	 */
+	@Override
 	protected void abort(String message, Throwable exception, int code) throws CoreException {
 		throw new CoreException(new Status(IStatus.ERROR, JUnitCorePlugin.CORE_PLUGIN_ID, code, message, exception));
 	}

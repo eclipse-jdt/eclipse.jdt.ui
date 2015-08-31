@@ -65,7 +65,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	private int fLRUMenuCount;
 	private IMenuManager fMenuManager;
 	private IMenuListener fMenuListener;
-	private List<IContributionItem> fContributions= new ArrayList<IContributionItem>();
+	private List<IContributionItem> fContributions= new ArrayList<>();
 	private final IWorkbenchPage fWorkbenchPage;
 	private boolean fAllowWindowWorkingSetByDefault;
 
@@ -81,6 +81,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		fEditWorkingSetAction= new EditWorkingSetAction(this, site);
 
 		fWorkingSetListener= new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				doPropertyChange(event);
 			}
@@ -107,6 +108,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		fEditWorkingSetAction= new EditWorkingSetAction(this, shell);
 
 		fWorkingSetListener= new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				doPropertyChange(event);
 			}
@@ -196,9 +198,6 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	}
 
 
-	/* (non-Javadoc)
-	 * @see ActionGroup#fillActionBars(IActionBars)
-	 */
 	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		fillToolBar(actionBars.getToolBarManager());
@@ -219,6 +218,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	 *
 	 * @param mm the menu manager
 	 */
+	@Override
 	public void fillViewMenu(IMenuManager mm) {
 		if (mm.find(IWorkingSetActionGroup.ACTION_GROUP) == null) {
 			mm.add(new Separator(IWorkingSetActionGroup.ACTION_GROUP));
@@ -231,6 +231,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 
 		fMenuManager= mm;
 		fMenuListener= new IMenuListener() {
+			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				removePreviousLRUWorkingSetActions(manager);
 				addLRUWorkingSetActions(manager);
@@ -285,6 +286,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	}
 
 
+	@Override
 	public void cleanViewMenu(IMenuManager menuManager) {
 		for (Iterator<IContributionItem> iter= fContributions.iterator(); iter.hasNext();) {
 			IContributionItem removed= menuManager.remove(iter.next());
@@ -297,9 +299,6 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		fMenuListener= null;
 	}
 
-	/* (non-Javadoc)
-	 * @see ActionGroup#dispose()
-	 */
 	@Override
 	public void dispose() {
 		if (fMenuManager != null && fMenuListener != null)

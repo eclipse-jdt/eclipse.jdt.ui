@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class CodeFormatterUtilTest extends CoreTests {
 
-	private static final Class THIS= CodeFormatterUtilTest.class;
+	private static final Class<CodeFormatterUtilTest> THIS= CodeFormatterUtilTest.class;
 
 	private IJavaProject fJProject1;
 
@@ -63,11 +63,12 @@ public class CodeFormatterUtilTest extends CoreTests {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "999");
@@ -75,6 +76,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 	}
@@ -104,6 +106,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 
 				doc.addPositionCategory(POS_CATEGORY);
 				doc.addPositionUpdater(new DefaultPositionUpdater(POS_CATEGORY) {
+					@Override
 					protected boolean notDeleted() {
 						if (fOffset < fPosition.offset && (fPosition.offset + fPosition.length < fOffset + fLength)) {
 							fPosition.offset= fOffset + fLength; // deleted positions: set to end of remove

@@ -57,6 +57,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		fWorkingSetFilter= null;
 		fMethodOverrideTester= null;
 		fTypeHierarchyLifeCycleListener= new ITypeHierarchyLifeCycleListener() {
+			@Override
 			public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchyProvider, IType[] changedTypes) {
 				if (changedTypes == null) {
 					synchronized (this) {
@@ -161,9 +162,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	}
 
 
-	/* (non-Javadoc)
-	 * @see IReconciled#providesWorkingCopies()
-	 */
+	@Override
 	public boolean providesWorkingCopies() {
 		return true;
 	}
@@ -173,8 +172,9 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 * Called for the root element
 	 * @see IStructuredContentProvider#getElements
 	 */
+	@Override
 	public Object[] getElements(Object parent) {
-		ArrayList<IType> types= new ArrayList<IType>();
+		ArrayList<IType> types= new ArrayList<>();
 		getRootTypes(types);
 		for (int i= types.size() - 1; i >= 0; i--) {
 			IType curr= types.get(i);
@@ -245,12 +245,13 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 * Called for the tree children.
 	 * @see ITreeContentProvider#getChildren
 	 */
+	@Override
 	public Object[] getChildren(Object element) {
 		if (element instanceof IType) {
 			try {
 				IType type= (IType)element;
 
-				List<IMember> children= new ArrayList<IMember>();
+				List<IMember> children= new ArrayList<>();
 				if (fMemberFilter != null) {
 					addFilteredMemberChildren(type, children);
 				}
@@ -268,6 +269,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	/*
 	 * @see ITreeContentProvider#hasChildren
 	 */
+	@Override
 	public boolean hasChildren(Object element) {
 		if (element instanceof IType) {
 			try {
@@ -294,7 +296,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	}
 
 	private void addTypeChildren(IType type, List<IMember> children) throws JavaModelException {
-		ArrayList<IType> types= new ArrayList<IType>();
+		ArrayList<IType> types= new ArrayList<>();
 		getTypesInHierarchy(type, types);
 		int len= types.size();
 		for (int i= 0; i < len; i++) {
@@ -331,7 +333,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	}
 
 	private boolean hasTypeChildren(IType type) throws JavaModelException {
-		ArrayList<IType> types= new ArrayList<IType>();
+		ArrayList<IType> types= new ArrayList<>();
 		getTypesInHierarchy(type, types);
 		int len= types.size();
 		for (int i= 0; i < len; i++) {
@@ -346,6 +348,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	/*
 	 * @see IContentProvider#inputChanged
 	 */
+	@Override
 	public void inputChanged(Viewer part, Object oldInput, Object newInput) {
 		Assert.isTrue(part instanceof TreeViewer);
 		fViewer= (TreeViewer)part;
@@ -354,6 +357,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	/*
 	 * @see IContentProvider#dispose
 	 */
+	@Override
 	public void dispose() {
 		fTypeHierarchy.removeChangedListener(fTypeHierarchyLifeCycleListener);
 
@@ -362,6 +366,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	/*
 	 * @see ITreeContentProvider#getParent
 	 */
+	@Override
 	public Object getParent(Object element) {
 		if (element instanceof IMember) {
 			IMember member= (IMember) element;

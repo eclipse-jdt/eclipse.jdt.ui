@@ -73,24 +73,18 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 		setWindowTitle("New XY Project");
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IExecutableExtension#setInitializationData(org.eclipse.core.runtime.IConfigurationElement, java.lang.String, java.lang.Object)
-	 */
+	@Override
 	public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
 		//  The config element will be used in <code>finishPage</code> to set the result perspective.
 		fConfigElement= cfig;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)
-	 */
+	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		fWorkbench= workbench;
 	}
 
-	/* (non-Javadoc)
-	 * @see Wizard#addPages
-	 */
+	@Override
 	public void addPages() {
 		super.addPages();
 		fMainPage= new WizardNewProjectCreationPage("NewProjectCreationWizard");
@@ -102,6 +96,7 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 
 		// the Java build path configuration page
 		fJavaPage= new JavaCapabilityConfigurationPage() {
+			@Override
 			public void setVisible(boolean visible) {
 				// need to override to react to changes on first page
 				updatePage();
@@ -156,11 +151,10 @@ public class MyProjectCreationWizard extends Wizard implements IExecutableExtens
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see Wizard#performFinish
-	 */
+	@Override
 	public boolean performFinish() {
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
+			@Override
 			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException, InterruptedException {
 				finishPage(monitor);
 			}

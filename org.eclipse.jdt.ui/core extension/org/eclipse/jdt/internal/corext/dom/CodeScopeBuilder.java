@@ -49,12 +49,12 @@ public class CodeScopeBuilder extends ASTVisitor {
 		}
 		private void addChild(Scope child) {
 			if (fChildren == null)
-				fChildren= new ArrayList<Scope>(2);
+				fChildren= new ArrayList<>(2);
 			fChildren.add(child);
 		}
 		private void addName(String name) {
 			if (fNames == null)
-				fNames= new ArrayList<String>(2);
+				fNames= new ArrayList<>(2);
 			fNames.add(name);
 		}
 		public Scope findScope(int start, int length) {
@@ -134,13 +134,13 @@ public class CodeScopeBuilder extends ASTVisitor {
 
 	private CodeScopeBuilder(ASTNode node, IBinding ignore) {
 		fScope= new Scope(null, node.getStartPosition(), node.getLength());
-		fScopes= new ArrayList<Scope>();
+		fScopes= new ArrayList<>();
 		fIgnoreBinding= ignore;
 	}
 
 	private CodeScopeBuilder(ASTNode node, Selection ignore) {
 		fScope= new Scope(null, node.getStartPosition(), node.getLength());
-		fScopes= new ArrayList<Scope>();
+		fScopes= new ArrayList<>();
 		fIgnoreRange= ignore;
 	}
 

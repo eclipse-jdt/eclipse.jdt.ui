@@ -226,14 +226,17 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	//---- IRenameProcessor -------------------------------------
 
+	@Override
 	public final String getCurrentElementName(){
 		return fField.getElementName();
 	}
 
+	@Override
 	public final String getCurrentElementQualifier(){
 		return fField.getDeclaringType().getFullyQualifiedName('.');
 	}
 
+	@Override
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		RefactoringStatus result= Checks.checkFieldName(newName, fField);
@@ -261,30 +264,36 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return JavaElementLabels.getElementLabel(fField.getDeclaringType(), JavaElementLabels.ALL_DEFAULT);
 	}
 
+	@Override
 	public Object getNewElement() {
 		return fField.getDeclaringType().getField(getNewElementName());
 	}
 
 	//---- ITextUpdating2 ---------------------------------------------
 
+	@Override
 	public boolean canEnableTextUpdating() {
 		return true;
 	}
 
+	@Override
 	public boolean getUpdateTextualMatches() {
 		return fUpdateTextualMatches;
 	}
 
+	@Override
 	public void setUpdateTextualMatches(boolean update) {
 		fUpdateTextualMatches= update;
 	}
 
 	//---- IReferenceUpdating -----------------------------------
 
+	@Override
 	public void setUpdateReferences(boolean update) {
 		fUpdateReferences= update;
 	}
 
+	@Override
 	public boolean getUpdateReferences(){
 		return fUpdateReferences;
 	}
@@ -369,22 +378,27 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	// ------------------- IDelegateUpdating ----------------------
 
+	@Override
 	public boolean canEnableDelegateUpdating() {
 		return (getDelegateCount() > 0);
 	}
 
+	@Override
 	public boolean getDelegateUpdating() {
 		return fDelegateUpdating;
 	}
 
+	@Override
 	public void setDelegateUpdating(boolean update) {
 		fDelegateUpdating= update;
 	}
 
+	@Override
 	public void setDeprecateDelegates(boolean deprecate) {
 		fDelegateDeprecation= deprecate;
 	}
 
+	@Override
 	public boolean getDeprecateDelegates() {
 		return fDelegateDeprecation;
 	}
@@ -829,7 +843,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			RefactoringStatus result= new RefactoringStatus();
 			SearchResultGroup[] oldReferences= fReferences;
 
-			List<ICompilationUnit> compilationUnitsToModify= new ArrayList<ICompilationUnit>();
+			List<ICompilationUnit> compilationUnitsToModify= new ArrayList<>();
 			if (fIsComposite) {
 				// limited change set, no accessors.
 				for (int i= 0; i < oldReferences.length; i++)
@@ -943,9 +957,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return new RefactoringStatus();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getDelegateUpdatingTitle(boolean plural) {
 		if (plural)
 			return RefactoringCoreMessages.DelegateFieldCreator_keep_original_renamed_plural;

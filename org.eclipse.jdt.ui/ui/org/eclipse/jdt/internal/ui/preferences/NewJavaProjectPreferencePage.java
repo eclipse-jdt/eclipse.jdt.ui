@@ -139,7 +139,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 
 	public static IClasspathEntry[] decodeJRELibraryClasspathEntries(String encoded) {
 		StringTokenizer tok= new StringTokenizer(encoded, " "); //$NON-NLS-1$
-		ArrayList<IClasspathEntry> res= new ArrayList<IClasspathEntry>();
+		ArrayList<IClasspathEntry> res= new ArrayList<>();
 		while (tok.hasMoreTokens()) {
 			try {
 				tok.nextToken(); // desc: ignore
@@ -244,19 +244,22 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		// title used when opened programatically
 		setTitle(PreferencesMessages.NewJavaProjectPreferencePage_title);
 
-		fRadioButtons= new ArrayList<Button>();
-		fCheckBoxes= new ArrayList<Button>();
-		fTextControls= new ArrayList<Text>();
+		fRadioButtons= new ArrayList<>();
+		fCheckBoxes= new ArrayList<>();
+		fTextControls= new ArrayList<>();
 
 		fSelectionListener= new SelectionListener() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {}
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				controlChanged(e.widget);
 			}
 		};
 
 		fModifyListener= new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				controlModified(e.widget);
 			}
@@ -295,6 +298,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	/*
 	 * @see IWorkbenchPreferencePage#init(IWorkbench)
 	 */
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 
@@ -532,7 +536,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 
 	private String[] getJRENames() {
 		String prefString= getPreferenceStore().getString(CLASSPATH_JRELIBRARY_LIST);
-		ArrayList<String> list= new ArrayList<String>();
+		ArrayList<String> list= new ArrayList<>();
 		StringTokenizer tok= new StringTokenizer(prefString, ";"); //$NON-NLS-1$
 		while (tok.hasMoreTokens()) {
 			list.add(decodeJRELibraryDescription(tok.nextToken()));

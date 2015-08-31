@@ -43,7 +43,7 @@ import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 public class NlsRefactoringCreateChangeTest extends TestCase {
 
-	private static final Class THIS= NlsRefactoringCreateChangeTest.class;
+	private static final Class<NlsRefactoringCreateChangeTest> THIS= NlsRefactoringCreateChangeTest.class;
 
 	private NlsRefactoringTestHelper fHelper;
 	private IJavaProject fJavaProject;
@@ -61,12 +61,14 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJavaProject= ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJavaProject, "src");
 		fHelper= new NlsRefactoringTestHelper(fJavaProject);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJavaProject, ProjectTestSetup.getDefaultClasspath());
 	}

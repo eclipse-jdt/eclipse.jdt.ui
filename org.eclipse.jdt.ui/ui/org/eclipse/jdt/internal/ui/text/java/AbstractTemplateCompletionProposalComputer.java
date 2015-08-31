@@ -49,6 +49,7 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (!(context instanceof JavaContentAssistInvocationContext))
 			return Collections.emptyList();
@@ -104,6 +105,7 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public List<IContextInformation> computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		return Collections.emptyList();
 	}
@@ -111,6 +113,7 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#getErrorMessage()
 	 */
+	@Override
 	public String getErrorMessage() {
 		return null;
 	}
@@ -118,12 +121,11 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionStarted()
 	 */
+	@Override
 	public void sessionStarted() {
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionEnded()
-	 */
+	@Override
 	public void sessionEnded() {
 		if (fEngine != null) {
 			fEngine.reset();

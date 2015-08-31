@@ -53,11 +53,6 @@ public class GotoResourceAction extends Action {
 
 		private class GotoResourceFilter extends ResourceFilter {
 
-			/*
-			 * (non-Javadoc)
-			 *
-			 * @see org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog.ResourceFilter#matchItem(java.lang.Object)
-			 */
 			@Override
 			public boolean matchItem(Object item) {
 				IResource resource = (IResource) item;
@@ -87,11 +82,6 @@ public class GotoResourceAction extends Action {
 				return true;
 			}
 
-			/*
-			 * (non-Javadoc)
-			 *
-			 * @see org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog.ResourceFilter#equalsFilter(org.eclipse.ui.dialogs.FilteredItemsSelectionDialog.ItemsFilter)
-			 */
 			@Override
 			public boolean equalsFilter(ItemsFilter filter) {
 				if (!super.equalsFilter(filter)) {

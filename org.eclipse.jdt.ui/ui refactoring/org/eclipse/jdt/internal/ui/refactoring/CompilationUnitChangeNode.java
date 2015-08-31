@@ -94,10 +94,10 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 			return new ChildNode[0]; // no edit preview & edit disabling possible in the MultiStateTextFileChange (edits must be applied in sequence)
 		}
 
-		ICompilationUnit cunit= (ICompilationUnit) change.getAdapter(ICompilationUnit.class);
+		ICompilationUnit cunit= change.getAdapter(ICompilationUnit.class);
 		if (cunit != null) {
-			List<ChildNode> children= new ArrayList<ChildNode>(5);
-			Map<IJavaElement, JavaLanguageNode> map= new HashMap<IJavaElement, JavaLanguageNode>(20);
+			List<ChildNode> children= new ArrayList<>(5);
+			Map<IJavaElement, JavaLanguageNode> map= new HashMap<>(20);
 			TextEditBasedChangeGroup[] changes= getSortedChangeGroups(change);
 			for (int i= 0; i < changes.length; i++) {
 				TextEditBasedChangeGroup tec= changes[i];
@@ -120,6 +120,7 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 	}
 
 	private static class OffsetComparator implements Comparator<TextEditBasedChangeGroup> {
+		@Override
 		public int compare(TextEditBasedChangeGroup c1, TextEditBasedChangeGroup c2) {
 			int p1= getOffset(c1);
 			int p2= getOffset(c2);
@@ -137,7 +138,7 @@ public class CompilationUnitChangeNode extends TextEditChangeNode {
 
 	private TextEditBasedChangeGroup[] getSortedChangeGroups(TextEditBasedChange change) {
 		TextEditBasedChangeGroup[] edits= change.getChangeGroups();
-		List<TextEditBasedChangeGroup> result= new ArrayList<TextEditBasedChangeGroup>(edits.length);
+		List<TextEditBasedChangeGroup> result= new ArrayList<>(edits.length);
 		for (int i= 0; i < edits.length; i++) {
 			if (!edits[i].getTextEditGroup().isEmpty())
 				result.add(edits[i]);

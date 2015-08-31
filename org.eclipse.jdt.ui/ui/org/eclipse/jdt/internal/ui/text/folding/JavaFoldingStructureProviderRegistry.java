@@ -127,7 +127,7 @@ public class JavaFoldingStructureProviderRegistry {
 	 */
 	public void reloadExtensions() {
 		IExtensionRegistry registry= Platform.getExtensionRegistry();
-		Map<String, JavaFoldingStructureProviderDescriptor> map= new HashMap<String, JavaFoldingStructureProviderDescriptor>();
+		Map<String, JavaFoldingStructureProviderDescriptor> map= new HashMap<>();
 
 		IConfigurationElement[] elements= registry.getConfigurationElementsFor(JavaPlugin.getPluginId(), EXTENSION_POINT);
 		for (int i= 0; i < elements.length; i++) {

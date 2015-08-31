@@ -20,17 +20,15 @@ import org.eclipse.jdt.junit.model.ITestSuiteElement;
 
 public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 
-	private List/*<TestElement>*/ fChildren;
+	private List<TestElement> fChildren;
 	private Status fChildrenStatus;
 
 	public TestSuiteElement(TestSuiteElement parent, String id, String testName, int childrenCount) {
 		super(parent, id, testName);
-		fChildren= new ArrayList(childrenCount);
+		fChildren= new ArrayList<>(childrenCount);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.junit.ITestElement#getTestResult()
-	 */
+	@Override
 	public Result getTestResult(boolean includeChildren) {
 		if (includeChildren) {
 			return getStatus().convertToResult();
@@ -39,24 +37,21 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.junit.ITestSuiteElement#getSuiteTypeName()
-	 */
+	@Override
 	public String getSuiteTypeName() {
 		return getClassName();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.junit.model.ITestSuiteElement#getChildren()
-	 */
+	@Override
 	public ITestElement[] getChildren() {
-		return (ITestElement[]) fChildren.toArray(new ITestElement[fChildren.size()]);
+		return fChildren.toArray(new ITestElement[fChildren.size()]);
 	}
 
 	public void addChild(TestElement child) {
 		fChildren.add(child);
 	}
 
+	@Override
 	public Status getStatus() {
 		Status suiteStatus= getSuiteStatus();
 		if (fChildrenStatus != null) {
@@ -68,7 +63,7 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 	}
 
 	private Status getCumulatedStatus() {
-		TestElement[] children= (TestElement[]) fChildren.toArray(new TestElement[fChildren.size()]); // copy list to avoid concurreny problems
+		TestElement[] children= fChildren.toArray(new TestElement[fChildren.size()]); // copy list to avoid concurreny problems
 		if (children.length == 0)
 			return getSuiteStatus();
 
@@ -95,7 +90,7 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 			internalSetChildrenStatus(childStatus);
 			return;
 		}
-		TestElement lastChild= (TestElement) fChildren.get(childCount - 1);
+		TestElement lastChild= fChildren.get(childCount - 1);
 		if (child == lastChild) {
 			if (childStatus.isDone()) {
 				// all children done, collect cumulative status
@@ -147,6 +142,7 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 			parent.childChangedStatus(this, getStatus());
 	}
 
+	@Override
 	public String toString() {
 		return "TestSuite: " + getSuiteTypeName() + " : " + super.toString() + " (" + fChildren.size() + ")";   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}

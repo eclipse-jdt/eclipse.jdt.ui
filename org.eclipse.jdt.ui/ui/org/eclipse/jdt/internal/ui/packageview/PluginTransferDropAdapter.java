@@ -26,16 +26,12 @@ public class PluginTransferDropAdapter extends PluginDropAdapter implements Tran
 		setFeedbackEnabled(false);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Transfer getTransfer() {
 		return PluginTransfer.getInstance();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean isEnabled(DropTargetEvent event) {
 		return PluginTransfer.getInstance().isSupportedType(event.currentDataType);
 	}

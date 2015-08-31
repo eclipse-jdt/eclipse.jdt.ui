@@ -47,16 +47,12 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 		fMarker= marker;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
-	 */
+	@Override
 	public void apply(IDocument document) {
 		fResolution.run(fMarker);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
-	 */
+	@Override
 	public String getAdditionalProposalInfo() {
 		if (fResolution instanceof IMarkerResolution2) {
 			return ((IMarkerResolution2) fResolution).getDescription();
@@ -73,23 +69,17 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
-	 */
+	@Override
 	public IContextInformation getContextInformation() {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
-	 */
+	@Override
 	public String getDisplayString() {
 		return fResolution.getLabel();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
-	 */
+	@Override
 	public Image getImage() {
 		if (fResolution instanceof IMarkerResolution2) {
 			return ((IMarkerResolution2) fResolution).getImage();
@@ -100,9 +90,7 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 		return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal#getRelevance()
-	 */
+	@Override
 	public int getRelevance() {
 		if (fResolution instanceof IJavaCompletionProposal) {
 			return ((IJavaCompletionProposal) fResolution).getRelevance();
@@ -110,9 +98,7 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 		return IProposalRelevance.MARKER_RESOLUTION;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
-	 */
+	@Override
 	public Point getSelection(IDocument document) {
 		if (fResolution instanceof IJavaCompletionProposal) {
 			return ((IJavaCompletionProposal) fResolution).getSelection(document);

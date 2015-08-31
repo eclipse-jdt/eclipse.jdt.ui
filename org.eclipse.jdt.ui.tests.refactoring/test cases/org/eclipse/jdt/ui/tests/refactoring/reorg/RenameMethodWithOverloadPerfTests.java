@@ -64,6 +64,7 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 		executeRefactoring(1000, 10, true, 10);
 	}
 
+	@Override
 	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
 		ICompilationUnit cunit= generateSources(numberOfCus, numberOfRefs);
 		IMethod method= cunit.findPrimaryType().getMethod("setString", new String[] {"QString;"});
@@ -107,6 +108,7 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 		pack.createCompilationUnit("Ref" + index + ".java", buf.toString(), false, null);
 	}
 
+	@Override
 	protected void assertMeasurements() {
 		assertPerformanceInRelativeBand(Dimension.CPU_TIME, -100, +10);
 	}

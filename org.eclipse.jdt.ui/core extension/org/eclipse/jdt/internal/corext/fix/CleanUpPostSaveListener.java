@@ -133,9 +133,6 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			return true;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public Change perform(IProgressMonitor pm) throws CoreException {
 			if (isValid(pm).hasFatalError())
@@ -153,7 +150,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 				
 				final IDocument document= buffer.getDocument();
 				final long oldFileValue= fFile.getModificationStamp();
-				final LinkedList<UndoEdit> undoEditCollector= new LinkedList<UndoEdit>();
+				final LinkedList<UndoEdit> undoEditCollector= new LinkedList<>();
 				final long[] oldDocValue= new long[1];
 				final boolean[] setContentStampSuccess= { false };
 				
@@ -167,6 +164,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 						public boolean fDone;
 						public Exception fException;
 						
+						@Override
 						public void run() {
 							synchronized (this) {
 								try {
@@ -257,9 +255,6 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			fCleanUpNames= cleanUpNames;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.dialogs.IconAndMessageDialog#createMessageArea(org.eclipse.swt.widgets.Composite)
-		 */
 		@Override
 		protected Control createMessageArea(Composite parent) {
 			initializeDialogUnits(parent);
@@ -316,17 +311,13 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	private static boolean FIRST_CALL= false;
 	private static boolean FIRST_CALL_DONE= false;
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean needsChangedRegions(ICompilationUnit unit) throws CoreException {
 		ICleanUp[] cleanUps= getCleanUps(unit.getJavaProject().getProject());
 		return requiresChangedRegions(cleanUps);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void saved(ICompilationUnit unit, IRegion[] changedRegions, IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
@@ -343,7 +334,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			long oldDocValue= getDocumentStamp((IFile)unit.getResource(), new SubProgressMonitor(monitor, 2));
 
 			CompositeChange result= new CompositeChange(FixMessages.CleanUpPostSaveListener_SaveAction_ChangeName);
-			LinkedList<UndoEdit> undoEdits= new LinkedList<UndoEdit>();
+			LinkedList<UndoEdit> undoEdits= new LinkedList<>();
 
 			if (FIRST_CALL && !FIRST_CALL_DONE) {
 				FIRST_CALL= false;
@@ -353,7 +344,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			}
 			HashSet<ICleanUp> slowCleanUps;
 			if (FIRST_CALL_DONE) {
-				slowCleanUps= new HashSet<ICleanUp>();
+				slowCleanUps= new HashSet<>();
 			} else {
 				slowCleanUps= null;
 			}
@@ -372,7 +363,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     				if (showStatus(preCondition) != Window.OK)
     					return;
 
-    				Map<String, String> options= new HashMap<String, String>();
+    				Map<String, String> options= new HashMap<>();
     				for (int i= 0; i < cleanUps.length; i++) {
     					Map<String, String> map= cleanUps[i].getRequirements().getCompilerOptions();
     					if (map != null) {
@@ -392,7 +383,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
     					context= new MultiLineCleanUpContext(unit, ast, changedRegions);
     				}
 
-    				ArrayList<ICleanUp> undoneCleanUps= new ArrayList<ICleanUp>();
+    				ArrayList<ICleanUp> undoneCleanUps= new ArrayList<>();
 					CleanUpChange change= CleanUpRefactoring.calculateChange(context, cleanUps, undoneCleanUps, slowCleanUps);
 
     				RefactoringStatus postCondition= new RefactoringStatus();
@@ -457,11 +448,11 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		if (CleanUpOptions.TRUE.equals(settings.get(CleanUpConstants.CLEANUP_ON_SAVE_ADDITIONAL_OPTIONS))) {
 			cleanUps= getCleanUps(settings, null);
 		} else {
-			HashMap<String, String> filteredSettins= new HashMap<String, String>();
+			HashMap<String, String> filteredSettins= new HashMap<>();
 			filteredSettins.put(CleanUpConstants.FORMAT_SOURCE_CODE, settings.get(CleanUpConstants.FORMAT_SOURCE_CODE));
 			filteredSettins.put(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY, settings.get(CleanUpConstants.FORMAT_SOURCE_CODE_CHANGES_ONLY));
 			filteredSettins.put(CleanUpConstants.ORGANIZE_IMPORTS, settings.get(CleanUpConstants.ORGANIZE_IMPORTS));
-			Set<String> ids= new HashSet<String>(2);
+			Set<String> ids= new HashSet<>(2);
 			ids.add("org.eclipse.jdt.ui.cleanup.format"); //$NON-NLS-1$
 			ids.add("org.eclipse.jdt.ui.cleanup.imports"); //$NON-NLS-1$
 			cleanUps= getCleanUps(filteredSettins, ids);
@@ -548,7 +539,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
 				performChangeOperation.run(new SubProgressMonitor(monitor, 5));
 
-				ArrayList<Region> result= new ArrayList<Region>();
+				ArrayList<Region> result= new ArrayList<>();
 				for (int i= 0; i < positions.length; i++) {
 					Position position= positions[i];
 					if (!position.isDeleted())
@@ -638,16 +629,12 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 	    return false;
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getName() {
 		return FixMessages.CleanUpPostSaveListener_name;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getId() {
 		return POSTSAVELISTENER_ID;
 	}
@@ -686,6 +673,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 			showSlowCleanUpDialog(cleanUpNames);
 		} else {
 			Display.getDefault().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					showSlowCleanUpDialog(cleanUpNames);
 				}

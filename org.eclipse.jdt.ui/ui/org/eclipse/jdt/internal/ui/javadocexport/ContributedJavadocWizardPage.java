@@ -68,48 +68,33 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 		setDescription(fConfigElement.getAttribute(ATT_DESCRIPTION));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		Control createContents= getPage().createContents(parent);
 		setControl(createContents);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.NewElementWizardPage#setVisible(boolean)
-	 */
 	@Override
 	public void setVisible(boolean visible) {
 		getPage().setVisible(visible);
 		super.setVisible(visible);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.JavadocExportWizardPage.IJavadocExportWizardPageContainer#getRunnableContext()
-	 */
+	@Override
 	public IRunnableContext getRunnableContext() {
 		return getContainer();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.JavadocExportWizardPage.IJavadocExportWizardPageContainer#statusUpdated()
-	 */
+	@Override
 	public void statusUpdated() {
 		updateStatus(getPage().getStatus());
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.DialogPage#performHelp()
-	 */
 	@Override
 	public void performHelp() {
 		getPage().performHelp();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
-	 */
 	@Override
 	public void dispose() {
 		if (fPage != null) {
@@ -119,20 +104,23 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 		super.dispose();
 	}
 
+	@Override
 	public String[] getConfiguredJavadocOptions() {
-		ArrayList<String> vmArgs= new ArrayList<String>();
-		ArrayList<String> toolArgs= new ArrayList<String>();
+		ArrayList<String> vmArgs= new ArrayList<>();
+		ArrayList<String> toolArgs= new ArrayList<>();
 		fStore.getArgumentArray(vmArgs, toolArgs);
 		return toolArgs.toArray(new String[toolArgs.size()]);
 	}
 
+	@Override
 	public String[] getConfiguredVMOptions() {
-		ArrayList<String> vmArgs= new ArrayList<String>();
-		ArrayList<String> toolArgs= new ArrayList<String>();
+		ArrayList<String> vmArgs= new ArrayList<>();
+		ArrayList<String> toolArgs= new ArrayList<>();
 		fStore.getArgumentArray(vmArgs, toolArgs);
 		return vmArgs.toArray(new String[vmArgs.size()]);
 	}
 
+	@Override
 	public IJavaElement[] getSelectedJavaElements() {
 		IJavaElement[] sourceElements= fStore.getSourceElements();
 		if (sourceElements != null) {
@@ -168,7 +156,7 @@ public class ContributedJavadocWizardPage extends NewElementWizardPage implement
 	}
 
 	public static ContributedJavadocWizardPage[] getContributedPages(JavadocOptionsManager store) {
-		ArrayList<ContributedJavadocWizardPage> pages= new ArrayList<ContributedJavadocWizardPage>();
+		ArrayList<ContributedJavadocWizardPage> pages= new ArrayList<>();
 
 		IConfigurationElement[] elements= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, ATT_EXTENSION);
 		for (int i = 0; i < elements.length; i++) {

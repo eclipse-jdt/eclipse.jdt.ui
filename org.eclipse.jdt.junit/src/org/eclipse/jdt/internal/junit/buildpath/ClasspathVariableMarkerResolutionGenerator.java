@@ -50,6 +50,7 @@ public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolu
 	/*
 	 * @see org.eclipse.ui.IMarkerResolutionGenerator2#hasResolutions(org.eclipse.core.resources.IMarker)
 	 */
+	@Override
 	public boolean hasResolutions(IMarker marker) {
 		int id = marker.getAttribute(IJavaModelMarker.ID, -1);
 		if (id == IJavaModelStatusConstants.DEPRECATED_VARIABLE) {
@@ -66,6 +67,7 @@ public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolu
 	/*
 	 * @see org.eclipse.ui.IMarkerResolutionGenerator#getResolutions(org.eclipse.core.resources.IMarker)
 	 */
+	@Override
 	public IMarkerResolution[] getResolutions(IMarker marker) {
 		if (!hasResolutions(marker)) {
 			return NO_RESOLUTION;
@@ -77,18 +79,22 @@ public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolu
 
 		return new IMarkerResolution2[] {
 				new IMarkerResolution2() {
+					@Override
 					public Image getImage() {
 						return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 					}
 
+					@Override
 					public String getLabel() {
 						return JUnitMessages.ClasspathVariableMarkerResolutionGenerator_use_JUnit3;
 					}
 
+					@Override
 					public String getDescription() {
 						return JUnitMessages.ClasspathVariableMarkerResolutionGenerator_use_JUnit3_desc;
 					}
 
+					@Override
 					public void run(IMarker nonsenseArgument) {
 						IClasspathEntry[] entries;
 						try {
@@ -129,6 +135,7 @@ public class ClasspathVariableMarkerResolutionGenerator implements IMarkerResolu
 		 */
 		try {
 			context.run(true, false, new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						project.setRawClasspath(entries, monitor);

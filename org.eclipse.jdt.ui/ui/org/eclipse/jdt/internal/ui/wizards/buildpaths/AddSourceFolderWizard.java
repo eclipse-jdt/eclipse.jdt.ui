@@ -60,9 +60,6 @@ public class AddSourceFolderWizard extends BuildPathWizard {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void addPages() {
 		super.addPages();
@@ -76,9 +73,6 @@ public class AddSourceFolderWizard extends BuildPathWizard {
 		addPage(fFilterPage);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public List<CPListElement> getInsertedElements() {
 		List<CPListElement> result= super.getInsertedElements();
@@ -88,25 +82,16 @@ public class AddSourceFolderWizard extends BuildPathWizard {
 		return result;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public List<CPListElement> getRemovedElements() {
 		return fAddFolderPage.getRemovedElements();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public List<CPListElement> getModifiedElements() {
 		return fAddFolderPage.getModifiedElements();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean performFinish() {
 		getEntryToEdit().setAttribute(CPListElement.INCLUSION, fFilterPage.getInclusionPattern());

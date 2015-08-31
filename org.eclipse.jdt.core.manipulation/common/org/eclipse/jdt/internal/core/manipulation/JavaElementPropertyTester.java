@@ -84,9 +84,7 @@ public class JavaElementPropertyTester extends PropertyTester {
 	public static final String PROJECT_OPTION = "projectOption"; //$NON-NLS-1$
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.expressions.IPropertyTester#test(java.lang.Object, java.lang.String, java.lang.Object[], java.lang.Object)
-	 */
+	@Override
 	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
 		if (!(receiver instanceof IJavaElement)) {
 			return false;

@@ -158,11 +158,13 @@ public class VariableCreationDialog extends StatusDialog {
 	private class NewVariableAdapter implements IDialogFieldListener, IStringButtonAdapter {
 
 		// -------- IDialogFieldListener
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			doFieldUpdated(field);
 		}
 
 		// -------- IStringButtonAdapter
+		@Override
 		public void changeControlPressed(DialogField field) {
 			doChangeControlPressed(field);
 		}

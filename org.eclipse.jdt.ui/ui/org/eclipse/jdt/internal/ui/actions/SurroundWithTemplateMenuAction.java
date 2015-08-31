@@ -89,9 +89,6 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 			super(ActionMessages.SurroundWithTemplateMenuAction_ConfigureTemplatesActionName);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void run() {
 			PreferenceDialog preferenceDialog= PreferencesUtil.createPreferenceDialogOn(getShell(), JAVA_TEMPLATE_PREFERENCE_PAGE_ID, new String[] { JAVA_TEMPLATE_PREFERENCE_PAGE_ID, CODE_TEMPLATE_PREFERENCE_PAGE_ID }, null);
@@ -119,19 +116,24 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 	private IPartService fPartService;
 	private IPartListener fPartListener= new IPartListener() {
 
+		@Override
 		public void partActivated(IWorkbenchPart part) {
 		}
 
+		@Override
 		public void partBroughtToTop(IWorkbenchPart part) {
 		}
 
+		@Override
 		public void partClosed(IWorkbenchPart part) {
 		}
 
+		@Override
 		public void partDeactivated(IWorkbenchPart part) {
 			disposeMenuItems();
 		}
 
+		@Override
 		public void partOpened(IWorkbenchPart part) {
 		}
 
@@ -150,9 +152,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Menu getMenu(Menu parent) {
 		setMenu(new Menu(parent));
 		fillMenu(fMenu);
@@ -160,9 +160,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		return fMenu;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Menu getMenu(Control parent) {
 		setMenu(new Menu(parent));
 		fillMenu(fMenu);
@@ -196,9 +194,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		menu.add(new ConfigureTemplatesAction());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void dispose() {
 		if (fPartService != null) {
 			fPartService.removePartListener(fPartListener);
@@ -207,9 +203,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		setMenu(null);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void init(IWorkbenchWindow window) {
 		if (fPartService != null) {
 			fPartService.removePartListener(fPartListener);
@@ -225,9 +219,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void run(IAction action) {
 		IWorkbenchPart activePart= JavaPlugin.getActivePage().getActivePart();
 		if (!(activePart instanceof CompilationUnitEditor))
@@ -245,9 +237,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		}.createMenu();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		// Default do nothing
 	}
@@ -382,7 +372,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 	}
 
 	private static IAction[] getActionsFromProposals(IJavaCompletionProposal[] proposals, final int offset, final ITextViewer viewer) {
-		List<Action> result= new ArrayList<Action>();
+		List<Action> result= new ArrayList<>();
 
 		for (int i= 0, j= 1; i < proposals.length; i++) {
 			if (proposals[i] instanceof ICompletionProposalExtension2) {
@@ -395,9 +385,6 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 				actionName.append(proposals[i].getDisplayString());
 
 				Action action= new Action(actionName.toString()) {
-					/**
-					 * {@inheritDoc}
-					 */
 					@Override
 					public void run() {
 						applyProposal(proposal, viewer, (char)0, 0, offset);
@@ -422,10 +409,12 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 		IEditingSupportRegistry registry= null;
 		IEditingSupport helper= new IEditingSupport() {
 
+			@Override
 			public boolean isOriginator(DocumentEvent event, IRegion focus) {
 				return focus.getOffset() <= offset && focus.getOffset() + focus.getLength() >= offset;
 			}
 
+			@Override
 			public boolean ownsFocusShell() {
 				return false;
 			}

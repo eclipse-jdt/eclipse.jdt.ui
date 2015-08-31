@@ -31,16 +31,12 @@ public class ReorgDestinationFactory {
 			fLocation= location;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public Object getDestination() {
 			return fDestination;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public int getLocation() {
 			return fLocation;
 		}

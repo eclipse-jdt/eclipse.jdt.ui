@@ -19,6 +19,7 @@ import junit.framework.TestSuite;
 import org.eclipse.team.core.RepositoryProvider;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -49,7 +50,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestRepositoryProvi
 
 public class ValidateEditTests extends RefactoringTest {
 
-	private static final Class clazz= ValidateEditTests.class;
+	private static final Class<ValidateEditTests> clazz= ValidateEditTests.class;
 
 	public ValidateEditTests(String name) {
 		super(name);
@@ -63,11 +64,13 @@ public class ValidateEditTests extends RefactoringTest {
 		return new Java15Setup(someTest);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		RepositoryProvider.map(getRoot().getJavaProject().getProject(), RefactoringTestRepositoryProvider.PROVIDER_ID);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		RepositoryProvider.unmap(getRoot().getJavaProject().getProject());
 		super.tearDown();
@@ -98,7 +101,7 @@ public class ValidateEditTests extends RefactoringTest {
 		if (status != null)
 			assertTrue(status.toString(), status.isOK());
 
-		Collection validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
+		Collection<IPath> validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
 		assertEquals(2, validatedEditPaths.size());
 		assertTrue(validatedEditPaths.contains(cu1.getPath()));
 		assertTrue(validatedEditPaths.contains(cu2.getPath()));
@@ -140,7 +143,7 @@ public class ValidateEditTests extends RefactoringTest {
 		if (status != null)
 			assertTrue(status.toString(), status.isOK());
 
-		Collection validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
+		Collection<IPath> validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
 		assertEquals(2, validatedEditPaths.size());
 		assertTrue(validatedEditPaths.contains(cu1.getPath()));
 		assertTrue(validatedEditPaths.contains(cu3.getPath()));
@@ -171,7 +174,7 @@ public class ValidateEditTests extends RefactoringTest {
 		if (status != null)
 			assertTrue(status.toString(), status.isOK());
 
-		Collection validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
+		Collection<IPath> validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
 		assertEquals(1, validatedEditPaths.size());
 		assertTrue(validatedEditPaths.contains(cu1.getPath()));
 	}
@@ -205,7 +208,7 @@ public class ValidateEditTests extends RefactoringTest {
 		if (status != null)
 			assertTrue(status.toString(), status.isOK());
 
-		Collection validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
+		Collection<IPath> validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
 		assertEquals(2, validatedEditPaths.size());
 		assertTrue(validatedEditPaths.contains(cu1.getPath()));
 		assertTrue(validatedEditPaths.contains(file.getFullPath()));
@@ -237,7 +240,7 @@ public class ValidateEditTests extends RefactoringTest {
 		if (status != null)
 			assertTrue(status.toString(), status.isOK());
 
-		Collection validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
+		Collection<IPath> validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
 		assertEquals(2, validatedEditPaths.size());
 		assertTrue(validatedEditPaths.contains(cu1.getPath()));
 		assertTrue(validatedEditPaths.contains(cu2.getPath()));
@@ -269,7 +272,7 @@ public class ValidateEditTests extends RefactoringTest {
 		if (status != null)
 			assertTrue(status.toString(), status.isOK());
 
-		Collection validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
+		Collection<IPath> validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
 		assertEquals(2, validatedEditPaths.size());
 		assertTrue(validatedEditPaths.contains(cu1.getPath()));
 		assertTrue(validatedEditPaths.contains(cu2.getPath()));
@@ -310,7 +313,7 @@ public class ValidateEditTests extends RefactoringTest {
 		if (status != null)
 			assertTrue(status.toString(), status.isOK());
 
-		Collection validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
+		Collection<IPath> validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
 		assertEquals(2, validatedEditPaths.size());
 		assertTrue(validatedEditPaths.contains(cu1.getPath())); // moved and changed
 		assertTrue(validatedEditPaths.contains(cu2.getPath())); // changed
@@ -342,7 +345,7 @@ public class ValidateEditTests extends RefactoringTest {
 		if (status != null)
 			assertTrue(status.toString(), status.isOK());
 
-		Collection validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
+		Collection<IPath> validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
 		assertEquals(1, validatedEditPaths.size());
 		assertTrue(validatedEditPaths.contains(file2.getFullPath())); // replaced
 	}
@@ -379,7 +382,7 @@ public class ValidateEditTests extends RefactoringTest {
 		if (status != null)
 			assertTrue(status.toString(), status.isOK());
 
-		Collection validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
+		Collection<IPath> validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
 		assertEquals(2, validatedEditPaths.size());
 		assertTrue(validatedEditPaths.contains(cu1.getPath())); // moved and changed
 		assertTrue(validatedEditPaths.contains(cu2.getPath())); // replaced
@@ -416,7 +419,7 @@ public class ValidateEditTests extends RefactoringTest {
 		if (status != null)
 			assertTrue(status.toString(), status.isOK());
 
-		Collection validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
+		Collection<IPath> validatedEditPaths= RefactoringTestRepositoryProvider.getValidatedEditPaths(getRoot().getJavaProject().getProject());
 		assertEquals(1, validatedEditPaths.size());
 		assertTrue(validatedEditPaths.contains(cu2.getPath())); // replaced
 	}

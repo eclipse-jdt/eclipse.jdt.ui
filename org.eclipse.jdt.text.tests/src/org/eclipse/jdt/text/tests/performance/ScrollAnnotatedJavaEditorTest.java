@@ -21,7 +21,7 @@ import junit.framework.TestSuite;
  */
 public class ScrollAnnotatedJavaEditorTest extends AbstractScrollAnnotatedJavaEditorTest {
 
-	private static final Class THIS= ScrollAnnotatedJavaEditorTest.class;
+	private static final Class<ScrollAnnotatedJavaEditorTest> THIS= ScrollAnnotatedJavaEditorTest.class;
 
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));

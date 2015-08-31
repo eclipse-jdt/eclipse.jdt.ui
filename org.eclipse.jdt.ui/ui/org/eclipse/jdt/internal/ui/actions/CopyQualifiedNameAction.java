@@ -116,9 +116,6 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.COPY_QUALIFIED_NAME_ACTION);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(canEnable(selection.toArray()));
@@ -176,9 +173,6 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.action.Action#run()
-	 */
 	@Override
 	public void run() {
 
@@ -280,7 +274,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 		if (!(selection instanceof IStructuredSelection))
 			return null;
 
-		List<Object> result= new ArrayList<Object>();
+		List<Object> result= new ArrayList<>();
 		for (Iterator<?> iter= ((IStructuredSelection)selection).iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (isValidElement(element))

@@ -80,7 +80,7 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 		setTitle(title);
 		fWorkingValues= settings;
 		setStatusLineAboveButtons(false);
-		fTabPages= new ArrayList<IModifyDialogTabPage>();
+		fTabPages= new ArrayList<>();
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 	}
 
@@ -159,9 +159,11 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 		applyDialogFont(composite);
 
 		fTabFolder.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				final TabItem tabItem= (TabItem) e.item;
 				final IModifyDialogTabPage page= (IModifyDialogTabPage) tabItem.getData();
@@ -226,9 +228,7 @@ public abstract class CleanUpSelectionDialog extends StatusDialog implements IMo
 		fTabPages.add(tabPage);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void valuesModified() {
 		updateCountLabel();
 		updateStatus(StatusInfo.OK_STATUS);

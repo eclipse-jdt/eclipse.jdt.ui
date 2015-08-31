@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.Path;
 
 public class PathTransformationTests extends TestCase {
 
-	private static final Class clazz= PathTransformationTests.class;
+	private static final Class<PathTransformationTests> clazz= PathTransformationTests.class;
 	public PathTransformationTests(String name) {
 		super(name);
 	}

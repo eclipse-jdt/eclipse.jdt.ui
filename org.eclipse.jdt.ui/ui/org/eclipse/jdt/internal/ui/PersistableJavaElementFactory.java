@@ -52,6 +52,7 @@ public class PersistableJavaElementFactory implements IElementFactory, IPersista
 	/*
 	 * @see IElementFactory
 	 */
+	@Override
 	public IAdaptable createElement(IMemento memento) {
 
 		String identifier= memento.getString(KEY);
@@ -64,12 +65,14 @@ public class PersistableJavaElementFactory implements IElementFactory, IPersista
 	/*
 	 * @see IPersistableElement.
 	 */
+	@Override
 	public String getFactoryId() {
 		return FACTORY_ID;
 	}
 	/*
 	 * @see IPersistableElement
 	 */
+	@Override
 	public void saveState(IMemento memento) {
 		memento.putString(KEY, fElement.getHandleIdentifier());
 	}

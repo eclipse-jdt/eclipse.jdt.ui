@@ -39,10 +39,12 @@ public class JavaElementProperties implements IPropertySource {
 		fSource= source;
 	}
 
+	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		return fgPropertyDescriptors;
 	}
 
+	@Override
 	public Object getPropertyValue(Object name) {
 		if (name.equals(IBasicPropertyConstants.P_TEXT)) {
 			return fSource.getElementName();
@@ -50,17 +52,21 @@ public class JavaElementProperties implements IPropertySource {
 		return null;
 	}
 
+	@Override
 	public void setPropertyValue(Object name, Object value) {
 	}
 
+	@Override
 	public Object getEditableValue() {
 		return this;
 	}
 
+	@Override
 	public boolean isPropertySet(Object property) {
 		return false;
 	}
 
+	@Override
 	public void resetPropertyValue(Object property) {
 	}
 }

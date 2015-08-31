@@ -41,6 +41,7 @@ public class OpenTextEditorStartupTest extends StartupPerformanceTestCase {
 			fTearDown= tearDown;
 		}
 
+		@Override
 		protected void setUp() throws Exception {
 			if (fSetUp) {
 				ResourceTestHelper.copy(ORIG_FILE, FILE);
@@ -49,6 +50,7 @@ public class OpenTextEditorStartupTest extends StartupPerformanceTestCase {
 			}
 		}
 
+		@Override
 		protected void tearDown() throws Exception {
 			if (fTearDown) {
 				EditorTestHelper.closeAllEditors();
@@ -58,7 +60,7 @@ public class OpenTextEditorStartupTest extends StartupPerformanceTestCase {
 		}
 	}
 
-	private static final Class THIS= OpenTextEditorStartupTest.class;
+	private static final Class<OpenTextEditorStartupTest> THIS= OpenTextEditorStartupTest.class;
 
 	private static final String SHORT_NAME= "Eclipse SDK startup with text editor open in Java perspective";
 

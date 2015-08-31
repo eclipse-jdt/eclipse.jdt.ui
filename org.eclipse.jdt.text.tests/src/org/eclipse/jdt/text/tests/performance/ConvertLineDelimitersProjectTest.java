@@ -34,7 +34,7 @@ import org.eclipse.core.filebuffers.manipulation.FileBufferOperationRunner;
  */
 public class ConvertLineDelimitersProjectTest extends TextPerformanceTestCase {
 
-	private static final Class THIS= ConvertLineDelimitersProjectTest.class;
+	private static final Class<ConvertLineDelimitersProjectTest> THIS= ConvertLineDelimitersProjectTest.class;
 
 	private static final int WARM_UP_RUNS= 5;
 
@@ -52,6 +52,7 @@ public class ConvertLineDelimitersProjectTest extends TextPerformanceTestCase {
 		return new DisableAutoBuildTestSetup(new TextPluginTestSetup(new TestSuite(THIS)));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		setWarmUpRuns(WARM_UP_RUNS);

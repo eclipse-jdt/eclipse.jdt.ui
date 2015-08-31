@@ -32,8 +32,8 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 public class LocalTypeAnalyzer extends ASTVisitor {
 
 	private Selection fSelection;
-	private List<AbstractTypeDeclaration> fTypeDeclarationsBefore= new ArrayList<AbstractTypeDeclaration>(2);
-	private List<AbstractTypeDeclaration> fTypeDeclarationsSelected= new ArrayList<AbstractTypeDeclaration>(2);
+	private List<AbstractTypeDeclaration> fTypeDeclarationsBefore= new ArrayList<>(2);
+	private List<AbstractTypeDeclaration> fTypeDeclarationsSelected= new ArrayList<>(2);
 	private String fBeforeTypeReferenced;
 	private String fSelectedTypeReferenced;
 

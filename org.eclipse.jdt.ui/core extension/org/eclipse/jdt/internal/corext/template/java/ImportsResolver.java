@@ -35,9 +35,6 @@ public class ImportsResolver extends TemplateVariableResolver {
 	public ImportsResolver() {
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolve(org.eclipse.jface.text.templates.TemplateVariable, org.eclipse.jface.text.templates.TemplateContext)
-	 */
 	@Override
 	public void resolve(TemplateVariable variable, TemplateContext context) {
 		variable.setUnambiguous(true);
@@ -57,9 +54,6 @@ public class ImportsResolver extends TemplateVariableResolver {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.text.templates.TemplateVariableResolver#resolveAll(org.eclipse.jface.text.templates.TemplateContext)
-	 */
 	@Override
 	protected String[] resolveAll(TemplateContext context) {
 		return new String[0];

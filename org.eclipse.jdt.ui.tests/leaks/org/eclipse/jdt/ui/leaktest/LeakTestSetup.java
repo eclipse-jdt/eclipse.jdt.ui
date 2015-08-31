@@ -30,6 +30,7 @@ public class LeakTestSetup extends TestSetup {
 		}
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		if (fgCurrentSetup != this) {
 			return;
@@ -38,6 +39,7 @@ public class LeakTestSetup extends TestSetup {
 		introManager.closeIntro(introManager.getIntro());
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		if (fgCurrentSetup != this) {
 			return;

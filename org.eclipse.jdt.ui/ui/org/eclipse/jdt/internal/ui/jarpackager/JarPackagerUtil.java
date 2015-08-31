@@ -124,7 +124,7 @@ public final class JarPackagerUtil {
 	public static List<IResource> asResources(Object[] elements) {
 		if (elements == null)
 			return null;
-		List<IResource> selectedResources= new ArrayList<IResource>(elements.length);
+		List<IResource> selectedResources= new ArrayList<>(elements.length);
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];
 			if (element instanceof IJavaElement) {
@@ -169,6 +169,7 @@ public final class JarPackagerUtil {
 			return false;
 		final boolean[] returnValue= new boolean[1];
 		Runnable runnable= new Runnable() {
+			@Override
 			public void run() {
 				returnValue[0]= MessageDialog.openQuestion(parent, title, message);
 			}

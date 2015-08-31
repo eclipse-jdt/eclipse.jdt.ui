@@ -106,7 +106,7 @@ public class JavaSearchScopeFactory {
 		if (workingSets == null || workingSets.length < 1)
 			return EMPTY_SCOPE;
 
-		Set<IJavaElement> javaElements= new HashSet<IJavaElement>(workingSets.length * 10);
+		Set<IJavaElement> javaElements= new HashSet<>(workingSets.length * 10);
 		for (int i= 0; i < workingSets.length; i++) {
 			IWorkingSet workingSet= workingSets[i];
 			if (workingSet.isEmpty() && workingSet.isAggregateWorkingSet()) {
@@ -122,7 +122,7 @@ public class JavaSearchScopeFactory {
 	}
 
 	public IJavaSearchScope createJavaSearchScope(IWorkingSet workingSet, int includeMask) {
-		Set<IJavaElement> javaElements= new HashSet<IJavaElement>(10);
+		Set<IJavaElement> javaElements= new HashSet<>(10);
 		if (workingSet.isEmpty() && workingSet.isAggregateWorkingSet()) {
 			return createWorkspaceScope(includeMask);
 		}
@@ -137,7 +137,7 @@ public class JavaSearchScopeFactory {
 	public IJavaSearchScope createJavaSearchScope(IResource[] resources, int includeMask) {
 		if (resources == null)
 			return EMPTY_SCOPE;
-		Set<IJavaElement> javaElements= new HashSet<IJavaElement>(resources.length);
+		Set<IJavaElement> javaElements= new HashSet<>(resources.length);
 		addJavaElements(javaElements, resources);
 		return createJavaSearchScope(javaElements, includeMask);
 	}
@@ -155,7 +155,7 @@ public class JavaSearchScopeFactory {
 	}
 
 	public IJavaSearchScope createJavaProjectSearchScope(String[] projectNames, int includeMask) {
-		ArrayList<IJavaElement> res= new ArrayList<IJavaElement>();
+		ArrayList<IJavaElement> res= new ArrayList<>();
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		for (int i= 0; i < projectNames.length; i++) {
 			IJavaProject project= JavaCore.create(root.getProject(projectNames[i]));
@@ -285,7 +285,7 @@ public class JavaSearchScopeFactory {
 
 	public IProject[] getProjects(IJavaSearchScope scope) {
 		IPath[] paths= scope.enclosingProjectsAndJars();
-		HashSet<IResource> temp= new HashSet<IResource>();
+		HashSet<IResource> temp= new HashSet<>();
 		for (int i= 0; i < paths.length; i++) {
 			IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(paths[i]);
 			if (resource != null && resource.getType() == IResource.PROJECT)
@@ -306,7 +306,7 @@ public class JavaSearchScopeFactory {
 		if (elements.length == 0)
 			return new IJavaElement[0];
 
-		Set<IJavaElement> result= new HashSet<IJavaElement>(elements.length);
+		Set<IJavaElement> result= new HashSet<>(elements.length);
 		for (int i= 0; i < elements.length; i++) {
 			Object selectedElement= elements[i];
 			if (selectedElement instanceof IJavaElement) {

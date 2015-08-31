@@ -100,6 +100,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 	/*
 	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();

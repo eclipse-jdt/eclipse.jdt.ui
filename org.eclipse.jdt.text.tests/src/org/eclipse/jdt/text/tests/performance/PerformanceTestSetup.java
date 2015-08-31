@@ -51,6 +51,7 @@ public class PerformanceTestSetup extends TestSetup {
 	/*
 	 * @see junit.extensions.TestSetup#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		EditorTestHelper.showView(EditorTestHelper.INTRO_VIEW_ID, false);
 
@@ -71,6 +72,7 @@ public class PerformanceTestSetup extends TestSetup {
 	/*
 	 * @see junit.extensions.TestSetup#tearDown()
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		// do nothing, the set up workspace will be used by other tests (see test.xml)
 	}

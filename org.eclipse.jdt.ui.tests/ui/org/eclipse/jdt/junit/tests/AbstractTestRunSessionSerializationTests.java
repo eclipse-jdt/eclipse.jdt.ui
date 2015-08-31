@@ -68,6 +68,7 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		final SerializationResult result= new SerializationResult();
 
 		TestRunListener testRunListener= new TestRunListener() {
+			@Override
 			public void sessionFinished(ITestRunSession session) {
 				assertNotNull(session);
 				result.fTestRunSession= (TestRunSession) session;
@@ -78,6 +79,7 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		try {
 			new AbstractTestRunListenerTest().launchJUnit(elementToLaunch, (String) null);
 			assertTrue(new DisplayHelper(){
+				@Override
 				protected boolean condition() {
 					return result.fTestRunSession != null;
 				}

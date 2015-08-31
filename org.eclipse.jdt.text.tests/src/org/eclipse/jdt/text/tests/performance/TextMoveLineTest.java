@@ -21,12 +21,13 @@ import junit.framework.TestSuite;
  */
 public class TextMoveLineTest extends MoveLineTest {
 
-	private static final Class THIS= TextMoveLineTest.class;
+	private static final Class<TextMoveLineTest> THIS= TextMoveLineTest.class;
 
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected String getEditorId() {
 		return EditorTestHelper.TEXT_EDITOR_ID;
 	}

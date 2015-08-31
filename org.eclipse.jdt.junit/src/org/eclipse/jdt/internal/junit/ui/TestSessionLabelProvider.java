@@ -55,6 +55,7 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 		timeFormat.setMinimumIntegerDigits(1);
 	}
 
+	@Override
 	public StyledString getStyledText(Object element) {
 		String label= getSimpleLabel(element);
 		if (label == null) {

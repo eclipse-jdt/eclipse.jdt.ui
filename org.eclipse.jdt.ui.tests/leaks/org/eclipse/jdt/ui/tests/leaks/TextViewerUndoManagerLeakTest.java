@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,9 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.leaks;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
@@ -29,6 +26,9 @@ import org.eclipse.jface.text.TextViewerUndoManager;
 
 import org.eclipse.jdt.ui.leaktest.LeakTestCase;
 import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests for leaks in TextViewerUndoManager.
@@ -61,6 +61,7 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 	/*
 	 *  @see TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() {
 		fShell= new Shell();
 		fUndoManager= new TextViewerUndoManager(MAX_UNDO_LEVEL);
@@ -103,7 +104,7 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 		assertInstanceCount(types, expected);
 	}
 
-	private Class getSharedUndoManagersInnerClass(String className) {
+	private Class<?> getSharedUndoManagersInnerClass(String className) {
 		try {
 			return Class.forName("org.eclipse.jface.text.TextViewerUndoManager$" + className, true, getClass().getClassLoader());
 		} catch (ClassNotFoundException e) {
@@ -112,7 +113,7 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 		}
 	}
 
-	private Class getDocumentUndoManagersInnerClass(String className) {
+	private Class<?> getDocumentUndoManagersInnerClass(String className) {
 		try {
 			return Class.forName("org.eclipse.text.undo.DocumentUndoManager$" + className, true, getClass().getClassLoader());
 		} catch (ClassNotFoundException e) {

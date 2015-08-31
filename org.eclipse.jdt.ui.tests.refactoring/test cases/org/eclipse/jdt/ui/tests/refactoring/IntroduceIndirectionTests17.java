@@ -14,7 +14,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 
 public class IntroduceIndirectionTests17 extends IntroduceIndirectionTests{
-	private static final Class clazz= IntroduceIndirectionTests17.class;
+	private static final Class<IntroduceIndirectionTests17> clazz= IntroduceIndirectionTests17.class;
 
 	public IntroduceIndirectionTests17(String name) {
 		super(name);

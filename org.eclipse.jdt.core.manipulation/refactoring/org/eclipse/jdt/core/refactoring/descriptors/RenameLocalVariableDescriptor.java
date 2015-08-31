@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.JavaRefactoringDesc
  *
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
+@Deprecated
 public final class RenameLocalVariableDescriptor extends JavaRefactoringDescriptor {
 
 	/** The name attribute */
@@ -59,13 +60,12 @@ public final class RenameLocalVariableDescriptor extends JavaRefactoringDescript
 	 * Creates a new refactoring descriptor.
 	 * @deprecated merged into {@link RenameJavaElementDescriptor}
 	 */
+	@Deprecated
 	public RenameLocalVariableDescriptor() {
 		super(IJavaRefactorings.RENAME_LOCAL_VARIABLE);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	protected void populateArgumentMap() {
 		super.populateArgumentMap();
 		JavaRefactoringDescriptorUtil.setString(fArguments, ATTRIBUTE_NAME, fName);
@@ -123,9 +123,7 @@ public final class RenameLocalVariableDescriptor extends JavaRefactoringDescript
 		fReferences= update;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public RefactoringStatus validateDescriptor() {
 		RefactoringStatus status= super.validateDescriptor();
 		if (fName == null || "".equals(fName)) //$NON-NLS-1$

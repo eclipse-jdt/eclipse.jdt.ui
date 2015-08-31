@@ -54,25 +54,16 @@ public final class LoggedCreateTargetChange extends ResourceChange {
 		fQueries= queries;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected IResource getModifiedResource() {
 		return null;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getName() {
 		return RefactoringCoreMessages.LoggedCreateTargetChange_change_name;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public RefactoringStatus isValid(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		if (fSelection instanceof IJavaElement) {
@@ -87,9 +78,6 @@ public final class LoggedCreateTargetChange extends ResourceChange {
 		return new RefactoringStatus();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Change perform(IProgressMonitor monitor) throws CoreException {
 		fQueries.createNewPackageQuery().getCreatedTarget(fSelection);

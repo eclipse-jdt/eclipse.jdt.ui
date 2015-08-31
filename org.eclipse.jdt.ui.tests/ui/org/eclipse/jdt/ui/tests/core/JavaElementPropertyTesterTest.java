@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.core.manipulation.JavaElementPropertyTester;
 
 public class JavaElementPropertyTesterTest extends TestCase {
 
-	private static final Class THIS= JavaElementPropertyTesterTest.class;
+	private static final Class<JavaElementPropertyTesterTest> THIS= JavaElementPropertyTesterTest.class;
 
 	private IJavaProject fJProject1;
 	private IJavaProject fOtherProject,  fOtherClosedProject;
@@ -68,6 +68,7 @@ public class JavaElementPropertyTesterTest extends TestCase {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
 		fOtherProject= JavaCore.create(createSimpleProject("SimpleProject", true));
 		fOtherClosedProject= JavaCore.create(createSimpleProject("SimpleProject", false));
@@ -93,6 +94,7 @@ public class JavaElementPropertyTesterTest extends TestCase {
 		fFolder= fJProject1.getPackageFragmentRoot(folder);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 		fOtherProject.getProject().delete(true, null);

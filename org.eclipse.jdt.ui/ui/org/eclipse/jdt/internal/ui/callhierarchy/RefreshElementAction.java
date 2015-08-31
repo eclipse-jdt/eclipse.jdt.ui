@@ -61,7 +61,7 @@ public class RefreshElementAction extends Action {
 			fViewer.getPart().refresh();
 			return;
 		}
-		List<MethodWrapper> toExpand= new ArrayList<MethodWrapper>();
+		List<MethodWrapper> toExpand= new ArrayList<>();
 		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			MethodWrapper element= (MethodWrapper)iter.next();
 			boolean isExpanded= fViewer.getExpandedState(element);

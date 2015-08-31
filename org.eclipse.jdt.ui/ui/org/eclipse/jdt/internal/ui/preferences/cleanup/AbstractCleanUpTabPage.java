@@ -41,12 +41,14 @@ public abstract class AbstractCleanUpTabPage extends CleanUpTabPage {
 	/* 
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage#setOptions(org.eclipse.jdt.internal.ui.fix.CleanUpOptions)
 	 */
+	@Override
 	public void setOptions(CleanUpOptions options) {
 	}
 
 	/* 
 	 * @see org.eclipse.jdt.internal.ui.preferences.cleanup.ICleanUpTabPage#getPreview()
 	 */
+	@Override
 	public String getPreview() {
 		if (fPreviewCleanUps == null) {
 			fPreviewCleanUps= createPreviewCleanUps(fValues);

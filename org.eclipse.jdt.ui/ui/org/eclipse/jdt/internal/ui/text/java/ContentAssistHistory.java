@@ -314,7 +314,7 @@ public final class ContentAssistHistory {
 			if (fHistory == null)
 				return Collections.emptyList();
 			if (fList == null) {
-				fList= Collections.unmodifiableList(new ArrayList<String>(fHistory.keySet()));
+				fList= Collections.unmodifiableList(new ArrayList<>(fHistory.keySet()));
 			}
 			return fList;
 		}
@@ -326,7 +326,7 @@ public final class ContentAssistHistory {
 
 	private static final Set<String> UNCACHEABLE;
 	static {
-		Set<String> uncacheable= new HashSet<String>();
+		Set<String> uncacheable= new HashSet<>();
 		uncacheable.add("java.lang.Object"); //$NON-NLS-1$
 		uncacheable.add("java.lang.Comparable"); //$NON-NLS-1$
 		uncacheable.add("java.io.Serializable"); //$NON-NLS-1$
@@ -349,7 +349,7 @@ public final class ContentAssistHistory {
 		Assert.isLegal(maxRHS > 0);
 		fMaxLHS= maxLHS;
 		fMaxRHS= maxRHS;
-		fLHSCache= new MRUMap<String, MRUSet<String>>(fMaxLHS);
+		fLHSCache= new MRUMap<>(fMaxLHS);
 	}
 
 	/**
@@ -400,7 +400,7 @@ public final class ContentAssistHistory {
 		MRUSet<String> rhsCache= fLHSCache.get(lhs);
 		if (rhsCache != null) {
 			int count= rhsCache.size();
-			LinkedHashMap<String, Integer> history= new LinkedHashMap<String, Integer>((int) (count / 0.75));
+			LinkedHashMap<String, Integer> history= new LinkedHashMap<>((int) (count / 0.75));
 			int rank= 1;
 			for (Iterator<String> it= rhsCache.iterator(); it.hasNext(); rank++) {
 				String type= it.next();
@@ -418,7 +418,7 @@ public final class ContentAssistHistory {
 	 * @return the set of remembered right hand sides ordered by least recent selection
 	 */
 	public Map<String, RHSHistory> getEntireHistory() {
-		HashMap<String, RHSHistory> map= new HashMap<String, RHSHistory>((int) (fLHSCache.size() / 0.75));
+		HashMap<String, RHSHistory> map= new HashMap<>((int) (fLHSCache.size() / 0.75));
 		for ( Iterator<Entry<String, MRUSet<String>>> it= fLHSCache.entrySet().iterator(); it.hasNext();) {
 			Entry<String, MRUSet<String>> entry= it.next();
 			String lhs= entry.getKey();
@@ -444,7 +444,7 @@ public final class ContentAssistHistory {
 	private Set<String> getCache(String lhs) {
 		MRUSet<String> rhsCache= fLHSCache.get(lhs);
 		if (rhsCache == null) {
-			rhsCache= new MRUSet<String>(fMaxRHS);
+			rhsCache= new MRUSet<>(fMaxRHS);
 			fLHSCache.put(lhs, rhsCache);
 		}
 

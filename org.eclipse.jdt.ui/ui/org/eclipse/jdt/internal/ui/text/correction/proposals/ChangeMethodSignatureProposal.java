@@ -141,7 +141,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	private void modifyParameters(ASTRewrite rewrite, MethodDeclaration methodDecl) {
 		AST ast= methodDecl.getAST();
 
-		ArrayList<String> usedNames= new ArrayList<String>();
+		ArrayList<String> usedNames= new ArrayList<>();
 		boolean hasCreatedVariables= false;
 
 		IVariableBinding[] declaredFields= fSenderBinding.getDeclaringClass().getDeclaredFields();
@@ -349,7 +349,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	}
 
 	private TagElement insertParamTag(ListRewrite tagRewriter, List<SingleVariableDeclaration> parameters, int currentIndex, TagElement newTagElement) {
-		HashSet<String> previousNames= new HashSet<String>();
+		HashSet<String> previousNames= new HashSet<>();
 		for (int n = 0; n < currentIndex; n++) {
 			SingleVariableDeclaration var= parameters.get(n);
 			previousNames.add(var.getName().getIdentifier());
@@ -463,7 +463,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	}
 
 	private TagElement insertThrowsTag(ListRewrite tagRewriter, List<Type> exceptions, int currentIndex, TagElement newTagElement) {
-		HashSet<String> previousNames= new HashSet<String>();
+		HashSet<String> previousNames= new HashSet<>();
 		for (int n = 0; n < currentIndex; n++) {
 			Type curr= exceptions.get(n);
 			previousNames.add(ASTNodes.getTypeName(curr));

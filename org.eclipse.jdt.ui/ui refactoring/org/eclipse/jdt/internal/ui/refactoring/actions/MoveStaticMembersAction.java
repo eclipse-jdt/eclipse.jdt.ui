@@ -128,7 +128,7 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 			if (! (iterator.next() instanceof IMember))
 				return null;
 		}
-		Set<IMember> memberSet= new HashSet<IMember>();
+		Set<IMember> memberSet= new HashSet<>();
 		@SuppressWarnings("unchecked")
 		List<IMember> selectionList= (List<IMember>) (List<?>) Arrays.asList(selection.toArray());
 		memberSet.addAll(selectionList);

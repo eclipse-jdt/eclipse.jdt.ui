@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,16 +29,15 @@ import org.eclipse.core.resources.mapping.ModelProvider;
 
 public class TestModelProvider extends ModelProvider {
 
-	private static class Sorter implements Comparator {
-		public int compare(Object o1, Object o2) {
-			IResourceDelta d1= (IResourceDelta) o1;
-			IResourceDelta d2= (IResourceDelta) o2;
+	private static class Sorter implements Comparator<IResourceDelta> {
+		@Override
+		public int compare(IResourceDelta d1, IResourceDelta d2) {
 			return d1.getResource().getFullPath().toPortableString().compareTo(
 				d2.getResource().getFullPath().toPortableString());
 		}
 	}
 
-	private static final Comparator COMPARATOR= new Sorter();
+	private static final Comparator<IResourceDelta> COMPARATOR= new Sorter();
 
 	public static IResourceDelta LAST_DELTA;
 	public static boolean IS_COPY_TEST;
@@ -50,6 +49,7 @@ public class TestModelProvider extends ModelProvider {
 		LAST_DELTA= null;
 	}
 
+	@Override
 	public IStatus validateChange(IResourceDelta delta, IProgressMonitor pm) {
 		LAST_DELTA= delta;
 		return super.validateChange(delta, pm);
@@ -192,7 +192,7 @@ public class TestModelProvider extends ModelProvider {
 	}
 
 	private static IResourceDelta[] getExpectedChildren(IResourceDelta delta) {
-		List result= new ArrayList();
+		List<IResourceDelta> result= new ArrayList<>();
 		IResourceDelta[] children= delta.getAffectedChildren();
 		for (int i= 0; i < children.length; i++) {
 			IResourceDelta child= children[i];
@@ -208,7 +208,7 @@ public class TestModelProvider extends ModelProvider {
 				}
 			}
 		}
-		return (IResourceDelta[]) result.toArray(new IResourceDelta[result.size()]);
+		return result.toArray(new IResourceDelta[result.size()]);
 	}
 
 	private static boolean isIgnorable(IResource resource) {
@@ -219,7 +219,7 @@ public class TestModelProvider extends ModelProvider {
 	}
 
 	private static IResourceDelta[] getActualChildren(IResourceDelta delta, IResourceDelta[] expectedChildren) {
-		List result= new ArrayList();
+		List<IResourceDelta> result= new ArrayList<>();
 		if (!IS_COPY_TEST) {
 			IResourceDelta[] children= delta.getAffectedChildren();
 			for (int i= 0; i < children.length; i++) {
@@ -243,7 +243,7 @@ public class TestModelProvider extends ModelProvider {
 				}
 			}
 		}
-		return (IResourceDelta[]) result.toArray(new IResourceDelta[result.size()]);
+		return result.toArray(new IResourceDelta[result.size()]);
 	}
 
 	private static boolean contains(IResourceDelta[] expectedChildren, IResourceDelta actualDelta) {
@@ -273,6 +273,7 @@ public class TestModelProvider extends ModelProvider {
 	private static void assertCopySource(IResourceDelta delta) {
 		try {
 			delta.accept(new IResourceDeltaVisitor() {
+				@Override
 				public boolean visit(IResourceDelta d) throws CoreException {
 					Assert.assertTrue("Not a copy delta", (d.getKind() & ~IResourceDelta.CHANGED) == 0);
 					return true;

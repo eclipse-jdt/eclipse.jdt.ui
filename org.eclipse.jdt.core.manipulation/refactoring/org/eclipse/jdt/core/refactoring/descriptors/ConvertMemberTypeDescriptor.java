@@ -64,7 +64,7 @@ public final class ConvertMemberTypeDescriptor extends JavaRefactoringDescriptor
 	 *
 	 * @since 1.2
 	 */
-	public ConvertMemberTypeDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public ConvertMemberTypeDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.CONVERT_MEMBER_TYPE, project, description, comment, arguments, flags);
 	}
 

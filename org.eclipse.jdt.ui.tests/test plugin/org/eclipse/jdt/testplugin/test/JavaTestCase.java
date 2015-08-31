@@ -45,6 +45,7 @@ public class JavaTestCase extends TestCase {
 	 * 
 	 * @throws Exception in case of any problem
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("HelloWorldProject", "bin");
 
@@ -62,6 +63,7 @@ public class JavaTestCase extends TestCase {
 	 * 
 	 * @throws Exception in case of any problem
 	 */
+	@Override
 	protected void tearDown () throws Exception {
 		JavaProjectHelper.delete(fJavaProject);
 	}

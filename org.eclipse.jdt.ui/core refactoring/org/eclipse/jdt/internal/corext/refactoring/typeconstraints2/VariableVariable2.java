@@ -31,10 +31,12 @@ public final class VariableVariable2 extends ConstraintVariable2 implements ISou
 		fKey= binding.getKey();
 	}
 
+	@Override
 	public void setCompilationUnit(ICompilationUnit unit) {
 		fCompilationUnit= unit;
 	}
 
+	@Override
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}

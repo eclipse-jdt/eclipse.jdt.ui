@@ -29,11 +29,13 @@ public class DisableAutoBuildTestSetup extends TestSetup {
 		super(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fWasAutobuilding= CoreUtility.setAutoBuilding(false);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		if (fWasAutobuilding) {
 			ResourceTestHelper.fullBuild();

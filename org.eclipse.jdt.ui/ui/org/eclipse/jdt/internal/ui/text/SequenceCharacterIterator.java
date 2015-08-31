@@ -78,6 +78,7 @@ public class SequenceCharacterIterator implements CharacterIterator {
 	/*
 	 * @see java.text.CharacterIterator#first()
 	 */
+	@Override
 	public char first() {
 		return setIndex(getBeginIndex());
 	}
@@ -85,6 +86,7 @@ public class SequenceCharacterIterator implements CharacterIterator {
 	/*
 	 * @see java.text.CharacterIterator#last()
 	 */
+	@Override
 	public char last() {
 		if (fFirst == fLast)
 			return setIndex(getEndIndex());
@@ -95,6 +97,7 @@ public class SequenceCharacterIterator implements CharacterIterator {
 	/*
 	 * @see java.text.CharacterIterator#current()
 	 */
+	@Override
 	public char current() {
 		if (fIndex >= fFirst && fIndex < fLast)
 			return fSequence.charAt(fIndex);
@@ -105,6 +108,7 @@ public class SequenceCharacterIterator implements CharacterIterator {
 	/*
 	 * @see java.text.CharacterIterator#next()
 	 */
+	@Override
 	public char next() {
 		return setIndex(Math.min(fIndex + 1, getEndIndex()));
 	}
@@ -112,6 +116,7 @@ public class SequenceCharacterIterator implements CharacterIterator {
 	/*
 	 * @see java.text.CharacterIterator#previous()
 	 */
+	@Override
 	public char previous() {
 		if (fIndex > getBeginIndex()) {
 			return setIndex(fIndex - 1);
@@ -123,6 +128,7 @@ public class SequenceCharacterIterator implements CharacterIterator {
 	/*
 	 * @see java.text.CharacterIterator#setIndex(int)
 	 */
+	@Override
 	public char setIndex(int position) {
 		if (position >= getBeginIndex() && position <= getEndIndex())
 			fIndex= position;
@@ -136,6 +142,7 @@ public class SequenceCharacterIterator implements CharacterIterator {
 	/*
 	 * @see java.text.CharacterIterator#getBeginIndex()
 	 */
+	@Override
 	public int getBeginIndex() {
 		return fFirst;
 	}
@@ -143,6 +150,7 @@ public class SequenceCharacterIterator implements CharacterIterator {
 	/*
 	 * @see java.text.CharacterIterator#getEndIndex()
 	 */
+	@Override
 	public int getEndIndex() {
 		return fLast;
 	}
@@ -150,6 +158,7 @@ public class SequenceCharacterIterator implements CharacterIterator {
 	/*
 	 * @see java.text.CharacterIterator#getIndex()
 	 */
+	@Override
 	public int getIndex() {
 		return fIndex;
 	}

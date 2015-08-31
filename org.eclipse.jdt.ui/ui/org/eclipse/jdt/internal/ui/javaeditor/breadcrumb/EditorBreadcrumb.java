@@ -144,6 +144,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	 */
 	protected abstract void deactivateBreadcrumb();
 
+	@Override
 	public ISelectionProvider getSelectionProvider() {
 		return fBreadcrumbViewer;
 	}
@@ -155,6 +156,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IBreadcrumb#setInput(java.lang.Object)
 	 */
+	@Override
 	public void setInput(Object element) {
 		if (element == null)
 			return;
@@ -172,6 +174,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IBreadcrumb#setFocus()
 	 */
+	@Override
 	public void activate() {
 		if (fBreadcrumbViewer.getSelection().isEmpty())
 			fBreadcrumbViewer.setSelection(new StructuredSelection(fBreadcrumbViewer.getInput()));
@@ -181,6 +184,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.breadcrumb.IBreadcrumb#isActive()
 	 */
+	@Override
 	public boolean isActive() {
 		return fIsActive;
 	}
@@ -188,6 +192,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IBreadcrumb#createContent(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public Control createContent(Composite parent) {
 		Assert.isTrue(fComposite == null, "Content must only be created once."); //$NON-NLS-1$
 
@@ -204,6 +209,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		fComposite.setLayout(gridLayout);
 
 		fDisplayFocusListener= new Listener() {
+			@Override
 			public void handleEvent(Event event) {
 				if (isBreadcrumbEvent(event)) {
 					if (fHasFocus)
@@ -234,6 +240,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		fBreadcrumbViewer.getControl().setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 
 		fBreadcrumbViewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				Object element= ((IStructuredSelection) event.getSelection()).getFirstElement();
 				if (element == null)
@@ -250,12 +257,14 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		});
 
 		fBreadcrumbViewer.addOpenListener(new IOpenListener() {
+			@Override
 			public void open(OpenEvent event) {
 				doRevealOrOpen(event.getSelection());
 			}
 		});
 
 		fBreadcrumbViewer.addMenuDetectListener(new MenuDetectListener() {
+			@Override
 			public void menuDetected(MenuDetectEvent event) {
 				ISelectionProvider selectionProvider;
 				if (fBreadcrumbViewer.isDropDownOpen()) {
@@ -292,6 +301,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		});
 
 		fPropertyChangeListener= new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (ACTIVE_TAB_BG_END.equals(event.getProperty())) {
 					if (fComposite.isFocusControl()) {
@@ -308,6 +318,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IEditorViewPart#dispose()
 	 */
+	@Override
 	public void dispose() {
 		if (fPropertyChangeListener != null) {
 			JFaceResources.getColorRegistry().removeListener(fPropertyChangeListener);
@@ -420,6 +431,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 		deinstallDisplayListeners();
 
 		fDisplayKeyListener= new Listener() {
+			@Override
 			public void handleEvent(Event event) {
 				if (event.keyCode != SWT.ESC)
 					return;
@@ -487,6 +499,7 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 
 		fPartListener= new IPartListener() {
 
+			@Override
 			public void partActivated(IWorkbenchPart part) {
 				if (part == fTextEditor && fHasFocus) {
 					//focus-in event comes before part activation and the
@@ -496,19 +509,23 @@ public abstract class EditorBreadcrumb implements IBreadcrumb {
 				}
 			}
 
+			@Override
 			public void partBroughtToTop(IWorkbenchPart part) {
 			}
 
+			@Override
 			public void partClosed(IWorkbenchPart part) {
 
 			}
 
+			@Override
 			public void partDeactivated(IWorkbenchPart part) {
 				if (part == fTextEditor && fHasFocus) {
 					focusLost();
 				}
 			}
 
+			@Override
 			public void partOpened(IWorkbenchPart part) {
 			}
 

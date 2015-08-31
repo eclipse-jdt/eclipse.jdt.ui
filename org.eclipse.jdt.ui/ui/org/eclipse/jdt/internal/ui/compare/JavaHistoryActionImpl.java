@@ -213,6 +213,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		}
 
 		IRunnableWithProgress r= new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
 					textFileBuffer.commit(pm, false);

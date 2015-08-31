@@ -330,8 +330,8 @@ public final class CompletionProposalCategory {
 	 */
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, String partition, SubProgressMonitor monitor) {
 		fLastError= null;
-		List<ICompletionProposal> result= new ArrayList<ICompletionProposal>();
-		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<CompletionProposalComputerDescriptor>(fRegistry.getProposalComputerDescriptors(partition));
+		List<ICompletionProposal> result= new ArrayList<>();
+		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<>(fRegistry.getProposalComputerDescriptors(partition));
 		for (CompletionProposalComputerDescriptor desc : descriptors) {
 			if (desc.getCategory() == this)
 				result.addAll(desc.computeCompletionProposals(context, monitor));
@@ -354,8 +354,8 @@ public final class CompletionProposalCategory {
 	 */
 	public List<IContextInformation> computeContextInformation(ContentAssistInvocationContext context, String partition, SubProgressMonitor monitor) {
 		fLastError= null;
-		List<IContextInformation> result= new ArrayList<IContextInformation>();
-		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<CompletionProposalComputerDescriptor>(fRegistry.getProposalComputerDescriptors(partition));
+		List<IContextInformation> result= new ArrayList<>();
+		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<>(fRegistry.getProposalComputerDescriptors(partition));
 		for (CompletionProposalComputerDescriptor desc : descriptors) {
 			if (desc.getCategory() == this && (isIncluded() || isSeparateCommand()))
 				result.addAll(desc.computeContextInformation(context, monitor));
@@ -378,7 +378,7 @@ public final class CompletionProposalCategory {
 	 * Notifies the computers in this category of a proposal computation session start.
 	 */
 	public void sessionStarted() {
-		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<CompletionProposalComputerDescriptor>(fRegistry.getProposalComputerDescriptors());
+		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<>(fRegistry.getProposalComputerDescriptors());
 		for (CompletionProposalComputerDescriptor desc : descriptors) {
 			if (desc.getCategory() == this) {
 				desc.sessionStarted();
@@ -394,7 +394,7 @@ public final class CompletionProposalCategory {
 	 */
 	public void sessionEnded() {
 		fNeedsSortingAfterFiltering= false;
-		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<CompletionProposalComputerDescriptor>(fRegistry.getProposalComputerDescriptors());
+		List<CompletionProposalComputerDescriptor> descriptors= new ArrayList<>(fRegistry.getProposalComputerDescriptors());
 		for (CompletionProposalComputerDescriptor desc : descriptors) {
 			if (desc.getCategory() == this)
 				desc.sessionEnded();

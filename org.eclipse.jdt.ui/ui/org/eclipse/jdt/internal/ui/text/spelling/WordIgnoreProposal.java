@@ -60,6 +60,7 @@ public class WordIgnoreProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public final void apply(final IDocument document) {
 
 		final ISpellCheckEngine engine= SpellCheckEngine.getInstance();
@@ -76,6 +77,7 @@ public class WordIgnoreProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
+	@Override
 	public String getAdditionalProposalInfo() {
 		return Messages.format(JavaUIMessages.Spelling_ignore_info, new String[] { WordCorrectionProposal.getHtmlRepresentation(fWord)});
 	}
@@ -83,6 +85,7 @@ public class WordIgnoreProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getContextInformation()
 	 */
+	@Override
 	public final IContextInformation getContextInformation() {
 		return null;
 	}
@@ -90,6 +93,7 @@ public class WordIgnoreProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
 	 */
+	@Override
 	public String getDisplayString() {
 		return Messages.format(JavaUIMessages.Spelling_ignore_label, new String[] { fWord });
 	}
@@ -97,12 +101,14 @@ public class WordIgnoreProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
 	 */
+	@Override
 	public Image getImage() {
 		return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
 	}
 	/*
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
 	 */
+	@Override
 	public final int getRelevance() {
 		return IProposalRelevance.WORD_IGNORE;
 	}
@@ -110,6 +116,7 @@ public class WordIgnoreProposal implements IJavaCompletionProposal {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getSelection(org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public final Point getSelection(final IDocument document) {
 		return new Point(fContext.getOffset(), fContext.getLength());
 	}

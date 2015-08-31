@@ -92,18 +92,22 @@ public class TestChangeMethodSignaturParticipant extends ChangeMethodSignaturePa
 	public TestChangeMethodSignaturParticipant() {
 	}
 
+	@Override
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) throws OperationCanceledException {
 		return new RefactoringStatus();
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		return null;
 	}
 
+	@Override
 	public String getName() {
 		return getClass().getName();
 	}
 
+	@Override
 	protected boolean initialize(Object element) {
 		fgInstance= this;
 		fElement= element;

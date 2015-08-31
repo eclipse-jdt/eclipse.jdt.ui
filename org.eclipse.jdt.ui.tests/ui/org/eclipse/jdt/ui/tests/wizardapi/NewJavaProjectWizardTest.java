@@ -55,6 +55,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		/**
 		 * @see NewJavaProjectWizardPage#getLocationPath()
 		 */
+		@Override
 		protected IPath getLocationPath() {
 			return null;
 		}
@@ -62,6 +63,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 		/**
 		 * @see NewJavaProjectWizardPage#getProjectHandle()
 		 */
+		@Override
 		protected IProject getProjectHandle() {
 			return fNewProject;
 		}
@@ -86,6 +88,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 	/**
 	 * @see TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -100,6 +103,7 @@ public class NewJavaProjectWizardTest extends TestCase {
 	/**
 	 * @see TestCase#tearDown()
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		IProject project= root.getProject(PROJECT_NAME);

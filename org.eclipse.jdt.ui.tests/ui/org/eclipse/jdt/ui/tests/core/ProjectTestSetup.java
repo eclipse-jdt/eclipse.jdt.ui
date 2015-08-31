@@ -56,9 +56,7 @@ public class ProjectTestSetup extends TestSetup {
 		super(test);
 	}
 
-	/* (non-Javadoc)
-	 * @see junit.extensions.TestSetup#setUp()
-	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -86,6 +84,7 @@ public class ProjectTestSetup extends TestSetup {
 		return javaProject;
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		if (fJProject != null) {
 			JavaProjectHelper.delete(fJProject);

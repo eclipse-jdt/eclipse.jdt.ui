@@ -54,6 +54,7 @@ public final class JavaDocScanner extends JavaCommentScanner {
 		/**
 		 * @see IWordDetector#isWordStart(char)
 		 */
+		@Override
 		public boolean isWordStart(char c) {
 			return (c == '<' || c == '-');
 		}
@@ -61,6 +62,7 @@ public final class JavaDocScanner extends JavaCommentScanner {
 		/**
 		 * @see IWordDetector#isWordPart(char)
 		 */
+		@Override
 		public boolean isWordPart(char c) {
 			return (c == '-' || c == '!' || c == '>');
 		}
@@ -156,7 +158,7 @@ public final class JavaDocScanner extends JavaCommentScanner {
 	@Override
 	protected List<IRule> createRules() {
 
-		List<IRule> list= new ArrayList<IRule>();
+		List<IRule> list= new ArrayList<>();
 
 		// Add rule for tags
 		Token token= getToken(IJavaColorConstants.JAVADOC_TAG);

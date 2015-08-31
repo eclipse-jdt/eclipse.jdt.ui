@@ -30,9 +30,6 @@ public class TypeNameMatchCollector extends TypeNameMatchRequestor {
 		return ! TypeFilter.isFiltered(match);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.core.search.TypeNameMatchRequestor#acceptTypeNameMatch(org.eclipse.jdt.core.search.TypeNameMatch)
-	 */
 	@Override
 	public void acceptTypeNameMatch(TypeNameMatch match) {
 		if (inScope(match)) {

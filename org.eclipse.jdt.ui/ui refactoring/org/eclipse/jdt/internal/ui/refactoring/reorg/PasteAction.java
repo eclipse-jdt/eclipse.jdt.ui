@@ -197,9 +197,6 @@ public class PasteAction extends SelectionDispatchAction{
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.PASTE_ACTION);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		// Moved condition checking to run (see http://bugs.eclipse.org/bugs/show_bug.cgi?id=78450)
@@ -208,7 +205,7 @@ public class PasteAction extends SelectionDispatchAction{
 	private Paster[] createEnabledPasters(TransferData[] availableDataTypes, Clipboard clipboard) {
 		Paster paster;
 		Shell shell = getShell();
-		List<Paster> result= new ArrayList<Paster>(2);
+		List<Paster> result= new ArrayList<>(2);
 		paster= new ProjectPaster(shell, clipboard);
 		if (paster.canEnable(availableDataTypes))
 			result.add(paster);
@@ -239,6 +236,7 @@ public class PasteAction extends SelectionDispatchAction{
 		//see bug 33028 for explanation why we need this
 		final Object[] result= new Object[1];
 		shell.getDisplay().syncExec(new Runnable() {
+			@Override
 			public void run() {
 				result[0]= clipboard.getContents(transfer);
 			}
@@ -414,7 +412,7 @@ public class PasteAction extends SelectionDispatchAction{
 					packageName= pack.getName().getFullyQualifiedName();
 				}
 
-				ArrayList<ParsedCu> cus= new ArrayList<ParsedCu>();
+				ArrayList<ParsedCu> cus= new ArrayList<>();
 				List<AbstractTypeDeclaration> types= unit.types();
 
 				int startOffset= 0;
@@ -509,18 +507,23 @@ public class PasteAction extends SelectionDispatchAction{
 			final String text= getClipboardText(fAvailableTypes);
 			
 			IStorage storage= new IEncodedStorage() {
+				@Override
 				public <T> T getAdapter(Class<T> adapter) {
 					return null;
 				}
+				@Override
 				public boolean isReadOnly() {
 					return false;
 				}
+				@Override
 				public String getName() {
 					return null;
 				}
+				@Override
 				public IPath getFullPath() {
 					return null;
 				}
+				@Override
 				public InputStream getContents() throws CoreException {
 					try {
 						return new ByteArrayInputStream(text.getBytes(getCharset()));
@@ -529,6 +532,7 @@ public class PasteAction extends SelectionDispatchAction{
 			                    IJavaStatusConstants.INTERNAL_ERROR, JavaUIMessages.JavaPlugin_internal_error, e));
 					}
 				}
+				@Override
 				public String getCharset() throws CoreException {
 					return "UTF-8"; //$NON-NLS-1$
 				}
@@ -675,11 +679,13 @@ public class PasteAction extends SelectionDispatchAction{
 			final IEditorPart[] editorPart= new IEditorPart[1];
 
 			IRunnableWithProgress op= new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException {
 
-					final ArrayList<ICompilationUnit> cus= new ArrayList<ICompilationUnit>();
+					final ArrayList<ICompilationUnit> cus= new ArrayList<>();
 					try {
 						JavaCore.run(new IWorkspaceRunnable() {
+							@Override
 							public void run(IProgressMonitor pm) throws CoreException {
 								pm.beginTask("", 1 + fParsedCus.length); //$NON-NLS-1$
 
@@ -700,7 +706,7 @@ public class PasteAction extends SelectionDispatchAction{
 								if (selectedWorkingSets.length == 1) {
 									IWorkingSet ws= selectedWorkingSets[0];
 									if (!IWorkingSetIDs.OTHERS.equals(ws.getId())) {
-										ArrayList<IAdaptable> newElements= new ArrayList<IAdaptable>();
+										ArrayList<IAdaptable> newElements= new ArrayList<>();
 										newElements.addAll(Arrays.asList(ws.getElements()));
 										newElements.addAll(Arrays.asList(ws.adaptElements(new IAdaptable[] { fDestination.getJavaProject() })));
 										ws.setElements(newElements.toArray(new IAdaptable[newElements.size()]));
@@ -1018,7 +1024,7 @@ public class PasteAction extends SelectionDispatchAction{
 			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
 			scanner.setSource(text.toCharArray());
 
-			ArrayList<ParsedCu> cus= new ArrayList<ParsedCu>();
+			ArrayList<ParsedCu> cus= new ArrayList<>();
 			int start= 0;
 			boolean tokensScanned= false;
 			fPackageDeclCount= 0;
@@ -1129,7 +1135,7 @@ public class PasteAction extends SelectionDispatchAction{
 		@Override
 		public void paste(IJavaElement[] selectedJavaElements, IResource[] selectedResources, IWorkingSet[] selectedWorkingSets, TransferData[] availableTypes) throws JavaModelException, InterruptedException, InvocationTargetException {
 			IWorkingSet workingSet= selectedWorkingSets[0];
-			Set<IAdaptable> elements= new HashSet<IAdaptable>(Arrays.asList(workingSet.getElements()));
+			Set<IAdaptable> elements= new HashSet<>(Arrays.asList(workingSet.getElements()));
 			IJavaElement[] javaElements= getClipboardJavaElements(availableTypes);
 			if (javaElements != null) {
 				for (int i= 0; i < javaElements.length; i++) {
@@ -1139,8 +1145,8 @@ public class PasteAction extends SelectionDispatchAction{
 			}
 			IResource[] resources= getClipboardResources(availableTypes);
 			if (resources != null) {
-				List<IJavaElement> realJavaElements= new ArrayList<IJavaElement>();
-				List<IResource> realResource= new ArrayList<IResource>();
+				List<IJavaElement> realJavaElements= new ArrayList<>();
+				List<IResource> realResource= new ArrayList<>();
 				ReorgUtils.splitIntoJavaElementsAndResources(resources, realJavaElements, realResource);
 				for (Iterator<IJavaElement> iter= realJavaElements.iterator(); iter.hasNext();) {
 					IJavaElement element= iter.next();
@@ -1204,7 +1210,7 @@ public class PasteAction extends SelectionDispatchAction{
 		private IProject[] getProjectsToPaste(TransferData[] availableTypes) {
 			IResource[] resources= getClipboardResources(availableTypes);
 			IJavaElement[] javaElements= getClipboardJavaElements(availableTypes);
-			Set<IResource> result= new HashSet<IResource>();
+			Set<IResource> result= new HashSet<>();
 			if (resources != null)
 				result.addAll(Arrays.asList(resources));
 			if (javaElements != null)

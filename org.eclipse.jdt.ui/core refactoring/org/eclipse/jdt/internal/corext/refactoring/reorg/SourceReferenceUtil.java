@@ -59,8 +59,8 @@ public class SourceReferenceUtil {
 	}
 
 	public static ISourceReference[] removeAllWithParentsSelected(ISourceReference[] elems){
-		Set<ISourceReference> set= new HashSet<ISourceReference>(Arrays.asList(elems));
-		List<ISourceReference> result= new ArrayList<ISourceReference>(elems.length);
+		Set<ISourceReference> set= new HashSet<>(Arrays.asList(elems));
+		List<ISourceReference> result= new ArrayList<>(elems.length);
 		for (int i= 0; i < elems.length; i++) {
 			ISourceReference elem= elems[i];
 			if (! (elem instanceof IJavaElement))
@@ -75,6 +75,7 @@ public class SourceReferenceUtil {
 
 	public static ISourceReference[] sortByOffset(ISourceReference[] methods){
 		Arrays.sort(methods, new Comparator<ISourceReference>(){
+			@Override
 			public int compare(ISourceReference o1, ISourceReference o2){
 				try{
 					return o2.getSourceRange().getOffset() - o1.getSourceRange().getOffset();

@@ -37,7 +37,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 	private Set<ColoringLabelProvider> fManagedLabelProviders;
 
 	public ColoredViewersManager() {
-		fManagedLabelProviders= new HashSet<ColoringLabelProvider>();
+		fManagedLabelProviders= new HashSet<>();
 	}
 
 	public void installColoredLabels(ColoringLabelProvider labelProvider) {
@@ -63,6 +63,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 		}
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
 		if (property.equals(JFacePreferences.QUALIFIER_COLOR)
@@ -74,6 +75,7 @@ public class ColoredViewersManager implements IPropertyChangeListener {
 				|| property.equals(IWorkbenchPreferenceConstants.USE_COLORED_LABELS)
 		) {
 			Display.getDefault().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					updateAllViewers();
 				}

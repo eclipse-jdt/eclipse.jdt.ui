@@ -35,9 +35,6 @@ public class LambdaExpressionsCleanUp extends AbstractCleanUp {
 		super();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(requireAST(), false, false, null);
@@ -52,9 +49,6 @@ public class LambdaExpressionsCleanUp extends AbstractCleanUp {
 				|| isEnabled(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit compilationUnit= context.getAST();
@@ -70,12 +64,9 @@ public class LambdaExpressionsCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String[] getStepDescriptions() {
-		List<String> result= new ArrayList<String>();
+		List<String> result= new ArrayList<>();
 		if (isEnabled(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES)) {
 			if (isEnabled(CleanUpConstants.USE_LAMBDA)) {
 				result.add(MultiFixMessages.LambdaExpressionsCleanUp_use_lambda_where_possible);
@@ -88,9 +79,6 @@ public class LambdaExpressionsCleanUp extends AbstractCleanUp {
 		return result.toArray(new String[result.size()]);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();

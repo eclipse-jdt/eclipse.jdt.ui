@@ -349,7 +349,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 * @return the hard-coded positions
 	 */
 	private HighlightedPosition[] createHardcodedPositions() {
-		List<HighlightedPosition> positions= new ArrayList<HighlightedPosition>();
+		List<HighlightedPosition> positions= new ArrayList<>();
 		for (int i= 0; i < fHardcodedRanges.length; i++) {
 			HighlightedRange range= null;
 			Highlighting hl= null;
@@ -473,6 +473,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	/*
 	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 	 */
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		handlePropertyChangeEvent(event);
 	}

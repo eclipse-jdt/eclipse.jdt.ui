@@ -24,6 +24,7 @@ import org.eclipse.compare.IViewerCreator;
  */
 public class JavaContentViewerCreator implements IViewerCreator {
 
+	@Override
 	public Viewer createViewer(Composite parent, CompareConfiguration mp) {
 		return new JavaMergeViewer(parent, SWT.NULL, mp);
 	}

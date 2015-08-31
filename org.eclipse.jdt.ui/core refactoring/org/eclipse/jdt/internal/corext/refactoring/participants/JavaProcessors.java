@@ -38,7 +38,7 @@ public class JavaProcessors {
 	}
 
 	public static String[] computeAffectedNaturs(IJavaElement[] elements) throws CoreException {
-		Set<String> result= new HashSet<String>();
+		Set<String> result= new HashSet<>();
 		for (int i= 0; i < elements.length; i++) {
 			String[] natures= computeAffectedNatures(elements[i]);
 			for (int j= 0; j < natures.length; j++) {

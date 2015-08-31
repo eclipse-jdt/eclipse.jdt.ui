@@ -64,13 +64,16 @@ public class HistoryListAction extends Action {
 			};
 
 			IListAdapter<IMember[]> adapter= new IListAdapter<IMember[]>() {
+				@Override
 				public void customButtonPressed(ListDialogField<IMember[]> field, int index) {
 					doCustomButtonPressed();
 				}
+				@Override
 				public void selectionChanged(ListDialogField<IMember[]> field) {
 					doSelectionChanged();
 				}
 
+				@Override
 				public void doubleClicked(ListDialogField<IMember[]> field) {
 					doDoubleClicked();
 				}
@@ -104,7 +107,7 @@ public class HistoryListAction extends Action {
 				}
 			};
 
-			fHistoryList= new ListDialogField<IMember[]>(adapter, buttonLabels, new ColoringLabelProvider(labelProvider));
+			fHistoryList= new ListDialogField<>(adapter, buttonLabels, new ColoringLabelProvider(labelProvider));
 			fHistoryList.setLabelText(CallHierarchyMessages.HistoryListDialog_label);
 			fHistoryList.setElements(Arrays.asList(elements));
 

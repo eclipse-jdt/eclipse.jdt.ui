@@ -81,6 +81,7 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
  * DO NOT REMOVE, used in a product.
  * @deprecated As of 3.5, replaced by {@link org.eclipse.ui.dialogs.FilteredItemsSelectionDialog}
  */
+@Deprecated
 @SuppressWarnings("all")
 public class TypeSelectionComponent extends Composite implements ITypeSelectionComponent {
 	
@@ -174,6 +175,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		createContent(message, elementKind);
 	}
 	
+	@Override
 	public void triggerSearch() {
 		fViewer.forceSearch();
 	}
@@ -207,13 +209,16 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		gd.horizontalSpan= 2;
 		fFilter.setLayoutData(gd);
 		fFilter.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				patternChanged((Text)e.widget);
 			}
 		});
 		fFilter.addKeyListener(new KeyListener() {
+			@Override
 			public void keyReleased(KeyEvent e) {
 			}
+			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == SWT.ARROW_DOWN) {
 					fViewer.setFocus();
@@ -232,6 +237,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		label.setFont(font);
 		label.setText(JavaUIMessages.TypeSelectionComponent_label);
 		label.addTraverseListener(new TraverseListener() {
+			@Override
 			public void keyTraversed(TraverseEvent e) {
 				if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit) {
 					e.detail= SWT.TRAVERSE_NONE;
@@ -299,6 +305,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 			});
 		}
 		addDisposeListener(new DisposeListener() {
+			@Override
 			public void widgetDisposed(DisposeEvent event) {
 				disposeComponent();
 			}
@@ -342,6 +349,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		label.setText(message);
 		label.setFont(font);
 		label.addTraverseListener(new TraverseListener() {
+			@Override
 			public void keyTraversed(TraverseEvent e) {
 				if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit) {
 					e.detail= SWT.TRAVERSE_NONE;
@@ -403,6 +411,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 			fFilterActionGroup= new WorkingSetFilterActionGroup(getShell(),
 				JavaPlugin.getActivePage(),
 				new IPropertyChangeListener() {
+					@Override
 					public void propertyChange(PropertyChangeEvent event) {
 						IWorkingSet ws= (IWorkingSet)event.getNewValue();
 						if (ws == null || (ws.isAggregateWorkingSet() && ws.isEmpty())) {

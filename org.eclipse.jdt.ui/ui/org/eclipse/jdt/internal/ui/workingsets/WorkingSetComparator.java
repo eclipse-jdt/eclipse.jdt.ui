@@ -59,6 +59,7 @@ public class WorkingSetComparator implements Comparator<IWorkingSet> {
 	 * 
 	 * @see Comparator#compare(Object, Object)
 	 */
+	@Override
 	public int compare(IWorkingSet w1, IWorkingSet w2) {
 
 		if (fIsOtherWorkingSetOnTop && IWorkingSetIDs.OTHERS.equals(w1.getId()))

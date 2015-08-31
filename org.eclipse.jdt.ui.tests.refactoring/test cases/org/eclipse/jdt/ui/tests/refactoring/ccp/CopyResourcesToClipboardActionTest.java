@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
 
 public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 
-	private static final Class clazz= CopyResourcesToClipboardActionTest.class;
+	private static final Class<CopyResourcesToClipboardActionTest> clazz= CopyResourcesToClipboardActionTest.class;
 
 	private ICompilationUnit fCuA;
 	private ICompilationUnit fCuB;
@@ -59,6 +59,7 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 		return file;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fClipboard= new MockClipboard(Display.getDefault());
@@ -80,6 +81,7 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 		assertTrue(faTxt.exists());
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		fClipboard.dispose();

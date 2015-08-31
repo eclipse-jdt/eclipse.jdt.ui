@@ -52,12 +52,14 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 			super(test);
 		}
 
+		@Override
 		protected void setUp() throws Exception {
 			super.setUp();
 			fAutoBuilding= CoreUtility.setAutoBuilding(false);
 			fTestProject= new SWTTestProject();
 		}
 
+		@Override
 		protected void tearDown() throws Exception {
 			fTestProject.delete();
 			CoreUtility.setAutoBuilding(fAutoBuilding);
@@ -87,6 +89,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		System.out.println("starting " + OpenTypePerfTest.class.getName() + "#" + getName());
 		super.setUp();
@@ -185,8 +188,10 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 				false,
 				pattern,
 				new TypeSelectionExtension() {
+					@Override
 					public ISelectionStatusValidator getSelectionValidator() {
 						return new ISelectionStatusValidator() {
+							@Override
 							public IStatus validate(Object[] selection) {
 								finish(openFirst);
 								return Status.OK_STATUS;
@@ -199,6 +204,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 			fOpenTypeDialog.setBlockOnOpen(false);
 			fOpenTypeDialog.open();
 			new DisplayHelper() {
+				@Override
 				protected boolean condition() {
 					return fOpenTypeDialog == null;
 				}
@@ -219,6 +225,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 		if (! openFirst) {
 			stopMeasuring();
 			fShell.getDisplay().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					openTypeDialog.close();
 				}
@@ -226,6 +233,7 @@ public class OpenTypePerfTest extends JdtPerformanceTestCase {
 
 		} else {
 			fShell.getDisplay().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					openTypeDialog.getOkButton().notifyListeners(SWT.Selection, new Event());
 					stopMeasuring();

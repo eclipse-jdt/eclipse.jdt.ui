@@ -38,7 +38,7 @@ public class EnumeratedTypeSet extends TypeSet {
 	/**
 	 * Set containing the TTypes in this EnumeratedTypeSet.
 	 */
-	Set<TType> fMembers= new LinkedHashSet<TType>();
+	Set<TType> fMembers= new LinkedHashSet<>();
 
 	/**
 	 * Constructs a new EnumeratedTypeSet with the members of Set s in it.
@@ -149,7 +149,7 @@ public class EnumeratedTypeSet extends TypeSet {
 			// More than an optimization: the universe never contains array types, so
 			// if s2 has array types, the following will retain them, as it should.
 			EnumeratedTypeSet ets2= (EnumeratedTypeSet) s2;
-			fMembers= new LinkedHashSet<TType>();
+			fMembers= new LinkedHashSet<>();
 			fMembers.addAll(ets2.fMembers);
 		} else
 			retainAll(s2);
@@ -202,50 +202,32 @@ public class EnumeratedTypeSet extends TypeSet {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Set#size()
-	 */
 	public int size() {
 		return fMembers.size();
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Set#clear()
-	 */
 	public void clear() {
 		if (isUniverse())
-			fMembers= new LinkedHashSet<TType>();
+			fMembers= new LinkedHashSet<>();
 		else
 			fMembers.clear();
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Set#isEmpty()
-	 */
 	@Override
 	public boolean isEmpty() {
 		return fMembers.isEmpty();
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Set#toArray()
-	 */
 	public TType[] toArray() {
 		return fMembers.toArray(new TType[fMembers.size()]);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Set#add(java.lang.Object)
-	 */
 	public boolean add(TType t) {
 		// Doesn't make sense to do here what other methods do (copy-and-modify)
 		Assert.isTrue(!isUniverse(), "Someone's trying to expand the universe!"); //$NON-NLS-1$
 		return fMembers.add(t);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Set#contains(java.lang.Object)
-	 */
 	@Override
 	public boolean contains(TType t) {
 		if (isUniverse())
@@ -253,9 +235,6 @@ public class EnumeratedTypeSet extends TypeSet {
 		return fMembers.contains(t);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Set#remove(java.lang.Object)
-	 */
 	public boolean remove(TType t) {
 		if (isUniverse())
 			fMembers= cloneSet(fMembers);
@@ -263,14 +242,11 @@ public class EnumeratedTypeSet extends TypeSet {
 	}
 
 	private Set<TType> cloneSet(Set<TType> members) {
-		Set<TType> result= new LinkedHashSet<TType>();
+		Set<TType> result= new LinkedHashSet<>();
 		result.addAll(members);
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Set#addAll(java.util.Collection)
-	 */
 	public boolean addAll(TypeSet s) {
 		if (s instanceof EnumeratedTypeSet) {
 			EnumeratedTypeSet ets= (EnumeratedTypeSet) s;
@@ -293,9 +269,6 @@ public class EnumeratedTypeSet extends TypeSet {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Set#containsAll(java.util.Collection)
-	 */
 	@Override
 	public boolean containsAll(TypeSet s) {
 		if (isUniverse())
@@ -307,18 +280,12 @@ public class EnumeratedTypeSet extends TypeSet {
 		return fMembers.containsAll(ets.fMembers);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Set#removeAll(java.util.Collection)
-	 */
 	public boolean removeAll(EnumeratedTypeSet s) {
 		if (isUniverse())
 			fMembers= cloneSet(fMembers);
 		return fMembers.removeAll(s.fMembers);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Set#retainAll(java.util.Collection)
-	 */
 	public boolean retainAll(TypeSet s) {
 		if (s.isUniverse()) return false;
 
@@ -331,25 +298,16 @@ public class EnumeratedTypeSet extends TypeSet {
 			return fMembers.retainAll(ets.fMembers);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#isSingleton()
-	 */
 	@Override
 	public boolean isSingleton() {
 		return fMembers.size() == 1;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#anyMember()
-	 */
 	@Override
 	public TType anyMember() {
 		return fMembers.iterator().next();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#upperBound()
-	 */
 	@Override
 	public TypeSet upperBound() {
 		if (fMembers.size() == 1)
@@ -380,9 +338,6 @@ public class EnumeratedTypeSet extends TypeSet {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#lowerBound()
-	 */
 	@Override
 	public TypeSet lowerBound() {
 		if (fMembers.size() == 1)
@@ -421,25 +376,16 @@ public class EnumeratedTypeSet extends TypeSet {
 			return getTypeSetEnvironment().getEmptyTypeSet();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueLowerBound()
-	 */
 	@Override
 	public boolean hasUniqueLowerBound() {
 		return fMembers.size() == 1;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#hasUniqueUpperBound()
-	 */
 	@Override
 	public boolean hasUniqueUpperBound() {
 		return fMembers.size() == 1;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueLowerBound()
-	 */
 	@Override
 	public TType uniqueLowerBound() {
 		if (fMembers.size() == 1)
@@ -447,9 +393,6 @@ public class EnumeratedTypeSet extends TypeSet {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#uniqueUpperBound()
-	 */
 	@Override
 	public TType uniqueUpperBound() {
 		if (fMembers.size() == 1)
@@ -457,9 +400,6 @@ public class EnumeratedTypeSet extends TypeSet {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Set#iterator()
-	 */
 	@Override
 	public Iterator<TType> iterator() {
 		return fMembers.iterator();
@@ -470,10 +410,6 @@ public class EnumeratedTypeSet extends TypeSet {
 	 */
 	private static final int sMaxElements= 10; // Integer.MAX_VALUE;
 
-	/*
-	 * (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		StringBuffer b= new StringBuffer();
@@ -497,9 +433,6 @@ public class EnumeratedTypeSet extends TypeSet {
 		return b.toString();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#enumerate()
-	 */
 	@Override
 	public EnumeratedTypeSet enumerate() {
 		return this; // (EnumeratedTypeSet) makeClone();

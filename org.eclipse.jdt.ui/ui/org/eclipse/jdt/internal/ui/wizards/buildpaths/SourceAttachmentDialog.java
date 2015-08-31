@@ -59,6 +59,7 @@ public class SourceAttachmentDialog extends StatusDialog {
 		super(parent);
 
 		IStatusChangeListener listener= new IStatusChangeListener() {
+			@Override
 			public void statusChanged(IStatus status) {
 				updateStatus(status);
 			}
@@ -77,18 +78,12 @@ public class SourceAttachmentDialog extends StatusDialog {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
-	 */
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJavaHelpContextIds.SOURCE_ATTACHMENT_DIALOG);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);

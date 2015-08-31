@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,7 @@
 package org.eclipse.jdt.ui.tests.core;
 
 import java.util.Hashtable;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.util.List;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -36,9 +34,12 @@ import org.eclipse.jdt.internal.corext.dom.TypeRules;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class TypeRulesTest extends CoreTests {
 
-	private static final Class THIS= TypeRulesTest.class;
+	private static final Class<TypeRulesTest> THIS= TypeRulesTest.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -55,8 +56,9 @@ public class TypeRulesTest extends CoreTests {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(JavaCore.COMPILER_PB_NO_EFFECT_ASSIGNMENT, JavaCore.IGNORE);
 		options.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.IGNORE);
 		options.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
@@ -68,6 +70,7 @@ public class TypeRulesTest extends CoreTests {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
@@ -155,7 +158,8 @@ public class TypeRulesTest extends CoreTests {
 
 		VariableDeclarationFragment[] targets= new VariableDeclarationFragment[fields.length];
 		for (int i= 0; i < fields.length; i++) {
-			targets[i]= (VariableDeclarationFragment) fields[i].fragments().get(0);
+			List<VariableDeclarationFragment> fragments= fields[i].fragments();
+			targets[i]= fragments.get(0);
 		}
 		return targets;
 	}

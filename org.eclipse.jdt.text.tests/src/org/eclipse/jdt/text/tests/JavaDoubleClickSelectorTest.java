@@ -31,6 +31,7 @@ public class JavaDoubleClickSelectorTest extends TestCase {
 
 	private static class PublicSelector extends JavaDoubleClickSelector {
 
+		@Override
 		public IRegion findWord(IDocument document, int anchor) {
 			return super.findWord(document, anchor);
 		}

@@ -55,7 +55,7 @@ public class NLSScanner {
 	}
 
 	private static NLSLine[] scan(IScanner scanner, char[] content) throws InvalidInputException, BadLocationException {
-		List<NLSLine> lines= new ArrayList<NLSLine>();
+		List<NLSLine> lines= new ArrayList<>();
 		scanner.setSource(content);
 		int token= scanner.getNextToken();
 		int currentLineNr= -1;
@@ -68,7 +68,7 @@ public class NLSScanner {
 		 * a) >=0: parenthesis counter per nested annotation level, or
 		 * b)  -1: read a '@' or '.' in annotation type, waiting for identifier to complete annotation.
 		 */
-		LinkedList<int[]> insideAnnotation= new LinkedList<int[]>();
+		LinkedList<int[]> insideAnnotation= new LinkedList<>();
 		int defaultCounter= 0; // counting up tokens starting with 'default'
 
 		while (token != ITerminalSymbols.TokenNameEOF) {

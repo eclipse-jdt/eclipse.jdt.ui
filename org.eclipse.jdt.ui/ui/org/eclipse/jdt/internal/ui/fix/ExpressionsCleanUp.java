@@ -35,9 +35,6 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 		super();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public CleanUpRequirements getRequirements() {
 		return new CleanUpRequirements(requireAST(), false, false, null);
@@ -52,9 +49,6 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 		       isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public ICleanUpFix createFix(CleanUpContext context) throws CoreException {
 		CompilationUnit compilationUnit= context.getAST();
@@ -70,12 +64,9 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 				isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_NEVER));
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String[] getStepDescriptions() {
-		List<String> result= new ArrayList<String>();
+		List<String> result= new ArrayList<>();
 		if (isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES) && isEnabled(CleanUpConstants.EXPRESSIONS_USE_PARENTHESES_ALWAYS))
 			result.add(MultiFixMessages.ExpressionsCleanUp_addParanoiac_description);
 
@@ -85,9 +76,6 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 		return result.toArray(new String[result.size()]);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public String getPreview() {
 		StringBuffer buf= new StringBuffer();

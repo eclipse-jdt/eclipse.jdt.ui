@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,6 +61,7 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 		// Nothing to do
 	}
 
+	@Override
 	public void createPartControl(Composite parent) {
 		fViewer = new CommonViewer(VIEWER_ID, parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		// Only enable the Java model content
@@ -71,6 +72,7 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 			setInput(fContext);
 	}
 
+	@Override
 	public void setFocus() {
 		// Nothing to do
 	}
@@ -83,6 +85,7 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 		return (ITreeContentProvider)fViewer.getContentProvider();
 	}
 
+	@Override
 	public void onLoad(INavigatorContentExtension anExtension) {
 		this.fExtension = anExtension;
 		setContext(fContext);
@@ -107,6 +110,7 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 		setInput(fContext);
 	}
 
+	@Override
 	public void dispose() {
 		super.dispose();
 		if (fContext != null) {
@@ -122,6 +126,7 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 				true);
 		manager.initialize(new NullProgressMonitor());
 		SynchronizationContext context = new SynchronizationContext(manager, ISynchronizationContext.THREE_WAY, tree) {
+			@Override
 			public void refresh(ResourceTraversal[] traversals, int flags, IProgressMonitor monitor) throws CoreException {
 				// Nothing to do
 			}
@@ -143,31 +148,40 @@ public class MockPluginView extends ViewPart implements INavigatorContentService
 	private ResourceDiff createResourceDiff(IProject project, String path, int kind) {
 		final IResource resource = getResource(project, path);
 		ResourceDiff diff = new ResourceDiff(resource, kind, 0, new FileRevision() {
+			@Override
 			public String getName() {
 				return resource.getName();
 			}
+			@Override
 			public IStorage getStorage(IProgressMonitor monitor) throws CoreException {
 				return new IStorage() {
-					public Object getAdapter(Class adapter) {
+					@Override
+					public <T> T getAdapter(Class<T> adapter) {
 						return null;
 					}
+					@Override
 					public boolean isReadOnly() {
 						return true;
 					}
+					@Override
 					public String getName() {
 						return resource.getName();
 					}
+					@Override
 					public IPath getFullPath() {
 						return resource.getFullPath();
 					}
+					@Override
 					public InputStream getContents() throws CoreException {
 						return new ByteArrayInputStream("".getBytes());
 					}
 				};
 			}
+			@Override
 			public boolean isPropertyMissing() {
 				return false;
 			}
+			@Override
 			public IFileRevision withAllProperties(IProgressMonitor monitor) throws CoreException {
 				return this;
 			}}, null);

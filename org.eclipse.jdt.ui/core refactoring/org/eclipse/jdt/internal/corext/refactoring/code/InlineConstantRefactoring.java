@@ -225,7 +225,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			private Set<String> getLocallyDeclaredNames(BodyDeclaration scope) {
 				Assert.isTrue(!(scope instanceof AbstractTypeDeclaration));
 
-				final Set<String> result= new HashSet<String>();
+				final Set<String> result= new HashSet<>();
 
 				if (scope instanceof FieldDeclaration)
 					return result;
@@ -561,7 +561,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		}
 
 		private String prepareInitializerForLocation(Expression location) throws CoreException {
-			HashSet<SimpleName> staticImportsInReference= new HashSet<SimpleName>();
+			HashSet<SimpleName> staticImportsInReference= new HashSet<>();
 			final IJavaProject project= fCuRewrite.getCu().getJavaProject();
 			if (fIs15)
 				ImportReferencesCollector.collect(location, project, null, new ArrayList<SimpleName>(), staticImportsInReference);
@@ -820,8 +820,8 @@ public class InlineConstantRefactoring extends Refactoring {
 		try {
 			fSelectionCuRewrite.clearASTAndImportRewrites();
 			fDeclarationCuRewrite.clearASTAndImportRewrites();
-			List<CompilationUnitChange>changes= new ArrayList<CompilationUnitChange>();
-			HashSet<SimpleName> staticImportsInInitializer= new HashSet<SimpleName>();
+			List<CompilationUnitChange>changes= new ArrayList<>();
+			HashSet<SimpleName> staticImportsInInitializer= new HashSet<>();
 			ImportReferencesCollector.collect(getInitializer(), fField.getJavaProject(), null, new ArrayList<SimpleName>(), staticImportsInInitializer);
 
 			if (getReplaceAllReferences()) {
@@ -913,6 +913,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		engine.setScope(RefactoringScopeFactory.create(fField));
 		engine.setStatus(status);
 		engine.setRequestor(new IRefactoringSearchRequestor() {
+			@Override
 			public SearchMatch acceptSearchMatch(SearchMatch match) {
 				return match.isInsideDocComment() ? null : match;
 			}
@@ -925,7 +926,7 @@ public class InlineConstantRefactoring extends Refactoring {
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.InlineConstantRefactoring_preview, 2);
-			final Map<String, String> arguments= new HashMap<String, String>();
+			final Map<String, String> arguments= new HashMap<>();
 			String project= null;
 			IJavaProject javaProject= fSelectionCu.getJavaProject();
 			if (javaProject != null)

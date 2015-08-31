@@ -32,30 +32,22 @@ public class MockupPreferenceStore implements IPreferenceStore {
 	/** Listeners on this store */
 	private ListenerList fListeners= new ListenerList(ListenerList.IDENTITY);
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void addPropertyChangeListener(IPropertyChangeListener listener) {
 		fListeners.add(listener);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void removePropertyChangeListener(IPropertyChangeListener listener) {
 		fListeners.remove(listener);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean contains(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void firePropertyChangeEvent(String name, Object oldValue, Object newValue) {
 		firePropertyChangeEvent(this, name, oldValue, newValue);
 	}
@@ -75,198 +67,142 @@ public class MockupPreferenceStore implements IPreferenceStore {
 			((IPropertyChangeListener) listeners[i]).propertyChange(event);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean getBoolean(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean getDefaultBoolean(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public double getDefaultDouble(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public float getDefaultFloat(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public int getDefaultInt(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public long getDefaultLong(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getDefaultString(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public double getDouble(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public float getFloat(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public int getInt(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public long getLong(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getString(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean isDefault(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean needsSaving() {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void putValue(String name, String value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setDefault(String name, double value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setDefault(String name, float value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setDefault(String name, int value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setDefault(String name, long value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setDefault(String name, String defaultObject) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setDefault(String name, boolean value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setToDefault(String name) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setValue(String name, double value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setValue(String name, float value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setValue(String name, int value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setValue(String name, long value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setValue(String name, String value) {
 		throw new UnsupportedOperationException();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void setValue(String name, boolean value) {
 		throw new UnsupportedOperationException();
 	}

@@ -56,7 +56,7 @@ class CallSearchResultCollector {
     }
 
     protected Map<String, MethodCall> createCalledMethodsData() {
-        return new HashMap<String, MethodCall>();
+        return new HashMap<>();
     }
 
     /**

@@ -79,9 +79,6 @@ public class TypeParametersFix extends CompilationUnitRewriteOperationsFix {
 			fCreatedTypes= parameterizedTypes;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			TextEditGroup group= createTextEditGroup(FixMessages.TypeParametersFix_insert_inferred_type_arguments_description, cuRewrite);
@@ -114,9 +111,6 @@ public class TypeParametersFix extends CompilationUnitRewriteOperationsFix {
 			fParameterizedType= parameterizedType;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			TextEditGroup group= createTextEditGroup(FixMessages.TypeParametersFix_remove_redundant_type_arguments_description, cuRewrite);
@@ -137,7 +131,7 @@ public class TypeParametersFix extends CompilationUnitRewriteOperationsFix {
 		if (node == null)
 			return null;
 
-		final ArrayList<ASTNode> changedNodes= new ArrayList<ASTNode>();
+		final ArrayList<ASTNode> changedNodes= new ArrayList<>();
 		node.accept(new InsertTypeArgumentsVisitor(changedNodes));
 
 		if (changedNodes.isEmpty())
@@ -175,7 +169,7 @@ public class TypeParametersFix extends CompilationUnitRewriteOperationsFix {
 	public static ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean insertInferredTypeArguments, boolean removeRedundantTypeArguments) {
 
 		if (insertInferredTypeArguments) {
-			final ArrayList<ASTNode> changedNodes= new ArrayList<ASTNode>();
+			final ArrayList<ASTNode> changedNodes= new ArrayList<>();
 			compilationUnit.accept(new InsertTypeArgumentsVisitor(changedNodes));
 
 			if (changedNodes.isEmpty())
@@ -185,7 +179,7 @@ public class TypeParametersFix extends CompilationUnitRewriteOperationsFix {
 			return new TypeParametersFix(FixMessages.TypeParametersFix_insert_inferred_type_arguments_name, compilationUnit, new CompilationUnitRewriteOperation[] { op });
 
 		} else if (removeRedundantTypeArguments) {
-			List<CompilationUnitRewriteOperation> result= new ArrayList<CompilationUnitRewriteOperation>();
+			List<CompilationUnitRewriteOperation> result= new ArrayList<>();
 			for (int i= 0; i < problems.length; i++) {
 				IProblemLocation problem= problems[i];
 				int id= problem.getProblemId();

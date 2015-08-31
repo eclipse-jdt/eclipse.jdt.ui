@@ -78,6 +78,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 	/*
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
 		if (property.equals(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE)
@@ -93,9 +94,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IPropertyListener#propertyChanged(java.lang.Object, int)
-	 */
+	@Override
 	public void propertyChanged(Object source, int propId) {
 		if (propId == IEditorRegistry.PROP_CONTENTS) {
 			fireLabelProviderChanged(new LabelProviderChangedEvent(this, null)); // refresh all

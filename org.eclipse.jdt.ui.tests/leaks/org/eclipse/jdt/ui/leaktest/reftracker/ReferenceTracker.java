@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,7 @@ public final class ReferenceTracker {
 		fSkipWeakOrSoft= true;
 	}
 
-	private static boolean isInteresting(Class clazz) {
+	private static boolean isInteresting(Class<?> clazz) {
 		String name= clazz.getName();
 		if (name.startsWith(CURRENT_PKG_NAME) || name.startsWith("sun.reflect.")) {  //$NON-NLS-1$
 			return false;
@@ -95,7 +95,7 @@ public final class ReferenceTracker {
 		fStatus.add(new Status(IStatus.ERROR, JavaTestPlugin.getPluginId(), IStatus.ERROR, "Problem on access of " + fld.toString(), t));
 	}
 
-	private void followStaticReferences(Class classInstance) {
+	private void followStaticReferences(Class<?> classInstance) {
 		Field[] declaredFields= classInstance.getDeclaredFields();
 		for (int i= 0; i < declaredFields.length; i++) {
 			Field fld= declaredFields[i];
@@ -115,7 +115,7 @@ public final class ReferenceTracker {
 
 	private void visit(ReferencedObject ref) {
 		Object curr= ref.getValue();
-		Class currClass= curr.getClass();
+		Class<?> currClass= curr.getClass();
 		if (!isInteresting(currClass)) {
 			return;
 		}
@@ -142,7 +142,7 @@ public final class ReferenceTracker {
 			return;
 		} else {
 			if (currClass == Class.class) {
-				followStaticReferences((Class) curr);
+				followStaticReferences((Class<?>) curr);
 			}
 			do {
 				Field[] declaredFields= currClass.getDeclaredFields();

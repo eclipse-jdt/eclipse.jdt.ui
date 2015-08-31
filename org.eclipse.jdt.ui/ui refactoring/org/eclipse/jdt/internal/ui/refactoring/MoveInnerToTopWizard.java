@@ -83,6 +83,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 			});
 			fFieldNameEntryText.addModifyListener(new ModifyListener() {
 
+				@Override
 				public final void modifyText(ModifyEvent event) {
 					final String text= fFieldNameEntryText.getText();
 					final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();
@@ -100,6 +101,7 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 			});
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			initializeDialogUnits(parent);
 			Composite newControl= new Composite(parent, SWT.NONE);

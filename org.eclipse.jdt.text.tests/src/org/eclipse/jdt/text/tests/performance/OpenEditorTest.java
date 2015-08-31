@@ -28,7 +28,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 public abstract class OpenEditorTest extends TextPerformanceTestCase {
 
-	private static final Class THIS= OpenEditorTest.class;
+	private static final Class<OpenEditorTest> THIS= OpenEditorTest.class;
 
 	public OpenEditorTest() {
 		super();
@@ -75,6 +75,7 @@ public abstract class OpenEditorTest extends TextPerformanceTestCase {
 	 * @see org.eclipse.jdt.text.tests.performance.TextPerformanceTestCase#createPerformanceMeter()
 	 * @since 3.4
 	 */
+	@Override
 	protected PerformanceMeter createPerformanceMeter() {
 		PerformanceMeter perfMeter= super.createPerformanceMeter();
 		return perfMeter;

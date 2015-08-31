@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  *
  * @deprecated DO NOT USE this class will be removed soon, it is replaced by {@link ClasspathContainerPreferencePage}
  */
+@Deprecated
 public class ConfigureContainerAction implements IObjectActionDelegate {
 
 	private ISelection fCurrentSelection;
@@ -51,6 +52,7 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 	/*
 	 * @see IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
 	 */
+	@Override
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 		fPart= targetPart;
 	}
@@ -58,6 +60,7 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 	/*
 	 * @see IActionDelegate#run(IAction)
 	 */
+	@Override
 	public void run(IAction action) {
 		if (fCurrentSelection instanceof IStructuredSelection) {
 			ClassPathContainer container= (ClassPathContainer) ((IStructuredSelection) fCurrentSelection).getFirstElement();
@@ -89,6 +92,7 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 				context= PlatformUI.getWorkbench().getProgressService();
 			}
 			context.run(true, true, new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						project.setRawClasspath(newEntries, project.getOutputLocation(), monitor);
@@ -122,6 +126,7 @@ public class ConfigureContainerAction implements IObjectActionDelegate {
 	/*
 	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
 	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		fCurrentSelection= selection;
 	}

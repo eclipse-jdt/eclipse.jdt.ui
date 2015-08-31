@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectio
  */
 public class BasicJavaEditorActionContributor extends BasicTextEditorActionContributor {
 
-	private List<RetargetAction> fPartListeners= new ArrayList<RetargetAction>();
+	private List<RetargetAction> fPartListeners= new ArrayList<>();
 
 	private TogglePresentationAction fTogglePresentation;
 	private ToggleMarkOccurrencesAction fToggleMarkOccurrencesAction;

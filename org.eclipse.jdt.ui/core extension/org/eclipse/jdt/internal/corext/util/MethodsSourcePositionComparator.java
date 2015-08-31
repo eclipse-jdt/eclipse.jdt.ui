@@ -55,6 +55,7 @@ public class MethodsSourcePositionComparator implements Comparator<IMethodBindin
 		fTypeBinding= typeBinding;
 	}
 
+	@Override
 	public int compare(IMethodBinding firstMethodBinding, IMethodBinding secondMethodBinding) {
 		if (firstMethodBinding == null || secondMethodBinding == null) {
 			return 0;

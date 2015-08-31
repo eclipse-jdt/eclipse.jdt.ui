@@ -238,6 +238,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		/*
 		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 		 */
+		@Override
 		public Object[] getElements(Object inputElement) {
 			return new String[] {fJavaCategory, fJavadocCategory, fCommentsCategory};
 		}
@@ -245,15 +246,18 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		/*
 		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 		 */
+		@Override
 		public void dispose() {
 		}
 
 		/*
 		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 		 */
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 
+		@Override
 		public Object[] getChildren(Object parentElement) {
 			if (parentElement instanceof String) {
 				String entry= (String) parentElement;
@@ -267,6 +271,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			return new Object[0];
 		}
 
+		@Override
 		public Object getParent(Object element) {
 			if (element instanceof String)
 				return null;
@@ -278,6 +283,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			return fCommentsCategory;
 		}
 
+		@Override
 		public boolean hasChildren(Object element) {
 			return element instanceof String;
 		}
@@ -347,7 +353,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * Highlighting color list
 	 * @since  3.0
 	 */
-	private final java.util.List<HighlightingColorListItem> fListModel= new ArrayList<HighlightingColorListItem>();
+	private final java.util.List<HighlightingColorListItem> fListModel= new ArrayList<>();
 	/**
 	 * Highlighting color tree viewer
 	 * @since  3.0
@@ -400,7 +406,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 
-		ArrayList<OverlayKey> overlayKeys= new ArrayList<OverlayKey>();
+		ArrayList<OverlayKey> overlayKeys= new ArrayList<>();
 
 		for (int i= 0, n= fListModel.size(); i < n; i++) {
 			HighlightingColorListItem item= fListModel.get(i);
@@ -425,6 +431,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 * @param parent the parent composite
 	 * @return the control for the preference page
 	 */
+	@Override
 	public Control createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -690,15 +697,18 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		previewer.setLayoutData(gd);
 
 		fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				handleSyntaxColorListSelection();
 			}
 		});
 
 		foregroundColorButton.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				PreferenceConverter.setValue(getPreferenceStore(), item.getColorKey(), fSyntaxForegroundColorEditor.getColorValue());
@@ -706,9 +716,11 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		});
 
 		fBoldCheckBox.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				getPreferenceStore().setValue(item.getBoldKey(), fBoldCheckBox.getSelection());
@@ -716,18 +728,22 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		});
 
 		fItalicCheckBox.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				getPreferenceStore().setValue(item.getItalicKey(), fItalicCheckBox.getSelection());
 			}
 		});
 		fStrikethroughCheckBox.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				getPreferenceStore().setValue(item.getStrikethroughKey(), fStrikethroughCheckBox.getSelection());
@@ -735,9 +751,11 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		});
 
 		fUnderlineCheckBox.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				getPreferenceStore().setValue(item.getUnderlineKey(), fUnderlineCheckBox.getSelection());
@@ -745,9 +763,11 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		});
 
 		fEnableCheckbox.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				if (item instanceof SemanticHighlightingColorListItem) {
@@ -782,6 +802,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			/*
 			 * @see org.eclipse.jface.viewers.IDoubleClickListener#doubleClick(org.eclipse.jface.viewers.DoubleClickEvent)
 			 */
+			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				IStructuredSelection s= (IStructuredSelection) event.getSelection();
 				Object element= s.getFirstElement();

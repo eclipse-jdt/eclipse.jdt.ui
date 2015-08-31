@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,6 +85,7 @@ public class JUnitCore {
 	 * @param listener listener to be added
 	 * @deprecated As of 3.3, replaced by {@link #addTestRunListener(TestRunListener)}
 	 */
+	@Deprecated
 	public static void addTestRunListener(ITestRunListener listener) {
 		JUnitCorePlugin.getDefault().addTestRunListener(listener);
 	}
@@ -95,6 +96,7 @@ public class JUnitCore {
 	 * @param listener listener to be removed
 	 * @deprecated As of 3.3, replaced by {@link #removeTestRunListener(TestRunListener)}
 	 */
+	@Deprecated
 	public static void removeTestRunListener(ITestRunListener listener) {
 		JUnitCorePlugin.getDefault().removeTestRunListener(listener);
 	}
@@ -136,11 +138,11 @@ public class JUnitCore {
 	 * @since 3.5
 	 */
 	public static IType[] findTestTypes(IJavaElement container, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
-		final Set result= new HashSet();
+		final Set<IType> result= new HashSet<>();
 		JUnit4TestFinder finder= new JUnit4TestFinder();
 		finder.findTestsInContainer(container, result, monitor);
 
-		return (IType[])result.toArray(new IType[result.size()]);
+		return result.toArray(new IType[result.size()]);
 	}
 
 	/**

@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
  * DO NOT REMOVE, used in a product.
  * @deprecated As of 3.6, replaced by {@link org.eclipse.jdt.core.SourceRange}
  */
+@Deprecated
 public class SourceRange implements ISourceRange { // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=88265 (Allow implementation of ISourceRange)
 
 	private final int fOffset;
@@ -43,6 +44,7 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
 	/*
 	 * @see ISourceRange#getLength()
 	 */
+	@Override
 	public int getLength() {
 		return fLength;
 	}
@@ -50,6 +52,7 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
 	/*
 	 * @see ISourceRange#getOffset()
 	 */
+	@Override
 	public int getOffset() {
 		return fOffset;
 	}
@@ -78,6 +81,7 @@ public class SourceRange implements ISourceRange { // see https://bugs.eclipse.o
 	 */
 	public static ISourceRange[] reverseSortByOffset(ISourceRange[] ranges){
 		Comparator<ISourceRange> comparator= new Comparator<ISourceRange>(){
+			@Override
 			public int compare(ISourceRange o1, ISourceRange o2){
 				return o2.getOffset() - o1.getOffset();
 			}

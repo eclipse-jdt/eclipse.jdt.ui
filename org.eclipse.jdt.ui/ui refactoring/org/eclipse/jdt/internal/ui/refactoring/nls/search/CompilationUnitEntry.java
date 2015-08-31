@@ -32,6 +32,7 @@ public class CompilationUnitEntry implements IAdaptable {
 		return fCompilationUnit;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Class<T> adapter) {
 		if (ICompilationUnit.class.equals(adapter))

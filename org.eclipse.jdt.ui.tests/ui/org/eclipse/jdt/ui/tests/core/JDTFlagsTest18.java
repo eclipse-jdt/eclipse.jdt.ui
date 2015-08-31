@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,10 +12,6 @@ package org.eclipse.jdt.ui.tests.core;
 
 import java.io.File;
 import java.util.Hashtable;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.junit.Assert;
 
@@ -53,9 +49,13 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 public class JDTFlagsTest18 extends TestCase {
 
-	private static final Class THIS= JDTFlagsTest18.class;
+	private static final Class<JDTFlagsTest18> THIS= JDTFlagsTest18.class;
 
 	private IJavaProject fJProject1;
 
@@ -88,7 +88,7 @@ public class JDTFlagsTest18 extends TestCase {
 	protected CompilationUnit getCompilationUnitNode(String source) {
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setSource(source.toCharArray());
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		JavaCore.setComplianceOptions(JavaCore.VERSION_1_8, options);
 		parser.setCompilerOptions(options);
 		CompilationUnit cuNode = (CompilationUnit) parser.createAST(null);

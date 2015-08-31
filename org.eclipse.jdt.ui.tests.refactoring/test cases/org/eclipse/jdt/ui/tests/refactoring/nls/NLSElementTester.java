@@ -37,6 +37,7 @@ public class NLSElementTester extends TestCase{
 		return new TestSuite(NLSElementTester.class);
 	}
 
+	@Override
 	protected void setUp(){
 		fOff= 3;
 		fLen= 5;
@@ -44,6 +45,7 @@ public class NLSElementTester extends TestCase{
 		fEl= new NLSElement(fVal, fOff, fLen, 0, false);
 	}
 
+	@Override
 	protected void tearDown(){
 	}
 

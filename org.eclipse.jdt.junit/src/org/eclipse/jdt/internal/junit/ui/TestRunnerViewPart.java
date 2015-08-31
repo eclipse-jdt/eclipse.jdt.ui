@@ -327,19 +327,27 @@ public class TestRunnerViewPart extends ViewPart {
 	public static final Object FAMILY_JUNIT_RUN = new Object();
 
 	private IPartListener2 fPartListener= new IPartListener2() {
+		@Override
 		public void partActivated(IWorkbenchPartReference ref) { }
+		@Override
 		public void partBroughtToTop(IWorkbenchPartReference ref) { }
+		@Override
 		public void partInputChanged(IWorkbenchPartReference ref) { }
+		@Override
 		public void partClosed(IWorkbenchPartReference ref) { }
+		@Override
 		public void partDeactivated(IWorkbenchPartReference ref) { }
+		@Override
 		public void partOpened(IWorkbenchPartReference ref) { }
 
+		@Override
 		public void partVisible(IWorkbenchPartReference ref) {
 			if (getSite().getId().equals(ref.getId())) {
 				fPartIsVisible= true;
 			}
 		}
 
+		@Override
 		public void partHidden(IWorkbenchPartReference ref) {
 			if (getSite().getId().equals(ref.getId())) {
 				fPartIsVisible= false;
@@ -547,6 +555,7 @@ public class TestRunnerViewPart extends ViewPart {
 	
 	private static class ImportTestRunSessionFromURLAction extends Action {
 		private static class URLValidator implements IInputValidator {
+			@Override
 			public String isValid(String newText) {
 				if (newText.length() == 0)
 					return null;
@@ -662,8 +671,10 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	private class TestRunSessionListener implements ITestRunSessionListener {
+		@Override
 		public void sessionAdded(final TestRunSession testRunSession) {
 			getDisplay().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					if (JUnitUIPreferencesConstants.getShowInAllViews() ||
 							getSite().getWorkbenchWindow() == JUnitPlugin.getActiveWorkbenchWindow()) {
@@ -685,8 +696,10 @@ public class TestRunnerViewPart extends ViewPart {
 				}
 			});
 		}
+		@Override
 		public void sessionRemoved(final TestRunSession testRunSession) {
 			getDisplay().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					if (testRunSession.equals(fTestRunSession)) {
 						List<TestRunSession> testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
@@ -705,6 +718,7 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	private class TestSessionListener implements ITestSessionListener {
+		@Override
 		public void sessionStarted(){
 			fTestViewer.registerViewersRefresh();
 			fShowOnErrorOnly= getShowOnErrorOnly();
@@ -715,6 +729,7 @@ public class TestRunnerViewPart extends ViewPart {
 			fRerunLastTestAction.setEnabled(true);
 		}
 
+		@Override
 		public void sessionEnded(long elapsedTime){
 			deregisterTestSessionListener(false);
 			
@@ -725,6 +740,7 @@ public class TestRunnerViewPart extends ViewPart {
 			registerInfoMessage(msg);
 
 			postSyncRunnable(new Runnable() {
+				@Override
 				public void run() {
 					if (isDisposed())
 						return;
@@ -744,6 +760,7 @@ public class TestRunnerViewPart extends ViewPart {
 			stopUpdateJobs();
 		}
 
+		@Override
 		public void sessionStopped(final long elapsedTime) {
 			deregisterTestSessionListener(false);
 			
@@ -753,6 +770,7 @@ public class TestRunnerViewPart extends ViewPart {
 			handleStopped();
 		}
 
+		@Override
 		public void sessionTerminated() {
 			deregisterTestSessionListener(true);
 			
@@ -762,11 +780,13 @@ public class TestRunnerViewPart extends ViewPart {
 			handleStopped();
 		}
 
+		@Override
 		public void runningBegins() {
 			if (!fShowOnErrorOnly)
 				postShowTestResultsView();
 		}
 
+		@Override
 		public void testStarted(TestCaseElement testCaseElement) {
 			fTestViewer.registerAutoScrollTarget(testCaseElement);
 			fTestViewer.registerViewerUpdate(testCaseElement);
@@ -777,6 +797,7 @@ public class TestRunnerViewPart extends ViewPart {
 			registerInfoMessage(status);
 		}
 
+		@Override
 		public void testFailed(TestElement testElement, TestElement.Status status, String trace, String expected, String actual) {
 			if (isAutoScroll()) {
 				fTestViewer.registerFailedForAutoScroll(testElement);
@@ -797,20 +818,24 @@ public class TestRunnerViewPart extends ViewPart {
 //			}
 		}
 
+		@Override
 		public void testEnded(TestCaseElement testCaseElement){
 			fTestViewer.registerViewerUpdate(testCaseElement);
 		}
 
+		@Override
 		public void testReran(TestCaseElement testCaseElement, TestElement.Status status, String trace, String expectedResult, String actualResult) {
 			fTestViewer.registerViewerUpdate(testCaseElement); //TODO: autoExpand?
 			postSyncProcessChanges();
 			showFailure(testCaseElement);
 		}
 
+		@Override
 		public void testAdded(TestElement testElement) {
 			fTestViewer.registerTestAdded(testElement);
 		}
 
+		@Override
 		public boolean acceptsSwapToDisk() {
 			return false;
 		}
@@ -972,6 +997,7 @@ public class TestRunnerViewPart extends ViewPart {
 	 * Listen for for modifications to Java elements
 	 */
 	private class DirtyListener implements IElementChangedListener {
+		@Override
 		public void elementChanged(ElementChangedEvent event) {
 			processDelta(event.getDelta());
 		}
@@ -1091,7 +1117,7 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	public TestRunnerViewPart() {
-		fImagesToDispose= new ArrayList<Image>();
+		fImagesToDispose= new ArrayList<>();
 
 		fStackViewIcon= createManagedImage("eview16/stackframe.gif");//$NON-NLS-1$
 		fTestRunOKIcon= createManagedImage("eview16/junitsucc.gif"); //$NON-NLS-1$
@@ -1420,6 +1446,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 	private void handleStopped() {
 		postSyncRunnable(new Runnable() {
+			@Override
 			public void run() {
 				if (isDisposed())
 					return;
@@ -1674,6 +1701,7 @@ action enablement
 
 	protected void postShowTestResultsView() {
 		postSyncRunnable(new Runnable() {
+			@Override
 			public void run() {
 				if (isDisposed())
 					return;
@@ -1877,8 +1905,10 @@ action enablement
 
 	private void addResizeListener(Composite parent) {
 		parent.addControlListener(new ControlListener() {
+			@Override
 			public void controlMoved(ControlEvent e) {
 			}
+			@Override
 			public void controlResized(ControlEvent e) {
 				computeOrientation();
 			}
@@ -1920,6 +1950,7 @@ action enablement
 		fRerunLastTestAction= new RerunLastAction();
 		IHandlerService handlerService= getSite().getWorkbenchWindow().getService(IHandlerService.class);
 		IHandler handler = new AbstractHandler() {
+			@Override
 			public Object execute(ExecutionEvent event) throws ExecutionException {
 				fRerunLastTestAction.run();
 				return null;
@@ -1933,6 +1964,7 @@ action enablement
 
 		fRerunFailedFirstAction= new RerunLastFailedFirstAction();
 		handler = new AbstractHandler() {
+			@Override
 			public Object execute(ExecutionEvent event) throws ExecutionException {
 				fRerunFailedFirstAction.run();
 				return null;
@@ -1989,6 +2021,7 @@ action enablement
 		fActivateOnErrorAction= new ActivateOnErrorAction();
 		viewMenu.add(fActivateOnErrorAction);
 		fViewMenuListener= new IMenuListener() {
+			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				fActivateOnErrorAction.update();
 			}
@@ -2044,6 +2077,7 @@ action enablement
 
 	private void showFailure(final TestElement test) {
 		postSyncRunnable(new Runnable() {
+			@Override
 			public void run() {
 				if (!isDisposed())
 					fFailureTrace.showFailure(test);
@@ -2090,6 +2124,7 @@ action enablement
 			fViewImage= fTestRunFailDirtyIcon;
 
 		Runnable r= new Runnable() {
+			@Override
 			public void run() {
 				if (isDisposed())
 					return;
@@ -2148,6 +2183,7 @@ action enablement
 
 	private void postSyncProcessChanges() {
 		postSyncRunnable(new Runnable() {
+			@Override
 			public void run() {
 				processChangesInUI();
 			}
@@ -2191,6 +2227,7 @@ action enablement
 	static void importTestRunSession(final String url) {
 		try {
 			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					JUnitModel.importTestRunSession(url, monitor);
 				}

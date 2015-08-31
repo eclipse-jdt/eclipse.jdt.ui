@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 		super();
 		fDeclaration= decl;
 		fAccessMode= FlowInfo.UNUSED;
-		fReferences= new ArrayList<SimpleName>(2);
+		fReferences= new ArrayList<>(2);
 		fOperatorPrecedence= -1;
 	}
 

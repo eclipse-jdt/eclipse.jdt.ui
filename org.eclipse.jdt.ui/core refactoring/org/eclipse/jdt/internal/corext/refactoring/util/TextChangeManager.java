@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
  */
 public class TextChangeManager {
 
-	private Map<ICompilationUnit, TextChange> fMap= new HashMap<ICompilationUnit, TextChange>(10);
+	private Map<ICompilationUnit, TextChange> fMap= new HashMap<>(10);
 
 	private final boolean fKeepExecutedTextEdits;
 
@@ -89,6 +89,7 @@ public class TextChangeManager {
 		ICompilationUnit[] cus= cuSet.toArray(new ICompilationUnit[cuSet.size()]);
 		// sort by cu name:
 		Arrays.sort(cus, new Comparator<ICompilationUnit>() {
+			@Override
 			public int compare(ICompilationUnit o1, ICompilationUnit o2) {
 				String name1= o1.getElementName();
 				String name2= o2.getElementName();

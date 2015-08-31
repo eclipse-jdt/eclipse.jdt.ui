@@ -37,7 +37,7 @@ public class LocalDeclarationAnalyzer extends ASTVisitor {
 
 	private LocalDeclarationAnalyzer(Selection selection) {
 		fSelection= selection;
-		fAffectedLocals= new ArrayList<VariableDeclaration>(1);
+		fAffectedLocals= new ArrayList<>(1);
 	}
 
 	@Override

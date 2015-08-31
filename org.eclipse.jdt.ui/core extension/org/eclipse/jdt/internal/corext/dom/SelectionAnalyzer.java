@@ -120,7 +120,7 @@ public class SelectionAnalyzer extends GenericVisitor {
 	}
 
 	protected void handleFirstSelectedNode(ASTNode node) {
-		fSelectedNodes= new ArrayList<ASTNode>(5);
+		fSelectedNodes= new ArrayList<>(5);
 		fSelectedNodes.add(node);
 	}
 

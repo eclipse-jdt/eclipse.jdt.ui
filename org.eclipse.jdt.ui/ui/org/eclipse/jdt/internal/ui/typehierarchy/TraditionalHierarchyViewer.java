@@ -84,9 +84,6 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 			return count;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyContentProvider#getRootTypes(java.util.List)
-		 */
 		@Override
 		protected final void getRootTypes(List<IType> res) {
 			ITypeHierarchy hierarchy= getHierarchy();

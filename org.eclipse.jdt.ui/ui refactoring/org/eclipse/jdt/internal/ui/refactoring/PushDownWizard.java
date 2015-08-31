@@ -118,6 +118,7 @@ public final class PushDownWizard extends RefactoringWizard {
 				super.dispose();
 			}
 
+			@Override
 			public Image getColumnImage(final Object element, final int index) {
 				final MemberActionInfo info= (MemberActionInfo) element;
 				switch (index) {
@@ -131,6 +132,7 @@ public final class PushDownWizard extends RefactoringWizard {
 				}
 			}
 
+			@Override
 			public String getColumnText(final Object element, final int index) {
 				final MemberActionInfo info= (MemberActionInfo) element;
 				switch (index) {
@@ -147,12 +149,14 @@ public final class PushDownWizard extends RefactoringWizard {
 
 		private class PushDownCellModifier implements ICellModifier {
 
+			@Override
 			public boolean canModify(final Object element, final String property) {
 				if (!ACTION_PROPERTY.equals(property))
 					return false;
 				return ((MemberActionInfo) element).isEditable();
 			}
 
+			@Override
 			public Object getValue(final Object element, final String property) {
 				if (!ACTION_PROPERTY.equals(property))
 					return null;
@@ -161,6 +165,7 @@ public final class PushDownWizard extends RefactoringWizard {
 				return new Integer(info.getAction());
 			}
 
+			@Override
 			public void modify(final Object element, final String property, final Object value) {
 				if (!ACTION_PROPERTY.equals(property))
 					return;
@@ -318,6 +323,7 @@ public final class PushDownWizard extends RefactoringWizard {
 			});
 		}
 
+		@Override
 		public void createControl(final Composite parent) {
 			final Composite composite= new Composite(parent, SWT.NONE);
 			composite.setLayout(new GridLayout());
@@ -360,12 +366,14 @@ public final class PushDownWizard extends RefactoringWizard {
 			fTableViewer.setLabelProvider(new MemberActionInfoLabelProvider());
 			fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
+				@Override
 				public void selectionChanged(final SelectionChangedEvent event) {
 					PushDownInputPage.this.updateButtonEnablementState((IStructuredSelection) event.getSelection());
 				}
 			});
 			fTableViewer.addCheckStateListener(new ICheckStateListener() {
 
+				@Override
 				public void checkStateChanged(final CheckStateChangedEvent event) {
 					final boolean checked= event.getChecked();
 					final MemberActionInfo info= (MemberActionInfo) event.getElement();
@@ -378,6 +386,7 @@ public final class PushDownWizard extends RefactoringWizard {
 			});
 			fTableViewer.addDoubleClickListener(new IDoubleClickListener() {
 
+				@Override
 				public void doubleClick(final DoubleClickEvent event) {
 					PushDownInputPage.this.editSelectedMembers();
 				}
@@ -417,7 +426,7 @@ public final class PushDownWizard extends RefactoringWizard {
 
 		// String -> Integer
 		private Map<String, Integer> createStringMappingForSelectedElements() {
-			final Map<String, Integer> result= new HashMap<String, Integer>();
+			final Map<String, Integer> result= new HashMap<>();
 			int action= MemberActionInfo.PUSH_DOWN_ACTION;
 			result.put(MemberActionInfoLabelProvider.getActionLabel(action), new Integer(action));
 			int action1= MemberActionInfo.PUSH_ABSTRACT_ACTION;
@@ -458,7 +467,7 @@ public final class PushDownWizard extends RefactoringWizard {
 
 		private MemberActionInfo[] getActiveInfos() {
 			final MemberActionInfo[] infos= fProcessor.getMemberActionInfos();
-			final List<MemberActionInfo> result= new ArrayList<MemberActionInfo>(infos.length);
+			final List<MemberActionInfo> result= new ArrayList<>(infos.length);
 			for (int index= 0; index < infos.length; index++) {
 				final MemberActionInfo info= infos[index];
 				if (info.isActive())
@@ -500,7 +509,7 @@ public final class PushDownWizard extends RefactoringWizard {
 
 		private IMember[] getMembers() {
 			final MemberActionInfo[] infos= (MemberActionInfo[]) fTableViewer.getInput();
-			final List<IMember> result= new ArrayList<IMember>(infos.length);
+			final List<IMember> result= new ArrayList<>(infos.length);
 			for (int index= 0; index < infos.length; index++) {
 				result.add(infos[index].getMember());
 			}
@@ -517,6 +526,7 @@ public final class PushDownWizard extends RefactoringWizard {
 			try {
 				PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, new IRunnableWithProgress() {
 
+					@Override
 					public void run(final IProgressMonitor pm) throws InvocationTargetException {
 						try {
 							fProcessor.computeAdditionalRequiredMembersToPushDown(pm);
@@ -551,6 +561,7 @@ public final class PushDownWizard extends RefactoringWizard {
 			fTableViewer.setCellEditors(new CellEditor[] { null, comboBoxCellEditor});
 			fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
+				@Override
 				public void selectionChanged(final SelectionChangedEvent event) {
 					if (comboBoxCellEditor.getControl() == null & !table.isDisposed())
 						comboBoxCellEditor.create(table);

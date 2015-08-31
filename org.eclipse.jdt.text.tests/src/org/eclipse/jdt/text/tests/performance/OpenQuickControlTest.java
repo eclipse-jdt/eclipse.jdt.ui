@@ -25,7 +25,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
  */
 public abstract class OpenQuickControlTest extends TextPerformanceTestCase {
 
-	private static final Class THIS= OpenQuickControlTest.class;
+	private static final Class<OpenQuickControlTest> THIS= OpenQuickControlTest.class;
 
 	private static final int MEASURED_RUNS= 200;
 
@@ -44,11 +44,13 @@ public abstract class OpenQuickControlTest extends TextPerformanceTestCase {
 		return suite;
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		ResourceTestHelper.delete(PATH + ORIG_NAME, ".java", getWarmUpRuns() + getMeasuredRuns());
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		setWarmUpRuns(WARM_UP_RUNS);

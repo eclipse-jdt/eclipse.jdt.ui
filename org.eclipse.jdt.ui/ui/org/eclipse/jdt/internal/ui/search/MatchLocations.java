@@ -45,30 +45,21 @@ public class MatchLocations {
 		public MatchLocationSelectionDialog(Shell parent, int initialSelection, int searchFor) {
 			super(parent);
 			fSearchFor= searchFor;
-			fButtons= new ArrayList<Button>();
+			fButtons= new ArrayList<>();
 			fCurrentSelection= initialSelection;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
-		 */
 		@Override
 		protected void configureShell(Shell shell) {
 			super.configureShell(shell);
 			shell.setText(SearchMessages.MatchLocations_dialog_title);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.dialogs.Dialog#isResizable()
-		 */
 		@Override
 		protected boolean isResizable() {
 			return true;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
-		 */
 		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite contents= (Composite) super.createDialogArea(parent);
@@ -272,7 +263,7 @@ public class MatchLocations {
 		if (nOptions > entryLimit) {
 			return SearchMessages.MatchLocations_match_locations_description;
 		}
-		ArrayList<String> args= new ArrayList<String>(3);
+		ArrayList<String> args= new ArrayList<>(3);
 		if (isSet(locations, IJavaSearchConstants.IMPORT_DECLARATION_TYPE_REFERENCE)) {
 			args.add(SearchMessages.MatchLocations_imports_description);
 		}

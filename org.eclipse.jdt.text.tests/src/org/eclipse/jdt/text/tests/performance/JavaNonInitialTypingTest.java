@@ -22,24 +22,27 @@ public class JavaNonInitialTypingTest extends NonInitialTypingTest {
 
 	private static final String SHORT_NAME_TYPING= "Java editor typing speed";
 
-	private static final Class THIS= JavaNonInitialTypingTest.class;
+	private static final Class<JavaNonInitialTypingTest> THIS= JavaNonInitialTypingTest.class;
 
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected String getScenarioId() {
 		if ("testTypeAMethod".equals(getName()))
 			return "org.eclipse.jdt.text.tests.performance.NonInitialTypingTest#testTypeAMethod()";
 		return super.getScenarioId();
 	}
 
+	@Override
 	protected String getSummaryName() {
 		if ("testTypeAMethod".equals(getName()))
 			return SHORT_NAME_TYPING;
 		return null;
 	}
 
+	@Override
 	protected String getEditorId() {
 		return "org.eclipse.jdt.ui.CompilationUnitEditor";
 	}

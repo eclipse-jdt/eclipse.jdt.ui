@@ -38,6 +38,7 @@ class InclusivePositionUpdater implements IPositionUpdater {
 	/*
 	 * @see org.eclipse.jface.text.IPositionUpdater#update(org.eclipse.jface.text.DocumentEvent)
 	 */
+	@Override
 	public void update(DocumentEvent event) {
 
 		int eventOffset= event.getOffset();

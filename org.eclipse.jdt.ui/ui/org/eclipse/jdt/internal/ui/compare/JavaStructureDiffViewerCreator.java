@@ -25,6 +25,7 @@ import org.eclipse.compare.IViewerCreator;
  */
 public class JavaStructureDiffViewerCreator implements IViewerCreator {
 
+	@Override
 	public Viewer createViewer(Composite parent, CompareConfiguration cc) {
 		return new JavaStructureDiffViewer(parent, cc);
 	}

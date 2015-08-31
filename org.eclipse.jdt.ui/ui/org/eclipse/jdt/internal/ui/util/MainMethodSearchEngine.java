@@ -59,9 +59,6 @@ public class MainMethodSearchEngine{
 				return (fStyle & IJavaElementSearchConstants.CONSIDER_BINARIES) != 0;
 			}
 
-			/* (non-Javadoc)
-			 * @see org.eclipse.jdt.core.search.SearchRequestor#acceptSearchMatch(org.eclipse.jdt.core.search.SearchMatch)
-			 */
 			@Override
 			public void acceptSearchMatch(SearchMatch match) throws CoreException {
 				Object enclosingElement= match.getElement();
@@ -98,7 +95,7 @@ public class MainMethodSearchEngine{
 	 * @throws CoreException
 	 */
 	public IType[] searchMainMethods(IProgressMonitor pm, IJavaSearchScope scope, int style) throws CoreException {
-		List<IType> typesFound= new ArrayList<IType>(200);
+		List<IType> typesFound= new ArrayList<>(200);
 
 		SearchPattern pattern= SearchPattern.createPattern("main(String[]) void", //$NON-NLS-1$
 				IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
@@ -128,6 +125,7 @@ public class MainMethodSearchEngine{
 		final IType[][] res= new IType[1][];
 
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
 					res[0]= searchMainMethods(pm, scope, style);

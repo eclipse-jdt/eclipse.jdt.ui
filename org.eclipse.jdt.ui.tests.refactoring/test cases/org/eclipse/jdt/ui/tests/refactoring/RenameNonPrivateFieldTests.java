@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,9 +16,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -30,6 +27,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
+import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -42,14 +40,17 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class RenameNonPrivateFieldTests extends RefactoringTest {
 
-	private static final Class clazz= RenameNonPrivateFieldTests.class;
+	private static final Class<RenameNonPrivateFieldTests> clazz= RenameNonPrivateFieldTests.class;
 	private static final String REFACTORING_PATH= "RenameNonPrivateField/";
 
 	private static final boolean BUG_79990_CORE_SEARCH_METHOD_DECL= true;
 
-	private Object fPrefixPref;
+	private String fPrefixPref;
 
 	//Test methods can configure these fields:
 	private boolean fUpdateReferences= true;
@@ -70,22 +71,25 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 		return new RefactoringTestSetup(someTest);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		fPrefixPref= options.get(JavaCore.CODEASSIST_FIELD_PREFIXES);
 		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, getPrefixes());
 		JavaCore.setOptions(options);
 		fIsPreDeltaTest= true;
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		Hashtable options= JavaCore.getOptions();
+		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, fPrefixPref);
 		JavaCore.setOptions(options);
 	}
@@ -140,9 +144,9 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 		RenameRefactoring refactoring= (RenameRefactoring) createRefactoring(descriptor);
 		RenameFieldProcessor processor= (RenameFieldProcessor) refactoring.getProcessor();
 
-		List elements= new ArrayList();
+		List<IAnnotatable> elements= new ArrayList<>();
 		elements.add(field);
-		List args= new ArrayList();
+		List<RenameArguments> args= new ArrayList<>();
 		args.add(new RenameArguments(newFieldName, fUpdateReferences));
 		if (fRenameGetter) {
 			elements.add(processor.getGetter());
@@ -160,7 +164,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest {
 
 		ParticipantTesting.testRename(
 				renameHandles,
-				(RenameArguments[]) args.toArray(new RenameArguments[args.size()]));
+				args.toArray(new RenameArguments[args.size()]));
 
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());

@@ -197,7 +197,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 200);
 			final IClasspathEntry entry= root.getRawClasspathEntry();
 			final IClasspathEntry[] entries= project.getRawClasspath();
-			final List<IClasspathEntry> list= new ArrayList<IClasspathEntry>();
+			final List<IClasspathEntry> list= new ArrayList<>();
 			list.addAll(Arrays.asList(entries));
 			final IFileStore store= EFS.getLocalFileSystem().getStore(JavaPlugin.getDefault().getStateLocation().append(STUB_FOLDER).append(project.getElementName()));
 			if (store.fetchInfo(EFS.NONE, new SubProgressMonitor(monitor, 25, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)).exists())
@@ -250,7 +250,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 	 * The packages which already have been processed (element type:
 	 * &lt;IPackageFragment&gt;)
 	 */
-	private final Collection<IJavaElement> fProcessedFragments= new HashSet<IJavaElement>();
+	private final Collection<IJavaElement> fProcessedFragments= new HashSet<>();
 
 	/** The temporary source folder, or <code>null</code> */
 	private IFolder fSourceFolder= null;
@@ -286,9 +286,6 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 		super(caption, title, description);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected RefactoringStatus aboutToPerformHistory(final IProgressMonitor monitor) {
 		final RefactoringStatus status= new RefactoringStatus();
@@ -337,9 +334,6 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 		return status;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected RefactoringStatus aboutToPerformRefactoring(final Refactoring refactoring, final RefactoringDescriptor descriptor, final IProgressMonitor monitor) {
 		final RefactoringStatus status= new RefactoringStatus();
@@ -417,7 +411,7 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 				try {
 					final SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 40, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
 					final IJavaElement[] elements= root.getChildren();
-					final List<IPackageFragment> list= new ArrayList<IPackageFragment>(elements.length);
+					final List<IPackageFragment> list= new ArrayList<>(elements.length);
 					try {
 						subMonitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, elements.length);
 						for (int index= 0; index < elements.length; index++) {
@@ -483,9 +477,6 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 		return status;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected RefactoringContext createRefactoringContext(RefactoringDescriptor descriptor, RefactoringStatus status, IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(descriptor);
@@ -638,9 +629,6 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 		return handle;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected RefactoringStatus historyPerformed(final IProgressMonitor monitor) {
 		try {
@@ -665,18 +653,12 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean performCancel() {
 		fCancelled= true;
 		return super.performCancel();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected RefactoringStatus refactoringPerformed(final Refactoring refactoring, final IProgressMonitor monitor) {
 		try {
@@ -697,9 +679,6 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean selectPreviewChange(final Change change) {
 		if (fSourceFolder != null) {
@@ -715,9 +694,6 @@ public abstract class BinaryRefactoringHistoryWizard extends RefactoringHistoryW
 		return super.selectPreviewChange(change);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean selectStatusEntry(final RefactoringStatusEntry entry) {
 		if (fSourceFolder != null) {

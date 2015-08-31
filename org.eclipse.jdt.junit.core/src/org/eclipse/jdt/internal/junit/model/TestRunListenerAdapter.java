@@ -61,78 +61,59 @@ public class TestRunListenerAdapter implements ITestSessionListener {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.junit.model.ITestSessionListener#sessionStarted()
-	 */
+	@Override
 	public void sessionStarted() {
 		// wait until all test are added
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.junit.model.ITestSessionListener#sessionEnded(long)
-	 */
+	@Override
 	public void sessionEnded(long elapsedTime) {
 		fireSessionFinished();
 		fSession.swapOut();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.junit.model.ITestSessionListener#sessionStopped(long)
-	 */
+	@Override
 	public void sessionStopped(long elapsedTime) {
 		fireSessionFinished();
 		fSession.swapOut();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.junit.model.ITestSessionListener#sessionTerminated()
-	 */
+	@Override
 	public void sessionTerminated() {
 		fSession.swapOut();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.junit.model.ITestSessionListener#testAdded(org.eclipse.jdt.internal.junit.model.TestElement)
-	 */
+	@Override
 	public void testAdded(TestElement testElement) {
 		// do nothing
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.junit.model.ITestSessionListener#runningBegins()
-	 */
+	@Override
 	public void runningBegins() {
 		fireSessionStarted();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.junit.model.ITestSessionListener#testStarted(org.eclipse.jdt.internal.junit.model.TestCaseElement)
-	 */
+	@Override
 	public void testStarted(TestCaseElement testCaseElement) {
 		fireTestCaseStarted(testCaseElement);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.junit.model.ITestSessionListener#testEnded(org.eclipse.jdt.internal.junit.model.TestCaseElement)
-	 */
+	@Override
 	public void testEnded(TestCaseElement testCaseElement) {
 		fireTestCaseFinished(testCaseElement);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.junit.model.ITestSessionListener#testFailed(org.eclipse.jdt.internal.junit.model.TestElement, org.eclipse.jdt.internal.junit.model.TestElement.Status, java.lang.String, java.lang.String, java.lang.String)
-	 */
+	@Override
 	public void testFailed(TestElement testElement, Status status, String trace, String expected, String actual) {
 		// ignore
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.junit.model.ITestSessionListener#testReran(org.eclipse.jdt.internal.junit.model.TestCaseElement, org.eclipse.jdt.internal.junit.model.TestElement.Status, java.lang.String, java.lang.String, java.lang.String)
-	 */
+	@Override
 	public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
 		// ignore
 	}
 
+	@Override
 	public boolean acceptsSwapToDisk() {
 		return true;
 	}

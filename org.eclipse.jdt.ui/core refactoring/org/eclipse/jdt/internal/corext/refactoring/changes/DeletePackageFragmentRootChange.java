@@ -93,9 +93,6 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 		return getRoot();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.JDTChange#getModifiedResource()
-	 */
 	@Override
 	protected IResource getModifiedResource() {
 		return getRoot().getResource();
@@ -119,7 +116,7 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange {
 
 		ResourceDescription rootDescription = ResourceDescription.fromResource(rootResource);
 		IJavaProject[] referencingProjects= JavaElementUtil.getReferencingProjects(root);
-		HashMap<IFile, String> classpathFilesContents= new HashMap<IFile, String>();
+		HashMap<IFile, String> classpathFilesContents= new HashMap<>();
 		for (int i= 0; i < referencingProjects.length; i++) {
 			IJavaProject javaProject= referencingProjects[i];
 			IFile classpathFile= javaProject.getProject().getFile(".classpath"); //$NON-NLS-1$

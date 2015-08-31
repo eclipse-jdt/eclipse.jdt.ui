@@ -195,7 +195,7 @@ public abstract class FlowInfo {
 
 	protected void addTypeVariable(ITypeBinding typeParameter) {
 		if (fTypeVariables == null)
-			fTypeVariables= new HashSet<ITypeBinding>();
+			fTypeVariables= new HashSet<>();
 		fTypeVariables.add(typeParameter);
 	}
 
@@ -252,7 +252,7 @@ public abstract class FlowInfo {
 	 * @return an array of local variable bindings conforming to the given type.
 	 */
 	public IVariableBinding[] get(FlowContext context, int mode) {
-		List<IVariableBinding> result= new ArrayList<IVariableBinding>();
+		List<IVariableBinding> result= new ArrayList<>();
 		int[] locals= getAccessModes();
 		if (locals == null)
 			return EMPTY_ARRAY;

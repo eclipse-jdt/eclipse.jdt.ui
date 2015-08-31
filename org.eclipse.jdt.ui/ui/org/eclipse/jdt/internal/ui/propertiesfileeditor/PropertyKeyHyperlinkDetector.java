@@ -56,6 +56,7 @@ public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 	/*
 	 * @see org.eclipse.jface.text.hyperlink.IHyperlinkDetector#detectHyperlinks(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion, boolean)
 	 */
+	@Override
 	public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
 		ITextEditor textEditor= (ITextEditor)getAdapter(ITextEditor.class);
 		if (region == null || textEditor == null)
@@ -176,6 +177,7 @@ public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 				/*
 				 * @see java.lang.Runnable#run()
 				 */
+				@Override
 				public void run() {
 					statusLine.setMessage(true, message, null);
 				}

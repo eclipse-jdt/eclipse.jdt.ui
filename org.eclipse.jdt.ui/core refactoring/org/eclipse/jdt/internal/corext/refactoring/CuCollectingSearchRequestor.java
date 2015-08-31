@@ -60,6 +60,7 @@ public class CuCollectingSearchRequestor extends CollectingSearchRequestor {
 	 * @throws CoreException
 	 * @deprecated
 	 */
+	@Deprecated
 	@Override
 	public final void acceptSearchMatch(SearchMatch match) throws CoreException {
 		if (filterMatch(match))

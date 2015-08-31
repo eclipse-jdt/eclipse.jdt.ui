@@ -58,7 +58,8 @@ public abstract class JavaPreview {
 	private final class JavaSourcePreviewerUpdater {
 
 	    final IPropertyChangeListener fontListener= new IPropertyChangeListener() {
-	        public void propertyChange(PropertyChangeEvent event) {
+	        @Override
+			public void propertyChange(PropertyChangeEvent event) {
 	            if (event.getProperty().equals(PreferenceConstants.EDITOR_TEXT_FONT)) {
 					final Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 					fSourceViewer.getTextWidget().setFont(font);
@@ -70,6 +71,7 @@ public abstract class JavaPreview {
 		};
 
 	    final IPropertyChangeListener propertyListener= new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (fViewerConfiguration.affectsTextPresentation(event)) {
 					fViewerConfiguration.handlePropertyChangeEvent(event);
@@ -85,6 +87,7 @@ public abstract class JavaPreview {
 		    fPreferenceStore.addPropertyChangeListener(propertyListener);
 
 			fSourceViewer.getTextWidget().addDisposeListener(new DisposeListener() {
+				@Override
 				public void widgetDisposed(DisposeEvent e) {
 					JFaceResources.getFontRegistry().removeListener(fontListener);
 					fPreferenceStore.removePropertyChangeListener(propertyListener);
@@ -113,7 +116,7 @@ public abstract class JavaPreview {
 		tools.setupJavaDocumentPartitioner( fPreviewDocument, IJavaPartitions.JAVA_PARTITIONING);
 
 		PreferenceStore prioritizedSettings= new PreferenceStore();
-		HashMap<String, String> complianceOptions= new HashMap<String, String>();
+		HashMap<String, String> complianceOptions= new HashMap<>();
 		JavaModelUtil.setComplianceOptions(complianceOptions, JavaModelUtil.VERSION_LATEST);
 		for (Entry<String, String> complianceOption : complianceOptions.entrySet()) {
 			prioritizedSettings.setValue(complianceOption.getKey(), complianceOption.getValue());

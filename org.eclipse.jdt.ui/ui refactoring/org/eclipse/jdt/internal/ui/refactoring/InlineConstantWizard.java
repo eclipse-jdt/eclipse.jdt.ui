@@ -74,6 +74,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 			setDescription(description);
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			initializeDialogUnits(parent);
 			fRefactoring= (InlineConstantRefactoring)getRefactoring();

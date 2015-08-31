@@ -45,6 +45,7 @@ public class JUnitProjectTestSetup extends TestSetup {
 	 * @see junit.framework.TestCase#setUp()
 	 * @since 3.1
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		String projectName= "JUnit_" + System.currentTimeMillis();
 		fgProject= JavaProjectHelper.createJavaProjectWithJUnitSource(projectName, "src", "bin");
@@ -54,6 +55,7 @@ public class JUnitProjectTestSetup extends TestSetup {
 	 * @see junit.framework.TestCase#tearDown()
 	 * @since 3.1
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		if (fgProject != null) {
 			JavaProjectHelper.delete(fgProject);

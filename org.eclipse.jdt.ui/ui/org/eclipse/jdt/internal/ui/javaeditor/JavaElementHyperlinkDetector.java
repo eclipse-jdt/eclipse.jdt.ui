@@ -65,6 +65,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 	/*
 	 * @see org.eclipse.jface.text.hyperlink.IHyperlinkDetector#detectHyperlinks(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion, boolean)
 	 */
+	@Override
 	public IHyperlink[] detectHyperlinks(ITextViewer textViewer, IRegion region, boolean canShowMultipleHyperlinks) {
 		ITextEditor textEditor= (ITextEditor)getAdapter(ITextEditor.class);
 		if (region == null || !(textEditor instanceof JavaEditor))
@@ -109,7 +110,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 			if (elements.length == 0)
 				return null;
 			
-			ArrayList<IHyperlink> links= new ArrayList<IHyperlink>(elements.length);
+			ArrayList<IHyperlink> links= new ArrayList<>(elements.length);
 			for (int i= 0; i < elements.length; i++) {
 				addHyperlinks(links, wordRegion, (SelectionDispatchAction)openAction, elements[i], elements.length > 1, (JavaEditor)textEditor);
 			}
@@ -174,7 +175,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 	 * @since 3.4
 	 */
 	private IJavaElement[] selectOpenableElements(IJavaElement[] elements) {
-		List<IJavaElement> result= new ArrayList<IJavaElement>(elements.length);
+		List<IJavaElement> result= new ArrayList<>(elements.length);
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement element= elements[i];
 			switch (element.getElementType()) {

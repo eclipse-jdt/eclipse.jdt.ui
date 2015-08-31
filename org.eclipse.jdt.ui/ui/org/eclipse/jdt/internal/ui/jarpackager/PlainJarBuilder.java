@@ -38,23 +38,16 @@ public class PlainJarBuilder extends JarBuilder {
 	private JarPackageData fJarPackage;
 	private JarWriter3 fJarWriter;
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public String getId() {
 		return BUILDER_ID;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public IManifestProvider getManifestProvider() {
 		return new ManifestProvider();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void open(JarPackageData jarPackage, Shell displayShell, MultiStatus statusMsg) throws CoreException {
 		super.open(jarPackage, displayShell, statusMsg);
@@ -62,23 +55,17 @@ public class PlainJarBuilder extends JarBuilder {
 		fJarWriter= new JarWriter3(fJarPackage, displayShell);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void writeFile(IFile resource, IPath destinationPath) throws CoreException {
 		fJarWriter.write(resource, destinationPath);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void writeArchive(ZipFile archiveRoot, IProgressMonitor progressMonitor) {
 		//do nothing, plain jar builder can not handle archives, use fat jar builder
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void close() throws CoreException {
 		if (fJarWriter != null) {
 			fJarWriter.close();

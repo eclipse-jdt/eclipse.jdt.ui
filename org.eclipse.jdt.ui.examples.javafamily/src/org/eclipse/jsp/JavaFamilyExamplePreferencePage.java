@@ -23,9 +23,6 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 public class JavaFamilyExamplePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
-	 */
 	protected Control createContents(Composite parent) {
 		Composite c= new Composite(parent, SWT.NULL);
 		//c.setLayout(new FillLayout());
@@ -49,9 +46,6 @@ public class JavaFamilyExamplePreferencePage extends PreferencePage implements I
 		return "Start JSP Indexing"; //$NON-NLS-1$
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
-	 */
 	public void init(IWorkbench workbench) {
 		// empty implementation
 	}

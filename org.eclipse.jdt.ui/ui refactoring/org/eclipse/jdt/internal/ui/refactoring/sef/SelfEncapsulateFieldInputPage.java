@@ -82,10 +82,11 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_CU);
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		fRefactoring= (SelfEncapsulateFieldRefactoring)getRefactoring();
 
-		fEnablements= new ArrayList<Control>();
+		fEnablements= new ArrayList<>();
 		loadSettings();
 
 		Composite result= new Composite(parent, SWT.NONE);
@@ -110,6 +111,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		fGetterName.setText(fRefactoring.getGetterName());
 		TextFieldNavigationHandler.install(fGetterName);
 		fGetterName.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				doGetterModified();
 			}
@@ -131,6 +133,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 			fSetterName.setText(fRefactoring.getSetterName());
 			fSetterName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fSetterName.addModifyListener(new ModifyListener() {
+				@Override
 				public void modifyText(ModifyEvent e) {
 					doSetterModified();
 				}

@@ -25,6 +25,7 @@ public abstract class AbstractRenameTypePerfTest extends RepeatingRefactoringPer
 		super(name);
 	}
 
+	@Override
 	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
 		ICompilationUnit cunit= generateSources(numberOfCus, numberOfRefs);
 		IType type= cunit.findPrimaryType();

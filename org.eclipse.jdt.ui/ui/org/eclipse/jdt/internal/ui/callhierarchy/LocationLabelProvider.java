@@ -29,9 +29,6 @@ class LocationLabelProvider extends LabelProvider implements ITableLabelProvider
         // Do nothing
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.LabelProvider#getText(java.lang.Object)
-     */
     @Override
 	public String getText(Object element) {
         return getColumnText(element, COLUMN_INFO);
@@ -73,20 +70,16 @@ class LocationLabelProvider extends LabelProvider implements ITableLabelProvider
         return buf.toString();
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
-     */
-    public Image getColumnImage(Object element, int columnIndex) {
+    @Override
+	public Image getColumnImage(Object element, int columnIndex) {
         if (columnIndex == COLUMN_ICON) {
             return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_SEARCH_OCCURRENCE);
         }
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
-     */
-    public String getColumnText(Object element, int columnIndex) {
+    @Override
+	public String getColumnText(Object element, int columnIndex) {
         if (element instanceof CallLocation) {
             CallLocation callLocation= (CallLocation) element;
 

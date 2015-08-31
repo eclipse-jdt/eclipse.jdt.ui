@@ -55,6 +55,7 @@ public class RenameRefactoringProposal implements IJavaCompletionProposal, IComp
 	/*
 	 * @see ICompletionProposal#apply(IDocument)
 	 */
+	@Override
 	public void apply(IDocument document) {
 		RenameJavaElementAction renameAction= new RenameJavaElementAction(fEditor);
 		renameAction.doRun();
@@ -63,6 +64,7 @@ public class RenameRefactoringProposal implements IJavaCompletionProposal, IComp
 	/*
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
+	@Override
 	public Point getSelection(IDocument document) {
 		return null;
 	}
@@ -70,6 +72,7 @@ public class RenameRefactoringProposal implements IJavaCompletionProposal, IComp
 	/*
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
+	@Override
 	public String getAdditionalProposalInfo() {
 		return CorrectionMessages.RenameRefactoringProposal_additionalInfo;
 	}
@@ -77,6 +80,7 @@ public class RenameRefactoringProposal implements IJavaCompletionProposal, IComp
 	/*
 	 * @see ICompletionProposal#getDisplayString()
 	 */
+	@Override
 	public String getDisplayString() {
 		String shortCutString= CorrectionCommandHandler.getShortCutString(getCommandId());
 		if (shortCutString != null) {
@@ -88,6 +92,7 @@ public class RenameRefactoringProposal implements IJavaCompletionProposal, IComp
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension6#getStyledDisplayString()
 	 */
+	@Override
 	public StyledString getStyledDisplayString() {
 		StyledString str= new StyledString(fLabel);
 
@@ -102,6 +107,7 @@ public class RenameRefactoringProposal implements IJavaCompletionProposal, IComp
 	/*
 	 * @see ICompletionProposal#getImage()
 	 */
+	@Override
 	public Image getImage() {
 		return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LINKED_RENAME);
 	}
@@ -109,6 +115,7 @@ public class RenameRefactoringProposal implements IJavaCompletionProposal, IComp
 	/*
 	 * @see ICompletionProposal#getContextInformation()
 	 */
+	@Override
 	public IContextInformation getContextInformation() {
 		return null;
 	}
@@ -116,6 +123,7 @@ public class RenameRefactoringProposal implements IJavaCompletionProposal, IComp
 	/*
 	 * @see IJavaCompletionProposal#getRelevance()
 	 */
+	@Override
 	public int getRelevance() {
 		return fRelevance;
 	}
@@ -123,6 +131,7 @@ public class RenameRefactoringProposal implements IJavaCompletionProposal, IComp
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IShortcutProposal#getProposalId()
 	 */
+	@Override
 	public String getCommandId() {
 		return IJavaEditorActionDefinitionIds.RENAME_ELEMENT;
 	}

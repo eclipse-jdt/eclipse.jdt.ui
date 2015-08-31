@@ -43,9 +43,6 @@ public final class PullUpWizard extends RefactoringWizard {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_PULL_UP);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void addUserInputPages() {
 		final PullUpMethodPage page= new PullUpMethodPage(fProcessor);

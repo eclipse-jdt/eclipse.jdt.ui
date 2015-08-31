@@ -23,6 +23,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
  */
 public class NullRefactoring extends Refactoring {
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1);
 		pm.worked(1);
@@ -31,6 +32,7 @@ public class NullRefactoring extends Refactoring {
 	}
 
 
+	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1);
 		pm.worked(1);
@@ -38,6 +40,7 @@ public class NullRefactoring extends Refactoring {
 		return new RefactoringStatus();
 	}
 
+	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1);
 		pm.worked(1);
@@ -45,6 +48,7 @@ public class NullRefactoring extends Refactoring {
 		return new RefactoringStatus();
 	}
 
+	@Override
 	public String getName() {
 		return "Null Refactoring";
 	}

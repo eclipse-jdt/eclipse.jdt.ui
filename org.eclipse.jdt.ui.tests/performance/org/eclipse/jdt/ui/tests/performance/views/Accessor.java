@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,13 +24,14 @@ import org.eclipse.core.runtime.Assert;
  * <p>
  * <strong>Note:</strong> Copied from org.eclipse.text.tests.
  * </p>
+ * @param <E> The 
  * 
  * @since 3.5
  */
-class Accessor {
+class Accessor<E> {
 
 	/** The class to access. */
-	private Class fClass;
+	private Class<E> fClass;
 	/** The instance to access. */
 	private Object fInstance;
 
@@ -42,7 +43,7 @@ class Accessor {
 	 * @param instance the instance
 	 * @param clazz the class
 	 */
-	public Accessor(Object instance, Class clazz) {
+	public Accessor(Object instance, Class<E> clazz) {
 		org.eclipse.core.runtime.Assert.isNotNull(instance);
 		Assert.isNotNull(clazz);
 		fInstance= instance;
@@ -64,7 +65,9 @@ class Accessor {
 		Assert.isNotNull(classLoader);
 		fInstance= instance;
 		try {
-			fClass= Class.forName(className, true, classLoader);
+			@SuppressWarnings("unchecked")
+			Class<E> clazz= (Class<E>) Class.forName(className, true, classLoader);
+			fClass= clazz;
 		} catch (ClassNotFoundException e) {
 			fail();
 		} catch (ExceptionInInitializerError e) {
@@ -96,15 +99,17 @@ class Accessor {
 	 * @param constructorTypes the types of the constructor arguments
 	 * @param constructorArgs the constructor arguments
 	 */
-	public Accessor(String className, ClassLoader classLoader, Class[] constructorTypes, Object[] constructorArgs) {
+	public Accessor(String className, ClassLoader classLoader, Class<?>[] constructorTypes, Object[] constructorArgs) {
 		try {
-			fClass= Class.forName(className, true, classLoader);
+			@SuppressWarnings("unchecked")
+			Class<E> clazz= (Class<E>) Class.forName(className, true, classLoader);
+			fClass= clazz;
 		} catch (ClassNotFoundException e) {
 			fail();
 		} catch (ExceptionInInitializerError e) {
 			fail();
 		}
-		Constructor constructor= null;
+		Constructor<E> constructor= null;
 		try {
 			constructor= fClass.getDeclaredConstructor(constructorTypes);
 		} catch (SecurityException e2) {
@@ -138,7 +143,9 @@ class Accessor {
 	 */
 	public Accessor(String className, ClassLoader classLoader) {
 		try {
-			fClass= Class.forName(className, true, classLoader);
+			@SuppressWarnings("unchecked")
+			Class<E> clazz= (Class<E>) Class.forName(className, true, classLoader);
+			fClass= clazz;
 		} catch (ClassNotFoundException e) {
 			fail();
 		} catch (ExceptionInInitializerError e) {
@@ -170,7 +177,7 @@ class Accessor {
 	 * @param arguments the method arguments
 	 * @return the method return value
 	 */
-	public Object invoke(String methodName, Class[] types, Object[] arguments) {
+	public Object invoke(String methodName, Class<?>[] types, Object[] arguments) {
 		Method method= null;
 		try {
 			method= fClass.getDeclaredMethod(methodName, types);
@@ -314,12 +321,12 @@ class Accessor {
 		return field;
 	}
 
-	private static Class[] getTypes(Object[] objects) {
+	private static Class<?>[] getTypes(Object[] objects) {
 		if (objects == null)
 			return null;
 
 		int length= objects.length;
-		Class[] classes= new Class[length];
+		Class<?>[] classes= new Class[length];
 		for (int i= 0; i < length; i++) {
 			Assert.isNotNull(objects[i]);
 			classes[i]= objects[i].getClass();

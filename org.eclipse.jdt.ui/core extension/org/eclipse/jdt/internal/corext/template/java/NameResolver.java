@@ -80,7 +80,7 @@ public class NameResolver extends TemplateVariableResolver {
 	}
 
 	private Object[] flatten(Object[][] allValues) {
-		List<Object> flattened= new ArrayList<Object>(allValues.length);
+		List<Object> flattened= new ArrayList<>(allValues.length);
 		for (int i= 0; i < allValues.length; i++) {
 			flattened.addAll(Arrays.asList(allValues[i]));
 		}

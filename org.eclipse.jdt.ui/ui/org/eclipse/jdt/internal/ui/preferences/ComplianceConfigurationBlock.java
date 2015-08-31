@@ -190,9 +190,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		setDefaultCompilerComplianceValues();
 
 		fBlockEnableState= null;
-		fComplianceFollowsEEControls= new ArrayList<Control>();
-		fComplianceControls= new ArrayList<Control>();
-		fComplianceChildControls= new ArrayList<Control>();
+		fComplianceFollowsEEControls= new ArrayList<>();
+		fComplianceControls= new ArrayList<>();
+		fComplianceChildControls= new ArrayList<>();
 
 		fComplianceStatus= new StatusInfo();
 
@@ -224,9 +224,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		return keys;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#settingsUpdated()
-	 */
 	@Override
 	protected void settingsUpdated() {
 		setValue(INTR_DEFAULT_COMPLIANCE, getCurrentCompliance());
@@ -449,6 +446,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, new String[] { getVersionLabel(VERSION_1_3), getVersionLabel(VERSION_1_3) }));
 		fJRE50InfoText.setVisible(false);
 		fJRE50InfoText.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				if ("1".equals(e.text)) { //$NON-NLS-1$
 					openJREInstallPreferencePage(false);
@@ -458,6 +456,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 					openBuildPathPropertyPage();
 				}
 			}
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				widgetDefaultSelected(e);
 			}
@@ -479,7 +478,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	protected final void openBuildPathPropertyPage() {
 		if (getPreferenceContainer() != null) {
-			Map<Object, IClasspathEntry> data= new HashMap<Object, IClasspathEntry>();
+			Map<Object, IClasspathEntry> data= new HashMap<>();
 			data.put(BuildPathsPropertyPage.DATA_REVEAL_ENTRY, JavaRuntime.getDefaultJREContainerEntry());
 			getPreferenceContainer().openPage(BuildPathsPropertyPage.PROP_ID, data);
 		}
@@ -498,9 +497,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		validateComplianceStatus();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
 		if (!areSettingsEnabled()) {
@@ -696,9 +692,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#useProjectSpecificSettings(boolean)
-	 */
 	@Override
 	public void useProjectSpecificSettings(boolean enable) {
 		super.useProjectSpecificSettings(enable);
@@ -1010,7 +1003,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		IVMInstall defaultVMInstall= JavaRuntime.getDefaultVMInstall();
 		if (defaultVMInstall instanceof IVMInstall2 && isOriginalDefaultCompliance()) {
 			String complianceLevel= JavaModelUtil.getCompilerCompliance((IVMInstall2)defaultVMInstall, JavaCore.VERSION_1_4);
-			Map<String, String> complianceOptions= new HashMap<String, String>();
+			Map<String, String> complianceOptions= new HashMap<>();
 			JavaModelUtil.setComplianceOptions(complianceOptions, complianceLevel);
 			setDefaultValue(PREF_COMPLIANCE, complianceOptions.get(PREF_COMPLIANCE.getName()));
 			setDefaultValue(PREF_PB_ASSERT_AS_IDENTIFIER, complianceOptions.get(PREF_PB_ASSERT_AS_IDENTIFIER.getName()));

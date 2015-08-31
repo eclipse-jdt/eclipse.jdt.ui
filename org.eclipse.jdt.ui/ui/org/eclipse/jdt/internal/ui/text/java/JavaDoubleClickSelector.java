@@ -106,6 +106,7 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy impl
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
 		 */
+		@Override
 		public void setSourceVersion(String version) {
 			if (JavaCore.VERSION_1_5.compareTo(version) <= 0)
 				fSelectAnnotations= true;
@@ -331,6 +332,7 @@ public class JavaDoubleClickSelector extends DefaultTextDoubleClickStrategy impl
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
 	 */
+	@Override
 	public void setSourceVersion(String version) {
 		fPairMatcher.setSourceVersion(version);
 		fWordDetector.setSourceVersion(version);

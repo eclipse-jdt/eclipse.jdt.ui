@@ -21,7 +21,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class UserInterfaceManager {
 
-	private Map<Class<? extends RefactoringProcessor>, Tuple> fMap= new HashMap<Class<? extends RefactoringProcessor>, Tuple>();
+	private Map<Class<? extends RefactoringProcessor>, Tuple> fMap= new HashMap<>();
 
 	private static class Tuple {
 		private Class<? extends UserInterfaceStarter> starter;
@@ -38,7 +38,7 @@ public class UserInterfaceManager {
 
 
 	public UserInterfaceStarter getStarter(Refactoring refactoring) {
-		RefactoringProcessor processor= (RefactoringProcessor)refactoring.getAdapter(RefactoringProcessor.class);
+		RefactoringProcessor processor= refactoring.getAdapter(RefactoringProcessor.class);
 		if (processor == null)
 			return null;
 		Tuple tuple= fMap.get(processor.getClass());

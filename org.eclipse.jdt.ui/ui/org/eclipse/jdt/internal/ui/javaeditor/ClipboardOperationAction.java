@@ -171,25 +171,16 @@ public final class ClipboardOperationAction extends TextEditorAction {
 
 		private static final int TYPEID = registerType(TYPE_NAME);
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.swt.dnd.Transfer#getTypeIds()
-		 */
 		@Override
 		protected int[] getTypeIds() {
 			return new int[] { TYPEID };
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.swt.dnd.Transfer#getTypeNames()
-		 */
 		@Override
 		protected String[] getTypeNames() {
 			return new String[] { TYPE_NAME };
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.swt.dnd.Transfer#javaToNative(java.lang.Object, org.eclipse.swt.dnd.TransferData)
-		 */
 		@Override
 		protected void javaToNative(Object data, TransferData transferData) {
 			if (data instanceof ClipboardData) {
@@ -201,9 +192,6 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * Method declared on Transfer.
-		 */
 		@Override
 		protected Object nativeToJava(TransferData transferData) {
 			byte[] bytes = (byte[]) super.nativeToJava(transferData);
@@ -259,9 +247,6 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.action.IAction#run()
-	 */
 	@Override
 	public void run() {
 		if (fOperationCode == -1 || fOperationTarget == null)
@@ -275,6 +260,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			return;
 
 		BusyIndicator.showWhile(getDisplay(), new Runnable() {
+			@Override
 			public void run() {
 				internalDoOperation();
 			}
@@ -335,9 +321,6 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.IUpdate#update()
-	 */
 	@Override
 	public void update() {
 		super.update();
@@ -355,9 +338,6 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		setEnabled(isEnabled);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.texteditor.TextEditorAction#setEditor(org.eclipse.ui.texteditor.ITextEditor)
-	 */
 	@Override
 	public void setEditor(ITextEditor editor) {
 		super.setEditor(editor);
@@ -396,8 +376,8 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				if (textData == null)
 					return;
 
-				ArrayList<Object> datas= new ArrayList<Object>(3);
-				ArrayList<ByteArrayTransfer> transfers= new ArrayList<ByteArrayTransfer>(3);
+				ArrayList<Object> datas= new ArrayList<>(3);
+				ArrayList<ByteArrayTransfer> transfers= new ArrayList<>(3);
 				datas.add(textData);
 				transfers.add(TextTransfer.getInstance());
 
@@ -464,8 +444,8 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			}
 		}
 
-		ArrayList<SimpleName> typeImportsRefs= new ArrayList<SimpleName>();
-		ArrayList<SimpleName> staticImportsRefs= new ArrayList<SimpleName>();
+		ArrayList<SimpleName> typeImportsRefs= new ArrayList<>();
+		ArrayList<SimpleName> staticImportsRefs= new ArrayList<>();
 
 		ImportReferencesCollector.collect(astRoot, inputElement.getJavaProject(), new Region(offset, length), typeImportsRefs, staticImportsRefs);
 
@@ -473,7 +453,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			return null;
 		}
 
-		HashSet<String> namesToImport= new HashSet<String>(typeImportsRefs.size());
+		HashSet<String> namesToImport= new HashSet<>(typeImportsRefs.size());
 		for (int i= 0; i < typeImportsRefs.size(); i++) {
 			Name curr= typeImportsRefs.get(i);
 			IBinding binding= curr.resolveBinding();
@@ -495,7 +475,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			}
 		}
 
-		HashSet<String> staticsToImport= new HashSet<String>(staticImportsRefs.size());
+		HashSet<String> staticsToImport= new HashSet<>(staticImportsRefs.size());
 		for (int i= 0; i < staticImportsRefs.size(); i++) {
 			Name curr= staticImportsRefs.get(i);
 			IBinding binding= curr.resolveBinding();
@@ -571,6 +551,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 
 		try {
 			getProgressService().busyCursorWhile(new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						JavaModelUtil.applyEdit(unit, rewrite.rewriteImports(monitor), false, null);

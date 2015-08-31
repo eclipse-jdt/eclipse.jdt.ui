@@ -64,7 +64,7 @@ public final class ExtractConstantDescriptor extends JavaRefactoringDescriptor {
 	 *
 	 * @since 1.2
 	 */
-	public ExtractConstantDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public ExtractConstantDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.EXTRACT_CONSTANT, project, description, comment, arguments, flags);
 	}
 

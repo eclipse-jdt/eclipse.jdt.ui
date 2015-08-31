@@ -94,9 +94,6 @@ public class JavaElementComparator extends ViewerComparator {
 		fMemberOrderCache= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ViewerComparator#category(java.lang.Object)
-	 */
 	@Override
 	public int category(Object element) {
 		if (element instanceof IJavaElement) {
@@ -182,9 +179,6 @@ public class JavaElementComparator extends ViewerComparator {
 		return offset + MEMBERSOFFSET;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ViewerComparator#compare(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-	 */
 	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		int cat1= category(e1);

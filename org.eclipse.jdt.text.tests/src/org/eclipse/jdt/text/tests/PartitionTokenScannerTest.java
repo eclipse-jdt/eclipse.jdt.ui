@@ -42,6 +42,7 @@ public class PartitionTokenScannerTest extends TestCase {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() {
 		fReference= new JavaPartitionScanner();
 		fTestee= new FastJavaPartitionScanner(true);

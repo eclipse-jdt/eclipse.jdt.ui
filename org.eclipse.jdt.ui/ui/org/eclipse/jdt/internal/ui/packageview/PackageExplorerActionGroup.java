@@ -127,6 +127,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		TreeViewer viewer= part.getTreeViewer();
 
 		IPropertyChangeListener workingSetListener= new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				doWorkingSetChanged(event);
 			}
@@ -157,6 +158,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		frameSource.connectTo(fFrameList);
 		fZoomInAction= new GoIntoAction(fFrameList);
 		fPart.getSite().getSelectionProvider().addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				fZoomInAction.update();
 				}
@@ -166,6 +168,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		fForwardAction= new ForwardAction(fFrameList);
 		fUpAction= new UpAction(fFrameList);
 		fFrameList.addPropertyChangeListener(new IPropertyChangeListener() { // connect after the actions (order of property listener)
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				fPart.updateTitle();
 				fPart.updateToolbar();

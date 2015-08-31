@@ -24,7 +24,7 @@ import org.eclipse.jface.text.ISynchronizable;
  * @since 3.2
  */
 public class SynchronizedLineDifferInitializationTest extends DocumentLineDifferInitializationTest {
-	private static final Class THIS= SynchronizedLineDifferInitializationTest.class;
+	private static final Class<SynchronizedLineDifferInitializationTest> THIS= SynchronizedLineDifferInitializationTest.class;
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
@@ -32,6 +32,7 @@ public class SynchronizedLineDifferInitializationTest extends DocumentLineDiffer
 	/*
 	 * @see org.eclipse.jdt.text.tests.performance.DocumentLineDifferInitializationText#createDocument(java.lang.String)
 	 */
+	@Override
 	protected IDocument createDocument(String contents) {
 		IDocument document= FileBuffers.getTextFileBufferManager().createEmptyDocument(null, LocationKind.IFILE);
 		if (document instanceof ISynchronizable)

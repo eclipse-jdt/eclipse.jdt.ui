@@ -220,7 +220,7 @@ abstract class TargetProvider {
 		}
 		public void addInvocation(ASTNode node) {
 			if (fInvocations == null)
-				fInvocations= new ArrayList<ASTNode>(2);
+				fInvocations= new ArrayList<>(2);
 			fInvocations.add(node);
 		}
 		public ASTNode[] getInvocations() {
@@ -232,8 +232,8 @@ abstract class TargetProvider {
 	}
 
 	private static class InvocationFinder extends ASTVisitor {
-		Map<BodyDeclaration, BodyData> result= new HashMap<BodyDeclaration, BodyData>(2);
-		Stack<BodyData> fBodies= new Stack<BodyData>();
+		Map<BodyDeclaration, BodyData> result= new HashMap<>(2);
+		Stack<BodyData> fBodies= new Stack<>();
 		BodyData fCurrent;
 		private IMethodBinding fBinding;
 		public InvocationFinder(IMethodBinding binding) {
@@ -450,7 +450,7 @@ abstract class TargetProvider {
 
 			SearchPattern pattern= SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(method, true, false);
-			final HashSet<ICompilationUnit> affectedCompilationUnits= new HashSet<ICompilationUnit>();
+			final HashSet<ICompilationUnit> affectedCompilationUnits= new HashSet<>();
 			CollectingSearchRequestor requestor= new CollectingSearchRequestor(binaryRefs) {
 				private ICompilationUnit fLastCU;
 				@Override

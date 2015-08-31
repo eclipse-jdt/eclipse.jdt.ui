@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,16 +16,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.Status;
-
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.IFileBuffer;
-import org.eclipse.core.filebuffers.IFileBufferListener;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.jdt.astview.ASTViewImages;
+import org.eclipse.jdt.astview.ASTViewPlugin;
+import org.eclipse.jdt.astview.EditorUtility;
+import org.eclipse.jdt.astview.TreeInfoCollector;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -37,6 +31,17 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ListenerList;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.IFileBuffer;
+import org.eclipse.core.filebuffers.IFileBufferListener;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -89,12 +94,8 @@ import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.astview.ASTViewImages;
-import org.eclipse.jdt.astview.ASTViewPlugin;
-import org.eclipse.jdt.astview.EditorUtility;
-import org.eclipse.jdt.astview.TreeInfoCollector;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -128,27 +129,32 @@ public class ASTView extends ViewPart implements IShowInSource {
 	/**
 	 * @deprecated to get rid of deprecation warnings in code
 	 */
+	@Deprecated
 	private static final int JLS4= AST.JLS4;
 	/**
 	 * @deprecated to get rid of deprecation warnings in code
 	 */
+	@Deprecated
 	private static final int JLS3= AST.JLS3;
 	/**
 	 * @deprecated to get rid of deprecation warnings in code
 	 */
+	@Deprecated
 	private static final int JLS2= AST.JLS2;
 
 	private class ASTViewSelectionProvider implements ISelectionProvider {
 		ListenerList fListeners= new ListenerList(ListenerList.IDENTITY);
 
+		@Override
 		public void addSelectionChangedListener(ISelectionChangedListener listener) {
 			fListeners.add(listener);
 		}
 
+		@Override
 		public ISelection getSelection() {
 			IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
-			ArrayList externalSelection= new ArrayList();
-			for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			ArrayList<Object> externalSelection= new ArrayList<>();
+			for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 				Object unwrapped= ASTView.unwrapAttribute(iter.next());
 				if (unwrapped != null)
 					externalSelection.add(unwrapped);
@@ -156,10 +162,12 @@ public class ASTView extends ViewPart implements IShowInSource {
 			return new StructuredSelection(externalSelection);
 		}
 
+		@Override
 		public void removeSelectionChangedListener(ISelectionChangedListener listener) {
 			fListeners.remove(listener);
 		}
 
+		@Override
 		public void setSelection(ISelection selection) {
 			//not supported
 		}
@@ -180,6 +188,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			return fLevel;
 		}
 		
+		@Override
 		public void run() {
 			setASTLevel(fLevel, true);
 		}
@@ -205,6 +214,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			return fInputKind;
 		}
 		
+		@Override
 		public void run() {
 			setASTInputType(fInputKind);
 		}
@@ -224,115 +234,86 @@ public class ASTView extends ViewPart implements IShowInSource {
 			fView= null;
 		}
 
+		@Override
 		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 			if (fASTViewVisible) {
 				fView.handleEditorPostSelectionChanged(part, selection);
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.filebuffers.IFileBufferListener#bufferCreated(org.eclipse.core.filebuffers.IFileBuffer)
-		 */
+		@Override
 		public void bufferCreated(IFileBuffer buffer) {
 			// not interesting
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.filebuffers.IFileBufferListener#bufferDisposed(org.eclipse.core.filebuffers.IFileBuffer)
-		 */
+		@Override
 		public void bufferDisposed(IFileBuffer buffer) {
 			if (buffer instanceof ITextFileBuffer) {
-				fView.handleDocumentDisposed(((ITextFileBuffer) buffer).getDocument());
+				fView.handleDocumentDisposed();
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.filebuffers.IFileBufferListener#bufferContentAboutToBeReplaced(org.eclipse.core.filebuffers.IFileBuffer)
-		 */
+		@Override
 		public void bufferContentAboutToBeReplaced(IFileBuffer buffer) {
 			// not interesting
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.filebuffers.IFileBufferListener#bufferContentReplaced(org.eclipse.core.filebuffers.IFileBuffer)
-		 */
+		@Override
 		public void bufferContentReplaced(IFileBuffer buffer) {
 			// not interesting
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.filebuffers.IFileBufferListener#stateChanging(org.eclipse.core.filebuffers.IFileBuffer)
-		 */
+		@Override
 		public void stateChanging(IFileBuffer buffer) {
 			// not interesting
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.filebuffers.IFileBufferListener#dirtyStateChanged(org.eclipse.core.filebuffers.IFileBuffer, boolean)
-		 */
+		@Override
 		public void dirtyStateChanged(IFileBuffer buffer, boolean isDirty) {
 			// not interesting
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.filebuffers.IFileBufferListener#stateValidationChanged(org.eclipse.core.filebuffers.IFileBuffer, boolean)
-		 */
+		@Override
 		public void stateValidationChanged(IFileBuffer buffer, boolean isStateValidated) {
 			// not interesting
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.filebuffers.IFileBufferListener#underlyingFileMoved(org.eclipse.core.filebuffers.IFileBuffer, org.eclipse.core.runtime.IPath)
-		 */
+		@Override
 		public void underlyingFileMoved(IFileBuffer buffer, IPath path) {
 			// not interesting
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.filebuffers.IFileBufferListener#underlyingFileDeleted(org.eclipse.core.filebuffers.IFileBuffer)
-		 */
+		@Override
 		public void underlyingFileDeleted(IFileBuffer buffer) {
 			// not interesting
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.core.filebuffers.IFileBufferListener#stateChangeFailed(org.eclipse.core.filebuffers.IFileBuffer)
-		 */
+		@Override
 		public void stateChangeFailed(IFileBuffer buffer) {
 			// not interesting
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.IDocumentListener#documentAboutToBeChanged(org.eclipse.jface.text.DocumentEvent)
-		 */
+		@Override
 		public void documentAboutToBeChanged(DocumentEvent event) {
 			// not interesting
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.text.IDocumentListener#documentChanged(org.eclipse.jface.text.DocumentEvent)
-		 */
+		@Override
 		public void documentChanged(DocumentEvent event) {
-			fView.handleDocumentChanged(event.getDocument());
+			fView.handleDocumentChanged();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
-		 */
+		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			fView.handleSelectionChanged(event.getSelection());
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.IDoubleClickListener#doubleClick(org.eclipse.jface.viewers.DoubleClickEvent)
-		 */
+		@Override
 		public void doubleClick(DoubleClickEvent event) {
-			fView.handleDoubleClick(event);
+			fView.handleDoubleClick();
 		}
 		
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.IPartListener2#partHidden(org.eclipse.ui.IWorkbenchPartReference)
-		 */
+		@Override
 		public void partHidden(IWorkbenchPartReference partRef) {
 			IWorkbenchPart part= partRef.getPart(false);
 			if (part == fView) {
@@ -340,9 +321,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.IPartListener2#partVisible(org.eclipse.ui.IWorkbenchPartReference)
-		 */
+		@Override
 		public void partVisible(IWorkbenchPartReference partRef) {
 			IWorkbenchPart part= partRef.getPart(false);
 			if (part == fView) {
@@ -350,44 +329,32 @@ public class ASTView extends ViewPart implements IShowInSource {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.IPartListener2#partActivated(org.eclipse.ui.IWorkbenchPartReference)
-		 */
+		@Override
 		public void partActivated(IWorkbenchPartReference partRef) {
 			// not interesting
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.IPartListener2#partBroughtToTop(org.eclipse.ui.IWorkbenchPartReference)
-		 */
+		@Override
 		public void partBroughtToTop(IWorkbenchPartReference partRef) {
 			// not interesting
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.IPartListener2#partClosed(org.eclipse.ui.IWorkbenchPartReference)
-		 */
+		@Override
 		public void partClosed(IWorkbenchPartReference partRef) {
 			fView.notifyWorkbenchPartClosed(partRef);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.IPartListener2#partDeactivated(org.eclipse.ui.IWorkbenchPartReference)
-		 */
+		@Override
 		public void partDeactivated(IWorkbenchPartReference partRef) {
 			// not interesting
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.IPartListener2#partOpened(org.eclipse.ui.IWorkbenchPartReference)
-		 */
+		@Override
 		public void partOpened(IWorkbenchPartReference partRef) {
 			// not interesting
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.IPartListener2#partInputChanged(org.eclipse.ui.IWorkbenchPartReference)
-		 */
+		@Override
 		public void partInputChanged(IWorkbenchPartReference partRef) {
 			// not interesting
 		}
@@ -437,7 +404,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private ITypeRoot fTypeRoot;
 	private CompilationUnit fRoot;
 	private IDocument fCurrentDocument;
-	private ArrayList fTrayRoots;
+	private ArrayList<Object> fTrayRoots;
 	
 	private boolean fDoLinkWithEditor;
 	private boolean fCreateBindings;
@@ -494,9 +461,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		}
 	}
 
-	/*(non-Javadoc)
-	 * @see org.eclipse.ui.IViewPart#init(org.eclipse.ui.IViewSite)
-	 */
+	@Override
 	public void init(IViewSite site) throws PartInitException {
 		super.setSite(site);
 		if (fSuperListener == null) {
@@ -588,7 +553,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fViewer.setInput(root);
 		fViewer.getTree().setEnabled(root != null);
 		fSash.setMaximizedControl(fViewer.getTree());
-		fTrayRoots= new ArrayList();
+		fTrayRoots= new ArrayList<>();
 		if (fTray != null)
 			fTray.setInput(fTrayRoots);
 		setASTUptoDate(root != null);
@@ -604,14 +569,19 @@ public class ASTView extends ViewPart implements IShowInSource {
 		
 		if ((getCurrentInputKind() == ASTInputKindAction.USE_RECONCILE)) {
 			final IProblemRequestor problemRequestor= new IProblemRequestor() { //strange: don't get bindings when supplying null as problemRequestor
+				@Override
 				public void acceptProblem(IProblem problem) {/*not interested*/}
+				@Override
 				public void beginReporting() {/*not interested*/}
+				@Override
 				public void endReporting() {/*not interested*/}
+				@Override
 				public boolean isActive() {
 					return true;
 				}
 			};
 			WorkingCopyOwner workingCopyOwner= new WorkingCopyOwner() {
+				@Override
 				public IProblemRequestor getProblemRequestor(ICompilationUnit workingCopy) {
 					return problemRequestor;
 				}
@@ -698,9 +668,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchPart#dispose()
-	 */
+	@Override
 	public void dispose() {
 		if (fSuperListener != null) {
 			if (fEditor != null) {
@@ -725,10 +693,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		return new Status(IStatus.ERROR, ASTViewPlugin.getPluginId(), IStatus.ERROR, message, th);
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
-	 */
+	@Override
 	public void createPartControl(Composite parent) {
 		fSash= new SashForm(parent, SWT.VERTICAL | SWT.SMOOTH);
 		fViewer = new TreeViewer(fSash, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
@@ -739,6 +704,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fViewer.addSelectionChangedListener(fSuperListener);
 		fViewer.addDoubleClickListener(fSuperListener);
 		fViewer.addFilter(new ViewerFilter() {
+			@Override
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				if (!fCreateBindings && element instanceof Binding)
 					return false;
@@ -756,12 +722,13 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fTray= new TreeViewer(trayForm, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		trayForm.setContent(fTray.getTree());
 		
-		fTrayRoots= new ArrayList();
+		fTrayRoots= new ArrayList<>();
 		fTray.setContentProvider(new TrayContentProvider());
 		final TrayLabelProvider trayLabelProvider= new TrayLabelProvider();
 		fTray.setLabelProvider(trayLabelProvider);
 		fTray.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
 		fTrayUpdater= new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection viewerSelection= (IStructuredSelection) fViewer.getSelection();
 				if (viewerSelection.size() == 1) {
@@ -777,21 +744,25 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fTray.addPostSelectionChangedListener(fTrayUpdater);
 		fViewer.addPostSelectionChangedListener(fTrayUpdater);
 		fTray.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				performTrayDoubleClick();
 			}
 		});
 		fTray.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection selection= (IStructuredSelection) event.getSelection();
 				fDeleteAction.setEnabled(selection.size() >= 1 && fTray.getTree().isFocusControl());
 			}
 		});
 		fTray.getTree().addFocusListener(new FocusAdapter() {
+			@Override
 			public void focusGained(FocusEvent e) {
 				IStructuredSelection selection= (IStructuredSelection) fTray.getSelection();
 				fDeleteAction.setEnabled(selection.size() >= 1);
 			}
+			@Override
 			public void focusLost(FocusEvent e) {
 				fDeleteAction.setEnabled(false);
 			}
@@ -823,6 +794,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		MenuManager menuMgr = new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(new IMenuListener() {
+			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				ASTView.this.fillContextMenu(manager);
 			}
@@ -836,6 +808,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		MenuManager menuMgr = new MenuManager("#TrayPopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(new IMenuListener() {
+			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				manager.add(fCopyAction);
 				manager.add(fDeleteAction);
@@ -856,7 +829,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		bars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fFocusAction);
 		bars.setGlobalActionHandler(ActionFactory.DELETE.getId(), fDeleteAction);
 		
-		IHandlerService handlerService= (IHandlerService) getViewSite().getService(IHandlerService.class);
+		IHandlerService handlerService= getViewSite().getService(IHandlerService.class);
 		handlerService.activateHandler(IWorkbenchCommandConstants.NAVIGATE_TOGGLE_LINK_WITH_EDITOR, new ActionHandler(fLinkWithEditor));
 	}
 
@@ -917,6 +890,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	
 	private void makeActions() {
 		fRefreshAction = new Action() {
+			@Override
 			public void run() {
 				performRefresh();
 			}
@@ -927,6 +901,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		ASTViewImages.setImageDescriptors(fRefreshAction, ASTViewImages.REFRESH);
 
 		fClearAction = new Action() {
+			@Override
 			public void run() {
 				performClear();
 			}
@@ -944,6 +919,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		};
 		
 		fCreateBindingsAction = new Action("&Create Bindings", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+			@Override
 			public void run() {
 				performCreateBindings();
 			}
@@ -953,6 +929,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fCreateBindingsAction.setEnabled(true);
 		
 		fStatementsRecoveryAction = new Action("&Statements Recovery", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+			@Override
 			public void run() {
 				performStatementsRecovery();
 			}
@@ -961,6 +938,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fStatementsRecoveryAction.setEnabled(true);
 		
 		fBindingsRecoveryAction = new Action("&Bindings Recovery", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+			@Override
 			public void run() {
 				performBindingsRecovery();
 			}
@@ -969,6 +947,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fBindingsRecoveryAction.setEnabled(true);
 		
 		fIgnoreMethodBodiesAction = new Action("&Ignore Method Bodies", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+			@Override
 			public void run() {
 				performIgnoreMethodBodies();
 			}
@@ -977,6 +956,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fIgnoreMethodBodiesAction.setEnabled(true);
 		
 		fFilterNonRelevantAction = new Action("&Hide Non-Relevant Attributes", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+			@Override
 			public void run() {
 				performFilterNonRelevant();
 			}
@@ -986,6 +966,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fFilterNonRelevantAction.setEnabled(true);
 
 		fFindDeclaringNodeAction= new Action("Find &Declaring Node...", IAction.AS_PUSH_BUTTON) { //$NON-NLS-1$
+			@Override
 			public void run() {
 				performFindDeclaringNode();
 			}
@@ -994,6 +975,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fFindDeclaringNodeAction.setEnabled(false);
 		
 		fParseBindingFromElementAction= new Action("&Parse Binding from &Element Handle...", IAction.AS_PUSH_BUTTON) { //$NON-NLS-1$
+			@Override
 			public void run() {
 				performParseBindingFromElement();
 			}
@@ -1002,6 +984,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fParseBindingFromElementAction.setEnabled(true);
 		
 		fParseBindingFromKeyAction= new Action("Parse Binding from &Key...", IAction.AS_PUSH_BUTTON) { //$NON-NLS-1$
+			@Override
 			public void run() {
 				performParseBindingFromKey();
 			}
@@ -1010,6 +993,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fParseBindingFromKeyAction.setEnabled(true);
 		
 		fFocusAction = new Action() {
+			@Override
 			public void run() {
 				performSetFocus();
 			}
@@ -1020,6 +1004,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		ASTViewImages.setImageDescriptors(fFocusAction, ASTViewImages.SETFOCUS);
 
 		fCollapseAction = new Action() {
+			@Override
 			public void run() {
 				performCollapse();
 			}
@@ -1030,6 +1015,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		ASTViewImages.setImageDescriptors(fCollapseAction, ASTViewImages.COLLAPSE);
 		
 		fExpandAction = new Action() {
+			@Override
 			public void run() {
 				performExpand();
 			}
@@ -1042,12 +1028,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fCopyAction= new TreeCopyAction(new Tree[] {fViewer.getTree(), fTray.getTree()});
 		
 		fDoubleClickAction = new Action() {
+			@Override
 			public void run() {
 				performDoubleClick();
 			}
 		};
 		
 		fLinkWithEditor = new Action() {
+			@Override
 			public void run() {
 				performLinkWithEditor();
 			}
@@ -1066,6 +1054,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		};
 		
 		fAddToTrayAction= new Action() {
+			@Override
 			public void run() {
 				performAddToTray();
 			}
@@ -1076,6 +1065,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		ASTViewImages.setImageDescriptors(fAddToTrayAction, ASTViewImages.ADD_TO_TRAY);
 		
 		fDeleteAction= new Action() {
+			@Override
 			public void run() {
 				performDelete();
 			}
@@ -1160,11 +1150,11 @@ public class ASTView extends ViewPart implements IShowInSource {
 		}
 	}
 		
-	protected void handleDocumentDisposed(IDocument document) {
+	protected void handleDocumentDisposed() {
 		uninstallModificationListener();
 	}
 	
-	protected void handleDocumentChanged(IDocument document) {
+	protected void handleDocumentChanged() {
 		setASTUptoDate(false);
 	}
 	
@@ -1225,7 +1215,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		}
 	}
 
-	protected void handleDoubleClick(DoubleClickEvent event) {
+	protected void handleDoubleClick() {
 		fDoubleClickAction.run();
 	}
 
@@ -1381,6 +1371,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		class MyASTRequestor extends ASTRequestor {
 			String fBindingKey;
 			IBinding fBinding;
+			@Override
 			public void acceptBinding(String bindingKey, IBinding binding) {
 				fBindingKey= bindingKey;
 				fBinding= binding;
@@ -1461,7 +1452,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			if (val instanceof ASTNode) {
 				node= (ASTNode) val;
 			} else if (val instanceof List) {
-				List list= (List) val;
+				List<?> list= (List<?>) val;
 				if (list.size() > 0) {
 					node= (ASTNode) list.get(0);
 					nodeEnd= (ASTNode) list.get(list.size() - 1);
@@ -1571,7 +1562,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	protected void performDelete() {
 		boolean removed= false;
 		IStructuredSelection selection= (IStructuredSelection) fTray.getSelection();
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object obj= iter.next();
 			if (obj instanceof DynamicAttributeProperty)
 				obj= ((DynamicAttributeProperty) obj).getParent();
@@ -1584,10 +1575,12 @@ public class ASTView extends ViewPart implements IShowInSource {
 			fTray.setInput(fTrayRoots);
 	}
 	
+	@Override
 	public void setFocus() {
 		fViewer.getControl().setFocus();
 	}
 
+	@Override
 	public ShowInContext getShowInContext() {
 		return new ShowInContext(null, getSite().getSelectionProvider().getSelection());
 	}

@@ -31,6 +31,7 @@ import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
  * DO NOT REMOVE, used in a product.</p>
  * @deprecated As of 3.6, replaced by {@link org.eclipse.jdt.ui.JavaUI#createTypeDialog(Shell, IRunnableContext, IJavaSearchScope, int, boolean, String, TypeSelectionExtension)}
  */
+@Deprecated
 public class TestSelectionDialog extends TwoPaneElementSelector {
 
 	private final IType[] fTypes;

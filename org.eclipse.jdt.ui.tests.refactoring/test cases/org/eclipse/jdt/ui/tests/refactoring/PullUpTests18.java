@@ -32,7 +32,7 @@ import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
 
 public class PullUpTests18 extends PullUpTests {
 
-	private static final Class clazz= PullUpTests18.class;
+	private static final Class<PullUpTests18> clazz= PullUpTests18.class;
 
 	public PullUpTests18(String name) {
 		super(name);

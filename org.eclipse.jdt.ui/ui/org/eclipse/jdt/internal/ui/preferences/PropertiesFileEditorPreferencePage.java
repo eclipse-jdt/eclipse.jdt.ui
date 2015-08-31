@@ -108,6 +108,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 				/*
 				 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 				 */
+				@Override
 				public void propertyChange(PropertyChangeEvent event) {
 					if (event.getProperty().equals(PreferenceConstants.PROPERTIES_FILE_EDITOR_TEXT_FONT)) {
 						Font font= JFaceResources.getFont(PreferenceConstants.PROPERTIES_FILE_EDITOR_TEXT_FONT);
@@ -119,6 +120,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 				/*
 				 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 				 */
+				@Override
 				public void propertyChange(PropertyChangeEvent event) {
 					if (configuration.affectsTextPresentation(event)) {
 						configuration.handlePropertyChangeEvent(event);
@@ -130,6 +132,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 				/*
 				 * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
 				 */
+				@Override
 				public void widgetDisposed(DisposeEvent e) {
 					preferenceStore.removePropertyChangeListener(propertyChangeListener);
 					JFaceResources.getFontRegistry().removeListener(fontChangeListener);
@@ -254,6 +257,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		/*
 		 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 		 */
+		@Override
 		public Color getForeground(Object element) {
 			return ((HighlightingColorListItem)element).getItemColor();
 		}
@@ -261,6 +265,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		/*
 		 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
 		 */
+		@Override
 		public Color getBackground(Object element) {
 			return null;
 		}
@@ -274,6 +279,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		/*
 		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 		 */
+		@Override
 		public Object[] getElements(Object inputElement) {
 			return ((java.util.List<?>)inputElement).toArray();
 		}
@@ -281,12 +287,14 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		/*
 		 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 		 */
+		@Override
 		public void dispose() {
 		}
 
 		/*
 		 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 		 */
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 	}
@@ -350,7 +358,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	/**
 	 * Highlighting color list
 	 */
-	private final List<HighlightingColorListItem> fHighlightingColorList= new ArrayList<HighlightingColorListItem>();
+	private final List<HighlightingColorListItem> fHighlightingColorList= new ArrayList<>();
 	/**
 	 * Highlighting color list viewer
 	 */
@@ -374,7 +382,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 
-		ArrayList<OverlayKey> overlayKeys= new ArrayList<OverlayKey>();
+		ArrayList<OverlayKey> overlayKeys= new ArrayList<>();
 
 		for (int i= 0; i < fSyntaxColorListModel.length; i++) {
 			String colorKey= fSyntaxColorListModel[i][1];
@@ -393,6 +401,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	/*
 	 * @see IWorkbenchPreferencePage#init()
 	 */
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 
@@ -507,6 +516,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 
 
 		fHighlightingColorListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				handleSyntaxColorListSelection();
 			}

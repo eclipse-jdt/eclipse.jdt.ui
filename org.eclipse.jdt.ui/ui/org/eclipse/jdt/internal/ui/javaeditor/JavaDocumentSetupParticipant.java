@@ -30,6 +30,7 @@ public class JavaDocumentSetupParticipant  implements IDocumentSetupParticipant 
 	/*
 	 * @see org.eclipse.core.filebuffers.IDocumentSetupParticipant#setup(org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public void setup(IDocument document) {
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);

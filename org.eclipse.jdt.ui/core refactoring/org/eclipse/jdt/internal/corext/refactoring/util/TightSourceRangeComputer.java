@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
  * @since 3.2
  */
 public class TightSourceRangeComputer extends TargetSourceRangeComputer {
-	private HashSet<ASTNode> fTightSourceRangeNodes= new HashSet<ASTNode>();
+	private HashSet<ASTNode> fTightSourceRangeNodes= new HashSet<>();
 
 	/**
 	 * Add the given node to the set of "tight" nodes.

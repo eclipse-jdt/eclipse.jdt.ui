@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.callhierarchy.TreeRoot;
 public class CallHierarchyContentProviderTest extends TestCase {
     private static final int DEFAULT_MAX_DEPTH= 10;
 
-    private static final Class THIS= CallHierarchyContentProviderTest.class;
+    private static final Class<CallHierarchyContentProviderTest> THIS= CallHierarchyContentProviderTest.class;
 
     private CallHierarchyTestHelper helper;
 
@@ -44,7 +44,8 @@ public class CallHierarchyContentProviderTest extends TestCase {
 		return new TestSuite(THIS);
     }
 
-    protected void setUp() throws Exception {
+    @Override
+	protected void setUp() throws Exception {
         helper= new CallHierarchyTestHelper();
         helper.setUp();
 
@@ -53,7 +54,8 @@ public class CallHierarchyContentProviderTest extends TestCase {
         CallHierarchyUI.getDefault().setMaxCallDepth(DEFAULT_MAX_DEPTH);
     }
 
-    protected void tearDown() throws Exception {
+    @Override
+	protected void tearDown() throws Exception {
         helper.tearDown();
         helper= null;
 

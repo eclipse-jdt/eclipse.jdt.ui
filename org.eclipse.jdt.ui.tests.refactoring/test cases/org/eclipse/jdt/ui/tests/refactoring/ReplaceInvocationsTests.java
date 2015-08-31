@@ -43,15 +43,18 @@ public class ReplaceInvocationsTests extends AbstractSelectionTestCase {
 		return fgTestSetup;
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fIsPreDeltaTest= true;
 	}
 
+	@Override
 	protected String getResourceLocation() {
 		return "ReplaceInvocationsWorkspace/ReplaceInvocations/";
 	}
 
+	@Override
 	protected String adaptName(String name) {
 		return Character.toUpperCase(name.charAt(0)) + name.substring(1) + ".java";
 	}

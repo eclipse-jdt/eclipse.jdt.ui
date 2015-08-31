@@ -215,9 +215,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		try {
@@ -256,9 +253,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		}
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(fEditor)) {
@@ -324,8 +318,8 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			return;
 		}
 
-		HashMap<IJavaElement, IVariableBinding> fieldsToBindings= new HashMap<IJavaElement, IVariableBinding>();
-		ArrayList<IVariableBinding> selected= new ArrayList<IVariableBinding>();
+		HashMap<IJavaElement, IVariableBinding> fieldsToBindings= new HashMap<>();
+		ArrayList<IVariableBinding> selected= new ArrayList<>();
 
 		IVariableBinding[] candidates= typeBinding.getDeclaredFields();
 		for (int i= 0; i < candidates.length; i++) {
@@ -354,7 +348,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			return;
 		}
 
-		ArrayList<IVariableBinding> fields= new ArrayList<IVariableBinding>();
+		ArrayList<IVariableBinding> fields= new ArrayList<>();
 		IField[] allFields= type.getFields();
 		for (int i= 0; i < allFields.length; i++) {
 			IVariableBinding fieldBinding= fieldsToBindings.remove(allFields[i]);
@@ -400,7 +394,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				notifyResult(false);
 				return;
 			}
-			ArrayList<IVariableBinding> result= new ArrayList<IVariableBinding>(elements.length);
+			ArrayList<IVariableBinding> result= new ArrayList<>(elements.length);
 			for (int index= 0; index < elements.length; index++) {
 				if (elements[index] instanceof IVariableBinding)
 					result.add((IVariableBinding) elements[index]);
@@ -441,9 +435,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		return Bindings.findMethodInType(binding, "Object", new ITypeBinding[0]); //$NON-NLS-1$
 	}
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
@@ -458,9 +449,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 	// ---- Java Editor --------------------------------------------------------------
 
-	/*
-	 * (non-Javadoc) Method declared on SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}

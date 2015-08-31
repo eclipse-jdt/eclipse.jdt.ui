@@ -31,6 +31,7 @@ class EmptyJavaFoldingPreferenceBlock implements IJavaFoldingPreferenceBlock {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.folding.IJavaFoldingPreferences#createControl(org.eclipse.swt.widgets.Group)
 	 */
+	@Override
 	public Control createControl(Composite composite) {
 		Composite inner= new Composite(composite, SWT.NONE);
 		inner.setLayout(new GridLayout(3, false));
@@ -56,24 +57,28 @@ class EmptyJavaFoldingPreferenceBlock implements IJavaFoldingPreferenceBlock {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.folding.IJavaFoldingPreferenceBlock#initialize()
 	 */
+	@Override
 	public void initialize() {
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.folding.IJavaFoldingPreferenceBlock#performOk()
 	 */
+	@Override
 	public void performOk() {
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.folding.IJavaFoldingPreferenceBlock#performDefaults()
 	 */
+	@Override
 	public void performDefaults() {
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.folding.IJavaFoldingPreferenceBlock#dispose()
 	 */
+	@Override
 	public void dispose() {
 	}
 

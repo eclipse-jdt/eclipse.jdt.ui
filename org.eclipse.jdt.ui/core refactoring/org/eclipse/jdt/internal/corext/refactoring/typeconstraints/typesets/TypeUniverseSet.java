@@ -18,33 +18,21 @@ public class TypeUniverseSet extends SubTypesOfSingleton {
 		super(typeSetEnvironment.getJavaLangObject(), typeSetEnvironment);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.SubTypesSet#contains(TType)
-	 */
 	@Override
 	public boolean contains(TType t) {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.SubTypesSet#containsAll(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
-	 */
 	@Override
 	public boolean containsAll(TypeSet s) {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#addedTo(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet)
-	 */
 	@Override
 	public TypeSet addedTo(TypeSet that) {
 		return this;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.SubTypesOfSingleton#makeClone()
-	 */
 	@Override
 	public TypeSet makeClone() {
 		return this; // new TypeUniverseSet();

@@ -147,9 +147,6 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 			action.setSpecialSelectionProvider(specialSelectionProvider);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on ActionGroup.
-	 */
 	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		Assert.isNotNull(actionBars);
@@ -175,9 +172,6 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 	}
 
 
-	/* (non-Javadoc)
-	 * Method declared on ActionGroup.
-	 */
 	@Override
 	public void fillContextMenu(IMenuManager manager) {
 		IMenuManager javaSearchMM= new MenuManager(MENU_TEXT, IContextMenuConstants.GROUP_SEARCH);

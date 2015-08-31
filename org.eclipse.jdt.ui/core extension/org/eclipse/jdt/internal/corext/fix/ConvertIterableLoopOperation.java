@@ -120,7 +120,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 	private IVariableBinding fIteratorVariable= null;
 
 	/** The nodes of the element variable occurrences */
-	private final List<Expression> fOccurrences= new ArrayList<Expression>(2);
+	private final List<Expression> fOccurrences= new ArrayList<>(2);
 
 	private EnhancedForStatement fEnhancedForLoop;
 
@@ -207,9 +207,6 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		return getRoot().getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel positionGroups) throws CoreException {
 		final TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, cuRewrite);

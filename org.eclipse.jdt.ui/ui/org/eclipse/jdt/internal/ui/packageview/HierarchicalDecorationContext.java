@@ -48,9 +48,6 @@ public class HierarchicalDecorationContext {
 		public HierarchicalSynchronizationStateTester() {
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.team.ui.mapping.SynchronizationStateTester#getState(java.lang.Object, int, org.eclipse.core.runtime.IProgressMonitor)
-		 */
 		@Override
 		public int getState(Object element, int stateMask, IProgressMonitor monitor) throws CoreException {
 			if (element instanceof JavaElementResourceMapping) {

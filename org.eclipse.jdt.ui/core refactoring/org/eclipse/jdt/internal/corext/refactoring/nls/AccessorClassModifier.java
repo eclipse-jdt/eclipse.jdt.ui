@@ -81,11 +81,8 @@ public class AccessorClassModifier {
 		AbstractTypeDeclaration parent= null;
 		if (fRoot.types().size() > 0) {
 			parent= (AbstractTypeDeclaration)fRoot.types().get(0);
-			fFields= new ArrayList<FieldDeclaration>();
+			fFields= new ArrayList<>();
 			parent.accept(new GenericVisitor() {
-				/**
-				 * {@inheritDoc}
-				 */
 				@Override
 				public boolean visit(FieldDeclaration node) {
 					int modifiers= node.getModifiers();
@@ -294,7 +291,7 @@ public class AccessorClassModifier {
 			fListRewrite.insertLast(fieldDeclaration, editGroup);
 			fFields.add(fieldDeclaration);
 		} else {
-			ArrayList<String> identifiers= new ArrayList<String>();
+			ArrayList<String> identifiers= new ArrayList<>();
 			for (Iterator<FieldDeclaration> iterator= fFields.iterator(); iterator.hasNext();) {
 				FieldDeclaration field= iterator.next();
 				VariableDeclarationFragment fragment= (VariableDeclarationFragment) field.fragments().get(0);

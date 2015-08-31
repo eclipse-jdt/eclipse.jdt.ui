@@ -54,6 +54,7 @@ public class JUnitWorkspaceTestSetup extends TestSetup {
 		return WORKSPACE_PATH + fgProject.getElementName() + '/';
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		if (fJUnit4) {
 			fgProject= JavaProjectHelper.createJavaProject(PROJECT_NAME_4, "bin");
@@ -71,6 +72,7 @@ public class JUnitWorkspaceTestSetup extends TestSetup {
 		JavaProjectHelper.importResources((IFolder) fgRoot.getResource(), JavaTestPlugin.getDefault().getBundle(), getProjectPath() + SRC_NAME);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fgProject);
 		fgProject= null;

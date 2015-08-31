@@ -175,7 +175,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 			}
 		}
 		if (parent instanceof ISynchronizationContext) {
-			final Set<IJavaElement> result= new HashSet<IJavaElement>();
+			final Set<IJavaElement> result= new HashSet<>();
 			for (final Iterator<IAdaptable> iterator= modification.getChildren().iterator(); iterator.hasNext();) {
 				final Object element= iterator.next();
 				if (element instanceof IProject) {
@@ -199,7 +199,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 *         <code>false</code> otherwise
 	 */
 	private boolean convertToJavaElements(final PipelinedViewerUpdate update) {
-		final Set<IJavaElement> result= new HashSet<IJavaElement>();
+		final Set<IJavaElement> result= new HashSet<>();
 		for (final Iterator<IAdaptable> iterator= update.getRefreshTargets().iterator(); iterator.hasNext();) {
 			final Object element= iterator.next();
 			if (element instanceof IProject) {
@@ -214,13 +214,11 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		return !result.isEmpty();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void diffsChanged(final IDiffChangeEvent event, final IProgressMonitor monitor) {
 		syncExec(new Runnable() {
 
+			@Override
 			public void run() {
 				handleChange(event);
 			}
@@ -236,7 +234,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 * @return the projects that contain changes
 	 */
 	private IJavaProject[] getChangedProjects(final IDiffChangeEvent event) {
-		final Set<IJavaProject> result= new HashSet<IJavaProject>();
+		final Set<IJavaProject> result= new HashSet<>();
 		final IDiff[] changes= event.getChanges();
 		for (int index= 0; index < changes.length; index++) {
 			final IResource resource= ResourceDiffTree.getResourceFor(changes[index]);
@@ -271,9 +269,6 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		return result.toArray(new IJavaProject[result.size()]);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Object[] getChildrenInContext(final ISynchronizationContext context, final Object parent, final Object[] children) {
 		final Object[] elements= super.getChildrenInContext(context, parent, children);
@@ -300,7 +295,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 * @return the filtered elements
 	 */
 	private Object[] getFilteredElements(final Object parent, final Object[] children) {
-		final List<Object> result= new ArrayList<Object>(children.length);
+		final List<Object> result= new ArrayList<>(children.length);
 		for (int index= 0; index < children.length; index++) {
 			if (children[index] instanceof IFolder) {
 				if (!(JavaCore.create((IFolder) children[index]) instanceof IPackageFragmentRoot))
@@ -311,9 +306,6 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		return result.toArray();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected ITreeContentProvider getDelegateContentProvider() {
 		if (fContentProvider == null)
@@ -330,7 +322,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 * @return the deleted projects
 	 */
 	private Set<IProject> getDeletedProjects(final IDiffChangeEvent event) {
-		final Set<IProject> result= new HashSet<IProject>();
+		final Set<IProject> result= new HashSet<>();
 		final IPath[] deletions= event.getRemovals();
 		for (int index= 0; index < deletions.length; index++) {
 			final IPath path= deletions[index];
@@ -371,7 +363,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 * @return the java project children
 	 */
 	private Object[] getJavaProjectChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
-		final LinkedList<Object> list= new LinkedList<Object>();
+		final LinkedList<Object> list= new LinkedList<>();
 		for (int index= 0; index < children.length; index++) {
 			if (children[index] instanceof IPackageFragment) {
 				final IPackageFragment fragment= (IPackageFragment) children[index];
@@ -441,6 +433,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 			return true;
 		final boolean[] found = new boolean[] { false };
 		tree.accept(child.getFullPath(), new IDiffVisitor() {
+			@Override
 			public boolean visit(IDiff delta){
 				IResource treeResource = ResourceDiffTree.getResourceFor(delta);
 				if (treeResource.getType()==IResource.FILE && !treeResource.getParent().exists()){
@@ -454,17 +447,11 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	}
 
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected String getModelProviderId() {
 		return JavaModelProvider.JAVA_MODEL_PROVIDER_ID;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Object getModelRoot() {
 		if (fModelRoot == null)
@@ -484,7 +471,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 * @return the package fragment children
 	 */
 	private Object[] getPackageFragmentChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
-		final Set<Object> set= new HashSet<Object>();
+		final Set<Object> set= new HashSet<>();
 		for (int index= 0; index < children.length; index++)
 			set.add(children[index]);
 		IPackageFragment packageFragment= (IPackageFragment) parent;
@@ -526,7 +513,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 * @return the package fragment root children
 	 */
 	private Object[] getPackageFragmentRootChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
-		final Set<Object> set= new HashSet<Object>();
+		final Set<Object> set= new HashSet<>();
 		for (int index= 0; index < children.length; index++) {
 			if (children[index] instanceof IPackageFragment) {
 				IPackageFragment fragment = (IPackageFragment) children[index];
@@ -562,6 +549,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 					final IFolder folder= (IFolder) members[index];
 					tree.accept(folder.getFullPath(), new IDiffVisitor() {
 
+						@Override
 						public final boolean visit(final IDiff diff) {
 							if (isVisible(diff)) {
 								final IResource current= tree.getResource(diff);
@@ -588,15 +576,13 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		return children;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void getPipelinedChildren(final Object parent, final Set children) {
 		if (parent instanceof ISynchronizationContext) {
 			// When a context is the root, the resource content provider returns
 			// projects as direct children. We should replace any projects that
 			// are Java projects with an IJavaProject
-			final Set<IJavaElement> result= new HashSet<IJavaElement>(children.size());
+			final Set<IJavaElement> result= new HashSet<>(children.size());
 			for (final Iterator<Object> iterator= children.iterator(); iterator.hasNext();) {
 				final Object element= iterator.next();
 				if (element instanceof IProject) {
@@ -638,25 +624,18 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public void getPipelinedElements(final Object element, final Set elements) {
 		getPipelinedChildren(element, elements);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public Object getPipelinedParent(final Object element, final Object parent) {
 		if (element instanceof IJavaElement)
 			return getParent(element);
 		return parent;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected ResourceTraversal[] getTraversals(final ISynchronizationContext context, final Object object) {
 		return getResourceTraversals(object);
@@ -669,7 +648,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 */
 	private Set<IJavaProject> getVisibleProjects() {
 		final TreeItem[] children= ((TreeViewer) getViewer()).getTree().getItems();
-		final Set<IJavaProject> result= new HashSet<IJavaProject>();
+		final Set<IJavaProject> result= new HashSet<>();
 		for (int index= 0; index < children.length; index++) {
 			final Object data= children[index].getData();
 			if (data instanceof IJavaProject)
@@ -690,9 +669,9 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		// and determine what needs to be done to the project
 		// (i.e. add, remove or refresh)
 		final IJavaProject[] changed= getChangedProjects(event);
-		final List<IJavaProject> refreshes= new ArrayList<IJavaProject>(changed.length);
-		final List<IJavaProject> additions= new ArrayList<IJavaProject>(changed.length);
-		final List<IJavaProject> removals= new ArrayList<IJavaProject>(changed.length);
+		final List<IJavaProject> refreshes= new ArrayList<>(changed.length);
+		final List<IJavaProject> additions= new ArrayList<>(changed.length);
+		final List<IJavaProject> removals= new ArrayList<>(changed.length);
 		for (int index= 0; index < changed.length; index++) {
 			final IJavaProject project= changed[index];
 			if (hasVisibleChanges(event.getTree(), project)) {
@@ -730,9 +709,6 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean hasChildren(final Object element) {
 		if (element instanceof ICompilationUnit || element instanceof IFile || element instanceof RefactoringDescriptorProxy || element instanceof RefactoringDescriptor)
@@ -787,39 +763,28 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		});
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public PipelinedShapeModification interceptAdd(final PipelinedShapeModification modification) {
 		convertToJavaElements(modification);
 		return modification;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean interceptRefresh(final PipelinedViewerUpdate update) {
 		return convertToJavaElements(update);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public PipelinedShapeModification interceptRemove(final PipelinedShapeModification modification) {
 		convertToJavaElements(modification);
 		return modification;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
 	public boolean interceptUpdate(final PipelinedViewerUpdate anUpdateSynchronization) {
 		return convertToJavaElements(anUpdateSynchronization);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean isInScope(final ISynchronizationScope scope, final Object parent, final Object element) {
 		final IResource resource= JavaModelProvider.getResource(element);
@@ -844,6 +809,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		if (control != null && !control.isDisposed())
 			control.getDisplay().syncExec(new Runnable() {
 
+				@Override
 				public void run() {
 					if (!control.isDisposed())
 						BusyIndicator.showWhile(control.getDisplay(), runnable);

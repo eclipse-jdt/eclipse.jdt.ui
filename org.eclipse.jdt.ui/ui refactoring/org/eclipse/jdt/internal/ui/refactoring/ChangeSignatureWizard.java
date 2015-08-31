@@ -84,6 +84,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		/*
 		 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 		 */
+		@Override
 		public void createControl(Composite parent) {
 			Composite composite= new Composite(parent, SWT.NONE);
 			final GridLayout layout= new GridLayout();
@@ -220,6 +221,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 
 			if (getChangeMethodSignatureProcessor().canChangeNameAndReturnType()) {
 				text.addModifyListener(new ModifyListener(){
+					@Override
 					public void modifyText(ModifyEvent e) {
 						getChangeMethodSignatureProcessor().setNewReturnTypeName(text.getText());
 						update(true);
@@ -253,6 +255,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 
 			if (getChangeMethodSignatureProcessor().canChangeNameAndReturnType()) {
 				text.addModifyListener(new ModifyListener(){
+					@Override
 					public void modifyText(ModifyEvent e) {
 						getChangeMethodSignatureProcessor().setNewMethodName(text.getText());
 						update(true);
@@ -289,12 +292,15 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 
 			String labelText= null; //no label
 			ChangeParametersControl cp= new ChangeParametersControl(border, SWT.NONE, labelText, new IParameterListChangeListener() {
+				@Override
 				public void parameterChanged(ParameterInfo parameter) {
 					update(true);
 				}
+				@Override
 				public void parameterListChanged() {
 					update(true);
 				}
+				@Override
 				public void parameterAdded(ParameterInfo parameter) {
 					update(true);
 				}
@@ -309,6 +315,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			border.setLayout(new GridLayout());
 
 			ChangeExceptionsControl cp= new ChangeExceptionsControl(border, SWT.NONE, new IExceptionListChangeListener() {
+				@Override
 				public void exceptionListChanged() {
 					update(true);
 				}

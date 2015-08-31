@@ -73,31 +73,21 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		public TodoTaskLabelProvider() {
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
-		 */
 		@Override
 		public Image getImage(Object element) {
 			return null; // JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_INFO);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
-		 */
 		@Override
 		public String getText(Object element) {
 			return getColumnText(element, 0);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
-		 */
+		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
 		}
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
-		 */
+		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			TodoTask task= (TodoTask) element;
 			if (columnIndex == 0) {
@@ -118,9 +108,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 			}
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.IFontProvider#getFont(java.lang.Object)
-		 */
+		@Override
 		public Font getFont(Object element) {
 			if (isDefaultTask((TodoTask) element)) {
 				return JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT);
@@ -157,7 +145,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 			null,
 			PreferencesMessages.TodoTaskConfigurationBlock_markers_tasks_setdefault_button,
 		};
-		fTodoTasksList= new ListDialogField<TodoTask>(adapter, buttons, new TodoTaskLabelProvider());
+		fTodoTasksList= new ListDialogField<>(adapter, buttons, new TodoTaskLabelProvider());
 		fTodoTasksList.setDialogFieldListener(adapter);
 		fTodoTasksList.setRemoveButtonIndex(IDX_REMOVE);
 
@@ -218,22 +206,26 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 			return selectedElements.size() == 1 && !isDefaultTask(selectedElements.get(0));
 		}
 
+		@Override
 		public void customButtonPressed(ListDialogField<TodoTask> field, int index) {
 			doTodoButtonPressed(index);
 		}
 
+		@Override
 		public void selectionChanged(ListDialogField<TodoTask> field) {
 			List<TodoTask> selectedElements= field.getSelectedElements();
 			field.enableButton(IDX_EDIT, canEdit(selectedElements));
 			field.enableButton(IDX_DEFAULT, canSetToDefault(selectedElements));
 		}
 
+		@Override
 		public void doubleClicked(ListDialogField<TodoTask> field) {
 			if (canEdit(field.getSelectedElements())) {
 				doTodoButtonPressed(IDX_EDIT);
 			}
 		}
 
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			updateModel(field);
 		}
@@ -334,9 +326,6 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		return new String[] { title, message };
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateControls()
-	 */
 	@Override
 	protected void updateControls() {
 		unpackTodoTasks();
@@ -347,7 +336,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		String currPrios= getValue(PREF_COMPILER_TASK_PRIORITIES);
 		String[] tags= getTokens(currTags, ","); //$NON-NLS-1$
 		String[] prios= getTokens(currPrios, ","); //$NON-NLS-1$
-		ArrayList<TodoTask> elements= new ArrayList<TodoTask>(tags.length);
+		ArrayList<TodoTask> elements= new ArrayList<>(tags.length);
 		for (int i= 0; i < tags.length; i++) {
 			TodoTask task= new TodoTask();
 			task.name= tags[i].trim();

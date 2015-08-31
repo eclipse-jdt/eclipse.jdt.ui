@@ -28,25 +28,16 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 public class NativeLibAttributeConfiguration extends ClasspathAttributeConfiguration {
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#getImageDescriptor(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
-	 */
 	@Override
 	public ImageDescriptor getImageDescriptor(ClasspathAttributeAccess attribute) {
 		return JavaPluginImages.DESC_OBJS_NATIVE_LIB_PATH_ATTRIB;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#getNameLabel(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
-	 */
 	@Override
 	public String getNameLabel(ClasspathAttributeAccess attribute) {
 		return NewWizardMessages.CPListLabelProvider_native_library_path;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#getValueLabel(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
-	 */
 	@Override
 	public String getValueLabel(ClasspathAttributeAccess attribute) {
 		String arg= attribute.getClasspathAttribute().getValue();
@@ -56,25 +47,16 @@ public class NativeLibAttributeConfiguration extends ClasspathAttributeConfigura
 		return arg;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#canEdit(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
-	 */
 	@Override
 	public boolean canEdit(ClasspathAttributeAccess attribute) {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#canRemove(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
-	 */
 	@Override
 	public boolean canRemove(ClasspathAttributeAccess attribute) {
 		return attribute.getClasspathAttribute().getValue() != null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#performEdit(org.eclipse.swt.widgets.Shell, org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
-	 */
 	@Override
 	public IClasspathAttribute performEdit(Shell shell, ClasspathAttributeAccess attribute) {
 		NativeLibrariesDialog dialog= new NativeLibrariesDialog(shell, attribute.getClasspathAttribute().getValue(), attribute.getParentClasspassEntry());
@@ -84,9 +66,6 @@ public class NativeLibAttributeConfiguration extends ClasspathAttributeConfigura
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration#performRemove(org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess)
-	 */
 	@Override
 	public IClasspathAttribute performRemove(ClasspathAttributeAccess attribute) {
 		return JavaCore.newClasspathAttribute(JavaRuntime.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY, null);

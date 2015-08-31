@@ -28,30 +28,34 @@ import org.eclipse.swt.widgets.Display;
 //have to create this class because of bug 40095
 public class MockClipboard extends Clipboard{
 
-	private Map fContents; //Transfer -> Object
+	private Map<Transfer, Object> fContents; //Transfer -> Object
 
 	public MockClipboard(Display display) {
 		super(display);
-		fContents= new HashMap();
+		fContents= new HashMap<>();
 	}
 
+	@Override
 	protected void checkSubclass() {
 		//do nothing
 	}
 
+	@Override
 	public TransferData[] getAvailableTypes() {
-		Set result= new HashSet();
-		for (Iterator iter= fContents.keySet().iterator(); iter.hasNext();) {
-			Transfer transfer= (Transfer)iter.next();
+		Set<TransferData> result= new HashSet<>();
+		for (Iterator<Transfer> iter= fContents.keySet().iterator(); iter.hasNext();) {
+			Transfer transfer= iter.next();
 			result.addAll(Arrays.asList(transfer.getSupportedTypes()));
 		}
-		return (TransferData[]) result.toArray(new TransferData[result.size()]);
+		return result.toArray(new TransferData[result.size()]);
 	}
 
+	@Override
 	public Object getContents(Transfer transfer) {
 		return fContents.get(transfer);
 	}
 
+	@Override
 	public void setContents(Object[] data, Transfer[] dataTypes) {
 		if (data == null || dataTypes == null || data.length != dataTypes.length) {
 			DND.error(SWT.ERROR_INVALID_ARGUMENT);
@@ -62,6 +66,7 @@ public class MockClipboard extends Clipboard{
 		}
 	}
 
+	@Override
 	public void dispose() {
 		fContents.clear();
 		super.dispose();

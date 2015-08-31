@@ -85,6 +85,7 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
 	 * Returns the compilation unit.
 	 * @return an <code>ICompilationUnit</code>
 	 */
+	@Override
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
@@ -102,6 +103,7 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
 	 * Returns the length.
 	 * @return int
 	 */
+	@Override
 	public int getSelectionLength() {
 		return Math.max(getLength(), 0);
 	}
@@ -110,10 +112,12 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
 	 * Returns the offset.
 	 * @return int
 	 */
+	@Override
 	public int getSelectionOffset() {
 		return getOffset();
 	}
 
+	@Override
 	public CompilationUnit getASTRoot() {
 		if (fASTRoot == null) {
 			fASTRoot= SharedASTProvider.getAST(fCompilationUnit, fWaitFlag, null);
@@ -133,9 +137,7 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
 		fASTRoot= root;
 	}
 
-	/*(non-Javadoc)
-	 * @see org.eclipse.jdt.ui.text.java.IInvocationContext#getCoveringNode()
-	 */
+	@Override
 	public ASTNode getCoveringNode() {
 		if (fNodeFinder == null) {
 			fNodeFinder= new NodeFinder(getASTRoot(), getOffset(), getLength());
@@ -143,9 +145,7 @@ public class AssistContext extends TextInvocationContext implements IInvocationC
 		return fNodeFinder.getCoveringNode();
 	}
 
-	/*(non-Javadoc)
-	 * @see org.eclipse.jdt.ui.text.java.IInvocationContext#getCoveredNode()
-	 */
+	@Override
 	public ASTNode getCoveredNode() {
 		if (fNodeFinder == null) {
 			fNodeFinder= new NodeFinder(getASTRoot(), getOffset(), getLength());

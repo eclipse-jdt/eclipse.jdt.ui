@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,7 +49,7 @@ public class PullUpTests extends RefactoringTest {
 
 	private static final boolean BUG_91542= true;
 
-	private static final Class clazz= PullUpTests.class;
+	private static final Class<PullUpTests> clazz= PullUpTests.class;
 
 	private static final String REFACTORING_PATH= "PullUp/";
 
@@ -65,6 +65,7 @@ public class PullUpTests extends RefactoringTest {
 		return new Java15Setup(someTest);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -137,19 +138,19 @@ public class PullUpTests extends RefactoringTest {
 		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 		setSuperclassAsTargetClass(processor);
 
-		List additionalRequired= Arrays.asList(processor.getAdditionalRequiredMembersToPullUp(new NullProgressMonitor()));
-		List required= new ArrayList();
+		List<IMember> additionalRequired= Arrays.asList(processor.getAdditionalRequiredMembersToPullUp(new NullProgressMonitor()));
+		List<IMember> required= new ArrayList<>();
 		required.addAll(additionalRequired);
 		required.addAll(Arrays.asList(members));
 		IField[] expectedFields= getFields(type, expectedFieldNames);
 		IMethod[] expectedMethods= getMethods(type, expectedMethodNames, expectedMethodSignatures);
-		List expected= Arrays.asList(merge(expectedFields, expectedMethods));
+		List<IMember> expected= Arrays.asList(merge(expectedFields, expectedMethods));
 		assertEquals("incorrect size", expected.size(), required.size());
-		for (Iterator iter= expected.iterator(); iter.hasNext();) {
+		for (Iterator<IMember> iter= expected.iterator(); iter.hasNext();) {
 			Object each= iter.next();
 			assertTrue ("required does not contain " + each, required.contains(each));
 		}
-		for (Iterator iter= required.iterator(); iter.hasNext();) {
+		for (Iterator<IMember> iter= required.iterator(); iter.hasNext();) {
 			Object each= iter.next();
 			assertTrue ("expected does not contain " + each, expected.contains(each));
 		}
@@ -191,8 +192,8 @@ public class PullUpTests extends RefactoringTest {
 	}
 
 	private static IMethod[] getMethods(IMember[] members){
-		List l= Arrays.asList(JavaElementUtil.getElementsOfType(members, IJavaElement.METHOD));
-		return (IMethod[]) l.toArray(new IMethod[l.size()]);
+		List<IJavaElement> l= Arrays.asList(JavaElementUtil.getElementsOfType(members, IJavaElement.METHOD));
+		return l.toArray(new IMethod[l.size()]);
 	}
 
 	private Refactoring createRefactoringPrepareForInputCheck(String[] selectedMethodNames, String[][] selectedMethodSignatures,
@@ -1006,6 +1007,29 @@ public class PullUpTests extends RefactoringTest {
 			StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, codeTemplate.getPattern(), null);
 		}
 
+	}
+
+	public void test51() throws Exception {
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
+
+		String[] methodNames= new String[] { "b" };
+		String[][] signatures= new String[][] { new String[0] };
+
+		IType type= getType(cuA, "A");
+		IMethod[] methods= getMethods(type, methodNames, signatures);
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
+
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		setSuperclassAsTargetClass(processor);
+
+		RefactoringStatus result= performRefactoring(ref);
+		assertTrue("precondition was supposed to pass", result == null || !result.hasError());
+
+		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
+		assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
 	}
 
 	public void testFail0() throws Exception{

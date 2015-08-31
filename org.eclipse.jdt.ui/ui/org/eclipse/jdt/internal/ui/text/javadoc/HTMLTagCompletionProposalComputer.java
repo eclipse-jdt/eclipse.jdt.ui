@@ -119,6 +119,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#computeCompletionProposals(org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 * @since 3.2
 	 */
+	@Override
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (!(context instanceof JavadocContentAssistInvocationContext))
 			return Collections.emptyList();
@@ -138,7 +139,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 		}
 
 		try {
-			fResult= new ArrayList<ICompletionProposal>(100);
+			fResult= new ArrayList<>(100);
 			evalProposals();
 			return fResult;
 		} finally {
@@ -220,6 +221,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#computeContextInformation(org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 * @since 3.2
 	 */
+	@Override
 	public List<IContextInformation> computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		return Collections.emptyList();
 	}
@@ -228,6 +230,7 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
 	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#getErrorMessage()
 	 * @since 3.2
 	 */
+	@Override
 	public String getErrorMessage() {
 		return fErrorMessage;
 	}
@@ -236,7 +239,8 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
      * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionEnded()
      * @since 3.2
      */
-    public void sessionEnded() {
+    @Override
+	public void sessionEnded() {
     	fErrorMessage= null;
     }
 
@@ -244,7 +248,8 @@ public class HTMLTagCompletionProposalComputer implements IJavaCompletionProposa
      * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionStarted()
      * @since 3.2
      */
-    public void sessionStarted() {
+    @Override
+	public void sessionStarted() {
     	fErrorMessage= null;
     }
 }

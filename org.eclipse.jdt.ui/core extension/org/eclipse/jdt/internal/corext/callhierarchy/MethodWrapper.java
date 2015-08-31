@@ -220,7 +220,7 @@ public abstract class MethodWrapper extends PlatformObject {
         Map<String, MethodCall> existingResults = lookupMethod(getMethodCall());
 
         if (existingResults != null && !existingResults.isEmpty()) {
-            fElements = new HashMap<String, MethodCall>();
+            fElements = new HashMap<>();
             fElements.putAll(existingResults);
         } else {
             initCalls();
@@ -284,7 +284,7 @@ public abstract class MethodWrapper extends PlatformObject {
     }
 
     private void initCalls() {
-        this.fElements = new HashMap<String, MethodCall>();
+        this.fElements = new HashMap<>();
 
         initCacheForMethod();
     }
@@ -314,7 +314,7 @@ public abstract class MethodWrapper extends PlatformObject {
     }
 
     private void initCacheForMethod() {
-        Map<String, MethodCall> cachedCalls = new HashMap<String, MethodCall>();
+        Map<String, MethodCall> cachedCalls = new HashMap<>();
         getMethodCache().put(this.getMethodCall().getKey(), cachedCalls);
     }
 

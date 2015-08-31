@@ -63,6 +63,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	/*
 	 * @see IJavaAnnotation#getArguments()
 	 */
+	@Override
 	public String[] getArguments() {
 		IMarker marker= getMarker();
 		if (marker != null && marker.exists() && isProblem())
@@ -73,6 +74,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	/*
 	 * @see IJavaAnnotation#getId()
 	 */
+	@Override
 	public int getId() {
 		IMarker marker= getMarker();
 		if (marker == null  || !marker.exists())
@@ -97,6 +99,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	/*
 	 * @see IJavaAnnotation#isProblem()
 	 */
+	@Override
 	public boolean isProblem() {
 		String type= getType();
 		return WARNING_ANNOTATION_TYPE.equals(type) || ERROR_ANNOTATION_TYPE.equals(type);
@@ -122,6 +125,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	/*
 	 * @see IJavaAnnotation#hasOverlay()
 	 */
+	@Override
 	public boolean hasOverlay() {
 		return fOverlay != null;
 	}
@@ -129,6 +133,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getOverlay()
 	 */
+	@Override
 	public IJavaAnnotation getOverlay() {
 		return fOverlay;
 	}
@@ -136,6 +141,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	/*
 	 * @see IJavaAnnotation#addOverlaid(IJavaAnnotation)
 	 */
+	@Override
 	public void addOverlaid(IJavaAnnotation annotation) {
 		// not supported
 	}
@@ -143,6 +149,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	/*
 	 * @see IJavaAnnotation#removeOverlaid(IJavaAnnotation)
 	 */
+	@Override
 	public void removeOverlaid(IJavaAnnotation annotation) {
 		// not supported
 	}
@@ -150,6 +157,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	/*
 	 * @see IJavaAnnotation#getOverlaidIterator()
 	 */
+	@Override
 	public Iterator<IJavaAnnotation> getOverlaidIterator() {
 		// not supported
 		return null;
@@ -158,6 +166,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getCompilationUnit()
 	 */
+	@Override
 	public ICompilationUnit getCompilationUnit() {
 		IJavaElement element= JavaCore.create(getMarker().getResource());
 		if (element instanceof ICompilationUnit) {
@@ -169,6 +178,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getMarkerType()
 	 */
+	@Override
 	public String getMarkerType() {
 		IMarker marker= getMarker();
 		if (marker == null  || !marker.exists())

@@ -92,25 +92,25 @@ public final class CompletionProposalComputerRegistry {
 	 * {@link String}, value type:
 	 * {@linkplain List List&lt;CompletionProposalComputerDescriptor&gt;}).
 	 */
-	private final Map<String, List<CompletionProposalComputerDescriptor>> fDescriptorsByPartition= new HashMap<String, List<CompletionProposalComputerDescriptor>>();
+	private final Map<String, List<CompletionProposalComputerDescriptor>> fDescriptorsByPartition= new HashMap<>();
 	/**
 	 * Unmodifiable versions of the sets stored in
 	 * <code>fDescriptorsByPartition</code> (key type: {@link String},
 	 * value type:
 	 * {@linkplain List List&lt;CompletionProposalComputerDescriptor&gt;}).
 	 */
-	private final Map<String, List<CompletionProposalComputerDescriptor>> fPublicDescriptorsByPartition= new HashMap<String, List<CompletionProposalComputerDescriptor>>();
+	private final Map<String, List<CompletionProposalComputerDescriptor>> fPublicDescriptorsByPartition= new HashMap<>();
 	/**
 	 * All descriptors (element type:
 	 * {@link CompletionProposalComputerDescriptor}).
 	 */
-	private final List<CompletionProposalComputerDescriptor> fDescriptors= new ArrayList<CompletionProposalComputerDescriptor>();
+	private final List<CompletionProposalComputerDescriptor> fDescriptors= new ArrayList<>();
 	/**
 	 * Unmodifiable view of <code>fDescriptors</code>
 	 */
 	private final List<CompletionProposalComputerDescriptor> fPublicDescriptors= Collections.unmodifiableList(fDescriptors);
 
-	private final List<CompletionProposalCategory> fCategories= new ArrayList<CompletionProposalCategory>();
+	private final List<CompletionProposalCategory> fCategories= new ArrayList<>();
 	private final List<CompletionProposalCategory> fPublicCategories= Collections.unmodifiableList(fCategories);
 	/**
 	 * <code>true</code> if this registry has been loaded.
@@ -266,10 +266,10 @@ public final class CompletionProposalComputerRegistry {
 	 */
 	public void reload() {
 		IExtensionRegistry registry= Platform.getExtensionRegistry();
-		List<IConfigurationElement> elements= new ArrayList<IConfigurationElement>(Arrays.asList(registry.getConfigurationElementsFor(JavaPlugin.getPluginId(), EXTENSION_POINT)));
+		List<IConfigurationElement> elements= new ArrayList<>(Arrays.asList(registry.getConfigurationElementsFor(JavaPlugin.getPluginId(), EXTENSION_POINT)));
 
-		Map<String, List<CompletionProposalComputerDescriptor>> map= new HashMap<String, List<CompletionProposalComputerDescriptor>>();
-		List<CompletionProposalComputerDescriptor> all= new ArrayList<CompletionProposalComputerDescriptor>();
+		Map<String, List<CompletionProposalComputerDescriptor>> map= new HashMap<>();
+		List<CompletionProposalComputerDescriptor> all= new ArrayList<>();
 
 		List<CompletionProposalCategory> categories= getCategories(elements);
 		for (Iterator<IConfigurationElement> iter= elements.iterator(); iter.hasNext();) {
@@ -281,7 +281,7 @@ public final class CompletionProposalComputerRegistry {
 					String partition= it.next();
 					List<CompletionProposalComputerDescriptor> list= map.get(partition);
 					if (list == null) {
-						list= new ArrayList<CompletionProposalComputerDescriptor>();
+						list= new ArrayList<>();
 						map.put(partition, list);
 					}
 					list.add(desc);
@@ -331,11 +331,11 @@ public final class CompletionProposalComputerRegistry {
 	private List<CompletionProposalCategory> getCategories(List<IConfigurationElement> elements) {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		String preference= store.getString(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES);
-		Set<String> disabled= new HashSet<String>();
+		Set<String> disabled= new HashSet<>();
 		StringTokenizer tok= new StringTokenizer(preference, "\0");  //$NON-NLS-1$
 		while (tok.hasMoreTokens())
 			disabled.add(tok.nextToken());
-		Map<String, Integer> ordered= new HashMap<String, Integer>();
+		Map<String, Integer> ordered= new HashMap<>();
 		preference= store.getString(PreferenceConstants.CODEASSIST_CATEGORY_ORDER);
 		tok= new StringTokenizer(preference, "\0"); //$NON-NLS-1$
 		while (tok.hasMoreTokens()) {
@@ -349,7 +349,7 @@ public final class CompletionProposalComputerRegistry {
 		CompletionProposalCategory typeProposals= null;
 		CompletionProposalCategory allButTypeProposals= null;
 		
-		List<CompletionProposalCategory> categories= new ArrayList<CompletionProposalCategory>();
+		List<CompletionProposalCategory> categories= new ArrayList<>();
 		for (Iterator<IConfigurationElement> iter= elements.iterator(); iter.hasNext();) {
 			IConfigurationElement element= iter.next();
 			try {
@@ -473,7 +473,7 @@ public final class CompletionProposalComputerRegistry {
 	 * @return the names of the contributors other than <code>culprit</code> that contribute to <code>category</code> (element type: {@link String})
 	 */
 	private Set<String> getAffectedContributors(CompletionProposalCategory category, IContributor culprit) {
-	    Set<String> affectedPlugins= new HashSet<String>();
+	    Set<String> affectedPlugins= new HashSet<>();
         for (Iterator<CompletionProposalComputerDescriptor> it= getProposalComputerDescriptors().iterator(); it.hasNext();) {
 	        CompletionProposalComputerDescriptor desc= it.next();
 	        CompletionProposalCategory cat= desc.getCategory();

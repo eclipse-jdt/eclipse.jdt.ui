@@ -195,6 +195,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 							batchMonitor.subTask(BasicElementLabels.getFileName(source));
 
 							SafeRunner.run(new ISafeRunnable() {
+								@Override
 								public void run() throws Exception {
 									IProblem[] problems= ast.getProblems();
 									for (int p= 0; p < problems.length; p++) {
@@ -207,6 +208,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 									}
 									ast.accept(unitCollector);
 								}
+								@Override
 								public void handleException(Throwable exception) {
 									String cuName= JavaElementLabels.getElementLabel(source, JavaElementLabels.CU_QUALIFIED);
 									String msg= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_internal_error, new Object[] {cuName});
@@ -259,13 +261,13 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	}
 
 	private HashMap<IJavaProject, ArrayList<IJavaElement>> getJavaElementsPerProject(IJavaElement[] elements) {
-		HashMap<IJavaProject, ArrayList<IJavaElement>> result= new HashMap<IJavaProject, ArrayList<IJavaElement>>();
+		HashMap<IJavaProject, ArrayList<IJavaElement>> result= new HashMap<>();
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement element= elements[i];
 			IJavaProject javaProject= element.getJavaProject();
 			ArrayList<IJavaElement> javaElements= result.get(javaProject);
 			if (javaElements == null) {
-				javaElements= new ArrayList<IJavaElement>();
+				javaElements= new ArrayList<>();
 				result.put(javaProject, javaElements);
 			}
 			javaElements.add(element);
@@ -275,7 +277,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
 	private RefactoringStatus check15() throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
-		HashSet<IJavaProject> checkedProjects= new HashSet<IJavaProject>();
+		HashSet<IJavaProject> checkedProjects= new HashSet<>();
 
 		for (int i= 0; i < fElements.length; i++) {
 			IJavaProject javaProject= fElements[i].getJavaProject();
@@ -334,7 +336,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		for (int i= 0; i < types.length; i++) {
 			types[i].setProperty(REWRITTEN, null);
 		}
-		List<ParameterizedType> result= new ArrayList<ParameterizedType>();
+		List<ParameterizedType> result= new ArrayList<>();
 		HashMap<ICompilationUnit, CuUpdate> updates= update.getUpdates();
 		Set<Entry<ICompilationUnit, CuUpdate>> entrySet= updates.entrySet();
 		for (Iterator<Entry<ICompilationUnit, CuUpdate>> iter= entrySet.iterator(); iter.hasNext();) {
@@ -473,7 +475,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
 	private static ArrayList<CollectionElementVariable2> getTypeArgumentCvs(ConstraintVariable2 baseCv, InferTypeArgumentsTCModel tCModel) {
 		Map<String, CollectionElementVariable2> elementCvs= tCModel.getElementVariables(baseCv);
-		ArrayList<CollectionElementVariable2> typeArgumentCvs= new ArrayList<CollectionElementVariable2>();
+		ArrayList<CollectionElementVariable2> typeArgumentCvs= new ArrayList<>();
 		for (Iterator<CollectionElementVariable2> iter= elementCvs.values().iterator(); iter.hasNext();) {
 			CollectionElementVariable2 elementCv= iter.next();
 			int index= elementCv.getDeclarationTypeVariableIndex();
@@ -552,7 +554,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
 				@Override
 				public final ChangeDescriptor getDescriptor() {
-					final Map<String, String> arguments= new HashMap<String, String>();
+					final Map<String, String> arguments= new HashMap<>();
 					final IJavaProject project= getSingleProject();
 					final String description= RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description;
 					final String header= project != null ? Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, BasicElementLabels.getJavaElementName(project.getElementName())) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description;
@@ -606,7 +608,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		} else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_LEAVE));
 		int count= 1;
-		final List<IJavaElement> elements= new ArrayList<IJavaElement>();
+		final List<IJavaElement> elements= new ArrayList<>();
 		String handle= null;
 		String attribute= JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count;
 		final RefactoringStatus status= new RefactoringStatus();

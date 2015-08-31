@@ -53,20 +53,24 @@ public class ExternalNullAnnotationQuickAssistProcessor implements IQuickAssistP
 		fAssistant= javaCorrectionAssistant;
 	}
 
+	@Override
 	public String getErrorMessage() {
 		return fErrorMessage;
 	}
 
+	@Override
 	public boolean canFix(Annotation annotation) {
 		return false; // irrelevant on class files
 	}
 
+	@Override
 	public boolean canAssist(IQuickAssistInvocationContext invocationContext) {
 		IEditorPart part= fAssistant.getEditor();
 		IClassFile classFile= ((IClassFileEditorInput) part.getEditorInput()).getClassFile();
 		return classFile.getJavaProject().getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED);
 	}
 
+	@Override
 	public ICompletionProposal[] computeQuickAssistProposals(IQuickAssistInvocationContext quickAssistContext) {
 		ICompilationUnit cu= null;
 		try {
@@ -85,7 +89,7 @@ public class ExternalNullAnnotationQuickAssistProcessor implements IQuickAssistP
 			int length= viewer != null ? viewer.getSelectedRange().y : 0;
 			context= new AssistContext(cu, viewer, part, documentOffset, length);
 
-			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<IJavaCompletionProposal>();
+			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
 
 			// shortcut (we only have one processor):
 			ExternalNullAnnotationChangeProposals.collectExternalAnnotationProposals(context.getCompilationUnit(),

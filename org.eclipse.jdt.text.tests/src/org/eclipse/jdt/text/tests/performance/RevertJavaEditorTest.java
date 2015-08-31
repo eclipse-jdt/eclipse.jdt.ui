@@ -19,7 +19,7 @@ import junit.framework.TestSuite;
  */
 public class RevertJavaEditorTest extends RevertEditorTest {
 
-	private static final Class THIS= RevertJavaEditorTest.class;
+	private static final Class<RevertJavaEditorTest> THIS= RevertJavaEditorTest.class;
 
 	private static final String FILE= PerformanceTestSetup.PROJECT + "/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
 
@@ -27,6 +27,7 @@ public class RevertJavaEditorTest extends RevertEditorTest {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		EditorTestHelper.runEventQueue();

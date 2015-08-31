@@ -53,9 +53,6 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	/** The package image, or <code>null</code> */
 	private Image fPackageImage= null;
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void dispose() {
 		if (fPackageImage != null && !fPackageImage.isDisposed())
@@ -65,9 +62,6 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 		super.dispose();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public Image getDelegateImage(final Object element) {
 		if (element instanceof IPackageFragment) {
@@ -82,9 +76,6 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 		return super.getDelegateImage(element);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected ILabelProvider getDelegateLabelProvider() {
 		if (fLabelProvider == null)
@@ -92,9 +83,6 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 		return fLabelProvider;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected IDiff getDiff(final Object element) {
 		final ISynchronizationContext context= getContext();
@@ -109,18 +97,12 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 		return super.getDiff(element);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected int getMarkerSeverity(final Object element) {
 		// Decoration label provider is handling this
 		return -1;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Object getModelRoot() {
 		if (fModelRoot == null)
@@ -128,9 +110,6 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 		return fModelRoot;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean hasDecendantConflicts(final Object element) {
 		final ISynchronizationContext context= getContext();
@@ -140,9 +119,6 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 		return super.hasDecendantConflicts(element);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean isBusy(final Object element) {
 		final ISynchronizationContext context= getContext();
@@ -152,17 +128,12 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 		return super.isBusy(element);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected boolean isIncludeOverlays() {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ITreePathLabelProvider#updateLabel(org.eclipse.jface.viewers.ViewerLabel, org.eclipse.jface.viewers.TreePath)
-	 */
+	@Override
 	public void updateLabel(ViewerLabel label, TreePath elementPath) {
 		Object firstSegment = elementPath.getFirstSegment();
 		if (firstSegment instanceof IProject && elementPath.getSegmentCount() == 2) {

@@ -68,6 +68,7 @@ public class InferTypeArgumentsWizard extends RefactoringWizard {
 			setDescription(DESCRIPTION);
 		}
 
+		@Override
 		public void createControl(Composite parent) {
 			fRefactoring= (InferTypeArgumentsRefactoring) getRefactoring();
 			loadSettings();

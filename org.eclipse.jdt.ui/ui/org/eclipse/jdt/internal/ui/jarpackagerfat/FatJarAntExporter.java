@@ -84,7 +84,7 @@ public abstract class FatJarAntExporter {
 	 * On apply the longest substitution is chosen.  
 	 */
 	private static class PathSubstituter {
-		private Map<String, String> pathSubstitutions= new HashMap<String, String>();
+		private Map<String, String> pathSubstitutions= new HashMap<>();
 
 		public PathSubstituter addSubstitution(String basePath, String baseReplacement) {
 			pathSubstitutions.put(basePath, baseReplacement);
@@ -191,7 +191,7 @@ public abstract class FatJarAntExporter {
 		IRuntimeClasspathEntry[] entries= JavaRuntime.computeUnresolvedRuntimeClasspath(configuration);
 		entries= JavaRuntime.resolveRuntimeClasspath(entries, configuration);
 
-		ArrayList<IPath> userEntries= new ArrayList<IPath>(entries.length);
+		ArrayList<IPath> userEntries= new ArrayList<>(entries.length);
 		for (int i= 0; i < entries.length; i++) {
 			if (entries[i].getClasspathProperty() == IRuntimeClasspathEntry.USER_CLASSES) {
 

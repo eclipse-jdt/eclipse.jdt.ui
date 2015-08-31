@@ -164,7 +164,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 		// it's ok to use instance preferences here as subclasses replace
 		// with project dependent versions (see CompilationUnitEditor.AdaptedSourceViewer)
 		IFormattingContext context= new JavaFormattingContext();
-		Map<String, String> map= new HashMap<String, String>(JavaCore.getOptions());
+		Map<String, String> map= new HashMap<>(JavaCore.getOptions());
 		context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, map);
 
 		return context;
@@ -419,6 +419,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	/*
 	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 	 */
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		String property = event.getProperty();
 		if (AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND.equals(property)
@@ -472,6 +473,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 
 		StyledText text= getTextWidget();
 		text.addBidiSegmentListener(new BidiSegmentListener() {
+			@Override
 			public void lineGetSegments(BidiSegmentEvent event) {
 				if (redraws()) {
 					try {

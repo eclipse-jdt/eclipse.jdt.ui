@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,10 +16,6 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -31,6 +27,10 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.RankedWordProposal;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 
 public class SpellCheckEngineTestCase extends TestCase {
 
@@ -39,6 +39,7 @@ public class SpellCheckEngineTestCase extends TestCase {
 		/*
 		 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellDictionary#addWord(java.lang.String)
 		 */
+		@Override
 		public void addWord(String word) {
 			hashWord(word);
 		}
@@ -46,6 +47,7 @@ public class SpellCheckEngineTestCase extends TestCase {
 		/*
 		 * @see org.eclipse.jdt.ui.text.spelling.engine.AbstractSpellDictionary#getURL()
 		 */
+		@Override
 		protected URL getURL() throws MalformedURLException {
 			return getClass().getResource("Dictionary"); //$NON-NLS-1$
 		}
@@ -73,12 +75,11 @@ public class SpellCheckEngineTestCase extends TestCase {
 		super(name);
 	}
 
-	protected final boolean contains(Set words, String word) {
+	protected final boolean contains(Set<RankedWordProposal> words, String word) {
 
 		RankedWordProposal proposal= null;
-		for (final Iterator iterator= words.iterator(); iterator.hasNext();) {
-
-			proposal= (RankedWordProposal)iterator.next();
+		for (Iterator<RankedWordProposal> iterator= words.iterator(); iterator.hasNext();) {
+			proposal= iterator.next();
 			if (proposal.getText().equals(word))
 				return true;
 		}
@@ -88,6 +89,7 @@ public class SpellCheckEngineTestCase extends TestCase {
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
@@ -105,6 +107,7 @@ public class SpellCheckEngineTestCase extends TestCase {
 	/*
 	 * @see junit.framework.TestCase#tearDown()
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 
@@ -120,7 +123,7 @@ public class SpellCheckEngineTestCase extends TestCase {
 	}
 
 	public void testAvailableLocales() {
-		final Set result= SpellCheckEngine.getLocalesWithInstalledDictionaries();
+		final Set<Locale> result= SpellCheckEngine.getLocalesWithInstalledDictionaries();
 		assertTrue(result.size() >= 0);
 	}
 
@@ -222,7 +225,7 @@ public class SpellCheckEngineTestCase extends TestCase {
 
 		fUSDictionary.addWord(SENTENCESTART);
 
-		Set proposals= checker.getProposals(SENTENCESTART, true);
+		Set<RankedWordProposal> proposals= checker.getProposals(SENTENCESTART, true);
 		assertTrue(proposals.size() >= 1);
 
 		assertTrue(contains(proposals, SENTENCESTART));
@@ -239,24 +242,24 @@ public class SpellCheckEngineTestCase extends TestCase {
 
 		assertTrue(contains(proposals, SENTENCESTART));
 		assertFalse(contains(proposals, SENTENCECONTENT));
-		assertTrue(((RankedWordProposal) proposals.iterator().next()).getRank() == - DefaultPhoneticDistanceAlgorithm.COST_CASE);
+		assertTrue(proposals.iterator().next().getRank() == - DefaultPhoneticDistanceAlgorithm.COST_CASE);
 
 		fDEDictionary.addWord(SENTENCESTART);
 
 		proposals= checker.getProposals(SENTENCESTART, false);
 		assertTrue(proposals.size() >= 1);
-		assertTrue(((RankedWordProposal) proposals.iterator().next()).getRank() == 0);
+		assertTrue(proposals.iterator().next().getRank() == 0);
 
 		proposals= checker.getProposals(SENTENCESTART, true);
 		assertTrue(proposals.size() >= 1);
-		assertTrue(((RankedWordProposal) proposals.iterator().next()).getRank() == 0);
+		assertTrue(proposals.iterator().next().getRank() == 0);
 
 		proposals= checker.getProposals(SENTENCECONTENT, true);
 		assertTrue(proposals.size() >= 1);
-		assertTrue(((RankedWordProposal) proposals.iterator().next()).getRank() == - DefaultPhoneticDistanceAlgorithm.COST_CASE);
+		assertTrue(proposals.iterator().next().getRank() == - DefaultPhoneticDistanceAlgorithm.COST_CASE);
 
 		proposals= checker.getProposals(SENTENCECONTENT, false);
 		assertTrue(proposals.size() >= 1);
-		assertTrue(((RankedWordProposal) proposals.iterator().next()).getRank() == - DefaultPhoneticDistanceAlgorithm.COST_CASE);
+		assertTrue(proposals.iterator().next().getRank() == - DefaultPhoneticDistanceAlgorithm.COST_CASE);
 	}
 }

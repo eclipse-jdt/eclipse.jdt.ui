@@ -23,6 +23,7 @@ public class InlineMethodTestSetup18 extends Java18Setup {
 		super(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 

@@ -218,17 +218,11 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			fProjectName= projectName;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public ILaunchConfiguration getLaunchConfiguration() {
 			return fLaunchConfiguration;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public String getLaunchConfigurationName() {
 			StringBuffer result= new StringBuffer();
@@ -299,12 +293,9 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		setTitle(FatJarPackagerMessages.JarPackageWizardPage_title);
 		setDescription(FatJarPackagerMessages.FatJarPackageWizardPage_description);
 		fJarPackage= jarPackage;
-		fLauchConfigurationModel= new ArrayList<LaunchConfigurationElement>();
+		fLauchConfigurationModel= new ArrayList<>();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void createControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
@@ -472,6 +463,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fExtractJarsRadioButton.setText(FatJarPackagerMessages.FatJarPackageWizardPage_extractJars_text);
 		fExtractJarsRadioButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fExtractJarsRadioButton.addListener(SWT.Selection, new Listener() {
+			@Override
 			public void handleEvent(Event event) {
 				if (((Button)event.widget).getSelection())
 					fLibraryHandler= new ExtractLibraryHandler();
@@ -482,6 +474,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fPackageJarsRadioButton.setText(FatJarPackagerMessages.FatJarPackageWizardPage_packageJars_text);
 		fPackageJarsRadioButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fPackageJarsRadioButton.addListener(SWT.Selection, new Listener() {
+			@Override
 			public void handleEvent(Event event) {
 				if (((Button)event.widget).getSelection())
 					fLibraryHandler= new PackageLibraryHandler();
@@ -492,6 +485,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		fCopyJarFilesRadioButton.setText(FatJarPackagerMessages.FatJarPackageWizardPage_copyJarFiles_text);
 		fCopyJarFilesRadioButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fCopyJarFilesRadioButton.addListener(SWT.Selection, new Listener() {
+			@Override
 			public void handleEvent(Event event) {
 				if (((Button)event.widget).getSelection())
 					fLibraryHandler= new CopyLibraryHandler();
@@ -671,7 +665,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	}
 
 	private LaunchConfigurationElement[] getLaunchConfigurations() {
-		ArrayList<ExistingLaunchConfigurationElement> result= new ArrayList<ExistingLaunchConfigurationElement>();
+		ArrayList<ExistingLaunchConfigurationElement> result= new ArrayList<>();
 
 		try {
 			ILaunchManager manager= DebugPlugin.getDefault().getLaunchManager();
@@ -707,7 +701,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 	private static IJavaProject[] getProjectSearchOrder(String projectName) {
 
-		ArrayList<String> projectNames= new ArrayList<String>();
+		ArrayList<String> projectNames= new ArrayList<>();
 		projectNames.add(projectName);
 
 		int nextProject= 0;
@@ -730,7 +724,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 			nextProject+= 1;
 		}
 
-		ArrayList<IJavaProject> result= new ArrayList<IJavaProject>();
+		ArrayList<IJavaProject> result= new ArrayList<>();
 		for (int i= 0, size= projectNames.size(); i < size; i++) {
 			String name= projectNames.get(i);
 			IJavaProject project= getJavaProject(name);
@@ -760,7 +754,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		IRuntimeClasspathEntry[] entries= JavaRuntime.computeUnresolvedRuntimeClasspath(configuration);
 		entries= JavaRuntime.resolveRuntimeClasspath(entries, configuration);
 
-		ArrayList<IPath> userEntries= new ArrayList<IPath>(entries.length);
+		ArrayList<IPath> userEntries= new ArrayList<>(entries.length);
 		for (int i= 0; i < entries.length; i++) {
 			if (entries[i].getClasspathProperty() == IRuntimeClasspathEntry.USER_CLASSES) {
 
@@ -799,7 +793,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 * @return all package fragment roots corresponding to each classpath entry start the search at project with projectName
 	 */
 	private static IPackageFragmentRoot[] getRequiredPackageFragmentRoots(IPath[] classpathEntries, final String projectName, MultiStatus status) {
-		ArrayList<IPackageFragmentRoot> result= new ArrayList<IPackageFragmentRoot>();
+		ArrayList<IPackageFragmentRoot> result= new ArrayList<>();
 
 		IJavaProject[] searchOrder= getProjectSearchOrder(projectName);
 
@@ -829,7 +823,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	}
 
 	private static IPackageFragmentRoot[] findRootsInProject(IPath entry, IJavaProject project) {
-		ArrayList<IPackageFragmentRoot> result= new ArrayList<IPackageFragmentRoot>();
+		ArrayList<IPackageFragmentRoot> result= new ArrayList<>();
 
 		try {
 			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
@@ -972,9 +966,6 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void saveWidgetValues() {
 		super.saveWidgetValues();

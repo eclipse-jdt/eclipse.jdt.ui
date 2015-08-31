@@ -66,7 +66,7 @@ public class MethodCall {
      */
     public void addCallLocation(CallLocation location) {
         if (fCallLocations == null) {
-            fCallLocations = new ArrayList<CallLocation>();
+            fCallLocations = new ArrayList<>();
         }
 
         fCallLocations.add(location);

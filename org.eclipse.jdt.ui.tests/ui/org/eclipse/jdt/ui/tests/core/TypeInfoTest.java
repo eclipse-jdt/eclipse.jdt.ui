@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
 public class TypeInfoTest extends TestCase {
 
-	private static final Class THIS= TypeInfoTest.class;
+	private static final Class<TypeInfoTest> THIS= TypeInfoTest.class;
 
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
@@ -59,6 +59,7 @@ public class TypeInfoTest extends TestCase {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		assertNotNull("jre is null", JavaProjectHelper.addRTJar(fJProject1));
@@ -68,6 +69,7 @@ public class TypeInfoTest extends TestCase {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 		JavaProjectHelper.delete(fJProject2);
@@ -92,7 +94,7 @@ public class TypeInfoTest extends TestCase {
 
 		// internal jar
 		//IPackageFragmentRoot root2= JavaProjectHelper.addLibraryWithImport(fJProject1, JARFILE, null, null);
-		ArrayList result= new ArrayList();
+		ArrayList<TypeNameMatch> result= new ArrayList<>();
 
 		IJavaElement[] elements= new IJavaElement[] { fJProject1 };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
@@ -122,7 +124,7 @@ public class TypeInfoTest extends TestCase {
 
 
 		for (int i= 0; i < result.size(); i++) {
-			TypeNameMatch ref= (TypeNameMatch) result.get(i);
+			TypeNameMatch ref= result.get(i);
 			//System.out.println(ref.getTypeName());
 			assertResolve(ref);
 
@@ -143,9 +145,9 @@ public class TypeInfoTest extends TestCase {
 		StringAsserts.assertEqualString(resolvedType.getFullyQualifiedName('.'), ref.getFullyQualifiedName());
 	}
 
-	private void findTypeRef(List refs, String fullname) {
+	private void findTypeRef(List<TypeNameMatch> refs, String fullname) {
 		for (int i= 0; i <refs.size(); i++) {
-			TypeNameMatch curr= (TypeNameMatch) refs.get(i);
+			TypeNameMatch curr= refs.get(i);
 			if (fullname.equals(curr.getFullyQualifiedName())) {
 				return;
 			}
@@ -155,7 +157,7 @@ public class TypeInfoTest extends TestCase {
 
 
 	public void test2() throws Exception {
-		ArrayList result= new ArrayList();
+		ArrayList<TypeNameMatch> result= new ArrayList<>();
 
 		// add Junit source to project 2
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
@@ -187,7 +189,7 @@ public class TypeInfoTest extends TestCase {
 		assertEquals("wrong element count", 51, result.size());
 		//System.out.println("Elements found: " + result.size());
 		for (int i= 0; i < result.size(); i++) {
-			TypeNameMatch ref= (TypeNameMatch) result.get(i);
+			TypeNameMatch ref= result.get(i);
 			//System.out.println(ref.getTypeName());
 			assertResolve(ref);
 		}
@@ -200,7 +202,7 @@ public class TypeInfoTest extends TestCase {
 		JavaProjectHelper.addLibraryWithImport(fJProject1, Path.fromOSString(lib.getPath()), null, null); // as internal
 		JavaProjectHelper.addLibrary(fJProject1, Path.fromOSString(lib.getPath())); // and as external
 
-		ArrayList result= new ArrayList();
+		ArrayList<TypeNameMatch> result= new ArrayList<>();
 
 		IJavaElement[] elements= new IJavaElement[] { fJProject1 };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
@@ -218,8 +220,8 @@ public class TypeInfoTest extends TestCase {
 			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 			null);
 		assertEquals("result size", result.size(), 2);
-		IType type1= ((TypeNameMatch) result.get(0)).getType();
-		IType type2= ((TypeNameMatch) result.get(1)).getType();
+		IType type1= result.get(0).getType();
+		IType type2= result.get(1).getType();
 
 		assertNotNull(type1);
 		assertNotNull(type2);

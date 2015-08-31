@@ -121,7 +121,7 @@ class AstMatchingNodeFinder {
 
 		Visitor(ASTNode nodeToMatch){
 			fNodeToMatch= nodeToMatch;
-			fFound= new ArrayList<ASTNode>();
+			fFound= new ArrayList<>();
 			fMatcher= new JdtASTMatcher();
 		}
 

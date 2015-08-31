@@ -22,15 +22,15 @@ public class ResourceProcessors {
 
 	public static String[] computeAffectedNatures(IResource resource) throws CoreException {
 		IProject project= resource.getProject();
-		Set<String> result= new HashSet<String>();
-		Set<IProject> visitedProjects= new HashSet<IProject>();
+		Set<String> result= new HashSet<>();
+		Set<IProject> visitedProjects= new HashSet<>();
 		computeNatures(result, visitedProjects, project);
 		return result.toArray(new String[result.size()]);
 	}
 
 	public static String[] computeAffectedNatures(IResource[] resources) throws CoreException {
-		Set<String> result= new HashSet<String>();
-		Set<IProject> visitedProjects= new HashSet<IProject>();
+		Set<String> result= new HashSet<>();
+		Set<IProject> visitedProjects= new HashSet<>();
 		for (int i= 0; i < resources.length; i++) {
 			computeNatures(result, visitedProjects, resources[i].getProject());
 		}

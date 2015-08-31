@@ -110,11 +110,9 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		return fInput;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on IElementChangedListener.
-	 */
+	@Override
 	public void elementChanged(final ElementChangedEvent event) {
-		final ArrayList<Runnable> runnables= new ArrayList<Runnable>();
+		final ArrayList<Runnable> runnables= new ArrayList<>();
 		try {
 			// 58952 delete project does not update Package Explorer [package explorer]
 			// if the input to the viewer is deleted then refresh to avoid the display of stale elements
@@ -212,9 +210,6 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on IContentProvider.
-	 */
 	@Override
 	public void dispose() {
 		super.dispose();
@@ -222,9 +217,6 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider#getPackageFragmentRootContent(org.eclipse.jdt.core.IPackageFragmentRoot)
-	 */
 	@Override
 	protected Object[] getPackageFragmentRootContent(IPackageFragmentRoot root) throws JavaModelException {
 		if (fIsFlatLayout) {
@@ -232,7 +224,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 
 		// hierarchical package mode
-		ArrayList<Object> result= new ArrayList<Object>();
+		ArrayList<Object> result= new ArrayList<>();
 		getHierarchicalPackageChildren(root, null, result);
 		if (!isProjectPackageFragmentRoot(root)) {
 			Object[] nonJavaResources= root.getNonJavaResources();
@@ -243,9 +235,6 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		return result.toArray();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider#getPackageContent(org.eclipse.jdt.core.IPackageFragment)
-	 */
 	@Override
 	protected Object[] getPackageContent(IPackageFragment fragment) throws JavaModelException {
 		if (fIsFlatLayout) {
@@ -253,7 +242,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 
 		// hierarchical package mode
-		ArrayList<Object> result= new ArrayList<Object>();
+		ArrayList<Object> result= new ArrayList<>();
 
 		getHierarchicalPackageChildren((IPackageFragmentRoot) fragment.getParent(), fragment, result);
 		Object[] nonPackages= super.getPackageContent(fragment);
@@ -265,9 +254,6 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		return result.toArray();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider#getFolderContent(org.eclipse.core.resources.IFolder)
-	 */
 	@Override
 	protected Object[] getFolderContent(IFolder folder) throws CoreException {
 		if (fIsFlatLayout) {
@@ -275,7 +261,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 
 		// hierarchical package mode
-		ArrayList<Object> result= new ArrayList<Object>();
+		ArrayList<Object> result= new ArrayList<>();
 
 		getHierarchicalPackagesInFolder(folder, result);
 		Object[] others= super.getFolderContent(folder);
@@ -310,15 +296,12 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider#getPackageFragmentRoots(org.eclipse.jdt.core.IJavaProject)
-	 */
 	@Override
 	protected Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
 		if (!project.getProject().isOpen())
 			return NO_CHILDREN;
 
-		List<Object> result= new ArrayList<Object>();
+		List<Object> result= new ArrayList<>();
 
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
@@ -403,9 +386,6 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		return super.internalGetParent(element);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on IContentProvider.
-	 */
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		super.inputChanged(viewer, oldInput, newInput);
@@ -832,6 +812,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	 */
 	 private void postUpdateIcon(final IJavaElement element, Collection<Runnable> runnables) {
 		 runnables.add(new Runnable() {
+			@Override
 			public void run() {
 				// 1GF87WR: ITPUI:ALL - SWTEx + NPE closing a workbench window.
 				fViewer.update(element, new String[]{IBasicPropertyConstants.P_IMAGE});
@@ -922,7 +903,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		// Therefore move the refresh start down to the viewer's input
 		if (isParent(root, fInput) || root instanceof IJavaModel)
 			root= fInput;
-		List<Object> toRefresh= new ArrayList<Object>(1);
+		List<Object> toRefresh= new ArrayList<>(1);
 		toRefresh.add(root);
 		augmentElementToRefresh(toRefresh, relation, affectedElement);
 		postRefresh(toRefresh, true, runnables);
@@ -949,6 +930,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 	protected void postRefresh(final List<Object> toRefresh, final boolean updateLabels, Collection<Runnable> runnables) {
 		runnables.add(new Runnable() {
+			@Override
 			public void run() {
 				Object[] elements= toRefresh.toArray();
 				for (int i= 0; i < elements.length; i++) {
@@ -963,6 +945,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 	protected void postAdd(final Object parent, final Object element, Collection<Runnable> runnables) {
 		runnables.add(new Runnable() {
+			@Override
 			public void run() {
 				Widget[] items= fViewer.testFindItems(element);
 				for (int i= 0; i < items.length; i++) {
@@ -981,6 +964,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 	protected void postRemove(final Object element, Collection<Runnable> runnables) {
 		runnables.add(new Runnable() {
+			@Override
 			public void run() {
 				if (fViewer.testFindItems(element).length > 0) {
 					fViewer.remove(element);
@@ -991,6 +975,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 	protected void postProjectStateChanged(final Object root, Collection<Runnable> runnables) {
 		runnables.add(new Runnable() {
+			@Override
 			public void run() {
 				fViewer.refresh(root, true);
 				// trigger a synthetic selection change so that action refresh their
@@ -1004,6 +989,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	/*
 	 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 	 */
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		if (arePackagesFoldedInHierarchicalLayout() != fFoldPackages){
 			fFoldPackages= arePackagesFoldedInHierarchicalLayout();

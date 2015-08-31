@@ -158,6 +158,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	 * @throws CoreException if accessing the CU or rewritting the imports fails
 	 * @throws OperationCanceledException Runtime error thrown when operation is canceled.
 	 */
+	@Override
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
@@ -460,12 +461,12 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			typeKinds= ASTResolving.getPossibleTypeKinds(nameNode, is50OrHigher);
 		}
 
-		ArrayList<TypeNameMatch> typeInfos= new ArrayList<TypeNameMatch>();
+		ArrayList<TypeNameMatch> typeInfos= new ArrayList<>();
 		TypeNameMatchCollector requestor= new TypeNameMatchCollector(typeInfos);
 		int matchMode= SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE;
 		new SearchEngine().searchAllTypeNames(null, matchMode, simpleTypeName.toCharArray(), matchMode, getSearchForConstant(typeKinds), searchScope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 
-		ArrayList<TypeNameMatch> typeRefsFound= new ArrayList<TypeNameMatch>(typeInfos.size());
+		ArrayList<TypeNameMatch> typeRefsFound= new ArrayList<>(typeInfos.size());
 		for (int i= 0, len= typeInfos.size(); i < len; i++) {
 			TypeNameMatch curr= typeInfos.get(i);
 			if (curr.getPackageName().length() > 0) { // do not suggest imports from the default package

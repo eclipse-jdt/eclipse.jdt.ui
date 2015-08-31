@@ -19,10 +19,6 @@ import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -60,9 +56,13 @@ import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditor;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditorMessages;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesQuickAssistProcessor;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 public class PropertiesFileQuickAssistTest extends TestCase {
 
-	private static final Class THIS= PropertiesFileQuickAssistTest.class;
+	private static final Class<PropertiesFileQuickAssistTest> THIS= PropertiesFileQuickAssistTest.class;
 
 	private IJavaProject fJProject;
 	private IPackageFragmentRoot fSourceFolder;
@@ -82,8 +82,9 @@ public class PropertiesFileQuickAssistTest extends TestCase {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 
@@ -109,6 +110,7 @@ public class PropertiesFileQuickAssistTest extends TestCase {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject, ProjectTestSetup.getDefaultClasspath());
 	}

@@ -37,10 +37,10 @@ public class MockPluginView extends PackagesView {
 	private boolean fRemoveHappened;
 	private boolean fAddHappened;
 
-	private List fRemovedObject;
-	private List fAddedObject;
-	private List fAddedParentObject;
-	private List fRefreshedObject;
+	private List<Object> fRemovedObject;
+	private List<Object> fAddedObject;
+	private List<Object> fAddedParentObject;
+	private List<Object> fRefreshedObject;
 
 	private boolean fRefreshLogging;
 
@@ -50,15 +50,16 @@ public class MockPluginView extends PackagesView {
 
 	public MockPluginView() {
 		super();
-		fRefreshedObject= new ArrayList();
-		fAddedObject= new ArrayList();
-		fRemovedObject= new ArrayList();
-		fAddedParentObject= new ArrayList();
+		fRefreshedObject= new ArrayList<>();
+		fAddedObject= new ArrayList<>();
+		fRemovedObject= new ArrayList<>();
+		fAddedParentObject= new ArrayList<>();
 	}
 
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
+	@Override
 	public void createPartControl(Composite parent) {
 
 		//create viewer
@@ -80,6 +81,7 @@ public class MockPluginView extends PackagesView {
 	 *
 	 * @see org.eclipse.jdt.internal.ui.browsing.PackagesView#isInListState()
 	 */
+	@Override
 	protected boolean isInListState(){
 		return fgListState;
 	}
@@ -102,6 +104,7 @@ public class MockPluginView extends PackagesView {
 	}
 
 
+	@Override
 	protected StructuredViewer createViewer(Composite parent){
 		if(isInListState())
 			return new TestProblemTableViewer(parent, SWT.MULTI);
@@ -109,6 +112,7 @@ public class MockPluginView extends PackagesView {
 			return new TestProblemTreeViewer(parent, SWT.MULTI);
 	}
 
+	@Override
 	public void dispose() {
 		if (fViewer != null) {
 			IContentProvider p = fViewer.getContentProvider();
@@ -122,6 +126,7 @@ public class MockPluginView extends PackagesView {
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPart#setFocus()
 	 */
+	@Override
 	public void setFocus() {
 	}
 
@@ -132,6 +137,7 @@ public class MockPluginView extends PackagesView {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#findElementToSelect(org.eclipse.jdt.core.IJavaElement)
 	 */
+	@Override
 	protected IJavaElement findElementToSelect(IJavaElement je) {
 		return null;
 	}
@@ -139,6 +145,7 @@ public class MockPluginView extends PackagesView {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#getHelpContextId()
 	 */
+	@Override
 	protected String getHelpContextId() {
 		return null;
 	}
@@ -146,6 +153,7 @@ public class MockPluginView extends PackagesView {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#isValidInput(java.lang.Object)
 	 */
+	@Override
 	protected boolean isValidInput(Object element) {
 		return false;
 	}
@@ -155,7 +163,7 @@ public class MockPluginView extends PackagesView {
 	 * Returns a list of objects refreshed in the viewer.
 	 * @return List
 	 */
-	public List getRefreshedObject() {
+	public List<Object> getRefreshedObject() {
 		return fRefreshedObject;
 	}
 
@@ -171,7 +179,7 @@ public class MockPluginView extends PackagesView {
 	 * Returns a list of the parents of added objects
 	 * @return List
 	 */
-	public List getAddedParentObject() {
+	public List<Object> getAddedParentObject() {
 		return fAddedParentObject;
 	}
 
@@ -179,7 +187,7 @@ public class MockPluginView extends PackagesView {
 	 * Returns a list of objects removed from the viewer
 	 * @return List
 	 */
-	public List getRemovedObject() {
+	public List<Object> getRemovedObject() {
 		return fRemovedObject;
 	}
 
@@ -195,7 +203,7 @@ public class MockPluginView extends PackagesView {
 	 * Returns the object added to the viewer
 	 * @return List
 	 */
-	public List getAddedObject() {
+	public List<Object> getAddedObject() {
 		return fAddedObject;
 	}
 
@@ -228,6 +236,7 @@ public class MockPluginView extends PackagesView {
 			super.setUseHashlookup(true);
 		}
 
+		@Override
 		public void refresh(Object object) {
 			fRefreshHappened= true;
 			fRefreshedObject.add(object);
@@ -235,11 +244,13 @@ public class MockPluginView extends PackagesView {
 				new Exception("Refresh tree item: " + object).printStackTrace(System.out);
 		}
 
+		@Override
 		public void remove(Object object) {
 			fRemoveHappened= true;
 			fRemovedObject.add(object);
 		}
 
+		@Override
 		public void add(Object parentObject, Object object) {
 			fAddHappened= true;
 			fAddedObject.add(object);
@@ -255,6 +266,7 @@ public class MockPluginView extends PackagesView {
 			super.setUseHashlookup(true);
 		}
 
+		@Override
 		public void refresh(Object object) {
 			fRefreshHappened= true;
 			fRefreshedObject.add(object);
@@ -263,12 +275,14 @@ public class MockPluginView extends PackagesView {
 			super.refresh(object);
 		}
 
+		@Override
 		public void remove(Object object) {
 			fRemoveHappened= true;
 			fRemovedObject.add(object);
 			super.remove(object);
 		}
 
+		@Override
 		public void add(Object object) {
 			fAddHappened= true;
 			fAddedObject.add(object);

@@ -52,6 +52,7 @@ public class CompareResultsAction extends Action {
 			fOpenDialog= new CompareResultDialog(fView.getShell(), failedTest);
 			fOpenDialog.create();
 			fOpenDialog.getShell().addDisposeListener(new DisposeListener() {
+				@Override
 				public void widgetDisposed(DisposeEvent e) {
 					fOpenDialog= null;
 				}

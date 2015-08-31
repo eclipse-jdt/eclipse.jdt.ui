@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,15 +47,11 @@ public class DialogFieldExample {
 	}
 
 	private class MylabelProvider extends LabelProvider implements ITableLabelProvider {
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
-		 */
+		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
 		}
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
-		 */
+		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			if (columnIndex == 0) {
 				return element.toString();
@@ -95,7 +91,7 @@ public class DialogFieldExample {
 		String[] columnHeaders= new String[] { "Name", "Number" };
 
 
-		ListDialogField list= new ListDialogField(adapter, addButtons, new MylabelProvider());
+		ListDialogField<String> list= new ListDialogField<>(adapter, addButtons, new MylabelProvider());
 		list.setUpButtonIndex(3);
 		list.setDownButtonIndex(4);
 		list.setRemoveButtonIndex(6);
@@ -130,28 +126,30 @@ public class DialogFieldExample {
 
 	private static Random fgRandom= new Random();
 
-	private class Adapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter {
+	private class Adapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter<String> {
 
 		// -------- IStringButtonAdapter
+		@Override
 		public void changeControlPressed(DialogField field) {
 		}
 
 		// -------- IListAdapter
-		public void customButtonPressed(ListDialogField field, int index) {
+		@Override
+		public void customButtonPressed(ListDialogField<String> field, int index) {
 			if (field != null) {
 				field.addElement("elementxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-" + fgRandom.nextInt());
 			}
 		}
 
-		public void selectionChanged(ListDialogField field) {}
+		@Override
+		public void selectionChanged(ListDialogField<String> field) {}
 
 		// -------- IDialogFieldListener
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 		}
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#doubleClicked(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
-		 */
-		public void doubleClicked(ListDialogField field) {
+		@Override
+		public void doubleClicked(ListDialogField<String> field) {
 		}
 	}
 

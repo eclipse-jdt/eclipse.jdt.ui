@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
  */
 public class GenerateDelegateMethodsTest extends SourceTestCase {
 
-	static final Class THIS= GenerateDelegateMethodsTest.class;
+	static final Class<GenerateDelegateMethodsTest> THIS= GenerateDelegateMethodsTest.class;
 
 	public GenerateDelegateMethodsTest(String name) {
 		super(name);
@@ -65,9 +65,7 @@ public class GenerateDelegateMethodsTest extends SourceTestCase {
 		return new ProjectTestSetup(test);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.tests.core.source.SourceTestCase#setUp()
-	 */
+	@Override
 	protected void setUp() throws CoreException {
 		super.setUp();
 

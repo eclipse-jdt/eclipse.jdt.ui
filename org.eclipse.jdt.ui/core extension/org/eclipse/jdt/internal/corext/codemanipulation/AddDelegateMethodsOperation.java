@@ -73,7 +73,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	private boolean fApply= true;
 
 	/** The method binding keys for which a method was generated */
-	private final List<IMethodBinding> fCreated= new ArrayList<IMethodBinding>();
+	private final List<IMethodBinding> fCreated= new ArrayList<>();
 
 	/** The resulting text edit */
 	private TextEdit fResultingEdit= null;
@@ -146,6 +146,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	/*
 	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public final void run(IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();

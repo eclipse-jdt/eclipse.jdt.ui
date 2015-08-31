@@ -92,13 +92,15 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 	private String fDescription;
 
 	public ImplementOccurrencesFinder() {
-		fResult= new ArrayList<OccurrenceLocation>();
+		fResult= new ArrayList<>();
 	}
 
+	@Override
 	public String initialize(CompilationUnit root, int offset, int length) {
 		return initialize(root, NodeFinder.perform(root, offset, length));
 	}
 
+	@Override
 	public String initialize(CompilationUnit root, ASTNode node) {
 		if (!(node instanceof Name))
 			return SearchMessages.ImplementOccurrencesFinder_invalidTarget;
@@ -128,6 +130,7 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 			fResult.add(new OccurrenceLocation(fSelectedNode.getStartPosition(), fSelectedNode.getLength(), 0, fDescription));
 	}
 
+	@Override
 	public OccurrenceLocation[] getOccurrences() {
 		performSearch();
 		if (fResult.isEmpty())
@@ -135,10 +138,12 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 		return fResult.toArray(new OccurrenceLocation[fResult.size()]);
 	}
 
+	@Override
 	public int getSearchKind() {
 		return K_IMPLEMENTS_OCCURRENCE;
 	}
 
+	@Override
 	public CompilationUnit getASTRoot() {
 		return fASTRoot;
 	}
@@ -146,10 +151,12 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.search.IOccurrencesFinder#getJobLabel()
 	 */
+	@Override
 	public String getJobLabel() {
 		return SearchMessages.ImplementOccurrencesFinder_searchfor ;
 	}
 
+	@Override
 	public String getElementName() {
 		if (fSelectedNode != null) {
 			return ASTNodes.asString(fSelectedNode);
@@ -157,14 +164,17 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 		return null;
 	}
 
+	@Override
 	public String getUnformattedPluralLabel() {
 		return SearchMessages.ImplementOccurrencesFinder_label_plural;
 	}
 
+	@Override
 	public String getUnformattedSingularLabel() {
 		return SearchMessages.ImplementOccurrencesFinder_label_singular;
 	}
 
+	@Override
 	public String getID() {
 		return ID;
 	}

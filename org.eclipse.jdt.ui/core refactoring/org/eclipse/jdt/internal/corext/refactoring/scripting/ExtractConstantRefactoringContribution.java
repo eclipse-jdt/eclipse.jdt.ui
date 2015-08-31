@@ -31,9 +31,6 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactori
  */
 public final class ExtractConstantRefactoringContribution extends JavaUIRefactoringContribution {
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public final Refactoring createRefactoring(JavaRefactoringDescriptor descriptor, RefactoringStatus status) throws CoreException {
 		JavaRefactoringArguments arguments= new JavaRefactoringArguments(descriptor.getProject(), retrieveArgumentMap(descriptor));
@@ -46,7 +43,7 @@ public final class ExtractConstantRefactoringContribution extends JavaUIRefactor
 	}
 
 	@Override
-	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map arguments, int flags) {
+	public RefactoringDescriptor createDescriptor(String id, String project, String description, String comment, Map<String, String> arguments, int flags) {
 		return RefactoringSignatureDescriptorFactory.createExtractConstantDescriptor(project, description, comment, arguments, flags);
 	}
 }

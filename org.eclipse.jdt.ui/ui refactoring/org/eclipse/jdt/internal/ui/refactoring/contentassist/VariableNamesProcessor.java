@@ -58,6 +58,7 @@ public class VariableNamesProcessor implements IContentAssistProcessor, ISubject
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeCompletionProposals(org.eclipse.jface.text.ITextViewer, int)
 	 */
+	@Override
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
 		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
 		return null;
@@ -66,6 +67,7 @@ public class VariableNamesProcessor implements IContentAssistProcessor, ISubject
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
 	 */
+	@Override
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
 		Assert.isTrue(false, "ITextViewer not supported"); //$NON-NLS-1$
 		return null;
@@ -74,6 +76,7 @@ public class VariableNamesProcessor implements IContentAssistProcessor, ISubject
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
 	 */
+	@Override
 	public char[] getCompletionProposalAutoActivationCharacters() {
 		return null;
 	}
@@ -81,6 +84,7 @@ public class VariableNamesProcessor implements IContentAssistProcessor, ISubject
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationAutoActivationCharacters()
 	 */
+	@Override
 	public char[] getContextInformationAutoActivationCharacters() {
 		return null; //no context
 	}
@@ -88,6 +92,7 @@ public class VariableNamesProcessor implements IContentAssistProcessor, ISubject
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
 	 */
+	@Override
 	public String getErrorMessage() {
 		return fErrorMessage;
 	}
@@ -95,6 +100,7 @@ public class VariableNamesProcessor implements IContentAssistProcessor, ISubject
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationValidator()
 	 */
+	@Override
 	public IContextInformationValidator getContextInformationValidator() {
 		return null; //no context
 	}
@@ -102,6 +108,7 @@ public class VariableNamesProcessor implements IContentAssistProcessor, ISubject
 	/*
 	 * @see org.eclipse.jface.contentassist.IContentAssistProcessorExtension#computeContextInformation(org.eclipse.jface.contentassist.IContentAssistSubject, int)
 	 */
+	@Override
 	public IContextInformation[] computeContextInformation(IContentAssistSubjectControl contentAssistSubject, int documentOffset) {
 		return null; //no context
 	}
@@ -109,12 +116,13 @@ public class VariableNamesProcessor implements IContentAssistProcessor, ISubject
 	/*
 	 * @see org.eclipse.jface.contentassist.IContentAssistProcessorExtension#computeCompletionProposals(org.eclipse.jface.contentassist.IContentAssistSubject, int)
 	 */
+	@Override
 	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubject, int documentOffset) {
 		if (fTempNameProposals.length == 0)
 			return null;
 		String input= contentAssistSubject.getDocument().get();
 
-		ArrayList<JavaCompletionProposal> proposals= new ArrayList<JavaCompletionProposal>();
+		ArrayList<JavaCompletionProposal> proposals= new ArrayList<>();
 		String prefix= input.substring(0, documentOffset);
 		Image image= fImageRegistry.get(fProposalImageDescriptor);
 		for (int i= 0; i < fTempNameProposals.length; i++) {

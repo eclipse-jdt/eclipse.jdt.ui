@@ -32,9 +32,6 @@ public class CodeFormatterPreferencePage extends ProfilePreferencePage {
 		setTitle(PreferencesMessages.CodeFormatterPreferencePage_title);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.ProfilePreferencePage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
 	@Override
 	public void createControl(Composite parent) {
 	    super.createControl(parent);
@@ -46,17 +43,11 @@ public class CodeFormatterPreferencePage extends ProfilePreferencePage {
 	    return new CodeFormatterConfigurationBlock(getProject(), access);
     }
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPreferencePageID()
-	 */
 	@Override
 	protected String getPreferencePageID() {
 		return PREF_ID;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPropertyPageID()
-	 */
 	@Override
 	protected String getPropertyPageID() {
 		return PROP_ID;

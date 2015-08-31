@@ -54,7 +54,7 @@ public class CleanUpOptions {
 	 * Creates a new instance.
 	 */
 	public CleanUpOptions() {
-		fOptions= new Hashtable<String, String>();
+		fOptions= new Hashtable<>();
 	}
 
 	/**

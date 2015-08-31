@@ -91,9 +91,6 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		return JavaPlugin.getDefault().getWorkbench().getSharedImages();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		List<?> elements= selection.toList();
@@ -106,9 +103,6 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			setEnabled(canEnable(resources, javaElements, jarEntryResources));
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		try {
@@ -174,7 +168,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 				copyToClipboard(fResources, new String[0], namesBuf.toString(), fJavaElements, new TypedSource[0], 0, clipboard);
 			} else {
 				//Set<String> fileNames
-				Set<String> fileNames= new HashSet<String>(countOfNonJarResources);
+				Set<String> fileNames= new HashSet<>(countOfNonJarResources);
 				processResources(fileNames, namesBuf);
 				processJavaElements(fileNames, namesBuf);
 
@@ -284,7 +278,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		}
 
 		private static Transfer[] createDataTypeArray(IResource[] resources, IJavaElement[] javaElements, String[] fileNames, TypedSource[] typedSources) {
-			List<ByteArrayTransfer> result= new ArrayList<ByteArrayTransfer>(4);
+			List<ByteArrayTransfer> result= new ArrayList<>(4);
 			if (resources.length != 0)
 				result.add(ResourceTransfer.getInstance());
 			if (javaElements.length != 0)
@@ -298,7 +292,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		}
 
 		private static Object[] createDataArray(IResource[] resources, IJavaElement[] javaElements, String[] fileNames, String names, TypedSource[] typedSources) {
-			List<Object> result= new ArrayList<Object>(4);
+			List<Object> result= new ArrayList<>(4);
 			if (resources.length != 0)
 				result.add(resources);
 			if (javaElements.length != 0)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,9 +11,6 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.Hashtable;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -36,11 +33,14 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class ExtractInterfaceTests extends RefactoringTest {
 
-	private static final Class clazz= ExtractInterfaceTests.class;
+	private static final Class<ExtractInterfaceTests> clazz= ExtractInterfaceTests.class;
 	private static final String REFACTORING_PATH= "ExtractInterface/";
-    private Hashtable fOldOptions;
+    private Hashtable<String, String> fOldOptions;
     private boolean fGenerateAnnotations= false;
 
 	public ExtractInterfaceTests(String name) {
@@ -74,7 +74,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 
 		fOldOptions= JavaCore.getOptions();
 
-	    Hashtable options= TestOptions.getDefaultOptions();
+	    Hashtable<String, String> options= TestOptions.getDefaultOptions();
 	    options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, DefaultCodeFormatterConstants.TRUE);
 	    options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "1");
 	    options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);

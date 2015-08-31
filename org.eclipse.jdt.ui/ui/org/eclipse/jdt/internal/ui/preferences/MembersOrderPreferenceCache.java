@@ -72,6 +72,7 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 			|| PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER.equals(property);
 	}
 
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		String property= event.getProperty();
 

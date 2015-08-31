@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  */
 public final class ExtractSupertypeTests extends RefactoringTest {
 
-	private static final Class clazz= ExtractSupertypeTests.class;
+	private static final Class<ExtractSupertypeTests> clazz= ExtractSupertypeTests.class;
 
 	private static final String REFACTORING_PATH= "ExtractSupertype/";
 
@@ -63,8 +63,8 @@ public final class ExtractSupertypeTests extends RefactoringTest {
 	}
 
 	private static IMethod[] getMethods(IMember[] members) {
-		List l= Arrays.asList(JavaElementUtil.getElementsOfType(members, IJavaElement.METHOD));
-		return (IMethod[]) l.toArray(new IMethod[l.size()]);
+		List<IJavaElement> l= Arrays.asList(JavaElementUtil.getElementsOfType(members, IJavaElement.METHOD));
+		return l.toArray(new IMethod[l.size()]);
 	}
 
 	public static Test setUpTest(Test someTest) {
@@ -79,6 +79,7 @@ public final class ExtractSupertypeTests extends RefactoringTest {
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}

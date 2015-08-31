@@ -19,11 +19,6 @@ import java.io.StringWriter;
 
 public class DefaultClassifier implements IClassifiesThrowables {
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jdt.internal.junit.runner.ThrowableClassifier#getTrace(java.lang.Throwable)
-	 */
 	public String getTrace(Throwable t) {
 		StringWriter stringWriter= new StringWriter();
 		PrintWriter writer= new PrintWriter(stringWriter);
@@ -32,11 +27,6 @@ public class DefaultClassifier implements IClassifiesThrowables {
 		return buffer.toString();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jdt.internal.junit.runner.ThrowableClassifier#isComparisonFailure(java.lang.Throwable)
-	 */
 	public boolean isComparisonFailure(Throwable throwable) {
 		// avoid reference to comparison failure to avoid a dependency on 3.8.1 or 4.x
 		String classname= throwable.getClass().getName();

@@ -66,6 +66,7 @@ public final class RefactoringSearchEngine2 {
 	/** Default implementation of a search requestor */
 	private static class DefaultSearchRequestor implements IRefactoringSearchRequestor {
 
+		@Override
 		public final SearchMatch acceptSearchMatch(final SearchMatch match) {
 			return match;
 		}
@@ -75,10 +76,10 @@ public final class RefactoringSearchEngine2 {
 	private class RefactoringCompilationUnitCollector extends RefactoringSearchCollector {
 
 		/** The collected compilation units */
-		private final Set<ICompilationUnit> fCollectedUnits= new HashSet<ICompilationUnit>();
+		private final Set<ICompilationUnit> fCollectedUnits= new HashSet<>();
 
 		/** The inaccurate matches */
-		private final Set<SearchMatch> fInaccurateMatches= new HashSet<SearchMatch>();
+		private final Set<SearchMatch> fInaccurateMatches= new HashSet<>();
 
 		@Override
 		public final void acceptSearchMatch(final SearchMatch match) throws CoreException {
@@ -139,13 +140,13 @@ public final class RefactoringSearchEngine2 {
 	private class RefactoringSearchMatchCollector extends RefactoringSearchCollector {
 
 		/** The binary resources */
-		private final Set<IResource> fBinaryResources= new HashSet<IResource>();
+		private final Set<IResource> fBinaryResources= new HashSet<>();
 
 		/** The collected matches */
-		private final List<SearchMatch> fCollectedMatches= new ArrayList<SearchMatch>();
+		private final List<SearchMatch> fCollectedMatches= new ArrayList<>();
 
 		/** The inaccurate matches */
-		private final Set<SearchMatch> fInaccurateMatches= new HashSet<SearchMatch>();
+		private final Set<SearchMatch> fInaccurateMatches= new HashSet<>();
 
 		@Override
 		public final void acceptSearchMatch(final SearchMatch match) throws CoreException {
@@ -301,7 +302,7 @@ public final class RefactoringSearchEngine2 {
 		IJavaProject project= null;
 		ICompilationUnit unit= null;
 		if (fGranularity == GRANULARITY_COMPILATION_UNIT) {
-			final Map<IJavaProject, Set<ICompilationUnit>> map= new HashMap<IJavaProject, Set<ICompilationUnit>>();
+			final Map<IJavaProject, Set<ICompilationUnit>> map= new HashMap<>();
 			final ICompilationUnit[] units= getAffectedCompilationUnits();
 			for (int index= 0; index < units.length; index++) {
 				unit= units[index];
@@ -309,7 +310,7 @@ public final class RefactoringSearchEngine2 {
 				if (project != null) {
 					Set<ICompilationUnit> set= map.get(project);
 					if (set == null) {
-						set= new HashSet<ICompilationUnit>();
+						set= new HashSet<>();
 						map.put(project, set);
 					}
 					set.add(unit);
@@ -317,7 +318,7 @@ public final class RefactoringSearchEngine2 {
 			}
 			return map;
 		} else {
-			final Map<IJavaProject, Set<SearchResultGroup>> map= new HashMap<IJavaProject, Set<SearchResultGroup>>();
+			final Map<IJavaProject, Set<SearchResultGroup>> map= new HashMap<>();
 			final SearchResultGroup[] groups= getGroupedMatches();
 			SearchResultGroup group= null;
 			for (int index= 0; index < groups.length; index++) {
@@ -328,7 +329,7 @@ public final class RefactoringSearchEngine2 {
 					if (project != null) {
 						Set<SearchResultGroup> set= map.get(project);
 						if (set == null) {
-							set= new HashSet<SearchResultGroup>();
+							set= new HashSet<>();
 							map.put(project, set);
 						}
 						set.add(group);
@@ -362,7 +363,7 @@ public final class RefactoringSearchEngine2 {
 	 * @return the found search matches
 	 */
 	private SearchResultGroup[] getGroupedMatches() {
-		final Map<IResource, List<SearchMatch>> grouped= new HashMap<IResource, List<SearchMatch>>();
+		final Map<IResource, List<SearchMatch>> grouped= new HashMap<>();
 		List<SearchMatch> matches= null;
 		IResource resource= null;
 		SearchMatch match= null;
@@ -431,7 +432,7 @@ public final class RefactoringSearchEngine2 {
 	private Collection<?> getSearchMatches() {
 		Collection<?> results= null;
 		if (fInaccurate) {
-			results= new LinkedList<Object>(getCollector().getCollectedMatches());
+			results= new LinkedList<>(getCollector().getCollectedMatches());
 			final Collection<SearchMatch> collection= getCollector().getInaccurateMatches();
 			SearchMatch match= null;
 			for (final Iterator<?> iterator= results.iterator(); iterator.hasNext();) {
@@ -461,7 +462,7 @@ public final class RefactoringSearchEngine2 {
 	private SearchMatch[] getUngroupedMatches() {
 		Collection<?> results= null;
 		if (fBinary) {
-			results= new LinkedList<Object>(getSearchMatches());
+			results= new LinkedList<>(getSearchMatches());
 			final Collection<IResource> collection= getCollector().getBinaryResources();
 			SearchMatch match= null;
 			for (final Iterator<?> iterator= results.iterator(); iterator.hasNext();) {

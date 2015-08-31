@@ -64,7 +64,7 @@ public final class IntroduceIndirectionDescriptor extends JavaRefactoringDescrip
 	 *
 	 * @since 1.2
 	 */
-	public IntroduceIndirectionDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public IntroduceIndirectionDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.INTRODUCE_INDIRECTION, project, description, comment, arguments, flags);
 	}
 

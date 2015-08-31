@@ -25,10 +25,12 @@ public class ASTFlattener extends GenericVisitor {
 	/**
 	 * @deprecated to avoid deprecation warnings
 	 */
+	@Deprecated
 	private static final int JLS3= AST.JLS3;
 	/**
 	 * @deprecated to avoid deprecation warnings
 	 */
+	@Deprecated
 	private static final int JLS4= AST.JLS4;
 	
 	/**
@@ -124,6 +126,7 @@ public class ASTFlattener extends GenericVisitor {
 	 * @return component type
 	 * @deprecated to avoid deprecation warning
 	 */
+	@Deprecated
 	private static Type getComponentType(ArrayType node) {
 		return node.getComponentType();
 	}
@@ -133,6 +136,7 @@ public class ASTFlattener extends GenericVisitor {
 	 * @return thrown exception names
 	 * @deprecated to avoid deprecation warning
 	 */
+	@Deprecated
 	private static List<Name> getThrownExceptions(MethodDeclaration node) {
 		return node.thrownExceptions();
 	}

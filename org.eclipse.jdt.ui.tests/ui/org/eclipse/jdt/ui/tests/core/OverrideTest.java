@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class OverrideTest extends TestCase {
 
-	private static final Class THIS= OverrideTest.class;
+	private static final Class<OverrideTest> THIS= OverrideTest.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -53,6 +53,7 @@ public class OverrideTest extends TestCase {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.addRTJar(fJProject1);
@@ -61,6 +62,7 @@ public class OverrideTest extends TestCase {
 		fPackage= fSourceFolder.createPackageFragment("override.test", false, null);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 	}

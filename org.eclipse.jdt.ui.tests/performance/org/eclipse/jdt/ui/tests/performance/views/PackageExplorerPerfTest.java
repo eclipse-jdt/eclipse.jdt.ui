@@ -57,6 +57,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 		public MyTestSetup(Test test) {
 			super(test);
 		}
+		@Override
 		protected void setUp() throws Exception {
 			fJProject1= JavaProjectHelper.createJavaProject("Testing", "bin");
 			// we must make sure that the performance test are compatible to 2.1.3 & 3.0 so use rt13
@@ -64,6 +65,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 			File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 			JavaProjectHelper.addSourceContainerWithImport(fJProject1, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
 		}
+		@Override
 		protected void tearDown() throws Exception {
 			if (fJProject1 != null && fJProject1.exists())
 				JavaProjectHelper.delete(fJProject1);
@@ -138,6 +140,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 		}
 		
 		javaProject.getProject().getWorkspace().run(new IWorkspaceRunnable() {
+			@Override
 			public void run(IProgressMonitor monitor) throws CoreException {
 				javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);
 			}
@@ -160,6 +163,7 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 	private void touchAllFilesOnDisk(IFolder folder) throws CoreException {
 		final long now= System.currentTimeMillis();
 		folder.accept(new IResourceVisitor() {
+			@Override
 			public boolean visit(IResource resource) throws CoreException {
 				if (resource instanceof IFile) {
 					IFile file= (IFile) resource;

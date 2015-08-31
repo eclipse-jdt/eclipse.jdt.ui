@@ -34,9 +34,6 @@ public class ReorgCopyWizard extends RefactoringWizard {
 		setDefaultPageTitle(ReorgMessages.ReorgCopyWizard_1);
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#addUserInputPages()
-	 */
 	@Override
 	protected void addUserInputPages() {
 		addPage(new CopyInputPage(fProcessor));

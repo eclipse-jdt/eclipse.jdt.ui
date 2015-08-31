@@ -50,9 +50,9 @@ public class MoveModifications extends RefactoringModifications {
 	private List<IParticipantDescriptorFilter> fParticipantDescriptorFilter;
 
 	public MoveModifications() {
-		fMoves= new ArrayList<Object>();
-		fMoveArguments= new ArrayList<RefactoringArguments>();
-		fParticipantDescriptorFilter= new ArrayList<IParticipantDescriptorFilter>();
+		fMoves= new ArrayList<>();
+		fMoveArguments= new ArrayList<>();
+		fParticipantDescriptorFilter= new ArrayList<>();
 	}
 
 	public void move(IResource resource, MoveArguments args) {
@@ -97,7 +97,7 @@ public class MoveModifications extends RefactoringModifications {
 			createIncludingParents(resourceDestination);
 			MoveArguments arguments= new MoveArguments(resourceDestination, args.getUpdateReferences());
 			IResource[] resourcesToMove= collectResourcesOfInterest(pack);
-			Set<IResource> allMembers= new HashSet<IResource>(Arrays.asList(resourceSource.members()));
+			Set<IResource> allMembers= new HashSet<>(Arrays.asList(resourceSource.members()));
 			for (int i= 0; i < resourcesToMove.length; i++) {
 				IResource toMove= resourcesToMove[i];
 				getResourceModifications().addMove(toMove, arguments);
@@ -161,7 +161,7 @@ public class MoveModifications extends RefactoringModifications {
 
 	@Override
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {
-		List<RefactoringParticipant> result= new ArrayList<RefactoringParticipant>();
+		List<RefactoringParticipant> result= new ArrayList<>();
 		for (int i= 0; i < fMoves.size(); i++) {
 			result.addAll(Arrays.asList(ParticipantManager.loadMoveParticipants(status,
 				owner, fMoves.get(i),

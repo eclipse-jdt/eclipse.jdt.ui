@@ -87,6 +87,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		fWarnings= new MultiStatus(JavaPlugin.getPluginId(), 0, JarPackagerMessages.JarPackageReader_jarPackageReaderWarnings, null);
 	}
 
+	@Override
 	public void read(JarPackageData jarPackage) throws CoreException {
 		try {
 			readXML(jarPackage);
@@ -106,7 +107,8 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	 *
 	 * @exception CoreException if closing the stream fails
      */
-    public void close() throws CoreException {
+    @Override
+	public void close() throws CoreException {
     	if (fInputStream != null)
     		try {
 				fInputStream.close();
@@ -174,7 +176,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		if (element.getNodeName().equals("storedRefactorings")) { //$NON-NLS-1$
 			jarPackage.setExportStructuralOnly(getBooleanAttribute(element, "structuralOnly", jarPackage.isExportStructuralOnly())); //$NON-NLS-1$
 			jarPackage.setDeprecationAware(getBooleanAttribute(element, "deprecationInfo", jarPackage.isDeprecationAware())); //$NON-NLS-1$
-			List<IAdaptable> elements= new ArrayList<IAdaptable>();
+			List<IAdaptable> elements= new ArrayList<>();
 			int count= 1;
 			String value= element.getAttribute("project" + count); //$NON-NLS-1$
 			while (value != null && !"".equals(value)) { //$NON-NLS-1$
@@ -255,7 +257,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			jarPackage.setExportOutputFolders(getBooleanAttribute(element, "exportOutputFolder", false)); //$NON-NLS-1$
 			jarPackage.setExportJavaFiles(getBooleanAttribute(element, "exportJavaFiles")); //$NON-NLS-1$
 			NodeList selectedElements= element.getChildNodes();
-			Set<IAdaptable> elementsToExport= new HashSet<IAdaptable>(selectedElements.getLength());
+			Set<IAdaptable> elementsToExport= new HashSet<>(selectedElements.getLength());
 			for (int j= 0; j < selectedElements.getLength(); j++) {
 				Node selectedNode= selectedElements.item(j);
 				if (selectedNode.getNodeType() != Node.ELEMENT_NODE)
@@ -278,7 +280,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	private void xmlReadSelectedProjects(JarPackageData jarPackage, Element element) throws java.io.IOException {
 		if (element.getNodeName().equals("selectedProjects")) { //$NON-NLS-1$
 			NodeList selectedElements= element.getChildNodes();
-			Set<IAdaptable> selectedProjects= new HashSet<IAdaptable>(selectedElements.getLength());
+			Set<IAdaptable> selectedProjects= new HashSet<>(selectedElements.getLength());
 			for (int index= 0; index < selectedElements.getLength(); index++) {
 				Node node= selectedElements.item(index);
 				if (node.getNodeType() != Node.ELEMENT_NODE)
@@ -358,7 +360,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		if (list.getLength() == 0)
 			return null; // optional entry is not present
 		NodeList packageNodes= list.item(0).getChildNodes();
-		List<IJavaElement> packages= new ArrayList<IJavaElement>(packageNodes.getLength());
+		List<IJavaElement> packages= new ArrayList<>(packageNodes.getLength());
 		for (int i= 0; i < packageNodes.getLength(); i++) {
 			Node packageNode= packageNodes.item(i);
 			if (packageNode.getNodeType() == Node.ELEMENT_NODE && packageNode.getNodeName().equals("package")) { //$NON-NLS-1$
@@ -394,6 +396,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	 *
 	 * @return the status of this operation
 	 */
+	@Override
 	public IStatus getStatus() {
 		if (fWarnings.getChildren().length == 0)
 			return Status.OK_STATUS;

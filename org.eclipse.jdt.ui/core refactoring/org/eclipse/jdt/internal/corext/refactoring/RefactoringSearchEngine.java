@@ -59,7 +59,7 @@ public class RefactoringSearchEngine {
 
 		class ResourceSearchRequestor extends SearchRequestor{
 			boolean hasPotentialMatches= false ;
-			Set<IResource> resources= new HashSet<IResource>(5);
+			Set<IResource> resources= new HashSet<>(5);
 			private IResource fLastResource;
 
 			@Override
@@ -80,7 +80,7 @@ public class RefactoringSearchEngine {
 			throw new JavaModelException(e);
 		}
 
-		List<IJavaElement> result= new ArrayList<IJavaElement>(requestor.resources.size());
+		List<IJavaElement> result= new ArrayList<>(requestor.resources.size());
 		for (Iterator<IResource> iter= requestor.resources.iterator(); iter.hasNext(); ) {
 			IResource resource= iter.next();
 			IJavaElement element= JavaCore.create(resource);
@@ -157,7 +157,7 @@ public class RefactoringSearchEngine {
 	 * @return a SearchResultGroup[], grouped by SearchMatch#getResource()
 	 */
 	public static SearchResultGroup[] groupByCu(List<SearchMatch> matchList, RefactoringStatus status) {
-		Map<IResource, List<SearchMatch>> grouped= new HashMap<IResource, List<SearchMatch>>();
+		Map<IResource, List<SearchMatch>> grouped= new HashMap<>();
 		boolean hasPotentialMatches= false;
 		boolean hasNonCuMatches= false;
 
@@ -195,7 +195,7 @@ public class RefactoringSearchEngine {
 	public static SearchPattern createOrPattern(IJavaElement[] elements, int limitTo) {
 		if (elements == null || elements.length == 0)
 			return null;
-		Set<IJavaElement> set= new HashSet<IJavaElement>(Arrays.asList(elements));
+		Set<IJavaElement> set= new HashSet<>(Arrays.asList(elements));
 		Iterator<IJavaElement> iter= set.iterator();
 		IJavaElement first= iter.next();
 		SearchPattern pattern= SearchPattern.createPattern(first, limitTo, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
@@ -213,6 +213,7 @@ public class RefactoringSearchEngine {
 
 	private static boolean containsStatusEntry(final RefactoringStatus status, final RefactoringStatusEntry other) {
 		return status.getEntries(new IRefactoringStatusEntryComparator() {
+			@Override
 			public final int compare(final RefactoringStatusEntry entry1, final RefactoringStatusEntry entry2) {
 				return entry1.getMessage().compareTo(entry2.getMessage());
 			}

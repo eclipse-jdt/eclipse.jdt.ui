@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 
 public class ImportOrganizeTest18 extends ImportOrganizeTest {
 
-	private static final Class THIS= ImportOrganizeTest18.class;
+	private static final Class<ImportOrganizeTest18> THIS= ImportOrganizeTest18.class;
 
 	private IJavaProject fJProject1;
 
@@ -47,15 +47,17 @@ public class ImportOrganizeTest18 extends ImportOrganizeTest {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= Java18ProjectTestSetup.getProject();
 
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
 		JavaCore.setOptions(options);
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		setOrganizeImportSettings(null, 99, 99, fJProject1);
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());

@@ -50,9 +50,9 @@ public class TemplateEngine {
 	/** The context type. */
 	private TemplateContextType fContextType;
 	/** The result proposals. */
-	private ArrayList<TemplateProposal> fProposals= new ArrayList<TemplateProposal>();
+	private ArrayList<TemplateProposal> fProposals= new ArrayList<>();
 	/** Positions created on the key documents to remove in reset. */
-	private final Map<IDocument, Position> fPositions= new HashMap<IDocument, Position>();
+	private final Map<IDocument, Position> fPositions= new HashMap<>();
 
 	/**
 	 * Creates the template engine for the given <code>contextType</code>.

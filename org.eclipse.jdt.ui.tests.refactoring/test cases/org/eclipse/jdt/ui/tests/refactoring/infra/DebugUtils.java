@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,19 +46,19 @@ public final class DebugUtils {
 			System.out.println(refs[i].toString());
 	}
 
-	public static void dumpCollectionCollection(Collection c) {
-		for (Iterator iter= c.iterator(); iter.hasNext(); ){
-			dumpCollection("", (List)iter.next()); //$NON-NLS-1$
+	public static void dumpCollectionCollection(Collection<?> c) {
+		for (Iterator<?> iter= c.iterator(); iter.hasNext(); ){
+			dumpCollection("", (List<?>) iter.next()); //$NON-NLS-1$
 		}
 	}
 
-	public static void dumpCollection(String msg, Collection c){
+	public static void dumpCollection(String msg, Collection<?> c){
 		System.out.println("DUMPING collection: "+  msg); //$NON-NLS-1$
 		if (c == null){
 			System.out.println("null"); //$NON-NLS-1$
 			return;
 		}
-		for (Iterator iter= c.iterator(); iter.hasNext(); ){
+		for (Iterator<?> iter= c.iterator(); iter.hasNext(); ){
 			System.out.println(iter.next().toString());
 		}
 	}
@@ -78,13 +78,13 @@ public final class DebugUtils {
 		}
 	}
 
-	public static void dumpIMethodList(String msg, List l){
+	public static void dumpIMethodList(String msg, List<?> l){
 		System.out.println("DUMPING IMethodList: "+  msg); //$NON-NLS-1$
 		if (l == null){
 			System.out.println("null"); //$NON-NLS-1$
 			return;
 		}
-		Iterator iter= l.iterator();
+		Iterator<?> iter= l.iterator();
 		while(iter.hasNext()){
 			dumpIMethod((IMethod)iter.next());
 		}

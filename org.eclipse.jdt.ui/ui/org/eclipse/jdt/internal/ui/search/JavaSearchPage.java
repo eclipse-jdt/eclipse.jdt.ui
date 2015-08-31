@@ -288,12 +288,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	 *
 	 */
 	public JavaSearchPage() {
-		fPreviousSearchPatterns= new ArrayList<SearchPatternData>();
+		fPreviousSearchPatterns= new ArrayList<>();
 	}
 
 
 	//---- Action Handling ------------------------------------------------
 
+	@Override
 	public boolean performAction() {
 		return performNewSearch();
 	}
@@ -516,9 +517,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	//---- Widget creation ------------------------------------------------
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 		readConfiguration();
@@ -618,6 +617,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			}
 		});
 		fPattern.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				doPatternModified();
 				updateOKStatus();
@@ -660,9 +660,6 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
-	 */
 	@Override
 	public void dispose() {
 		writeConfiguration();
@@ -748,7 +745,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 		fMatchLocationsLink= null;
 
 
-		ArrayList<Button> buttons= new ArrayList<Button>();
+		ArrayList<Button> buttons= new ArrayList<>();
 		buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_allOccurrences, ALL_OCCURRENCES, limitTo == ALL_OCCURRENCES));
 		buttons.add(createButton(fLimitToGroup, SWT.RADIO, SearchMessages.SearchPage_limitTo_declarations, DECLARATIONS, limitTo == DECLARATIONS));
 
@@ -1075,6 +1072,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	/*
 	 * Implements method from ISearchPage
 	 */
+	@Override
 	public void setContainer(ISearchPageContainer container) {
 		fContainer= container;
 	}

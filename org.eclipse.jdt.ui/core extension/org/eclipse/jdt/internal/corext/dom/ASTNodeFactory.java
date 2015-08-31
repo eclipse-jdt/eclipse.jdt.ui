@@ -332,7 +332,7 @@ public class ASTNodeFactory {
 	 * @return Returns a list of nodes of type {@link Modifier}.
 	 */
 	public static List<Modifier> newModifiers(AST ast, List<? extends IExtendedModifier> modifierNodes) {
-		List<Modifier> res= new ArrayList<Modifier>(modifierNodes.size());
+		List<Modifier> res= new ArrayList<>(modifierNodes.size());
 		for (int i= 0; i < modifierNodes.size(); i++) {
 			Object curr= modifierNodes.get(i);
 			if (curr instanceof Modifier) {

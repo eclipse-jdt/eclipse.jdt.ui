@@ -27,6 +27,7 @@ public class DefaultCleanUpOptionsInitializer implements ICleanUpOptionsInitiali
 	 * @see org.eclipse.jdt.ui.cleanup.ICleanUpOptionsInitializer#setDefaultOptions(org.eclipse.jdt.ui.cleanup.CleanUpOptions)
 	 * @since 3.5
 	 */
+	@Override
 	public void setDefaultOptions(CleanUpOptions options) {
 		CleanUpConstants.setDefaultOptions(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS, options);
 	}

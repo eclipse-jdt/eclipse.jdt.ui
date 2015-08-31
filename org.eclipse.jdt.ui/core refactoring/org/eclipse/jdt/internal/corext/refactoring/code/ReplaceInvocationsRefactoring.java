@@ -436,7 +436,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		// TODO: update for fSelectionStart == -1
-		final Map<String, String> arguments= new HashMap<String, String>();
+		final Map<String, String> arguments= new HashMap<>();
 		String project= null;
 		IJavaProject javaProject= fSelectionTypeRoot.getJavaProject();
 		if (javaProject != null)
@@ -459,7 +459,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 	}
 
 	private IFile[] getFilesToBeModified(ICompilationUnit[] units) {
-		List<IFile> result= new ArrayList<IFile>(units.length + 1);
+		List<IFile> result= new ArrayList<>(units.length + 1);
 		IFile file;
 		for (int i= 0; i < units.length; i++) {
 			file= getFile(units[i]);
@@ -537,7 +537,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		for (int i= 0; i < invocations.length; i++) {
 			removeNestedCalls(status, unit, parents, invocations, i);
 		}
-		List<ASTNode> result= new ArrayList<ASTNode>();
+		List<ASTNode> result= new ArrayList<>();
 		for (int i= 0; i < invocations.length; i++) {
 			if (invocations[i] != null)
 				result.add(invocations[i]);

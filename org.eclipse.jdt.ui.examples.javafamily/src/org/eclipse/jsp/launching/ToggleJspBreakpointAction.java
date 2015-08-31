@@ -38,9 +38,6 @@ public class ToggleJspBreakpointAction extends Action {
 	private ITextEditor fEditor;
 	private IVerticalRulerInfo fRulerInfo;
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.action.IAction#run()
-	 */
 	public void run() {
 		IBreakpointManager manager = DebugPlugin.getDefault().getBreakpointManager();
 		IBreakpoint[] breakpoints = manager.getBreakpoints();

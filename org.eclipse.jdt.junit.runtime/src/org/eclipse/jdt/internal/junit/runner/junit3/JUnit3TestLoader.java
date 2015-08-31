@@ -36,14 +36,6 @@ public class JUnit3TestLoader implements ITestLoader {
 
 	// WANT: give test loaders a schema
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.eclipse.jdt.internal.junit.runner.TestLoader#loadSuites(java.lang.String[],
-	 *      java.lang.String, java.lang.String[],
-	 *      org.eclipse.jdt.internal.junit.runner.RunFailureListener,
-	 *      org.eclipse.jdt.internal.junit.runner.TestIdMap)
-	 */
 	public ITestReference[] loadTests(Class[] testClasses, String testName, String[] failureNames, RemoteTestRunner listener) {
 		// instantiate all tests
 		ITestReference[] suites= new ITestReference[testClasses.length];

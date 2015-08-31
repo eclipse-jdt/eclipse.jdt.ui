@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,10 +11,6 @@
 package org.eclipse.jdt.text.tests;
 
 import java.util.Iterator;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.swt.custom.StyleRange;
 
@@ -37,6 +33,10 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 
 
 public class JavaColoringTest extends TestCase {
@@ -49,6 +49,7 @@ public class JavaColoringTest extends TestCase {
 		super(name);
 	}
 
+	@Override
 	protected void setUp() {
 
 		IPreferenceStore store= new PreferenceStore();
@@ -76,6 +77,7 @@ public class JavaColoringTest extends TestCase {
 		return new TestSuite(JavaColoringTest.class);
 	}
 
+	@Override
 	protected void tearDown () {
 
 		fTextTools.dispose();
@@ -97,7 +99,7 @@ public class JavaColoringTest extends TestCase {
 				buf.append(range.toString());
 			buf.append('\n');
 
-			Iterator e= presentation.getAllStyleRangeIterator();
+			Iterator<StyleRange> e= presentation.getAllStyleRangeIterator();
 			while (e.hasNext()) {
 				buf.append(e.next().toString());
 				buf.append('\n');

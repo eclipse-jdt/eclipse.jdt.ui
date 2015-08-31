@@ -23,6 +23,7 @@ public class JavaElementDecorator extends LabelProvider implements ILabelDecorat
 	/*
 	 * @see ILabelDecorator#decorateImage(Image, Object)
 	 */
+	@Override
 	public Image decorateImage(Image image, Object element) {
 		return null;
 	}
@@ -30,6 +31,7 @@ public class JavaElementDecorator extends LabelProvider implements ILabelDecorat
 	/*
 	 * @see ILabelDecorator#decorateText(String, Object)
 	 */
+	@Override
 	public String decorateText(String text, Object element) {
 		return text + "*";
 	}

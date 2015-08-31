@@ -73,7 +73,7 @@ public class DimensionRewrite {
 	 * @return list of copy targets
 	 */
 	public static List<Dimension> copyDimensions(List<Dimension> dimensions, ASTRewrite rewrite) {
-		ArrayList<Dimension> result= new ArrayList<Dimension>();
+		ArrayList<Dimension> result= new ArrayList<>();
 		for (int i= 0; i < dimensions.size(); i++) {
 			result.add((Dimension) rewrite.createCopyTarget(dimensions.get(i)));
 		}

@@ -22,6 +22,7 @@ import org.eclipse.jface.dialogs.Dialog;
  * DO NOT REMOVE, used in a product.
  * @deprecated As of 3.5, replaced by {@link org.eclipse.jface.layout.PixelConverter}
  */
+@Deprecated
 public class PixelConverter {
 
 	private final FontMetrics fFontMetrics;

@@ -27,10 +27,12 @@ public class JavaProjectAdapterFactory implements IAdapterFactory {
 		IProject.class,
 	};
 
+	@Override
 	public Class<?>[] getAdapterList() {
 		return PROPERTIES;
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getAdapter(Object element, Class<T> key) {
 		if (IProject.class.equals(key)) {

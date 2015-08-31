@@ -75,6 +75,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		fEncoding= encoding;
 	}
 
+	@Override
 	public void write(JarPackageData jarPackage) throws CoreException {
 		try  {
 			writeXML(jarPackage);
@@ -241,7 +242,8 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	 * 
 	 * @throws CoreException if closing the stream fails
 	 */
-    public void close() throws CoreException {
+    @Override
+	public void close() throws CoreException {
     	if (fOutputStream != null) {
 			try {
 				fOutputStream.close();
@@ -285,6 +287,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 	/*
 	 * This writer always returns OK
 	 */
+	@Override
 	public IStatus getStatus() {
 		return Status.OK_STATUS;
 	}

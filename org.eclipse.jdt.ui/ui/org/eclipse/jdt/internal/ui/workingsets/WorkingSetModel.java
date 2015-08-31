@@ -88,6 +88,7 @@ public class WorkingSetModel {
 	private List<IWorkingSet> fAllWorkingSets;
 
 	private static class WorkingSetComparar implements IElementComparer {
+		@Override
 		public boolean equals(Object o1, Object o2) {
 			IWorkingSet w1= o1 instanceof IWorkingSet ? (IWorkingSet)o1 : null;
 			IWorkingSet w2= o2 instanceof IWorkingSet ? (IWorkingSet)o2 : null;
@@ -95,6 +96,7 @@ public class WorkingSetModel {
 				return o1.equals(o2);
 			return w1 == w2;
 		}
+		@Override
 		public int hashCode(Object element) {
 			if (element instanceof IWorkingSet)
 				return System.identityHashCode(element);
@@ -103,11 +105,11 @@ public class WorkingSetModel {
 	}
 
 	private static class ElementMapper {
-		private final Map<IAdaptable, Object> fElementToWorkingSet= new HashMap<IAdaptable, Object>();
-		private final Map<IWorkingSet, IAdaptable[]> fWorkingSetToElement= new IdentityHashMap<IWorkingSet, IAdaptable[]>();
+		private final Map<IAdaptable, Object> fElementToWorkingSet= new HashMap<>();
+		private final Map<IWorkingSet, IAdaptable[]> fWorkingSetToElement= new IdentityHashMap<>();
 
-		private final Map<IAdaptable, Object> fResourceToWorkingSet= new HashMap<IAdaptable, Object>();
-		private final List<IAdaptable> fNonProjectTopLevelElements= new ArrayList<IAdaptable>();
+		private final Map<IAdaptable, Object> fResourceToWorkingSet= new HashMap<>();
+		private final List<IAdaptable> fNonProjectTopLevelElements= new ArrayList<>();
 
 		public void clear() {
 			fElementToWorkingSet.clear();
@@ -126,8 +128,8 @@ public class WorkingSetModel {
 			if (oldElements == null)
 				return null;
 			IAdaptable[] newElements= ws.getElements();
-			List<IAdaptable> toRemove= new ArrayList<IAdaptable>(Arrays.asList(oldElements));
-			List<IAdaptable> toAdd= new ArrayList<IAdaptable>(Arrays.asList(newElements));
+			List<IAdaptable> toRemove= new ArrayList<>(Arrays.asList(oldElements));
+			List<IAdaptable> toAdd= new ArrayList<>(Arrays.asList(newElements));
 			computeDelta(toRemove, toAdd, oldElements, newElements);
 			for (Iterator<IAdaptable> iter= toAdd.iterator(); iter.hasNext();) {
 				addElement(iter.next(), ws);
@@ -197,7 +199,7 @@ public class WorkingSetModel {
 			if (obj == null) {
 				map.put(key, value);
 			} else if (obj instanceof IWorkingSet) {
-				List<IWorkingSet> l= new ArrayList<IWorkingSet>(2);
+				List<IWorkingSet> l= new ArrayList<>(2);
 				l.add((IWorkingSet) obj);
 				l.add(value);
 				map.put(key, l);
@@ -245,7 +247,7 @@ public class WorkingSetModel {
 			}
 			if (obj == null)
 				return Collections.emptyList();
-			List<IWorkingSet> result= new ArrayList<IWorkingSet>(1);
+			List<IWorkingSet> result= new ArrayList<>(1);
 			result.add((IWorkingSet) obj);
 			return result;
 		}
@@ -257,8 +259,8 @@ public class WorkingSetModel {
 	public WorkingSetModel(IMemento memento) {
 		fLocalWorkingSetManager= PlatformUI.getWorkbench().createLocalWorkingSetManager();
 		addListenersToWorkingSetManagers();
-		fActiveWorkingSets= new ArrayList<IWorkingSet>();
-		fAllWorkingSets= new ArrayList<IWorkingSet>();
+		fActiveWorkingSets= new ArrayList<>();
+		fAllWorkingSets= new ArrayList<>();
 
 		if (memento == null || ! restoreState(memento)) {
 			IWorkingSet others= fLocalWorkingSetManager.createWorkingSet(WorkingSetMessages.WorkingSetModel_others_name, new IAdaptable[0]);
@@ -276,6 +278,7 @@ public class WorkingSetModel {
 	private void addListenersToWorkingSetManagers() {
 		fListeners= new ListenerList(ListenerList.IDENTITY);
 		fWorkingSetManagerListener= new IPropertyChangeListener() {
+			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				workingSetManagerChanged(event);
 			}
@@ -323,7 +326,7 @@ public class WorkingSetModel {
 			}
 			if (sets != null && sets.size() > 0) {
 				if (result == null)
-					result= new ArrayList<Object>(Arrays.asList(elements));
+					result= new ArrayList<>(Arrays.asList(elements));
 				result.addAll(sets);
 			}
 		}
@@ -384,7 +387,7 @@ public class WorkingSetModel {
 	 * @since 3.7
 	 */
 	private List<IWorkingSet> getActiveAndAllWorkingSetsFromManagers() {
-		List<IWorkingSet> result= new ArrayList<IWorkingSet>();
+		List<IWorkingSet> result= new ArrayList<>();
 		result.addAll(fActiveWorkingSets);
 		IWorkingSet[] locals= fLocalWorkingSetManager.getWorkingSets();
 		for (int i= 0; i < locals.length; i++) {
@@ -434,7 +437,7 @@ public class WorkingSetModel {
 		Assert.isLegal(!isOrderDifferentInWorkingSetLists(Arrays.asList(allWorkingSets), Arrays.asList(activeWorkingSets)));
 		if (isSortingEnabled)
 			Arrays.sort(allWorkingSets, new WorkingSetComparator(true));
-		fAllWorkingSets= new ArrayList<IWorkingSet>(Arrays.asList(allWorkingSets));
+		fAllWorkingSets= new ArrayList<>(Arrays.asList(allWorkingSets));
 		setActiveWorkingSets(activeWorkingSets, isSortingEnabled);
 	}
 
@@ -453,7 +456,7 @@ public class WorkingSetModel {
 		if (fIsSortingEnabled) {
 			Arrays.sort(workingSets, new WorkingSetComparator(true));
 		}
-		fActiveWorkingSets= new ArrayList<IWorkingSet>(Arrays.asList(workingSets));
+		fActiveWorkingSets= new ArrayList<>(Arrays.asList(workingSets));
 		if (isOrderDifferentInWorkingSetLists(fAllWorkingSets, fActiveWorkingSets)) { //see bug 338531
 			adjustOrderingOfAllWorkingSets();
 		}
@@ -619,12 +622,12 @@ public class WorkingSetModel {
 			IWorkingSet workingSet= (IWorkingSet)event.getNewValue();
 			if (isSupportedAsTopLevelElement(workingSet)) {
 				IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
-				List<IWorkingSet> allWorkingSets= new ArrayList<IWorkingSet>(Arrays.asList(manager.getAllWorkingSets()));
+				List<IWorkingSet> allWorkingSets= new ArrayList<>(Arrays.asList(manager.getAllWorkingSets()));
 				if (allWorkingSets.contains(workingSet)) {
-					List<IWorkingSet> elements= new ArrayList<IWorkingSet>(fActiveWorkingSets);
+					List<IWorkingSet> elements= new ArrayList<>(fActiveWorkingSets);
 					if (workingSet.isVisible() && !fActiveWorkingSets.contains(workingSet))
 						elements.add(workingSet);
-					List<IWorkingSet> allElements= new ArrayList<IWorkingSet>(Arrays.asList(getAllWorkingSets()));
+					List<IWorkingSet> allElements= new ArrayList<>(Arrays.asList(getAllWorkingSets()));
 					if (!allElements.contains(workingSet))
 						allElements.add(workingSet);
 					setWorkingSets(allElements.toArray(new IWorkingSet[allElements.size()]), fIsSortingEnabled, elements.toArray(new IWorkingSet[elements.size()]));
@@ -644,9 +647,9 @@ public class WorkingSetModel {
 			}
 		} else if (IWorkingSetManager.CHANGE_WORKING_SET_REMOVE.equals(property)) {
 			IWorkingSet workingSet= (IWorkingSet)event.getOldValue();
-			List<IWorkingSet> elements= new ArrayList<IWorkingSet>(fActiveWorkingSets);
+			List<IWorkingSet> elements= new ArrayList<>(fActiveWorkingSets);
 			elements.remove(workingSet);
-			List<IWorkingSet> allElements= new ArrayList<IWorkingSet>(Arrays.asList(getAllWorkingSets()));
+			List<IWorkingSet> allElements= new ArrayList<>(Arrays.asList(getAllWorkingSets()));
 			allElements.remove(workingSet);
 			setWorkingSets(allElements.toArray(new IWorkingSet[allElements.size()]), fIsSortingEnabled, elements.toArray(new IWorkingSet[elements.size()]));
 		} else if (IWorkingSetManager.CHANGE_WORKING_SET_LABEL_CHANGE.equals(property)) {

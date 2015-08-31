@@ -192,7 +192,7 @@ public class JavaEditorTextHoverDescriptor {
 	}
 
 	private static JavaEditorTextHoverDescriptor[] createDescriptors(IConfigurationElement[] elements) {
-		List<JavaEditorTextHoverDescriptor> result= new ArrayList<JavaEditorTextHoverDescriptor>(elements.length);
+		List<JavaEditorTextHoverDescriptor> result= new ArrayList<>(elements.length);
 		for (int i= 0; i < elements.length; i++) {
 			IConfigurationElement element= elements[i];
 			if (HOVER_TAG.equals(element.getName())) {
@@ -207,7 +207,7 @@ public class JavaEditorTextHoverDescriptor {
 		String compiledTextHoverModifiers= JavaPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS);
 
 		StringTokenizer tokenizer= new StringTokenizer(compiledTextHoverModifiers, VALUE_SEPARATOR);
-		HashMap<String, String> idToModifier= new HashMap<String, String>(tokenizer.countTokens() / 2);
+		HashMap<String, String> idToModifier= new HashMap<>(tokenizer.countTokens() / 2);
 
 		while (tokenizer.hasMoreTokens()) {
 			String id= tokenizer.nextToken();
@@ -218,7 +218,7 @@ public class JavaEditorTextHoverDescriptor {
 		String compiledTextHoverModifierMasks= JavaPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS);
 
 		tokenizer= new StringTokenizer(compiledTextHoverModifierMasks, VALUE_SEPARATOR);
-		HashMap<String, String> idToModifierMask= new HashMap<String, String>(tokenizer.countTokens() / 2);
+		HashMap<String, String> idToModifierMask= new HashMap<>(tokenizer.countTokens() / 2);
 
 		while (tokenizer.hasMoreTokens()) {
 			String id= tokenizer.nextToken();

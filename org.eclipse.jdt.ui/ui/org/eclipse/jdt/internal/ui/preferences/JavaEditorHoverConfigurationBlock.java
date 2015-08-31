@@ -97,10 +97,12 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 
 	private class JavaEditorTextHoverDescriptorLabelProvider implements ITableLabelProvider {
 
+		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			return null;
 		}
 
+		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			switch (columnIndex) {
 			case ENABLED_PROP:
@@ -118,16 +120,20 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 			return null;
 		}
 
+		@Override
 		public void addListener(ILabelProviderListener listener) {
 		}
 
+		@Override
 		public void dispose() {
 		}
 
+		@Override
 		public boolean isLabelProperty(Object element, String property) {
 			return false;
 		}
 
+		@Override
 		public void removeListener(ILabelProviderListener listener) {
 		}
 	}
@@ -135,13 +141,16 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 
 	private class JavaEditorTextHoverDescriptorContentProvider implements IStructuredContentProvider {
 
+		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			// Do nothing since the viewer listens to resource deltas
 		}
 
+		@Override
 		public void dispose() {
 		}
 
+		@Override
 		public Object[] getElements(Object element) {
 			return (Object[])element;
 		}
@@ -161,12 +170,14 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 
 	private StatusInfo fStatus;
 
-	private Map<Button, String> fCheckBoxes= new HashMap<Button, String>();
+	private Map<Button, String> fCheckBoxes= new HashMap<>();
 	private SelectionListener fCheckBoxListener= new SelectionListener() {
+		@Override
 		public void widgetDefaultSelected(SelectionEvent e) {
 			Button button= (Button) e.widget;
 			fStore.setValue(fCheckBoxes.get(button), button.getSelection());
 		}
+		@Override
 		public void widgetSelected(SelectionEvent e) {
 			Button button= (Button) e.widget;
 			fStore.setValue(fCheckBoxes.get(button), button.getSelection());
@@ -185,7 +196,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 
 	private OverlayPreferenceStore.OverlayKey[] createOverlayStoreKeys() {
 
-		ArrayList<OverlayKey> overlayKeys= new ArrayList<OverlayKey>();
+		ArrayList<OverlayKey> overlayKeys= new ArrayList<>();
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER));
 
@@ -203,6 +214,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 	 * @param parent the parent composite
 	 * @return the control for the preference page
 	 */
+	@Override
 	public Control createControl(Composite parent) {
 
 		ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
@@ -244,9 +256,11 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 		layouter.setLayoutData(gd);
 
 		fHoverTable.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleHoverListSelection();
 			}
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
@@ -271,6 +285,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 			/*
 			 * @see org.eclipse.jface.viewers.ICheckStateListener#checkStateChanged(org.eclipse.jface.viewers.CheckStateChangedEvent)
 			 */
+			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				String id= ((JavaEditorTextHoverDescriptor)event.getElement()).getId();
 				if (id == null)
@@ -301,10 +316,12 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 
 		fModifierEditor.addKeyListener(new KeyListener() {
 			private boolean isModifierCandidate;
+			@Override
 			public void keyPressed(KeyEvent e) {
 				isModifierCandidate= e.keyCode > 0 && e.character == 0 && e.stateMask == 0;
 			}
 
+			@Override
 			public void keyReleased(KeyEvent e) {
 				if (isModifierCandidate && e.stateMask > 0 && e.stateMask == e.stateMask && e.character == 0) {// && e.time -time < 1000) {
 					String text= fModifierEditor.getText();
@@ -339,6 +356,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 		});
 
 		fModifierEditor.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				handleModifierModified();
 			}
@@ -377,6 +395,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 		return JavaPlugin.getDefault().getJavaEditorTextHoverDescriptors();
 	}
 
+	@Override
 	public void initialize() {
 		JavaEditorTextHoverDescriptor[] hoverDescs= getContributedHovers();
 		fHoverConfigs= new HoverConfig[hoverDescs.length];
@@ -403,6 +422,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 		fHoverTableViewer.refresh();
 	}
 
+	@Override
 	public void performOk() {
 		StringBuffer buf= new StringBuffer();
 		StringBuffer maskBuf= new StringBuffer();
@@ -428,6 +448,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 		JavaPlugin.getDefault().resetJavaEditorTextHoverDescriptors();
 	}
 
+	@Override
 	public void performDefaults() {
 		restoreFromPreferences();
 		initializeFields();
@@ -438,7 +459,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 		String compiledTextHoverModifiers= fStore.getString(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS);
 
 		StringTokenizer tokenizer= new StringTokenizer(compiledTextHoverModifiers, JavaEditorTextHoverDescriptor.VALUE_SEPARATOR);
-		HashMap<String, String> idToModifier= new HashMap<String, String>(tokenizer.countTokens() / 2);
+		HashMap<String, String> idToModifier= new HashMap<>(tokenizer.countTokens() / 2);
 
 		while (tokenizer.hasMoreTokens()) {
 			String id= tokenizer.nextToken();
@@ -449,7 +470,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 		String compiledTextHoverModifierMasks= JavaPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS);
 
 		tokenizer= new StringTokenizer(compiledTextHoverModifierMasks, JavaEditorTextHoverDescriptor.VALUE_SEPARATOR);
-		HashMap<String, String> idToModifierMask= new HashMap<String, String>(tokenizer.countTokens() / 2);
+		HashMap<String, String> idToModifierMask= new HashMap<>(tokenizer.countTokens() / 2);
 
 		while (tokenizer.hasMoreTokens()) {
 			String id= tokenizer.nextToken();
@@ -531,7 +552,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 			fStatus= new StatusInfo();
 
 		int i= 0;
-		HashMap<Integer, String> stateMasks= new HashMap<Integer, String>(fHoverConfigs.length);
+		HashMap<Integer, String> stateMasks= new HashMap<>(fHoverConfigs.length);
 		while (fStatus.isOK() && i < fHoverConfigs.length) {
 			if (fHoverConfigs[i].fIsEnabled) {
 				String label= getContributedHovers()[i].getLabel();
@@ -577,6 +598,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 	/*
 	 * @see DialogPage#dispose()
 	 */
+	@Override
 	public void dispose() {
 		// nothing to dispose
 	}

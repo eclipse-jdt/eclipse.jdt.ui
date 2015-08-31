@@ -148,6 +148,7 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 	/**
 	 * @see IResourceChangeListener#resourceChanged
 	 */
+	@Override
 	public void resourceChanged(IResourceChangeEvent e) {
 		try {
 			IMarkerDelta[] deltas= e.findMarkerDeltas(null, true);

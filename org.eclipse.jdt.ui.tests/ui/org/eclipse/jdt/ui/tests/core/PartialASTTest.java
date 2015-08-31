@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,6 @@ package org.eclipse.jdt.ui.tests.core;
 import java.util.Hashtable;
 import java.util.List;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -28,6 +25,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -48,9 +46,12 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class PartialASTTest extends CoreTests {
 
-	private static final Class THIS= PartialASTTest.class;
+	private static final Class<PartialASTTest> THIS= PartialASTTest.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -69,8 +70,9 @@ public class PartialASTTest extends CoreTests {
 	}
 
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);
@@ -84,6 +86,7 @@ public class PartialASTTest extends CoreTests {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
@@ -145,7 +148,7 @@ public class PartialASTTest extends CoreTests {
 	}
 
 	private void assertAllBindings(CompilationUnit astRoot) {
-		List list= astRoot.types();
+		List<AbstractTypeDeclaration> list= astRoot.types();
 		for (int i= 0; i < list.size(); i++) {
 			TypeDeclaration decl= (TypeDeclaration) list.get(i);
 			assertTrue(decl.resolveBinding() != null);
@@ -153,18 +156,18 @@ public class PartialASTTest extends CoreTests {
 			if (!decl.isInterface() && decl.getSuperclassType() != null) {
 				assertTrue(decl.getSuperclassType().resolveBinding() != null);
 			}
-			List interfaces= decl.superInterfaceTypes();
+			List<Type> interfaces= decl.superInterfaceTypes();
 			for (int j= 0; j < interfaces.size(); j++) {
-				assertTrue(((Type) interfaces.get(j)).resolveBinding() != null);
+				assertTrue(interfaces.get(j).resolveBinding() != null);
 			}
 
 			MethodDeclaration[] declarations= decl.getMethods();
 			for (int k= 0; k < declarations.length; k++) {
 				MethodDeclaration meth= declarations[k];
 				assertTrue(meth.resolveBinding() != null);
-				List params= meth.parameters();
+				List<SingleVariableDeclaration> params= meth.parameters();
 				for (int n= 0; n < params.size(); n++) {
-					SingleVariableDeclaration arg= (SingleVariableDeclaration) params.get(n);
+					SingleVariableDeclaration arg= params.get(n);
 					assertTrue(arg.resolveBinding() != null);
 				}
 				if (!meth.isConstructor()) {

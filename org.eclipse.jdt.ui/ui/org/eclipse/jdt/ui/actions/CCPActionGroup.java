@@ -179,9 +179,6 @@ public class CCPActionGroup extends ActionGroup {
 		return fDeleteAction;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
@@ -195,9 +192,6 @@ public class CCPActionGroup extends ActionGroup {
 			actionBars.setGlobalActionHandler(ActionFactory.PASTE.getId(), fPasteAction);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in ActionGroup
-	 */
 	@Override
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);

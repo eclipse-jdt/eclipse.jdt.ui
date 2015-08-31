@@ -25,18 +25,22 @@ public class Error extends ExceptionAttribute {
 		fException= thrownException;
 	}
 
+	@Override
 	public Object[] getChildren() {
 		return EMPTY;
 	}
 
+	@Override
 	public Image getImage() {
 		return null;
 	}
 
+	@Override
 	public String getLabel() {
 		return fLabel;
 	}
 
+	@Override
 	public Object getParent() {
 		return fParent;
 	}
@@ -44,6 +48,7 @@ public class Error extends ExceptionAttribute {
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -72,6 +77,7 @@ public class Error extends ExceptionAttribute {
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return (fParent != null ? fParent.hashCode() : 0)
 				+ (fLabel != null ? fLabel.hashCode() : 0);

@@ -66,33 +66,42 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.CreateTargetQueries;
 public class MoveTest extends RefactoringTest {
 
 	private static final class ConfirmAllQuery implements IReorgQueries {
+		@Override
 		public IConfirmQuery createSkipQuery(String queryTitle, int queryID) {
 			return new IConfirmQuery() {
+				@Override
 				public boolean confirm(String question) throws OperationCanceledException {
 					return false;
 				}
+				@Override
 				public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
 					return false;
 				}
 			};
 		}
 
+		@Override
 		public IConfirmQuery createYesNoQuery(String queryTitle, boolean allowCancel, int queryID) {
 			return new IConfirmQuery() {
+				@Override
 				public boolean confirm(String question) throws OperationCanceledException {
 					return true;
 				}
+				@Override
 				public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
 					return true;
 				}
 			};
 		}
 
+		@Override
 		public IConfirmQuery createYesYesToAllNoNoToAllQuery(String queryTitle, boolean allowCancel, int queryID) {
 			return new IConfirmQuery() {
+				@Override
 				public boolean confirm(String question) throws OperationCanceledException {
 					return true;
 				}
+				@Override
 				public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
 					return true;
 				}
@@ -101,33 +110,42 @@ public class MoveTest extends RefactoringTest {
 	}
 
 	private static final class ConfirmNoneQuery implements IReorgQueries {
+		@Override
 		public IConfirmQuery createSkipQuery(String queryTitle, int queryID) {
 			return new IConfirmQuery() {
+				@Override
 				public boolean confirm(String question) throws OperationCanceledException {
 					return false;
 				}
+				@Override
 				public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
 					return false;
 				}
 			};
 		}
 
+		@Override
 		public IConfirmQuery createYesNoQuery(String queryTitle, boolean allowCancel, int queryID) {
 			return new IConfirmQuery() {
+				@Override
 				public boolean confirm(String question) throws OperationCanceledException {
 					return false;
 				}
+				@Override
 				public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
 					return false;
 				}
 			};
 		}
 
+		@Override
 		public IConfirmQuery createYesYesToAllNoNoToAllQuery(String queryTitle, boolean allowCancel, int queryID) {
 			return new IConfirmQuery() {
+				@Override
 				public boolean confirm(String question) throws OperationCanceledException {
 					return false;
 				}
+				@Override
 				public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
 					return false;
 				}
@@ -139,7 +157,7 @@ public class MoveTest extends RefactoringTest {
 		super(name);
 	}
 
-	private static final Class clazz= MoveTest.class;
+	private static final Class<MoveTest> clazz= MoveTest.class;
 	private static final String REFACTORING_PATH= "Move/";
 
 	public static Test suite() {
@@ -150,11 +168,13 @@ public class MoveTest extends RefactoringTest {
 		return new RefactoringTestSetup(someTest);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fIsPreDeltaTest= true;
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -1018,8 +1038,8 @@ public class MoveTest extends RefactoringTest {
 
 		//import statement with type from default package - only <= java 1.3
 		IJavaProject javaProject= getRoot().getJavaProject();
-		Map originalOptions= javaProject.getOptions(false);
-		Map newOptions= javaProject.getOptions(false);
+		Map<String, String> originalOptions= javaProject.getOptions(false);
+		Map<String, String> newOptions= javaProject.getOptions(false);
 		newOptions.put(JavaCore.COMPILER_COMPLIANCE, "1.3");
 		newOptions.put(JavaCore.COMPILER_SOURCE, "1.3");
 		javaProject.setOptions(newOptions);
@@ -1065,8 +1085,8 @@ public class MoveTest extends RefactoringTest {
 	public void testDestination_no_cuFromRoot() throws Exception{
 		//import statement with type from default package - only <= java 1.3
 		IJavaProject javaProject= getRoot().getJavaProject();
-		Map originalOptions= javaProject.getOptions(false);
-		Map newOptions= javaProject.getOptions(false);
+		Map<String, String> originalOptions= javaProject.getOptions(false);
+		Map<String, String> newOptions= javaProject.getOptions(false);
 		newOptions.put(JavaCore.COMPILER_COMPLIANCE, "1.4"); //will cause error (potential match)
 		newOptions.put(JavaCore.COMPILER_SOURCE, "1.4"); //will cause error (potential match)
 		javaProject.setOptions(newOptions);

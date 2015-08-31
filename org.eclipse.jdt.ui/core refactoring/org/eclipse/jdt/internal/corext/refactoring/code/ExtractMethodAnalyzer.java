@@ -217,7 +217,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		if (result.hasFatalError())
 			return result;
 
-		List<ASTNode> validDestinations= new ArrayList<ASTNode>();
+		List<ASTNode> validDestinations= new ArrayList<>();
 		ASTNode destination= ASTResolving.findParentType(fEnclosingBodyDeclaration.getParent());
 		while (destination != null) {
 			if (isValidDestination(destination)) {
@@ -427,7 +427,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		for (int i= 0; i < selectedNodes.length; i++) {
 			final ASTNode astNode= selectedNodes[i];
 			astNode.accept(new ASTVisitor() {
-				ArrayList<String> fLocalLoopLabels= new ArrayList<String>();
+				ArrayList<String> fLocalLoopLabels= new ArrayList<>();
 				
 				@Override
 				public boolean visit(BreakStatement node) {
@@ -555,7 +555,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 	}
 
 	private IVariableBinding[] removeSelectedDeclarations(IVariableBinding[] bindings) {
-		List<IVariableBinding> result= new ArrayList<IVariableBinding>(bindings.length);
+		List<IVariableBinding> result= new ArrayList<>(bindings.length);
 		Selection selection= getSelection();
 		for (int i= 0; i < bindings.length; i++) {
 			ASTNode decl= ((CompilationUnit)fEnclosingBodyDeclaration.getRoot()).findDeclaringNode(bindings[i]);
@@ -567,7 +567,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 	private ITypeBinding[] computeTypeVariables(ITypeBinding[] bindings) {
 		Selection selection= getSelection();
-		Set<ITypeBinding> result= new HashSet<ITypeBinding>();
+		Set<ITypeBinding> result= new HashSet<>();
 		// first remove all type variables that come from outside of the method
 		// or are covered by the selection
 		CompilationUnit compilationUnit= (CompilationUnit)fEnclosingBodyDeclaration.getRoot();
@@ -601,7 +601,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		IRegion region= getSelectedNodeRange();
 		Selection selection= Selection.createFromStartLength(region.getOffset(), region.getLength());
 
-		List<IVariableBinding> localReads= new ArrayList<IVariableBinding>();
+		List<IVariableBinding> localReads= new ArrayList<>();
 		flowContext.setComputeMode(FlowContext.ARGUMENTS);
 		FlowInfo argInfo= new InputFlowAnalyzer(flowContext, selection, true).perform(fEnclosingBodyDeclaration);
 		IVariableBinding[] reads= argInfo.get(flowContext, FlowInfo.READ | FlowInfo.READ_POTENTIAL | FlowInfo.UNKNOWN);
@@ -636,7 +636,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 				status.addFatalError(message, JavaStatusContext.create(fCUnit, getSelection()));
 				return;
 		}
-		List<IVariableBinding> callerLocals= new ArrayList<IVariableBinding>(5);
+		List<IVariableBinding> callerLocals= new ArrayList<>(5);
 		FlowInfo localInfo= new InputFlowAnalyzer(flowContext, selection, false).perform(fEnclosingBodyDeclaration);
 		IVariableBinding[] writes= localInfo.get(flowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN);
 		for (int i= 0; i < writes.length; i++) {
@@ -703,7 +703,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 	public ITypeBinding[] getExceptions(boolean includeRuntimeExceptions) {
 		if (includeRuntimeExceptions)
 			return fAllExceptions;
-		List<ITypeBinding> result= new ArrayList<ITypeBinding>(fAllExceptions.length);
+		List<ITypeBinding> result= new ArrayList<>(fAllExceptions.length);
 		for (int i= 0; i < fAllExceptions.length; i++) {
 			ITypeBinding exception= fAllExceptions[i];
 			if (!includeRuntimeExceptions && Bindings.isRuntimeException(exception))

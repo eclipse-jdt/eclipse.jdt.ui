@@ -204,7 +204,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 				dialog.setElementPositionEnabled(false);
 				if (dialog.open() == Window.OK) {
 					Object[] selection= dialog.getResult();
-					ArrayList<Object> result= new ArrayList<Object>(selection.length);
+					ArrayList<Object> result= new ArrayList<>(selection.length);
 					for (int i= 0; i < selection.length; i++) {
 						if (selection[i] instanceof IMethodBinding)
 							result.add(selection[i]);
@@ -219,7 +219,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 				}
 			} else {
 				settings.createComments= false;
-				List<IMethodBinding> result= new ArrayList<IMethodBinding>();
+				List<IMethodBinding> result= new ArrayList<>();
 				for (int i= 0; i < bindings.length; i++) {
 					IMethodBinding curr= bindings[i];
 					if (Modifier.isAbstract(curr.getModifiers()))
@@ -289,6 +289,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension4#isAutoInsertable()
 	 */
+	@Override
 	public boolean isAutoInsertable() {
 		return false;
 	}

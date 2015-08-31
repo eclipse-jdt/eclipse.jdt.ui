@@ -105,9 +105,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.JARIMPORT_WIZARD_PAGE);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
 		public void update() {
 			final IWorkbenchPart part= fSite.getPage().getActivePart();
 			if (part != null)
@@ -158,7 +156,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 	public GenerateBuildPathActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
         fSite= site;
 		fSelectionProvider= selectionProvider;
-        fActions= new ArrayList<Action>();
+        fActions= new ArrayList<>();
 
 		final CreateLinkedSourceFolderAction addLinkedSourceFolderAction= new CreateLinkedSourceFolderAction(site);
 		fActions.add(addLinkedSourceFolderAction);
@@ -210,18 +208,12 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 
     }
 
-    /* (non-Javadoc)
-     * Method declared in ActionGroup
-     */
     @Override
 	public void fillActionBars(IActionBars actionBar) {
         super.fillActionBars(actionBar);
         setGlobalActionHandlers(actionBar);
     }
 
-    /* (non-Javadoc)
-     * Method declared in ActionGroup
-     */
     @Override
 	public void fillContextMenu(IMenuManager menu) {
         super.fillContextMenu(menu);
@@ -230,7 +222,8 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         String menuText= ActionMessages.BuildPath_label;
         IMenuManager subMenu= new MenuManager(menuText, MENU_ID);
         subMenu.addMenuListener(new IMenuListener() {
-        	public void menuAboutToShow(IMenuManager manager) {
+        	@Override
+			public void menuAboutToShow(IMenuManager manager) {
         		fillViewSubMenu(manager);
         	}
         });
@@ -292,9 +285,6 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     	return true;
     }
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void dispose() {
 		if (fActions != null) {

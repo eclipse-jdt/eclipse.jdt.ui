@@ -13,9 +13,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.util.Arrays;
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -52,6 +49,9 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class MarkerResolutionTest extends QuickFixTest {
 
 
@@ -68,6 +68,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 		/*
 		 * @see org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext#getOffset()
 		 */
+		@Override
 		public int getOffset() {
 			return fOffset;
 		}
@@ -75,6 +76,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 		/*
 		 * @see org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext#getLength()
 		 */
+		@Override
 		public int getLength() {
 			return -1;
 		}
@@ -82,13 +84,14 @@ public class MarkerResolutionTest extends QuickFixTest {
 		/*
 		 * @see org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext#getSourceViewer()
 		 */
+		@Override
 		public ISourceViewer getSourceViewer() {
 			return fSourceViewer;
 		}
 	}
 
 
-	private static final Class THIS= MarkerResolutionTest.class;
+	private static final Class<MarkerResolutionTest> THIS= MarkerResolutionTest.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -107,8 +110,9 @@ public class MarkerResolutionTest extends QuickFixTest {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		JavaCore.setOptions(options);
@@ -122,6 +126,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}

@@ -40,7 +40,7 @@ public class CPJavaProject {
     }
 
     public CPJavaProject createWorkingCopy() {
-    	List<CPListElement> newList= new ArrayList<CPListElement>(fCPListElements.size());
+    	List<CPListElement> newList= new ArrayList<>(fCPListElements.size());
     	for (Iterator<CPListElement> iterator= fCPListElements.iterator(); iterator.hasNext();) {
 	        CPListElement element= iterator.next();
 	        newList.add(element.copy());

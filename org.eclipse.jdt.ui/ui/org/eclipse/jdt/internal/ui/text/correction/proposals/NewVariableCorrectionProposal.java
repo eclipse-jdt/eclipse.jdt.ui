@@ -145,7 +145,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			// add javadoc tag
 			Javadoc javadoc= methodDeclaration.getJavadoc();
 			if (javadoc != null) {
-				HashSet<String> leadingNames= new HashSet<String>();
+				HashSet<String> leadingNames= new HashSet<>();
 				for (Iterator<SingleVariableDeclaration> iter= methodDeclaration.parameters().iterator(); iter.hasNext();) {
 					SingleVariableDeclaration curr= iter.next();
 					leadingNames.add(curr.getName().getIdentifier());
@@ -361,6 +361,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		}
 		if (names.length > 1) {
 			Arrays.sort(names, new Comparator<SimpleName>() {
+				@Override
 				public int compare(SimpleName s1, SimpleName s2) {
 					return s1.getStartPosition() - s2.getStartPosition();
 				}

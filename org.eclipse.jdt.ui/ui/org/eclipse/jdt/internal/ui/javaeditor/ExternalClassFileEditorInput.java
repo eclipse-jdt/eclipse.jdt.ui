@@ -33,6 +33,7 @@ public class ExternalClassFileEditorInput extends FileEditorInput implements ICl
 	/*
 	 * @see IClassFileEditorInput#getClassFile()
 	 */
+	@Override
 	public IClassFile getClassFile() {
 		return fClassFile;
 	}

@@ -123,6 +123,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * @since 2.0
 	 * @deprecated As of 3.0, replaced by {@link AbstractDecoratedTextEditorPreferenceConstants#EDITOR_TAB_WIDTH}
 	 */
+	@Deprecated
 	public final static String PREFERENCE_TAB_WIDTH= PreferenceConstants.EDITOR_TAB_WIDTH;
 
 	/**
@@ -131,6 +132,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * @since 2.0
 	 * @deprecated as of 3.1 use {@link org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants#FORMATTER_TAB_CHAR}
 	 */
+	@Deprecated
 	public final static String SPACES_FOR_TABS= PreferenceConstants.EDITOR_SPACES_FOR_TABS;
 
 
@@ -211,6 +213,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * @see JavaTextTools
 	 * @deprecated As of 3.0, replaced by {@link JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)}
 	 */
+	@Deprecated
 	public JavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor) {
 		super(createPreferenceStore(tools));
 		fJavaTextTools= tools;
@@ -301,6 +304,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * @since 2.0
 	 * @deprecated As of 3.0
 	 */
+	@Deprecated
 	protected IPreferenceStore getPreferenceStore() {
 		Assert.isTrue(!isNewSetup());
 		return fJavaTextTools.getPreferenceStore();
@@ -415,6 +419,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 			assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
 			assistant.setInformationControlCreator(new IInformationControlCreator() {
+				@Override
 				public IInformationControl createInformationControl(Shell parent) {
 					return new DefaultInformationControl(parent, JavaPlugin.getAdditionalInfoAffordanceString());
 				}
@@ -728,6 +733,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	@Override
 	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
 		return new IInformationControlCreator() {
+			@Override
 			public IInformationControl createInformationControl(Shell parent) {
 				return new DefaultInformationControl(parent, false);
 			}
@@ -745,6 +751,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 */
 	private IInformationControlCreator getInformationPresenterControlCreator(ISourceViewer sourceViewer) {
 		return new IInformationControlCreator() {
+			@Override
 			public IInformationControl createInformationControl(Shell parent) {
 				return new DefaultInformationControl(parent, true);
 			}
@@ -763,6 +770,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 */
 	private IInformationControlCreator getOutlinePresenterControlCreator(ISourceViewer sourceViewer, final String commandId) {
 		return new IInformationControlCreator() {
+			@Override
 			public IInformationControl createInformationControl(Shell parent) {
 				int shellStyle= SWT.RESIZE;
 				int treeStyle= SWT.V_SCROLL | SWT.H_SCROLL;
@@ -773,6 +781,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 	private IInformationControlCreator getHierarchyPresenterControlCreator() {
 		return new IInformationControlCreator() {
+			@Override
 			public IInformationControl createInformationControl(Shell parent) {
 				int shellStyle= SWT.RESIZE;
 				int treeStyle= SWT.V_SCROLL | SWT.H_SCROLL;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,7 +59,7 @@ public class ParticipantTesting {
 	}
 
 	public static String[] createHandles(Object[] elements) {
-		List result= new ArrayList();
+		List<String> result= new ArrayList<>();
 		for (int i= 0; i < elements.length; i++) {
 			Object element= elements[i];
 			if (element instanceof IJavaElement) {
@@ -71,7 +71,7 @@ public class ParticipantTesting {
 					getJavaElement().getHandleIdentifier() + "_mapping");
 			}
 		}
-		return (String[])result.toArray(new String[result.size()]);
+		return result.toArray(new String[result.size()]);
 	}
 
 	public static void testRename(String[] expectedHandles, RenameArguments[] args) {
@@ -142,7 +142,7 @@ public class ParticipantTesting {
 		}
 	}
 
-	public static void testSimilarElements(List similarList, List similarNewNameList, List similarNewHandleList) {
+	public static void testSimilarElements(List<String> similarList, List<String> similarNewNameList, List<String> similarNewHandleList) {
 		Assert.assertEquals(similarList.size(), similarNewNameList.size());
 		if (similarList.size() == 0) {
 			TestRenameParticipantShared.testNumberOfSimilarElements(0);
@@ -152,7 +152,7 @@ public class ParticipantTesting {
 
 	}
 
-	private static void testElementsShared(String[] expected, List actual) {
+	private static void testElementsShared(String[] expected, List<String> actual) {
 		for (int i= 0; i < expected.length; i++) {
 			String handle= expected[i];
 			Assert.assertTrue("Expected handle not found: " + handle, actual.contains(handle));
@@ -160,7 +160,7 @@ public class ParticipantTesting {
 		testNumberOfElements(expected.length, actual);
 	}
 
-	private static void testNumberOfElements(int expected, List actual) {
+	private static void testNumberOfElements(int expected, List<String> actual) {
 		if (expected == 0 && actual == null)
 			return;
 		Assert.assertEquals(expected, actual.size());

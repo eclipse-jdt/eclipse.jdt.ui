@@ -74,7 +74,7 @@ import org.eclipse.jdt.ui.tests.refactoring.TestModelProvider;
 
 public class CopyTest extends RefactoringTest {
 
-	private static final Class clazz= CopyTest.class;
+	private static final Class<CopyTest> clazz= CopyTest.class;
 	private static final String REFACTORING_PATH= "Copy/";
 
 	public CopyTest(String name) {
@@ -89,11 +89,13 @@ public class CopyTest extends RefactoringTest {
 		return new RefactoringTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		fIsPreDeltaTest= true;
 	}
 
+	@Override
 	protected void executePerformOperation(PerformChangeOperation perform, IWorkspace workspace) throws CoreException {
 		if (fIsPreDeltaTest) {
 			try {
@@ -107,6 +109,7 @@ public class CopyTest extends RefactoringTest {
 		}
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -177,11 +180,13 @@ public class CopyTest extends RefactoringTest {
 		private String fCuInitialSuggestedName= "unset";
 		private String fResourceInitialSuggestedName= "unset";
 
+		@Override
 		public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String s) {
 			setCuInitialSuggestedName(s);
 			return createStaticQuery(NEW_CU_NAME);
 		}
 
+		@Override
 		public INewNameQuery createNewResourceNameQuery(IResource res, String s) {
 			setResourceInitialSuggestedName(s);
 			if (res instanceof IFile)
@@ -190,22 +195,27 @@ public class CopyTest extends RefactoringTest {
 				return createStaticQuery(NEW_FOLDER_NAME);
 		}
 
+		@Override
 		public INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String s) {
 			return createStaticQuery(NEW_PACKAGE_NAME);
 		}
 
+		@Override
 		public INewNameQuery createNullQuery() {
 			return createStaticQuery(null);
 		}
 
+		@Override
 		public INewNameQuery createStaticQuery(final String newName) {
 			return new INewNameQuery(){
+				@Override
 				public String getNewName() {
 					return newName;
 				}
 			};
 		}
 
+		@Override
 		public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName) {
 			return createStaticQuery(NEW_PACKAGE_FRAGMENT_ROOT_NAME);
 		}
@@ -228,25 +238,32 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	private static class MockCancelNameQueries implements INewNameQueries{
+		@Override
 		public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String s) {
 			return createNullQuery();
 		}
+		@Override
 		public INewNameQuery createNewResourceNameQuery(IResource res, String s) {
 			return createNullQuery();
 		}
+		@Override
 		public INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String s) {
 			return createNullQuery();
 		}
+		@Override
 		public INewNameQuery createNullQuery() {
 			return new INewNameQuery() {
+				@Override
 				public String getNewName() {
 					throw new OperationCanceledException();
 				}
 			};
 		}
+		@Override
 		public INewNameQuery createStaticQuery(final String newName) {
 			return createNullQuery();
 		}
+		@Override
 		public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName) {
 			return createNullQuery();
 		}

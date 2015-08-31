@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
  */
 public class SearchLeakTest extends LeakTestCase {
 
-	private static final Class THIS= SearchLeakTest.class;
+	private static final Class<SearchLeakTest> THIS= SearchLeakTest.class;
 
 	public SearchLeakTest(String name) {
 		super(name);
@@ -53,10 +53,12 @@ public class SearchLeakTest extends LeakTestCase {
 		return new LeakTestSetup(new JUnitSourceSetup(test));
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}

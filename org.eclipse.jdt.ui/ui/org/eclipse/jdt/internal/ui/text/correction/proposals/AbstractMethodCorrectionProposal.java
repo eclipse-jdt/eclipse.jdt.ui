@@ -128,7 +128,7 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 
 		addNewModifiers(rewrite, targetTypeDecl, decl.modifiers());
 
-		ArrayList<String> takenNames= new ArrayList<String>();
+		ArrayList<String> takenNames= new ArrayList<>();
 		addNewTypeParameters(rewrite, takenNames, decl.typeParameters());
 
 		decl.setName(newNameNode);

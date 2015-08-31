@@ -37,9 +37,6 @@ class CallHierarchyTransferDropAdapter extends ViewerInputDropAdapter {
 		fCallHierarchyViewPart= viewPart;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected void doInputView(Object inputElements) {
 		IMember[] newElements= (IMember[])inputElements;
@@ -54,10 +51,6 @@ class CallHierarchyTransferDropAdapter extends ViewerInputDropAdapter {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.dnd.ViewerInputDropAdapter#performDrop(java.lang.Object)
-	 * @since 3.7
-	 */
 	@Override
 	public boolean performDrop(Object data) {
 		setSelectionFeedbackEnabled(false);
@@ -74,9 +67,6 @@ class CallHierarchyTransferDropAdapter extends ViewerInputDropAdapter {
 		return super.performDrop(data);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Object getInputElement(ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
@@ -88,10 +78,6 @@ class CallHierarchyTransferDropAdapter extends ViewerInputDropAdapter {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.dnd.ViewerInputDropAdapter#determineOperation(java.lang.Object, int, org.eclipse.swt.dnd.TransferData, int)
-	 * @since 3.7
-	 */
 	@Override
 	protected int determineOperation(Object target, int operation, TransferData transferType, int operations) {
 		setSelectionFeedbackEnabled(false);

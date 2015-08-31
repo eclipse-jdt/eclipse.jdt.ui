@@ -50,6 +50,7 @@ public class JarEntryEditorInputFactory implements IElementFactory {
 	/*
 	 * @see org.eclipse.ui.IElementFactory#createElement(org.eclipse.ui.IMemento)
 	 */
+	@Override
 	public IAdaptable createElement(IMemento memento) {
 
 		String rootIdentifier= memento.getString(KEY_ELEMENT);
@@ -144,7 +145,7 @@ public class JarEntryEditorInputFactory implements IElementFactory {
 	 * @see IPersistableElement#saveState(IMemento)
 	 */
 	public static void saveState(IMemento memento, IJarEntryResource jarEntryResource) {
-		ArrayList<String> reversePath= new ArrayList<String>();
+		ArrayList<String> reversePath= new ArrayList<>();
 		reversePath.add(jarEntryResource.getName());
 
 		Object parent= jarEntryResource.getParent();

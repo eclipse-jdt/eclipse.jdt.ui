@@ -14,9 +14,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -48,6 +45,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 
@@ -58,9 +56,12 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectMainTypeNameProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CorrectPackageDeclarationProposal;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 public class ReorgQuickFixTest extends QuickFixTest {
 
-	private static final Class THIS= ReorgQuickFixTest.class;
+	private static final Class<ReorgQuickFixTest> THIS= ReorgQuickFixTest.class;
 
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
@@ -77,8 +78,9 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		return new ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getDefaultOptions();
+		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(JavaCore.COMPILER_PB_UNUSED_IMPORT, JavaCore.ERROR);
@@ -93,6 +95,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 	}
 
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
@@ -109,7 +112,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -137,7 +140,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -170,7 +173,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -209,7 +212,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -244,7 +247,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -292,7 +295,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -340,7 +343,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -386,7 +389,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -439,7 +442,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		pack2.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -463,7 +466,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("X.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
@@ -509,7 +512,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
 		assertNumberOfProposals(proposals, 2);
@@ -561,7 +564,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -595,7 +598,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -632,7 +635,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -666,7 +669,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
 
 		CompilationUnit astRoot= getASTRoot(cu);
-		ArrayList proposals= collectCorrections(cu, astRoot);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 
@@ -695,7 +698,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true, IJavaModelMarker.TASK_MARKER);
-		ArrayList proposals= collectCorrections(context, problem);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(context, problem);
 
 
 
@@ -728,7 +731,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true, IJavaModelMarker.TASK_MARKER);
-		ArrayList proposals= collectCorrections(context, problem);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(context, problem);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -760,7 +763,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true, IJavaModelMarker.TASK_MARKER);
-		ArrayList proposals= collectCorrections(context, problem);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(context, problem);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -793,7 +796,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true, IJavaModelMarker.TASK_MARKER);
-		ArrayList proposals= collectCorrections(context, problem);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(context, problem);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -826,7 +829,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true, IJavaModelMarker.TASK_MARKER);
-		ArrayList proposals= collectCorrections(context, problem);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(context, problem);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -860,7 +863,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true, IJavaModelMarker.TASK_MARKER);
-		ArrayList proposals= collectCorrections(context, problem);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(context, problem);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -892,7 +895,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
 		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true, IJavaModelMarker.TASK_MARKER);
-		ArrayList proposals= collectCorrections(context, problem);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(context, problem);
 
 		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
@@ -1033,18 +1036,22 @@ public class ReorgQuickFixTest extends QuickFixTest {
 
 
 			IClasspathContainer newContainer= new IClasspathContainer() {
+				@Override
 				public IClasspathEntry[] getClasspathEntries() {
 					return entries;
 				}
 
+				@Override
 				public String getDescription() {
 					return "MyUserLibrary";
 				}
 
+				@Override
 				public int getKind() {
 					return IClasspathContainer.K_APPLICATION;
 				}
 
+				@Override
 				public IPath getPath() {
 					return containerPath;
 				}

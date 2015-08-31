@@ -79,9 +79,6 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 
 	//---- Text Selection ----------------------------------------------------------------------
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 		setEnabled(true);

@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
  */
 public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 
-	static final Class THIS= GenerateConstructorUsingFieldsTest.class;
+	static final Class<GenerateConstructorUsingFieldsTest> THIS= GenerateConstructorUsingFieldsTest.class;
 
 	public GenerateConstructorUsingFieldsTest(String name) {
 		super(name);

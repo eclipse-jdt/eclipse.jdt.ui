@@ -45,6 +45,7 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 		}
 	}
 	
+	@Override
 	public String getText(Object obj) {
 		if (obj instanceof DynamicBindingProperty) {
 			DynamicBindingProperty dynamicBindingProperty= (DynamicBindingProperty) obj;
@@ -63,6 +64,7 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 		}
 	}
 	
+	@Override
 	public Image getImage(Object obj) {
 		if (obj instanceof DynamicBindingProperty) {
 			DynamicBindingProperty dynamicBindingProperty= (DynamicBindingProperty) obj;
@@ -82,14 +84,13 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 	/*
 	 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
 	 */
+	@Override
 	public void dispose() {
 		super.dispose();
 		fViewerElement= null;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
-	 */
+	@Override
 	public Color getForeground(Object element) {
 		if (element instanceof Binding) {
 			return fBlue;
@@ -116,6 +117,7 @@ public class TrayLabelProvider extends LabelProvider implements IColorProvider {
 	/*
 	 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
 	 */
+	@Override
 	public Color getBackground(Object element) {
 		return null;
 	}

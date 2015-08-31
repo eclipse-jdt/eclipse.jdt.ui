@@ -318,9 +318,6 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		return new StatusInfo();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#dispose()
-	 */
 	@Override
 	public void dispose() {
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings().addNewSection(SETTINGS_SECTION_NAME);

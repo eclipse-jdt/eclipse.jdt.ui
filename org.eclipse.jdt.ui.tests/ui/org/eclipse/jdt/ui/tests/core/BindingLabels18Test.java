@@ -33,7 +33,7 @@ import junit.framework.TestSuite;
 
 public class BindingLabels18Test extends AbstractBindingLabelsTest {
 
-	private static final Class THIS= BindingLabels18Test.class;
+	private static final Class<BindingLabels18Test> THIS= BindingLabels18Test.class;
 
 	public BindingLabels18Test(String name) {
 		super(name);
@@ -47,6 +47,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		return new Java18ProjectTestSetup(test);
 	}
 
+	@Override
 	protected void setUp() throws Exception {
 		fJProject1= Java18ProjectTestSetup.getProject();
 
@@ -54,6 +55,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		store.setValue(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}

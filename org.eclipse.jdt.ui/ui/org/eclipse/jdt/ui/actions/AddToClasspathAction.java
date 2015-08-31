@@ -73,9 +73,6 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.ADD_TO_CLASSPATH_ACTION);
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in SelectionDispatchAction
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
@@ -113,15 +110,13 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * Method declared in SelectionDispatchAction
-	 */
 	@Override
 	public void run(IStructuredSelection selection) {
 		try {
 			final IFile[] files= getJARFiles(selection);
 
 			IWorkspaceRunnable operation= new IWorkspaceRunnable() {
+				@Override
 				public void run(IProgressMonitor monitor) throws CoreException {
 					monitor.beginTask(ActionMessages.AddToClasspathAction_progressMessage, files.length);
 					for (int i= 0; i < files.length; i++) {
@@ -158,7 +153,7 @@ public class AddToClasspathAction extends SelectionDispatchAction {
 	}
 
 	private static IFile[] getJARFiles(IStructuredSelection selection) throws JavaModelException {
-		ArrayList<IFile> list= new ArrayList<IFile>();
+		ArrayList<IFile> list= new ArrayList<>();
 		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IAdaptable) {

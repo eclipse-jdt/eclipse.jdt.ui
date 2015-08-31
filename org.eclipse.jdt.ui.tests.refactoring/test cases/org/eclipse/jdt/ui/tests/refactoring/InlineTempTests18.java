@@ -14,7 +14,7 @@ import junit.framework.Test;
 
 public class InlineTempTests18 extends InlineTempTests {
 
-	private static final Class clazz= InlineTempTests18.class;
+	private static final Class<InlineTempTests18> clazz= InlineTempTests18.class;
 
 	public InlineTempTests18(String name) {
 		super(name);
@@ -37,6 +37,7 @@ public class InlineTempTests18 extends InlineTempTests {
 
 	//--- tests for lambda expressions
 
+	@Override
 	public void test0() throws Exception {
 		helper1(6, 18, 6, 20);
 	}
@@ -45,10 +46,12 @@ public class InlineTempTests18 extends InlineTempTests {
 		helper1(6, 18, 6, 20);
 	}
 
+	@Override
 	public void test2() throws Exception {
 		helper1(5, 20, 5, 25);
 	}
 	
+	@Override
 	public void test3() throws Exception {
 		helper1(9, 29, 9, 36);
 	}

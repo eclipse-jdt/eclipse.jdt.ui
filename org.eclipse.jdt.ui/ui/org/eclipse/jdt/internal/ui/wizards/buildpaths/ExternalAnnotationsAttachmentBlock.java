@@ -235,11 +235,13 @@ public class ExternalAnnotationsAttachmentBlock {
 	private class AnnotationsAttachmentAdapter implements IStringButtonAdapter, IDialogFieldListener {
 
 		// -------- IStringButtonAdapter --------
+		@Override
 		public void changeControlPressed(DialogField field) {
 			attachmentChangeControlPressed(field);
 		}
 
 		// ---------- IDialogFieldListener --------
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			attachmentDialogFieldChanged(field);
 		}
@@ -414,6 +416,7 @@ public class ExternalAnnotationsAttachmentBlock {
 		dialog.setInput(fWorkspaceRoot);
 		dialog.setInitialSelection(initSel);
 		dialog.setValidator(new ISelectionStatusValidator() {
+			@Override
 			public IStatus validate(Object[] selection) {
 				if (selection != null && selection.length == 1) {
 					Object selectedObject= selection[0];
@@ -448,6 +451,7 @@ public class ExternalAnnotationsAttachmentBlock {
 	 */
 	public static IRunnableWithProgress getRunnable(final Shell shell, final IClasspathEntry newEntry, final IJavaProject jproject, final IPath containerPath, final boolean isReferencedEntry) {
 		return new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
 					String[] changedAttributes= { IClasspathAttribute.EXTERNAL_ANNOTATION_PATH };

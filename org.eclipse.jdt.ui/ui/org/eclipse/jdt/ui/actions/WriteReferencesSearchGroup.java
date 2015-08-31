@@ -162,9 +162,6 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 	}
 
 
-	/* (non-Javadoc)
-	 * Method declared on ActionGroup.
-	 */
 	@Override
 	public void fillContextMenu(IMenuManager manager) {
 		MenuManager javaSearchMM= new MenuManager(MENU_TEXT, IContextMenuConstants.GROUP_SEARCH);

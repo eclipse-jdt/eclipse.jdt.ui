@@ -85,7 +85,7 @@ public class JavaElementUtil {
 	}
 
 	public static IJavaElement[] getElementsOfType(IJavaElement[] elements, int type){
-		Set<IJavaElement> result= new HashSet<IJavaElement>(elements.length);
+		Set<IJavaElement> result= new HashSet<>(elements.length);
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement element= elements[i];
 			if (element.getElementType() == type)
@@ -141,7 +141,7 @@ public class JavaElementUtil {
 	public static IMethod[] getAllConstructors(IType type) throws JavaModelException {
 		if (JavaModelUtil.isInterfaceOrAnnotation(type))
 			return new IMethod[0];
-		List<IMethod> result= new ArrayList<IMethod>();
+		List<IMethod> result= new ArrayList<>();
 		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < methods.length; i++) {
 			IMethod iMethod= methods[i];
@@ -161,7 +161,7 @@ public class JavaElementUtil {
 		if (cpe.getEntryKind() == IClasspathEntry.CPE_LIBRARY)
 			cpe= root.getResolvedClasspathEntry();
 		IJavaProject[] allJavaProjects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
-		List<IJavaProject> result= new ArrayList<IJavaProject>(allJavaProjects.length);
+		List<IJavaProject> result= new ArrayList<>(allJavaProjects.length);
 		for (int i= 0; i < allJavaProjects.length; i++) {
 			IJavaProject project= allJavaProjects[i];
 			IPackageFragmentRoot[] roots= project.findPackageFragmentRoots(cpe);
@@ -173,7 +173,7 @@ public class JavaElementUtil {
 
 	public static IMember[] merge(IMember[] a1, IMember[] a2) {
 		// Don't use hash sets since ordering is important for some refactorings.
-		List<IMember> result= new ArrayList<IMember>(a1.length + a2.length);
+		List<IMember> result= new ArrayList<>(a1.length + a2.length);
 		for (int i= 0; i < a1.length; i++) {
 			IMember member= a1[i];
 			if (!result.contains(member))
@@ -202,7 +202,7 @@ public class JavaElementUtil {
 
 		IPackageFragmentRoot root= (IPackageFragmentRoot) pack.getParent();
 		IJavaElement[] allPackages= root.getChildren();
-		ArrayList<IPackageFragment> subpackages= new ArrayList<IPackageFragment>();
+		ArrayList<IPackageFragment> subpackages= new ArrayList<>();
 		subpackages.add(pack);
 		String prefix= pack.getElementName() + '.';
 		for (int i= 0; i < allPackages.length; i++) {
@@ -236,6 +236,7 @@ public class JavaElementUtil {
 
 	public static IMember[] sortByOffset(IMember[] members){
 		Comparator<IMember> comparator= new Comparator<IMember>(){
+			@Override
 			public int compare(IMember o1, IMember o2){
 				try{
 					return o1.getNameRange().getOffset() - o2.getNameRange().getOffset();

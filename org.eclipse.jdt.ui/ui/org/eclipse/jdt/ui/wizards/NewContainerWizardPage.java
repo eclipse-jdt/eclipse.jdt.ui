@@ -289,11 +289,13 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	private class ContainerFieldAdapter implements IStringButtonAdapter, IDialogFieldListener {
 
 		// -------- IStringButtonAdapter
+		@Override
 		public void changeControlPressed(DialogField field) {
 			containerChangeControlPressed(field);
 		}
 
 		// -------- IDialogFieldListener
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			containerDialogFieldChanged(field);
 		}

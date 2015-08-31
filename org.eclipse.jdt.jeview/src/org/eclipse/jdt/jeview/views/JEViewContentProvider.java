@@ -16,34 +16,40 @@ import org.eclipse.jface.viewers.Viewer;
 
 public class JEViewContentProvider implements ITreeContentProvider {
 
+	@Override
 	public Object[] getChildren(Object element) {
 		if (element instanceof JEAttribute)
 			return ((JEAttribute) element).getChildren();
 		return JEAttribute.EMPTY;
 	}
 
+	@Override
 	public Object getParent(Object element) {
 		if (element instanceof JEAttribute)
 			return ((JEAttribute) element).getParent();
 		return null;
 	}
 
+	@Override
 	public boolean hasChildren(Object element) {
 		if (element instanceof JEAttribute)
 			return ((JEAttribute) element).getChildren().length > 0;
 		return false;
 	}
 
+	@Override
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof JEAttribute)
 			return ((JEAttribute) inputElement).getChildren();
 		return JEAttribute.EMPTY;
 	}
 
+	@Override
 	public void dispose() {
 		// do nothing
 	}
 
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		// do nothing
 	}

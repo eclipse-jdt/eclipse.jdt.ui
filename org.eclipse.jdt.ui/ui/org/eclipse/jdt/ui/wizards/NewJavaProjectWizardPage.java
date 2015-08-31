@@ -63,6 +63,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
  * </p>
  * @deprecated Use {@link NewJavaProjectWizardPageTwo} or {@link JavaCapabilityConfigurationPage}.
  */
+@Deprecated
 public class NewJavaProjectWizardPage extends NewElementWizardPage {
 
 	private static final String PAGE_NAME= "NewJavaProjectWizardPage"; //$NON-NLS-1$
@@ -92,6 +93,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 
 		fMainPage= mainpage;
 		IStatusChangeListener listener= new IStatusChangeListener() {
+			@Override
 			public void statusChanged(IStatus status) {
 				updateStatus(status);
 			}
@@ -216,9 +218,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 		return JavaCore.create(getProjectHandle());
 	}
 
-	/* (non-Javadoc)
-	 * @see WizardPage#createControl
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
@@ -307,6 +307,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 	 */
 	public IRunnableWithProgress getRunnable() {
 		return new IRunnableWithProgress() {
+			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				if (monitor == null) {
 					monitor= new NullProgressMonitor();

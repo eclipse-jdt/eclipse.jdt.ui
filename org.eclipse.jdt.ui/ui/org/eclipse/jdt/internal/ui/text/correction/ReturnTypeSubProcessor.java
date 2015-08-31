@@ -64,7 +64,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 public class ReturnTypeSubProcessor {
 
 	private static class ReturnStatementCollector extends ASTVisitor {
-		private ArrayList<ReturnStatement> fResult= new ArrayList<ReturnStatement>();
+		private ArrayList<ReturnStatement> fResult= new ArrayList<>();
 
 		public ITypeBinding getTypeBinding(AST ast) {
 			boolean couldBeObject= false;

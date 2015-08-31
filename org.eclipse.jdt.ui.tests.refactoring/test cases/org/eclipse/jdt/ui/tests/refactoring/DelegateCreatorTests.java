@@ -42,13 +42,14 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class DelegateCreatorTests extends RefactoringTest {
 
-	private static final Class clazz= DelegateCreatorTests.class;
+	private static final Class<DelegateCreatorTests> clazz= DelegateCreatorTests.class;
 	private static final String REFACTORING_PATH= "DelegateCreator/";
 
 	public DelegateCreatorTests(String name) {
 		super(name);
 	}
 
+	@Override
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}

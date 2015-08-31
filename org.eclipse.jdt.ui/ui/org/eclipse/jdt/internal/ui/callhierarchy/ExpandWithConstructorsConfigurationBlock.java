@@ -88,6 +88,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 			/*
 			 * @see IDialogFieldListener#dialogFieldChanged(DialogField)
 			 */
+			@Override
 			public void dialogFieldChanged(DialogField field) {
 				doValidation();
 			}
@@ -95,6 +96,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 			/*
 			 * @see IStringButtonAdapter#changeControlPressed(DialogField)
 			 */
+			@Override
 			public void changeControlPressed(DialogField field) {
 				doBrowseTypes();
 			}
@@ -348,6 +350,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		/*
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#customButtonPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField, int)
 		 */
+		@Override
 		public void customButtonPressed(ListDialogField<String> field, int index) {
 			doButtonPressed(index);
 		}
@@ -355,6 +358,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		/*
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#selectionChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
+		@Override
 		public void selectionChanged(ListDialogField<String> field) {
 			fList.enableButton(IDX_EDIT, canEdit(field));
 			fList.enableButton(IDX_REMOVE, canRemove(field));
@@ -374,6 +378,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		/* )
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
 		 */
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			doDialogFieldChanged(field);
 		}
@@ -381,6 +386,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 		/*
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#doubleClicked(org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField)
 		 */
+		@Override
 		public void doubleClicked(ListDialogField<String> field) {
 			if (canEdit(field)) {
 				doButtonPressed(IDX_EDIT);
@@ -482,7 +488,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 
 		ListAdapter adapter= new ListAdapter();
 
-		fList= new ListDialogField<String>(adapter, buttonLabels, new ListLabelProvider());
+		fList= new ListDialogField<>(adapter, buttonLabels, new ListLabelProvider());
 		fList.setDialogFieldListener(adapter);
 		fList.setLabelText(CallHierarchyMessages.ExpandWithConstructorsConfigurationBlock_description);
 		fList.setRemoveButtonIndex(IDX_REMOVE);

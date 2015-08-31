@@ -26,10 +26,12 @@ public class JavaReplaceAllWithQuickDiffTest extends AbstractJavaReplaceAllTest 
 		return new PerformanceTestSetup(new TestSuite(JavaReplaceAllWithQuickDiffTest.class));
 	}
 
+	@Override
 	protected boolean isQuickDiffEnabled() {
 		return true;
 	}
 
+	@Override
 	public void test() throws Exception {
 		// XXX: Removing from fingerprint as it is unstable
 //		setShortName("Replace All in Java editor (with quick diff)");

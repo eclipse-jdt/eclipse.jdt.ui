@@ -76,14 +76,14 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		setTitle(NewWizardMessages.UserLibraryWizardPage_title);
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
 		updateDescription(null);
-		fUsedPaths= new HashSet<IPath>();
+		fUsedPaths= new HashSet<>();
 		fProject= createPlaceholderProject();
 
 		LibraryListAdapter adapter= new LibraryListAdapter();
 		String[] buttonLabels= new String[] {
 				NewWizardMessages.UserLibraryWizardPage_list_config_button
 		};
-		fLibrarySelector= new CheckedListDialogField<CPUserLibraryElement>(adapter, buttonLabels, new CPListLabelProvider());
+		fLibrarySelector= new CheckedListDialogField<>(adapter, buttonLabels, new CPListLabelProvider());
 		fLibrarySelector.setDialogFieldListener(adapter);
 		fLibrarySelector.setLabelText(NewWizardMessages.UserLibraryWizardPage_list_label);
 		fEditResult= null;
@@ -111,8 +111,8 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 	}
 
 	private List<CPUserLibraryElement> updateLibraryList() {
-		HashSet<String> oldNames= new HashSet<String>();
-		HashSet<String> oldCheckedNames= new HashSet<String>();
+		HashSet<String> oldNames= new HashSet<>();
+		HashSet<String> oldCheckedNames= new HashSet<>();
 		List<CPUserLibraryElement> oldElements= fLibrarySelector.getElements();
 		for (int i= 0; i < oldElements.size(); i++) {
 			CPUserLibraryElement curr= oldElements.get(i);
@@ -122,12 +122,12 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 			}
 		}
 
-		ArrayList<CPUserLibraryElement> entriesToCheck= new ArrayList<CPUserLibraryElement>();
+		ArrayList<CPUserLibraryElement> entriesToCheck= new ArrayList<>();
 
 		String[] names= JavaCore.getUserLibraryNames();
 		Arrays.sort(names, Collator.getInstance());
 
-		ArrayList<CPUserLibraryElement> elements= new ArrayList<CPUserLibraryElement>(names.length);
+		ArrayList<CPUserLibraryElement> elements= new ArrayList<>(names.length);
 		for (int i= 0; i < names.length; i++) {
 			String curr= names[i];
 			IPath path= new Path(JavaCore.USER_LIBRARY_CONTAINER_ID).append(curr);
@@ -191,7 +191,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 
 	private void doButtonPressed(int index) {
 		if (index == 0) {
-			HashMap<String, String> data= new HashMap<String, String>(3);
+			HashMap<String, String> data= new HashMap<>(3);
 			if (fEditResult != null) {
 				data.put(UserLibraryPreferencePage.DATA_LIBRARY_TO_SELECT, fEditResult.getName());
 			}
@@ -224,9 +224,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-	 */
+	@Override
 	public void createControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setFont(parent.getFont());
@@ -249,16 +247,12 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPage#finish()
-	 */
+	@Override
 	public boolean finish() {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPage#getSelection()
-	 */
+	@Override
 	public IClasspathEntry getSelection() {
 		if (fEditResult != null) {
 			if (fOldClasspathEntry != null && fOldClasspathEntry.getPath().equals(fEditResult.getPath())) {
@@ -270,9 +264,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension2#getNewContainers()
-	 */
+	@Override
 	public IClasspathEntry[] getNewContainers() {
 		List<CPUserLibraryElement> selected= fLibrarySelector.getCheckedElements();
 		IClasspathEntry[] res= new IClasspathEntry[selected.size()];
@@ -283,9 +275,7 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		return res;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPage#setSelection(org.eclipse.jdt.core.IClasspathEntry)
-	 */
+	@Override
 	public void setSelection(IClasspathEntry containerEntry) {
 		fOldClasspathEntry= containerEntry;
 
@@ -319,25 +309,27 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 		public LibraryListAdapter() {
 		}
 
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			doDialogFieldChanged(field);
 		}
 
+		@Override
 		public void customButtonPressed(ListDialogField<CPUserLibraryElement> field, int index) {
 			doButtonPressed(index);
 		}
 
+		@Override
 		public void selectionChanged(ListDialogField<CPUserLibraryElement> field) {
 		}
 
+		@Override
 		public void doubleClicked(ListDialogField<CPUserLibraryElement> field) {
 			doDoubleClicked(field);
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension#initialize(org.eclipse.jdt.core.IJavaProject, org.eclipse.jdt.core.IClasspathEntry[])
-	 */
+	@Override
 	public void initialize(IJavaProject project, IClasspathEntry[] currentEntries) {
 		for (int i= 0; i < currentEntries.length; i++) {
 			IClasspathEntry curr= currentEntries[i];

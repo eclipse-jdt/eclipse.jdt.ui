@@ -56,6 +56,7 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 
 	private IExtensionActivationListener fMenuUpdater= new IExtensionActivationListener() {
 
+		@Override
 		public void onExtensionActivation(String viewerId, String[] theNavigatorExtensionIds, boolean isCurrentlyActive) {
 
 			if (fExtensionSite != null && fActionBars != null) {

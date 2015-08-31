@@ -38,14 +38,17 @@ public class JavaElement extends ASTAttribute {
 		return fJavaElement;
 	}
 	
+	@Override
 	public Object getParent() {
 		return fParent;
 	}
 
+	@Override
 	public Object[] getChildren() {
 		return EMPTY;
 	}
 
+	@Override
 	public String getLabel() {
 		if (fJavaElement == null) {
 			return ">java element: null"; //$NON-NLS-1$
@@ -57,6 +60,7 @@ public class JavaElement extends ASTAttribute {
 		}
 	}
 	
+	@Override
 	public Image getImage() {
 		return null;
 		//TODO: looks ugly when not all nodes have an icon
@@ -66,6 +70,7 @@ public class JavaElement extends ASTAttribute {
 	/*
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -94,6 +99,7 @@ public class JavaElement extends ASTAttribute {
 	/*
 	 * @see java.lang.Object#hashCode()
 	 */
+	@Override
 	public int hashCode() {
 		return (fParent != null ? fParent.hashCode() : 0) + (fJavaElement != null ? fJavaElement.hashCode() : 0);
 	}

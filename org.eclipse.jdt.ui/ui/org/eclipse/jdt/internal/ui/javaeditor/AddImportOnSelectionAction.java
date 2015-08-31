@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,11 +69,12 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 
 	private static final class AddImportComparator implements Comparator<String> {
 
+		@Override
 		public int compare(String o1, String o2) {
 			if (o1.equals(o2))
 				return 0;
 
-			History history= QualifiedTypeNameHistory.getDefault();
+			History<String, String> history= QualifiedTypeNameHistory.getDefault();
 
 			int pos1= history.getPosition(o1);
 			int pos2= history.getPosition(o2);
@@ -101,6 +102,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		setEnabled(getCompilationUnit() != null);
 	}
 
+	@Override
 	public void update() {
 		setEnabled(fEditor != null && getCompilationUnit() != null);
 	}
@@ -156,10 +158,12 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	private IEditingSupport createViewerHelper(final ITextSelection selection, final SelectTypeQuery query) {
 		return new IEditingSupport() {
 
+			@Override
 			public boolean isOriginator(DocumentEvent event, IRegion subjectRegion) {
 				return subjectRegion.getOffset() <= selection.getOffset() + selection.getLength() &&  selection.getOffset() <= subjectRegion.getOffset() + subjectRegion.getLength();
 			}
 
+			@Override
 			public boolean ownsFocusShell() {
 				return query.isShowing();
 			}
@@ -206,9 +210,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			fShell= shell;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation.IChooseImportQuery#chooseImport(org.eclipse.jdt.internal.corext.util.TypeInfo[], java.lang.String)
-		 */
+		@Override
 		public TypeNameMatch chooseImport(TypeNameMatch[] results, String containerName) {
 			int nResults= results.length;
 

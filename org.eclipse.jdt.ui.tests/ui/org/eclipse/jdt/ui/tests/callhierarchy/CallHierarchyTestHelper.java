@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -261,10 +261,10 @@ public class CallHierarchyTestHelper {
     /**
      * Asserts that all the expected methods were found in the call results.
      */
-    public void assertCalls(Collection expectedMembers, Collection calls) {
-        Collection foundMembers= new ArrayList();
+    public void assertCalls(Collection<IMember> expectedMembers, Collection<?> calls) {
+        Collection<IMember> foundMembers= new ArrayList<>();
 
-        for (Iterator iter= calls.iterator(); iter.hasNext();) {
+        for (Iterator<?> iter= calls.iterator(); iter.hasNext();) {
             MethodWrapper element= (MethodWrapper) iter.next();
             foundMembers.add(element.getMember());
         }
@@ -276,7 +276,7 @@ public class CallHierarchyTestHelper {
     /**
      * Asserts that all the expected methods were found in the call results.
      */
-    public void assertCalls(Collection expectedMembers, MethodWrapper[] callResults) {
+    public void assertCalls(Collection<IMember> expectedMembers, MethodWrapper[] callResults) {
         assertCalls(expectedMembers, Arrays.asList(callResults));
     }
 

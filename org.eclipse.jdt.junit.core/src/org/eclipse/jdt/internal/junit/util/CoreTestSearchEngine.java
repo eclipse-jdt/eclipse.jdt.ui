@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -179,7 +179,7 @@ public class CoreTestSearchEngine {
 		return result;
 	}
 
-	public static void findTestImplementorClasses(ITypeHierarchy typeHierarchy, IType testInterface, IRegion region, Set result)
+	public static void findTestImplementorClasses(ITypeHierarchy typeHierarchy, IType testInterface, IRegion region, Set<IType> result)
 			throws JavaModelException {
 		IType[] subtypes= typeHierarchy.getAllSubtypes(testInterface);
 		for (int i= 0; i < subtypes.length; i++) {
@@ -194,12 +194,13 @@ public class CoreTestSearchEngine {
 
 	private static class SuiteMethodTypesCollector extends SearchRequestor {
 
-		private Collection fResult;
+		private Collection<IType> fResult;
 
-		public SuiteMethodTypesCollector(Collection result) {
+		public SuiteMethodTypesCollector(Collection<IType> result) {
 			fResult= result;
 		}
 
+		@Override
 		public void acceptSearchMatch(SearchMatch match) throws CoreException {
 			Object enclosingElement= match.getElement();
 			if (!(enclosingElement instanceof IMethod))
@@ -218,7 +219,7 @@ public class CoreTestSearchEngine {
 		}
 	}
 
-	public static void findSuiteMethods(IJavaElement element, Set result, IProgressMonitor pm) throws CoreException {
+	public static void findSuiteMethods(IJavaElement element, Set<IType> result, IProgressMonitor pm) throws CoreException {
 		// fix for bug 36449 JUnit should constrain tests to selected project
 		// [JUnit]
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element }, IJavaSearchScope.SOURCES);

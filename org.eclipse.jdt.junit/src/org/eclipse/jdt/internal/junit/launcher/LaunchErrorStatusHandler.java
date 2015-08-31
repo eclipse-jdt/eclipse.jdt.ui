@@ -25,10 +25,12 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 public class LaunchErrorStatusHandler implements IStatusHandler {
 
+	@Override
 	public Object handleStatus(final IStatus status, Object source) throws CoreException {
 		final Boolean[] success= new Boolean[] { Boolean.FALSE };
 		getDisplay().syncExec(
 				new Runnable() {
+					@Override
 					public void run() {
 						Shell shell= JUnitPlugin.getActiveWorkbenchShell();
 						if (shell == null)

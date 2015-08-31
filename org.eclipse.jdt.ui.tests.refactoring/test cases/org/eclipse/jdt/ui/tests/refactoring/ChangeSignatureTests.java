@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,9 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -39,11 +36,14 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 /**
  * @see org.eclipse.jdt.core.Signature for encoding of signature strings.
  */
 public class ChangeSignatureTests extends RefactoringTest {
-	private static final Class clazz= ChangeSignatureTests.class;
+	private static final Class<ChangeSignatureTests> clazz= ChangeSignatureTests.class;
 	private static final String REFACTORING_PATH= "ChangeSignature/";
 
 	private static final boolean BUG_83691_CORE_JAVADOC_REF= true;
@@ -103,7 +103,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		return result;
 	}
 
-	static void addInfos(List list, ParameterInfo[] newParamInfos, int[] newIndices) {
+	static void addInfos(List<ParameterInfo> list, ParameterInfo[] newParamInfos, int[] newIndices) {
 		if (newParamInfos == null || newIndices == null)
 			return;
 		for (int i= newIndices.length - 1; i >= 0; i--) {
@@ -233,11 +233,11 @@ public class ChangeSignatureTests extends RefactoringTest {
 				newVisibility, deleted, returnTypeName, false);
 	}
 
-	private void markAsDeleted(List list, int[] deleted) {
+	private void markAsDeleted(List<ParameterInfo> list, int[] deleted) {
 		if (deleted == null)
 			return;
 		for (int i= 0; i < deleted.length; i++) {
-			((ParameterInfo)list.get(deleted[i])).markAsDeleted();
+			list.get(deleted[i]).markAsDeleted();
 		}
 	}
 
@@ -281,24 +281,24 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertParticipant(classA);
 	}
 
-	private void modifyInfos(List infos, ParameterInfo[] newParamInfos, int[] newIndices, String[] oldParamNames, String[] newParamNames, String[] newParamTypeNames, int[] permutation) {
+	private void modifyInfos(List<ParameterInfo> infos, ParameterInfo[] newParamInfos, int[] newIndices, String[] oldParamNames, String[] newParamNames, String[] newParamTypeNames, int[] permutation) {
 		addInfos(infos, newParamInfos, newIndices);
-		List swapped= new ArrayList(infos.size());
-		List oldNameList= Arrays.asList(oldParamNames);
-		List newNameList= Arrays.asList(newParamNames);
+		List<Integer> swapped= new ArrayList<>(infos.size());
+		List<String> oldNameList= Arrays.asList(oldParamNames);
+		List<String> newNameList= Arrays.asList(newParamNames);
 		for (int i= 0; i < permutation.length; i++) {
-			if (((ParameterInfo)infos.get(i)).isAdded())
+			if (infos.get(i).isAdded())
 				continue;
 			if (! swapped.contains(new Integer(i))){
 				swapped.add(new Integer(permutation[i]));
 
-				ParameterInfo infoI= (ParameterInfo)infos.get(i);
-				infoI.setNewName((String)newNameList.get(oldNameList.indexOf(infoI.getOldName())));
+				ParameterInfo infoI= infos.get(i);
+				infoI.setNewName(newNameList.get(oldNameList.indexOf(infoI.getOldName())));
 				if (newParamTypeNames != null)
 					infoI.setNewTypeName(newParamTypeNames[oldNameList.indexOf(infoI.getOldName())]);
 
-				ParameterInfo infoI1= (ParameterInfo)infos.get(permutation[i]);
-				infoI1.setNewName((String)newNameList.get(oldNameList.indexOf(infoI1.getOldName())));
+				ParameterInfo infoI1= infos.get(permutation[i]);
+				infoI1.setNewName(newNameList.get(oldNameList.indexOf(infoI1.getOldName())));
 				if (newParamTypeNames != null)
 					infoI1.setNewTypeName(newParamTypeNames[oldNameList.indexOf(infoI1.getOldName())]);
 
@@ -307,13 +307,13 @@ public class ChangeSignatureTests extends RefactoringTest {
 		}
 	}
 
-	private static void modifyInfos(List infos, String[] newOrder, String[] oldNames, String[] newNames) {
+	private static void modifyInfos(List<ParameterInfo> infos, String[] newOrder, String[] oldNames, String[] newNames) {
 		int[] permutation= createPermutation(infos, newOrder);
-		List swapped= new ArrayList(infos.size());
+		List<Integer> swapped= new ArrayList<>(infos.size());
 		if (oldNames == null || newNames == null){
 			ParameterInfo[] newInfos= new  ParameterInfo[infos.size()];
 			for (int i= 0; i < permutation.length; i++) {
-				newInfos[i]= (ParameterInfo)infos.get(permutation[i]);
+				newInfos[i]= infos.get(permutation[i]);
 			}
 			infos.clear();
 			for (int i= 0; i < newInfos.length; i++) {
@@ -321,28 +321,28 @@ public class ChangeSignatureTests extends RefactoringTest {
 			}
 			return;
 		} else {
-			List oldNameList= Arrays.asList(oldNames);
-			List newNameList= Arrays.asList(newNames);
+			List<String> oldNameList= Arrays.asList(oldNames);
+			List<String> newNameList= Arrays.asList(newNames);
 			for (int i= 0; i < permutation.length; i++) {
 				if (! swapped.contains(new Integer(i))){
 					swapped.add(new Integer(permutation[i]));
-					ParameterInfo infoI= (ParameterInfo)infos.get(i);
-					infoI.setNewName((String)newNameList.get(oldNameList.indexOf(infoI.getOldName())));
-					ParameterInfo infoI1= (ParameterInfo)infos.get(permutation[i]);
-					infoI1.setNewName((String)newNameList.get(oldNameList.indexOf(infoI1.getOldName())));
+					ParameterInfo infoI= infos.get(i);
+					infoI.setNewName(newNameList.get(oldNameList.indexOf(infoI.getOldName())));
+					ParameterInfo infoI1= infos.get(permutation[i]);
+					infoI1.setNewName(newNameList.get(oldNameList.indexOf(infoI1.getOldName())));
 					swap(infos, i, permutation[i]);
 				}
 			}
 		}
 	}
 
-	private static void swap(List infos, int i, int i1) {
-		Object o= infos.get(i);
+	private static void swap(List<ParameterInfo> infos, int i, int i1) {
+		ParameterInfo o= infos.get(i);
 		infos.set(i, infos.get(i1));
 		infos.set(i1, o);
 	}
 
-	private static int[] createPermutation(List infos, String[] newOrder) {
+	private static int[] createPermutation(List<ParameterInfo> infos, String[] newOrder) {
 		int[] result= new int[infos.size()];
 		for (int i= 0; i < result.length; i++) {
 			result[i]= indexOfOldName(infos, newOrder[i]);
@@ -350,9 +350,9 @@ public class ChangeSignatureTests extends RefactoringTest {
 		return result;
 	}
 
-	private static int indexOfOldName(List infos, String string) {
-		for (Iterator iter= infos.iterator(); iter.hasNext();) {
-			ParameterInfo info= (ParameterInfo) iter.next();
+	private static int indexOfOldName(List<ParameterInfo> infos, String string) {
+		for (Iterator<ParameterInfo> iter= infos.iterator(); iter.hasNext();) {
+			ParameterInfo info= iter.next();
 			if (info.getOldName().equals(string))
 				return infos.indexOf(info);
 		}
@@ -509,9 +509,9 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 
-	private void mangleExceptions(List list, String[] removeExceptions, String[] addExceptions, ICompilationUnit cu) throws Exception {
-		for (Iterator iter= list.iterator(); iter.hasNext(); ) {
-			ExceptionInfo info= (ExceptionInfo) iter.next();
+	private void mangleExceptions(List<ExceptionInfo> list, String[] removeExceptions, String[] addExceptions, ICompilationUnit cu) throws Exception {
+		for (Iterator<ExceptionInfo> iter= list.iterator(); iter.hasNext(); ) {
+			ExceptionInfo info= iter.next();
 			String name= info.getFullyQualifiedName();
 			for (int i= 0; i < removeExceptions.length; i++) {
 				if (name.equals(removeExceptions[i]))

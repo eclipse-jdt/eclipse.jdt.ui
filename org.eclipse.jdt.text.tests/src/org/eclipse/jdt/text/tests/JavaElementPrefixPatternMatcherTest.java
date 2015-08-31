@@ -63,7 +63,7 @@ public class JavaElementPrefixPatternMatcherTest extends TestCase {
 
 	private static final String[] ALL_STRING_CONSTANTS;
 	static {
-		ArrayList<String> strings= new ArrayList<String>();
+		ArrayList<String> strings= new ArrayList<>();
 		for (Field field : JavaElementPrefixPatternMatcherTest.class.getDeclaredFields()) {
 			if (String.class.equals(field.getType()))
 				try {
@@ -84,7 +84,7 @@ public class JavaElementPrefixPatternMatcherTest extends TestCase {
 	private static void doMatch(String pattern, String... labelStrings) {
 		JavaElementPrefixPatternMatcher matcher= new JavaElementPrefixPatternMatcher(pattern);
 		
-		ArrayList<String> matched= new ArrayList<String>();
+		ArrayList<String> matched= new ArrayList<>();
 		for (String label : ALL_STRING_CONSTANTS) {
 			if (matcher.matches(label))
 				matched.add(label);

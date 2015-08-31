@@ -66,9 +66,6 @@ public class BulletListBlock extends Composite {
 		configureStyledText(fText, fEnabled);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public boolean getEnabled() {
 		return fEnabled;

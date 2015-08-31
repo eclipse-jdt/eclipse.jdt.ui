@@ -64,7 +64,7 @@ public final class ConvertLocalVariableDescriptor extends JavaRefactoringDescrip
 	 *
 	 * @since 1.2
 	 */
-	public ConvertLocalVariableDescriptor(String project, String description, String comment, Map arguments, int flags) {
+	public ConvertLocalVariableDescriptor(String project, String description, String comment, Map<String, String> arguments, int flags) {
 		super(IJavaRefactorings.CONVERT_LOCAL_VARIABLE, project, description, comment, arguments, flags);
 	}
 

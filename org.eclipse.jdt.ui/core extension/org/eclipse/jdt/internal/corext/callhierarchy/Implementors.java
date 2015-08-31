@@ -122,7 +122,7 @@ public class Implementors {
     }
 
     private IType[] findImplementingTypes(IType type, IProgressMonitor progressMonitor) {
-        Collection<IType> implementingTypes = new ArrayList<IType>();
+        Collection<IType> implementingTypes = new ArrayList<>();
 
         IImplementorFinder[] finders = getImplementorFinders();
 
@@ -140,7 +140,7 @@ public class Implementors {
     }
 
     private IType[] findInterfaces(IType type, IProgressMonitor progressMonitor) {
-        Collection<IType> interfaces = new ArrayList<IType>();
+        Collection<IType> interfaces = new ArrayList<>();
 
         IImplementorFinder[] finders = getImplementorFinders();
 
@@ -168,7 +168,7 @@ public class Implementors {
      */
     private IJavaElement[] findMethods(IMethod method, IType[] types,
         IProgressMonitor progressMonitor) {
-        Collection<IMethod> foundMethods = new ArrayList<IMethod>();
+        Collection<IMethod> foundMethods = new ArrayList<>();
 
         SubProgressMonitor subProgressMonitor = new SubProgressMonitor(progressMonitor,
                 10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);

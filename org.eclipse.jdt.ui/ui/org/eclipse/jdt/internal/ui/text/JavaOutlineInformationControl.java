@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,8 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
+import org.eclipse.jface.viewers.ITreePathContentProvider;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -100,7 +102,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	private LexicalSortingAction fLexicalSortingAction;
 	private SortByDefiningTypeAction fSortByDefiningTypeAction;
 	private ShowOnlyMainTypeAction fShowOnlyMainTypeAction;
-	private Map<IType, ITypeHierarchy> fTypeHierarchies= new HashMap<IType, ITypeHierarchy>();
+	private Map<IType, ITypeHierarchy> fTypeHierarchies= new HashMap<>();
 
 	/**
 	 * Category filter action group.
@@ -214,25 +216,24 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		protected Object[] getFilteredChildren(Object parent) {
 			Object[] result = getRawChildren(parent);
 			int unfilteredChildren= result.length;
 			ViewerFilter[] filters = getFilters();
 			if (filters != null) {
-				for (int i= 0; i < filters.length; i++)
-					result = filters[i].filter(this, parent, result);
+				for (int i= 0; i < filters.length; i++) {
+					if (parent instanceof TreePath) {
+						result = filters[i].filter(this, (TreePath) parent, result);
+					} else {
+						result = filters[i].filter(this, parent, result);
+					}
+				}
 			}
 			fIsFiltering= unfilteredChildren != result.length;
 			return result;
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		protected void internalExpandToLevel(Widget node, int level) {
 			if (!fIsFiltering && node instanceof TreeItem && getMatcher() == null) {
@@ -266,7 +267,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	}
 
 
-	private class OutlineContentProvider extends StandardJavaElementContentProvider {
+	private class OutlineContentProvider extends StandardJavaElementContentProvider implements ITreePathContentProvider {
 
 		private boolean fShowInheritedMembers;
 
@@ -302,11 +303,24 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			tree.setRedraw(true);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
+		@Override
+		public TreePath[] getParents(Object element) {
+			return new TreePath[0];
+		}
+
+		@Override
+		public boolean hasChildren(TreePath path) {
+			return hasChildren(path.getLastSegment());
+		}
+
 		@Override
 		public Object[] getChildren(Object element) {
+			return getChildren(new TreePath(new Object[] { element }));
+		}
+
+		@Override
+		public Object[] getChildren(TreePath parentPath) {
+			Object element= parentPath.getLastSegment();
 			if (fShowOnlyMainType) {
 				if (element instanceof ITypeRoot) {
 					element= ((ITypeRoot)element).findPrimaryType();
@@ -319,9 +333,17 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			if (fShowInheritedMembers && element instanceof IType) {
 				IType type= (IType)element;
 				if (type.getDeclaringType() == null || type.equals(fInitiallySelectedType)) {
+					// Avoid endless loops, see https://bugs.eclipse.org/395202 :
+					// Cut off children of types that are shown repeatedly.
+					for (int i= 0; i < parentPath.getSegmentCount() - 1; i++) {
+						if (type.equals(parentPath.getSegment(i))) {
+							return super.getChildren(element);
+						}
+					}
+
 					ITypeHierarchy th= getSuperTypeHierarchy(type);
 					if (th != null) {
-						List<Object> children= new ArrayList<Object>();
+						List<Object> children= new ArrayList<>();
 						IType[] superClasses= th.getAllSupertypes(type);
 						children.addAll(Arrays.asList(super.getChildren(type)));
 						for (int i= 0, scLength= superClasses.length; i < scLength; i++)
@@ -333,18 +355,12 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			return super.getChildren(element);
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			super.inputChanged(viewer, oldInput, newInput);
 			fTypeHierarchies.clear();
 		}
 
-		/**
-		 * {@inheritDoc}
-		 */
 		@Override
 		public void dispose() {
 			super.dispose();
@@ -468,6 +484,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		private void valueChanged(final boolean on, boolean store) {
 			setChecked(on);
 			BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
+				@Override
 				public void run() {
 					fOutlineViewer.refresh(false);
 				}
@@ -512,6 +529,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		@Override
 		public void run() {
 			BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
+				@Override
 				public void run() {
 					fInnerLabelProvider.setShowDefiningType(isChecked());
 					getDialogSettings().put(STORE_SORT_BY_DEFINING_TYPE_CHECKED, isChecked());
@@ -540,9 +558,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		super(parent, shellStyle, treeStyle, commandId, true);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected Text createFilterText(Composite parent) {
 		Text text= super.createFilterText(parent);
@@ -550,9 +565,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		return text;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected TreeViewer createTreeViewer(Composite parent, int style) {
 		Tree tree= new Tree(parent, SWT.SINGLE | (style & ~SWT.MULTI));
@@ -591,9 +603,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		return treeViewer;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected String getStatusFieldText() {
 		KeySequence[] sequences= getInvokingCommandKeySequences();
@@ -617,9 +626,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		return "org.eclipse.jdt.internal.ui.text.QuickOutline"; //$NON-NLS-1$
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public void setInput(Object information) {
 		if (information == null || information instanceof String) {

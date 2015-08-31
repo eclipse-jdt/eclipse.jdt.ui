@@ -80,10 +80,12 @@ public abstract class SurroundWith {
 			fBlockRewrite= blockRewrite;
 		}
 
+		@Override
 		public boolean needsSplit(VariableDeclarationFragment last, VariableDeclarationFragment current) {
 			return fAccessedInside.contains(last) != fAccessedInside.contains(current) || fAccessedAfter.contains(last) != fAccessedAfter.contains(current);
 		}
 
+		@Override
 		public void initializeStatement(VariableDeclarationStatement statement, VariableDeclarationFragment current) {
 			if (fAccessedAfter.contains(current)) {
 				if (fAccessedInside.contains(current))
@@ -133,10 +135,12 @@ public abstract class SurroundWith {
 			fLastStatement= null;
 		}
 
+		@Override
 		public boolean needsSplit(VariableDeclarationFragment last, VariableDeclarationFragment current) {
 			return fAccessedInside.contains(last) != fAccessedInside.contains(current);
 		}
 
+		@Override
 		public void initializeStatement(VariableDeclarationStatement statement, VariableDeclarationFragment current) {
 			if (fAccessedInside.contains(current))
 				makeFinal(statement, fRewrite);
@@ -225,7 +229,7 @@ public abstract class SurroundWith {
 		List<VariableDeclaration> readInside;
 		readInside= getVariableDeclarationReadsInside(selectedStatements, maxVariableId);
 
-		List<ASTNode> inserted= new ArrayList<ASTNode>();
+		List<ASTNode> inserted= new ArrayList<>();
 		moveToBlock(selectedStatements, inserted, accessedAfter, readInside, rewrite);
 		if (fIsNewContext) {
 			ImportRewrite importRewrite= StubUtility.createImportRewrite((CompilationUnit)selectedStatements[0].getRoot(), false);
@@ -276,7 +280,7 @@ public abstract class SurroundWith {
 	 * @return	List of VariableDeclaration
 	 */
 	protected List<VariableDeclaration> getVariableDeclarationReadsInside(Statement[] selectedNodes, int maxVariableId) {
-		ArrayList<VariableDeclaration> result= new ArrayList<VariableDeclaration>();
+		ArrayList<VariableDeclaration> result= new ArrayList<>();
 		if (!fIsNewContext)
 			return result;
 
@@ -313,7 +317,7 @@ public abstract class SurroundWith {
 		}
 		List<Statement> bodyAfterSelection= statements.subList(statements.indexOf(startNode) + 1, statements.size());
 
-		List<VariableDeclarationFragment> result= new ArrayList<VariableDeclarationFragment>();
+		List<VariableDeclarationFragment> result= new ArrayList<>();
 		if (!bodyAfterSelection.isEmpty()) {
 
 			IVariableBinding[] accesses= getAccesses(bodyAfterSelection.toArray(new ASTNode[bodyAfterSelection.size()]), maxVariableId);
@@ -500,9 +504,6 @@ public abstract class SurroundWith {
 
 	private void qualifyThisExpressions(ASTNode node, final ASTRewrite rewrite, final ImportRewrite importRewrite, final ImportRewriteContext importRewriteContext) {
 		node.accept(new GenericVisitor() {
-			/**
-			 * {@inheritDoc}
-			 */
 			@Override
 			public boolean visit(ThisExpression thisExpr) {
 				if (thisExpr.getQualifier() == null) {

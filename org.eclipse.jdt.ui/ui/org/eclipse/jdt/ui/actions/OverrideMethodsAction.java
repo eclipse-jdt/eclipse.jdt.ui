@@ -213,7 +213,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			return;
 		}
 
-		ArrayList<IMethodBinding> methods= new ArrayList<IMethodBinding>();
+		ArrayList<IMethodBinding> methods= new ArrayList<>();
 		for (int i= 0; i < selected.length; i++) {
 			Object elem= selected[i];
 			if (elem instanceof IMethodBinding) {

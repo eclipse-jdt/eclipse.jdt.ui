@@ -51,6 +51,7 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 	/*
 	 * @see org.eclipse.jface.text.source.IAnnotationImageProvider#getManagedImage(org.eclipse.jface.text.source.Annotation)
 	 */
+	@Override
 	public Image getManagedImage(Annotation annotation) {
 		if (annotation instanceof IJavaAnnotation) {
 			IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
@@ -63,6 +64,7 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 	/*
 	 * @see org.eclipse.jface.text.source.IAnnotationImageProvider#getImageDescriptorId(org.eclipse.jface.text.source.Annotation)
 	 */
+	@Override
 	public String getImageDescriptorId(Annotation annotation) {
 		// unmanaged images are not supported
 		return null;
@@ -71,6 +73,7 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 	/*
 	 * @see org.eclipse.jface.text.source.IAnnotationImageProvider#getImageDescriptor(java.lang.String)
 	 */
+	@Override
 	public ImageDescriptor getImageDescriptor(String symbolicName) {
 		// unmanaged images are not supported
 		return null;

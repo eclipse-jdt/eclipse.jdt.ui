@@ -59,9 +59,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 
 	private final static IMarkerResolution[] NO_RESOLUTION = new IMarkerResolution[0];
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IMarkerResolutionGenerator2#hasResolutions(org.eclipse.core.resources.IMarker)
-	 */
+	@Override
 	public boolean hasResolutions(IMarker marker) {
 		int id= marker.getAttribute(IJavaModelMarker.ID, -1);
 		if (id == IJavaModelStatusConstants.CP_CONTAINER_PATH_UNBOUND
@@ -74,16 +72,14 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.IMarkerResolutionGenerator#getResolutions(org.eclipse.core.resources.IMarker)
-	 */
+	@Override
 	public IMarkerResolution[] getResolutions(IMarker marker) {
 		final Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		if (!hasResolutions(marker) || shell == null) {
 			return NO_RESOLUTION;
 		}
 
-		ArrayList<IMarkerResolution2> resolutions= new ArrayList<IMarkerResolution2>();
+		ArrayList<IMarkerResolution2> resolutions= new ArrayList<>();
 
 		final IJavaProject project= getJavaProject(marker);
 
@@ -96,6 +92,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 				String label= NewWizardMessages.UserLibraryMarkerResolutionGenerator_changetouserlib_label;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				resolutions.add(new UserLibraryMarkerResolution(label, image) {
+					@Override
 					public void run(IMarker m) {
 						changeToExistingLibrary(shell, path, false, project);
 					}
@@ -104,6 +101,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 					String label2= Messages.format(NewWizardMessages.UserLibraryMarkerResolutionGenerator_createuserlib_label, path.segment(1));
 					Image image2= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_LIBRARY);
 					resolutions.add(new UserLibraryMarkerResolution(label2, image2) {
+						@Override
 						public void run(IMarker m) {
 							createUserLibrary(shell, path);
 						}
@@ -113,6 +111,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 			String label= NewWizardMessages.UserLibraryMarkerResolutionGenerator_changetoother;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			resolutions.add(new UserLibraryMarkerResolution(label, image) {
+				@Override
 				public void run(IMarker m) {
 					changeToExistingLibrary(shell, path, true, project);
 				}
@@ -156,6 +155,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 				context= PlatformUI.getWorkbench().getProgressService();
 			}
 			context.run(true, true, new IRunnableWithProgress() {
+				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						project.setRawClasspath(newEntries, project.getOutputLocation(), monitor);
@@ -190,7 +190,7 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 	protected void createUserLibrary(final Shell shell, IPath unboundPath) {
 		String name= unboundPath.segment(1);
 		String id= UserLibraryPreferencePage.ID;
-		HashMap<String, Object> data= new HashMap<String, Object>(3);
+		HashMap<String, Object> data= new HashMap<>(3);
 		data.put(UserLibraryPreferencePage.DATA_LIBRARY_TO_SELECT, name);
 		data.put(UserLibraryPreferencePage.DATA_DO_CREATE, Boolean.TRUE);
 		PreferencesUtil.createPreferenceDialogOn(shell, id, new String[] { id }, data).open();
@@ -213,23 +213,17 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 			fImage= image;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.IMarkerResolution#getLabel()
-		 */
+		@Override
 		public String getLabel() {
 			return fLabel;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.IMarkerResolution2#getDescription()
-		 */
+		@Override
 		public String getDescription() {
 			return null;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.IMarkerResolution2#getImage()
-		 */
+		@Override
 		public Image getImage() {
 			return fImage;
 		}
@@ -242,18 +236,22 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 			fProject= project;
 		}
 
+		@Override
 		public String getDescription() {
 			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_description, BasicElementLabels.getResourceName(fProject.getElementName()));
 		}
 
+		@Override
 		public Image getImage() {
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ACCESSRULES_ATTRIB);
 		}
 
+		@Override
 		public String getLabel() {
 			return CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_label;
 		}
 
+		@Override
 		public void run(IMarker marker) {
 			PreferencesUtil.createPropertyDialogOn(JavaPlugin.getActiveWorkbenchShell(), fProject, BuildPathsPropertyPage.PROP_ID, null, null).open();
 		}

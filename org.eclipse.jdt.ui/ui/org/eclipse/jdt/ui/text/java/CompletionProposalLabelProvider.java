@@ -371,7 +371,7 @@ public class CompletionProposalLabelProvider {
 		// TODO remove when bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=84690 gets fixed
 		if (declaringTypeSignature == null)
 			return "java.lang.Object"; //$NON-NLS-1$
-		return SignatureUtil.stripSignatureToFQN(String.valueOf(declaringTypeSignature));
+		return Signature.toString(Signature.getTypeErasure(String.valueOf(declaringTypeSignature)));
 	}
 
 	/**

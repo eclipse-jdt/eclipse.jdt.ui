@@ -146,6 +146,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		/**
 		 * @see ICellModifier#canModify(Object, String)
 		 */
+		@Override
 		public boolean canModify(Object element, String property) {
 			if (property == null)
 				return false;
@@ -164,6 +165,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		/**
 		 * @see ICellModifier#getValue(Object, String)
 		 */
+		@Override
 		public Object getValue(Object element, String property) {
 			if (element instanceof NLSSubstitution) {
 				NLSSubstitution substitution= (NLSSubstitution) element;
@@ -186,6 +188,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		/**
 		 * @see ICellModifier#modify(Object, String, Object)
 		 */
+		@Override
 		public void modify(Object element, String property, Object value) {
 			if (element instanceof TableItem) {
 				Object data= ((TableItem) element).getData();
@@ -232,6 +235,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fFontRegistry= JFaceResources.getFontRegistry();
 		}
 
+		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			String columnText= ""; //$NON-NLS-1$
 			if (element instanceof NLSSubstitution) {
@@ -248,6 +252,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			return getEscapedAsciiString(columnText);
 		}
 
+		@Override
 		public Image getColumnImage(Object element, int columnIndex) {
 			if ((columnIndex == STATE_PROP) && (element instanceof NLSSubstitution)) {
 				return getNLSImage((NLSSubstitution) element);
@@ -256,6 +261,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			return null;
 		}
 
+		@Override
 		public Font getFont(Object element) {
 			if (element instanceof NLSSubstitution) {
 				NLSSubstitution substitution= (NLSSubstitution) element;
@@ -412,9 +418,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			return composite;
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
-		 */
+		@Override
 		public void dialogFieldChanged(DialogField field) {
 			IStatus keyStatus= validateKey(fKeyField.getText());
 			//IStatus valueStatus= StatusInfo.OK_STATUS; // no validation yet
@@ -490,6 +494,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	/*
 	 * @see IDialogPage#createControl(Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
@@ -614,8 +619,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				fNLSRefactoring.getResourceBundleName(),
 				fNLSRefactoring.getResourceBundlePackage());
 
-		ArrayList<AccessorDescription> currChoices= new ArrayList<AccessorDescription>();
-		ArrayList<String> currLabels= new ArrayList<String>();
+		ArrayList<AccessorDescription> currChoices= new ArrayList<>();
+		ArrayList<String> currLabels= new ArrayList<>();
 
 		currChoices.add(configured);
 		currLabels.add(configured.getLabel());
@@ -646,7 +651,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		if (section == null) {
 			return new AccessorDescription[0];
 		}
-		ArrayList<AccessorDescription> res= new ArrayList<AccessorDescription>();
+		ArrayList<AccessorDescription> res= new ArrayList<>();
 		for (int i= 0; i < SETTINGS_MAX_ENTRIES; i++) {
 			IDialogSettings serializedDesc= section.getSection(String.valueOf(i));
 			if (serializedDesc != null) {
@@ -745,11 +750,14 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fTableViewer.setCellModifier(new CellModifier());
 
 		fTableViewer.setContentProvider(new IStructuredContentProvider() {
+			@Override
 			public Object[] getElements(Object inputElement) {
 				return fSubstitutions;
 			}
+			@Override
 			public void dispose() {
 			}
+			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			}
 		});
@@ -769,6 +777,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fTableViewer.setInput(new Object());
 
 		fTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				ExternalizeWizardPage.this.selectionChanged(event);
 			}
@@ -850,6 +859,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fPrefixField.selectAll();
 
 		fPrefixField.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent e) {
 				fNLSRefactoring.setPrefix(fPrefixField.getText());
 				validateKeys(true);
@@ -992,10 +1002,12 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		formData.right = new FormAttachment(100,0);
 		fFilterCheckBox.setLayoutData(formData);
 		fFilterCheckBox.addSelectionListener(new SelectionListener() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				doFilterCheckBoxPressed();
 			}
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
@@ -1240,7 +1252,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	}
 
 	private List<NLSSubstitution> getExternalizedElements(IStructuredSelection selection) {
-		ArrayList<NLSSubstitution> res= new ArrayList<NLSSubstitution>();
+		ArrayList<NLSSubstitution> res= new ArrayList<>();
 		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
 			NLSSubstitution substitution= (NLSSubstitution) iter.next();
 			if (substitution.getState() == NLSSubstitution.EXTERNALIZED && !substitution.hasStateChanged()) {

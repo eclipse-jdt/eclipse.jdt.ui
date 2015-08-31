@@ -61,9 +61,6 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 		fNewName= newTypeName;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
-	 */
 	@Override
 	protected ASTRewrite getRewrite() throws CoreException {
 		CompilationUnit astRoot= fContext.getASTRoot();
