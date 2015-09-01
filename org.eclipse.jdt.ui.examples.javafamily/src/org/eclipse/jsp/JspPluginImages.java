@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,10 +15,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
-import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.debug.core.DebugPlugin;
 
 /**
  * The images provided by the debug plugin.
@@ -42,7 +44,7 @@ public class JspPluginImages {
 		String pathSuffix = "icons/full/"; //$NON-NLS-1$
 			
 		try {
-			ICON_BASE_URL= new URL(JspUIPlugin.getDefault().getDescriptor().getInstallURL(), pathSuffix);
+			ICON_BASE_URL= new URL(JspUIPlugin.getDefault().getBundle().getEntry("/"), pathSuffix); //$NON-NLS-1$
 		} catch (MalformedURLException e) {
 			// do nothing
 		}

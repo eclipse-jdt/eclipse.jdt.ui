@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jsp;
 
+import org.osgi.framework.BundleContext;
+
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.indexsearch.IIndexQuery;
@@ -171,19 +173,22 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 	public void search(IIndexQuery query, ISearchResultCollector resultCollector, IProgressMonitor pm) {
 		fSearchEngine.search(query, resultCollector, pm, SearchEngine.WAIT_UNTIL_READY_TO_SEARCH);
 	}
+	
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+		initializeDefaultPreferences();
+	}
 		
-	/**
-	 * Shutdown the JspCore plug-in.
-	 * <p>
-	 * De-registers the resource changed listener.
-	 * <p>
-	 * @see org.eclipse.core.runtime.Plugin#shutdown()
-	 */
-	public void shutdown() {
-		controlJSPIndexing(false);
+	public void stop(BundleContext context) throws Exception {
+		try {
+			controlJSPIndexing(false);
+		} finally {
+			super.stop(context);
+		}
 	}
 	
-	protected void initializeDefaultPreferences(IPreferenceStore prefs) {
+	private void initializeDefaultPreferences() {
+		IPreferenceStore prefs= getPreferenceStore();
 		TextEditorPreferenceConstants.initializeDefaultValues(prefs);
 	}
 	
