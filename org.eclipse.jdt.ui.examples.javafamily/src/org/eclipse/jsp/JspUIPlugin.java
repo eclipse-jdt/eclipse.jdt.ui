@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2005 IBM Corporation and others.
+ * Copyright (c) 2003, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jsp;
 
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.core.indexsearch.IIndexQuery;
 import org.eclipse.core.indexsearch.ISearchResultCollector;
 import org.eclipse.core.indexsearch.SearchEngine;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -23,18 +31,13 @@ import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPluginDescriptor;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageRegistry;
 
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.editors.text.TextEditorPreferenceConstants;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import org.eclipse.ui.editors.text.TextEditorPreferenceConstants;
 
 
 /**
@@ -54,11 +57,8 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 	
 	private SearchEngine fSearchEngine;
 	
-	/**
-	 * @param descriptor
-	 */
-	public JspUIPlugin(IPluginDescriptor descriptor) {
-		super(descriptor);
+	public JspUIPlugin() {
+		super();
 		fgDefault= this;
 		fSearchEngine= SearchEngine.getSearchEngine();
 	}
