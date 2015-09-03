@@ -429,6 +429,71 @@ public class QuickFixTest18 extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
+	public void testUnimplementedMethods6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.math.BigInteger;\n");
+		buf.append("interface IHasInt {\n");
+		buf.append("    int getInt();\n");
+		buf.append("}\n");
+		buf.append("interface IHasIntAsBigInteger extends IHasInt {\n");
+		buf.append("    default int getInt() {\n");
+		buf.append("        return getIntAsBigInteger().intValue();\n");
+		buf.append("    }\n");
+		buf.append("    BigInteger getIntAsBigInteger();\n");
+		buf.append("}\n");
+		buf.append("class C implements IHasIntAsBigInteger {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("IHasInt.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.math.BigInteger;\n");
+		buf.append("interface IHasInt {\n");
+		buf.append("    int getInt();\n");
+		buf.append("}\n");
+		buf.append("interface IHasIntAsBigInteger extends IHasInt {\n");
+		buf.append("    default int getInt() {\n");
+		buf.append("        return getIntAsBigInteger().intValue();\n");
+		buf.append("    }\n");
+		buf.append("    BigInteger getIntAsBigInteger();\n");
+		buf.append("}\n");
+		buf.append("class C implements IHasIntAsBigInteger {\n");
+		buf.append("\n");
+		buf.append("    @Override\n");
+		buf.append("    public BigInteger getIntAsBigInteger() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.math.BigInteger;\n");
+		buf.append("interface IHasInt {\n");
+		buf.append("    int getInt();\n");
+		buf.append("}\n");
+		buf.append("interface IHasIntAsBigInteger extends IHasInt {\n");
+		buf.append("    default int getInt() {\n");
+		buf.append("        return getIntAsBigInteger().intValue();\n");
+		buf.append("    }\n");
+		buf.append("    BigInteger getIntAsBigInteger();\n");
+		buf.append("}\n");
+		buf.append("abstract class C implements IHasIntAsBigInteger {\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 	public void testLambdaReturnType1() throws Exception {
 		StringBuffer buf= new StringBuffer();
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
