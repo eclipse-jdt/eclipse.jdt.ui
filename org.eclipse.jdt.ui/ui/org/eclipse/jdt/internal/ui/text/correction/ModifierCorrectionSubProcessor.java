@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -541,9 +541,11 @@ public class ModifierCorrectionSubProcessor {
 		ASTNode parentType= ASTResolving.findParentType(decl);
 		TypeDeclaration parentTypeDecl= null;
 		boolean parentIsAbstractClass= false;
+		boolean parentIsInterface= false;
 		if (parentType instanceof TypeDeclaration) {
 			parentTypeDecl= (TypeDeclaration) parentType;
 			parentIsAbstractClass= !parentTypeDecl.isInterface() && Modifier.isAbstract(parentTypeDecl.getModifiers());
+			parentIsInterface= parentTypeDecl.isInterface();
 		}
 		boolean hasNoBody= decl.getBody() == null;
 
@@ -585,7 +587,7 @@ public class ModifierCorrectionSubProcessor {
 				rewrite.remove(decl.getBody(), null);
 
 				int excluded;
-				if (parentTypeDecl.isInterface()) {
+				if (parentIsInterface) {
 					excluded= ~(Modifier.PUBLIC | Modifier.ABSTRACT);
 				} else {
 					excluded= ~(Modifier.PUBLIC | Modifier.PROTECTED | Modifier.ABSTRACT);
@@ -598,7 +600,7 @@ public class ModifierCorrectionSubProcessor {
 				proposals.add(proposal);
 			}
 
-			if (JavaModelUtil.is18OrHigher(cu.getJavaProject()) && parentTypeDecl.isInterface()) {
+			if (JavaModelUtil.is18OrHigher(cu.getJavaProject()) && parentIsInterface) {
 				{
 					// insert proposal to add static modifier
 					String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertostatic_description, decl.getName());
