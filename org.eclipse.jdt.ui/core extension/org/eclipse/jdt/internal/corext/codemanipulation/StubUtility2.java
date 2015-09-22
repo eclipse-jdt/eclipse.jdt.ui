@@ -596,9 +596,12 @@ public final class StubUtility2 {
 						toImplement.remove(oneMethod);
 					}
 				}
-				if (Modifier.isAbstract(curr.getModifiers())) {
-					toImplement.add(curr);
+				int modifiers= curr.getModifiers();
+				if (!Modifier.isStatic(modifiers)) {
 					allMethods.add(curr);
+					if (Modifier.isAbstract(modifiers)) {
+						toImplement.add(curr);
+					}
 				}
 			}
 			ITypeBinding[] superInterfaces= typeBinding.getInterfaces();

@@ -899,6 +899,40 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 	}
 
+	public void testAbstractMethodWithBody3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("enum E {\n");
+		buf.append("    A {\n");
+		buf.append("        public void foo() {}\n");
+		buf.append("    };\n");
+		buf.append("    public abstract void foo() {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n"); 
+		buf.append("enum E {\n");
+		buf.append("    A {\n");
+		buf.append("        public void foo() {}\n");
+		buf.append("    };\n");
+		buf.append("    public abstract void foo();\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 	public void testAbstractMethodInNonAbstractClass() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

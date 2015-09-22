@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,13 +13,16 @@ package org.eclipse.jsp.launching;
 import java.io.File;
 import java.text.MessageFormat;
 
+import org.eclipse.jsp.JspUIPlugin;
+
+import org.eclipse.core.variables.IValueVariable;
+import org.eclipse.core.variables.VariablesPlugin;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.variables.IValueVariable;
-import org.eclipse.core.variables.VariablesPlugin;
+
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
-import org.eclipse.jsp.JspUIPlugin;
 
 /**
  * Launch delegate for a local Tomcat server
@@ -59,7 +62,7 @@ public class TomcatLaunchDelegate extends JavaLaunchDelegate {
 		IValueVariable variable = VariablesPlugin.getDefault().getStringVariableManager().getValueVariable("catalina_home"); //$NON-NLS-1$
 		IStatus err = null;
 		if (variable == null) {
-			err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, LaunchingMessages.TomcatLaunchDelegate_9, null); 
+			err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getBundle().getSymbolicName(), 0, LaunchingMessages.TomcatLaunchDelegate_9, null); 
 		} else {
 			String home = variable.getValue();	
 			if (home != null && home.length() > 0) {
@@ -67,10 +70,10 @@ public class TomcatLaunchDelegate extends JavaLaunchDelegate {
 				if (file.exists() && file.isDirectory()) {
 					return home;
 				} else {
-					err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, MessageFormat.format(LaunchingMessages.TomcatLaunchDelegate_7, new String[]{home}), null); 
+					err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getBundle().getSymbolicName(), 0, MessageFormat.format(LaunchingMessages.TomcatLaunchDelegate_7, new String[]{home}), null); 
 				}
 			} else {
-				err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, LaunchingMessages.TomcatLaunchDelegate_8, null); 
+				err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getBundle().getSymbolicName(), 0, LaunchingMessages.TomcatLaunchDelegate_8, null); 
 			}
 		}
 		throw new CoreException(err);

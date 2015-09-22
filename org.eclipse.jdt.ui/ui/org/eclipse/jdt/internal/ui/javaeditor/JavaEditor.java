@@ -2788,7 +2788,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		Assert.isNotNull(method);
 		method.setAccessible(true);
 		try {
-			method.invoke(this, new Object[] { new Boolean(state) });
+			method.invoke(this, new Object[] { Boolean.valueOf(state) });
 		} catch (IllegalArgumentException ex) {
 			JavaPlugin.log(ex);
 		} catch (InvocationTargetException ex) {
