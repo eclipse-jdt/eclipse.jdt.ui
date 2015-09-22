@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1379,13 +1379,17 @@ public class JavaElementLabelComposer {
 			path= root.getPath();
 		}
 		if (getFlag(flags, JavaElementLabels.REFERENCED_ROOT_POST_QUALIFIED)) {
-			int segements= path.segmentCount();
-			if (segements > 0) {
-				fBuffer.append(path.segment(segements - 1));
+			int segmentCount= path.segmentCount();
+			if (segmentCount > 0) {
+				String elementName= root.getElementName();
+				fBuffer.append(elementName);
 				int offset= fBuffer.length();
-				if (segements > 1 || path.getDevice() != null) {
+				
+				boolean skipLastSegment= elementName.equals(path.lastSegment());
+				if (segmentCount > 1 || path.getDevice() != null || !skipLastSegment) {
 					fBuffer.append(JavaElementLabels.CONCAT_STRING);
-					fBuffer.append(path.removeLastSegments(1).toOSString());
+					IPath postQualifier= skipLastSegment ? path.removeLastSegments(1) : path;
+					fBuffer.append(postQualifier.toOSString());
 				}
 				if (classpathEntry != null) {
 					IClasspathEntry referencingEntry= classpathEntry.getReferencingEntry();
