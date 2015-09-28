@@ -77,8 +77,10 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
@@ -129,6 +131,7 @@ import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
@@ -191,7 +194,8 @@ public class LocalCorrectionsSubProcessor {
 		if (selectedNode == null) {
 			return;
 		}
-		while (selectedNode != null && !(selectedNode instanceof Statement) && !(selectedNode instanceof VariableDeclarationExpression)) {
+		while (selectedNode != null && !(selectedNode instanceof Statement) && !(selectedNode instanceof VariableDeclarationExpression) 
+				&& !(selectedNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY) && !(selectedNode instanceof MethodReference)) {
 			selectedNode= selectedNode.getParent();
 		}
 		if (selectedNode == null) {
@@ -241,7 +245,12 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 
-		ITypeBinding[] uncaughtExceptions= ExceptionAnalyzer.perform(decl, Selection.createFromStartLength(offset, length));
+		ASTNode enclosingNode= SurroundWithAnalyzer.getEnclosingNode(selectedNode);
+		if (enclosingNode == null) {
+			return;
+		}
+
+		ITypeBinding[] uncaughtExceptions= ExceptionAnalyzer.perform(enclosingNode, Selection.createFromStartLength(offset, length));
 		if (uncaughtExceptions.length == 0) {
 			return;
 		}
@@ -381,8 +390,8 @@ public class LocalCorrectionsSubProcessor {
 		}
 
 		//Add throws declaration
-		if (decl instanceof MethodDeclaration) {
-			MethodDeclaration methodDecl= (MethodDeclaration) decl;
+		if (enclosingNode instanceof MethodDeclaration) {
+			MethodDeclaration methodDecl= (MethodDeclaration) enclosingNode;
 			IMethodBinding binding= methodDecl.resolveBinding();
 			boolean isApplicable= (binding != null);
 			if (isApplicable) {

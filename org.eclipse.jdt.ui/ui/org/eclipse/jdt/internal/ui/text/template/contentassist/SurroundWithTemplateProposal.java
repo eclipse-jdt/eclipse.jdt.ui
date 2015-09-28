@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -69,14 +68,14 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		private final IJavaProject fCurrentProject;
 		private ASTNode fTemplateNode;
 
-		public SurroundWithTemplate(IInvocationContext context, Statement[] selectedNodes, Template template) {
+		public SurroundWithTemplate(IInvocationContext context, ASTNode[] selectedNodes, Template template) {
 			super(context.getASTRoot(), selectedNodes);
 			fTemplate= template;
 			fCurrentProject= context.getCompilationUnit().getJavaProject();
 		}
 
 		@Override
-		protected List<VariableDeclaration> getVariableDeclarationReadsInside(Statement[] selectedNodes, int maxVariableId) {
+		protected List<VariableDeclaration> getVariableDeclarationReadsInside(ASTNode[] selectedNodes, int maxVariableId) {
 			if (isNewContext())
 				return super.getVariableDeclarationReadsInside(selectedNodes, maxVariableId);
 			return new ArrayList<>();
@@ -136,17 +135,17 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 	private final ICompilationUnit fCompilationUnit;
 	private final CompilationUnitContext fContext;
 	private final Template fTemplate;
-	private final Statement[] fSelectedStatements;
+	private final ASTNode[] fSelectedNodes;
 	private TemplateProposal fProposal;
 	private IRegion fSelectedRegion;
 
-	public SurroundWithTemplateProposal(ICompilationUnit compilationUnit, Template template, CompilationUnitContext context, IRegion region, Image image, Statement[] selectedStatements) {
+	public SurroundWithTemplateProposal(ICompilationUnit compilationUnit, Template template, CompilationUnitContext context, IRegion region, Image image, ASTNode[] selectedNodes) {
 		super(template, context, region, image);
 		fCompilationUnit= compilationUnit;
 		fTemplate= template;
 		fContext= context;
 		fRegion= region;
-		fSelectedStatements= selectedStatements;
+		fSelectedNodes= selectedNodes;
 	}
 
 	/*
@@ -244,7 +243,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 	private CompilationUnitContext createNewContext(IDocument document) throws CoreException, BadLocationException {
 		AssistContext invocationContext= new AssistContext(fCompilationUnit, fContext.getStart(), fContext.getEnd() - fContext.getStart());
 
-		SurroundWithTemplate surroundWith= new SurroundWithTemplate(invocationContext, fSelectedStatements, fTemplate);
+		SurroundWithTemplate surroundWith= new SurroundWithTemplate(invocationContext, fSelectedNodes, fTemplate);
 		Map<String, String> options= fCompilationUnit.getJavaProject().getOptions(true);
 
 		surroundWith.getRewrite().rewriteAST(document, options).apply(document);

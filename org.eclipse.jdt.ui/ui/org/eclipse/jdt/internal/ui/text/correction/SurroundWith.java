@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -157,14 +157,14 @@ public abstract class SurroundWith {
 	}
 
 	private final CompilationUnit fRootNode;
-	private final Statement[] fSelectedStatements;
+	private final ASTNode[] fSelectedNodes;
 	private boolean fIsNewContext;
 	private ITrackedNodePosition fFirstInsertedPosition;
 	private ITrackedNodePosition fLastInsertedPosition;
 
-	public SurroundWith(CompilationUnit root, Statement[] selectedStatements) {
+	public SurroundWith(CompilationUnit root, ASTNode[] selectedNodes) {
 		fRootNode= root;
-		fSelectedStatements= selectedStatements;
+		fSelectedNodes= selectedNodes;
 	}
 
 
@@ -175,7 +175,7 @@ public abstract class SurroundWith {
 			return true;
 
 		Selection selection= Selection.createFromStartLength(context.getSelectionOffset(), context.getSelectionLength());
-		SurroundWithAnalyzer analyzer= new SurroundWithAnalyzer(unit, selection);
+		SurroundWithAnalyzer analyzer= new SurroundWithAnalyzer(unit, selection, false);
 		context.getASTRoot().accept(analyzer);
 
 		return analyzer.getStatus().isOK() && analyzer.hasSelectedNodes();
@@ -189,15 +189,15 @@ public abstract class SurroundWith {
 	 * @return Selected nodes or null if no valid selection.
 	 * @throws CoreException if the analyzer cannot be created
 	 */
-	public static Statement[] getSelectedStatements(IInvocationContext context) throws CoreException {
+	public static ASTNode[] getValidSelectedNodes(IInvocationContext context) throws CoreException {
 		Selection selection= Selection.createFromStartLength(context.getSelectionOffset(), context.getSelectionLength());
-		SurroundWithAnalyzer analyzer= new SurroundWithAnalyzer(context.getCompilationUnit(), selection);
+		SurroundWithAnalyzer analyzer= new SurroundWithAnalyzer(context.getCompilationUnit(), selection, false);
 		context.getASTRoot().accept(analyzer);
 
 		if (!analyzer.getStatus().isOK() || !analyzer.hasSelectedNodes()) {
 			return null;
 		} else {
-			return analyzer.getSelectedStatements();
+			return analyzer.getValidSelectedNodes();
 		}
 	}
 
@@ -215,33 +215,33 @@ public abstract class SurroundWith {
 	 * @throws CoreException A core exception is thrown when the could not be created.
 	 */
 	public ASTRewrite getRewrite() throws CoreException {
-		Statement[] selectedStatements= fSelectedStatements;
+		ASTNode[] selectedNodes= fSelectedNodes;
 		AST ast= getAst();
 
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
-		BodyDeclaration enclosingBodyDeclaration= (BodyDeclaration)ASTNodes.getParent(selectedStatements[0], BodyDeclaration.class);
+		BodyDeclaration enclosingBodyDeclaration= (BodyDeclaration)ASTNodes.getParent(selectedNodes[0], BodyDeclaration.class);
 		int maxVariableId= LocalVariableIndex.perform(enclosingBodyDeclaration) + 1;
 
 		fIsNewContext= isNewContext();
 
-		List<VariableDeclarationFragment> accessedAfter= getVariableDeclarationsAccessedAfter(selectedStatements[selectedStatements.length - 1], maxVariableId);
+		List<VariableDeclarationFragment> accessedAfter= getVariableDeclarationsAccessedAfter(selectedNodes[selectedNodes.length - 1], maxVariableId);
 		List<VariableDeclaration> readInside;
-		readInside= getVariableDeclarationReadsInside(selectedStatements, maxVariableId);
+		readInside= getVariableDeclarationReadsInside(selectedNodes, maxVariableId);
 
 		List<ASTNode> inserted= new ArrayList<>();
-		moveToBlock(selectedStatements, inserted, accessedAfter, readInside, rewrite);
+		moveToBlock(selectedNodes, inserted, accessedAfter, readInside, rewrite);
 		if (fIsNewContext) {
-			ImportRewrite importRewrite= StubUtility.createImportRewrite((CompilationUnit)selectedStatements[0].getRoot(), false);
-			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(selectedStatements[0], importRewrite);
-			for (int i= 0; i < selectedStatements.length; i++) {
-				qualifyThisExpressions(selectedStatements[i], rewrite, importRewrite, importRewriteContext);
+			ImportRewrite importRewrite= StubUtility.createImportRewrite((CompilationUnit)selectedNodes[0].getRoot(), false);
+			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(selectedNodes[0], importRewrite);
+			for (int i= 0; i < selectedNodes.length; i++) {
+				qualifyThisExpressions(selectedNodes[i], rewrite, importRewrite, importRewriteContext);
 			}
 		}
 
-		if (selectedStatements.length == 1 && ASTNodes.isControlStatementBody(selectedStatements[0].getLocationInParent())) {
+		if (selectedNodes.length == 1 && ASTNodes.isControlStatementBody(selectedNodes[0].getLocationInParent())) {
 			Block wrap= ast.newBlock();
-			rewrite.replace(selectedStatements[0], wrap, null);
+			rewrite.replace(selectedNodes[0], wrap, null);
 			ListRewrite listRewrite= rewrite.getListRewrite(wrap, Block.STATEMENTS_PROPERTY);
 
 			for (Iterator<ASTNode> iterator= inserted.iterator(); iterator.hasNext();) {
@@ -250,9 +250,9 @@ public abstract class SurroundWith {
 			}
 
 		} else {
-			ListRewrite listRewrite= getListRewrite(selectedStatements[0], rewrite);
+			ListRewrite listRewrite= getListRewrite(selectedNodes[0], rewrite);
 
-			ASTNode current= selectedStatements[selectedStatements.length - 1];
+			ASTNode current= selectedNodes[selectedNodes.length - 1];
 			for (Iterator<ASTNode> iterator= inserted.iterator(); iterator.hasNext();) {
 				ASTNode node= iterator.next();
 				listRewrite.insertAfter(node, current, null);
@@ -279,7 +279,7 @@ public abstract class SurroundWith {
 	 * @param selectedNodes The selectedNodes
 	 * @return	List of VariableDeclaration
 	 */
-	protected List<VariableDeclaration> getVariableDeclarationReadsInside(Statement[] selectedNodes, int maxVariableId) {
+	protected List<VariableDeclaration> getVariableDeclarationReadsInside(ASTNode[] selectedNodes, int maxVariableId) {
 		ArrayList<VariableDeclaration> result= new ArrayList<>();
 		if (!fIsNewContext)
 			return result;
@@ -364,7 +364,7 @@ public abstract class SurroundWith {
 	}
 
 	/**
-	 * Moves the nodes in toMove to <code>block</block> except the VariableDeclarationFragments
+	 * Moves the nodes in toMove to <code>block</code> except the VariableDeclarationFragments
 	 * in <code>accessedAfter</code>. The initializers (if any) of variable declarations
 	 * in <code>accessedAfter</code> are moved to the block if the variable declaration is
 	 * part of <code>toMove</code>. VariableDeclarations in <code>accessedInside</code> are
@@ -382,7 +382,7 @@ public abstract class SurroundWith {
 	 * @param accessedInside VariableDeclaration which can be made final
 	 * @param rewrite The rewrite to use.
 	 */
-	private final void moveToBlock(Statement[] toMove, List<ASTNode> statements, final List<VariableDeclarationFragment> accessedAfter, final List<VariableDeclaration> accessedInside, final ASTRewrite rewrite) {
+	private final void moveToBlock(ASTNode[] toMove, List<ASTNode> statements, final List<VariableDeclarationFragment> accessedAfter, final List<VariableDeclaration> accessedInside, final ASTRewrite rewrite) {
 
 		for (int i= 0; i < toMove.length; i++) {
 			ASTNode node= toMove[i];
@@ -557,13 +557,9 @@ public abstract class SurroundWith {
 		return getRootNode().getAST();
 	}
 
-	protected final Statement[] getSelectedStatements() {
-		return fSelectedStatements;
-	}
-
 	private CompilationUnit getRootNode() {
-		if (fSelectedStatements.length > 0)
-			return (CompilationUnit)fSelectedStatements[0].getRoot();
+		if (fSelectedNodes.length > 0)
+			return (CompilationUnit)fSelectedNodes[0].getRoot();
 		return fRootNode;
 	}
 
