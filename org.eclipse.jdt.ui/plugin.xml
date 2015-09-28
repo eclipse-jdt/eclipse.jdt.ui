@@ -1065,8 +1065,23 @@
       <colorDefinition
             label="%DeclarationViewBackgroundColor.label"
             categoryId="org.eclipse.jdt.ui.presentation"
-            value="COLOR_INFO_BACKGROUND"
             id="org.eclipse.jdt.ui.DeclarationView.backgroundColor">
+         <colorFactory
+               plugin="org.eclipse.ui"
+               class="org.eclipse.ui.internal.themes.RGBVisibleContrastColorFactory">
+            <parameter
+                  name="foreground"
+                  value="0,0,0">
+            </parameter>
+            <parameter
+                  name="background"
+                  value="COLOR_INFO_BACKGROUND">
+            </parameter>
+            <parameter
+                  name="alternativeBackground"
+                  value="COLOR_LIST_BACKGROUND">
+            </parameter>
+         </colorFactory>
          <description>
             %DeclarationViewBackgroundColor.description
          </description>
