@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -344,6 +344,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	// values
 	private static final String ERROR= JavaCore.ERROR;
 	private static final String WARNING= JavaCore.WARNING;
+	private static final String INFO= JavaCore.INFO;
 	private static final String IGNORE= JavaCore.IGNORE;
 
 	private static final String ENABLED= JavaCore.ENABLED;
@@ -445,10 +446,11 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	}
 
 	private Composite createStyleTabContent(Composite folder) {
-		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
-		String[] errorWarningIgnoreLabels= new String[] {
+		String[] errorWarningInfoIgnore= new String[] { ERROR, WARNING, INFO, IGNORE };
+		String[] errorWarningInfoIgnoreLabels= new String[] {
 			PreferencesMessages.ProblemSeveritiesConfigurationBlock_error,
 			PreferencesMessages.ProblemSeveritiesConfigurationBlock_warning,
+			PreferencesMessages.ProblemSeveritiesConfigurationBlock_info,
 			PreferencesMessages.ProblemSeveritiesConfigurationBlock_ignore
 		};
 
@@ -493,39 +495,39 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		// - expression level
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_static_access_receiver_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_STATIC_ACCESS_RECEIVER, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_STATIC_ACCESS_RECEIVER, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_indirect_access_to_static_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_INDIRECT_STATIC_ACCESS, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_INDIRECT_STATIC_ACCESS, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unqualified_field_access_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNQUALIFIED_FIELD_ACCESS, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNQUALIFIED_FIELD_ACCESS, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_synth_access_emul_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_SYNTHETIC_ACCESS_EMULATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_SYNTHETIC_ACCESS_EMULATION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_parameter_assignment;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_PARAMETER_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_PARAMETER_ASSIGNMENT, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		// - statements level
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_non_externalized_strings_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_undocumented_empty_block_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_resource_not_managed_via_twr_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		// - member level
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_method_naming_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_missing_static_on_method_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_MISSING_STATIC_ON_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_MISSING_STATIC_ON_METHOD, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_potentially_missing_static_on_method_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		// --- potential_programming_problems
 
@@ -538,68 +540,68 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		// - affecting expressions
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_comparing_identical;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_COMPARING_IDENTICAL, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_COMPARING_IDENTICAL, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_no_effect_assignment_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NO_EFFECT_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NO_EFFECT_ASSIGNMENT, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_accidential_assignement_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_autoboxing_problem_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_AUTOBOXING_PROBLEM, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_AUTOBOXING_PROBLEM, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_char_array_in_concat_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_CHAR_ARRAY_IN_CONCAT, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_CHAR_ARRAY_IN_CONCAT, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		// - affecting method invocations
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_inexact_vararg_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		// - affecting single statements
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_empty_statement_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_EMPTY_STATEMENT, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_EMPTY_STATEMENT, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_object_allocation_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_OBJECT_ALLOCATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_OBJECT_ALLOCATION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_incomplete_enum_switch_label;
-		node= fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_INCOMPLETE_ENUM_SWITCH, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		node= fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_INCOMPLETE_ENUM_SWITCH, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_missing_enum_case_despite_default;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_15_PB_MISSING_ENUM_CASE_DESPITE_DEFAULT, enabledDisabled, extraIndent, node);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_switch_missing_default_case_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_SWITCH_MISSING_DEFAULT_CASE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_SWITCH_MISSING_DEFAULT_CASE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_fall_through_case;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_FALLTHROUGH_CASE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_FALLTHROUGH_CASE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_hidden_catchblock_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_HIDDEN_CATCH_BLOCK, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_HIDDEN_CATCH_BLOCK, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_finally_block_not_completing_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		// - affecting code blocks
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_dead_code;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_DEAD_CODE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_DEAD_CODE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_resource_leak_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNCLOSED_CLOSEABLE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNCLOSED_CLOSEABLE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_potential_resource_leak_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIALLY_UNCLOSED_CLOSEABLE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIALLY_UNCLOSED_CLOSEABLE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		// - affecting members
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_missing_serial_version_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_MISSING_SERIAL_VERSION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_MISSING_SERIAL_VERSION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_missing_synchronized_on_inherited_method;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_MISSING_SYNCHRONIZED_ON_INHERITED_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_MISSING_SYNCHRONIZED_ON_INHERITED_METHOD, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_missing_hashcode_method;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_MISSING_HASHCODE_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_MISSING_HASHCODE_METHOD, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 
 		// --- name_shadowing
@@ -612,22 +614,22 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		inner= createInnerComposite(excomposite, nColumns, composite.getFont());
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_field_hiding_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_FIELD_HIDING, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_FIELD_HIDING, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_local_variable_hiding_label;
-		node= fFilteredPrefTree.addComboBox(inner, label, PREF_PB_LOCAL_VARIABLE_HIDING, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		node= fFilteredPrefTree.addComboBox(inner, label, PREF_PB_LOCAL_VARIABLE_HIDING, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_special_param_hiding_label;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, enabledDisabled, extraIndent, node);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_type_parameter_hiding_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_TYPE_PARAMETER_HIDING, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_TYPE_PARAMETER_HIDING, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_overriding_pkg_dflt_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_incompatible_interface_method_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		// --- API access rules
 
@@ -639,7 +641,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		inner= createInnerComposite(excomposite, nColumns, composite.getFont());
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_deprecation_label;
-		node= fFilteredPrefTree.addComboBox(inner, label, PREF_PB_DEPRECATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		node= fFilteredPrefTree.addComboBox(inner, label, PREF_PB_DEPRECATION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_deprecation_in_deprecation_label;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_DEPRECATION_IN_DEPRECATED_CODE, enabledDisabled, extraIndent, node);
@@ -648,10 +650,10 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_DEPRECATION_WHEN_OVERRIDING, enabledDisabled, extraIndent, node);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_forbidden_reference_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_FORBIDDEN_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_FORBIDDEN_REFERENCE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_discourraged_reference_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_DISCOURRAGED_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_DISCOURRAGED_REFERENCE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 
 		// --- unnecessary_code
@@ -664,37 +666,37 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		inner= createInnerComposite(excomposite, nColumns, composite.getFont());
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_local_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_LOCAL, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_LOCAL, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_parameter_label;
-		node= fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_PARAMETER, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		node= fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_PARAMETER, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_signal_param_in_overriding_label;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, disabledEnabled, extraIndent, node);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_type_parameter;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_TYPE_PARAMETER, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_TYPE_PARAMETER, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_ignore_documented_unused_parameters;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_UNUSED_PARAMETER_INCLUDE_DOC_COMMENT_REFERENCE, enabledDisabled, defaultIndent, node);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_exception_parameter_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_EXCEPTION_PARAMETER, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_EXCEPTION_PARAMETER, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_imports_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_IMPORT, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_private_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_PRIVATE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_PRIVATE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unnecessary_else_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNNECESSARY_ELSE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNNECESSARY_ELSE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unnecessary_type_check_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNNECESSARY_TYPE_CHECK, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNNECESSARY_TYPE_CHECK, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_throwing_exception_label;
-		node= fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		node= fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_throwing_exception_when_overriding_label;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING, disabledEnabled, extraIndent, node);
@@ -706,10 +708,10 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_EXEMPT_EXCEPTION_AND_THROWABLE, enabledDisabled, extraIndent, node);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_label_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_LABEL, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_LABEL, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_redundant_super_interface_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_REDUNDANT_SUPERINTERFACE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_REDUNDANT_SUPERINTERFACE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		// --- generics
 
@@ -721,16 +723,16 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		inner= createInnerComposite(excomposite, nColumns, composite.getFont());
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unsafe_type_op_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_UNCHECKED_TYPE_OPERATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_UNCHECKED_TYPE_OPERATION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_raw_type_reference;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_RAW_TYPE_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_RAW_TYPE_REFERENCE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_final_param_bound_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_FINAL_PARAM_BOUND, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_FINAL_PARAM_BOUND, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_redundant_type_arguments_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_17_PB_REDUNDANT_TYPE_ARGUMENTS, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_17_PB_REDUNDANT_TYPE_ARGUMENTS, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unavoidable_generic_type_problems;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_15_PB_UNAVOIDABLE_GENERIC_TYPE_PROBLEMS, disabledEnabled, defaultIndent, section);
@@ -745,25 +747,25 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		inner= createInnerComposite(excomposite, nColumns, composite.getFont());
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_missing_override_annotation_label;
-		node= fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_MISSING_OVERRIDE_ANNOTATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		node= fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_MISSING_OVERRIDE_ANNOTATION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_missing_override_annotation_for_interface_method_implementations_label;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_16_PB_MISSING_OVERRIDE_ANNOTATION_FOR_INTERFACE_METHOD_IMPLEMENTATION, enabledDisabled, extraIndent, node);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_missing_deprecated_annotation_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_MISSING_DEPRECATED_ANNOTATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_MISSING_DEPRECATED_ANNOTATION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_annotation_super_interface_label;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_ANNOTATION_SUPER_INTERFACE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_ANNOTATION_SUPER_INTERFACE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unhandled_surpresswarning_tokens;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNHANDLED_WARNING_TOKEN, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNHANDLED_WARNING_TOKEN, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_enable_surpresswarning_annotation;
 		node= fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_SUPPRESS_WARNINGS, enabledDisabled, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_unused_suppresswarnings_token;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_WARNING_TOKEN, errorWarningIgnore, errorWarningIgnoreLabels, extraIndent, node);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_WARNING_TOKEN, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, extraIndent, node);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_suppress_optional_errors_label;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_SUPPRESS_OPTIONAL_ERRORS, enabledDisabled, extraIndent, node);
@@ -778,13 +780,13 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		inner= createInnerComposite(excomposite, nColumns, composite.getFont());
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_null_reference;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NULL_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NULL_REFERENCE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_potential_null_reference;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIAL_NULL_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIAL_NULL_REFERENCE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_redundant_null_check;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_REDUNDANT_NULL_CHECK, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_REDUNDANT_NULL_CHECK, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_include_assert_in_null_analysis;
 		fFilteredPrefTree.addCheckBox(inner, label, PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS, enabledDisabled, defaultIndent, section);
@@ -798,19 +800,19 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NULL_SPECIFICATION_VIOLATION, errorWarning, errorWarningLabels, extraIndent, node);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_null_annotation_inference_conflict;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIAL_NULL_ANNOTATION_INFERENCE_CONFLICT, errorWarningIgnore, errorWarningIgnoreLabels, extraIndent, node);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIAL_NULL_ANNOTATION_INFERENCE_CONFLICT, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, extraIndent, node);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_null_unchecked_conversion;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NULL_UNCHECKED_CONVERSION, errorWarningIgnore, errorWarningIgnoreLabels, extraIndent, node);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NULL_UNCHECKED_CONVERSION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, extraIndent, node);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_redundant_null_annotation;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_REDUNDANT_NULL_ANNOTATION, errorWarningIgnore, errorWarningIgnoreLabels, extraIndent, node);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_REDUNDANT_NULL_ANNOTATION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, extraIndent, node);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_nonnull_parameter_annotation_dropped;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NONNULL_PARAMETER_ANNOTATION_DROPPED, errorWarningIgnore, errorWarningIgnoreLabels, extraIndent, node);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NONNULL_PARAMETER_ANNOTATION_DROPPED, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, extraIndent, node);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_missing_nonnull_by_default_annotation;
-		fFilteredPrefTree.addComboBox(inner, label, PREF_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, errorWarningIgnore, errorWarningIgnoreLabels, extraIndent, node);
+		fFilteredPrefTree.addComboBox(inner, label, PREF_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, extraIndent, node);
 		
 		label= PreferencesMessages.NullAnnotationsConfigurationDialog_use_default_annotations_for_null;
 		fFilteredPrefTree.addCheckBoxWithLink(inner, label, INTR_DEFAULT_NULL_ANNOTATIONS, enabledDisabled, extraIndent, node, true, SWT.DEFAULT,
@@ -960,13 +962,17 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		}
 	}
 
-	private static boolean lessSevere(String errorWarningIgnore, String errorWarningIgnore2) {
-		if (IGNORE.equals(errorWarningIgnore))
-			return ! IGNORE.equals(errorWarningIgnore2);
-		else if (WARNING.equals(errorWarningIgnore))
-			return ERROR.equals(errorWarningIgnore2);
-		else
-			return false;
+	private static boolean lessSevere(String errorWarningInfoIgnore, String errorWarningInfoIgnore2) {
+		switch (errorWarningInfoIgnore) {
+			case IGNORE:
+				return !IGNORE.equals(errorWarningInfoIgnore2);
+			case INFO:
+				return !IGNORE.equals(errorWarningInfoIgnore2) && !INFO.equals(errorWarningInfoIgnore2);
+			case WARNING:
+				return ERROR.equals(errorWarningInfoIgnore2);
+			default:
+				return false;
+		}
 	}
 
 	private void updateNullAnnotationsSetting() {

@@ -155,6 +155,7 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_QUICK_FIX= NAME_PREFIX + "quickfix_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_FIXABLE_PROBLEM= NAME_PREFIX + "quickfix_warning_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_FIXABLE_ERROR= NAME_PREFIX + "quickfix_error_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_FIXABLE_INFO= NAME_PREFIX + "quickfix_info_obj.gif"; //$NON-NLS-1$
 
 	public static final String IMG_OBJS_ACCESSRULES_ATTRIB= NAME_PREFIX + "access_restriction_attrib.gif"; //$NON-NLS-1$
 
@@ -286,6 +287,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_QUICK_FIX= createManagedFromKey(T_OBJ, IMG_OBJS_QUICK_FIX);
 	public static final ImageDescriptor DESC_OBJS_FIXABLE_PROBLEM= createManagedFromKey(T_OBJ, IMG_OBJS_FIXABLE_PROBLEM);
 	public static final ImageDescriptor DESC_OBJS_FIXABLE_ERROR= createManagedFromKey(T_OBJ, IMG_OBJS_FIXABLE_ERROR);
+	public static final ImageDescriptor DESC_OBJS_FIXABLE_INFO= createManagedFromKey(T_OBJ, IMG_OBJS_FIXABLE_INFO);
 
 	public static final ImageDescriptor DESC_OBJS_DEFAULT_CHANGE= createUnManaged(T_OBJ, "change.png"); //$NON-NLS-1$
 

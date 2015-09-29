@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	// values
 	private static final String ERROR= JavaCore.ERROR;
 	private static final String WARNING= JavaCore.WARNING;
+	private static final String INFO= JavaCore.INFO;
 	private static final String IGNORE= JavaCore.IGNORE;
 
 	private static final String ABORT= JavaCore.ABORT;
@@ -136,10 +137,11 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.JavaBuildConfigurationBlock_warning
 		};
 
-		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
-		String[] errorWarningIgnoreLabels= new String[] {
+		String[] errorWarningInfoIgnore= new String[] { ERROR, WARNING, INFO, IGNORE };
+		String[] errorWarningInfoIgnoreLabels= new String[] {
 			PreferencesMessages.JavaBuildConfigurationBlock_error,
 			PreferencesMessages.JavaBuildConfigurationBlock_warning,
+			PreferencesMessages.JavaBuildConfigurationBlock_info,
 			PreferencesMessages.JavaBuildConfigurationBlock_ignore
 		};
 
@@ -192,13 +194,13 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		addComboBox(othersComposite, label, PREF_PB_CIRCULAR_BUILDPATH, errorWarning, errorWarningLabels, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_check_prereq_binary_level_label;
-		addComboBox(othersComposite, label, PREF_PB_INCOMPATIBLE_JDK_LEVEL, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(othersComposite, label, PREF_PB_INCOMPATIBLE_JDK_LEVEL, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, 0);
 		
 		label = PreferencesMessages.JavaBuildConfigurationBlock_pb_output_overlapping_with_source_label;
-		addComboBox(othersComposite, label, PREF_PB_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(othersComposite, label, PREF_PB_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_strictly_compatible_jre_not_available_label;
-		addComboBox(othersComposite, label, PREF_PB_STRICTLY_COMPATIBLE_JRE_NOT_AVAILABLE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(othersComposite, label, PREF_PB_STRICTLY_COMPATIBLE_JRE_NOT_AVAILABLE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_section_output_folder;
 		excomposite= createStyleSection(composite, label, nColumns);

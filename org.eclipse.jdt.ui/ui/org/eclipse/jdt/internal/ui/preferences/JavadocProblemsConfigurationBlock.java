@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,6 +61,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	// values
 	private static final String ERROR= JavaCore.ERROR;
 	private static final String WARNING= JavaCore.WARNING;
+	private static final String INFO= JavaCore.INFO;
 	private static final String IGNORE= JavaCore.IGNORE;
 
 	private static final String ENABLED= JavaCore.ENABLED;
@@ -116,11 +117,12 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	}
 
 	private Composite createJavadocTabContent(Composite folder) {
-		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
+		String[] errorWarningInfoIgnore= new String[] { ERROR, WARNING, INFO, IGNORE };
 
-		String[] errorWarningIgnoreLabels= new String[] {
+		String[] errorWarningInfoIgnoreLabels= new String[] {
 				PreferencesMessages.JavadocProblemsConfigurationBlock_error,
 				PreferencesMessages.JavadocProblemsConfigurationBlock_warning,
+				PreferencesMessages.JavadocProblemsConfigurationBlock_info,
 				PreferencesMessages.JavadocProblemsConfigurationBlock_ignore
 		};
 
@@ -211,7 +213,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);
 
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_label;
-		addComboBox(composite, label, PREF_PB_INVALID_JAVADOC, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(composite, label, PREF_PB_INVALID_JAVADOC, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, 0);
 
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_invalid_javadoc_tags_visibility_label;
 		addComboBox(composite, label, PREF_PB_INVALID_JAVADOC_TAGS_VISIBILITY, visibilities, visibilitiesLabels, indent);
@@ -243,7 +245,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);
 
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_label;
-		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, 0);
 
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_javadoc_tags_visibility_label;
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_TAGS_VISIBILITY, visibilities, visibilitiesLabels, indent);
@@ -259,7 +261,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		GridDataFactory.fillDefaults().span(nColumns, 1).hint(1, 5).applyTo(spacer);
 
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_label;
-		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, 0);
 
 		label = PreferencesMessages.JavadocProblemsConfigurationBlock_pb_missing_comments_visibility_label;
 		addComboBox(composite, label, PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, visibilities, visibilitiesLabels, indent);

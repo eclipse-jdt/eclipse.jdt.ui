@@ -125,6 +125,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	private static final String ERROR= JavaCore.ERROR;
 	private static final String WARNING= JavaCore.WARNING;
+	private static final String INFO= JavaCore.INFO;
 	private static final String IGNORE= JavaCore.IGNORE;
 
 	private static final String ENABLED= JavaCore.ENABLED;
@@ -355,19 +356,20 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.ComplianceConfigurationBlock_source_compatibility_label;
 		addComboBox(group, label, PREF_SOURCE_COMPATIBILITY, values3456, values3456Labels, indent);
 
-		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
+		String[] errorWarningInfoIgnore= new String[] { ERROR, WARNING, INFO, IGNORE };
 
-		String[] errorWarningIgnoreLabels= new String[] {
+		String[] errorWarningInfoIgnoreLabels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_error,
 			PreferencesMessages.ComplianceConfigurationBlock_warning,
+			PreferencesMessages.ComplianceConfigurationBlock_info,
 			PreferencesMessages.ComplianceConfigurationBlock_ignore
 		};
 
 		label= PreferencesMessages.ComplianceConfigurationBlock_pb_assert_as_identifier_label;
-		addComboBox(group, label, PREF_PB_ASSERT_AS_IDENTIFIER, errorWarningIgnore, errorWarningIgnoreLabels, indent);
+		addComboBox(group, label, PREF_PB_ASSERT_AS_IDENTIFIER, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, indent);
 
 		label= PreferencesMessages.ComplianceConfigurationBlock_pb_enum_as_identifier_label;
-		addComboBox(group, label, PREF_PB_ENUM_AS_IDENTIFIER, errorWarningIgnore, errorWarningIgnoreLabels, indent);
+		addComboBox(group, label, PREF_PB_ENUM_AS_IDENTIFIER, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, indent);
 
 		allChildren= group.getChildren();
 		fComplianceChildControls.addAll(Arrays.asList(allChildren));

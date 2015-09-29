@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -181,8 +181,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				return IAnnotationAccessExtension.DEFAULT_LAYER + 1;
 		}
 
-		private static Image fgQuickFixImage;
+		private static Image fgQuickFixWarningImage;
 		private static Image fgQuickFixErrorImage;
+		private static Image fgQuickFixInfoImage;
 		private static Image fgTaskImage;
 		private static Image fgInfoImage;
 		private static Image fgWarningImage;
@@ -239,8 +240,10 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				if (isQuickFixable()) {
 					if (JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(getType()))
 						fImage= fgQuickFixErrorImage;
+					else if (JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(getType()))
+						fImage= fgQuickFixWarningImage;
 					else
-						fImage= fgQuickFixImage;
+						fImage= fgQuickFixInfoImage;
 				} else {
 					String type= getType();
 					if (JavaMarkerAnnotation.TASK_ANNOTATION_TYPE.equals(type))
@@ -260,8 +263,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			if (fgImagesInitialized)
 				return;
 
-			fgQuickFixImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
+			fgQuickFixWarningImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
 			fgQuickFixErrorImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
+			fgQuickFixInfoImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_INFO);
 
 			ISharedImages sharedImages= PlatformUI.getWorkbench().getSharedImages();
 			fgTaskImage= sharedImages.getImage(SharedImages.IMG_OBJS_TASK_TSK);
@@ -318,6 +322,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			String type= getType();
 			return  JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(type)  ||
 						JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(type) ||
+						JavaMarkerAnnotation.INFO_ANNOTATION_TYPE.equals(type) ||
 						SPELLING_ANNOTATION_TYPE.equals(type);
 		}
 

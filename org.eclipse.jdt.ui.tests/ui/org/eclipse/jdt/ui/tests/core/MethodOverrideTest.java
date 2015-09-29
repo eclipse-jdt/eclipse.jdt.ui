@@ -447,7 +447,7 @@ public class MethodOverrideTest extends CoreTests {
 		boolean hasProblems= false;
 		for (int i= 0; i < problems.length; i++) {
 			IProblem prob= problems[i];
-			if (prob.isWarning()) {
+			if (prob.isWarning() || prob.isInfo()) {
 				continue;
 			}
 			switch (prob.getID()) {

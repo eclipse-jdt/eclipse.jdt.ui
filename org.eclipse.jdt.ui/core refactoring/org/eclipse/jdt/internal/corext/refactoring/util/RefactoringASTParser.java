@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -137,7 +137,7 @@ public class RefactoringASTParser {
 	/**
 	 * Returns the compiler options used for creating the refactoring AST.
 	 * <p>
-	 * Turns all errors and warnings into ignore and disables task tags. The customizable set of
+	 * Turns all errors, warnings and infos into ignore and disables task tags. The customizable set of
 	 * compiler options only contains additional Eclipse options. The standard JDK compiler options
 	 * can't be changed anyway.
 	 * 
@@ -150,7 +150,7 @@ public class RefactoringASTParser {
 		for (Iterator<String> iter= options.keySet().iterator(); iter.hasNext();) {
 			String key= iter.next();
 			String value= options.get(key);
-			if (JavaCore.ERROR.equals(value) || JavaCore.WARNING.equals(value)) {
+			if (JavaCore.ERROR.equals(value) || JavaCore.WARNING.equals(value) || JavaCore.INFO.equals(value)) {
 				// System.out.println("Ignoring - " + key);
 				options.put(key, JavaCore.IGNORE);
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -343,6 +343,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaBuildConfigurationBlock_section_build_path_problems;
 	public static String JavaBuildConfigurationBlock_error;
 	public static String JavaBuildConfigurationBlock_warning;
+	public static String JavaBuildConfigurationBlock_info;
 	public static String JavaBuildConfigurationBlock_ignore;
 	public static String JavaBuildConfigurationBlock_needsbuild_title;
 	public static String JavaBuildConfigurationBlock_needsfullbuild_message;
@@ -369,6 +370,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_enable_annotation_null_analysis;
 	public static String ProblemSeveritiesConfigurationBlock_error;
 	public static String ProblemSeveritiesConfigurationBlock_warning;
+	public static String ProblemSeveritiesConfigurationBlock_info;
 	public static String ProblemSeveritiesConfigurationBlock_ignore;
 	public static String ProblemSeveritiesConfigurationBlock_section_potential_programming_problems;
 	public static String ProblemSeveritiesConfigurationBlock_section_unnecessary_code;
@@ -453,6 +455,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavadocProblemsConfigurationBlock_private;
 	public static String JavadocProblemsConfigurationBlock_error;
 	public static String JavadocProblemsConfigurationBlock_warning;
+	public static String JavadocProblemsConfigurationBlock_info;
 	public static String JavadocProblemsConfigurationBlock_ignore;
 	public static String JavadocProblemsConfigurationBlock_note_title;
 	public static String JavadocProblemsConfigurationBlock_note_message;
@@ -478,6 +481,7 @@ public final class PreferencesMessages extends NLS {
 	public static String CompliancePreferencePage_title;
 	public static String ComplianceConfigurationBlock_error;
 	public static String ComplianceConfigurationBlock_warning;
+	public static String ComplianceConfigurationBlock_info;
 	public static String ComplianceConfigurationBlock_ignore;
 	public static String ComplianceConfigurationBlock_version11;
 	public static String ComplianceConfigurationBlock_version12;
