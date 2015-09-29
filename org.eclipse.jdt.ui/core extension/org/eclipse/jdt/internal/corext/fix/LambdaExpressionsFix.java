@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -89,7 +90,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		
 		@Override
 		public boolean visit(ClassInstanceCreation node) {
-			if (isFunctionalAnonymous(node)) {
+			if (isFunctionalAnonymous(node) && !fConversionRemovesAnnotations) {
 				fNodes.add(node);
 			}
 			return true;
@@ -519,6 +520,8 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
+	private static boolean fConversionRemovesAnnotations;
+
 	public static LambdaExpressionsFix createConvertToLambdaFix(ClassInstanceCreation cic) {
 		CompilationUnit root= (CompilationUnit) cic.getRoot();
 		if (!JavaModelUtil.is18OrHigher(root.getJavaElement().getJavaProject()))
@@ -609,8 +612,26 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		
 		if (!isInTargetTypeContext(node))
 			return false;
-		
+
+		// Check if annotations other than @Override and @Deprecated will be removed
+		checkAnnotationsRemoval(methodBinding);
+
 		return true;
+	}
+
+	private static void checkAnnotationsRemoval(IMethodBinding methodBinding) {
+		fConversionRemovesAnnotations= false;
+		IAnnotationBinding[] declarationAnnotations= methodBinding.getAnnotations();
+		for (IAnnotationBinding declarationAnnotation : declarationAnnotations) {
+			ITypeBinding annotationType= declarationAnnotation.getAnnotationType();
+			if (annotationType != null) {
+				String qualifiedName= annotationType.getQualifiedName();
+				if (!"java.lang.Override".equals(qualifiedName) && !"java.lang.Deprecated".equals(qualifiedName)) { //$NON-NLS-1$ //$NON-NLS-2$
+					fConversionRemovesAnnotations= true;
+					return;
+				}
+			}
+		}
 	}
 
 	private static boolean isInTargetTypeContext(ClassInstanceCreation node) {

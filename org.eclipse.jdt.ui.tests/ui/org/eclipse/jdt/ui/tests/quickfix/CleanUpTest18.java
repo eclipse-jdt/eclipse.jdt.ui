@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2014 IBM Corporation and others.
+ * Copyright (c) 2013, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -697,6 +697,46 @@ public class CleanUpTest18 extends CleanUpTestCase {
 		buf.append("    void m(FI fi) {\n");
 		buf.append("    };\n");
 		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+	}
+
+	public void testConvertToLambdaWithMethodAnnotations() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class C1 {\n");
+		buf.append("    Runnable r1 = new Runnable() {\n");
+		buf.append("        @Override @A @Deprecated\n");
+		buf.append("        public void run() {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("    Runnable r2 = new Runnable() {\n");
+		buf.append("        @Override @Deprecated\n");
+		buf.append("        public void run() {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		buf.append("@interface A {}\n");
+		String original= buf.toString();
+		ICompilationUnit cu1= pack1.createCompilationUnit("C1.java", original, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class C1 {\n");
+		buf.append("    Runnable r1 = new Runnable() {\n");
+		buf.append("        @Override @A @Deprecated\n");
+		buf.append("        public void run() {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("    Runnable r2 = () -> {\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		buf.append("@interface A {}\n");
 		String expected1= buf.toString();
 
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });

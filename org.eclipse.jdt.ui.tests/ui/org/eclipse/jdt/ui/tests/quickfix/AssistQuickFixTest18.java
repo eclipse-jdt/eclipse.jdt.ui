@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
@@ -941,6 +942,74 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		String expected1= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
+	public void testConvertToLambda19() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class C1 {\n");
+		buf.append("    Runnable r1 = new/*[1]*/ Runnable() {\n");
+		buf.append("        @Override @A @Deprecated\n");
+		buf.append("        public void run() {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("    Runnable r2 = new/*[2]*/ Runnable() {\n");
+		buf.append("        @Override @Deprecated\n");
+		buf.append("        public void run() {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		buf.append("@interface A {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("new/*[1]*/");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test;\n");
+		buf1.append("public class C1 {\n");
+		buf1.append("    Runnable r1 = () -> {\n");
+		buf1.append("    };\n");
+		buf1.append("    Runnable r2 = new/*[2]*/ Runnable() {\n");
+		buf1.append("        @Override @Deprecated\n");
+		buf1.append("        public void run() {\n");
+		buf1.append("        }\n");
+		buf1.append("    };\n");
+		buf1.append("}\n");
+		buf1.append("@interface A {}\n");
+		String expected= buf1.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+		offset= buf.toString().indexOf("new/*[2]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf1= new StringBuffer();
+		buf1.append("package test;\n");
+		buf1.append("public class C1 {\n");
+		buf1.append("    Runnable r1 = new/*[1]*/ Runnable() {\n");
+		buf1.append("        @Override @A @Deprecated\n");
+		buf1.append("        public void run() {\n");
+		buf1.append("        }\n");
+		buf1.append("    };\n");
+		buf1.append("    Runnable r2 = () -> {\n");
+		buf1.append("    };\n");
+		buf1.append("}\n");
+		buf1.append("@interface A {}\n");
+		expected= buf1.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
 	public void testConvertToLambdaAmbiguousOverridden() throws Exception {
