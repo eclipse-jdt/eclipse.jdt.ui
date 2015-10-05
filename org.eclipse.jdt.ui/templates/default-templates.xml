@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Robert Roth <robert.roth.off@gmail.com> - [templates] 2 new code templates: finally & lock - https://bugs.eclipse.org/184222
+ *     Lars Vogel <Lars.Vogel@vogella.com> - [templates] Provide templates that check for 'null' - https://bugs.eclipse.org/131445
  *******************************************************************************/
 -->
 
@@ -72,6 +73,14 @@
 }</template>
 
 <template name="else" description="%Templates.else" id="org.eclipse.jdt.ui.templates.else" context="java-statements" enabled="true" autoinsert="false">else {
+	${cursor}
+}</template>
+
+<template name="ifNull" description="%Templates.ifnull" id="org.eclipse.jdt.ui.templates.ifnull" context="java-statements" enabled="true" autoinsert="false">if (${name:var} == null) {
+	${cursor}
+}</template>
+
+<template name="ifNotNull" description="%Templates.ifnotnull" id="org.eclipse.jdt.ui.templates.ifnotnull" context="java-statements" enabled="true" autoinsert="false">if (${name:var} != null) {
 	${cursor}
 }</template>
 
