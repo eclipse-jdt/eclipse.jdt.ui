@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,12 +33,14 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 	private final static int NO_IMAGE= 0;
 	private final static int GRAY_IMAGE= 1;
 	private final static int OVERLAY_IMAGE= 2;
-	private final static int QUICKFIX_IMAGE= 3;
+	private final static int QUICKFIX_WARNING_IMAGE= 3;
 	private final static int QUICKFIX_ERROR_IMAGE= 4;
+	private final static int QUICKFIX_INFO_IMAGE= 5;
 
 
-	private static Image fgQuickFixImage;
+	private static Image fgQuickFixWarningImage;
 	private static Image fgQuickFixErrorImage;
+	private static Image fgQuickFixInfoImage;
 	private boolean fShowQuickFixIcon;
 	private int fCachedImageType;
 	private Image fCachedImage;
@@ -84,10 +86,10 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 		return fShowQuickFixIcon && annotation.isProblem() && JavaCorrectionProcessor.hasCorrections((Annotation) annotation);
 	}
 
-	private Image getQuickFixImage() {
-		if (fgQuickFixImage == null)
-			fgQuickFixImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
-		return fgQuickFixImage;
+	private Image getQuickFixWarningImage() {
+		if (fgQuickFixWarningImage == null)
+			fgQuickFixWarningImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
+		return fgQuickFixWarningImage;
 	}
 
 	private Image getQuickFixErrorImage() {
@@ -96,13 +98,26 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 		return fgQuickFixErrorImage;
 	}
 
+	private Image getQuickFixInfoImage() {
+		if (fgQuickFixInfoImage == null)
+			fgQuickFixInfoImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_INFO);
+		return fgQuickFixInfoImage;
+	}
+
 	private int getImageType(IJavaAnnotation annotation) {
 		int imageType= NO_IMAGE;
 		if (annotation.hasOverlay())
 			imageType= OVERLAY_IMAGE;
 		else if (!annotation.isMarkedDeleted()) {
-			if (showQuickFix(annotation))
-				imageType= JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotation.getType()) ? QUICKFIX_ERROR_IMAGE : QUICKFIX_IMAGE;
+			if (showQuickFix(annotation)) {
+				if (JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotation.getType())) {
+					imageType= QUICKFIX_ERROR_IMAGE;
+				} else if (JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(annotation.getType())) {
+					imageType= QUICKFIX_WARNING_IMAGE;
+				} else {
+					imageType= QUICKFIX_INFO_IMAGE;
+				}
+			}
 		} else {
 			imageType= GRAY_IMAGE;
 		}
@@ -110,7 +125,7 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 	}
 
 	private Image getImage(IJavaAnnotation annotation, int imageType) {
-		if ((imageType == QUICKFIX_IMAGE || imageType == QUICKFIX_ERROR_IMAGE) && fCachedImageType == imageType)
+		if ((imageType == QUICKFIX_WARNING_IMAGE || imageType == QUICKFIX_ERROR_IMAGE || imageType == QUICKFIX_INFO_IMAGE) && fCachedImageType == imageType)
 			return fCachedImage;
 
 		Image image= null;
@@ -120,13 +135,18 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 				image= getManagedImage((Annotation) overlay);
 				fCachedImageType= -1;
 				break;
-			case QUICKFIX_IMAGE:
-				image= getQuickFixImage();
+			case QUICKFIX_WARNING_IMAGE:
+				image= getQuickFixWarningImage();
 				fCachedImageType= imageType;
 				fCachedImage= image;
 				break;
 			case QUICKFIX_ERROR_IMAGE:
 				image= getQuickFixErrorImage();
+				fCachedImageType= imageType;
+				fCachedImage= image;
+				break;
+			case QUICKFIX_INFO_IMAGE:
+				image= getQuickFixInfoImage();
 				fCachedImageType= imageType;
 				fCachedImage= image;
 				break;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,10 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -35,17 +37,21 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+
 public class SurroundWithAnalyzer extends CodeAnalyzer {
 
 	private VariableDeclaration[] fLocals;
+	private boolean fSurroundWithTryCatch;
 
-	public SurroundWithAnalyzer(ICompilationUnit cunit, Selection selection) throws CoreException {
+	public SurroundWithAnalyzer(ICompilationUnit cunit, Selection selection, boolean surroundWithTryCatch) throws CoreException {
 		super(cunit, selection, false);
+		fSurroundWithTryCatch= surroundWithTryCatch;
 	}
 
-	public Statement[] getSelectedStatements() {
+	public ASTNode[] getValidSelectedNodes() {
 		if (hasSelectedNodes()) {
-			return internalGetSelectedNodes().toArray(new Statement[internalGetSelectedNodes().size()]);
+			return internalGetSelectedNodes().toArray(new ASTNode[internalGetSelectedNodes().size()]);
 		} else {
 			return new Statement[0];
 		}
@@ -70,7 +76,7 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 	@Override
 	public void endVisit(CompilationUnit node) {
 		postProcessSelectedNodes(internalGetSelectedNodes());
-		BodyDeclaration enclosingNode= null;
+		ASTNode enclosingNode= null;
 		superCall: {
 			if (getStatus().hasFatalError())
 				break superCall;
@@ -88,12 +94,16 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 				invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_doesNotCover);
 				break superCall;
 			}
-			enclosingNode= (BodyDeclaration)ASTNodes.getParent(getFirstSelectedNode(), BodyDeclaration.class);
-			if (!(enclosingNode instanceof MethodDeclaration) && !(enclosingNode instanceof Initializer)) {
+			enclosingNode= getEnclosingNode(getFirstSelectedNode());
+			boolean isValidEnclosingNode= enclosingNode instanceof MethodDeclaration || enclosingNode instanceof Initializer;
+			if (fSurroundWithTryCatch) {
+				isValidEnclosingNode= isValidEnclosingNode || enclosingNode instanceof MethodReference || enclosingNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY;
+			}
+			if (!isValidEnclosingNode) {
 				invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_doesNotContain);
 				break superCall;
 			}
-			if (!onlyStatements()) {
+			if (!validSelectedNodes()) {
 				invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_onlyStatements);
 			}
 			fLocals= LocalDeclarationAnalyzer.perform(enclosingNode, getSelection());
@@ -129,13 +139,33 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 		}
 	}
 
-	private boolean onlyStatements() {
+	private boolean validSelectedNodes() {
 		ASTNode[] nodes= getSelectedNodes();
 		for (int i= 0; i < nodes.length; i++) {
-			if (!(nodes[i] instanceof Statement))
+			ASTNode node= nodes[i];
+			boolean isValidNode= node instanceof Statement;
+			if (fSurroundWithTryCatch) { // allow method reference and lambda's expression body also
+				isValidNode= isValidNode || node instanceof MethodReference || node.getLocationInParent() == LambdaExpression.BODY_PROPERTY;
+			}
+			if (!isValidNode)
 				return false;
 		}
 		return true;
+	}
+
+	public static ASTNode getEnclosingNode(ASTNode firstSelectedNode) {
+		ASTNode enclosingNode;
+		if (firstSelectedNode instanceof MethodReference) {
+			enclosingNode= firstSelectedNode;
+		} else {
+			enclosingNode= ASTResolving.findEnclosingLambdaExpression(firstSelectedNode);
+			if (enclosingNode != null) {
+				enclosingNode= ((LambdaExpression) enclosingNode).getBody();
+			} else {
+				enclosingNode= ASTNodes.getParent(firstSelectedNode, BodyDeclaration.class);
+			}
+		}
+		return enclosingNode;
 	}
 
 }

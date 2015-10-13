@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,7 @@ import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.ASTNode;
 
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
@@ -186,16 +186,16 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		IRegion region= new Region(start, end - start);
 
 		AssistContext invocationContext= new AssistContext(cu, start, end - start);
-		Statement[] selectedStatements= SurroundWith.getSelectedStatements(invocationContext);
+		ASTNode[] selectedNodes= SurroundWith.getValidSelectedNodes(invocationContext);
 
 		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates();
 		for (int i= 0; i != templates.length; i++) {
 			Template currentTemplate= templates[i];
 			if (canEvaluate(context, currentTemplate)) {
 
-				if (selectedStatements != null) {
+				if (selectedNodes != null) {
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-					TemplateProposal proposal= new SurroundWithTemplateProposal(cu, currentTemplate, context, region, image, selectedStatements);
+					TemplateProposal proposal= new SurroundWithTemplateProposal(cu, currentTemplate, context, region, image, selectedNodes);
 					String[] arg= new String[] { currentTemplate.getName(), currentTemplate.getDescription() };
 					String decorated= Messages.format(CorrectionMessages.QuickTemplateProcessor_surround_label, arg);
 					proposal.setDisplayString(StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, new StyledString(currentTemplate.getName())));

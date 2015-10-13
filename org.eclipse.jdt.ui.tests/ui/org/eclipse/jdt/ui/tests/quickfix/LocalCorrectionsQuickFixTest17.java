@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -214,7 +214,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, 0); //quick fix on 1st problem
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 
@@ -272,34 +272,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		proposal= (CUCorrectionProposal)proposals.get(2);
-		String preview3= getPreviewContent(proposal);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(int n) throws IllegalArgumentException, MyException {\n");
-		buf.append("        if (n == 1)\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        else\n");
-		buf.append("            throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            bar(1);\n");
-		buf.append("        } catch (FileNotFoundException | IOException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
-
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
 	public void testUncaughtExceptionTryWithResources2() throws Exception {
@@ -329,7 +302,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3, 1); //quick fix on 2nd problem
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 
@@ -387,34 +360,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		proposal= (CUCorrectionProposal)proposals.get(2);
-		String preview3= getPreviewContent(proposal);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("class MyException extends Exception {\n");
-		buf.append("    static final long serialVersionUID = 1L;\n");
-		buf.append("}\n");
-		buf.append("public class E {\n");
-		buf.append("    void bar(int n) throws IllegalArgumentException, MyException {\n");
-		buf.append("        if (n == 1)\n");
-		buf.append("            throw new IllegalArgumentException();\n");
-		buf.append("        else\n");
-		buf.append("            throw new MyException();\n");
-		buf.append("    }\n");
-		buf.append("    void foo(String name, boolean b) {\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("            bar(1);\n");
-		buf.append("        } catch (FileNotFoundException | IOException e) {\n");
-		buf.append("        }\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected3= buf.toString();
-
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
 	public void testUncaughtExceptionTryWithResources3() throws Exception {
@@ -701,7 +647,7 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, 0); //quick fix on 1st problem
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 
@@ -741,25 +687,181 @@ public class LocalCorrectionsQuickFixTest17 extends QuickFixTest {
 		buf.append("}\n");
 		String expected2= buf.toString();
 
-		proposal= (CUCorrectionProposal)proposals.get(2);
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
+
+	public void testUncaughtExceptionTryWithResources6() throws Exception {
+		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=478714
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.io.ByteArrayInputStream;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.io.InputStream;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        try (InputStream foo = new ByteArrayInputStream(\"foo\".getBytes(\"UTF-8\"))) {\n");
+		buf.append("            String bla = new String(ByteStreams.toByteArray(foo), \"UTF-8\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class ByteStreams {\n");
+		buf.append("    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 4, 2);
+		assertNumberOfProposals(proposals, 5);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.io.ByteArrayInputStream;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.io.InputStream;\n");
+		buf.append("import java.io.UnsupportedEncodingException;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void main(String[] args) throws UnsupportedEncodingException, ArithmeticException, IOException {\n");
+		buf.append("        try (InputStream foo = new ByteArrayInputStream(\"foo\".getBytes(\"UTF-8\"))) {\n");
+		buf.append("            String bla = new String(ByteStreams.toByteArray(foo), \"UTF-8\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class ByteStreams {\n");
+		buf.append("    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.io.ByteArrayInputStream;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.io.InputStream;\n");
+		buf.append("import java.io.UnsupportedEncodingException;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        try (InputStream foo = new ByteArrayInputStream(\"foo\".getBytes(\"UTF-8\"))) {\n");
+		buf.append("            String bla = new String(ByteStreams.toByteArray(foo), \"UTF-8\");\n");
+		buf.append("        } catch (UnsupportedEncodingException e) {\n");
+		buf.append("        } catch (ArithmeticException e) {\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class ByteStreams {\n");
+		buf.append("    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(2);
 		String preview3= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.io.FileInputStream;\n");
-		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("\n");
+		buf.append("import java.io.ByteArrayInputStream;\n");
 		buf.append("import java.io.IOException;\n");
+		buf.append("import java.io.InputStream;\n");
+		buf.append("\n");
 		buf.append("public class E {\n");
-		buf.append("    void foo(String name, boolean b) {\n");
-		buf.append("        String e;\n");
-		buf.append("        try (FileInputStream fis = new FileInputStream(name)) {\n");
-		buf.append("        } catch (FileNotFoundException | IOException e1) {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        try (InputStream foo = new ByteArrayInputStream(\"foo\".getBytes(\"UTF-8\"))) {\n");
+		buf.append("            String bla = new String(ByteStreams.toByteArray(foo), \"UTF-8\");\n");
+		buf.append("        } catch (ArithmeticException | IOException e) {\n");
 		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class ByteStreams {\n");
+		buf.append("    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {\n");
+		buf.append("        return null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
+		proposal= (CUCorrectionProposal) proposals.get(3);
+		String preview4= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.io.ByteArrayInputStream;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.io.InputStream;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        try (InputStream foo = new ByteArrayInputStream(\"foo\".getBytes(\"UTF-8\"))) {\n");
+		buf.append("            try {\n");
+		buf.append("                String bla = new String(ByteStreams.toByteArray(foo), \"UTF-8\");\n");
+		buf.append("            } catch (ArithmeticException | IOException e) {\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class ByteStreams {\n");
+		buf.append("    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected4= buf.toString();
+
+		proposal= (CUCorrectionProposal) proposals.get(4);
+		String preview5= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.io.ByteArrayInputStream;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.io.InputStream;\n");
+		buf.append("import java.io.UnsupportedEncodingException;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("        try (InputStream foo = new ByteArrayInputStream(\"foo\".getBytes(\"UTF-8\"))) {\n");
+		buf.append("            try {\n");
+		buf.append("                String bla = new String(ByteStreams.toByteArray(foo), \"UTF-8\");\n");
+		buf.append("            } catch (UnsupportedEncodingException e) {\n");
+		buf.append("            } catch (ArithmeticException e) {\n");
+		buf.append("            } catch (IOException e) {\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class ByteStreams {\n");
+		buf.append("    public static byte[] toByteArray(InputStream foo) throws IOException, ArithmeticException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected5= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5 }, new String[] { expected1, expected2, expected3, expected4, expected5 });
 	}
 
 	public void testUnneededCaughtException1() throws Exception {

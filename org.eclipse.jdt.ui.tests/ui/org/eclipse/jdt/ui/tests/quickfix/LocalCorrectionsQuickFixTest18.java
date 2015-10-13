@@ -34,6 +34,7 @@ import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -151,6 +152,769 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 	}
+
+	public void testUncaughtExceptionInLambda1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class C1 {\n");
+		buf.append("    Runnable r = () -> info(\"Processing rule #{} {}\", \"\");\n");
+		buf.append("\n");
+		buf.append("    private void info(String string, Object object) throws GridException1 {}\n");
+		buf.append("}\n");
+		buf.append("@SuppressWarnings(\"serial\")\n");
+		buf.append("class GridException1 extends Exception {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class C1 {\n");
+		buf.append("    Runnable r = () -> {\n");
+		buf.append("        try {\n");
+		buf.append("            info(\"Processing rule #{} {}\", \"\");\n");
+		buf.append("        } catch (GridException1 e) {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("\n");
+		buf.append("    private void info(String string, Object object) throws GridException1 {}\n");
+		buf.append("}\n");
+		buf.append("@SuppressWarnings(\"serial\")\n");
+		buf.append("class GridException1 extends Exception {}\n");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testUncaughtExceptionInLambda2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class C2 {\n");
+		buf.append("    void test() {\n");
+		buf.append("        Runnable r = () -> info(\"Processing rule #{} {}\", \"\");\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private void info(String string, Object object) throws GridException2 {}\n");
+		buf.append("}\n");
+		buf.append("@SuppressWarnings(\"serial\")\n");
+		buf.append("class GridException2 extends Exception {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C2.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class C2 {\n");
+		buf.append("    void test() {\n");
+		buf.append("        Runnable r = () -> {\n");
+		buf.append("            try {\n");
+		buf.append("                info(\"Processing rule #{} {}\", \"\");\n");
+		buf.append("            } catch (GridException2 e) {\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private void info(String string, Object object) throws GridException2 {}\n");
+		buf.append("}\n");
+		buf.append("@SuppressWarnings(\"serial\")\n");
+		buf.append("class GridException2 extends Exception {}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+
+		assertProposalDoesNotExist(proposals, CorrectionMessages.LocalCorrectionsSubProcessor_addthrows_description);
+	}
+
+	public void testUncaughtExceptionInLambda3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("public class C3 {\n");
+		buf.append("    void test(ArrayList<Integer> ruleIds) {\n");
+		buf.append("        Runnable r = () -> {\n");
+		buf.append("            for (int ruleId : ruleIds) {\n");
+		buf.append("                info(\"Processing rule #{} {}\", ruleId);\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private void info(String string, Object object) throws GridException3 {}\n");
+		buf.append("}\n");
+		buf.append("@SuppressWarnings(\"serial\")\n");
+		buf.append("class GridException3 extends Exception {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C3.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("public class C3 {\n");
+		buf.append("    void test(ArrayList<Integer> ruleIds) {\n");
+		buf.append("        Runnable r = () -> {\n");
+		buf.append("            for (int ruleId : ruleIds) {\n");
+		buf.append("                try {\n");
+		buf.append("                    info(\"Processing rule #{} {}\", ruleId);\n");
+		buf.append("                } catch (GridException3 e) {\n");
+		buf.append("                }\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    private void info(String string, Object object) throws GridException3 {}\n");
+		buf.append("}\n");
+		buf.append("@SuppressWarnings(\"serial\")\n");
+		buf.append("class GridException3 extends Exception {}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUncaughtExceptionInLambda4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.util.stream.Stream;\n");
+		buf.append("public class C4 {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            Files.walk(new File(\".\").toPath()).filter(p -> p.toString().endsWith(\".java\"))\n");
+		buf.append("                    .forEach(p -> Files.lines(p).forEach(System.out::println));\n");
+		buf.append("        } catch (IOException e) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Files {\n");
+		buf.append("    public static Stream<Object> walk(Object start) throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("    public static Stream<String> lines(Object path) throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C4.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.util.stream.Stream;\n");
+		buf.append("public class C4 {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            Files.walk(new File(\".\").toPath()).filter(p -> p.toString().endsWith(\".java\"))\n");
+		buf.append("                    .forEach(p -> {\n");
+		buf.append("                        try {\n");
+		buf.append("                            Files.lines(p).forEach(System.out::println);\n");
+		buf.append("                        } catch (IOException e) {\n");
+		buf.append("                        }\n");
+		buf.append("                    });\n");
+		buf.append("        } catch (IOException e) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Files {\n");
+		buf.append("    public static Stream<Object> walk(Object start) throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("    public static Stream<String> lines(Object path) throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUncaughtExceptionInLambda5() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.util.function.Consumer;\n");
+		buf.append("import java.util.stream.Stream;\n");
+		buf.append("\n");
+		buf.append("public class C5 {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Consumer<Object> s = (a) -> Files.walk(new File(\".\").toPath())\n");
+		buf.append("                .filter(p -> p.toString().endsWith(\".java\"))\n");
+		buf.append("                .forEach(p -> {\n");
+		buf.append("                    try {\n");
+		buf.append("                        Files.lines(p).forEach(System.out::println);\n");
+		buf.append("                    } catch (IOException e) {}\n");
+		buf.append("                });\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Files {\n");
+		buf.append("    public static Stream<Object> walk(Object start) throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("    public static Stream<String> lines(Object path) throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C5.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.util.function.Consumer;\n");
+		buf.append("import java.util.stream.Stream;\n");
+		buf.append("\n");
+		buf.append("public class C5 {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Consumer<Object> s = (a) -> {\n");
+		buf.append("            try {\n");
+		buf.append("                Files.walk(new File(\".\").toPath())\n");
+		buf.append("                        .filter(p -> p.toString().endsWith(\".java\"))\n");
+		buf.append("                        .forEach(p -> {\n");
+		buf.append("                            try {\n");
+		buf.append("                                Files.lines(p).forEach(System.out::println);\n");
+		buf.append("                            } catch (IOException e) {}\n");
+		buf.append("                        });\n");
+		buf.append("            } catch (IOException e) {\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Files {\n");
+		buf.append("    public static Stream<Object> walk(Object start) throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("    public static Stream<String> lines(Object path) throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUncaughtExceptionInLambda6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.util.function.Consumer;\n");
+		buf.append("import java.util.stream.Stream;\n");
+		buf.append("\n");
+		buf.append("public class C5 {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Consumer<Object> s = (a) -> {\n");
+		buf.append("            try {\n");
+		buf.append("                Files.walk(new File(\".\").toPath())\n");
+		buf.append("                        .filter(p -> p.toString().endsWith(\".java\"))\n");
+		buf.append("                        .forEach(p -> Files.lines(p).forEach(System.out::println));\n");
+		buf.append("            } catch (IOException e) {}\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Files {\n");
+		buf.append("    public static Stream<Object> walk(Object start) throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("    public static Stream<String> lines(Object path) throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C5.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.util.function.Consumer;\n");
+		buf.append("import java.util.stream.Stream;\n");
+		buf.append("\n");
+		buf.append("public class C5 {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Consumer<Object> s = (a) -> {\n");
+		buf.append("            try {\n");
+		buf.append("                Files.walk(new File(\".\").toPath())\n");
+		buf.append("                        .filter(p -> p.toString().endsWith(\".java\"))\n");
+		buf.append("                        .forEach(p -> {\n");
+		buf.append("                            try {\n");
+		buf.append("                                Files.lines(p).forEach(System.out::println);\n");
+		buf.append("                            } catch (IOException e) {\n");
+		buf.append("                            }\n");
+		buf.append("                        });\n");
+		buf.append("            } catch (IOException e) {}\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Files {\n");
+		buf.append("    public static Stream<Object> walk(Object start) throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("    public static Stream<String> lines(Object path) throws IOException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUncaughtExceptionInLambda7() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.io.InvalidClassException;\n");
+		buf.append("interface C7 {\n");
+		buf.append("    int foo(int i);\n");
+		buf.append("    default C7 method1() {\n");
+		buf.append("        return x -> {\n");
+		buf.append("            try {\n");
+		buf.append("                if (x == -1)\n");
+		buf.append("                    throw new InvalidClassException(\"ex\");\n");
+		buf.append("                if (x == 0)\n");
+		buf.append("                    throw new FileNotFoundException();\n");
+		buf.append("            } catch (InvalidClassException e) {\n");
+		buf.append("            }\n");
+		buf.append("            return x;\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C7.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+
+		String[] expected= new String[3];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.io.InvalidClassException;\n");
+		buf.append("interface C7 {\n");
+		buf.append("    int foo(int i);\n");
+		buf.append("    default C7 method1() {\n");
+		buf.append("        return x -> {\n");
+		buf.append("            try {\n");
+		buf.append("                if (x == -1)\n");
+		buf.append("                    throw new InvalidClassException(\"ex\");\n");
+		buf.append("                if (x == 0)\n");
+		buf.append("                    try {\n");
+		buf.append("                        throw new FileNotFoundException();\n");
+		buf.append("                    } catch (FileNotFoundException e) {\n");
+		buf.append("                    }\n");
+		buf.append("            } catch (InvalidClassException e) {\n");
+		buf.append("            }\n");
+		buf.append("            return x;\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.io.InvalidClassException;\n");
+		buf.append("interface C7 {\n");
+		buf.append("    int foo(int i);\n");
+		buf.append("    default C7 method1() {\n");
+		buf.append("        return x -> {\n");
+		buf.append("            try {\n");
+		buf.append("                if (x == -1)\n");
+		buf.append("                    throw new InvalidClassException(\"ex\");\n");
+		buf.append("                if (x == 0)\n");
+		buf.append("                    throw new FileNotFoundException();\n");
+		buf.append("            } catch (InvalidClassException e) {\n");
+		buf.append("            } catch (FileNotFoundException e) {\n");
+		buf.append("            }\n");
+		buf.append("            return x;\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.io.InvalidClassException;\n");
+		buf.append("interface C7 {\n");
+		buf.append("    int foo(int i);\n");
+		buf.append("    default C7 method1() {\n");
+		buf.append("        return x -> {\n");
+		buf.append("            try {\n");
+		buf.append("                if (x == -1)\n");
+		buf.append("                    throw new InvalidClassException(\"ex\");\n");
+		buf.append("                if (x == 0)\n");
+		buf.append("                    throw new FileNotFoundException();\n");
+		buf.append("            } catch (InvalidClassException | FileNotFoundException e) {\n");
+		buf.append("            }\n");
+		buf.append("            return x;\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUncaughtExceptionInMethodReference1() throws Exception { // ExpressionMethodReference
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.util.function.Consumer;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private static Transformer TRANSFORMER = new Transformer();\n");
+		buf.append("    Consumer<? super String> mapper = TRANSFORMER::transform;\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class Transformer {\n");
+		buf.append("    void transform(String number) throws FileNotFoundException {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.util.function.Consumer;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private static Transformer TRANSFORMER = new Transformer();\n");
+		buf.append("    Consumer<? super String> mapper = arg0 -> {\n");
+		buf.append("        try {\n");
+		buf.append("            TRANSFORMER.transform(arg0);\n");
+		buf.append("        } catch (FileNotFoundException e) {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class Transformer {\n");
+		buf.append("    void transform(String number) throws FileNotFoundException {}\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUncaughtExceptionInMethodReference2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.util.Optional;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    private static Transformer TRANSFORMER = new Transformer();\n");
+		buf.append("    public void test() {\n");
+		buf.append("        Optional.ofNullable(\"10\").map(TRANSFORMER::transform).ifPresent(System.out::print);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Transformer {\n");
+		buf.append("    Long transform(String number) throws FileNotFoundException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.util.Optional;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    private static Transformer TRANSFORMER = new Transformer();\n");
+		buf.append("    public void test() {\n");
+		buf.append("        Optional.ofNullable(\"10\").map(arg0 -> {\n");
+		buf.append("            try {\n");
+		buf.append("                return TRANSFORMER.transform(arg0);\n");
+		buf.append("            } catch (FileNotFoundException e) {\n");
+		buf.append("            }\n");
+		buf.append("        }).ifPresent(System.out::print);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Transformer {\n");
+		buf.append("    Long transform(String number) throws FileNotFoundException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUncaughtExceptionInMethodReference3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.util.Optional;\n");
+		buf.append("import java.util.function.Consumer;\n");
+		buf.append("\n");
+		buf.append("public class E3 {\n");
+		buf.append("    private static Transformer TRANSFORMER = new Transformer();\n");
+		buf.append("    public void test() {\n");
+		buf.append("        Consumer<Object> s = (a) -> Optional.ofNullable(\"10\").map(TRANSFORMER::transform).ifPresent(System.out::print);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Transformer {\n");
+		buf.append("    Long transform(String number) throws FileNotFoundException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E3.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.FileNotFoundException;\n");
+		buf.append("import java.util.Optional;\n");
+		buf.append("import java.util.function.Consumer;\n");
+		buf.append("\n");
+		buf.append("public class E3 {\n");
+		buf.append("    private static Transformer TRANSFORMER = new Transformer();\n");
+		buf.append("    public void test() {\n");
+		buf.append("        Consumer<Object> s = (a) -> Optional.ofNullable(\"10\").map(arg0 -> {\n");
+		buf.append("            try {\n");
+		buf.append("                return TRANSFORMER.transform(arg0);\n");
+		buf.append("            } catch (FileNotFoundException e) {\n");
+		buf.append("            }\n");
+		buf.append("        }).ifPresent(System.out::print);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Transformer {\n");
+		buf.append("    Long transform(String number) throws FileNotFoundException {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUncaughtExceptionInMethodReference4() throws Exception { // Generic lambda not allowed
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("public class E4 {\n");
+		buf.append("    {\n");
+		buf.append("        FI fi = this::test;\n");
+		buf.append("    }\n");
+		buf.append("    private void test() throws IOException {}\n");
+		buf.append("    interface FI {\n");
+		buf.append("        <T> void foo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E4.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 0);
+		assertProposalDoesNotExist(proposals, CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_trycatch_description);
+	}
+
+	public void testUncaughtExceptionInMethodReference5() throws Exception { // CreationReference
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.util.HashSet;\n");
+		buf.append("import java.util.function.Supplier;\n");
+		buf.append("public class E5 {\n");
+		buf.append("    void test() {\n");
+		buf.append("        Supplier<HashSet<String>> c = MyHashSet::new;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("@SuppressWarnings(\"serial\")\n");
+		buf.append("class MyHashSet extends HashSet<String> {\n");
+		buf.append("    public MyHashSet() throws IOException {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E5.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.util.HashSet;\n");
+		buf.append("import java.util.function.Supplier;\n");
+		buf.append("public class E5 {\n");
+		buf.append("    void test() {\n");
+		buf.append("        Supplier<HashSet<String>> c = () -> {\n");
+		buf.append("            try {\n");
+		buf.append("                return new MyHashSet();\n");
+		buf.append("            } catch (IOException e) {\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("@SuppressWarnings(\"serial\")\n");
+		buf.append("class MyHashSet extends HashSet<String> {\n");
+		buf.append("    public MyHashSet() throws IOException {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUncaughtExceptionInMethodReference6() throws Exception { // TypeMethodReference
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E6 {\n");
+		buf.append("    void test() {\n");
+		buf.append("        Function<Clazz<Integer>, String> c = Clazz<Integer>::searchForRefs1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Clazz<E> {\n");
+		buf.append("    <F> String searchForRefs1() throws IOException {\n");
+		buf.append("        return \"\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E6.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.util.function.Function;\n");
+		buf.append("public class E6 {\n");
+		buf.append("    void test() {\n");
+		buf.append("        Function<Clazz<Integer>, String> c = arg0 -> {\n");
+		buf.append("            try {\n");
+		buf.append("                return arg0.searchForRefs1();\n");
+		buf.append("            } catch (IOException e) {\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Clazz<E> {\n");
+		buf.append("    <F> String searchForRefs1() throws IOException {\n");
+		buf.append("        return \"\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testUncaughtExceptionInMethodReference7() throws Exception { // SuperMethodReference
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.util.function.Supplier;\n");
+		buf.append("public class E7 extends Clazz<Object> {\n");
+		buf.append("    Supplier<String> c = super::searchForRefs1;\n");
+		buf.append("}\n");
+		buf.append("class Clazz<E> {\n");
+		buf.append("    <F> String searchForRefs1() throws IOException {\n");
+		buf.append("        return \"\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E7.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.util.function.Supplier;\n");
+		buf.append("public class E7 extends Clazz<Object> {\n");
+		buf.append("    Supplier<String> c = () -> {\n");
+		buf.append("        try {\n");
+		buf.append("            return super.searchForRefs1();\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		buf.append("class Clazz<E> {\n");
+		buf.append("    <F> String searchForRefs1() throws IOException {\n");
+		buf.append("        return \"\";\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 
 	public void testOverrideDefaultMethod1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

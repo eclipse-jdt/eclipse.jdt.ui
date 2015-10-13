@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,18 +11,23 @@
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 
 public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer {
@@ -66,7 +71,10 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 		int last= fSelectedNodes.length - 1;
 		fRanges.put(fSelectedNodes[last], super.computeSourceRange(fSelectedNodes[last]));
 
-		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+		IJavaProject javaProject= ((CompilationUnit) fSelectedNodes[0].getRoot()).getTypeRoot().getJavaProject();
+		String sourceLevel= javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
+		String complianceLevel= javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		IScanner scanner= ToolFactory.createScanner(true, false, false, sourceLevel, complianceLevel);
 		char[] source= fDocumentPortionToScan.toCharArray();
 		scanner.setSource(source);
 		fDocumentPortionToScan= null; // initializeRanges() is only called once
@@ -102,5 +110,23 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 		int newEnd= Math.max(fSelectionStart + pos, currentNode.getStartPosition() + currentNode.getLength());
 		range= fRanges.get(currentNode);
 		fRanges.put(currentNode, new SourceRange(range.getStartPosition(), newEnd - range.getStartPosition()));
+		
+		// The extended source range of the last child node can end after the selection.
+		// We have to ensure that the source range of such child nodes is also capped by the selection range.
+		// Example: (/*]*/TRANSFORMER::transform/*[*/)
+		// Selection is between /*]*/ and /*[*/, but the extended range of the "transform" node actually includes /*[*/ as well.
+		while (true) {
+			List<ASTNode> children= ASTNodes.getChildren(currentNode);
+			if (!children.isEmpty()) {
+				ASTNode lastChild= children.get(children.size() - 1);
+				SourceRange extRange= super.computeSourceRange(lastChild);
+				if (extRange.getStartPosition() + extRange.getLength() > newEnd) {
+					fRanges.put(lastChild, new SourceRange(extRange.getStartPosition(), newEnd - extRange.getStartPosition()));
+					currentNode= lastChild;
+					continue;
+				}
+			}
+			break;
+		}
 	}
 }

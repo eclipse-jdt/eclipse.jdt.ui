@@ -137,7 +137,8 @@ public class ASTNodes {
 
 	public static final int WARNING=				1 << 0;
 	public static final int ERROR=					1 << 1;
-	public static final int PROBLEMS=				WARNING | ERROR;
+	public static final int INFO=					1 << 2;
+	public static final int PROBLEMS=				WARNING | ERROR | INFO;
 
 	private static final Message[] EMPTY_MESSAGES= new Message[0];
 	private static final IProblem[] EMPTY_PROBLEMS= new IProblem[0];
@@ -1200,6 +1201,8 @@ public class ASTNodes {
 				consider= problem.isWarning();
 			else if ((severity & ERROR) != 0)
 				consider= problem.isError();
+			else if ((severity & INFO) != 0)
+				consider= problem.isInfo();
 			if (consider) {
 				ASTNode temp= node;
 				int count= iterations;

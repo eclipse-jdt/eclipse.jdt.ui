@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -89,7 +90,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		
 		@Override
 		public boolean visit(ClassInstanceCreation node) {
-			if (isFunctionalAnonymous(node)) {
+			if (isFunctionalAnonymous(node, true)) {
 				fNodes.add(node);
 			}
 			return true;
@@ -519,7 +520,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		if (!JavaModelUtil.is18OrHigher(root.getJavaElement().getJavaProject()))
 			return null;
 
-		if (!LambdaExpressionsFix.isFunctionalAnonymous(cic))
+		if (!LambdaExpressionsFix.isFunctionalAnonymous(cic, false))
 			return null;
 
 		CreateLambdaOperation op= new CreateLambdaOperation(Collections.singletonList(cic));
@@ -567,7 +568,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
 
-	static boolean isFunctionalAnonymous(ClassInstanceCreation node) {
+	static boolean isFunctionalAnonymous(ClassInstanceCreation node, boolean isCleanUp) {
 		ITypeBinding typeBinding= node.resolveTypeBinding();
 		if (typeBinding == null)
 			return false;
@@ -597,6 +598,20 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		// generic lambda expressions are not allowed
 		if (methodBinding.isGenericMethod())
 			return false;
+
+		// Skip the Clean up if there are annotations other than @Override and @Deprecated
+		if (isCleanUp) {
+			IAnnotationBinding[] declarationAnnotations= methodBinding.getAnnotations();
+			for (IAnnotationBinding declarationAnnotation : declarationAnnotations) {
+				ITypeBinding annotationType= declarationAnnotation.getAnnotationType();
+				if (annotationType != null) {
+					String qualifiedName= annotationType.getQualifiedName();
+					if (!"java.lang.Override".equals(qualifiedName) && !"java.lang.Deprecated".equals(qualifiedName)) { //$NON-NLS-1$ //$NON-NLS-2$
+						return false;
+					}
+				}
+			}
+		}
 
 		// lambda cannot refer to 'this'/'super' literals
 		if (SuperThisReferenceFinder.hasReference(methodDecl))

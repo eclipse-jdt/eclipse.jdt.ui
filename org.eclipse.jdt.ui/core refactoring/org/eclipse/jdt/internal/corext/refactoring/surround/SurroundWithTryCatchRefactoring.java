@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -41,7 +42,10 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -71,6 +75,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRang
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
 
 /**
  * Surround a set of statements with a try/catch block or a try/multi-catch block.
@@ -359,13 +365,37 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			replacementNode= fRewriter.createGroupNode(result.toArray(new ASTNode[result.size()]));
 		}
 		if (fSelectedNodes.length == 1) {
+			ASTNode selectedNode= fSelectedNodes[0];
+
+			if (selectedNode instanceof MethodReference) {
+				MethodReference methodReference= (MethodReference) selectedNode;
+				IMethodBinding functionalMethod= QuickAssistProcessor.getFunctionalMethodForMethodReference(methodReference);
+				// functionalMethod is non-null and non-generic. See ExceptionAnalyzer.handleMethodReference(MethodReference node).
+				Assert.isTrue(functionalMethod != null && !functionalMethod.isGenericMethod());
+				LambdaExpression lambda= QuickAssistProcessor.convertMethodRefernceToLambda(methodReference, functionalMethod, fRootNode, fRewriter, null, true);
+				ASTNode statementInBlock= (ASTNode) ((Block) lambda.getBody()).statements().get(0);
+				fRewriter.replace(statementInBlock, replacementNode, null);
+				statements.insertLast(statementInBlock, null);
+				return;
+			}
+
+			LambdaExpression enclosingLambda= ASTResolving.findEnclosingLambdaExpression(selectedNode);
+			if (enclosingLambda != null && selectedNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY && enclosingLambda.resolveMethodBinding() != null) {
+				QuickAssistProcessor.changeLambdaBodyToBlock(enclosingLambda, getAST(), fRewriter);
+				Block blockBody= (Block) fRewriter.get(enclosingLambda, LambdaExpression.BODY_PROPERTY);
+				ASTNode statementInBlock= (ASTNode) blockBody.statements().get(0);
+				fRewriter.replace(statementInBlock, replacementNode, null);
+				statements.insertLast(statementInBlock, null);
+				return;
+			}
+
 			if (expressionStatement != null) {
 				statements.insertLast(expressionStatement, null);
 			} else {
 				if (!selectedNodeRemoved)
-					statements.insertLast(fRewriter.createMoveTarget(fSelectedNodes[0]), null);
+					statements.insertLast(fRewriter.createMoveTarget(selectedNode), null);
 			}
-			fRewriter.replace(fSelectedNodes[0], replacementNode, null);
+			fRewriter.replace(selectedNode, replacementNode, null);
 		} else {
 			ListRewrite source= fRewriter.getListRewrite(
 				fSelectedNodes[0].getParent(),
@@ -377,7 +407,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		}
 	}
 
-	private List<ITypeBinding> filterSubtypeExceptions(ITypeBinding[] exceptions) {
+	public static List<ITypeBinding> filterSubtypeExceptions(ITypeBinding[] exceptions) {
 		List<ITypeBinding> filteredExceptions= new ArrayList<>();
 		filteredExceptions.addAll(Arrays.asList(exceptions));
 
