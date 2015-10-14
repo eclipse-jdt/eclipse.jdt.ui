@@ -320,10 +320,10 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		@Override
 		public boolean isProblem() {
 			String type= getType();
-			return  JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(type)  ||
-						JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(type) ||
-						JavaMarkerAnnotation.INFO_ANNOTATION_TYPE.equals(type) ||
-						SPELLING_ANNOTATION_TYPE.equals(type);
+			return JavaMarkerAnnotation.INFO_ANNOTATION_TYPE.equals(type)
+					|| JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(type)
+					|| JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(type)
+					|| SPELLING_ANNOTATION_TYPE.equals(type);
 		}
 
 		/*
