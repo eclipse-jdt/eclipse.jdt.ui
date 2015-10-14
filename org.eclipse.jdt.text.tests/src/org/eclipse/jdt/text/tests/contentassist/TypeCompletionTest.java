@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -203,7 +203,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 	    getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
 	    getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
 
-	    assertMethodBodyIncrementalCompletion("Strin|", "String|");
+	    assertMethodBodyIncrementalCompletion("Inval|", "Invalid|");
     }
 
 	public void testNoIncrementalInsertion() throws Exception {
@@ -217,14 +217,14 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
 
-		assertMethodBodyIncrementalCompletion("StRiN|", "String|");
+		assertMethodBodyIncrementalCompletion("InVa|", "Invalid|");
 	}
 
 	public void testNoIncrementalInsertionPrefixCorrection() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, true);
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
 
-		assertMethodBodyIncrementalCompletion("StRiNg|", "String|");
+		assertMethodBodyIncrementalCompletion("InVaLiD|", "Invalid|");
 	}
 
 	public void testNoIncrementalInsertionCamelCase() throws Exception {
