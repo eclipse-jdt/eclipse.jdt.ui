@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,10 +35,12 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Region;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
@@ -318,7 +320,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 		final Display display= workbenchShell.getDisplay();
 
 		fPopup= new Shell(workbenchShell, SWT.ON_TOP | SWT.NO_TRIM | SWT.TOOL);
-		fPopupLayout= new GridLayout(2, false);
+		fPopupLayout= new GridLayout(3, false);
 		fPopupLayout.marginWidth= 1;
 		fPopupLayout.marginHeight= 1;
 		fPopupLayout.marginLeft= 4;
@@ -704,6 +706,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 		addMoveSupport(fPopup, parent);
 
 		StyledText hint= new StyledText(fPopup, SWT.READ_ONLY | SWT.SINGLE);
+		hint.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		String enterKeyName= getEnterBinding();
 		String hintTemplate= ReorgMessages.RenameInformationPopup_EnterNewName;
 		hint.setText(Messages.format(hintTemplate, enterKeyName));
@@ -712,10 +715,24 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 		hint.setEnabled(false); // text must not be selectable
 		addMoveSupport(fPopup, hint);
 
+		addLink(parent);
 		addViewMenu(parent);
 
 		recursiveSetBackgroundColor(parent, background);
 
+	}
+
+	private void addLink(Composite parent) {
+		Link link= new Link(parent, SWT.NONE);
+		link.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		link.setText(ReorgMessages.RenameInformationPopup_OptionsLink);
+		link.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				activateEditor();
+				fRenameLinkedMode.startFullDialog();
+			}
+		});
 	}
 
 	private ToolBar addViewMenu(final Composite parent) {
@@ -736,6 +753,7 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 				showMenu(fToolBar);
 			}
 		});
+		fToolBar.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		fToolBar.pack();
 		return fToolBar;
 	}
