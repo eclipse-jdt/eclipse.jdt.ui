@@ -12,6 +12,7 @@
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *     Sandra Lions <sandra.lions-piron@oracle.com> - [quick fix] for qualified enum constants in switch-case labels - https://bugs.eclipse.org/bugs/90140
  *     Jeremie Bresson <dev@jmini.fr> - Bug 439912: [1.8][quick assist] Add quick assists to add and remove parentheses around single lambda parameter - https://bugs.eclipse.org/439912
+ *     Jens Reimann <jens.reimann@ibh-systems.com>, Fabian Pfaff <fabian.pfaff@vogella.com> - Bug 197850: [quick assist] Add import static field/method - https://bugs.eclipse.org/bugs/show_bug.cgi?id=197850
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -60,6 +61,8 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_convert_to_string_buffer_description;
 	public static String QuickAssistProcessor_exceptiontothrows_description;
 	public static String QuickAssistProcessor_extract_to_constant_description;
+	public static String QuickAssistProcessor_convert_to_static_import;
+	public static String QuickAssistProcessor_convert_to_static_import_replace_all;
 	public static String QuickAssistProcessor_inline_local_description;
 	public static String QuickAssistProcessor_name_extension_from_class;
 	public static String QuickAssistProcessor_name_extension_from_interface;

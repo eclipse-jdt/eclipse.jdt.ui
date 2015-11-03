@@ -11,6 +11,7 @@
  *     Lukas Hanke <hanke@yatta.de> - Bug 241696 [quick fix] quickfix to iterate over a collection - https://bugs.eclipse.org/bugs/show_bug.cgi?id=241696
  *     Lukas Hanke <hanke@yatta.de> - Bug 430818 [1.8][quick fix] Quick fix for "for loop" is not shown for bare local variable/argument/field - https://bugs.eclipse.org/bugs/show_bug.cgi?id=430818
  *     Mateusz Matela <mateusz.matela@gmail.com> - [formatter] Formatter does not format Java code correctly, especially when max line width is set
+ *     Jens Reimann <jens.reimann@ibh-systems.com>, Fabian Pfaff <fabian.pfaff@vogella.com> - Bug 197850: [quick assist] Add import static field/method - https://bugs.eclipse.org/bugs/show_bug.cgi?id=197850
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -10031,4 +10032,557 @@ public class AssistQuickFixTest extends QuickFixTest {
 			fJProject1.setOptions(saveOptions);
 		}
 	}
+
+	public void testConvertQualifiedNameToStaticImport() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class T {\n");
+		buf.append("	static String str;\n");
+		buf.append("	static <V> void doIt(V o) {};\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class S {\n");
+		buf.append("	{\n");
+		buf.append("		System.out.println(T.str);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu = pack1.createCompilationUnit("S.java", buf.toString(), false, null);
+
+		String selection= "str";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		StringBuffer expectation= new StringBuffer();
+		expectation.append("package test1;\n");
+		expectation.append("\n");
+		expectation.append("import static test1.T.str;\n");
+		expectation.append("\n");
+		expectation.append("public class S {\n");
+		expectation.append("	{\n");
+		expectation.append("		System.out.println(str);\n");
+		expectation.append("	}\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import", proposals);
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import (replace all occurrences)", proposals);
+
+		selection= "T";
+		offset= buf.toString().indexOf(selection);
+		context= getCorrectionContext(cu, offset, selection.length());
+		proposals= collectAssists(context, false);
+
+		assertProposalDoesNotExist(proposals, "Convert to static import");
+		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
+
+		selection= "ystem";
+		offset= buf.toString().indexOf(selection);
+		context= getCorrectionContext(cu, offset, selection.length());
+		proposals= collectAssists(context, false);
+
+		assertProposalDoesNotExist(proposals, "Convert to static import");
+		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
+	}
+
+	public void testConvertMethodInvocationWithTypeToStaticImport() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class T {\n");
+		buf.append("	static String str;\n");
+		buf.append("	static <V> void doIt(V o) {};\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class S {\n");
+		buf.append("	{\n");
+		buf.append("		T.<String>doIt(\"\");\n");
+		buf.append("		T.doIt(\"\");\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu = pack1.createCompilationUnit("S.java", buf.toString(), false, null);
+
+		String selection= "It";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		StringBuffer expectation= new StringBuffer();
+		expectation.append("package test1;\n");
+		expectation.append("\n");
+		expectation.append("import static test1.T.doIt;\n");
+		expectation.append("\n");
+		expectation.append("public class S {\n");
+		expectation.append("	{\n");
+		expectation.append("		doIt(\"\");\n");
+		expectation.append("		T.doIt(\"\");\n");
+		expectation.append("	}\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import", proposals);
+
+		expectation= new StringBuffer();
+		expectation.append("package test1;\n");
+		expectation.append("\n");
+		expectation.append("import static test1.T.doIt;\n");
+		expectation.append("\n");
+		expectation.append("public class S {\n");
+		expectation.append("	{\n");
+		expectation.append("		doIt(\"\");\n");
+		expectation.append("		doIt(\"\");\n");
+		expectation.append("	}\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import (replace all occurrences)", proposals);
+
+		selection= "T";
+		offset= buf.toString().indexOf(selection);
+		context= getCorrectionContext(cu, offset, selection.length());
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 0);
+		assertProposalDoesNotExist(proposals, "Convert to static import");
+		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
+	}
+
+	public void testConvertConstantToStaticImport() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class T {\n");
+		buf.append("	public static final String FOO = \"BAR\";\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class S {\n");
+		buf.append("	{\n");
+		buf.append("		public String foo = T.FOO;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu = pack1.createCompilationUnit("S.java", buf.toString(), false, null);
+
+		String selection= "FOO";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		StringBuffer expectation= new StringBuffer();
+		expectation.append("package test1;\n");
+		expectation.append("\n");
+		expectation.append("import static test1.T.FOO;\n");
+		expectation.append("\n");
+		expectation.append("public class S {\n");
+		expectation.append("	{\n");
+		expectation.append("		public String foo = FOO;\n");
+		expectation.append("	}\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import", proposals);
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import (replace all occurrences)", proposals);
+
+		selection= "T";
+		offset= buf.toString().indexOf(selection);
+		context= getCorrectionContext(cu, offset, selection.length());
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 0);
+		assertProposalDoesNotExist(proposals, "Convert to static import");
+		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
+	}
+
+	public void testConvertToStaticImportDoesNotAddImportWhenInScope() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class T {\n");
+		buf.append("	static String str;\n");
+		buf.append("	String str2 = T.str;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);
+
+		String selection= "str";
+		int offset= buf.toString().lastIndexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		StringBuffer expectation= new StringBuffer();
+		expectation.append("package test1;\n");
+		expectation.append("public class T {\n");
+		expectation.append("	static String str;\n");
+		expectation.append("	String str2 = str;\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import", proposals);
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import (replace all occurrences)", proposals);
+
+		selection= "T";
+		offset= buf.toString().lastIndexOf(selection);
+		context= getCorrectionContext(cu, offset, selection.length());
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 0);
+		assertProposalDoesNotExist(proposals, "Convert to static import");
+		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
+	}
+
+	public void testConvertToStaticImportDoesRemoveUnusedImport() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class T {\n");
+		buf.append("	public static final String FOO = \"BAR\";\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import test1.T\n");
+		buf.append("public class S {\n");
+		buf.append("	{\n");
+		buf.append("		public String foo = T.FOO;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("S.java", buf.toString(), false, null);
+
+		String selection= "FOO";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		StringBuffer expectation= new StringBuffer();
+		expectation.append("package test2;\n");
+		expectation.append("import static test1.T.FOO;\n");
+		expectation.append("public class S {\n");
+		expectation.append("	{\n");
+		expectation.append("		public String foo = FOO;\n");
+		expectation.append("	}\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import", proposals);
+
+		expectation= new StringBuffer();
+		expectation.append("package test2;\n");
+		expectation.append("import static test1.T.FOO;\n");
+		expectation.append("public class S {\n");
+		expectation.append("	{\n");
+		expectation.append("		public String foo = FOO;\n");
+		expectation.append("	}\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import (replace all occurrences)", proposals);
+
+		selection= "T";
+		offset= buf.toString().indexOf(selection);
+		context= getCorrectionContext(cu, offset, selection.length());
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 0);
+		assertProposalDoesNotExist(proposals, "Convert to static import");
+		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
+	}
+
+	public void testConvertToStaticImportDoesntRemoveImportWhenReferencedByDifferentReferenceType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class T {\n");
+		buf.append("	public static final String FOO = \"BAR\";\n");
+		buf.append("    public static void bar() {};\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import test1.T\n");
+		buf.append("public class S {\n");
+		buf.append("    public S() {\n");
+		buf.append("        String foo = T.FOO;\n");
+		buf.append("        T.bar();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("S.java", buf.toString(), false, null);
+
+		String selection= "FOO";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		StringBuffer expectation= new StringBuffer();
+		expectation.append("package test2;\n");
+		expectation.append("import static test1.T.FOO;\n");
+		expectation.append("\n");
+		expectation.append("import test1.T\n");
+		expectation.append("public class S {\n");
+		expectation.append("    public S() {\n");
+		expectation.append("        String foo = FOO;\n");
+		expectation.append("        T.bar();\n");
+		expectation.append("    }\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import", proposals);
+
+		expectation= new StringBuffer();
+		expectation.append("package test2;\n");
+		expectation.append("import static test1.T.FOO;\n");
+		expectation.append("\n");
+		expectation.append("import test1.T\n");
+		expectation.append("public class S {\n");
+		expectation.append("    public S() {\n");
+		expectation.append("        String foo = FOO;\n");
+		expectation.append("        T.bar();\n");
+		expectation.append("    }\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import (replace all occurrences)", proposals);
+
+		selection= "bar";
+		offset= buf.toString().indexOf(selection);
+		context= getCorrectionContext(cu, offset, selection.length());
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		expectation= new StringBuffer();
+		expectation.append("package test2;\n");
+		expectation.append("import static test1.T.bar;\n");
+		expectation.append("\n");
+		expectation.append("import test1.T\n");
+		expectation.append("public class S {\n");
+		expectation.append("    public S() {\n");
+		expectation.append("        String foo = T.FOO;\n");
+		expectation.append("        bar();\n");
+		expectation.append("    }\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import", proposals);
+
+		expectation= new StringBuffer();
+		expectation.append("package test2;\n");
+		expectation.append("import static test1.T.bar;\n");
+		expectation.append("\n");
+		expectation.append("import test1.T\n");
+		expectation.append("public class S {\n");
+		expectation.append("    public S() {\n");
+		expectation.append("        String foo = T.FOO;\n");
+		expectation.append("        bar();\n");
+		expectation.append("    }\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import (replace all occurrences)", proposals);
+
+		selection= "T";
+		offset= buf.toString().indexOf(selection);
+		context= getCorrectionContext(cu, offset, selection.length());
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 0);
+		assertProposalDoesNotExist(proposals, "Convert to static import");
+		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
+	}
+
+	public void testConvertToStaticImportDoesntRemoveImportWhenReferencedBySameReferenceType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class T {\n");
+		buf.append("	public static final String FOO = \"BAR\";\n");
+		buf.append("	public static final String ZIP = \"ZAP\";\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import test1.T\n");
+		buf.append("public class S {\n");
+		buf.append("    public S() {\n");
+		buf.append("        String foo = T.FOO;\n");
+		buf.append("        String zip = T.ZIP;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("S.java", buf.toString(), false, null);
+
+		String selection= "FOO";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		StringBuffer expectation= new StringBuffer();
+		expectation.append("package test2;\n");
+		expectation.append("import static test1.T.FOO;\n");
+		expectation.append("\n");
+		expectation.append("import test1.T\n");
+		expectation.append("public class S {\n");
+		expectation.append("    public S() {\n");
+		expectation.append("        String foo = FOO;\n");
+		expectation.append("        String zip = T.ZIP;\n");
+		expectation.append("    }\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import", proposals);
+
+		expectation= new StringBuffer();
+		expectation.append("package test2;\n");
+		expectation.append("import static test1.T.FOO;\n");
+		expectation.append("\n");
+		expectation.append("import test1.T\n");
+		expectation.append("public class S {\n");
+		expectation.append("    public S() {\n");
+		expectation.append("        String foo = FOO;\n");
+		expectation.append("        String zip = T.ZIP;\n");
+		expectation.append("    }\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import (replace all occurrences)", proposals);
+
+		selection= "T";
+		offset= buf.toString().indexOf(selection);
+		context= getCorrectionContext(cu, offset, selection.length());
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 0);
+		assertProposalDoesNotExist(proposals, "Convert to static import");
+		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
+
+		IPackageFragment pack3= fSourceFolder.createPackageFragment("test3", false, null);
+		buf= new StringBuffer();
+		buf.append("package test3;\n");
+		buf.append("import test1.T\n");
+		buf.append("public class G {\n");
+		buf.append("    public G() {\n");
+		buf.append("        String foo = T.FOO;\n");
+		buf.append("        String zip = T.FOO;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		cu= pack3.createCompilationUnit("G.java", buf.toString(), false, null);
+
+		selection= "FOO";
+		offset= buf.toString().indexOf(selection);
+		context= getCorrectionContext(cu, offset, selection.length());
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		expectation= new StringBuffer();
+		expectation.append("package test3;\n");
+		expectation.append("import static test1.T.FOO;\n");
+		expectation.append("\n");
+		expectation.append("import test1.T\n");
+		expectation.append("public class G {\n");
+		expectation.append("    public G() {\n");
+		expectation.append("        String foo = FOO;\n");
+		expectation.append("        String zip = T.FOO;\n");
+		expectation.append("    }\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import", proposals);
+
+		expectation= new StringBuffer();
+		expectation.append("package test3;\n");
+		expectation.append("import static test1.T.FOO;\n");
+		expectation.append("public class G {\n");
+		expectation.append("    public G() {\n");
+		expectation.append("        String foo = FOO;\n");
+		expectation.append("        String zip = FOO;\n");
+		expectation.append("    }\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import (replace all occurrences)", proposals);
+
+		selection= "T";
+		offset= buf.toString().indexOf(selection);
+		context= getCorrectionContext(cu, offset, selection.length());
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 0);
+		assertProposalDoesNotExist(proposals, "Convert to static import");
+		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
+	}
+
+	public void testCanConvertToStaticImportWhenClassContainsMethodInvocationWithoutExpression() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class T {\n");
+		buf.append("    public static String bar() { return \"\"; };\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import static test1.T.bar;\n");
+		buf.append("\n");
+		buf.append("import test1.T\n");
+		buf.append("public class S {\n");
+		buf.append("    public S() {\n");
+		buf.append("        String foo1 = T.bar();\n");
+		buf.append("        String foo2 = bar();\n");
+		buf.append("        String foo3 = T.bar();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("S.java", buf.toString(), false, null);
+
+		String selection= "bar";
+		int offset= buf.toString().lastIndexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		StringBuffer expectation= new StringBuffer();
+		expectation.append("package test2;\n");
+		expectation.append("import static test1.T.bar;\n");
+		expectation.append("\n");
+		expectation.append("import test1.T\n");
+		expectation.append("public class S {\n");
+		expectation.append("    public S() {\n");
+		expectation.append("        String foo1 = T.bar();\n");
+		expectation.append("        String foo2 = bar();\n");
+		expectation.append("        String foo3 = bar();\n");
+		expectation.append("    }\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import", proposals);
+
+		expectation= new StringBuffer();
+		expectation.append("package test2;\n");
+		expectation.append("import static test1.T.bar;\n");
+		expectation.append("public class S {\n");
+		expectation.append("    public S() {\n");
+		expectation.append("        String foo1 = bar();\n");
+		expectation.append("        String foo2 = bar();\n");
+		expectation.append("        String foo3 = bar();\n");
+		expectation.append("    }\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import (replace all occurrences)", proposals);
+
+		selection= "T";
+		offset= buf.toString().indexOf(selection);
+		context= getCorrectionContext(cu, offset, selection.length());
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 0);
+		assertProposalDoesNotExist(proposals, "Convert to static import");
+		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
+	}
+
 }
