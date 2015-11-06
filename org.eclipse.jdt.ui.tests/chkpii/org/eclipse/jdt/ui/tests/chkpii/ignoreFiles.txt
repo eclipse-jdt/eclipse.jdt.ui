@@ -105,6 +105,8 @@ org.sat4j.pb/*
 
 org.w3c.*/*
 
+org.mockito/*
+
 Git/eclipse/*
 Git/pde/*
 Git/news/*
