@@ -90,7 +90,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		
 		@Override
 		public boolean visit(ClassInstanceCreation node) {
-			if (isFunctionalAnonymous(node, true)) {
+			if (isFunctionalAnonymous(node) && !conversionRemovesAnnotations) {
 				fNodes.add(node);
 			}
 			return true;
@@ -515,16 +515,24 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
+	private static boolean conversionRemovesAnnotations;
+
 	public static LambdaExpressionsFix createConvertToLambdaFix(ClassInstanceCreation cic) {
 		CompilationUnit root= (CompilationUnit) cic.getRoot();
 		if (!JavaModelUtil.is18OrHigher(root.getJavaElement().getJavaProject()))
 			return null;
 
-		if (!LambdaExpressionsFix.isFunctionalAnonymous(cic, false))
+		if (!LambdaExpressionsFix.isFunctionalAnonymous(cic))
 			return null;
 
 		CreateLambdaOperation op= new CreateLambdaOperation(Collections.singletonList(cic));
-		return new LambdaExpressionsFix(FixMessages.LambdaExpressionsFix_convert_to_lambda_expression, root, new CompilationUnitRewriteOperation[] { op });
+		String message;
+		if (conversionRemovesAnnotations) {
+			message= FixMessages.LambdaExpressionsFix_convert_to_lambda_expression_removes_annotations;
+		} else {
+			message= FixMessages.LambdaExpressionsFix_convert_to_lambda_expression;
+		}
+		return new LambdaExpressionsFix(message, root, new CompilationUnitRewriteOperation[] { op });
 	}
 
 	public static IProposableFix createConvertToAnonymousClassCreationsFix(LambdaExpression lambda) {
@@ -568,7 +576,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
 
-	static boolean isFunctionalAnonymous(ClassInstanceCreation node, boolean isCleanUp) {
+	static boolean isFunctionalAnonymous(ClassInstanceCreation node) {
 		ITypeBinding typeBinding= node.resolveTypeBinding();
 		if (typeBinding == null)
 			return false;
@@ -599,20 +607,6 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		if (methodBinding.isGenericMethod())
 			return false;
 
-		// Skip the Clean up if there are annotations other than @Override and @Deprecated
-		if (isCleanUp) {
-			IAnnotationBinding[] declarationAnnotations= methodBinding.getAnnotations();
-			for (IAnnotationBinding declarationAnnotation : declarationAnnotations) {
-				ITypeBinding annotationType= declarationAnnotation.getAnnotationType();
-				if (annotationType != null) {
-					String qualifiedName= annotationType.getQualifiedName();
-					if (!"java.lang.Override".equals(qualifiedName) && !"java.lang.Deprecated".equals(qualifiedName)) { //$NON-NLS-1$ //$NON-NLS-2$
-						return false;
-					}
-				}
-			}
-		}
-
 		// lambda cannot refer to 'this'/'super' literals
 		if (SuperThisReferenceFinder.hasReference(methodDecl))
 			return false;
@@ -620,7 +614,25 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		if (ASTNodes.getTargetType(node) == null) // #isInTargetTypeContext
 			return false;
 		
+		// Check if annotations other than @Override and @Deprecated will be removed
+		checkAnnotationsRemoval(methodBinding);
+
 		return true;
+	}
+
+	private static void checkAnnotationsRemoval(IMethodBinding methodBinding) {
+		conversionRemovesAnnotations= false;
+		IAnnotationBinding[] declarationAnnotations= methodBinding.getAnnotations();
+		for (IAnnotationBinding declarationAnnotation : declarationAnnotations) {
+			ITypeBinding annotationType= declarationAnnotation.getAnnotationType();
+			if (annotationType != null) {
+				String qualifiedName= annotationType.getQualifiedName();
+				if (!"java.lang.Override".equals(qualifiedName) && !"java.lang.Deprecated".equals(qualifiedName)) { //$NON-NLS-1$ //$NON-NLS-2$
+					conversionRemovesAnnotations= true;
+					return;
+				}
+			}
+		}
 	}
 
 	/*private static boolean isInTargetTypeContext(ClassInstanceCreation node) {
