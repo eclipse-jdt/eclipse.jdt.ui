@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1030,6 +1030,18 @@ public class PullUpTests extends RefactoringTest {
 
 		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 		assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+	}
+
+	public void test52() throws Exception {
+		String[] selectedMethodNames= new String[] { "baz1", "baz2", "baz3", "baz4" };
+		String[][] selectedMethodSignatures= new String[][] { new String[0], new String[0], new String[0], new String[0] };
+
+		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
+				new String[] {},
+				new String[] {}, new String[] {},
+				new String[][] {},
+				new String[] {}, selectedMethodNames,
+				selectedMethodSignatures, new String[] {}, false, false, 0);
 	}
 
 	public void testFail0() throws Exception{

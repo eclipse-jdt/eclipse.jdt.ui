@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2015 IBM Corporation and others.
+ * Copyright (c) 2006, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1195,8 +1195,11 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 							adjustor.setOwner(fOwner);
 							adjustor.setStatus(status);
 							adjustor.setAdjustments(adjustments);
-							if (needsVisibilityAdjustment(method, false, new SubProgressMonitor(subsub, 1), status))
+							if (destination.isInterface() && !JdtFlags.isPublic(method)) {
+								adjustments.put(method, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(method, Modifier.ModifierKeyword.PUBLIC_KEYWORD, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { MemberVisibilityAdjustor.getLabel(method), RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_public}), JavaStatusContext.create(method))));								
+							} else if (needsVisibilityAdjustment(method, false, new SubProgressMonitor(subsub, 1), status)) {
 								adjustments.put(method, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(method, Modifier.ModifierKeyword.PROTECTED_KEYWORD, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { MemberVisibilityAdjustor.getLabel(method), RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_protected}), JavaStatusContext.create(method))));
+							}
 						}
 					} else
 						sub.worked(2);
@@ -1608,16 +1611,16 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	}
 
 	private int getModifiersWithUpdatedVisibility(final IMember member, final int modifiers, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final IProgressMonitor monitor, final boolean considerReferences, final RefactoringStatus status) throws JavaModelException {
+		if (getDestinationType().isInterface()) {
+			int flags= JdtFlags.clearAccessModifiers(modifiers);
+			flags= JdtFlags.clearFlag(Modifier.ABSTRACT | Modifier.STATIC | Modifier.FINAL, flags);
+			return flags;
+		}
 		if (needsVisibilityAdjustment(member, considerReferences, monitor, status)) {
 			final MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment adjustment= new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(member, Modifier.ModifierKeyword.PROTECTED_KEYWORD, RefactoringStatus.createWarningStatus(Messages.format(MemberVisibilityAdjustor.getMessage(member), new String[] { MemberVisibilityAdjustor.getLabel(member), MemberVisibilityAdjustor.getLabel(Modifier.ModifierKeyword.PROTECTED_KEYWORD)})));
 			adjustment.setNeedsRewriting(false);
 			adjustments.put(member, adjustment);
 			return JdtFlags.clearAccessModifiers(modifiers) | Modifier.PROTECTED;
-		}
-		if (getDestinationType().isInterface()) {
-			int flags= JdtFlags.clearAccessModifiers(modifiers);
-			flags= JdtFlags.clearFlag(Modifier.ABSTRACT | Modifier.STATIC | Modifier.FINAL, flags);
-			return flags;
 		}
 		return modifiers;
 	}
