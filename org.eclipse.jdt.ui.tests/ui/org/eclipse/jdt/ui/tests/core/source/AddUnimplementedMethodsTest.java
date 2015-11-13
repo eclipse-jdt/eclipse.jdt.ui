@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -353,6 +353,28 @@ public class AddUnimplementedMethodsTest extends TestCase {
 				}
 			}
 		}
+	}
+
+	public void testBug480682() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("public class Test480682 extends Base {\n");
+		buf.append("}\n");
+		buf.append("abstract class Base implements I {\n");
+		buf.append("    @Override\n");
+		buf.append("    public final void method1() {}\n");
+		buf.append("}\n");
+		buf.append("interface I {\n");
+		buf.append("    void method1();\n");
+		buf.append("    void method2();\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= fPackage.createCompilationUnit("Test480682.java", buf.toString(), true, null);
+		IType testClass= cu.createType(buf.toString(), null, true, null);
+
+		testHelper(testClass, -1, false);
+
+		IMethod[] methods= testClass.getMethods();
+		checkMethods(new String[] { "method2" }, methods);
 	}
 
 	/**
