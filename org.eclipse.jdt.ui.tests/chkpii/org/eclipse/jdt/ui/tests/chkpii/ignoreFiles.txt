@@ -145,3 +145,6 @@ zz*/*
 config/*
 org.eclipse.osgi.tests/*
 org.eclipse.e4.sdk/*
+
+rt.equinox.bundles/*
+rt.equinox.p2/*
