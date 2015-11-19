@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -394,6 +398,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	private static final String RETURN= "return"; //$NON-NLS-1$
 	private static String[] fgJava14Keywords= { "assert" }; //$NON-NLS-1$
 	private static String[] fgJava15Keywords= { "enum" }; //$NON-NLS-1$
+	private static String[] fgJava19Keywords= { "module", "requires", "exports", "provides", "with", "uses" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 
 	private static String[] fgTypes= { "void", "boolean", "char", "byte", "short", "strictfp", "int", "long", "float", "double" }; //$NON-NLS-1$ //$NON-NLS-5$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-8$ //$NON-NLS-9$  //$NON-NLS-10$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-2$
 
@@ -480,6 +485,15 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 		combinedWordRule.addWordMatcher(j15Matcher);
 		fVersionDependentRules.add(j15Matcher);
+
+		VersionedWordMatcher j19Matcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_1_9, version);
+
+		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
+		for (int i= 0; i < fgJava19Keywords.length; i++)
+			j19Matcher.addWord(fgJava19Keywords[i], token);
+
+		combinedWordRule.addWordMatcher(j19Matcher);
+		fVersionDependentRules.add(j19Matcher);
 
 		// Add rule for operators
 		token= getToken(IJavaColorConstants.JAVA_OPERATOR);
