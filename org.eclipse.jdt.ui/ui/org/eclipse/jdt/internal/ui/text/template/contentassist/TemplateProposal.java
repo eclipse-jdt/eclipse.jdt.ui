@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,11 +36,13 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.contentassist.BoldStylerProvider;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension7;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
@@ -62,9 +64,12 @@ import org.eclipse.ui.part.IWorkbenchPartOrientation;
 
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.search.SearchPattern;
+
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContext;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
@@ -77,7 +82,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * A template proposal.
  */
-public class TemplateProposal implements IJavaCompletionProposal, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension4, ICompletionProposalExtension6 {
+public class TemplateProposal
+		implements IJavaCompletionProposal, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension4, ICompletionProposalExtension6, ICompletionProposalExtension7 {
 
 	private final Template fTemplate;
 	private final TemplateContext fContext;
@@ -470,6 +476,25 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 
 	public void setDisplayString(StyledString displayString) {
 		fDisplayString= displayString;
+	}
+
+	@Override
+	public StyledString emphasizeMatch(IDocument document, int offset, BoldStylerProvider boldStylerProvider) {
+		StyledString styledDisplayString= new StyledString();
+		styledDisplayString.append(getStyledDisplayString());
+		int start= getPrefixCompletionStart(document, offset);
+		int patternLength= offset - start;
+		try {
+			String pattern= document.get(start, patternLength);
+			if (!pattern.isEmpty()) {
+				String displayString= styledDisplayString.getString();
+				int[] matchingRegions= SearchPattern.getMatchingRegions(pattern, displayString, SearchPattern.R_PREFIX_MATCH);
+				Strings.markMatchingRegions(styledDisplayString, 0, matchingRegions, boldStylerProvider.getBoldStyler());
+			}
+		} catch (BadLocationException e) {
+			// return styledDisplayString
+		}
+		return styledDisplayString;
 	}
 
 	/*

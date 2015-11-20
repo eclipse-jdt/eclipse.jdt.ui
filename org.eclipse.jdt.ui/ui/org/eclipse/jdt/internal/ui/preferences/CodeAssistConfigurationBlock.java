@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,7 +77,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_CODEASSIST_PREFIX_COMPLETION= getJDTUIKey(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION);
 	private static final Key PREF_CODEASSIST_DEPRECATION_CHECK= getJDTCoreKey(JavaCore.CODEASSIST_DEPRECATION_CHECK);
 	private static final Key PREF_CODEASSIST_CAMEL_CASE_MATCH= getJDTCoreKey(JavaCore.CODEASSIST_CAMEL_CASE_MATCH);
-//	private static final Key PREF_CODEASSIST_SUBSTRING_MATCH= getJDTCoreKey(JavaCore.CODEASSIST_SUBSTRING_MATCH);
+	private static final Key PREF_CODEASSIST_SUBSTRING_MATCH= getJDTCoreKey(JavaCore.CODEASSIST_SUBSTRING_MATCH);
 
 	private static Key[] getAllKeys() {
 		return new Key[] {
@@ -97,7 +97,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_CODEASSIST_PREFIX_COMPLETION,
 				PREF_CODEASSIST_DEPRECATION_CHECK,
 				PREF_CODEASSIST_CAMEL_CASE_MATCH,
-//				PREF_CODEASSIST_SUBSTRING_MATCH
+				PREF_CODEASSIST_SUBSTRING_MATCH
 		};
 	}
 
@@ -276,8 +276,8 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.CodeAssistConfigurationBlock_matchCamelCase_label;
 		addCheckBox(composite, label, PREF_CODEASSIST_CAMEL_CASE_MATCH, enabledDisabled, 0);
 		
-		/*label= PreferencesMessages.CodeAssistConfigurationBlock_matchSubstring_label;
-		addCheckBox(composite, label, PREF_CODEASSIST_SUBSTRING_MATCH, enabledDisabled, 0);*/
+		label= PreferencesMessages.CodeAssistConfigurationBlock_matchSubstring_label;
+		addCheckBox(composite, label, PREF_CODEASSIST_SUBSTRING_MATCH, enabledDisabled, 0);
 		
 		label= PreferencesMessages.JavaEditorPreferencePage_showOnlyProposalsVisibleInTheInvocationContext;
 		addCheckBox(composite, label, PREF_CODEASSIST_SHOW_VISIBLE_PROPOSALS, trueFalse, 0);

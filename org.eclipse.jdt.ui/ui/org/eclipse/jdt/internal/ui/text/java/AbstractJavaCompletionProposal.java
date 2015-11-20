@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,11 +61,13 @@ import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextPresentation;
+import org.eclipse.jface.text.contentassist.BoldStylerProvider;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension7;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
@@ -87,8 +89,10 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
@@ -106,7 +110,8 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
  *
  * @since 3.2
  */
-public abstract class AbstractJavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension5, ICompletionProposalExtension6 {
+public abstract class AbstractJavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3,
+		ICompletionProposalExtension5, ICompletionProposalExtension6, ICompletionProposalExtension7 {
 
 
 	/**
@@ -225,6 +230,8 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	private String fSortString;
 	private int fRelevance;
 	private boolean fIsInJavadoc;
+
+	private int fPatternMatchRule= -1;
 
 	private StyleRange fRememberedStyleRange;
 
@@ -804,21 +811,21 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	}
 
 	/**
-	 * Checks whether <code>prefix</code> is a valid prefix for this proposal. Usually, while code
-	 * completion is in progress, the user types and edits the prefix in the document in order to
-	 * filter the proposal list. From {@link #validate(IDocument, int, DocumentEvent) }, the
-	 * current prefix in the document is extracted and this method is called to find out whether the
+	 * Checks whether <code>pattern</code> is a valid pattern for this proposal. Usually, while code
+	 * completion is in progress, the user types and edits the pattern in the document in order to
+	 * filter the proposal list. From {@link #validate(IDocument, int, DocumentEvent) }, the current
+	 * pattern in the document is extracted and this method is called to find out whether the
 	 * proposal is still valid.
 	 * <p>
-	 * The default implementation checks if <code>prefix</code> is a prefix of the proposal's
+	 * The default implementation checks if <code>pattern</code> matches the proposal's
 	 * {@link #getDisplayString() display string} using the {@link #isPrefix(String, String) }
 	 * method.
 	 * </p>
 	 *
-	 * @param prefix the current prefix in the document
-	 * @return <code>true</code> if <code>prefix</code> is a valid prefix of this proposal
+	 * @param pattern the current pattern in the document
+	 * @return <code>true</code> if <code>pattern</code> is a valid match for this proposal
 	 */
-	protected boolean isValidPrefix(String prefix) {
+	protected boolean isValidPrefix(String pattern) {
 		/*
 		 * See http://dev.eclipse.org/bugs/show_bug.cgi?id=17667
 		 * why we do not use the replacement string.
@@ -828,7 +835,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		 * for performance reasons, as computing the
 		 * replacement string can be expensive.
 		 */
-		return isPrefix(prefix, TextProcessor.deprocess(getDisplayString()));
+		return isPrefix(pattern, TextProcessor.deprocess(getDisplayString()));
 	}
 
 	/**
@@ -837,6 +844,9 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 */
 	@Override
 	public int getRelevance() {
+		if (fPatternMatchRule == SearchPattern.R_SUBSTRING_MATCH) {
+			return fRelevance - 1;
+		}
 		return fRelevance;
 	}
 
@@ -869,22 +879,44 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	}
 
 	/**
-	 * Case insensitive comparison of <code>prefix</code> with the start of <code>string</code>.
+	 * Case insensitive matching of the <code>pattern</code> within the given <code>string</code>.
 	 *
-	 * @param prefix the prefix
-	 * @param string  the string to look for the prefix
-	 * @return <code>true</code> if the string begins with the given prefix and
-	 *			<code>false</code> if <code>prefix</code> is longer than <code>string</code>
-	 *			or the string doesn't start with the given prefix
+	 * @param pattern the pattern
+	 * @param string the string to look for the pattern
+	 * @return <code>true</code> if the given pattern matches the string as a prefix, as a CamelCase
+	 *         match, or as a substring pattern and <code>false</code> if <code>pattern</code> is
+	 *         longer than <code>string</code> or if the pattern doesn't match the string based on
+	 *         any of these rules
 	 * @since 3.2
 	 */
-	protected boolean isPrefix(String prefix, String string) {
-		if (prefix == null || string ==null || prefix.length() > string.length())
+	protected boolean isPrefix(String pattern, String string) {
+		if (pattern == null || string == null || pattern.length() > string.length())
 			return false;
-		String start= string.substring(0, prefix.length());
-		return start.equalsIgnoreCase(prefix) ||
-				isCamelCaseMatching() && CharOperation.camelCaseMatch(prefix.toCharArray(), string.toCharArray())/* ||
-				isSubstringMatching() && CharOperation.substringMatch(prefix.toCharArray(), string.toCharArray())*/;
+		fPatternMatchRule= getPatternMatchRule(pattern, string);
+		return fPatternMatchRule != -1;
+	}
+
+	/**
+	 * Matches the given <code>pattern</code> in <code>string</code> and returns the match rule.
+	 * 
+	 * @param pattern the pattern to match
+	 * @param string the string to look for the pattern
+	 * @return the match rule used to match the given <code>pattern</code> in <code>string</code>,
+	 *         or -1 if the <code>pattern</code> doesn't match the <code>string</code> based on any
+	 *         rule
+	 * @since 3.12
+	 */
+	protected int getPatternMatchRule(String pattern, String string) {
+		String start= string.substring(0, pattern.length());
+		if (start.equalsIgnoreCase(pattern)) {
+			return SearchPattern.R_PREFIX_MATCH;
+		} else if (isCamelCaseMatching() && CharOperation.camelCaseMatch(pattern.toCharArray(), string.toCharArray())) {
+			return SearchPattern.R_CAMELCASE_MATCH;
+		} else if (isSubstringMatching() && CharOperation.substringMatch(pattern.toCharArray(), string.toCharArray())) {
+			return SearchPattern.R_SUBSTRING_MATCH;
+		} else {
+			return -1;
+		}
 	}
 
 	/**
@@ -1197,6 +1229,53 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 
 	public void setStyledDisplayString(StyledString text) {
 		fDisplayString= text;
+	}
+
+	@Override
+	public StyledString emphasizeMatch(IDocument document, int offset, BoldStylerProvider boldStylerProvider) {
+		StyledString styledDisplayString= new StyledString();
+		styledDisplayString.append(getStyledDisplayString());
+
+		String pattern= getPatternToEmphasizeMatch(document, offset);
+		if (pattern != null && pattern.length() > 0) {
+			String displayString= styledDisplayString.getString();
+			int index= displayString.indexOf('(');
+			if (index == -1) {
+				index= displayString.indexOf(':');
+				if (index == -1) {
+					index= displayString.indexOf('-');
+				}
+			}
+			if (index != -1) {
+				displayString= displayString.substring(0, index);
+			}
+			int patternMatchRule= getPatternMatchRule(pattern, displayString);
+			int[] matchingRegions= SearchPattern.getMatchingRegions(pattern, displayString, patternMatchRule);
+			Strings.markMatchingRegions(styledDisplayString, 0, matchingRegions, boldStylerProvider.getBoldStyler());
+		}
+		return styledDisplayString;
+	}
+
+	/**
+	 * Computes the token at the given <code>offset</code> in <code>document</code> to emphasize the
+	 * ranges matching this token in proposal's display string.
+	 * 
+	 * @param document the document where content assist is invoked
+	 * @param offset the offset in the document at current caret location
+	 * @return the token at the given <code>offset</code> in <code>document</code> to be used for
+	 *         emphasizing matching ranges in proposal's display string
+	 * @since 3.12
+	 */
+	protected String getPatternToEmphasizeMatch(IDocument document, int offset) {
+		int start= getPrefixCompletionStart(document, offset);
+		int patternLength= offset - start;
+		String pattern= null;
+		try {
+			pattern= document.get(start, patternLength);
+		} catch (BadLocationException e) {
+			// return null
+		}
+		return pattern;
 	}
 
 	/*

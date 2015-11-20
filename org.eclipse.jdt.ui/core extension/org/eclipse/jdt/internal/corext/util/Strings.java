@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.action.LegacyActionTools;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
@@ -49,6 +50,35 @@ public class Strings {
 
 	private static final String JAVA_ELEMENT_DELIMITERS= TextProcessor.getDefaultDelimiters() + "<>(),?{} "; //$NON-NLS-1$
 
+	/**
+	 * Sets the given <code>styler</code> to use for <code>matchingRegions</code> (obtained from
+	 * {@link org.eclipse.jdt.core.search.SearchPattern#getMatchingRegions}) in the
+	 * <code>styledString</code> starting from the given <code>index</code>.
+	 * 
+	 * @param styledString the styled string to mark
+	 * @param index the index from which to start marking
+	 * @param matchingRegions the regions to mark
+	 * @param styler the styler to use for marking
+	 */
+	public static void markMatchingRegions(StyledString styledString, int index, int[] matchingRegions, Styler styler) {
+		if (matchingRegions != null) {
+			int offset= -1;
+			int length= 0;
+			for (int i= 0; i + 1 < matchingRegions.length; i= i + 2) {
+				if (offset == -1)
+					offset= index + matchingRegions[i];
+
+				// Concatenate adjacent regions
+				if (i + 2 < matchingRegions.length && matchingRegions[i] + matchingRegions[i + 1] == matchingRegions[i + 2]) {
+					length= length + matchingRegions[i + 1];
+				} else {
+					styledString.setStyle(offset, length + matchingRegions[i + 1], styler);
+					offset= -1;
+					length= 0;
+				}
+			}
+		}
+	}
 	
 	/**
 	 * Adds special marks so that that the given styled string is readable in a BiDi environment.

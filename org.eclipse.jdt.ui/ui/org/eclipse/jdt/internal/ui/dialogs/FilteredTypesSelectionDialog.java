@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,9 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.layout.GridData;
@@ -65,6 +62,7 @@ import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
 
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.contentassist.BoldStylerProvider;
 
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -699,16 +697,12 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		private boolean fContainerInfo;
 		private LocalResourceManager fImageManager;
 
-		private Font fBoldFont;
-
-		private Styler fBoldStyler;
+		private BoldStylerProvider fBoldStylerProvider;
 
 		private Styler fBoldQualifierStyler;
 
 		public TypeItemLabelProvider() {
 			fImageManager= new LocalResourceManager(JFaceResources.getResources());
-			fBoldStyler= createBoldStyler();
-			fBoldQualifierStyler= createBoldQualifierStyler();
 		}
 
 		/*
@@ -718,9 +712,9 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		public void dispose() {
 			super.dispose();
 			fImageManager.dispose();
-			if (fBoldFont != null) {
-				fBoldFont.dispose();
-				fBoldFont= null;
+			if (fBoldStylerProvider != null) {
+				fBoldStylerProvider.dispose();
+				fBoldStylerProvider= null;
 			}
 		}
 
@@ -788,7 +782,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			if (namePattern != null && !"*".equals(namePattern)) { //$NON-NLS-1$
 				String typeName= index == -1 ? text : text.substring(0, index);
 				int[] matchingRegions= SearchPattern.getMatchingRegions(namePattern, typeName, fFilter.getMatchRule());
-				markMatchingRegions(string, 0, matchingRegions, fBoldStyler);
+				Strings.markMatchingRegions(string, 0, matchingRegions, getBoldStylerProvider().getBoldStyler());
 			}
 
 			if (index != -1) {
@@ -803,69 +797,31 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 					else
 						packageName= text.substring(index, endIndex);
 					int[] matchingRegions= SearchPattern.getMatchingRegions(packagePattern, packageName, fFilter.getPackageFlags());
-					markMatchingRegions(string, index, matchingRegions, fBoldQualifierStyler);
+					Strings.markMatchingRegions(string, index, matchingRegions, getBoldQualifierStyler());
 				}
 			}
 			return string;
 		}
 
-		private void markMatchingRegions(StyledString string, int index, int[] matchingRegions, Styler styler) {
-			if (matchingRegions != null) {
-				int offset= -1;
-				int length= 0;
-				for (int i= 0; i + 1 < matchingRegions.length; i= i + 2) {
-					if (offset == -1)
-						offset= index + matchingRegions[i];
-					
-					// Concatenate adjacent regions
-					if (i + 2 < matchingRegions.length && matchingRegions[i] + matchingRegions[i + 1] == matchingRegions[i + 2]) {
-						length= length + matchingRegions[i + 1];
-					} else {
-						string.setStyle(offset, length + matchingRegions[i + 1], styler);
-						offset= -1;
-						length= 0;
+		private BoldStylerProvider getBoldStylerProvider() {
+			if (fBoldStylerProvider == null) {
+				fBoldStylerProvider= new BoldStylerProvider(getDialogArea().getFont());
+			}
+			return fBoldStylerProvider;
+		}
+
+		private Styler getBoldQualifierStyler() {
+			if (fBoldQualifierStyler == null) {
+				fBoldQualifierStyler= new Styler() {
+					@Override
+					public void applyStyles(TextStyle textStyle) {
+						StyledString.QUALIFIER_STYLER.applyStyles(textStyle);
+						getBoldStylerProvider().getBoldStyler().applyStyles(textStyle);
 					}
-				}
+				};
 			}
+			return fBoldQualifierStyler;
 		}
-
-		/**
-		 * Create the bold variant of the currently used font.
-		 * 
-		 * @return the bold font
-		 * @since 3.5
-		 */
-		private Font getBoldFont() {
-			if (fBoldFont == null) {
-				Font font= getDialogArea().getFont();
-				FontData[] data= font.getFontData();
-				for (int i= 0; i < data.length; i++) {
-					data[i].setStyle(SWT.BOLD);
-				}
-				fBoldFont= new Font(font.getDevice(), data);
-			}
-			return fBoldFont;
-		}
-
-		private Styler createBoldStyler() {
-			return new Styler() {
-				@Override
-				public void applyStyles(TextStyle textStyle) {
-					textStyle.font= getBoldFont();
-				}
-			};
-		}
-
-		private Styler createBoldQualifierStyler() {
-			return new Styler() {
-				@Override
-				public void applyStyles(TextStyle textStyle) {
-					StyledString.QUALIFIER_STYLER.applyStyles(textStyle);
-					textStyle.font= getBoldFont();
-				}
-			};
-		}
-
 	}
 
 	/**
