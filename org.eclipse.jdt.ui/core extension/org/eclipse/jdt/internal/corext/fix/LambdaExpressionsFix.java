@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2015 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,11 +41,14 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
@@ -90,7 +93,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		
 		@Override
 		public boolean visit(ClassInstanceCreation node) {
-			if (isFunctionalAnonymous(node) && !conversionRemovesAnnotations) {
+			if (isFunctionalAnonymous(node) && !fConversionRemovesAnnotations) {
 				fNodes.add(node);
 			}
 			return true;
@@ -247,6 +250,33 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
+	private static final class AnnotationsFinder extends ASTVisitor {
+		static boolean hasAnnotations(SingleVariableDeclaration methodParameter) {
+			try {
+				AnnotationsFinder finder= new AnnotationsFinder();
+				methodParameter.accept(finder);
+			} catch (AbortSearchException e) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public boolean visit(MarkerAnnotation node) {
+			throw new AbortSearchException();
+		}
+
+		@Override
+		public boolean visit(NormalAnnotation node) {
+			throw new AbortSearchException();
+		}
+
+		@Override
+		public boolean visit(SingleMemberAnnotation node) {
+			throw new AbortSearchException();
+		}
+	}
+
 	private static class CreateLambdaOperation extends CompilationUnitRewriteOperation {
 
 		private final List<ClassInstanceCreation> fExpressions;
@@ -287,13 +317,25 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				List<SingleVariableDeclaration> methodParameters= methodDeclaration.parameters();
 
 				// use short form with inferred parameter types and without parentheses if possible
+				boolean createExplicitlyTypedParameters= false;
+				for (SingleVariableDeclaration methodParameter : methodParameters) {
+					if (AnnotationsFinder.hasAnnotations(methodParameter)) {
+						createExplicitlyTypedParameters= true;
+						break;
+					}
+				}
 				LambdaExpression lambdaExpression= ast.newLambdaExpression();
 				List<VariableDeclaration> lambdaParameters= lambdaExpression.parameters();
-				lambdaExpression.setParentheses(methodParameters.size() != 1);
+				lambdaExpression.setParentheses(createExplicitlyTypedParameters || methodParameters.size() != 1);
 				for (SingleVariableDeclaration methodParameter : methodParameters) {
-					VariableDeclarationFragment lambdaParameter= ast.newVariableDeclarationFragment();
-					lambdaParameter.setName((SimpleName) rewrite.createCopyTarget(methodParameter.getName()));
-					lambdaParameters.add(lambdaParameter);
+					if (createExplicitlyTypedParameters) {
+						lambdaParameters.add((SingleVariableDeclaration) rewrite.createCopyTarget(methodParameter));
+						importRemover.registerRetainedNode(methodParameter);
+					} else {
+						VariableDeclarationFragment lambdaParameter= ast.newVariableDeclarationFragment();
+						lambdaParameter.setName((SimpleName) rewrite.createCopyTarget(methodParameter.getName()));
+						lambdaParameters.add(lambdaParameter);
+					}
 				}
 				
 				Block body= methodDeclaration.getBody();
@@ -317,7 +359,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				lambdaExpression.setBody(ASTNodes.getCopyOrReplacement(rewrite, lambdaBody, group));
 				Expression replacement= lambdaExpression;
 				ITypeBinding targetTypeBinding= ASTNodes.getTargetType(classInstanceCreation);
-				if (ASTNodes.isTargetAmbiguous(classInstanceCreation, lambdaParameters.isEmpty()) || targetTypeBinding.getFunctionalInterfaceMethod() == null) {
+				if (ASTNodes.isTargetAmbiguous(classInstanceCreation, ASTNodes.isExplicitlyTypedLambda(lambdaExpression)) || targetTypeBinding.getFunctionalInterfaceMethod() == null) {
 					CastExpression cast= ast.newCastExpression();
 					cast.setExpression(lambdaExpression);
 					ImportRewrite importRewrite= cuRewrite.getImportRewrite();
@@ -515,7 +557,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 		}
 	}
 
-	private static boolean conversionRemovesAnnotations;
+	private static boolean fConversionRemovesAnnotations;
 
 	public static LambdaExpressionsFix createConvertToLambdaFix(ClassInstanceCreation cic) {
 		CompilationUnit root= (CompilationUnit) cic.getRoot();
@@ -527,7 +569,7 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 
 		CreateLambdaOperation op= new CreateLambdaOperation(Collections.singletonList(cic));
 		String message;
-		if (conversionRemovesAnnotations) {
+		if (fConversionRemovesAnnotations) {
 			message= FixMessages.LambdaExpressionsFix_convert_to_lambda_expression_removes_annotations;
 		} else {
 			message= FixMessages.LambdaExpressionsFix_convert_to_lambda_expression;
@@ -621,14 +663,14 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 	}
 
 	private static void checkAnnotationsRemoval(IMethodBinding methodBinding) {
-		conversionRemovesAnnotations= false;
+		fConversionRemovesAnnotations= false;
 		IAnnotationBinding[] declarationAnnotations= methodBinding.getAnnotations();
 		for (IAnnotationBinding declarationAnnotation : declarationAnnotations) {
 			ITypeBinding annotationType= declarationAnnotation.getAnnotationType();
 			if (annotationType != null) {
 				String qualifiedName= annotationType.getQualifiedName();
 				if (!"java.lang.Override".equals(qualifiedName) && !"java.lang.Deprecated".equals(qualifiedName)) { //$NON-NLS-1$ //$NON-NLS-2$
-					conversionRemovesAnnotations= true;
+					fConversionRemovesAnnotations= true;
 					return;
 				}
 			}
