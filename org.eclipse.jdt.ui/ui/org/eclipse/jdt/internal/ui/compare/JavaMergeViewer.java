@@ -595,15 +595,14 @@ public class JavaMergeViewer extends TextMergeViewer {
 					dispose();
 
 					fEditor.remove(this);
-					if (fEditor.isEmpty())
+					if (fEditor.isEmpty()) {
 						fEditor= null;
+						fSite= null;
+					}
 
 					fSourceViewer.remove(this);
 					if (fSourceViewer.isEmpty())
 						fSourceViewer= null;
-
-					if (fSourceViewer == null && fEditor == null)
-						fSite= null;
 
 				}
 			};
