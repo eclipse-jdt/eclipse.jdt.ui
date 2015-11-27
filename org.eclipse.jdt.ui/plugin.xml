@@ -7,6 +7,11 @@
 <!-- which accompanies this distribution, and is available at               -->
 <!-- http://www.eclipse.org/legal/epl-v10.html                              -->
 <!--                                                                        -->
+<!-- This is an implementation of an early-draft specification developed    -->
+<!-- under the Java Community Process (JCP) and is made available for       -->
+<!-- testing and evaluation purposes only. The code is not compatible       -->
+<!-- with any specification of the JCP.                                     -->
+<!--                                                                        -->
 <!-- Contributors:                                                          -->
 <!--     IBM Corporation - initial API and implementation                   -->
 <!--     Francis Upton IV, Oakland Software <francisu@ieee.org> - Add support for Go Into with the ProjectExplorer - https://bugs.eclipse.org/bugs/show_bug.cgi?id=262091 -->
@@ -1013,6 +1018,16 @@
             id="org.eclipse.jdt.ui.JARDescEditor"
             launcher="org.eclipse.jdt.internal.ui.jarpackager.OpenJarExportWizardEditorLauncher"
             name="%jarDescEditorName">
+      </editor>
+      <editor
+            name="%ModuleInfoEditorName"
+            icon="$nl$/icons/full/obj16/jcu_obj.png"
+            filenames="module-info.java"
+            class="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor"
+            contributorClass="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditorActionContributor"
+            id="org.eclipse.jdt.ui.ModuleInfoEditor"
+            default="true"
+            symbolicFontName="org.eclipse.jdt.ui.editors.textfont">
       </editor>
    </extension>
    

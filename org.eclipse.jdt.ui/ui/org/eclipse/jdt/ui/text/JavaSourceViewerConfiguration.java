@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -343,7 +347,11 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 */
 	private void initializeScanners() {
 		Assert.isTrue(isNewSetup());
-		fCodeScanner= new JavaCodeScanner(getColorManager(), fPreferenceStore);
+		boolean isModuleInfoEditor= false;
+		if (fTextEditor != null && JavaUI.ID_MODULE_INFO_EDITOR.equals(fTextEditor.getEditorSite().getId())) {
+			isModuleInfoEditor= true;
+		}
+		fCodeScanner= new JavaCodeScanner(getColorManager(), fPreferenceStore, isModuleInfoEditor);
 		fMultilineCommentScanner= new JavaCommentScanner(getColorManager(), fPreferenceStore, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT);
 		fSinglelineCommentScanner= new JavaCommentScanner(getColorManager(), fPreferenceStore, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);
 		fStringScanner= new SingleTokenJavaScanner(getColorManager(), fPreferenceStore, IJavaColorConstants.JAVA_STRING);
