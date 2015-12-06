@@ -1766,21 +1766,19 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		return oldExtension.equals(newExtension);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#getAdapter(java.lang.Class)
-	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class required) {
+	public <T> T getAdapter(Class<T> required) {
 		if (SmartBackspaceManager.class.equals(required)) {
 			if (getSourceViewer() instanceof JavaSourceViewer) {
-				return ((JavaSourceViewer) getSourceViewer()).getBackspaceManager();
+				return (T) ((JavaSourceViewer) getSourceViewer()).getBackspaceManager();
 			}
 		}
 
 		if (ITemplatesPage.class.equals(required)) {
 			if (fTemplatesPage == null)
 				fTemplatesPage= createTemplatesPage();
-			return fTemplatesPage;
+			return (T) fTemplatesPage;
 		}
 
 		return super.getAdapter(required);

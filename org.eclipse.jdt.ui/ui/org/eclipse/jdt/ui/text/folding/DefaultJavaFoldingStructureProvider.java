@@ -1274,7 +1274,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private ProjectionAnnotationModel getModel() {
-		return (ProjectionAnnotationModel) fEditor.getAdapter(ProjectionAnnotationModel.class);
+		return fEditor.getAdapter(ProjectionAnnotationModel.class);
 	}
 
 	private IDocument getDocument() {

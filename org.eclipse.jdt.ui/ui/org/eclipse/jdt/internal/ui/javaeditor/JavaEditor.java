@@ -1856,7 +1856,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		if (sourceViewer instanceof ProjectionViewer) {
 			fProjectionSupport= new ProjectionSupport((ProjectionViewer)sourceViewer, getAnnotationAccess(), getSharedColors());
-			MarkerAnnotationPreferences markerAnnotationPreferences= (MarkerAnnotationPreferences)getAdapter(MarkerAnnotationPreferences.class);
+			MarkerAnnotationPreferences markerAnnotationPreferences= getAdapter(MarkerAnnotationPreferences.class);
 			if (markerAnnotationPreferences != null) {
 				Iterator<AnnotationPreference> e= markerAnnotationPreferences.getAnnotationPreferences().iterator();
 				while (e.hasNext()) {
@@ -2156,23 +2156,21 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		synchronizeOutlinePage(computeHighlightRangeSourceReference());
 	}
 
-	/*
-	 * @see AbstractTextEditor#getAdapter(Class)
-	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class required) {
+	public <T> T getAdapter(Class<T> required) {
 
 		if (IContentOutlinePage.class.equals(required)) {
 			if (fOutlinePage == null && getSourceViewer() != null && isCalledByOutline())
 				fOutlinePage= createOutlinePage();
-			return fOutlinePage;
+			return (T) fOutlinePage;
 		}
 
 		if (IEncodingSupport.class.equals(required))
-			return fEncodingSupport;
+			return (T) fEncodingSupport;
 
 		if (required == IShowInTargetList.class) {
-			return new IShowInTargetList() {
+			return (T) new IShowInTargetList() {
 				@Override
 				public String[] getShowInTargetIds() {
 					return new String[] { JavaUI.ID_PACKAGES, IPageLayout.ID_OUTLINE, JavaPlugin.ID_RES_NAV };
@@ -2186,7 +2184,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (inputJE instanceof ICompilationUnit && !JavaModelUtil.isPrimary((ICompilationUnit) inputJE))
 				return null;
 
-			return new IShowInSource() {
+			return (T) new IShowInSource() {
 				@Override
 				public ShowInContext getShowInContext() {
 					return new ShowInContext(null, null) {
@@ -2226,20 +2224,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		if (required == IJavaFoldingStructureProvider.class)
-			return fProjectionModelUpdater;
+			return (T) fProjectionModelUpdater;
 
 		if (fProjectionSupport != null) {
-			Object adapter= fProjectionSupport.getAdapter(getSourceViewer(), required);
+			T adapter= fProjectionSupport.getAdapter(getSourceViewer(), required);
 			if (adapter != null)
 				return adapter;
 		}
 
 		if (required == IContextProvider.class) {
-			if (isBreadcrumbActive()) {
-				return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.JAVA_EDITOR_BREADCRUMB);
-			} else {
-				return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.JAVA_EDITOR);
-			}
+			String contextId= isBreadcrumbActive() ? IJavaHelpContextIds.JAVA_EDITOR_BREADCRUMB : IJavaHelpContextIds.JAVA_EDITOR;
+			return (T) JavaUIHelp.getHelpContextProvider(this, contextId);
 		}
 
 		return super.getAdapter(required);

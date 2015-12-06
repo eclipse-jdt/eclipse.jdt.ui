@@ -91,7 +91,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 
 			fExitStrategy.arm(fEditor.getViewer());
 
-			IRewriteTarget target= (IRewriteTarget)fEditor.getAdapter(IRewriteTarget.class);
+			IRewriteTarget target= fEditor.getAdapter(IRewriteTarget.class);
 			if (target != null) {
 				target.beginCompoundChange();
 			}
@@ -105,7 +105,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 
 			fExitStrategy.disarm();
 
-			IRewriteTarget target= (IRewriteTarget)fEditor.getAdapter(IRewriteTarget.class);
+			IRewriteTarget target= fEditor.getAdapter(IRewriteTarget.class);
 			if (target != null) {
 				target.endCompoundChange();
 			}
@@ -464,7 +464,7 @@ public class JavaMoveLinesAction extends TextEditorAction {
 	 * Displays information in the status line why a line move is not possible
 	 */
 	private void showStatus() {
-		IEditorStatusLine status= (IEditorStatusLine) fSharedState.fEditor.getAdapter(IEditorStatusLine.class);
+		IEditorStatusLine status= fSharedState.fEditor.getAdapter(IEditorStatusLine.class);
 		if (status == null)
 			return;
 		status.setMessage(false, JavaEditorMessages.Editor_MoveLines_IllegalMove_status, null);
