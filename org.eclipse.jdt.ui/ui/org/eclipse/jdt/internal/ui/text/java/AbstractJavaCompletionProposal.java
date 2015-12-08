@@ -883,8 +883,8 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			return false;
 		String start= string.substring(0, prefix.length());
 		return start.equalsIgnoreCase(prefix) ||
-				isCamelCaseMatching() && CharOperation.camelCaseMatch(prefix.toCharArray(), string.toCharArray()) ||
-				isSubstringMatching() && CharOperation.substringMatch(prefix.toCharArray(), string.toCharArray());
+				isCamelCaseMatching() && CharOperation.camelCaseMatch(prefix.toCharArray(), string.toCharArray())/* ||
+				isSubstringMatching() && CharOperation.substringMatch(prefix.toCharArray(), string.toCharArray())*/;
 	}
 
 	/**
