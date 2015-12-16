@@ -11,8 +11,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.osgi.util.TextProcessor;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -29,7 +27,6 @@ import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
@@ -368,27 +365,6 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	public final void setImage(Image image) {
 		fImageComputed= true;
 		super.setImage(image);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
-	 */
-	@Override
-	protected boolean isValidPrefix(String prefix) {
-		if (super.isValidPrefix(prefix))
-			return true;
-
-		// CompletionProposal.METHOD_NAME_REFERENCE can also occur for method reference expressions like "String::equ^"
-		if (fProposal.getKind() == CompletionProposal.METHOD_NAME_REFERENCE && prefix.indexOf('.') != -1) {
-			// static imports - includes package & type name
-			StringBuffer buf= new StringBuffer();
-			buf.append(Signature.toCharArray(fProposal.getDeclarationSignature()));
-			buf.append('.');
-			buf.append(TextProcessor.deprocess(getDisplayString()));
-			return isPrefix(prefix, buf.toString());
-		}
-
-		return false;
 	}
 
 	/**
