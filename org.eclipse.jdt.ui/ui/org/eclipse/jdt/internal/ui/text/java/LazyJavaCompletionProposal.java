@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -378,7 +378,8 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 		if (super.isValidPrefix(prefix))
 			return true;
 
-		if (fProposal.getKind() == CompletionProposal.METHOD_NAME_REFERENCE) {
+		// CompletionProposal.METHOD_NAME_REFERENCE can also occur for method reference expressions like "String::equ^"
+		if (fProposal.getKind() == CompletionProposal.METHOD_NAME_REFERENCE && prefix.indexOf('.') != -1) {
 			// static imports - includes package & type name
 			StringBuffer buf= new StringBuffer();
 			buf.append(Signature.toCharArray(fProposal.getDeclarationSignature()));
