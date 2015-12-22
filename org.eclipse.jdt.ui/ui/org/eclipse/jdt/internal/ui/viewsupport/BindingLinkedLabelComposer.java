@@ -191,27 +191,27 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 					// mostly from JavaElementLabelComposer:
 					try {
 						names= iMethod.getParameterNames();
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e);
-					}
-					if (isPolymorphic) {
-						// handled specially below
-					} else if (types == null) {
-						nParams= names.length;
-					} else { // types != null
-						if (nParams != names.length) {
-							if (types.length > names.length) {
-								// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=99137
-								nParams= names.length;
-								ITypeBinding[] typesWithoutSyntheticParams= new ITypeBinding[nParams];
-								System.arraycopy(types, types.length - nParams, typesWithoutSyntheticParams, 0, nParams);
-								types= typesWithoutSyntheticParams;
-							} else {
-								// https://bugs.eclipse.org/bugs/show_bug.cgi?id=101029
-								// JavaPlugin.logErrorMessage("JavaElementLabels: Number of param types(" + nParams + ") != number of names(" + names.length + "): " + method.getElementName());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-								names= null; // no names rendered
+						if (isPolymorphic) {
+							// handled specially below
+						} else if (types == null) {
+							nParams= names.length;
+						} else { // types != null
+							if (nParams != names.length) {
+								if (types.length > names.length) {
+									// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=99137
+									nParams= names.length;
+									ITypeBinding[] typesWithoutSyntheticParams= new ITypeBinding[nParams];
+									System.arraycopy(types, types.length - nParams, typesWithoutSyntheticParams, 0, nParams);
+									types= typesWithoutSyntheticParams;
+								} else {
+									// https://bugs.eclipse.org/bugs/show_bug.cgi?id=101029
+									// JavaPlugin.logErrorMessage("JavaElementLabels: Number of param types(" + nParams + ") != number of names(" + names.length + "): " + method.getElementName());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+									names= null; // no names rendered
+								}
 							}
 						}
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e);
 					}
 				}
 				IAnnotationBinding[][] parameterAnnotations= null;
@@ -226,7 +226,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 					if (i > 0)
 						fBuffer.append(JavaElementLabels.COMMA_STRING);
 					if (parameterAnnotations != null && i < parameterAnnotations.length) {
-						appendAnnotationLabels(parameterAnnotations[i], flags);
+						appendAnnotationLabels(parameterAnnotations[i], flags, false, true);
 					}
 
 					if (types != null) {
@@ -401,19 +401,20 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 			flags &= ~(JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_CONTAINER_QUALIFIED); // qualification is done
 		}
 		if (!typeBinding.isArray()) { // different textual order for type annotations on array types
-			appendAnnotationLabels(typeBinding.getTypeAnnotations(), typeRefFlags);
+			appendAnnotationLabels(typeBinding.getTypeAnnotations(), typeRefFlags, false, true);
 		}
 		if (typeBinding.isPrimitive()) {
 			fBuffer.append(typeBinding.getName());
 		} else if (typeBinding.isArray()) {
 			appendTypeBindingLabel(typeBinding.getElementType(), flags);
-			IAnnotationBinding[] typeAnnotations= typeBinding.getTypeAnnotations();
-			if (typeAnnotations.length > 0) {
-				fBuffer.append(' ');
-				appendAnnotationLabels(typeAnnotations, typeRefFlags);
-			}
-			for (int dim= typeBinding.getDimensions(); dim > 0; dim--) {
+			ITypeBinding typeAtDimension = typeBinding;
+			while (typeAtDimension.isArray()) {
+				IAnnotationBinding[] typeAnnotations= typeAtDimension.getTypeAnnotations();
+				if (typeAnnotations.length > 0) {
+					appendAnnotationLabels(typeAnnotations, typeRefFlags, true, false);
+				}				
 				fBuffer.append('[').append(']');
+				typeAtDimension = typeAtDimension.getComponentType();
 			}
 		} else if (typeBinding.isClass() || typeBinding.isInterface() || typeBinding.isEnum()) {
 			fBuffer.append(getTypeLink(typeBinding, flags));
@@ -507,10 +508,15 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 		}
 	}
 
-	private void appendAnnotationLabels(IAnnotationBinding[] annotationBindings, long flags) {
+	private void appendAnnotationLabels(IAnnotationBinding[] annotationBindings, long flags, boolean prependBlank, boolean appendBlank) {
+		if ((flags & IS_POST_QUALIFICATION) != 0)
+			return;
+		if (prependBlank)
+			fBuffer.append(' ');
 		for (int i= 0; i < annotationBindings.length; i++) {
 			appendAnnotationLabel(annotationBindings[i], flags);
-			fBuffer.append(' ');
+			if (appendBlank || i < annotationBindings.length-1)
+				fBuffer.append(' ');
 		}
 	}
 
@@ -567,7 +573,7 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 	}
 
 	private void appendPackageLabel(IPackageBinding binding, long flags) {
-		appendAnnotationLabels(binding.getAnnotations(), flags);
+		appendAnnotationLabels(binding.getAnnotations(), flags, false, true);
 		String qualifiedName= binding.getName();
 		if (qualifiedName.length() > 0) {
 			IJavaElement packageElement= binding.getJavaElement();
