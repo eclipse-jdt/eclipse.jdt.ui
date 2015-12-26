@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,16 +13,29 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.Arrays;
+import java.util.List;
+
+import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -32,158 +45,462 @@ import org.eclipse.core.runtime.preferences.DefaultScope;
 
 import org.eclipse.core.resources.IProject;
 
+import org.eclipse.jface.contentassist.SubjectControlContentAssistant;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.layout.PixelConverter;
-import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.BidiUtils;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ICellModifier;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.ui.contentassist.ContentAssistHandler;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
+import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.dialogs.TableTextCellEditor;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
-import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.CompletionContextRequestor;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 
 public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlock {
 
+	private interface IAnnotationDialogField {
+		String getErrorMessage();
+		void setStatus(NullAnnotationsConfigurationDialog.AnnotationWrapper element, IStatus newStatus);
+	}
+
 	private class NullAnnotationsConfigurationDialog extends StatusDialog {
-		
-		private class StringButtonAdapter implements IDialogFieldListener, IStringButtonAdapter {
+
+		private static final String COLUMN_ANNOTATION= "annotation"; //$NON-NLS-1$
+		private static final String EMPTY_STRING= ""; //$NON-NLS-1$
+
+		private class AnnotationDialogField extends StringDialogField implements IAnnotationDialogField {
+			
+			final String fErrorMessage;
+			IStatus fStatus;
+			
+			public AnnotationDialogField(String errorMessage) {
+				fErrorMessage= errorMessage;
+				fStatus= new StatusInfo();
+			}
 			@Override
-			public void dialogFieldChanged(DialogField field) {
-				doValidation((StringButtonDialogField) field);
+			public String getText() {
+				return super.getText().trim();
+			}
+			@Override
+			public String getErrorMessage() {
+				return fErrorMessage;
+			}
+			public IStatus getStatus() {
+				return fStatus;
+			}
+			@Override
+			public void setStatus(AnnotationWrapper element, IStatus newStatus) {
+				fStatus= newStatus;
+			}
+			IStatus doValidation() {
+				return NullAnnotationsConfigurationDialog.this.doValidation(this, null, getText(), true);
+			}
+		}
+
+		private class AnnotationWrapper { // mimic a mutable string
+			public String annotationName;
+			public IStatus status; // null means: no status computed, yet.
+			
+			public AnnotationWrapper(String annotationName) {
+				this.annotationName= annotationName;
+			}
+		}
+
+		private class AnnotationListDialogField extends ListDialogField<AnnotationWrapper> implements IAnnotationDialogField {
+
+			final String fErrorMessage;
+
+			public AnnotationListDialogField(IListAdapter<AnnotationWrapper> adapter, String[] buttonLabels, ILabelProvider lprovider, String errorMessage) {
+				super(adapter, buttonLabels, lprovider);
+				fErrorMessage= errorMessage;
+			}
+
+			public void addElementsFromCommaSeparatedList(String value) {
+				value= value.trim();
+				if (value.isEmpty())
+					return;
+				String[] strings= value.split(","); //$NON-NLS-1$
+				for (int i= 0; i < strings.length; i++)
+					addElement(new AnnotationWrapper(strings[i].trim()));
+			}
+
+			public String getCommaSeparatedElements() {
+				List<AnnotationWrapper> elements= getElements();
+				if (elements.isEmpty()) return EMPTY_STRING;
+				StringBuilder buf= new StringBuilder();
+				for (int i= 0; i < elements.size(); i++) {
+					String annotationName= elements.get(i).annotationName;
+					if (annotationName.isEmpty())
+						continue;
+					if (i > 0) buf.append(',');
+					buf.append(annotationName);
+				}
+				return buf.toString();
 			}
 
 			@Override
-			public void changeControlPressed(DialogField field) {
-				doBrowseTypes((StringButtonDialogField) field);
+			public void elementChanged(AnnotationWrapper element) throws IllegalArgumentException {
+				super.elementChanged(element);
+				NullAnnotationsConfigurationDialog.this.doValidation(this, element, element.annotationName, false);
+			}
+			@Override
+			public String getErrorMessage() {
+				return fErrorMessage;
+			}
+			public IStatus getMostSevereStatus() {
+				List<AnnotationWrapper> elements= getElements();
+				if (elements.isEmpty())
+					return new StatusInfo();
+				IStatus[] all= new IStatus[elements.size()];
+				for (int i= 0; i < elements.size(); i++) {
+					all[i]= elements.get(i).status;
+					if (all[i] == null)
+						all[i]= new StatusInfo();
+				}
+				return StatusUtil.getMostSevere(all);
+			}
+			@Override
+			public void setStatus(AnnotationWrapper element, IStatus newStatus) {
+				element.status= newStatus;
+			}
+		}
+	
+		private class FieldListener implements ModifyListener {
+			AnnotationDialogField fField;
+			FieldListener(AnnotationDialogField field) {
+				fField= field;
+			}
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				fField.doValidation();
+			}
+		}
+
+		private class AnnotationCompletionContextRequestor extends CompletionContextRequestor {
+			@Override
+			public StubTypeContext getStubTypeContext() {
+				return TypeContextChecker.createAnnotationStubTypeContext(fProject);
+			}
+		}
+
+		private class AnnotationListAdapter implements IListAdapter<AnnotationWrapper> {
+
+			@Override
+			public void customButtonPressed(ListDialogField<AnnotationWrapper> field, int index) {
+				if (index == 0) { // "Add"
+					AnnotationWrapper newElement= new AnnotationWrapper(EMPTY_STRING);
+					field.addElement(newElement);
+					field.editElement(newElement);
+				}
+			}
+
+			@Override
+			public void selectionChanged(ListDialogField<AnnotationWrapper> field) {
+				// nothing
+			}
+
+			@Override
+			public void doubleClicked(ListDialogField<AnnotationWrapper> field) {
+				// nothing
+			}
+		}
+
+		private class AnnotationListLabelProvider extends LabelProvider {
+
+			AnnotationListDialogField fField;
+			
+			void setDialogField(AnnotationListDialogField field) {
+				fField= field;
+			}
+			
+			@Override
+			public String getText(Object element) {
+				return BasicElementLabels.getJavaElementName(((AnnotationWrapper) element).annotationName);
+			}
+			
+			@Override
+			public Image getImage(Object element) {
+				if (element instanceof AnnotationWrapper) {
+					AnnotationWrapper annotationWrapper= (AnnotationWrapper) element;
+					IStatus status= annotationWrapper.status;
+					if (status == null) {
+						status= validateNullnessAnnotation(annotationWrapper.annotationName, fField.getErrorMessage(), false);
+						annotationWrapper.status= status;
+					}
+					switch (status.getSeverity()) {
+						case IStatus.INFO:
+							return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_INFO);
+						case IStatus.ERROR:
+							return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_ERROR);
+						default:
+							// fall through
+					}
+				}
+				return JavaPluginImages.get(JavaPluginImages.IMG_BLANK);
 			}
 		}
 
 		private static final int RESTORE_DEFAULTS_BUTTON_ID= IDialogConstants.CLIENT_ID + 1;
 		
 		
-		private StringButtonDialogField fNullableAnnotationDialogField;
-		private StringButtonDialogField fNonNullAnnotationDialogField;
-		private StringButtonDialogField fNonNullByDefaultAnnotationDialogField;
-		private IStatus fNullableStatus, fNonNullStatus, fNonNullByDefaultStatus;
+		private AnnotationDialogField fNullableAnnotationDialogField;
+		private AnnotationDialogField fNonNullAnnotationDialogField;
+		private AnnotationDialogField fNonNullByDefaultAnnotationDialogField;
+		private AnnotationListDialogField fOtherNullableAnnotationsDialogField;
+		private AnnotationListDialogField fOtherNonNullAnnotationsDialogField;
+		private AnnotationListDialogField fOtherNonNullByDefaultAnnotationsDialogField;
 
 		private NullAnnotationsConfigurationDialog() {
 			super(ProblemSeveritiesConfigurationBlock.this.getShell());
 			
 			setTitle(PreferencesMessages.NullAnnotationsConfigurationDialog_title);
-			
-			fNullableStatus= new StatusInfo();
-			fNonNullStatus= new StatusInfo();
-			fNonNullByDefaultStatus= new StatusInfo();
-			
-			StringButtonAdapter adapter= new StringButtonAdapter();
 
-			fNullableAnnotationDialogField= new StringButtonDialogField(adapter);
-			fNullableAnnotationDialogField.setLabelText(PreferencesMessages.NullAnnotationsConfigurationDialog_nullable_annotation_label);
-			fNullableAnnotationDialogField.setButtonLabel(PreferencesMessages.NullAnnotationsConfigurationDialog_browse1);
-			fNullableAnnotationDialogField.setDialogFieldListener(adapter);
-			fNullableAnnotationDialogField.setText(getValue(PREF_NULLABLE_ANNOTATION_NAME));
+			String errorMessage= PreferencesMessages.NullAnnotationsConfigurationDialog_nullable_annotation_error;
+			fNullableAnnotationDialogField= createAnnotationDialogField(PREF_NULLABLE_ANNOTATION_NAME, errorMessage);
+			fOtherNullableAnnotationsDialogField= createAnnotationListDialogField(PREF_NULLABLE_ANNOTATION_SECONDARY_NAMES, errorMessage);
 			
-			fNonNullAnnotationDialogField= new StringButtonDialogField(adapter);
-			fNonNullAnnotationDialogField.setLabelText(PreferencesMessages.NullAnnotationsConfigurationDialog_nonnull_annotation_label);
-			fNonNullAnnotationDialogField.setButtonLabel(PreferencesMessages.NullAnnotationsConfigurationDialog_browse2);
-			fNonNullAnnotationDialogField.setDialogFieldListener(adapter);
-			fNonNullAnnotationDialogField.setText(getValue(PREF_NONNULL_ANNOTATION_NAME));
+			errorMessage= PreferencesMessages.NullAnnotationsConfigurationDialog_nonnull_annotation_error;
+			fNonNullAnnotationDialogField= createAnnotationDialogField(PREF_NONNULL_ANNOTATION_NAME, errorMessage);
+			fOtherNonNullAnnotationsDialogField= createAnnotationListDialogField(PREF_NONNULL_ANNOTATION_SECONDARY_NAMES, errorMessage);
 			
-			fNonNullByDefaultAnnotationDialogField= new StringButtonDialogField(adapter);
-			fNonNullByDefaultAnnotationDialogField.setLabelText(PreferencesMessages.NullAnnotationsConfigurationDialog_nonnullbydefault_annotation_label);
-			fNonNullByDefaultAnnotationDialogField.setButtonLabel(PreferencesMessages.NullAnnotationsConfigurationDialog_browse3);
-			fNonNullByDefaultAnnotationDialogField.setDialogFieldListener(adapter);
-			fNonNullByDefaultAnnotationDialogField.setText(getValue(PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME));
+			errorMessage= PreferencesMessages.NullAnnotationsConfigurationDialog_nonnullbydefault_annotation_error;
+			fNonNullByDefaultAnnotationDialogField= createAnnotationDialogField(PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME, errorMessage);
+			fOtherNonNullByDefaultAnnotationsDialogField= createAnnotationListDialogField(PREF_NONNULL_BY_DEFAULT_ANNOTATION_SECONDARY_NAMES, errorMessage);
 		}
-		
+
+		private AnnotationDialogField createAnnotationDialogField(Key key, String errorMessage) {
+			AnnotationDialogField field= new AnnotationDialogField(errorMessage);
+			field.setLabelText(PreferencesMessages.NullAnnotationsConfigurationDialog_primary_label);
+			field.setText(getValue(key));
+			return field;
+		}
+
+		private AnnotationListDialogField createAnnotationListDialogField(Key key, String errorMessage) {
+			String[] buttons= new String[] { PreferencesMessages.NullAnnotationsConfigurationDialog_add_button };
+			AnnotationListLabelProvider annotationLabelProvider= new AnnotationListLabelProvider();
+			AnnotationListDialogField field= new AnnotationListDialogField(new AnnotationListAdapter(), buttons, annotationLabelProvider, errorMessage);
+			field.setLabelText(PreferencesMessages.NullAnnotationsConfigurationDialog_secondary_label);
+			field.setTableColumns(new ListDialogField.ColumnsDescription(1, false));
+			field.addElementsFromCommaSeparatedList(getValue(key));
+			annotationLabelProvider.setDialogField(field);
+			return field;
+		}
+
 		@Override
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
 			initializeDialogUnits(parent);
 
 			GridLayout layout= (GridLayout) composite.getLayout();
-			layout.numColumns= 3;
+			layout.numColumns= 1;
 			
-			int fieldWidthHint= convertWidthInCharsToPixels(60);
+			int fieldWidthHint= convertWidthInCharsToPixels(90); // heuristic to match the default size of the dialog
 			
 			Label intro= new Label(composite, SWT.WRAP);
 			intro.setText(PreferencesMessages.NullAnnotationsConfigurationDialog_null_annotations_description);
 	    	intro.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, layout.numColumns, 1));
 			LayoutUtil.setWidthHint(intro, fieldWidthHint);
 	    	
-			fNullableAnnotationDialogField.doFillIntoGrid(composite, 3);
-			Text text= fNullableAnnotationDialogField.getTextControl(null);
-			LayoutUtil.setWidthHint(text, fieldWidthHint);
-			TextFieldNavigationHandler.install(text);
+			String[] texts= { PreferencesMessages.NullAnnotationsConfigurationDialog_nullable_annotations_label,
+					PreferencesMessages.NullAnnotationsConfigurationDialog_nullable_annotations_description };
+			createNullAnnotationGroup(fNullableAnnotationDialogField, fOtherNullableAnnotationsDialogField, composite, texts, fieldWidthHint);
 
-			fNonNullAnnotationDialogField.doFillIntoGrid(composite, 3);
-			TextFieldNavigationHandler.install(fNonNullAnnotationDialogField.getTextControl(null));
-			
-			fNonNullByDefaultAnnotationDialogField.doFillIntoGrid(composite, 3);
-			TextFieldNavigationHandler.install(fNonNullByDefaultAnnotationDialogField.getTextControl(null));
-			
+			texts= new String[] { PreferencesMessages.NullAnnotationsConfigurationDialog_nonnull_annotations_label,
+					PreferencesMessages.NullAnnotationsConfigurationDialog_nonnull_annotations_description };
+			createNullAnnotationGroup(fNonNullAnnotationDialogField, fOtherNonNullAnnotationsDialogField, composite, texts, fieldWidthHint);
+
+
+			texts= new String[] { PreferencesMessages.NullAnnotationsConfigurationDialog_nonnullbydefault_annotations_label,
+					PreferencesMessages.NullAnnotationsConfigurationDialog_nonnullbydefault_annotations_description };
+			createNullAnnotationGroup(fNonNullByDefaultAnnotationDialogField, fOtherNonNullByDefaultAnnotationsDialogField, composite, texts, fieldWidthHint);
+
 			fNullableAnnotationDialogField.postSetFocusOnDialogField(parent.getDisplay());
 
 			applyDialogFont(composite);
 			return composite;
 		}
-		
-		private void doBrowseTypes(StringButtonDialogField dialogField) {
-			IRunnableContext context= new BusyIndicatorRunnableContext();
-			IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
-			int style= IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES;
-			try {
-				SelectionDialog dialog= JavaUI.createTypeDialog(getShell(), context, scope, style, false, dialogField.getText());
-				dialog.setTitle(PreferencesMessages.NullAnnotationsConfigurationDialog_browse_title);
-				dialog.setMessage(PreferencesMessages.NullAnnotationsConfigurationDialog_choose_annotation);
-				if (dialog.open() == Window.OK) {
-					IType res= (IType) dialog.getResult()[0];
-					dialogField.setText(res.getFullyQualifiedName('.'));
+
+		private void createNullAnnotationGroup(AnnotationDialogField primaryField, final AnnotationListDialogField secondaryList, Composite parent, String[] texts, int fieldWidthHint) {
+			Group group= new Group(parent, SWT.NONE);
+			GridLayout layout= new GridLayout(3, false);
+			layout.marginLeft= convertWidthInCharsToPixels(2);
+			GridData groupData= new GridData(SWT.FILL, SWT.FILL, true, true);
+
+			// compensate different height of intro texts when suggesting height of the group:
+			GC gc= new GC(parent);
+			gc.setFont(JFaceResources.getDialogFont());
+			Point size= gc.stringExtent(texts[1]);
+			int lines= (size.x / fieldWidthHint) + 1;
+			gc.dispose();
+			groupData.heightHint= convertHeightInCharsToPixels(8+lines);
+			
+			group.setLayoutData(groupData);
+			group.setLayout(layout);
+			group.setText(texts[0]);
+
+			Label intro= new Label(group, SWT.WRAP);
+			intro.setText(texts[1]);
+			intro.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, layout.numColumns, 1));
+			LayoutUtil.setWidthHint(intro, 1); // force text wrapping
+
+			
+			primaryField.doFillIntoGrid(group, 2);
+			addSpacer(group); // button column is empty for the primary field
+
+			Text text= primaryField.getTextControl(null);
+			((GridData)text.getLayoutData()).grabExcessHorizontalSpace= true;
+			text.addModifyListener(new FieldListener(primaryField));
+			TextFieldNavigationHandler.install(text);
+			BidiUtils.applyBidiProcessing(text, StructuredTextTypeHandlerFactory.JAVA);
+
+			if (fProject != null) {
+				JavaTypeCompletionProcessor annotationCompletionProcessor= new JavaTypeCompletionProcessor(false, false, true);
+				annotationCompletionProcessor.setCompletionContextRequestor(new AnnotationCompletionContextRequestor());
+				ControlContentAssistHelper.createTextContentAssistant(text, annotationCompletionProcessor);
+			}
+			
+			
+			secondaryList.doFillIntoGrid(group, 3);
+			final TableViewer tableViewer= secondaryList.getTableViewer();
+			tableViewer.setColumnProperties(new String[] {COLUMN_ANNOTATION});
+			TableTextCellEditor cellEditor= new TableTextCellEditor(tableViewer, 0) {
+				@Override
+				protected Control createControl(Composite parent2) {
+					Control control= super.createControl(parent2);
+					BidiUtils.applyBidiProcessing(text, StructuredTextTypeHandlerFactory.JAVA);
+					return control;
 				}
-			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, getShell(), PreferencesMessages.NullAnnotationsConfigurationDialog_error_title, PreferencesMessages.NullAnnotationsConfigurationDialog_error_message);
+
+				@Override
+			    protected void keyReleaseOccured(KeyEvent event) {
+					if (event.keyCode == SWT.F2 && event.stateMask == 0) {
+						tableViewer.refresh(); // ensure icon is updated on F2
+					}
+			    	super.keyReleaseOccured(event);
+			    }
+			};
+			Text cellEditorText= cellEditor.getText();
+			TextFieldNavigationHandler.install(cellEditorText);
+			if (fProject != null) {
+				JavaTypeCompletionProcessor annotationCompletionProcessor= new JavaTypeCompletionProcessor(false, false, true);
+				annotationCompletionProcessor.setCompletionContextRequestor(new AnnotationCompletionContextRequestor());
+				SubjectControlContentAssistant contentAssistant= ControlContentAssistHelper.createJavaContentAssistant(annotationCompletionProcessor);
+				ContentAssistHandler.createHandlerForText(cellEditorText, contentAssistant);
+				cellEditor.setContentAssistant(contentAssistant);
+			}
+
+			tableViewer.setCellEditors(new CellEditor[] { cellEditor });
+			tableViewer.setCellModifier(new ICellModifier() {
+				@Override
+				public void modify(Object element, String property, Object value) {
+					if (element instanceof Item)
+						element= ((Item) element).getData();
+
+					AnnotationWrapper annotationWrapper= (AnnotationWrapper) element;
+					annotationWrapper.annotationName= ((String) value).trim();
+					secondaryList.elementChanged(annotationWrapper);
+				}
+				@Override
+				public Object getValue(Object element, String property) {
+					return ((AnnotationWrapper) element).annotationName;
+				}
+				@Override
+				public boolean canModify(Object element, String property) {
+					return true;
+				}
+			});
+			tableViewer.getTable().addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyPressed(KeyEvent event) {
+					if (event.keyCode == SWT.F2 && event.stateMask == 0) {
+						ISelection selection= tableViewer.getSelection();
+						if (! (selection instanceof IStructuredSelection))
+							return;
+						IStructuredSelection structuredSelection= (IStructuredSelection) selection;
+						if (!structuredSelection.isEmpty())
+							tableViewer.editElement(structuredSelection.getFirstElement(), 0);
+					}
+				}
+			});
+		}
+
+		private Label addSpacer(Group group) {
+			return new Label(group,  SWT.NONE);
+		}
+
+		@Override
+		public void create() {
+			super.create(); // cannot show error status before this super call
+			StringDialogField firstErrorField= null;
+			IStatus firstError= null;
+			AnnotationDialogField[] primaryFields= { fNullableAnnotationDialogField, fNonNullAnnotationDialogField, fNonNullByDefaultAnnotationDialogField };
+			for (AnnotationDialogField field : primaryFields) {
+				IStatus status= field.doValidation();
+				if (status.getSeverity() == IStatus.ERROR && firstError == null) {
+					firstErrorField= field;
+					firstError= status;
+				}
+			}
+			if (firstErrorField != null && firstError != null) {
+				updateStatus(firstError);
+				firstErrorField.postSetFocusOnDialogField(dialogArea.getDisplay());
 			}
 		}
-		
-		private void doValidation(StringButtonDialogField dialogField) {
-			String newValue= dialogField.getText();
-			if (fNullableAnnotationDialogField.equals(dialogField)) {
-				fNullableStatus= validateNullnessAnnotation(newValue, PreferencesMessages.NullAnnotationsConfigurationDialog_nullable_annotation_error);
-			} else if (fNonNullAnnotationDialogField.equals(dialogField)) {
-				fNonNullStatus= validateNullnessAnnotation(newValue, PreferencesMessages.NullAnnotationsConfigurationDialog_nonull_annotation_error);
-			} else if (fNonNullByDefaultAnnotationDialogField.equals(dialogField)) {
-				fNonNullByDefaultStatus= validateNullnessAnnotation(newValue, PreferencesMessages.NullAnnotationsConfigurationDialog_nonnullbydefault_annotation_error);
+
+		private IStatus doValidation(IAnnotationDialogField dialogField, AnnotationWrapper element, String newValue, boolean isTypeMandatory) {
+			IStatus fieldStatus= validateNullnessAnnotation(newValue, dialogField.getErrorMessage(), isTypeMandatory);
+			if (fieldStatus != null) {
+				dialogField.setStatus(element, fieldStatus);
+
+				// compute most severe among all known statuses, preferring fieldStatus then first-found if equal severities:
+				IStatus mostSevereStatus= StatusUtil.getMoreSevere(fNullableAnnotationDialogField.getStatus(), fieldStatus);
+				mostSevereStatus= StatusUtil.getMoreSevere(fNonNullAnnotationDialogField.getStatus(), mostSevereStatus);
+				mostSevereStatus= StatusUtil.getMoreSevere(fNonNullByDefaultAnnotationDialogField.getStatus(), mostSevereStatus);
+				mostSevereStatus= StatusUtil.getMoreSevere(fOtherNullableAnnotationsDialogField.getMostSevereStatus(), mostSevereStatus);
+				mostSevereStatus= StatusUtil.getMoreSevere(fOtherNonNullAnnotationsDialogField.getMostSevereStatus(), mostSevereStatus);
+				mostSevereStatus= StatusUtil.getMoreSevere(fOtherNonNullByDefaultAnnotationsDialogField.getMostSevereStatus(), mostSevereStatus);
+				updateStatus(mostSevereStatus);
+				return fieldStatus;
 			}
-			IStatus status= StatusUtil.getMostSevere(new IStatus[] { fNullableStatus, fNonNullStatus, fNonNullByDefaultStatus });
-			updateStatus(status);
+			return new StatusInfo();
 		}
 
 		@Override
@@ -198,6 +515,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				fNullableAnnotationDialogField.setText(NULL_ANNOTATIONS_DEFAULTS[0]);
 				fNonNullAnnotationDialogField.setText(NULL_ANNOTATIONS_DEFAULTS[1]);
 				fNonNullByDefaultAnnotationDialogField.setText(NULL_ANNOTATIONS_DEFAULTS[2]);
+				fOtherNullableAnnotationsDialogField.removeAllElements();
+				fOtherNonNullAnnotationsDialogField.removeAllElements();
+				fOtherNonNullByDefaultAnnotationsDialogField.removeAllElements();
 			} else {
 				super.buttonPressed(buttonId);
 			}
@@ -207,9 +527,13 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 			return new String[] {
 					fNullableAnnotationDialogField.getText(),
 					fNonNullAnnotationDialogField.getText(),
-					fNonNullByDefaultAnnotationDialogField.getText()
+					fNonNullByDefaultAnnotationDialogField.getText(),
+					fOtherNullableAnnotationsDialogField.getCommaSeparatedElements(),
+					fOtherNonNullAnnotationsDialogField.getCommaSeparatedElements(),
+					fOtherNonNullByDefaultAnnotationsDialogField.getCommaSeparatedElements()
 			};
 		}
+
 		@Override
 		protected boolean isResizable() {
 			return true;
@@ -289,6 +613,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_NULLABLE_ANNOTATION_NAME= getJDTCoreKey(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME);
 	private static final Key PREF_NONNULL_ANNOTATION_NAME= getJDTCoreKey(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME);
 	private static final Key PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME= getJDTCoreKey(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME);
+	private static final Key PREF_NULLABLE_ANNOTATION_SECONDARY_NAMES= getJDTCoreKey(JavaCore.COMPILER_NULLABLE_ANNOTATION_SECONDARY_NAMES);
+	private static final Key PREF_NONNULL_ANNOTATION_SECONDARY_NAMES= getJDTCoreKey(JavaCore.COMPILER_NONNULL_ANNOTATION_SECONDARY_NAMES);
+	private static final Key PREF_NONNULL_BY_DEFAULT_ANNOTATION_SECONDARY_NAMES= getJDTCoreKey(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_SECONDARY_NAMES);
 	private static final String[] NULL_ANNOTATIONS_DEFAULTS= {
 		PREF_NULLABLE_ANNOTATION_NAME.getStoredValue(DefaultScope.INSTANCE, null),
 		PREF_NONNULL_ANNOTATION_NAME.getStoredValue(DefaultScope.INSTANCE, null),
@@ -385,8 +712,11 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_ANNOTATION_NULL_ANALYSIS,
 				INTR_DEFAULT_NULL_ANNOTATIONS,
 				PREF_NULLABLE_ANNOTATION_NAME,
+				PREF_NULLABLE_ANNOTATION_SECONDARY_NAMES,
 				PREF_NONNULL_ANNOTATION_NAME,
+				PREF_NONNULL_ANNOTATION_SECONDARY_NAMES,
 				PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME,
+				PREF_NONNULL_BY_DEFAULT_ANNOTATION_SECONDARY_NAMES,
 				PREF_MISSING_NONNULL_BY_DEFAULT_ANNOTATION,
 				PREF_PB_NULL_SPECIFICATION_VIOLATION,
 				PREF_PB_POTENTIAL_NULL_ANNOTATION_INFERENCE_CONFLICT,
@@ -853,6 +1183,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 			setValue(PREF_NULLABLE_ANNOTATION_NAME, annotationNames[0]);
 			setValue(PREF_NONNULL_ANNOTATION_NAME, annotationNames[1]);
 			setValue(PREF_NONNULL_BY_DEFAULT_ANNOTATION_NAME, annotationNames[2]);
+			setValue(PREF_NULLABLE_ANNOTATION_SECONDARY_NAMES, annotationNames[3]);
+			setValue(PREF_NONNULL_ANNOTATION_SECONDARY_NAMES, annotationNames[4]);
+			setValue(PREF_NONNULL_BY_DEFAULT_ANNOTATION_SECONDARY_NAMES, annotationNames[5]);
 		}
 		updateNullAnnotationsSetting();
 	}
@@ -1022,11 +1355,26 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		getCheckBox(PREF_PB_SYNTACTIC_NULL_ANLYSIS_FOR_FIELDS).setEnabled(enableAnnotationNullAnalysis);
 	}
 
-	private IStatus validateNullnessAnnotation(String value, String errorMessage) {
+	private IStatus validateNullnessAnnotation(String value, String errorMessage, boolean isTypeMandatory) {
 		StatusInfo status= new StatusInfo();
+		if (value.isEmpty() && !isTypeMandatory)
+			return status;
 		if (JavaConventions.validateJavaTypeName(value, JavaCore.VERSION_1_5, JavaCore.VERSION_1_5).matches(IStatus.ERROR)
-				|| value.indexOf('.') == -1)
+				|| value.indexOf('.') == -1) {
 			status.setError(errorMessage);
+		} else if (fProject != null) {
+			try {
+				if (JavaCore.create(fProject).findType(value) == null) {
+					String notFoundMessage= NLS.bind(PreferencesMessages.NullAnnotationsConfigurationDialog_notFound_info, value);
+					if (isTypeMandatory)
+						status.setError(notFoundMessage);
+					else
+						status.setInfo(notFoundMessage);
+				}
+			} catch (JavaModelException e) {
+				ExceptionHandler.handle(e, getShell(), PreferencesMessages.NullAnnotationsConfigurationDialog_error_title, PreferencesMessages.NullAnnotationsConfigurationDialog_error_message);
+			}
+		}
 		return status;
 	}
 	

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -383,14 +383,21 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_needsbuild_title;
 	public static String ProblemSeveritiesConfigurationBlock_needsfullbuild_message;
 	public static String ProblemSeveritiesConfigurationBlock_needsprojectbuild_message;
-	public static String NullAnnotationsConfigurationDialog_nonnull_annotation_label;
+	public static String NullAnnotationsConfigurationDialog_nonnull_annotations_label;
+	public static String NullAnnotationsConfigurationDialog_nonnull_annotations_description;
 	public static String ProblemSeveritiesConfigurationBlock_missing_nonnull_by_default_annotation;
 	public static String NullAnnotationsConfigurationDialog_nonnullbydefault_annotation_error;
-	public static String NullAnnotationsConfigurationDialog_nonnullbydefault_annotation_label;
-	public static String NullAnnotationsConfigurationDialog_nonull_annotation_error;
+	public static String NullAnnotationsConfigurationDialog_nonnullbydefault_annotations_label;
+	public static String NullAnnotationsConfigurationDialog_nonnullbydefault_annotations_description;
+	public static String NullAnnotationsConfigurationDialog_nonnull_annotation_error;
 	public static String NullAnnotationsConfigurationDialog_null_annotations_description;
 	public static String NullAnnotationsConfigurationDialog_nullable_annotation_error;
-	public static String NullAnnotationsConfigurationDialog_nullable_annotation_label;
+	public static String NullAnnotationsConfigurationDialog_nullable_annotations_label;
+	public static String NullAnnotationsConfigurationDialog_nullable_annotations_description;
+	public static String NullAnnotationsConfigurationDialog_add_button;
+	public static String NullAnnotationsConfigurationDialog_notFound_info;
+	public static String NullAnnotationsConfigurationDialog_primary_label;
+	public static String NullAnnotationsConfigurationDialog_secondary_label;
 	public static String ProblemSeveritiesConfigurationBlock_common_description;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unavoidable_generic_type_problems;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unsafe_type_op_label;
@@ -764,11 +771,6 @@ public final class PreferencesMessages extends NLS {
 	}
 
 	public static String NameConventionConfigurationBlock_use_override_annotation_label;
-	public static String NullAnnotationsConfigurationDialog_browse_title;
-	public static String NullAnnotationsConfigurationDialog_browse1;
-	public static String NullAnnotationsConfigurationDialog_browse2;
-	public static String NullAnnotationsConfigurationDialog_browse3;
-	public static String NullAnnotationsConfigurationDialog_choose_annotation;
 	public static String NullAnnotationsConfigurationDialog_error_message;
 	public static String NullAnnotationsConfigurationDialog_error_title;
 	public static String NullAnnotationsConfigurationDialog_restore_defaults;

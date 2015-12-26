@@ -175,6 +175,8 @@ public class JavaPluginImages {
 
 	public static final String IMG_CONFIGURE_PROBLEM_SEVERITIES= NAME_PREFIX + "configure_problem_severity.png"; //$NON-NLS-1$
 
+	public static final String IMG_BLANK= NAME_PREFIX + "blank.png"; //$NON-NLS-1$
+
 	/*
 	 * Set of predefined Image Descriptors.
 	 */
@@ -478,6 +480,7 @@ public class JavaPluginImages {
 		createManagedFromKey(T_OBJ, IMG_OBJS_ERROR_ALT);
 		createManagedFromKey(T_OBJ, IMG_OBJS_WARNING_ALT);
 		createManagedFromKey(T_OBJ, IMG_OBJS_INFO_ALT);
+		createManagedFromKey(T_OBJ, IMG_BLANK);
 	}
 
 	private static final class CachedImageDescriptor extends ImageDescriptor {
