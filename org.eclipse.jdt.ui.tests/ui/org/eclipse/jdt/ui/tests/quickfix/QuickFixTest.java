@@ -106,6 +106,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(TypeParameterMismatchTest.suite());
 		suite.addTest(PropertiesFileQuickAssistTest.suite());
 		suite.addTest(NullAnnotationsQuickFixTest.suite());
+		suite.addTest(NullAnnotationsQuickFixTest18Mix.suite());
 		suite.addTest(AnnotateAssistTest15.suite());
 		suite.addTest(AnnotateAssistTest18.suite());
 
