@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -381,6 +381,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_TRANSIENT= createUnManagedCached(T_OVR, "transient_co.png"); 						//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_NATIVE= createUnManagedCached(T_OVR, "native_co.png"); 						//$NON-NLS-1$
 
+	public static final ImageDescriptor DESC_OVR_INFO= createUnManagedCached(T_OVR, "info_co.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_RUN= createUnManagedCached(T_OVR, "run_co.png"); 							//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_WARNING= createUnManagedCached(T_OVR, "warning_co.png"); 					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_IGNORE_OPTIONAL_PROBLEMS= createUnManagedCached(T_OVR, "ignore_optional_problems_ovr.png"); //$NON-NLS-1$

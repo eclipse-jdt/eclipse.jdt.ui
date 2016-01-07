@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -117,6 +117,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 	private static final int ERRORTICK_ERROR= JavaElementImageDescriptor.ERROR;
 	private static final int ERRORTICK_BUILDPATH_ERROR= JavaElementImageDescriptor.BUILDPATH_ERROR;
 	private static final int ERRORTICK_IGNORE_OPTIONAL_PROBLEMS= JavaElementImageDescriptor.IGNORE_OPTIONAL_PROBLEMS;
+	private static final int ERRORTICK_INFO= JavaElementImageDescriptor.INFO;
 
 	private ImageDescriptorRegistry fRegistry;
 	private boolean fUseNewRegistry= false;
@@ -300,7 +301,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 					IMarker curr= markers[i];
 					if (isMarkerInRange(curr, sourceElement)) {
 						int val= curr.getAttribute(IMarker.SEVERITY, -1);
-						if (val == IMarker.SEVERITY_WARNING || val == IMarker.SEVERITY_ERROR) {
+						if (val == IMarker.SEVERITY_INFO || val == IMarker.SEVERITY_WARNING || val == IMarker.SEVERITY_ERROR) {
 							severity= val;
 						}
 					}
@@ -311,6 +312,8 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 			return ERRORTICK_ERROR;
 		} else if (severity == IMarker.SEVERITY_WARNING) {
 			return ERRORTICK_WARNING;
+		} else if (severity == IMarker.SEVERITY_INFO) {
+			return ERRORTICK_INFO;
 		}
 		return 0;
 	}
@@ -349,6 +352,9 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		if (severity == IMarker.SEVERITY_WARNING) {
 			return ERRORTICK_WARNING;
 		}
+		if (severity == IMarker.SEVERITY_INFO) {
+			return ERRORTICK_INFO;
+		}
 		return 0;
 	}
 
@@ -377,7 +383,9 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 			IMarker marker= isAnnotationInRange(model, annot, sourceElement);
 			if (marker != null) {
 				int priority= marker.getAttribute(IMarker.SEVERITY, -1);
-				if (priority == IMarker.SEVERITY_WARNING) {
+				if (priority == IMarker.SEVERITY_INFO) {
+					info= ERRORTICK_INFO;
+				} else if (priority == IMarker.SEVERITY_WARNING) {
 					info= ERRORTICK_WARNING;
 				} else if (priority == IMarker.SEVERITY_ERROR) {
 					info= ERRORTICK_ERROR;
@@ -487,6 +495,8 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 			decoration.addOverlay(JavaPluginImages.DESC_OVR_BUILDPATH_ERROR);
 		} else if (adornmentFlags == ERRORTICK_WARNING) {
 			decoration.addOverlay(JavaPluginImages.DESC_OVR_WARNING);
+		} else if (adornmentFlags == ERRORTICK_INFO) {
+			decoration.addOverlay(JavaPluginImages.DESC_OVR_INFO);
 		}
 	}
 
