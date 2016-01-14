@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -157,18 +157,12 @@ public class DefaultSpellChecker implements ISpellChecker {
 		fLocale= locale;
 	}
 
-	/*
-	 * @see org.eclipse.spelling.done.ISpellChecker#addDictionary(org.eclipse.spelling.done.ISpellDictionary)
-	 */
 	@Override
 	public final void addDictionary(final ISpellDictionary dictionary) {
 		// synchronizing is necessary as this is a write access
 		fDictionaries.add(dictionary);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellChecker#acceptsWords()
-	 */
 	@Override
 	public boolean acceptsWords() {
 		// synchronizing might not be needed here since acceptWords is
@@ -189,9 +183,6 @@ public class DefaultSpellChecker implements ISpellChecker {
 		return false;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker#addWord(java.lang.String)
-	 */
 	@Override
 	public void addWord(final String word) {
 		// synchronizing is necessary as this is a write access
@@ -209,18 +200,12 @@ public class DefaultSpellChecker implements ISpellChecker {
 
 	}
 
-	/*
-	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellChecker#checkWord(java.lang.String)
-	 */
 	@Override
 	public final void checkWord(final String word) {
 		// synchronizing is necessary as this is a write access
 		fIgnored.remove(word.toLowerCase());
 	}
 
-	/*
-	 * @see org.eclipse.spelling.done.ISpellChecker#execute(org.eclipse.spelling.ISpellCheckTokenizer)
-	 */
 	@Override
 	public void execute(final ISpellEventListener listener, final ISpellCheckIterator iterator) {
 
@@ -276,9 +261,6 @@ public class DefaultSpellChecker implements ISpellChecker {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.spelling.done.ISpellChecker#getProposals(java.lang.String,boolean)
-	 */
 	@Override
 	public Set<RankedWordProposal> getProposals(final String word, final boolean sentence) {
 
@@ -301,18 +283,12 @@ public class DefaultSpellChecker implements ISpellChecker {
 		return proposals;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker#ignoreWord(java.lang.String)
-	 */
 	@Override
 	public final void ignoreWord(final String word) {
 		// synchronizing is necessary as this is a write access
 		fIgnored.add(word.toLowerCase());
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker#isCorrect(java.lang.String)
-	 */
 	@Override
 	public final boolean isCorrect(final String word) {
 		// synchronizing is necessary as this is called from execute
@@ -334,19 +310,12 @@ public class DefaultSpellChecker implements ISpellChecker {
 		return false;
 	}
 
-	/*
-	 * @see org.eclipse.spelling.done.ISpellChecker#removeDictionary(org.eclipse.spelling.done.ISpellDictionary)
-	 */
 	@Override
 	public final void removeDictionary(final ISpellDictionary dictionary) {
 		// synchronizing is necessary as this is a write access
 		fDictionaries.remove(dictionary);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker#getLocale()
-	 * @since 3.3
-	 */
 	@Override
 	public Locale getLocale() {
 		return fLocale;

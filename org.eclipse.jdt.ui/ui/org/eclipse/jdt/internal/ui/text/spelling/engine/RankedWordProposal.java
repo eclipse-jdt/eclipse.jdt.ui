@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,9 +37,6 @@ public class RankedWordProposal implements Comparable<RankedWordProposal> {
 		fRank= rank;
 	}
 
-	/*
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
 	@Override
 	public final int compareTo(RankedWordProposal word) {
 
@@ -54,9 +51,6 @@ public class RankedWordProposal implements Comparable<RankedWordProposal> {
 		return 0;
 	}
 
-	/*
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public final boolean equals(Object object) {
 
@@ -84,9 +78,6 @@ public class RankedWordProposal implements Comparable<RankedWordProposal> {
 		return fText;
 	}
 
-	/*
-	 * @see java.lang.Object#hashCode()
-	 */
 	@Override
 	public final int hashCode() {
 		return fText.hashCode();
