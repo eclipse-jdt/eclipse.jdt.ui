@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,8 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
+
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -129,7 +131,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -154,6 +156,8 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview1, expected);
 		assertEqualString(preview2, expected);
+
+		assertProposalExists(proposals, CorrectionMessages.ConfigureProblemSeveritySubProcessor_name);
 	}
 
 	public void testMissingParam2() throws Exception {
@@ -174,7 +178,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -218,7 +222,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -263,7 +267,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -302,7 +306,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -335,7 +339,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -375,7 +379,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -419,7 +423,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -461,7 +465,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -504,7 +508,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -698,7 +702,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -737,7 +741,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -779,7 +783,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -820,7 +824,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -863,7 +867,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -908,7 +912,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -951,7 +955,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -988,7 +992,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1027,7 +1031,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1063,7 +1067,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1108,7 +1112,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -1151,7 +1155,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1184,7 +1188,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1215,7 +1219,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections2(cu, 1);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1272,7 +1276,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 			assertCorrectLabels(proposals);
-			assertNumberOfProposals(proposals, 1);
+			assertNumberOfProposals(proposals, 2);
 
 			String[] expected= new String[1];
 			buf= new StringBuffer();
@@ -1321,7 +1325,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -1368,7 +1372,7 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		
 		String[] expected= new String[1];
 		buf= new StringBuffer();

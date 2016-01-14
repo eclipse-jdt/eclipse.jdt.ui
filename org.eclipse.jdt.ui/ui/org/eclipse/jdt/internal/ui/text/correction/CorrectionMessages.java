@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -255,6 +255,8 @@ public final class CorrectionMessages extends NLS {
 	public static String NewCUCompletionUsingWizardProposal_createenum_info;
 	public static String NewCUCompletionUsingWizardProposal_createinterface_info;
 	public static String NewCUCompletionUsingWizardProposal_createannotation_info;
+	public static String ConfigureProblemSeveritySubProcessor_info;
+	public static String ConfigureProblemSeveritySubProcessor_name;
 	public static String ConstructorFromSuperclassProposal_description;
 	public static String AssignToVariableAssistProposal_assigntolocal_description;
 	public static String AssignToVariableAssistProposal_assigntofield_description;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -102,7 +102,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -135,7 +135,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -169,7 +169,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -201,7 +201,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -232,7 +232,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
 		assertProposalDoesNotExist(proposals, CorrectionMessages.VarargsWarningsSubProcessor_add_safevarargs_label);
 	}
@@ -258,7 +258,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -302,7 +302,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -350,7 +350,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -391,7 +391,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -437,7 +437,7 @@ public class ModifierCorrectionsQuickFixTest17 extends QuickFixTest {
 
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 1);
+			assertNumberOfProposals(proposals, 2);
 
 			assertProposalDoesNotExist(proposals, "Add @SafeVarargs to 'asList(..)'");
 		} finally {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1290,7 +1290,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1335,7 +1335,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1380,7 +1380,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1425,7 +1425,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1470,7 +1470,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -1720,7 +1720,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -2453,7 +2453,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -2488,7 +2488,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -2527,7 +2527,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -2568,7 +2568,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -2605,7 +2605,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		String[] expected= new String[2];
 		buf= new StringBuffer();
@@ -2648,7 +2648,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -2679,7 +2679,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		buf= new StringBuffer();
@@ -2710,7 +2710,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		assertCorrectLabels(proposals);
 		String[] expected= new String[2];
 		buf= new StringBuffer();
@@ -2757,7 +2757,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -2798,7 +2798,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		String[] expected= new String[2];
 		buf= new StringBuffer();
 		buf.append("package test1; \n");
@@ -2847,7 +2847,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -2885,7 +2885,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -2925,7 +2925,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 4);
+		assertNumberOfProposals(proposals, 5);
 		String[] expected= new String[2];
 		buf= new StringBuffer();
 		buf.append("package test1; \n");
@@ -2982,7 +2982,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 3);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 6);
 		String[] expected= new String[3];
 		
 		buf= new StringBuffer();
@@ -3075,7 +3075,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		String[] expected= new String[1];
 		buf= new StringBuffer();
 		buf.append("package test1; \n");
@@ -3114,7 +3114,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[2];
 		buf= new StringBuffer();
@@ -3179,7 +3179,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -3250,7 +3250,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -3283,7 +3283,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -3316,7 +3316,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -3646,7 +3646,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[2];
 		buf= new StringBuffer();
@@ -3711,7 +3711,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[2];
 		buf= new StringBuffer();
@@ -3954,7 +3954,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -3987,7 +3987,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -4021,7 +4021,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
 		String[] expected= new String[2];

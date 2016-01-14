@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -280,7 +280,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.InheritedDefaultMethodConflictsWithOtherInherited:
 				return true;
 			default:
-				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId);
+				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
+						|| ConfigureProblemSeveritySubProcessor.hasConfigureProblemSeverityProposal(problemId);
 		}
 	}
 
@@ -777,5 +778,6 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 		if (JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {
 			SuppressWarningsSubProcessor.addSuppressWarningsProposals(context, problem, proposals);
 		}
+		ConfigureProblemSeveritySubProcessor.addConfigureProblemSeverityProposal(context, problem, proposals);
 	}
 }

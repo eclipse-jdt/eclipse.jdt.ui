@@ -173,6 +173,7 @@ public class JavaPluginImages {
 
 	public static final String IMG_OBJS_HELP= NAME_PREFIX + "help.gif"; //$NON-NLS-1$
 
+	public static final String IMG_CONFIGURE_PROBLEM_SEVERITIES= NAME_PREFIX + "configure_problem_severity.png"; //$NON-NLS-1$
 
 	/*
 	 * Set of predefined Image Descriptors.
@@ -347,7 +348,7 @@ public class JavaPluginImages {
     public static final ImageDescriptor DESC_ELCL_CONFIGURE_OUTPUT_FOLDER= createUnManaged(T_ELCL, "configure_output_folder.png"); //$NON-NLS-1$
 
     public static final ImageDescriptor DESC_DLCL_CONFIGURE_PROBLEM_SEVERITIES= createUnManaged(T_DLCL, "configure_problem_severity.png"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_ELCL_CONFIGURE_PROBLEM_SEVERITIES= createUnManaged(T_ELCL, "configure_problem_severity.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_CONFIGURE_PROBLEM_SEVERITIES= createManagedFromKey(T_ELCL, IMG_CONFIGURE_PROBLEM_SEVERITIES);
 
     public static final ImageDescriptor DESC_DLCL_EXCLUDE_FROM_BUILDPATH= createUnManaged(T_DLCL, "exclude_from_buildpath.png");  //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_EXCLUDE_FROM_BUILDPATH= createUnManaged(T_ELCL, "exclude_from_buildpath.png");  //$NON-NLS-1$
