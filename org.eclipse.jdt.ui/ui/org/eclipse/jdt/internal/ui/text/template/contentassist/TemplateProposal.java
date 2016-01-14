@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.text.template.contentassist;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
@@ -21,8 +22,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
@@ -479,7 +483,7 @@ public class TemplateProposal
 	}
 
 	@Override
-	public StyledString emphasizeMatch(IDocument document, int offset, BoldStylerProvider boldStylerProvider) {
+	public StyledString emphasizeMatch(IDocument document, int offset, final BoldStylerProvider boldStylerProvider) {
 		StyledString styledDisplayString= new StyledString();
 		styledDisplayString.append(getStyledDisplayString());
 		int start= getPrefixCompletionStart(document, offset);
@@ -489,7 +493,13 @@ public class TemplateProposal
 			if (!pattern.isEmpty()) {
 				String displayString= styledDisplayString.getString();
 				int[] matchingRegions= SearchPattern.getMatchingRegions(pattern, displayString, SearchPattern.R_PREFIX_MATCH);
-				Strings.markMatchingRegions(styledDisplayString, 0, matchingRegions, boldStylerProvider.getBoldStyler());
+				Strings.markMatchingRegions(styledDisplayString, 0, matchingRegions, new Styler() {
+					@Override
+					public void applyStyles(TextStyle textStyle) {
+						textStyle.foreground= JFaceResources.getColorRegistry().get(JFacePreferences.COUNTER_COLOR);
+						textStyle.font= boldStylerProvider.getBoldFont();
+					}
+				});
 			}
 		} catch (BadLocationException e) {
 			// return styledDisplayString
