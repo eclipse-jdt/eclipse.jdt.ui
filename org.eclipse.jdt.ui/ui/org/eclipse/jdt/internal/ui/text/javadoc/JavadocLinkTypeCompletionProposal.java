@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,15 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.jface.viewers.StyledString;
+
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.BoldStylerProvider;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.search.SearchPattern;
+
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
@@ -26,6 +32,8 @@ import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
  * @since 3.2
  */
 public class JavadocLinkTypeCompletionProposal extends LazyJavaTypeCompletionProposal {
+
+	private static final String LINK_PREFIX= "{@link "; //$NON-NLS-1$
 
 	public JavadocLinkTypeCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
 		super(proposal, context);
@@ -41,7 +49,7 @@ public class JavadocLinkTypeCompletionProposal extends LazyJavaTypeCompletionPro
 		// XXX: respect the auto-close preference, but do so consistently with method completions
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544
 //		if (autocloseBrackets())
-			return "{@link " + typeReplacement + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+		return LINK_PREFIX + typeReplacement + "}"; //$NON-NLS-1$
 //		else
 //			return "{@link " + typeReplacement; //$NON-NLS-1$
 	}
@@ -65,5 +73,31 @@ public class JavadocLinkTypeCompletionProposal extends LazyJavaTypeCompletionPro
 
 		if (continueWithMember)
 			setUpLinkedMode(document, '}');
+	}
+
+	@Override
+	public StyledString emphasizeMatch(IDocument document, int offset, BoldStylerProvider boldStylerProvider) {
+		StyledString styledDisplayString= new StyledString();
+		styledDisplayString.append(getStyledDisplayString());
+
+		String pattern= getPatternToEmphasizeMatch(document, offset);
+		if (pattern != null && pattern.length() > 0) {
+			String displayString= styledDisplayString.getString();
+			int index= displayString.indexOf('-');
+			if (index != -1) {
+				displayString= displayString.substring(0, index);
+			}
+			int prefixLength= LINK_PREFIX.length();
+			displayString= displayString.substring(prefixLength);
+			int patternMatchRule= getPatternMatchRule(pattern, displayString);
+			int[] matchingRegions= SearchPattern.getMatchingRegions(pattern, displayString, patternMatchRule);
+			if (matchingRegions != null) {
+				for (int i= 0; i < matchingRegions.length; i+= 2) {
+					matchingRegions[i]= matchingRegions[i] + prefixLength;
+				}
+			}
+			Strings.markMatchingRegions(styledDisplayString, 0, matchingRegions, boldStylerProvider.getBoldStyler());
+		}
+		return styledDisplayString;
 	}
 }
