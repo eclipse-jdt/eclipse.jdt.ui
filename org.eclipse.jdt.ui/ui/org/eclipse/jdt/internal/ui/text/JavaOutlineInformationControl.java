@@ -735,12 +735,15 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	private ITypeHierarchy getSuperTypeHierarchy(IType type) {
 		ITypeHierarchy th= fTypeHierarchies.get(type);
 		if (th == null) {
+			IProgressMonitor monitor = getProgressMonitor();
 			try {
-				th= SuperTypeHierarchyCache.getTypeHierarchy(type, getProgressMonitor());
+				th= SuperTypeHierarchyCache.getTypeHierarchy(type, monitor);
 			} catch (JavaModelException e) {
 				return null;
 			} catch (OperationCanceledException e) {
 				return null;
+			} finally {
+				monitor.done();
 			}
 			fTypeHierarchies.put(type, th);
 		}
