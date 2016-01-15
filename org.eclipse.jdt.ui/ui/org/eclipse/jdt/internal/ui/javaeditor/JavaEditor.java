@@ -51,6 +51,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
@@ -1208,8 +1209,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (window == getEditorSite().getWorkbenchWindow() && fMarkOccurrenceAnnotations && isActivePart()) {
 				fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
 				ITypeRoot inputJavaElement= getInputJavaElement();
-				if (inputJavaElement != null)
-					updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO, getProgressMonitor()));
+				if (inputJavaElement != null) {
+					IProgressMonitor monitor = getProgressMonitor();
+					try {
+						updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO, monitor));
+					} finally {
+						monitor.done();
+					}
+				}
 			}
 		}
 
@@ -2400,7 +2407,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (inputJavaElement == null)
 			return;
 
-		CompilationUnit ast= SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO /* DO NOT USE WAIT_ACTIVE_ONLY */ , getProgressMonitor());
+		IProgressMonitor monitor = getProgressMonitor();
+		CompilationUnit ast;
+		try {
+			ast= SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO /* DO NOT USE WAIT_ACTIVE_ONLY */ , monitor);
+		} finally {
+			monitor.done();
+		}
 		if (ast != null) {
 			fForcedMarkOccurrencesSelection= textSelection;
 			updateOccurrenceAnnotations((ITextSelection)textSelection, ast);
@@ -3355,8 +3368,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (forceUpdate && getSelectionProvider() != null) {
 			fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
 			ITypeRoot inputJavaElement= getInputJavaElement();
-			if (inputJavaElement != null)
-				updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO, getProgressMonitor()));
+			if (inputJavaElement != null) {
+				IProgressMonitor monitor = getProgressMonitor();
+				try {
+					updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO, monitor));
+				} finally {
+					monitor.done();
+				}
+			}
 		}
 
 		if (fOccurrencesFinderJobCanceler == null) {
@@ -3472,8 +3491,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fOverrideIndicatorManager= new OverrideIndicatorManager(model, inputElement, null);
 
 		if (provideAST) {
-			CompilationUnit ast= SharedASTProvider.getAST(inputElement, SharedASTProvider.WAIT_ACTIVE_ONLY, getProgressMonitor());
-			fOverrideIndicatorManager.reconciled(ast, true, getProgressMonitor());
+			IProgressMonitor monitor = getProgressMonitor();
+			try {
+				SubMonitor subMonitor= SubMonitor.convert(monitor, 2);
+				CompilationUnit ast= SharedASTProvider.getAST(inputElement, SharedASTProvider.WAIT_ACTIVE_ONLY, 
+						subMonitor.newChild(1, SubMonitor.SUPPRESS_NONE));
+				fOverrideIndicatorManager.reconciled(ast, true, subMonitor.newChild(1, SubMonitor.SUPPRESS_NONE));
+			} finally {
+				monitor.done();
+			}
 		}
 	}
 
