@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -408,6 +408,8 @@ final class FormatterMessages extends NLS {
 	public static String IndentationTabPage_general_group_option_indent_size;
 	public static String IndentationTabPage_field_alignment_group_title;
 	public static String IndentationTabPage_field_alignment_group_align_fields_in_columns;
+	public static String IndentationTabPage_field_alignment_group_blank_lines_separating_independent_groups;
+	public static String IndentationTabPage_field_alignment_group_blank_lines_to_preserve_info;
 	public static String IndentationTabPage_indent_group_title;
 	public static String IndentationTabPage_class_group_option_indent_declarations_within_class_body;
 	public static String IndentationTabPage_class_group_option_indent_declarations_within_enum_const;
