@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,11 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.BoldStylerProvider;
+
+import org.eclipse.jdt.core.search.SearchPattern;
+
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
@@ -103,20 +108,25 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 		setSortString(displayString == null ? replacementString : displayString.getString());
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
-	 */
 	@Override
 	protected boolean isValidPrefix(String prefix) {
 		String word= TextProcessor.deprocess(getDisplayString());
 		if (isInJavadoc()) {
-			int idx = word.indexOf("{@link "); //$NON-NLS-1$
-			if (idx==0) {
-				word = word.substring(7);
-			} else {
-				idx = word.indexOf("{@value "); //$NON-NLS-1$
-				if (idx==0) {
-					word = word.substring(8);
+			if (word.indexOf("{@link ") == 0) { //$NON-NLS-1$
+				word= word.substring(7);
+			} else if (word.indexOf("{@value ") == 0) { //$NON-NLS-1$
+				word= word.substring(8);
+			} else if (word.indexOf('<') == 0) {
+				word= word.substring(1);
+				boolean isClosing= word.indexOf('/') == 0;
+				if (isClosing) {
+					word= word.substring(1);
+				}
+				if (prefix.indexOf('<') == 0) {
+					prefix= prefix.substring(1);
+					if (isClosing && prefix.indexOf('/') == 0) {
+						prefix= prefix.substring(1);
+					}
 				}
 			}
 		} else if (word.indexOf("this.") != -1) { //$NON-NLS-1$
@@ -125,9 +135,6 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 		return isPrefix(prefix, word);
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementText()
-	 */
 	@Override
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		String string= getReplacementString();
@@ -138,5 +145,41 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 			return string.substring(5);
 		else
 			return string;
+	}
+
+	@Override
+	public StyledString emphasizeMatch(IDocument document, int offset, BoldStylerProvider boldStylerProvider) {
+		StyledString styledDisplayString= new StyledString();
+		styledDisplayString.append(getStyledDisplayString());
+		String displayString= styledDisplayString.getString();
+		if (isInJavadoc() && displayString.indexOf('<') == 0) {
+			displayString= displayString.substring(1);
+			boolean isClosing= displayString.indexOf('/') == 0;
+			if (isClosing) {
+				displayString= displayString.substring(1);
+			}
+			String pattern= getPatternToEmphasizeMatch(document, offset);
+			if (pattern != null && pattern.length() > 0) {
+				if (pattern.indexOf('<') == 0) {
+					pattern= pattern.substring(1);
+					if (isClosing && pattern.indexOf('/') == 0) {
+						pattern= pattern.substring(1);
+						Strings.markMatchingRegions(styledDisplayString, 0, new int[] { 1, 1 }, boldStylerProvider.getBoldStyler());
+					}
+					Strings.markMatchingRegions(styledDisplayString, 0, new int[] { 0, 1 }, boldStylerProvider.getBoldStyler());
+				}
+				int patternMatchRule= getPatternMatchRule(pattern, displayString);
+				int[] matchingRegions= SearchPattern.getMatchingRegions(pattern, displayString, patternMatchRule);
+				if (matchingRegions != null) {
+					int inc= isClosing ? 2 : 1;
+					for (int i= 0; i < matchingRegions.length; i+= 2) {
+						matchingRegions[i]= matchingRegions[i] + inc;
+					}
+				}
+				Strings.markMatchingRegions(styledDisplayString, 0, matchingRegions, boldStylerProvider.getBoldStyler());
+			}
+			return styledDisplayString;
+		}
+		return super.emphasizeMatch(document, offset, boldStylerProvider);
 	}
 }

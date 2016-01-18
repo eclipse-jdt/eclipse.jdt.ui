@@ -484,7 +484,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 
 	@Override
 	protected boolean isPrefix(String pattern, String string) {
-		if (string.charAt(0) == '@' && pattern.charAt(0) == '@') {
+		if (isInJavadoc() && string.charAt(0) == '@' && pattern.charAt(0) == '@') {
 			string= string.substring(1);
 			pattern= pattern.substring(1);
 		}
@@ -499,7 +499,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 		String pattern= getPatternToEmphasizeMatch(document, offset);
 		if (pattern != null && pattern.length() > 0) {
 			String displayString= styledDisplayString.getString();
-			boolean isJavadocTag= displayString.charAt(0) == '@' && pattern.charAt(0) == '@';
+			boolean isJavadocTag= isInJavadoc() && displayString.charAt(0) == '@' && pattern.charAt(0) == '@';
 			if (isJavadocTag) {
 				displayString= displayString.substring(1);
 				pattern= pattern.substring(1);

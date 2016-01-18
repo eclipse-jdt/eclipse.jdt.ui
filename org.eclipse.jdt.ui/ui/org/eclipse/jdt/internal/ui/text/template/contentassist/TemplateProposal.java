@@ -68,6 +68,8 @@ import org.eclipse.ui.part.IWorkbenchPartOrientation;
 
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
@@ -491,15 +493,33 @@ public class TemplateProposal
 		try {
 			String pattern= document.get(start, patternLength);
 			if (!pattern.isEmpty()) {
-				String displayString= styledDisplayString.getString();
-				int[] matchingRegions= SearchPattern.getMatchingRegions(pattern, displayString, SearchPattern.R_PREFIX_MATCH);
-				Strings.markMatchingRegions(styledDisplayString, 0, matchingRegions, new Styler() {
+				Styler styler= new Styler() {
 					@Override
 					public void applyStyles(TextStyle textStyle) {
 						textStyle.foreground= JFaceResources.getColorRegistry().get(JFacePreferences.COUNTER_COLOR);
 						textStyle.font= boldStylerProvider.getBoldFont();
 					}
-				});
+				};
+				String displayString= styledDisplayString.getString();
+				boolean hasBracket= fContext instanceof JavaDocContext && displayString.indexOf('<') == 0;
+				if (hasBracket) {
+					displayString= displayString.substring(1);
+					if (pattern.indexOf('<') == 0) {
+						pattern= pattern.substring(1);
+						Strings.markMatchingRegions(styledDisplayString, 0, new int[] { 0, 1 }, styler);
+					}
+				}
+				int matchRule= SearchPattern.R_PREFIX_MATCH;
+				if (JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_SUBSTRING_MATCH)) && CharOperation.substringMatch(pattern, displayString)) {
+					matchRule= SearchPattern.R_SUBSTRING_MATCH;
+				}
+				int[] matchingRegions= SearchPattern.getMatchingRegions(pattern, displayString, matchRule);
+				if (hasBracket && matchingRegions != null) {
+					for (int i= 0; i < matchingRegions.length; i+= 2) {
+						matchingRegions[i]++;
+					}
+				}
+				Strings.markMatchingRegions(styledDisplayString, 0, matchingRegions, styler);
 			}
 		} catch (BadLocationException e) {
 			// return styledDisplayString
@@ -579,11 +599,16 @@ public class TemplateProposal
 		try {
 			int replaceOffset= getReplaceOffset();
 			if (offset >= replaceOffset) {
-				String content= document.get(replaceOffset, offset - replaceOffset);
+				String content= document.get(replaceOffset, offset - replaceOffset).toLowerCase();
 				String templateName= fTemplate.getName().toLowerCase();
-				boolean valid= templateName.startsWith(content.toLowerCase());
+				boolean isSubstringEnabled= JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_SUBSTRING_MATCH));
+				boolean valid= isSubstringEnabled ? templateName.contains(content) : templateName.startsWith(content);
 				if (!valid && fContext instanceof JavaDocContext && templateName.startsWith("<")) { //$NON-NLS-1$
-					valid= templateName.startsWith(content.toLowerCase(), 1);
+					if (isSubstringEnabled) {
+						valid= CharOperation.substringMatch(content.indexOf('<') == 0 ? content.substring(1) : content, templateName.substring(1));
+					} else {
+						valid= templateName.startsWith(content, 1);
+					}
 				}
 				return valid;
 			}
