@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.BoldStylerProvider;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.CompletionProposal;
@@ -28,6 +29,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.core.search.SearchPattern;
+
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
@@ -477,4 +481,40 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 			fReplacementLengthComputed= false;
 		super.selected(viewer, smartToggle);
 	}
+
+	@Override
+	protected boolean isPrefix(String pattern, String string) {
+		if (string.charAt(0) == '@' && pattern.charAt(0) == '@') {
+			string= string.substring(1);
+			pattern= pattern.substring(1);
+		}
+		return super.isPrefix(pattern, string);
+	}
+
+	@Override
+	public StyledString emphasizeMatch(IDocument document, int offset, BoldStylerProvider boldStylerProvider) {
+		StyledString styledDisplayString= new StyledString();
+		styledDisplayString.append(getStyledDisplayString());
+
+		String pattern= getPatternToEmphasizeMatch(document, offset);
+		if (pattern != null && pattern.length() > 0) {
+			String displayString= styledDisplayString.getString();
+			boolean isJavadocTag= displayString.charAt(0) == '@' && pattern.charAt(0) == '@';
+			if (isJavadocTag) {
+				displayString= displayString.substring(1);
+				pattern= pattern.substring(1);
+			}
+			int patternMatchRule= getPatternMatchRule(pattern, displayString);
+			int[] matchingRegions= SearchPattern.getMatchingRegions(pattern, displayString, patternMatchRule);
+			if (isJavadocTag && matchingRegions != null) {
+				Strings.markMatchingRegions(styledDisplayString, 0, new int[] { 0, 1 }, boldStylerProvider.getBoldStyler());
+				for (int i= 0; i < matchingRegions.length; i+= 2) {
+					matchingRegions[i]++;
+				}
+			}
+			Strings.markMatchingRegions(styledDisplayString, 0, matchingRegions, boldStylerProvider.getBoldStyler());
+		}
+		return styledDisplayString;
+	}
+
 }

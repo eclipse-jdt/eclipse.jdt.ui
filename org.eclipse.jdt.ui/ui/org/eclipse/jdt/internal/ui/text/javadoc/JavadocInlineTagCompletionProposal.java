@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2012 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,15 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.jface.viewers.StyledString;
+
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.BoldStylerProvider;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.search.SearchPattern;
+
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
@@ -64,4 +70,48 @@ public class JavadocInlineTagCompletionProposal extends LazyJavaCompletionPropos
 		if (needsLinkedMode)
 			setUpLinkedMode(document, '}');
 	}
+
+	@Override
+	protected boolean isPrefix(String pattern, String string) {
+		if (string.charAt(0) == '{') {
+			string= string.substring(1);
+		}
+		if (pattern.charAt(0) == '{') {
+			pattern= pattern.substring(1);
+		}
+		return super.isPrefix(pattern, string);
+	}
+
+	@Override
+	public StyledString emphasizeMatch(IDocument document, int offset, BoldStylerProvider boldStylerProvider) {
+		StyledString styledDisplayString= new StyledString();
+		styledDisplayString.append(getStyledDisplayString());
+
+		String pattern= getPatternToEmphasizeMatch(document, offset);
+		if (pattern != null && pattern.length() > 0) {
+			String displayString= styledDisplayString.getString().substring(1); // remove '{'
+			boolean patternHasBrace= pattern.charAt(0) == '{';
+			if (patternHasBrace) {
+				pattern= pattern.substring(1);
+			}
+			if (displayString.charAt(0) == '@' && pattern.charAt(0) == '@') {
+				displayString= displayString.substring(1);
+				pattern= pattern.substring(1);
+				int patternMatchRule= getPatternMatchRule(pattern, displayString);
+				int[] matchingRegions= SearchPattern.getMatchingRegions(pattern, displayString, patternMatchRule);
+				if (matchingRegions != null) {
+					if (patternHasBrace) {
+						Strings.markMatchingRegions(styledDisplayString, 0, new int[] { 0, 1 }, boldStylerProvider.getBoldStyler());
+					}
+					Strings.markMatchingRegions(styledDisplayString, 0, new int[] { 1, 1 }, boldStylerProvider.getBoldStyler());
+					for (int i= 0; i < matchingRegions.length; i+= 2) {
+						matchingRegions[i]+= 2;
+					}
+				}
+				Strings.markMatchingRegions(styledDisplayString, 0, matchingRegions, boldStylerProvider.getBoldStyler());
+			}
+		}
+		return styledDisplayString;
+	}
+
 }
