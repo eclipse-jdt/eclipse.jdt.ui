@@ -461,6 +461,7 @@ final class FormatterMessages extends NLS {
 	public static String NewLinesTabPage_annotations_group_packages;
 	public static String NewLinesTabPage_annotations_group_types;
 	public static String NewLinesTabPage_annotations_group_type_annotations;
+	public static String NewLinesTabPage_annotations_group_enum_constants;
 	public static String NewLinesTabPage_annotations_group_fields;
 	public static String NewLinesTabPage_annotations_group_methods;
 	public static String NewLinesTabPage_annotations_group_title;
