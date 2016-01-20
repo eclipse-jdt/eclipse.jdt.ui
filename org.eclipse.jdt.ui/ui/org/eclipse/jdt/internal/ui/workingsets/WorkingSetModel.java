@@ -66,7 +66,7 @@ public class WorkingSetModel {
 
 	private final ILocalWorkingSetManager fLocalWorkingSetManager;
 	private List<IWorkingSet> fActiveWorkingSets;
-	private ListenerList fListeners;
+	private ListenerList<IPropertyChangeListener> fListeners;
 	private IPropertyChangeListener fWorkingSetManagerListener;
 	private OthersWorkingSetUpdater fOthersWorkingSetUpdater;
 
@@ -276,7 +276,7 @@ public class WorkingSetModel {
 	}
 
 	private void addListenersToWorkingSetManagers() {
-		fListeners= new ListenerList(ListenerList.IDENTITY);
+		fListeners= new ListenerList<>(ListenerList.IDENTITY);
 		fWorkingSetManagerListener= new IPropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
@@ -690,9 +690,8 @@ public class WorkingSetModel {
 
 
 	private void fireEvent(PropertyChangeEvent event) {
-		Object[] listeners= fListeners.getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			((IPropertyChangeListener)listeners[i]).propertyChange(event);
+		for (IPropertyChangeListener listener : fListeners) {
+			listener.propertyChange(event);
 		}
 	}
 

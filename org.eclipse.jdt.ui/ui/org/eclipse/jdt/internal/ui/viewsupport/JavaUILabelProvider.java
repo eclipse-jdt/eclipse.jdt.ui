@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.util.SafeRunnable;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -28,13 +29,12 @@ import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 public class JavaUILabelProvider implements ILabelProvider, IColorProvider, IStyledLabelProvider {
 
-	protected ListenerList fListeners = new ListenerList();
+	protected ListenerList<ILabelProviderListener> fListeners = new ListenerList<>();
 
 	protected JavaElementImageProvider fImageLabelProvider;
 	protected StorageLabelProvider fStorageLabelProvider;
@@ -256,9 +256,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider, ISty
      * @see ILabelProviderListener#labelProviderChanged
      */
     protected void fireLabelProviderChanged(final LabelProviderChangedEvent event) {
-        Object[] listeners = fListeners.getListeners();
-        for (int i = 0; i < listeners.length; ++i) {
-            final ILabelProviderListener l = (ILabelProviderListener) listeners[i];
+		for (final ILabelProviderListener l : fListeners) {
             SafeRunner.run(new SafeRunnable() {
                 @Override
 				public void run() {

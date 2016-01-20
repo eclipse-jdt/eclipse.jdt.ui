@@ -49,14 +49,14 @@ import org.eclipse.jdt.core.IPackageFragment;
 class PackageViewerWrapper extends StructuredViewer {
 
 	private StructuredViewer fViewer;
-	private ListenerList fListenerList;
-	private ListenerList fSelectionChangedListenerList;
-	private ListenerList fPostSelectionChangedListenerList;
+	private ListenerList<Object> fListenerList;
+	private ListenerList<ISelectionChangedListener> fSelectionChangedListenerList;
+	private ListenerList<ISelectionChangedListener> fPostSelectionChangedListenerList;
 
 	public PackageViewerWrapper() {
-		fListenerList= new ListenerList(ListenerList.IDENTITY);
-		fPostSelectionChangedListenerList= new ListenerList(ListenerList.IDENTITY);
-		fSelectionChangedListenerList= new ListenerList(ListenerList.IDENTITY);
+		fListenerList= new ListenerList<>(ListenerList.IDENTITY);
+		fPostSelectionChangedListenerList= new ListenerList<>(ListenerList.IDENTITY);
+		fSelectionChangedListenerList= new ListenerList<>(ListenerList.IDENTITY);
 	}
 
 	public void setViewer(StructuredViewer viewer) {

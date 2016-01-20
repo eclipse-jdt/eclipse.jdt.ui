@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,10 @@ package org.eclipse.jdt.internal.junit.model;
 import org.eclipse.jdt.junit.TestRunListener;
 import org.eclipse.jdt.junit.model.ITestCaseElement;
 
-import org.eclipse.jdt.internal.junit.model.TestElement.Status;
+import org.eclipse.core.runtime.ListenerList;
+
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
+import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 
 
 /**
@@ -28,35 +30,31 @@ public class TestRunListenerAdapter implements ITestSessionListener {
 		fSession= session;
 	}
 
-	private Object[] getListeners() {
-		return JUnitCorePlugin.getDefault().getNewTestRunListeners().getListeners();
+	private ListenerList<TestRunListener> getListenerList() {
+		return JUnitCorePlugin.getDefault().getNewTestRunListeners();
 	}
 
 	private void fireSessionStarted() {
-		Object[] listeners= getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			((TestRunListener) listeners[i]).sessionStarted(fSession);
+		for (TestRunListener listener : getListenerList()) {
+			listener.sessionStarted(fSession);
 		}
 	}
 
 	private void fireSessionFinished() {
-		Object[] listeners= getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			((TestRunListener) listeners[i]).sessionFinished(fSession);
+		for (TestRunListener listener : getListenerList()) {
+			listener.sessionFinished(fSession);
 		}
 	}
 
 	private void fireTestCaseStarted(ITestCaseElement testCaseElement) {
-		Object[] listeners= getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			((TestRunListener) listeners[i]).testCaseStarted(testCaseElement);
+		for (TestRunListener listener : getListenerList()) {
+			listener.testCaseStarted(testCaseElement);
 		}
 	}
 
 	private void fireTestCaseFinished(ITestCaseElement testCaseElement) {
-		Object[] listeners= getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			((TestRunListener) listeners[i]).testCaseFinished(testCaseElement);
+		for (TestRunListener listener : getListenerList()) {
+			listener.testCaseFinished(testCaseElement);
 		}
 	}
 

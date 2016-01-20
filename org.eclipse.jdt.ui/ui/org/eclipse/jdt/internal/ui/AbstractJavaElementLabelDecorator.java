@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,7 +42,7 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 
 	}
 
-	private ListenerList fListeners;
+	private ListenerList<ILabelProviderListener> fListeners;
 	private IElementChangedListener fChangeListener;
 
 	@Override
@@ -53,7 +53,7 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 		}
 
 		if (fListeners == null) {
-			fListeners= new ListenerList();
+			fListeners= new ListenerList<>();
 		}
 
 		fListeners.add(listener);
@@ -66,9 +66,8 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 			fChangeListener= null;
 		}
 		if (fListeners != null) {
-			Object[] listeners= fListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++) {
-				fListeners.remove(listeners[i]);
+			for (ILabelProviderListener listener : fListeners) {
+				fListeners.remove(listener);
 			}
 			fListeners= null;
 		}
@@ -95,9 +94,8 @@ public abstract class AbstractJavaElementLabelDecorator implements ILightweightL
 	private void fireChange(IJavaElement[] elements) {
 		if (fListeners != null && !fListeners.isEmpty()) {
 			LabelProviderChangedEvent event= new LabelProviderChangedEvent(this, elements);
-			Object[] listeners= fListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++) {
-				((ILabelProviderListener) listeners[i]).labelProviderChanged(event);
+			for (ILabelProviderListener listener : fListeners) {
+				listener.labelProviderChanged(event);
 			}
 		}
 	}

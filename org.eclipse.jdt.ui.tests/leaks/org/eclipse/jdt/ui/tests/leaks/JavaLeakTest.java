@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -302,7 +302,7 @@ public class JavaLeakTest extends LeakTestCase {
 			activateBreadcrumb((JavaEditor) part);
 		}
 
-		ListenerList listenerList= getPreferenceStoreListeners(part);
+		ListenerList<?> listenerList= getPreferenceStoreListeners(part);
 
 		// Can't close and assert abandonment in a separate method, since that would leave 'part' as a stack-local reference.
 		boolean res;
@@ -319,39 +319,38 @@ public class JavaLeakTest extends LeakTestCase {
 
 		// Check for listener leaks in Editors UI preference store.
 		Accessor storeAccessor= new Accessor(EditorsUI.getPreferenceStore(), EventManager.class);
-		listenerList= (ListenerList)storeAccessor.get("listenerList");
+		listenerList= (ListenerList<?>) storeAccessor.get("listenerList");
 		assertEmptyListenerList(listenerList);
 
 		// Verify that the editor instance is gone.
 		assertInstanceCount(clazz, 0);
 	}
 
-	private static ListenerList getPreferenceStoreListeners(IEditorPart part) {
+	private static ListenerList<?> getPreferenceStoreListeners(IEditorPart part) {
 		if (part instanceof AbstractTextEditor) {
 			Accessor editorAccessor= new Accessor(part, AbstractTextEditor.class);
 			Object store= editorAccessor.get("fPreferenceStore");
 			if (store instanceof ChainedPreferenceStore) {
 				Accessor storeAccessor= new Accessor(store, ChainedPreferenceStore.class);
-				return (ListenerList)storeAccessor.get("fClientListeners");
+				return (ListenerList<?>) storeAccessor.get("fClientListeners");
 			} else if (store instanceof ScopedPreferenceStore) {
 				Accessor storeAccessor= new Accessor(store, EventManager.class);
-				return (ListenerList)storeAccessor.get("listenerList");
+				return (ListenerList<?>) storeAccessor.get("listenerList");
 			}
 		}
 		return null;
 	}
 
-	private static void assertEmptyListenerList(ListenerList listenerList) {
+	private static void assertEmptyListenerList(ListenerList<?> listenerList) {
 		if (listenerList == null)
 			return;
 
 		String message= null;
-		Object[] listeners= listenerList.getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			if (listeners[i] instanceof SpellCheckEngine)
+		for (Object listener : listenerList) {
+			if (listener instanceof SpellCheckEngine)
 				continue; // The SpellCheckEngine instance adds one listener when the first editor is created.
 
-			message= "\n" + listeners[i];
+			message= "\n" + listener;
 		}
 		if (message != null)
 			fail("Property listeners leaked:" + message);

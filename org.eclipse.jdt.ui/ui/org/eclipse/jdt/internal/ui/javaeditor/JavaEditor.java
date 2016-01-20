@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -338,7 +338,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		/** Listeners on on this adapter */
-		private ListenerList fListeners= new ListenerList(ListenerList.IDENTITY);
+		private ListenerList<IPropertyChangeListener> fListeners= new ListenerList<>(ListenerList.IDENTITY);
 
 		/** Listener on the node */
 		private IEclipsePreferences.IPreferenceChangeListener fListener= new PreferenceChangeListener();
@@ -385,9 +385,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		@Override
 		public void firePropertyChangeEvent(String name, Object oldValue, Object newValue) {
 			PropertyChangeEvent event= new PropertyChangeEvent(this, name, oldValue, newValue);
-			Object[] listeners= fListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++)
-				((IPropertyChangeListener) listeners[i]).propertyChange(event);
+			for (IPropertyChangeListener listener : fListeners) {
+				listener.propertyChange(event);
+			}
 		}
 
 		@Override
@@ -1355,8 +1355,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	class JdtSelectionProvider extends SelectionProvider {
 
-		private ListenerList fSelectionListeners= new ListenerList();
-		private ListenerList fPostSelectionListeners= new ListenerList();
+		private ListenerList<ISelectionChangedListener> fSelectionListeners= new ListenerList<>();
+		private ListenerList<ISelectionChangedListener> fPostSelectionListeners= new ListenerList<>();
 		private ITextSelection fInvalidSelection;
 		private ISelection fValidSelection;
 
@@ -1453,13 +1453,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			SelectionChangedEvent event= new SelectionChangedEvent(this, fInvalidSelection);
 
-			Object[] listeners= fSelectionListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++)
-				((ISelectionChangedListener) listeners[i]).selectionChanged(event);
+			for (ISelectionChangedListener listener : fSelectionListeners) {
+				listener.selectionChanged(event);
+			}
 
-			listeners= fPostSelectionListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++)
-				((ISelectionChangedListener) listeners[i]).selectionChanged(event);
+			for (ISelectionChangedListener listener : fPostSelectionListeners) {
+				listener.selectionChanged(event);
+			}
 		}
 
 		/**
@@ -1470,13 +1470,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			SelectionChangedEvent event= new SelectionChangedEvent(this, fValidSelection);
 
-			Object[] listeners= fSelectionListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++)
-				((ISelectionChangedListener) listeners[i]).selectionChanged(event);
+			for (ISelectionChangedListener listener : fSelectionListeners) {
+				listener.selectionChanged(event);
+			}
 
-			listeners= fPostSelectionListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++)
-				((ISelectionChangedListener) listeners[i]).selectionChanged(event);
+			for (ISelectionChangedListener listener : fPostSelectionListeners) {
+				listener.selectionChanged(event);
+			}
 		}
 	}
 

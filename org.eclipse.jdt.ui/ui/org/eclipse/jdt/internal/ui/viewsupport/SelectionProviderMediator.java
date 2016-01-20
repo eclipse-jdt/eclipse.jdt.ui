@@ -70,8 +70,8 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 	private StructuredViewer[] fViewers;
 
 	private StructuredViewer fViewerInFocus;
-	private ListenerList fSelectionChangedListeners;
-	private ListenerList fPostSelectionChangedListeners;
+	private ListenerList<ISelectionChangedListener> fSelectionChangedListeners;
+	private ListenerList<ISelectionChangedListener> fPostSelectionChangedListeners;
 
 	/**
 	 * @param viewers All viewers that can provide a selection
@@ -81,8 +81,8 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 		Assert.isNotNull(viewers);
 		fViewers= viewers;
 		InternalListener listener= new InternalListener();
-		fSelectionChangedListeners= new ListenerList();
-		fPostSelectionChangedListeners= new ListenerList();
+		fSelectionChangedListeners= new ListenerList<>();
+		fPostSelectionChangedListeners= new ListenerList<>();
 		fViewerInFocus= viewerInFocus;
 
 		for (int i= 0; i < fViewers.length; i++) {
@@ -129,9 +129,7 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 		if (fSelectionChangedListeners != null) {
 			SelectionChangedEvent event= new SelectionChangedEvent(this, getSelection());
 
-			Object[] listeners= fSelectionChangedListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++) {
-				ISelectionChangedListener listener= (ISelectionChangedListener) listeners[i];
+			for (ISelectionChangedListener listener : fSelectionChangedListeners) {
 				listener.selectionChanged(event);
 			}
 		}
@@ -141,9 +139,7 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 		if (fPostSelectionChangedListeners != null) {
 			SelectionChangedEvent event= new SelectionChangedEvent(this, getSelection());
 
-			Object[] listeners= fPostSelectionChangedListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++) {
-				ISelectionChangedListener listener= (ISelectionChangedListener) listeners[i];
+			for (ISelectionChangedListener listener : fPostSelectionChangedListeners) {
 				listener.selectionChanged(event);
 			}
 		}

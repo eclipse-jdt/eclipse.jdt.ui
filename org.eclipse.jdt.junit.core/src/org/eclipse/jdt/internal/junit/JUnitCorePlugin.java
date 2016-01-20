@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,7 +90,7 @@ public class JUnitCorePlugin extends Plugin {
 	/**
 	 * List storing the registered test run listeners
 	 */
-	private ListenerList/*<TestRunListener>*/ fNewTestRunListeners;
+	private ListenerList<TestRunListener> fNewTestRunListeners;
 
 	private BundleContext fBundleContext;
 
@@ -99,7 +99,7 @@ public class JUnitCorePlugin extends Plugin {
 
 	public JUnitCorePlugin() {
 		fgPlugin= this;
-		fNewTestRunListeners= new ListenerList();
+		fNewTestRunListeners= new ListenerList<>();
 	}
 
 	public static JUnitCorePlugin getDefault() {
@@ -182,7 +182,7 @@ public class JUnitCorePlugin extends Plugin {
 			try {
 				Object testRunListener= configs[i].createExecutableExtension("class"); //$NON-NLS-1$
 				if (testRunListener instanceof TestRunListener) {
-					fNewTestRunListeners.add(testRunListener);
+					fNewTestRunListeners.add((TestRunListener) testRunListener);
 				} else if (testRunListener instanceof org.eclipse.jdt.junit.ITestRunListener) {
 					fLegacyTestRunListeners.add((org.eclipse.jdt.junit.ITestRunListener) testRunListener);
 				}
@@ -272,7 +272,7 @@ public class JUnitCorePlugin extends Plugin {
 	/**
 	 * @return a <code>ListenerList</code> of all <code>TestRunListener</code>s
 	 */
-	public ListenerList/*<TestRunListener>*/ getNewTestRunListeners() {
+	public ListenerList<TestRunListener> getNewTestRunListeners() {
 		loadTestRunListeners();
 		
 		return fNewTestRunListeners;

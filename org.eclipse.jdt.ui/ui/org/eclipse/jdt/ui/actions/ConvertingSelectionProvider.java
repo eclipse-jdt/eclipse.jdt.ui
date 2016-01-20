@@ -47,15 +47,14 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 
 	private class SelectionChangedListener implements ISelectionChangedListener {
 
-		ListenerList fListeners= new ListenerList();
+		ListenerList<ISelectionChangedListener> fListeners= new ListenerList<>();
 
 		@Override
 		public void selectionChanged(SelectionChangedEvent event) {
 			ISelection selection= convertFrom(event.getSelection());
 			SelectionChangedEvent newEvent= new SelectionChangedEvent(ConvertingSelectionProvider.this, selection);
-			Object[] listeners= fListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++) {
-				((ISelectionChangedListener)listeners[i]).selectionChanged(newEvent);
+			for (ISelectionChangedListener listener : fListeners) {
+				listener.selectionChanged(newEvent);
 			}
 		}
 		public void addListener(ISelectionChangedListener listener) {

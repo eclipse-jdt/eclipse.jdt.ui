@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -883,10 +883,10 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 
 	protected static class GlobalAnnotationModelListener implements IAnnotationModelListener, IAnnotationModelListenerExtension {
 
-		private ListenerList fListenerList;
+		private ListenerList<IAnnotationModelListener> fListenerList;
 
 		public GlobalAnnotationModelListener() {
-			fListenerList= new ListenerList(ListenerList.IDENTITY);
+			fListenerList= new ListenerList<>(ListenerList.IDENTITY);
 		}
 
 		/**
@@ -894,9 +894,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		 */
 		@Override
 		public void modelChanged(IAnnotationModel model) {
-			Object[] listeners= fListenerList.getListeners();
-			for (int i= 0; i < listeners.length; i++) {
-				((IAnnotationModelListener) listeners[i]).modelChanged(model);
+			for (IAnnotationModelListener listener : fListenerList) {
+				listener.modelChanged(model);
 			}
 		}
 
@@ -905,9 +904,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		 */
 		@Override
 		public void modelChanged(AnnotationModelEvent event) {
-			Object[] listeners= fListenerList.getListeners();
-			for (int i= 0; i < listeners.length; i++) {
-				Object curr= listeners[i];
+			for (IAnnotationModelListener curr : fListenerList) {
 				if (curr instanceof IAnnotationModelListenerExtension) {
 					((IAnnotationModelListenerExtension) curr).modelChanged(event);
 				}

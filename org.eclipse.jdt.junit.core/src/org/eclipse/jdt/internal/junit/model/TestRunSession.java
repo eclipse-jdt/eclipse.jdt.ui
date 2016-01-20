@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,7 +68,7 @@ public class TestRunSession implements ITestRunSession {
 	 */
 	private RemoteTestRunnerClient fTestRunnerClient;
 
-	private final ListenerList/*<ITestSessionListener>*/ fSessionListeners;
+	private final ListenerList<ITestSessionListener> fSessionListeners;
 
 	/**
 	 * The model root, or <code>null</code> if swapped to disk.
@@ -154,7 +154,7 @@ public class TestRunSession implements ITestRunSession {
 
 		fTestRunnerClient= null;
 
-		fSessionListeners= new ListenerList();
+		fSessionListeners= new ListenerList<>();
 	}
 
 
@@ -207,7 +207,7 @@ public class TestRunSession implements ITestRunSession {
 			}
 		});
 
-		fSessionListeners= new ListenerList();
+		fSessionListeners= new ListenerList<>();
 		addTestSessionListener(new TestRunListenerAdapter(this));
 	}
 
@@ -345,9 +345,7 @@ public class TestRunSession implements ITestRunSession {
 		if (isRunning() || isStarting() || isKeptAlive())
 			return;
 
-		Object[] listeners= fSessionListeners.getListeners();
-		for (int i= 0; i < listeners.length; ++i) {
-			ITestSessionListener registered= (ITestSessionListener) listeners[i];
+		for (ITestSessionListener registered : fSessionListeners) {
 			if (! registered.acceptsSwapToDisk())
 				return;
 		}
@@ -556,9 +554,8 @@ public class TestRunSession implements ITestRunSession {
 			fStartTime= System.currentTimeMillis();
 			fIsRunning= true;
 
-			Object[] listeners= fSessionListeners.getListeners();
-			for (int i= 0; i < listeners.length; ++i) {
-				((ITestSessionListener) listeners[i]).sessionStarted();
+			for (ITestSessionListener listener : fSessionListeners) {
+				listener.sessionStarted();
 			}
 		}
 
@@ -566,9 +563,8 @@ public class TestRunSession implements ITestRunSession {
 		public void testRunEnded(long elapsedTime) {
 			fIsRunning= false;
 
-			Object[] listeners= fSessionListeners.getListeners();
-			for (int i= 0; i < listeners.length; ++i) {
-				((ITestSessionListener) listeners[i]).sessionEnded(elapsedTime);
+			for (ITestSessionListener listener : fSessionListeners) {
+				listener.sessionEnded(elapsedTime);
 			}
 		}
 
@@ -577,9 +573,8 @@ public class TestRunSession implements ITestRunSession {
 			fIsRunning= false;
 			fIsStopped= true;
 
-			Object[] listeners= fSessionListeners.getListeners();
-			for (int i= 0; i < listeners.length; ++i) {
-				((ITestSessionListener) listeners[i]).sessionStopped(elapsedTime);
+			for (ITestSessionListener listener : fSessionListeners) {
+				listener.sessionStopped(elapsedTime);
 			}
 		}
 
@@ -588,9 +583,8 @@ public class TestRunSession implements ITestRunSession {
 			fIsRunning= false;
 			fIsStopped= true;
 
-			Object[] listeners= fSessionListeners.getListeners();
-			for (int i= 0; i < listeners.length; ++i) {
-				((ITestSessionListener) listeners[i]).sessionTerminated();
+			for (ITestSessionListener listener : fSessionListeners) {
+				listener.sessionTerminated();
 			}
 		}
 
@@ -598,9 +592,8 @@ public class TestRunSession implements ITestRunSession {
 		public void testTreeEntry(String description) {
 			TestElement testElement= addTreeEntry(description);
 
-			Object[] listeners= fSessionListeners.getListeners();
-			for (int i= 0; i < listeners.length; ++i) {
-				((ITestSessionListener) listeners[i]).testAdded(testElement);
+			for (ITestSessionListener listener : fSessionListeners) {
+				listener.testAdded(testElement);
 			}
 		}
 
@@ -608,9 +601,8 @@ public class TestRunSession implements ITestRunSession {
 			TestSuiteElement unrootedSuite= getUnrootedSuite();
 			TestElement testElement= createTestElement(unrootedSuite, testId, testName, false, 1);
 
-			Object[] listeners= fSessionListeners.getListeners();
-			for (int i= 0; i < listeners.length; ++i) {
-				((ITestSessionListener) listeners[i]).testAdded(testElement);
+			for (ITestSessionListener listener : fSessionListeners) {
+				listener.testAdded(testElement);
 			}
 
 			return testElement;
@@ -626,9 +618,8 @@ public class TestRunSession implements ITestRunSession {
 		@Override
 		public void testStarted(String testId, String testName) {
 			if (fStartedCount == 0) {
-				Object[] listeners= fSessionListeners.getListeners();
-				for (int i= 0; i < listeners.length; ++i) {
-					((ITestSessionListener) listeners[i]).runningBegins();
+				for (ITestSessionListener listener : fSessionListeners) {
+					listener.runningBegins();
 				}
 			}
 			TestElement testElement= getTestElement(testId);
@@ -643,9 +634,8 @@ public class TestRunSession implements ITestRunSession {
 
 			fStartedCount++;
 
-			Object[] listeners= fSessionListeners.getListeners();
-			for (int i= 0; i < listeners.length; ++i) {
-				((ITestSessionListener) listeners[i]).testStarted(testCaseElement);
+			for (ITestSessionListener listener : fSessionListeners) {
+				listener.testStarted(testCaseElement);
 			}
 		}
 
@@ -675,9 +665,8 @@ public class TestRunSession implements ITestRunSession {
 			if (testCaseElement.getStatus() == Status.RUNNING)
 				setStatus(testCaseElement, Status.OK);
 
-			Object[] listeners= fSessionListeners.getListeners();
-			for (int i= 0; i < listeners.length; ++i) {
-				((ITestSessionListener) listeners[i]).testEnded(testCaseElement);
+			for (ITestSessionListener listener : fSessionListeners) {
+				listener.testEnded(testCaseElement);
 			}
 		}
 
@@ -700,9 +689,8 @@ public class TestRunSession implements ITestRunSession {
 
 			registerTestFailureStatus(testElement, status, trace, expected, actual);
 
-			Object[] listeners= fSessionListeners.getListeners();
-			for (int i= 0; i < listeners.length; ++i) {
-				((ITestSessionListener) listeners[i]).testFailed(testElement, status, trace, expected, actual);
+			for (ITestSessionListener listener : fSessionListeners) {
+				listener.testFailed(testElement, status, trace, expected, actual);
 			}
 		}
 
@@ -720,10 +708,9 @@ public class TestRunSession implements ITestRunSession {
 			Status status= Status.convert(statusCode);
 			registerTestFailureStatus(testElement, status, trace, expectedResult, actualResult);
 
-			Object[] listeners= fSessionListeners.getListeners();
-			for (int i= 0; i < listeners.length; ++i) {
+			for (ITestSessionListener listener : fSessionListeners) {
 				//TODO: post old & new status?
-				((ITestSessionListener) listeners[i]).testReran(testCaseElement, status, trace, expectedResult, actualResult);
+				listener.testReran(testCaseElement, status, trace, expectedResult, actualResult);
 			}
 		}
 

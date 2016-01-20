@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2008 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,7 +56,7 @@ class EclipsePreferencesAdapter implements IPreferenceStore {
 	}
 
 	/** Listeners on on this adapter */
-	private ListenerList fListeners= new ListenerList(ListenerList.IDENTITY);
+	private ListenerList<IPropertyChangeListener> fListeners= new ListenerList<>(ListenerList.IDENTITY);
 
 	/** Listener on the node */
 	private IEclipsePreferences.IPreferenceChangeListener fListener= new PreferenceChangeListener();
@@ -102,9 +102,9 @@ class EclipsePreferencesAdapter implements IPreferenceStore {
 	@Override
 	public void firePropertyChangeEvent(String name, Object oldValue, Object newValue) {
 		PropertyChangeEvent event= new PropertyChangeEvent(this, name, oldValue, newValue);
-		Object[] listeners= fListeners.getListeners();
-		for (int i= 0; i < listeners.length; i++)
-			((IPropertyChangeListener) listeners[i]).propertyChange(event);
+		for (IPropertyChangeListener listener : fListeners) {
+			listener.propertyChange(event);
+		}
 	}
 
 	@Override

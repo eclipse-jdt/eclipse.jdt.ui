@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -134,9 +134,8 @@ public final class JUnitModel {
 			TestRunSession testRunSession= new TestRunSession(launch, javaProject, port);
 			addTestRunSession(testRunSession);
 			
-			Object[] listeners= JUnitCorePlugin.getDefault().getNewTestRunListeners().getListeners();
-			for (int i= 0; i < listeners.length; i++) {
-				((TestRunListener) listeners[i]).sessionLaunched(testRunSession);
+			for (TestRunListener listener : JUnitCorePlugin.getDefault().getNewTestRunListeners()) {
+				listener.sessionLaunched(testRunSession);
 			}
 		}
 	}
@@ -247,7 +246,7 @@ public final class JUnitModel {
 		}
 	}
 
-	private final ListenerList fTestRunSessionListeners= new ListenerList();
+	private final ListenerList<ITestRunSessionListener> fTestRunSessionListeners= new ListenerList<>();
 	/**
 	 * Active test run sessions, youngest first.
 	 */
@@ -584,16 +583,14 @@ public final class JUnitModel {
 			launchManager.removeLaunch(launch);
 		}
 
-		Object[] listeners = fTestRunSessionListeners.getListeners();
-		for (int i = 0; i < listeners.length; ++i) {
-			((ITestRunSessionListener) listeners[i]).sessionRemoved(testRunSession);
+		for (ITestRunSessionListener listener : fTestRunSessionListeners) {
+			listener.sessionRemoved(testRunSession);
 		}
 	}
 
 	private void notifyTestRunSessionAdded(TestRunSession testRunSession) {
-		Object[] listeners = fTestRunSessionListeners.getListeners();
-		for (int i = 0; i < listeners.length; ++i) {
-			((ITestRunSessionListener) listeners[i]).sessionAdded(testRunSession);
+		for (ITestRunSessionListener listener : fTestRunSessionListeners) {
+			listener.sessionAdded(testRunSession);
 		}
 	}
 

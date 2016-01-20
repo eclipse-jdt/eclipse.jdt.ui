@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -476,7 +476,7 @@ public class JavadocView extends AbstractInfoView {
 	private static class SelectionProvider implements ISelectionProvider {
 
 		/** The selection changed listeners. */
-		private final ListenerList fListeners= new ListenerList(ListenerList.IDENTITY);
+		private final ListenerList<ISelectionChangedListener> fListeners= new ListenerList<>(ListenerList.IDENTITY);
 		/** The widget. */
 		private final Control fControl;
 
@@ -511,9 +511,9 @@ public class JavadocView extends AbstractInfoView {
 		public void fireSelectionChanged() {
 			ISelection selection= getSelection();
 			SelectionChangedEvent event= new SelectionChangedEvent(this, selection);
-			Object[] selectionChangedListeners= fListeners.getListeners();
-			for (int i= 0; i < selectionChangedListeners.length; i++)
-				((ISelectionChangedListener)selectionChangedListeners[i]).selectionChanged(event);
+			for (ISelectionChangedListener selectionChangedListener : fListeners) {
+				selectionChangedListener.selectionChanged(event);
+			}
 		}
 
 		/*

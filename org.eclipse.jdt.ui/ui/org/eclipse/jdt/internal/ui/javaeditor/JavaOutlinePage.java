@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -773,8 +773,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 	private MemberFilterActionGroup fMemberFilterActionGroup;
 
-	private ListenerList fSelectionChangedListeners= new ListenerList(ListenerList.IDENTITY);
-	private ListenerList fPostSelectionChangedListeners= new ListenerList(ListenerList.IDENTITY);
+	private ListenerList<ISelectionChangedListener> fSelectionChangedListeners= new ListenerList<>(ListenerList.IDENTITY);
+	private ListenerList<ISelectionChangedListener> fPostSelectionChangedListeners= new ListenerList<>(ListenerList.IDENTITY);
 	private Hashtable<String, IAction> fActions= new Hashtable<>();
 
 	private TogglePresentationAction fTogglePresentation;
@@ -961,16 +961,14 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		fOutlineViewer.setContentProvider(new ChildrenProvider());
 		fOutlineViewer.setLabelProvider(new DecoratingJavaLabelProvider(lprovider));
 
-		Object[] listeners= fSelectionChangedListeners.getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			fSelectionChangedListeners.remove(listeners[i]);
-			fOutlineViewer.addSelectionChangedListener((ISelectionChangedListener) listeners[i]);
+		for (ISelectionChangedListener listener : fSelectionChangedListeners) {
+			fSelectionChangedListeners.remove(listener);
+			fOutlineViewer.addSelectionChangedListener(listener);
 		}
 
-		listeners= fPostSelectionChangedListeners.getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			fPostSelectionChangedListeners.remove(listeners[i]);
-			fOutlineViewer.addPostSelectionChangedListener((ISelectionChangedListener) listeners[i]);
+		for (ISelectionChangedListener listener : fPostSelectionChangedListeners) {
+			fPostSelectionChangedListeners.remove(listener);
+			fOutlineViewer.addPostSelectionChangedListener(listener);
 		}
 
 		MenuManager manager= new MenuManager(fContextMenuID, fContextMenuID);

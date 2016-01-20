@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -65,7 +66,7 @@ public class SelectionListenerWithASTManager {
 		private ISelectionListener fPostSelectionListener;
 		private ISelectionChangedListener fSelectionListener;
 		private Job fCurrentJob;
-		private ListenerList fAstListeners;
+		private ListenerList<ISelectionListenerWithAST> fAstListeners;
 		/**
 		 * Lock to avoid having more than one calculateAndInform job in parallel.
 		 * Only jobs may synchronize on this as otherwise deadlocks are possible.
@@ -75,7 +76,7 @@ public class SelectionListenerWithASTManager {
 		public PartListenerGroup(ITextEditor editorPart) {
 			fPart= editorPart;
 			fCurrentJob= null;
-			fAstListeners= new ListenerList(ListenerList.IDENTITY);
+			fAstListeners= new ListenerList<>(ListenerList.IDENTITY);
 
 			fSelectionListener= new ISelectionChangedListener() {
 				@Override
@@ -172,12 +173,13 @@ public class SelectionListenerWithASTManager {
 				CompilationUnit astRoot= SharedASTProvider.getAST(input, SharedASTProvider.WAIT_ACTIVE_ONLY, monitor);
 
 				if (astRoot != null && !monitor.isCanceled()) {
-					Object[] listeners;
-					synchronized (PartListenerGroup.this) {
-						listeners= fAstListeners.getListeners();
+					Iterator<ISelectionListenerWithAST> listeners;
+					synchronized (PartListenerGroup.this) { // sync probably doesn't make sense here...
+						listeners= fAstListeners.iterator();
 					}
-					for (int i= 0; i < listeners.length; i++) {
-						((ISelectionListenerWithAST) listeners[i]).selectionChanged(fPart, selection, astRoot);
+					while (listeners.hasNext()) {
+						ISelectionListenerWithAST listener= listeners.next();
+						listener.selectionChanged(fPart, selection, astRoot);
 						if (monitor.isCanceled()) {
 							return Status.CANCEL_STATUS;
 						}
