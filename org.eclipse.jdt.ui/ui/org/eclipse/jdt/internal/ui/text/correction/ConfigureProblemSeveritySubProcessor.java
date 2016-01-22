@@ -19,6 +19,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
@@ -33,7 +35,7 @@ public class ConfigureProblemSeveritySubProcessor {
 		return JavaCore.getOptionForConfigurableSeverity(problemId) != null;
 	}
 
-	public static void addConfigureProblemSeverityProposal(final IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+	public static void addConfigureProblemSeverityProposal(final IInvocationContext context, final IProblemLocation problem, Collection<ICommandAccess> proposals) {
 		final int problemId= problem.getProblemId();
 		final String optionId= JavaCore.getOptionForConfigurableSeverity(problemId);
 		if (optionId == null)
@@ -51,7 +53,16 @@ public class ConfigureProblemSeveritySubProcessor {
 
 			@Override
 			public String getAdditionalProposalInfo(IProgressMonitor monitor) {
-				return CorrectionMessages.ConfigureProblemSeveritySubProcessor_info;
+				String problemMsg= ""; //$NON-NLS-1$
+				for (IProblem iProblem : context.getASTRoot().getProblems()) {
+					if (problem.getProblemId() == iProblem.getID()
+							&& problem.getOffset() == iProblem.getSourceStart()
+							&& problem.getLength() == iProblem.getSourceEnd() - iProblem.getSourceStart() + 1) {
+						problemMsg= iProblem.getMessage();
+						break;
+					}
+				}
+				return Messages.format(CorrectionMessages.ConfigureProblemSeveritySubProcessor_info, new String[] { problemMsg });
 			}
 		};
 
