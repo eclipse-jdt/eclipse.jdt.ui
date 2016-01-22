@@ -17,9 +17,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jface.action.ToolBarManager;
-
-import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -34,7 +31,6 @@ import org.eclipse.ui.texteditor.spelling.SpellingAnnotation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 
@@ -156,26 +152,6 @@ public class ProblemHover extends AbstractAnnotationHover {
 					return (ICompilationUnit) element;
 			}
 			return null;
-		}
-
-		/*
-		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractAnnotationHover.AnnotationInfo#fillToolBar(org.eclipse.jface.action.ToolBarManager)
-		 */
-		@Override
-		public void fillToolBar(ToolBarManager manager, IInformationControl infoControl) {
-			super.fillToolBar(manager, infoControl);
-			if (!(annotation instanceof IJavaAnnotation))
-				return;
-
-			IJavaAnnotation javaAnnotation= (IJavaAnnotation) annotation;
-
-			String optionId= JavaCore.getOptionForConfigurableSeverity(javaAnnotation.getId());
-			if (optionId != null) {
-				IJavaProject javaProject= javaAnnotation.getCompilationUnit().getJavaProject();
-				boolean isJavadocProblem= (javaAnnotation.getId() & IProblem.Javadoc) != 0;
-				ConfigureProblemSeverityAction problemSeverityAction= new ConfigureProblemSeverityAction(javaProject, optionId, isJavadocProblem, infoControl);
-				manager.add(problemSeverityAction);
-			}
 		}
 
 	}
