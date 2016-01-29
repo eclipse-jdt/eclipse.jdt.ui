@@ -6759,6 +6759,11 @@
             id="org.eclipse.jdt.ui.cleanup.format"
             runAfter="org.eclipse.jdt.ui.cleanup.imports">
       </cleanUp>
+      <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.type_parameters"
+            runAfter="org.eclipse.jdt.ui.cleanup.strings">
+      </cleanUp>
    </extension>
 
   <extension
