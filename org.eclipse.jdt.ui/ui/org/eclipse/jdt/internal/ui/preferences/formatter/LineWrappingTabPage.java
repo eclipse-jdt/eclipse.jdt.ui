@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -394,6 +394,16 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	};
 
 
+	private final Category fForCategory= new Category(
+		DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_FOR_LOOP_HEADER,
+		"class Example {\n" + //$NON-NLS-1$
+		"	void foo(int argument) {\n" + //$NON-NLS-1$
+		"		for (int counter = 0; counter < argument; counter++) {\n" + //$NON-NLS-1$
+		"			doSomething(counter);\n" + //$NON-NLS-1$
+		"		}}}\n", //$NON-NLS-1$
+		FormatterMessages.LineWrappingTabPage_for
+	);
+
 	private final Category fCompactIfCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_COMPACT_IF,
 	    "class Example {" + //$NON-NLS-1$
@@ -692,6 +702,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		expressions.children.add(fAssignmentCategory);
 
 		final Category statements= new Category(FormatterMessages.LineWrappingTabPage_statements);
+		statements.children.add(fForCategory);
 		statements.children.add(fCompactIfCategory);
 		statements.children.add(fTryCategory);
 		statements.children.add(fCatchCategory);
