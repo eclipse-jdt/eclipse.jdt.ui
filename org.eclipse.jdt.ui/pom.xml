@@ -20,4 +20,7 @@
   <artifactId>org.eclipse.jdt.ui</artifactId>
   <version>3.12.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
+  <properties>
+    <code.ignoredWarnings>-warn:-deprecation,unavoidableGenericProblems</code.ignoredWarnings>
+  </properties>
 </project>

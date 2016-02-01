@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,11 +25,11 @@ public class WorkspaceTracker {
 		public void workspaceChanged();
 	}
 
-	private ListenerList fListeners;
+	private ListenerList<Listener> fListeners;
 	private ResourceListener fResourceListener;
 
 	private WorkspaceTracker() {
-		fListeners= new ListenerList();
+		fListeners= new ListenerList<>();
 	}
 
 	private class ResourceListener implements IResourceChangeListener {
@@ -40,9 +40,8 @@ public class WorkspaceTracker {
 	}
 
 	private void workspaceChanged() {
-		Object[] listeners= fListeners.getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			((Listener)listeners[i]).workspaceChanged();
+		for (Listener listener : fListeners) {
+			listener.workspaceChanged();
 		}
 	}
 

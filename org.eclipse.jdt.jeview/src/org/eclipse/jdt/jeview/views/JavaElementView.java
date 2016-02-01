@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -173,7 +173,8 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	}
 	private static class JEViewSelectionProvider implements ISelectionProvider {
 		private final TreeViewer fViewer;
-		ListenerList fSelectionChangedListeners= new ListenerList();
+
+		ListenerList<ISelectionChangedListener> fSelectionChangedListeners= new ListenerList<>();
 		private IStructuredSelection fLastSelection;
 
 		public JEViewSelectionProvider(TreeViewer viewer) {
@@ -201,9 +202,8 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 							if (newElement != oldElement && newElement.equals(oldElement) && newElement instanceof IJavaElement) {
 								// send out a fake selection event to make the Properties view update getKey():
 								SelectionChangedEvent event= new SelectionChangedEvent(this, StructuredSelection.EMPTY);
-								Object[] listeners= fSelectionChangedListeners.getListeners();
-								for (Object listener: listeners) {
-									((ISelectionChangedListener) listener).selectionChanged(event);
+								for (ISelectionChangedListener listener : fSelectionChangedListeners) {
+									listener.selectionChanged(event);
 								}
 								break;
 							}
@@ -214,9 +214,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				
 				SelectionChangedEvent event= new SelectionChangedEvent(this, selection);
 				
-				Object[] listeners= fSelectionChangedListeners.getListeners();
-				for (int i= 0; i < listeners.length; i++) {
-					ISelectionChangedListener listener= (ISelectionChangedListener) listeners[i];
+				for (ISelectionChangedListener listener : fSelectionChangedListeners) {
 					listener.selectionChanged(event);
 				}
 			}

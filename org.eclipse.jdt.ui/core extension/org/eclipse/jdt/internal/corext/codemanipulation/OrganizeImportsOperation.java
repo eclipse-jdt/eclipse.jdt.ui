@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -47,10 +49,10 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -67,6 +69,7 @@ import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
@@ -82,6 +85,102 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges);
 	}
 
+	/**
+	 * Matches unresolvable import declarations (those having associated
+	 * {@link IProblem#ImportNotFound} problems) to unresolved simple names.
+	 * <p>
+	 * For a given simple name, looks first for single imports of that simple name and then,
+	 * in the absence of such, for any on-demand imports. Considers type imports for simple names
+	 * of unresolved types and static imports for simple names of unresolved static members.
+	 * <p>
+	 * @see <a href="https://bugs.eclipse.org/357795">Bug 357795</a>
+	 */
+	private static class UnresolvableImportMatcher {
+		static UnresolvableImportMatcher forCompilationUnit(CompilationUnit cu) {
+			Collection<ImportDeclaration> unresolvableImports= determineUnresolvableImports(cu);
+
+			Map<String, Set<String>> typeImportsBySimpleName= new HashMap<>();
+			Map<String, Set<String>> staticImportsBySimpleName= new HashMap<>();
+			for (ImportDeclaration importDeclaration : unresolvableImports) {
+				String qualifiedName= importDeclaration.isOnDemand()
+						? importDeclaration.getName().getFullyQualifiedName() + ".*" //$NON-NLS-1$
+						: importDeclaration.getName().getFullyQualifiedName();
+
+				String simpleName= qualifiedName.substring(qualifiedName.lastIndexOf('.') + 1);
+
+				Map<String, Set<String>> importsBySimpleName= importDeclaration.isStatic()
+						? staticImportsBySimpleName : typeImportsBySimpleName;
+				Set<String> importsWithSimpleName= importsBySimpleName.get(simpleName);
+				if (importsWithSimpleName == null) {
+					importsWithSimpleName= new HashSet<>();
+					importsBySimpleName.put(simpleName, importsWithSimpleName);
+				}
+
+				importsWithSimpleName.add(qualifiedName);
+			}
+
+			return new UnresolvableImportMatcher(typeImportsBySimpleName, staticImportsBySimpleName);
+		}
+
+		private static Collection<ImportDeclaration> determineUnresolvableImports(CompilationUnit cu) {
+			Collection<ImportDeclaration> unresolvableImports= new ArrayList<>(cu.imports().size());
+			for (IProblem problem : cu.getProblems()) {
+				if (problem.getID() == IProblem.ImportNotFound) {
+					ImportDeclaration problematicImport= getProblematicImport(problem, cu);
+					if (problematicImport != null) {
+						unresolvableImports.add(problematicImport);
+					}
+				}
+			}
+
+			return unresolvableImports;
+		}
+
+		private static ImportDeclaration getProblematicImport(IProblem problem, CompilationUnit cu) {
+			ASTNode coveringNode= new ProblemLocation(problem).getCoveringNode(cu);
+			if (coveringNode != null) {
+				ASTNode importNode= ASTNodes.getParent(coveringNode, ASTNode.IMPORT_DECLARATION);
+				if (importNode instanceof ImportDeclaration) {
+					return (ImportDeclaration) importNode;
+				}
+			}
+			return null;
+		}
+
+		private final Map<String, Set<String>> fTypeImportsBySimpleName;
+		private final Map<String, Set<String>> fStaticImportsBySimpleName;
+
+		private UnresolvableImportMatcher(
+				Map<String, Set<String>> typeImportsBySimpleName, Map<String, Set<String>> staticImportsBySimpleName) {
+			fTypeImportsBySimpleName= typeImportsBySimpleName;
+			fStaticImportsBySimpleName= staticImportsBySimpleName;
+		}
+
+		private Set<String> matchImports(boolean isStatic, String simpleName) {
+			Map<String, Set<String>> importsBySimpleName= isStatic
+					? fStaticImportsBySimpleName : fTypeImportsBySimpleName;
+
+			Set<String> matchingSingleImports= importsBySimpleName.get(simpleName);
+			if (matchingSingleImports != null) {
+				return Collections.unmodifiableSet(matchingSingleImports);
+			}
+
+			Set<String> matchingOnDemandImports= importsBySimpleName.get("*"); //$NON-NLS-1$
+			if (matchingOnDemandImports != null) {
+				return Collections.unmodifiableSet(matchingOnDemandImports);
+			}
+
+			return Collections.emptySet();
+		}
+
+		Set<String> matchTypeImports(String simpleName) {
+			return matchImports(false, simpleName);
+		}
+
+		Set<String> matchStaticImports(String simpleName) {
+			return matchImports(true, simpleName);
+		}
+	}
 
 	private static class TypeReferenceProcessor {
 
@@ -116,6 +215,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 		private boolean fDoIgnoreLowerCaseNames;
 
+		private final UnresolvableImportMatcher fUnresolvableImportMatcher;
+
 		private IPackageFragment fCurrPackage;
 
 		private ScopeAnalyzer fAnalyzer;
@@ -127,11 +228,12 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private SourceRange[] fSourceRanges;
 
 
-		public TypeReferenceProcessor(Set<String> oldSingleImports, Set<String> oldDemandImports, CompilationUnit root, ImportRewrite impStructure, boolean ignoreLowerCaseNames) {
+		public TypeReferenceProcessor(Set<String> oldSingleImports, Set<String> oldDemandImports, CompilationUnit root, ImportRewrite impStructure, boolean ignoreLowerCaseNames, UnresolvableImportMatcher unresolvableImportMatcher) {
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
 			fImpStructure= impStructure;
 			fDoIgnoreLowerCaseNames= ignoreLowerCaseNames;
+			fUnresolvableImportMatcher= unresolvableImportMatcher;
 
 			ICompilationUnit cu= impStructure.getCompilationUnit();
 
@@ -223,8 +325,19 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					}
 				}
 			}
-			fImportsAdded.add(typeName);
-			fUnresolvedTypes.put(typeName, new UnresolvedTypeData(ref));
+
+			Set<String> matchingUnresolvableImports= fUnresolvableImportMatcher.matchTypeImports(typeName);
+			if (!matchingUnresolvableImports.isEmpty()) {
+				// If there are matching unresolvable import(s), rely on them to provide the type.
+				fImportsAdded.add(typeName);
+				for (String string : matchingUnresolvableImports) {
+					fImpStructure.addImport(string, UNRESOLVABLE_IMPORT_CONTEXT);
+				}
+			} else {
+				// Only resort to search results if there are no matching unresolvable imports.
+				fImportsAdded.add(typeName);
+				fUnresolvedTypes.put(typeName, new UnresolvedTypeData(ref));
+			}
 		}
 
 		public boolean process(IProgressMonitor monitor) throws JavaModelException {
@@ -351,6 +464,16 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 	}
 
+	/**
+	 * Used to ensure that unresolvable imports don't get reduced into on-demand imports.
+	 */
+	private static ImportRewriteContext UNRESOLVABLE_IMPORT_CONTEXT= new ImportRewriteContext() {
+		@Override
+		public int findInContext(String qualifier, String name, int kind) {
+			return RES_NAME_UNKNOWN_NEEDS_EXPLICIT_IMPORT;
+		}
+	};
+
 	private boolean fDoSave;
 
 	private boolean fIgnoreLowerCaseNames;
@@ -437,7 +560,16 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 			monitor.worked(1);
 
-			TypeReferenceProcessor processor= new TypeReferenceProcessor(oldSingleImports, oldDemandImports, astRoot, importsRewrite, fIgnoreLowerCaseNames);
+			UnresolvableImportMatcher unresolvableImportMatcher =
+					UnresolvableImportMatcher.forCompilationUnit(astRoot);
+
+			TypeReferenceProcessor processor= new TypeReferenceProcessor(
+					oldSingleImports,
+					oldDemandImports,
+					astRoot,
+					importsRewrite,
+					fIgnoreLowerCaseNames,
+					unresolvableImportMatcher);
 
 			Iterator<SimpleName> refIterator= typeReferences.iterator();
 			while (refIterator.hasNext()) {
@@ -446,7 +578,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 
 			boolean hasOpenChoices= processor.process(new SubProgressMonitor(monitor, 3));
-			addStaticImports(staticReferences, importsRewrite);
+			addStaticImports(staticReferences, importsRewrite, unresolvableImportMatcher);
 
 			if (hasOpenChoices && fChooseImportQuery != null) {
 				TypeNameMatch[][] choices= processor.getChoices();
@@ -494,12 +626,29 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	}
 
 
-	private void addStaticImports(List<SimpleName> staticReferences, ImportRewrite importsStructure) {
-		for (int i= 0; i < staticReferences.size(); i++) {
-			Name name= staticReferences.get(i);
+	private void addStaticImports(
+			Collection<SimpleName> staticReferences,
+			ImportRewrite importRewrite,
+			UnresolvableImportMatcher unresolvableImportMatcher) {
+		for (SimpleName name : staticReferences) {
 			IBinding binding= name.resolveBinding();
-			if (binding != null) { // paranoia check
-				importsStructure.addStaticImport(binding);
+			if (binding != null) {
+				importRewrite.addStaticImport(binding);
+			} else {
+				// This could be an unresolvable reference to a static member.
+				String identifier= name.getIdentifier();
+				Set<String> unresolvableImports= unresolvableImportMatcher.matchStaticImports(identifier);
+				for (String unresolvableImport : unresolvableImports) {
+					int lastDotIndex= unresolvableImport.lastIndexOf('.');
+					// It's OK to skip invalid imports.
+					if (lastDotIndex != -1) {
+						String declaringTypeName= unresolvableImport.substring(0, lastDotIndex);
+						String simpleName= unresolvableImport.substring(lastDotIndex + 1);
+						// Whether name refers to a field or to a method is unknown.
+						boolean isField= false;
+						importRewrite.addStaticImport(declaringTypeName, simpleName, isField, UNRESOLVABLE_IMPORT_CONTEXT);
+					}
+				}
 			}
 		}
 	}

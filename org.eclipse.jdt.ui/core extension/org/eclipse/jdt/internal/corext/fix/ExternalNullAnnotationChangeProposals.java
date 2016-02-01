@@ -319,25 +319,25 @@ public class ExternalNullAnnotationChangeProposals {
 
 	static ITypeBinding resolveBinding(TypeParameter type) {
 		ITypeBinding binding= type.resolveBinding();
-		if (binding == null) throw new MissingBindingException(type);
+		if (binding == null || binding.isRecovered()) throw new MissingBindingException(type);
 		return binding;
 	}
 
 	static ITypeBinding resolveBinding(Type type) {
 		ITypeBinding binding= type.resolveBinding();
-		if (binding == null) throw new MissingBindingException(type);
+		if (binding == null || binding.isRecovered()) throw new MissingBindingException(type);
 		return binding;
 	}
 	
 	static IMethodBinding resolveBinding(MethodDeclaration method) {
 		IMethodBinding binding= method.resolveBinding();
-		if (binding == null) throw new MissingBindingException(method);
+		if (binding == null || binding.isRecovered()) throw new MissingBindingException(method);
 		return binding;
 	}
 
 	static IVariableBinding resolveBinding(VariableDeclaration variable) {
 		IVariableBinding binding= variable.resolveBinding();
-		if (binding == null) throw new MissingBindingException(variable);
+		if (binding == null || binding.isRecovered()) throw new MissingBindingException(variable);
 		return binding;
 	}
 
@@ -416,7 +416,7 @@ public class ExternalNullAnnotationChangeProposals {
 			for (int i= 0; i < extraDims; i++) {
 				rendererNonNull.addDimension(i == outerExtraDims);
 				rendererNullable.addDimension(i == outerExtraDims);
-				rendererRemove.addDimension(i == outerExtraDims);				
+				rendererRemove.addDimension(i == outerExtraDims);
 			}
 		}
 		boolean useJava8= JavaModelUtil.is18OrHigher(javaProject.getOption(JavaCore.COMPILER_SOURCE, true));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,8 +20,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnnotatableType;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
@@ -31,6 +33,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -150,11 +153,12 @@ public class ImportReferencesCollector extends GenericVisitor {
 
 		IBinding binding= name.resolveBinding();
 		SimpleName simpleName= (SimpleName)name;
-		if (binding == null || binding instanceof ITypeBinding || !Modifier.isStatic(binding.getModifiers()) || simpleName.isDeclaration()) {
+		if (binding == null) {
+			// This may be a currently unresolvable reference to a static member.
+			fStaticImports.add(simpleName);
+		} else if (binding instanceof ITypeBinding || !Modifier.isStatic(binding.getModifiers()) || simpleName.isDeclaration()) {
 			return;
-		}
-
-		if (binding instanceof IVariableBinding) {
+		} else if (binding instanceof IVariableBinding) {
 			IVariableBinding varBinding= (IVariableBinding) binding;
 			if (varBinding.isField()) {
 				varBinding= varBinding.getVariableDeclaration();
@@ -258,7 +262,23 @@ public class ImportReferencesCollector extends GenericVisitor {
 		doVisitChildren(node.annotations());
 		return false;
 	}
+	
+	@Override
+	public boolean visit(LabeledStatement node) {
+		doVisitNode(node.getBody());
+		return false;
+	}
 
+	@Override
+	public boolean visit(ContinueStatement node) {
+		return false;
+	}
+	
+	@Override
+	public boolean visit(BreakStatement node) {
+		return false;
+	}
+	
 	/*
 	 * @see ASTVisitor#visit(ThisExpression)
 	 */
@@ -499,6 +519,12 @@ public class ImportReferencesCollector extends GenericVisitor {
 		if (list != null) {
 			doVisitChildren(list); // visit MethodRefParameter with Type
 		}
+		return false;
+	}
+	
+	@Override
+	public boolean visit(MethodRefParameter node) {
+		doVisitNode(node.getType());
 		return false;
 	}
 }

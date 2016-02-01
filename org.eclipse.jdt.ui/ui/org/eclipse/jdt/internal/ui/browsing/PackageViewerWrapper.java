@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -49,14 +49,14 @@ import org.eclipse.jdt.core.IPackageFragment;
 class PackageViewerWrapper extends StructuredViewer {
 
 	private StructuredViewer fViewer;
-	private ListenerList fListenerList;
-	private ListenerList fSelectionChangedListenerList;
-	private ListenerList fPostSelectionChangedListenerList;
+	private ListenerList<Object> fListenerList;
+	private ListenerList<ISelectionChangedListener> fSelectionChangedListenerList;
+	private ListenerList<ISelectionChangedListener> fPostSelectionChangedListenerList;
 
 	public PackageViewerWrapper() {
-		fListenerList= new ListenerList(ListenerList.IDENTITY);
-		fPostSelectionChangedListenerList= new ListenerList(ListenerList.IDENTITY);
-		fSelectionChangedListenerList= new ListenerList(ListenerList.IDENTITY);
+		fListenerList= new ListenerList<>(ListenerList.IDENTITY);
+		fPostSelectionChangedListenerList= new ListenerList<>(ListenerList.IDENTITY);
+		fSelectionChangedListenerList= new ListenerList<>(ListenerList.IDENTITY);
 	}
 
 	public void setViewer(StructuredViewer viewer) {
@@ -220,7 +220,7 @@ class PackageViewerWrapper extends StructuredViewer {
 	}
 
 	@Override
-	public void setFilters(ViewerFilter[] filters) {
+	public void setFilters(ViewerFilter... filters) {
 		fViewer.setFilters(filters);
 	}
 

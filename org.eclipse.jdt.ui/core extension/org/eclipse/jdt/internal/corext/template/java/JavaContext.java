@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
@@ -218,8 +219,14 @@ public class JavaContext extends CompilationUnitContext {
 		if (fForceEvaluation)
 			return true;
 
-		String key= getKey();
-		return (key.length() > 0 || !isAfterDot()) && template.getName().toLowerCase().startsWith(key.toLowerCase());
+		String key= getKey().toLowerCase();
+		if (key.length() > 0 || !isAfterDot()) {
+			String templateName= template.getName().toLowerCase();
+			return JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_SUBSTRING_MATCH))
+					? templateName.contains(key)
+					: templateName.startsWith(key);
+		}
+		return false;
 	}
 
 	private boolean isAfterDot() {

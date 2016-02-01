@@ -73,9 +73,8 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	
 	// === Tests ===
 
-	/**
+	/*
 	 * Assert that the "Annotate" command can be invoked on a ClassFileEditor
-	 * @throws Exception
 	 */
 	public void testAnnotateReturn() throws Exception {
 		
@@ -145,10 +144,9 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 		}
 	}
 
-	/**
+	/*
 	 * Assert two proposals ("@NonNull" and "@Nullable") on a simple return type (type variable).
 	 * Apply the second proposal and check the effect.
-	 * @throws Exception
 	 */
 	public void testAnnotateReturn2() throws Exception {
 		
@@ -205,10 +203,9 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 		}
 	}
 
-	/**
+	/*
 	 * Assert two proposals ("@NonNull" and "Remove") if annotation file already says "@Nullable".
 	 * Apply the second proposal and check the effect.
-	 * @throws Exception
 	 */
 	public void testAnnotateRemove() throws Exception {
 		
@@ -275,11 +272,10 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	}
 	
 
-	/**
+	/*
 	 * Assert two proposals ("@NonNull" and "@Nullable") on an (outer) array type (in parameter position).
 	 * The method already has a 2-line entry (i.e., not yet annotated).
 	 * Apply the second proposal and check the effect.
-	 * @throws Exception
 	 */
 	public void testAnnotateParameter_Array1() throws Exception {
 		
@@ -346,12 +342,11 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 		}
 	}
 
-	/**
+	/*
 	 * Assert two proposals ("@NonNull" and "@Nullable") on the array representing the varargs ellipsis
 	 * Apply the second proposal and check the effect.
 	 * 
 	 * Cf. {@link AnnotateAssistTest15#testAnnotateParameter_Array1()}
-	 * @throws Exception
 	 */
 	public void testAnnotateParameter_Varargs1() throws Exception {
 		
@@ -418,10 +413,9 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 		}
 	}
 
-	/**
+	/*
 	 * Assert two proposals ("@NonNull" and "@Nullable") on a simple field type (type variable).
 	 * Apply the second proposal and check the effect.
-	 * @throws Exception
 	 */
 	public void testAnnotateField1() throws Exception {
 		
@@ -478,10 +472,9 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 		}
 	}
 
-	/**
+	/*
 	 * Assert two proposals ("@NonNull" and "@Nullable") on a parameterized field type.
 	 * Apply the second proposal and check the effect.
-	 * @throws Exception
 	 */
 	public void testAnnotateField2() throws Exception {
 		
@@ -540,25 +533,18 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 
 	public void testBug466232() throws Exception {
 		final String MISSINGPATH= "pack/age/Missing";
-		String CLASS1_PATH= "pack/age/Class1";
 		String CLASS2_PATH= "pack/age/Class2";
 		String[] pathAndContents= new String[] {
 					MISSINGPATH+".java",
 					"package pack.age;\n" +
-					"@interface Missing {}\n",
-					CLASS1_PATH+".java",
-					"package pack.age;\n" +
-					"import pack.age.Missing;\n" +
-					"@Missing\n" +
-					"public class Class1 {\n" +
-					"    Class1 foo() { return this; }\n" +
+					"public class Missing {\n" +
+					"    Missing foo() { return this; }\n" +
 					"}\n",
 					CLASS2_PATH+".java",
 					"package pack.age;\n" +
-					"import pack.age.Class1;\n" + // creates UnresolvedReferenceBinding for transitively referenced "Missing"
-					"import pack.age.Missing;\n" + // throws AbortCompilation for unresolvable UnresolvedReferenceBinding "Missing"
+					"import pack.age.Missing;\n" +
 					"public class Class2 {\n" +
-					"    void test(Class1 c1) {\n" +
+					"    void test(Missing c1) {\n" + // will get a RecoveredTypeBinding for "Missing"
 					"        c1 = c1.foo();\n" +
 					"    }\n" +
 					"}\n"
@@ -576,7 +562,7 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 		ILogListener logListener= null;
 		ILog log= JavaPlugin.getDefault().getLog();
 		try {
-			int offset= pathAndContents[5].indexOf("Class1 c1");
+			int offset= pathAndContents[3].indexOf("Missing c1");
 
 			// not expecting proposals, but a log message, due to incomplete AST (no binding information available).
 			final IStatus[] resultingStatus= new IStatus[1];

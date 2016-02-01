@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -202,18 +202,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		createTableViewer(inner);
 		createOrderButtons(inner);
 		createModifyButtons(composite);
-		if (fIsSortingEnabled) {
-			fTableViewer.setComparator(new ViewerComparator(getComparator()) {
-				/*
-				 * @see ViewerComparator#compare(Viewer, Object, Object)
-				 * @since 3.5
-				 */
-				@Override
-				public int compare(Viewer viewer, Object e1, Object e2) {
-					return getComparator().compare(e1, e2);
-				}
-			});
-		}
+		updateSorting();
 		fTableViewer.setInput(fAllWorkingSets);
 		applyDialogFont(composite);
 
@@ -350,20 +339,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 			public void widgetSelected(SelectionEvent e) {
 				fIsSortingEnabled= fSortWorkingSet.getSelection();
 				updateButtonAvailability();
-				if (fIsSortingEnabled) {
-					fTableViewer.setComparator(new ViewerComparator(getComparator()) {
-						/*
-						 * @see ViewerComparator#compare(Viewer, Object, Object)
-						 * @since 3.5
-						 */
-						@Override
-						public int compare(Viewer viewer, Object e1, Object e2) {
-							return getComparator().compare(e1, e2);
-						}
-					});
-				} else {
-					fTableViewer.setComparator(null);
-				}
+				updateSorting();
 			}
 		});
 	}
@@ -701,5 +677,18 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	 */
 	public IWorkingSet[] getAllWorkingSets() {
 		return fAllWorkingSets.toArray(new IWorkingSet[fAllWorkingSets.size()]);
+	}
+
+	private void updateSorting() {
+		if (fIsSortingEnabled) {
+			fTableViewer.setComparator(new ViewerComparator() {
+				@Override
+				public int compare(Viewer viewer, Object e1, Object e2) {
+					return WorkingSetConfigurationDialog.this.getComparator().compare((IWorkingSet) e1, (IWorkingSet) e2);
+				}
+			});
+		} else {
+			fTableViewer.setComparator(null);
+		}
 	}
 }

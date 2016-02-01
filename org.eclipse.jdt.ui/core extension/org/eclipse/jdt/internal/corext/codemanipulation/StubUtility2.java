@@ -757,7 +757,7 @@ public final class StubUtility2 {
 		IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
 		for (int index= 0; index < typeMethods.length; index++) {
 			final int modifiers= typeMethods[index].getModifiers();
-			if (!typeMethods[index].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers) && !Modifier.isFinal(modifiers))
+			if (!typeMethods[index].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers))
 				allMethods.add(typeMethods[index]);
 		}
 		ITypeBinding clazz= typeBinding.getSuperclass();
@@ -765,7 +765,7 @@ public final class StubUtility2 {
 			IMethodBinding[] methods= clazz.getDeclaredMethods();
 			for (int offset= 0; offset < methods.length; offset++) {
 				final int modifiers= methods[offset].getModifiers();
-				if (!methods[offset].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers) && !Modifier.isFinal(modifiers)) {
+				if (!methods[offset].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
 					if (findOverridingMethod(methods[offset], allMethods) == null)
 						allMethods.add(methods[offset]);
 				}
@@ -784,6 +784,11 @@ public final class StubUtility2 {
 			getOverridableMethods(ast, ast.resolveWellKnownType("java.lang.Object"), allMethods); //$NON-NLS-1$
 		if (!isSubType)
 			allMethods.removeAll(Arrays.asList(typeMethods));
+		for (int index= allMethods.size() - 1; index >= 0; index--) {
+			IMethodBinding method= allMethods.get(index);
+			if (Modifier.isFinal(method.getModifiers()))
+				allMethods.remove(index);
+		}
 		return allMethods.toArray(new IMethodBinding[allMethods.size()]);
 	}
 
@@ -791,7 +796,7 @@ public final class StubUtility2 {
 		IMethodBinding[] methods= superBinding.getDeclaredMethods();
 		for (int offset= 0; offset < methods.length; offset++) {
 			final int modifiers= methods[offset].getModifiers();
-			if (!methods[offset].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers) && !Modifier.isFinal(modifiers)) {
+			if (!methods[offset].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
 				if (findOverridingMethod(methods[offset], allMethods) == null)
 					allMethods.add(methods[offset]);
 			}

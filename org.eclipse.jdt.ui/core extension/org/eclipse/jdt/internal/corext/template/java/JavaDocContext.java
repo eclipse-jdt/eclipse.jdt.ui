@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.jface.text.templates.TemplateTranslator;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -74,14 +75,18 @@ public class JavaDocContext extends CompilationUnitContext {
 	 */
 	@Override
 	public boolean canEvaluate(Template template) {
-		String key= getKey();
-
 		if (fForceEvaluation)
 			return true;
 
-		return
-			template.matches(key, getContextType().getId()) &&
-			(key.length() != 0) && template.getName().toLowerCase().startsWith(key.toLowerCase());
+		String key= getKey().toLowerCase();
+		if (template.matches(key, getContextType().getId()) && key.length() != 0) {
+			String templateName= template.getName().toLowerCase();
+			return JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_SUBSTRING_MATCH))
+					? templateName.contains(key)
+					: templateName.startsWith(key);
+		}
+
+		return false;
 	}
 
 	/*

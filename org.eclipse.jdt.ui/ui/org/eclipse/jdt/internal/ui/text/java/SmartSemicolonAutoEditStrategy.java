@@ -115,7 +115,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		CompilationUnitEditor editor= (CompilationUnitEditor)part;
 		if (editor.getInsertMode() != ITextEditorExtension3.SMART_INSERT || !editor.isEditable())
 			return;
-		ITextEditorExtension2 extension= (ITextEditorExtension2)editor.getAdapter(ITextEditorExtension2.class);
+		ITextEditorExtension2 extension= editor.getAdapter(ITextEditorExtension2.class);
 		if (extension != null && !extension.validateEditorInputState())
 			return;
 		if (isMultilineSelection(document, command))
@@ -151,7 +151,7 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 
 		try {
 
-			final SmartBackspaceManager manager= (SmartBackspaceManager) editor.getAdapter(SmartBackspaceManager.class);
+			final SmartBackspaceManager manager= editor.getAdapter(SmartBackspaceManager.class);
 			if (manager != null && JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_BACKSPACE)) {
 				TextEdit e1= new ReplaceEdit(command.offset, command.text.length(), document.get(command.offset, command.length));
 				UndoSpec s1= new UndoSpec(command.offset + command.text.length(),

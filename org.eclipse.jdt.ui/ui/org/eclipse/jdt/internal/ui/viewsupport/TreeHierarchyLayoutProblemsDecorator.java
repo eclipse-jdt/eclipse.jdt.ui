@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,7 +58,7 @@ public class TreeHierarchyLayoutProblemsDecorator extends ProblemsLabelDecorator
 				int flags= computePackageAdornmentFlags(fragments[i]);
 				if (flags == JavaElementImageDescriptor.ERROR) {
 					return flags;
-				} else if (flags != 0) {
+				} else if (flags != 0 && res != JavaElementImageDescriptor.WARNING) {
 					res= flags;
 				}
 			}

@@ -121,7 +121,7 @@ public class FindMethodExitOccurrencesAction extends SelectionDispatchAction {
 	}
 
 	private static void showMessage(Shell shell, JavaEditor editor, String msg) {
-		IEditorStatusLine statusLine= (IEditorStatusLine) editor.getAdapter(IEditorStatusLine.class);
+		IEditorStatusLine statusLine= editor.getAdapter(IEditorStatusLine.class);
 		if (statusLine != null)
 			statusLine.setMessage(true, msg, null);
 		shell.getDisplay().beep();

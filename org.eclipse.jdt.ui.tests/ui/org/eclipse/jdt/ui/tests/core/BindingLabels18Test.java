@@ -347,4 +347,63 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "{{java.lang|String}} s - {{org.test.C}}.{...}.() -> {...} {{java.util.function|Consumer}}.{{java.util.function.Consumer|accept}}({{java.util.function.Consumer|T}})");
 	}
 
+	public void testAnnotatedArrayDimension1() throws Exception {
+
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("import java.lang.annotation.*;\n");
+		buf.append("\n");
+		buf.append("@Target(ElementType.TYPE_USE) @interface TAnn {}\n");
+		buf.append("\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    void test (String [] @TAnn[] argss) {\n");
+		buf.append("    	String[] args = argss[0];\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", content, false, null);
+
+		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("argss[0]"), "argss".length());
+		IJavaElement thread= elems[0];
+		String lab= getBindingLabel(thread, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.USE_RESOLVED | JavaElementLabels.F_PRE_TYPE_SIGNATURE);
+		assertLinkMatch(lab, "{{java.lang|String}}[] @{{org.test|TAnn}}[] {{org.test.C|test}}({{java.lang|String}}[] @{{org.test|TAnn}}[]).argss");
+
+		lab= getBindingLabel(thread, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.F_PRE_TYPE_SIGNATURE | JavaElementLabels.F_POST_QUALIFIED);
+		assertLinkMatch(lab, "{{java.lang|String}}[] @{{org.test|TAnn}}[] argss - {{org.test.C|test}}({{java.lang|String}}[][])");
+	}
+
+	public void testAnnotatedArrayDimension2() throws Exception {
+
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("org.test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package org.test;\n");
+		buf.append("import java.lang.annotation.*;\n");
+		buf.append("\n");
+		buf.append("@Target(ElementType.TYPE_USE) @interface TA1 {}\n");
+		buf.append("@Target(ElementType.TYPE_USE) @interface TA2 {}\n");
+		buf.append("@Target(ElementType.TYPE_USE) @interface TA3 {}\n");
+		buf.append("\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    void test (@TA1 String @TA2[] @TA3[] argss) {\n");
+		buf.append("    	String[] args = argss[0];\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		String content= buf.toString();
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", content, false, null);
+
+		IJavaElement[] elems= cu.codeSelect(content.lastIndexOf("argss[0]"), "argss".length());
+		IJavaElement thread= elems[0];
+		String lab= getBindingLabel(thread, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.USE_RESOLVED | JavaElementLabels.F_PRE_TYPE_SIGNATURE);
+		assertLinkMatch(lab, "@{{org.test|TA1}} {{java.lang|String}} @{{org.test|TA2}}[] @{{org.test|TA3}}[] {{org.test.C|test}}(@{{org.test|TA1}} {{java.lang|String}} @{{org.test|TA2}}[] @{{org.test|TA3}}[]).argss");
+
+		lab= getBindingLabel(thread, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.F_PRE_TYPE_SIGNATURE | JavaElementLabels.F_POST_QUALIFIED);
+		assertLinkMatch(lab, "@{{org.test|TA1}} {{java.lang|String}} @{{org.test|TA2}}[] @{{org.test|TA3}}[] argss - {{org.test.C|test}}({{java.lang|String}}[][])");
+	}
 }

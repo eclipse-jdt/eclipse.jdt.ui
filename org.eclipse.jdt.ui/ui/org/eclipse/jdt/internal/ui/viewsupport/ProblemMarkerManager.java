@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -104,7 +104,7 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 		}
 	}
 
-	private ListenerList fListeners;
+	private ListenerList<IProblemChangedListener> fListeners;
 
 	private Set<IResource> fResourcesWithMarkerChanges;
 	private Set<IResource> fResourcesWithAnnotationChanges;
@@ -112,7 +112,7 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 	private UIJob fNotifierJob;
 
 	public ProblemMarkerManager() {
-		fListeners= new ListenerList();
+		fListeners= new ListenerList<>();
 		fResourcesWithMarkerChanges= new HashSet<>();
 		fResourcesWithAnnotationChanges= new HashSet<>();
 	}
@@ -232,9 +232,7 @@ public class ProblemMarkerManager implements IResourceChangeListener, IAnnotatio
 				fResourcesWithAnnotationChanges.clear();
 			}
 		}
-		Object[] listeners= fListeners.getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			IProblemChangedListener curr= (IProblemChangedListener) listeners[i];
+		for (IProblemChangedListener curr : fListeners) {
 			if (markerResources != null) {
 				curr.problemsChanged(markerResources, true);
 			}

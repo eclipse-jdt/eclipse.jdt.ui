@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2015 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,7 +39,9 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.text.source.CompositeRuler;
+import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IEditorInput;
@@ -106,15 +108,6 @@ public class JavaMergeViewer extends TextMergeViewer {
 	@Override
 	protected void handleDispose(DisposeEvent event) {
 		setPreferenceStore(null);
-		fSourceViewer= null;
-		if (fEditor != null) {
-			for (Iterator<CompilationUnitEditorAdapter> iterator= fEditor.values().iterator(); iterator.hasNext();) {
-				CompilationUnitEditorAdapter editor= iterator.next();
-				editor.dispose();
-			}
-			fEditor= null;
-		}
-		fSite= null;
 		super.handleDispose(event);
 	}
 
@@ -589,6 +582,32 @@ public class JavaMergeViewer extends TextMergeViewer {
 			createNavigationActions();
 			getSelectionProvider().addSelectionChangedListener(getSelectionChangedListener());
 		}
+
+		@Override
+		protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean isOverviewRulerVisible, int styles,
+				IPreferenceStore store) {
+			return new AdaptedSourceViewer(parent, verticalRuler, overviewRuler, isOverviewRulerVisible, styles, store) {
+				@Override
+				protected void handleDispose() {
+					super.handleDispose();
+
+					// dispose the compilation unit adapter 
+					dispose();
+
+					fEditor.remove(this);
+					if (fEditor.isEmpty()) {
+						fEditor= null;
+						fSite= null;
+					}
+
+					fSourceViewer.remove(this);
+					if (fSourceViewer.isEmpty())
+						fSourceViewer= null;
+
+				}
+			};
+		}
+
 		@Override
 		protected void doSetInput(IEditorInput input) throws CoreException {
 			super.doSetInput(input);
@@ -607,6 +626,10 @@ public class JavaMergeViewer extends TextMergeViewer {
 		@Override
 		public boolean isEditorInputReadOnly() {
 			return !fEditable;
+		}
+		@Override
+		protected boolean isWordWrapSupported() {
+			return false;
 		}
 		@Override
 		protected void setActionsActivated(boolean state) {

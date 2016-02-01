@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -155,7 +155,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		void customizeDocumentCommand(IDocument document, DocumentCommand command);
 	}
 
-	class AdaptedSourceViewer extends JavaSourceViewer  {
+	protected class AdaptedSourceViewer extends JavaSourceViewer {
 
 		public AdaptedSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
 			super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles, store);
@@ -1011,7 +1011,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * Reconciling listeners.
 	 * @since 3.0
 	 */
-	private final ListenerList fReconcilingListeners= new ListenerList(ListenerList.IDENTITY);
+	private final ListenerList<IJavaReconcilingListener> fReconcilingListeners= new ListenerList<>(ListenerList.IDENTITY);
 
 	/**
 	 * Mutex for the reconciler. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=63898
@@ -1644,9 +1644,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		JavaPlugin.getDefault().getASTProvider().aboutToBeReconciled(getInputJavaElement());
 
 		// Notify listeners
-		Object[] listeners = fReconcilingListeners.getListeners();
-		for (int i = 0, length= listeners.length; i < length; ++i)
-			((IJavaReconcilingListener)listeners[i]).aboutToBeReconciled();
+		for (IJavaReconcilingListener listener : fReconcilingListeners) {
+			listener.aboutToBeReconciled();
+		}
 	}
 
 	/*
@@ -1665,9 +1665,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		javaPlugin.getASTProvider().reconciled(ast, getInputJavaElement(), progressMonitor);
 
 		// Notify listeners
-		Object[] listeners = fReconcilingListeners.getListeners();
-		for (int i = 0, length= listeners.length; i < length; ++i)
-			((IJavaReconcilingListener)listeners[i]).reconciled(ast, forced, progressMonitor);
+		for (IJavaReconcilingListener listener : fReconcilingListeners) {
+			listener.reconciled(ast, forced, progressMonitor);
+		}
 
 		// Update Java Outline page selection
 		if (!forced && !progressMonitor.isCanceled()) {
@@ -1766,21 +1766,19 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		return oldExtension.equals(newExtension);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#getAdapter(java.lang.Class)
-	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class required) {
+	public <T> T getAdapter(Class<T> required) {
 		if (SmartBackspaceManager.class.equals(required)) {
 			if (getSourceViewer() instanceof JavaSourceViewer) {
-				return ((JavaSourceViewer) getSourceViewer()).getBackspaceManager();
+				return (T) ((JavaSourceViewer) getSourceViewer()).getBackspaceManager();
 			}
 		}
 
 		if (ITemplatesPage.class.equals(required)) {
 			if (fTemplatesPage == null)
 				fTemplatesPage= createTemplatesPage();
-			return fTemplatesPage;
+			return (T) fTemplatesPage;
 		}
 
 		return super.getAdapter(required);

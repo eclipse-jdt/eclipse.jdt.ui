@@ -88,7 +88,7 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 
 	private Image getQuickFixWarningImage() {
 		if (fgQuickFixWarningImage == null)
-			fgQuickFixWarningImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
+			fgQuickFixWarningImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_WARNING);
 		return fgQuickFixWarningImage;
 	}
 

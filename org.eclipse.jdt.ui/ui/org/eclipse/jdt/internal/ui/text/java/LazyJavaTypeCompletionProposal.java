@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -307,7 +307,23 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 */
 	@Override
 	protected boolean isValidPrefix(String prefix) {
-		return isPrefix(prefix, getSimpleTypeName()) || isPrefix(prefix, getQualifiedTypeName());
+		boolean isPrefix= isPrefix(prefix, getSimpleTypeName());
+		if (!isPrefix && prefix.indexOf('.') != -1) {
+			isPrefix= isPrefix(prefix, getQualifiedTypeName());
+		}
+		return isPrefix;
+	}
+
+	@Override
+	protected String getPatternToEmphasizeMatch(IDocument document, int offset) {
+		String pattern= super.getPatternToEmphasizeMatch(document, offset);
+		if (pattern != null && getPatternMatchRule(pattern, getStyledDisplayString().getString()) == -1) {
+			int lastIndexOfDot= pattern.lastIndexOf('.');
+			if (lastIndexOfDot != -1) {
+				pattern= pattern.substring(lastIndexOfDot + 1);
+			}
+		}
+		return pattern;
 	}
 
 	/*

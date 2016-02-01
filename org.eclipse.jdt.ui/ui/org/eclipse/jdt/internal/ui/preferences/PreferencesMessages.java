@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@
  *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
  *     Thomas Reinhardt <thomas@reinhardt.com> - [build path] user library dialog should allow to select JAR from workspace - http://bugs.eclipse.org/300542
  *     Stephan Herrmann <stephan@cs.tu-berlin.de> - [compiler][null] inheritance of null annotations as an option - https://bugs.eclipse.org/388281
+ *     Gábor Kövesdán - Contribution for Bug 350000 - [content assist] Include non-prefix matches in auto-complete suggestions
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -386,14 +387,21 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_needsbuild_title;
 	public static String ProblemSeveritiesConfigurationBlock_needsfullbuild_message;
 	public static String ProblemSeveritiesConfigurationBlock_needsprojectbuild_message;
-	public static String NullAnnotationsConfigurationDialog_nonnull_annotation_label;
+	public static String NullAnnotationsConfigurationDialog_nonnull_annotations_label;
+	public static String NullAnnotationsConfigurationDialog_nonnull_annotations_description;
 	public static String ProblemSeveritiesConfigurationBlock_missing_nonnull_by_default_annotation;
 	public static String NullAnnotationsConfigurationDialog_nonnullbydefault_annotation_error;
-	public static String NullAnnotationsConfigurationDialog_nonnullbydefault_annotation_label;
-	public static String NullAnnotationsConfigurationDialog_nonull_annotation_error;
+	public static String NullAnnotationsConfigurationDialog_nonnullbydefault_annotations_label;
+	public static String NullAnnotationsConfigurationDialog_nonnullbydefault_annotations_description;
+	public static String NullAnnotationsConfigurationDialog_nonnull_annotation_error;
 	public static String NullAnnotationsConfigurationDialog_null_annotations_description;
 	public static String NullAnnotationsConfigurationDialog_nullable_annotation_error;
-	public static String NullAnnotationsConfigurationDialog_nullable_annotation_label;
+	public static String NullAnnotationsConfigurationDialog_nullable_annotations_label;
+	public static String NullAnnotationsConfigurationDialog_nullable_annotations_description;
+	public static String NullAnnotationsConfigurationDialog_add_button;
+	public static String NullAnnotationsConfigurationDialog_notFound_info;
+	public static String NullAnnotationsConfigurationDialog_primary_label;
+	public static String NullAnnotationsConfigurationDialog_secondary_label;
 	public static String ProblemSeveritiesConfigurationBlock_common_description;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unavoidable_generic_type_problems;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unsafe_type_op_label;
@@ -767,11 +775,6 @@ public final class PreferencesMessages extends NLS {
 	}
 
 	public static String NameConventionConfigurationBlock_use_override_annotation_label;
-	public static String NullAnnotationsConfigurationDialog_browse_title;
-	public static String NullAnnotationsConfigurationDialog_browse1;
-	public static String NullAnnotationsConfigurationDialog_browse2;
-	public static String NullAnnotationsConfigurationDialog_browse3;
-	public static String NullAnnotationsConfigurationDialog_choose_annotation;
 	public static String NullAnnotationsConfigurationDialog_error_message;
 	public static String NullAnnotationsConfigurationDialog_error_title;
 	public static String NullAnnotationsConfigurationDialog_restore_defaults;
@@ -795,6 +798,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaBasePreferencePage_do_not_hide_dialog_title;
 	public static String JavaBasePreferencePage_do_not_hide_dialog_message;
 	public static String CodeAssistConfigurationBlock_matchCamelCase_label;
+	public static String CodeAssistConfigurationBlock_matchSubstring_label;
 	public static String ComplianceConfigurationBlock_version16;
 	public static String ComplianceConfigurationBlock_version17;
 	public static String ComplianceConfigurationBlock_version18;

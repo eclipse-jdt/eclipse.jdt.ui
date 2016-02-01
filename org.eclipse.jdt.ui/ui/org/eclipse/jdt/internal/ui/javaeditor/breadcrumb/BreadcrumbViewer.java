@@ -74,7 +74,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 
 	private final Composite fContainer;
 	private final ArrayList<BreadcrumbItem> fBreadcrumbItems;
-	private final ListenerList fMenuListeners;
+	private final ListenerList<MenuDetectListener> fMenuListeners;
 
 	private Image fGradientBackground;
 	private BreadcrumbItem fSelectedItem;
@@ -96,7 +96,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	 */
 	public BreadcrumbViewer(Composite parent, int style) {
 		fBreadcrumbItems= new ArrayList<>();
-		fMenuListeners= new ListenerList();
+		fMenuListeners= new ListenerList<>();
 
 		fContainer= new Composite(parent, SWT.NONE);
 		GridData layoutData= new GridData(SWT.FILL, SWT.TOP, true, false);
@@ -555,9 +555,8 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	 * @param event the event issued the menu detection
 	 */
 	void fireMenuDetect(MenuDetectEvent event) {
-		Object[] listeners= fMenuListeners.getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			((MenuDetectListener)listeners[i]).menuDetected(event);
+		for (MenuDetectListener listener : fMenuListeners) {
+			listener.menuDetected(event);
 		}
 	}
 

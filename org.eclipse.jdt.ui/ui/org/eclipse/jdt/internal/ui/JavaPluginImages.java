@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -152,8 +152,7 @@ public class JavaPluginImages {
 
 	public static final String IMG_OBJS_BREAKPOINT_INSTALLED= NAME_PREFIX + "brkpi_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_QUICK_ASSIST= NAME_PREFIX + "quickassist_obj.gif"; //$NON-NLS-1$
-	public static final String IMG_OBJS_QUICK_FIX= NAME_PREFIX + "quickfix_obj.gif"; //$NON-NLS-1$
-	public static final String IMG_OBJS_FIXABLE_PROBLEM= NAME_PREFIX + "quickfix_warning_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_FIXABLE_WARNING= NAME_PREFIX + "quickfix_warning_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_FIXABLE_ERROR= NAME_PREFIX + "quickfix_error_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_FIXABLE_INFO= NAME_PREFIX + "quickfix_info_obj.gif"; //$NON-NLS-1$
 
@@ -174,6 +173,9 @@ public class JavaPluginImages {
 
 	public static final String IMG_OBJS_HELP= NAME_PREFIX + "help.gif"; //$NON-NLS-1$
 
+	public static final String IMG_CONFIGURE_PROBLEM_SEVERITIES= NAME_PREFIX + "configure_problem_severity.png"; //$NON-NLS-1$
+
+	public static final String IMG_BLANK= NAME_PREFIX + "blank.png"; //$NON-NLS-1$
 
 	/*
 	 * Set of predefined Image Descriptors.
@@ -284,8 +286,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_BREAKPOINT_INSTALLED= createManagedFromKey(T_OBJ, IMG_OBJS_BREAKPOINT_INSTALLED);
 	public static final ImageDescriptor DESC_OBJS_ERROR= createManagedFromKey(T_OBJ, IMG_OBJS_ERROR);
 	public static final ImageDescriptor DESC_OBJS_QUICK_ASSIST= createManagedFromKey(T_OBJ, IMG_OBJS_QUICK_ASSIST);
-	public static final ImageDescriptor DESC_OBJS_QUICK_FIX= createManagedFromKey(T_OBJ, IMG_OBJS_QUICK_FIX);
-	public static final ImageDescriptor DESC_OBJS_FIXABLE_PROBLEM= createManagedFromKey(T_OBJ, IMG_OBJS_FIXABLE_PROBLEM);
+	public static final ImageDescriptor DESC_OBJS_FIXABLE_WARNING= createManagedFromKey(T_OBJ, IMG_OBJS_FIXABLE_WARNING);
 	public static final ImageDescriptor DESC_OBJS_FIXABLE_ERROR= createManagedFromKey(T_OBJ, IMG_OBJS_FIXABLE_ERROR);
 	public static final ImageDescriptor DESC_OBJS_FIXABLE_INFO= createManagedFromKey(T_OBJ, IMG_OBJS_FIXABLE_INFO);
 
@@ -349,7 +350,7 @@ public class JavaPluginImages {
     public static final ImageDescriptor DESC_ELCL_CONFIGURE_OUTPUT_FOLDER= createUnManaged(T_ELCL, "configure_output_folder.png"); //$NON-NLS-1$
 
     public static final ImageDescriptor DESC_DLCL_CONFIGURE_PROBLEM_SEVERITIES= createUnManaged(T_DLCL, "configure_problem_severity.png"); //$NON-NLS-1$
-	public static final ImageDescriptor DESC_ELCL_CONFIGURE_PROBLEM_SEVERITIES= createUnManaged(T_ELCL, "configure_problem_severity.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_CONFIGURE_PROBLEM_SEVERITIES= createManagedFromKey(T_ELCL, IMG_CONFIGURE_PROBLEM_SEVERITIES);
 
     public static final ImageDescriptor DESC_DLCL_EXCLUDE_FROM_BUILDPATH= createUnManaged(T_DLCL, "exclude_from_buildpath.png");  //$NON-NLS-1$
     public static final ImageDescriptor DESC_ELCL_EXCLUDE_FROM_BUILDPATH= createUnManaged(T_ELCL, "exclude_from_buildpath.png");  //$NON-NLS-1$
@@ -383,6 +384,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_TRANSIENT= createUnManagedCached(T_OVR, "transient_co.png"); 						//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_NATIVE= createUnManagedCached(T_OVR, "native_co.png"); 						//$NON-NLS-1$
 
+	public static final ImageDescriptor DESC_OVR_INFO= createUnManagedCached(T_OVR, "info_co.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_RUN= createUnManagedCached(T_OVR, "run_co.png"); 							//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_WARNING= createUnManagedCached(T_OVR, "warning_co.png"); 					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_IGNORE_OPTIONAL_PROBLEMS= createUnManagedCached(T_OVR, "ignore_optional_problems_ovr.png"); //$NON-NLS-1$
@@ -478,6 +480,7 @@ public class JavaPluginImages {
 		createManagedFromKey(T_OBJ, IMG_OBJS_ERROR_ALT);
 		createManagedFromKey(T_OBJ, IMG_OBJS_WARNING_ALT);
 		createManagedFromKey(T_OBJ, IMG_OBJS_INFO_ALT);
+		createManagedFromKey(T_OBJ, IMG_BLANK);
 	}
 
 	private static final class CachedImageDescriptor extends ImageDescriptor {

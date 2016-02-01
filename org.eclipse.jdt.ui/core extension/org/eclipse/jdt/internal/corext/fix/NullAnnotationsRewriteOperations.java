@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -201,6 +202,32 @@ public class NullAnnotationsRewriteOperations {
 			throw new RuntimeException("Argument " + paramName + " not found in method " + method.getName().getIdentifier()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
+		static ParameterAnnotationRewriteOperation create(CompilationUnit unit, LambdaExpression lambda, String annotationToAdd, String annotationToRemove, String paramName, boolean allowRemove, String message) {
+			String key= lambda.resolveMethodBinding().getKey();
+			for (Object param : lambda.parameters()) {
+				if (!(param instanceof SingleVariableDeclaration)) {
+					return null; // type elided lambda
+				}
+				SingleVariableDeclaration argument= (SingleVariableDeclaration) param;
+				if (argument.getName().getIdentifier().equals(paramName)) {
+					key+= argument.getName().getIdentifier();
+					return new ParameterAnnotationRewriteOperation(unit, key, argument, annotationToAdd, annotationToRemove, allowRemove, message);
+				}
+			}
+			// shouldn't happen, we've checked that paramName indeed denotes a parameter.
+			throw new RuntimeException("Argument " + paramName + " not found in method " + lambda.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+
+		private ParameterAnnotationRewriteOperation(CompilationUnit unit, String key, SingleVariableDeclaration argument, String annotationToAdd, String annotationToRemove, boolean allowRemove, String message) {
+			fUnit= unit;
+			fKey= key;
+			fArgument= argument;
+			fAnnotationToAdd= annotationToAdd;
+			fAnnotationToRemove= annotationToRemove;
+			fAllowRemove= allowRemove;
+			fMessage= message;
+		}
+
 		ParameterAnnotationRewriteOperation(CompilationUnit unit, MethodDeclaration method, String annotationToAdd, String annotationToRemove, int paramIdx, boolean allowRemove, String message) {
 			fUnit= unit;
 			fKey= method.resolveBinding().getKey();
@@ -364,9 +391,8 @@ public class NullAnnotationsRewriteOperations {
 					return new ReturnAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, allowRemove, message);
 				}
 			}
-		} else if (declaringNode instanceof MethodDeclaration) {
-			// complaint is in signature of this method
-			MethodDeclaration declaration= (MethodDeclaration) declaringNode;
+		} else if (declaringNode instanceof MethodDeclaration || declaringNode instanceof LambdaExpression) {
+			// complaint is in signature of this method / lambda
 			switch (problem.getProblemId()) {
 				case IProblem.ParameterLackingNonNullAnnotation:
 				case IProblem.ParameterLackingNullableAnnotation:
@@ -375,12 +401,22 @@ public class NullAnnotationsRewriteOperations {
 				case IProblem.SpecdNonNullLocalVariableComparisonYieldsFalse:
 				case IProblem.RedundantNullCheckOnSpecdNonNullLocalVariable:
 					// problems regarding the argument declaration:
-					if (declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
-						String paramName= findAffectedParameterName(selectedNode);
-						if (paramName != null) {
-							String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness,
-															new Object[] {paramName, annotationNameLabel});
-							return new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
+					String paramName= findAffectedParameterName(selectedNode);
+					if (paramName != null) {
+						switch (declaringNode.getNodeType()) {
+							case ASTNode.METHOD_DECLARATION:
+								MethodDeclaration method= (MethodDeclaration) declaringNode;
+								String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness,
+																new Object[] {paramName, annotationNameLabel});
+								return new ParameterAnnotationRewriteOperation(compilationUnit, method, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
+							case ASTNode.LAMBDA_EXPRESSION:
+								LambdaExpression lambda = (LambdaExpression) declaringNode;
+								// TODO: specific message for lambda
+								message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness,
+																	new Object[] {paramName, annotationNameLabel});
+								return ParameterAnnotationRewriteOperation.create(compilationUnit, lambda, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
+							default:
+								return null;
 						}
 					}
 					break;
@@ -392,21 +428,37 @@ public class NullAnnotationsRewriteOperations {
 				case IProblem.ConflictingInheritedNullAnnotations:
 					if (isArgumentProblem) {
 						// statement suggests changing parameters:
-						if (declaration.getNodeType() == ASTNode.METHOD_DECLARATION && selectedNode instanceof SimpleName) {
+						if (selectedNode instanceof SimpleName) {
 							// don't call findAffectedParameterName(), in this branch we're not interested in any target method
-							String paramName= ((SimpleName) selectedNode).getIdentifier();
+							paramName= ((SimpleName) selectedNode).getIdentifier();
 							if (paramName != null) {
-								String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness,
-																new Object[] { paramName, annotationNameLabel });
-								return new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
+								switch (declaringNode.getNodeType()) {
+									case ASTNode.METHOD_DECLARATION:
+										MethodDeclaration declaration= (MethodDeclaration) declaringNode;
+										String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness,
+												new Object[] { paramName, annotationNameLabel });
+										return new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
+									case ASTNode.LAMBDA_EXPRESSION:
+										LambdaExpression lambda= (LambdaExpression) declaringNode;
+										// TODO: appropriate message for lambda
+										message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness,
+												new Object[] { paramName, annotationNameLabel });
+										return ParameterAnnotationRewriteOperation.create(compilationUnit, lambda, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
+									default:
+										return null;
+								}
 							}
 						}
 						break;
 					}
 					//$FALL-THROUGH$
 				case IProblem.IllegalReturnNullityRedefinition:
-					String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_return_nullness, new String[] { declaration.getName().getIdentifier(), annotationNameLabel });
-					return new ReturnAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, allowRemove, message);
+					if (declaringNode.getNodeType()== ASTNode.METHOD_DECLARATION) {
+						MethodDeclaration declaration= (MethodDeclaration) declaringNode;
+						String name= declaration.getName().getIdentifier();
+						String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_return_nullness, new String[] { name, annotationNameLabel });
+						return new ReturnAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, allowRemove, message);
+					}
 			}
 		}
 		return null;
@@ -551,8 +603,17 @@ public class NullAnnotationsRewriteOperations {
 		return compilationUnit;
 	}
 
-	/* The relevant declaring node of a return statement is the enclosing method. */
+	/* The relevant declaring node of a return statement is the enclosing method or lambda. */
 	private static ASTNode getDeclaringNode(ASTNode selectedNode) {
-		return ASTNodes.getParent(selectedNode, ASTNode.METHOD_DECLARATION);
+		while (selectedNode != null) {
+			switch (selectedNode.getNodeType()) {
+				case ASTNode.METHOD_DECLARATION:
+				case ASTNode.LAMBDA_EXPRESSION:
+					return selectedNode;
+				default:
+					selectedNode= selectedNode.getParent();
+			}
+		}
+		return null;
 	}
 }

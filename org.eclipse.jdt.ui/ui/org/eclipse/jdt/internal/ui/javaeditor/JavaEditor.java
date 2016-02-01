@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
@@ -338,7 +339,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		/** Listeners on on this adapter */
-		private ListenerList fListeners= new ListenerList(ListenerList.IDENTITY);
+		private ListenerList<IPropertyChangeListener> fListeners= new ListenerList<>(ListenerList.IDENTITY);
 
 		/** Listener on the node */
 		private IEclipsePreferences.IPreferenceChangeListener fListener= new PreferenceChangeListener();
@@ -385,9 +386,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		@Override
 		public void firePropertyChangeEvent(String name, Object oldValue, Object newValue) {
 			PropertyChangeEvent event= new PropertyChangeEvent(this, name, oldValue, newValue);
-			Object[] listeners= fListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++)
-				((IPropertyChangeListener) listeners[i]).propertyChange(event);
+			for (IPropertyChangeListener listener : fListeners) {
+				listener.propertyChange(event);
+			}
 		}
 
 		@Override
@@ -1208,8 +1209,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (window == getEditorSite().getWorkbenchWindow() && fMarkOccurrenceAnnotations && isActivePart()) {
 				fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
 				ITypeRoot inputJavaElement= getInputJavaElement();
-				if (inputJavaElement != null)
-					updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO, getProgressMonitor()));
+				if (inputJavaElement != null) {
+					IProgressMonitor monitor = getProgressMonitor();
+					try {
+						updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO, monitor));
+					} finally {
+						monitor.done();
+					}
+				}
 			}
 		}
 
@@ -1355,8 +1362,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	class JdtSelectionProvider extends SelectionProvider {
 
-		private ListenerList fSelectionListeners= new ListenerList();
-		private ListenerList fPostSelectionListeners= new ListenerList();
+		private ListenerList<ISelectionChangedListener> fSelectionListeners= new ListenerList<>();
+		private ListenerList<ISelectionChangedListener> fPostSelectionListeners= new ListenerList<>();
 		private ITextSelection fInvalidSelection;
 		private ISelection fValidSelection;
 
@@ -1453,13 +1460,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			SelectionChangedEvent event= new SelectionChangedEvent(this, fInvalidSelection);
 
-			Object[] listeners= fSelectionListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++)
-				((ISelectionChangedListener) listeners[i]).selectionChanged(event);
+			for (ISelectionChangedListener listener : fSelectionListeners) {
+				listener.selectionChanged(event);
+			}
 
-			listeners= fPostSelectionListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++)
-				((ISelectionChangedListener) listeners[i]).selectionChanged(event);
+			for (ISelectionChangedListener listener : fPostSelectionListeners) {
+				listener.selectionChanged(event);
+			}
 		}
 
 		/**
@@ -1470,13 +1477,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 			SelectionChangedEvent event= new SelectionChangedEvent(this, fValidSelection);
 
-			Object[] listeners= fSelectionListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++)
-				((ISelectionChangedListener) listeners[i]).selectionChanged(event);
+			for (ISelectionChangedListener listener : fSelectionListeners) {
+				listener.selectionChanged(event);
+			}
 
-			listeners= fPostSelectionListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++)
-				((ISelectionChangedListener) listeners[i]).selectionChanged(event);
+			for (ISelectionChangedListener listener : fPostSelectionListeners) {
+				listener.selectionChanged(event);
+			}
 		}
 	}
 
@@ -1856,7 +1863,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		if (sourceViewer instanceof ProjectionViewer) {
 			fProjectionSupport= new ProjectionSupport((ProjectionViewer)sourceViewer, getAnnotationAccess(), getSharedColors());
-			MarkerAnnotationPreferences markerAnnotationPreferences= (MarkerAnnotationPreferences)getAdapter(MarkerAnnotationPreferences.class);
+			MarkerAnnotationPreferences markerAnnotationPreferences= getAdapter(MarkerAnnotationPreferences.class);
 			if (markerAnnotationPreferences != null) {
 				Iterator<AnnotationPreference> e= markerAnnotationPreferences.getAnnotationPreferences().iterator();
 				while (e.hasNext()) {
@@ -2156,23 +2163,21 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		synchronizeOutlinePage(computeHighlightRangeSourceReference());
 	}
 
-	/*
-	 * @see AbstractTextEditor#getAdapter(Class)
-	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object getAdapter(Class required) {
+	public <T> T getAdapter(Class<T> required) {
 
 		if (IContentOutlinePage.class.equals(required)) {
 			if (fOutlinePage == null && getSourceViewer() != null && isCalledByOutline())
 				fOutlinePage= createOutlinePage();
-			return fOutlinePage;
+			return (T) fOutlinePage;
 		}
 
 		if (IEncodingSupport.class.equals(required))
-			return fEncodingSupport;
+			return (T) fEncodingSupport;
 
 		if (required == IShowInTargetList.class) {
-			return new IShowInTargetList() {
+			return (T) new IShowInTargetList() {
 				@Override
 				public String[] getShowInTargetIds() {
 					return new String[] { JavaUI.ID_PACKAGES, IPageLayout.ID_OUTLINE, JavaPlugin.ID_RES_NAV };
@@ -2186,7 +2191,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (inputJE instanceof ICompilationUnit && !JavaModelUtil.isPrimary((ICompilationUnit) inputJE))
 				return null;
 
-			return new IShowInSource() {
+			return (T) new IShowInSource() {
 				@Override
 				public ShowInContext getShowInContext() {
 					return new ShowInContext(null, null) {
@@ -2226,20 +2231,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		if (required == IJavaFoldingStructureProvider.class)
-			return fProjectionModelUpdater;
+			return (T) fProjectionModelUpdater;
 
 		if (fProjectionSupport != null) {
-			Object adapter= fProjectionSupport.getAdapter(getSourceViewer(), required);
+			T adapter= fProjectionSupport.getAdapter(getSourceViewer(), required);
 			if (adapter != null)
 				return adapter;
 		}
 
 		if (required == IContextProvider.class) {
-			if (isBreadcrumbActive()) {
-				return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.JAVA_EDITOR_BREADCRUMB);
-			} else {
-				return JavaUIHelp.getHelpContextProvider(this, IJavaHelpContextIds.JAVA_EDITOR);
-			}
+			String contextId= isBreadcrumbActive() ? IJavaHelpContextIds.JAVA_EDITOR_BREADCRUMB : IJavaHelpContextIds.JAVA_EDITOR;
+			return (T) JavaUIHelp.getHelpContextProvider(this, contextId);
 		}
 
 		return super.getAdapter(required);
@@ -2405,7 +2407,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (inputJavaElement == null)
 			return;
 
-		CompilationUnit ast= SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO /* DO NOT USE WAIT_ACTIVE_ONLY */ , getProgressMonitor());
+		IProgressMonitor monitor = getProgressMonitor();
+		CompilationUnit ast;
+		try {
+			ast= SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO /* DO NOT USE WAIT_ACTIVE_ONLY */ , monitor);
+		} finally {
+			monitor.done();
+		}
 		if (ast != null) {
 			fForcedMarkOccurrencesSelection= textSelection;
 			updateOccurrenceAnnotations((ITextSelection)textSelection, ast);
@@ -3360,8 +3368,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (forceUpdate && getSelectionProvider() != null) {
 			fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
 			ITypeRoot inputJavaElement= getInputJavaElement();
-			if (inputJavaElement != null)
-				updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO, getProgressMonitor()));
+			if (inputJavaElement != null) {
+				IProgressMonitor monitor = getProgressMonitor();
+				try {
+					updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO, monitor));
+				} finally {
+					monitor.done();
+				}
+			}
 		}
 
 		if (fOccurrencesFinderJobCanceler == null) {
@@ -3477,8 +3491,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fOverrideIndicatorManager= new OverrideIndicatorManager(model, inputElement, null);
 
 		if (provideAST) {
-			CompilationUnit ast= SharedASTProvider.getAST(inputElement, SharedASTProvider.WAIT_ACTIVE_ONLY, getProgressMonitor());
-			fOverrideIndicatorManager.reconciled(ast, true, getProgressMonitor());
+			IProgressMonitor monitor = getProgressMonitor();
+			try {
+				SubMonitor subMonitor= SubMonitor.convert(monitor, 2);
+				CompilationUnit ast= SharedASTProvider.getAST(inputElement, SharedASTProvider.WAIT_ACTIVE_ONLY, 
+						subMonitor.newChild(1, SubMonitor.SUPPRESS_NONE));
+				fOverrideIndicatorManager.reconciled(ast, true, subMonitor.newChild(1, SubMonitor.SUPPRESS_NONE));
+			} finally {
+				monitor.done();
+			}
 		}
 	}
 
@@ -4214,7 +4235,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	private static boolean isCalledByOutline() {
 		Class<?>[] elements= new AccessChecker().getClassContext();
-		return elements[4].equals(ContentOutline.class) || elements[5].equals(ContentOutline.class);
+		for (int i= 0; i < elements.length && i < 10; i++) {
+			if (elements[i].equals(ContentOutline.class)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static final class AccessChecker extends SecurityManager {

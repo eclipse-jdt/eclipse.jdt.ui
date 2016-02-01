@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.Flags;
@@ -30,9 +32,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -697,6 +701,23 @@ public class TypeContextChecker {
 			stubTypeContext= new StubTypeContext(null, null, null);
 		}
 		return stubTypeContext;
+	}
+
+	public static StubTypeContext createAnnotationStubTypeContext(/*@NonNull*/ IProject project) {
+		try {
+			for (IPackageFragmentRoot root : JavaCore.create(project).getPackageFragmentRoots()) {
+				if (!root.isReadOnly()) {
+					IPackageFragment packageFragment= root.getPackageFragment(""); //$NON-NLS-1$
+					String prolog= "abstract class __X__ {\n\tabstract @"; //$NON-NLS-1$
+					String epilog= " __X__ dummy();\n} "; //$NON-NLS-1$
+					ICompilationUnit cu= packageFragment.getCompilationUnit(JavaTypeCompletionProcessor.DUMMY_CU_NAME);
+					return new StubTypeContext(cu, prolog, epilog);
+				}
+			}
+		} catch (JavaModelException e) {
+			// fall through
+		}
+		return new StubTypeContext(null, null, null);
 	}
 
 	public static Type parseSuperClass(String superClass) {

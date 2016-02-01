@@ -102,7 +102,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	@Override
 	public boolean isProblem() {
 		String type= getType();
-		return WARNING_ANNOTATION_TYPE.equals(type) || ERROR_ANNOTATION_TYPE.equals(type) || INFO_ANNOTATION_TYPE.equals(type);
+		return INFO_ANNOTATION_TYPE.equals(type) || WARNING_ANNOTATION_TYPE.equals(type) || ERROR_ANNOTATION_TYPE.equals(type);
 	}
 
 	/**

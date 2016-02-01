@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.text.template.contentassist;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
@@ -21,8 +22,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
@@ -36,11 +40,13 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.contentassist.BoldStylerProvider;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension4;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension7;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.ILinkedModeListener;
 import org.eclipse.jface.text.link.LinkedModeModel;
@@ -62,9 +68,14 @@ import org.eclipse.ui.part.IWorkbenchPartOrientation;
 
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.search.SearchPattern;
+
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContext;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
@@ -77,7 +88,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * A template proposal.
  */
-public class TemplateProposal implements IJavaCompletionProposal, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension4, ICompletionProposalExtension6 {
+public class TemplateProposal
+		implements IJavaCompletionProposal, ICompletionProposalExtension2, ICompletionProposalExtension3, ICompletionProposalExtension4, ICompletionProposalExtension6, ICompletionProposalExtension7 {
 
 	private final Template fTemplate;
 	private final TemplateContext fContext;
@@ -472,6 +484,49 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 		fDisplayString= displayString;
 	}
 
+	@Override
+	public StyledString emphasizeMatch(IDocument document, int offset, final BoldStylerProvider boldStylerProvider) {
+		StyledString styledDisplayString= new StyledString();
+		styledDisplayString.append(getStyledDisplayString());
+		int start= getPrefixCompletionStart(document, offset);
+		int patternLength= offset - start;
+		try {
+			String pattern= document.get(start, patternLength);
+			if (!pattern.isEmpty()) {
+				Styler styler= new Styler() {
+					@Override
+					public void applyStyles(TextStyle textStyle) {
+						textStyle.foreground= JFaceResources.getColorRegistry().get(JFacePreferences.COUNTER_COLOR);
+						textStyle.font= boldStylerProvider.getBoldFont();
+					}
+				};
+				String displayString= styledDisplayString.getString();
+				boolean hasBracket= fContext instanceof JavaDocContext && displayString.indexOf('<') == 0;
+				if (hasBracket) {
+					displayString= displayString.substring(1);
+					if (pattern.indexOf('<') == 0) {
+						pattern= pattern.substring(1);
+						Strings.markMatchingRegions(styledDisplayString, 0, new int[] { 0, 1 }, styler);
+					}
+				}
+				int matchRule= SearchPattern.R_PREFIX_MATCH;
+				if (JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_SUBSTRING_MATCH)) && CharOperation.substringMatch(pattern, displayString)) {
+					matchRule= SearchPattern.R_SUBSTRING_MATCH;
+				}
+				int[] matchingRegions= SearchPattern.getMatchingRegions(pattern, displayString, matchRule);
+				if (hasBracket && matchingRegions != null) {
+					for (int i= 0; i < matchingRegions.length; i+= 2) {
+						matchingRegions[i]++;
+					}
+				}
+				Strings.markMatchingRegions(styledDisplayString, 0, matchingRegions, styler);
+			}
+		} catch (BadLocationException e) {
+			// return styledDisplayString
+		}
+		return styledDisplayString;
+	}
+
 	/*
 	 * @see ICompletionProposal#getImage()
 	 */
@@ -544,11 +599,16 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 		try {
 			int replaceOffset= getReplaceOffset();
 			if (offset >= replaceOffset) {
-				String content= document.get(replaceOffset, offset - replaceOffset);
+				String content= document.get(replaceOffset, offset - replaceOffset).toLowerCase();
 				String templateName= fTemplate.getName().toLowerCase();
-				boolean valid= templateName.startsWith(content.toLowerCase());
+				boolean isSubstringEnabled= JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_SUBSTRING_MATCH));
+				boolean valid= isSubstringEnabled ? templateName.contains(content) : templateName.startsWith(content);
 				if (!valid && fContext instanceof JavaDocContext && templateName.startsWith("<")) { //$NON-NLS-1$
-					valid= templateName.startsWith(content.toLowerCase(), 1);
+					if (isSubstringEnabled) {
+						valid= CharOperation.substringMatch(content.indexOf('<') == 0 ? content.substring(1) : content, templateName.substring(1));
+					} else {
+						valid= templateName.startsWith(content, 1);
+					}
 				}
 				return valid;
 			}

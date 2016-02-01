@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 GK Software AG and others.
+ * Copyright (c) 2012, 2016 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -133,7 +133,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -174,7 +174,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -217,7 +217,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -259,7 +259,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -303,7 +303,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -347,7 +347,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 2, 0); // get correction for first of two problems
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -372,7 +372,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 
 		proposals= collectCorrections(cu, astRoot, 2, 1); // get correction for second of two problems
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		proposal= (CUCorrectionProposal) proposals.get(0);
 		preview= getPreviewContent(proposal);
 
@@ -412,7 +412,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -452,7 +452,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -493,7 +493,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -537,7 +537,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 
 		// primary proposal: Extract to checked local variable
@@ -596,7 +596,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -638,7 +638,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
 		assertEqualString(proposal.getDisplayString(), "Change parameter 'e1' to '@NonNull'");
@@ -673,7 +673,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2); // other is add @SW - TODO: check when this is offered
+		assertNumberOfProposals(proposals, 3); // other is add @SW - TODO: check when this is offered
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 
 		assertEqualString(proposal.getDisplayString(), "Change parameter 'e1' to '@NonNull'");
@@ -706,7 +706,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
 		assertEqualString(proposal.getDisplayString(), "Change parameter 'o' to '@NonNull'");
@@ -738,7 +738,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
 		assertEqualString(proposal.getDisplayString(), "Change parameter 'o' to '@NonNull'");
@@ -771,7 +771,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 0);
+		assertNumberOfProposals(proposals, 1);
 	}
 
 	// Attempt to override a @Nullable argument with a @NonNull argument
@@ -800,7 +800,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
 		assertEqualString(proposal.getDisplayString(), "Change parameter 'e1' to '@Nullable'");
@@ -857,7 +857,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
 		assertEqualString(proposal.getDisplayString(), "Change parameter 'e1' to '@Nullable'");
@@ -903,7 +903,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3); // one real change plus two @SuppressWarnings proposals
+		assertNumberOfProposals(proposals, 4); // one real change plus two @SuppressWarnings proposals
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
 		assertEqualString(proposal.getDisplayString(), "Change parameter 'e1' to '@NonNull'");
@@ -950,7 +950,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
 		assertEqualString(proposal.getDisplayString(), "Change parameter 'in' to '@NonNull'");
@@ -1011,7 +1011,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3); // third (uninteresting) is "add @SW"
+		assertNumberOfProposals(proposals, 4); // third (uninteresting) is "add @SW"
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
 		assertEqualString(proposal.getDisplayString(), "Change parameter 'in' to '@NonNull'");
@@ -1064,7 +1064,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 1); // only "add @SW"
+			assertNumberOfProposals(proposals, 2); // only "add @SW"
 		} finally {
 			fJProject1.setOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);			
 		}
@@ -1086,7 +1086,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1); // only "add @SW"
+		assertNumberOfProposals(proposals, 2); // only "add @SW"
 	}
 
 	// Bug 405086 - [quick fix] don't propose null annotations when those are disabled
@@ -1105,7 +1105,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2); // ignore 2nd ("add @SW")
+		assertNumberOfProposals(proposals, 3); // ignore 2nd ("add @SW")
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
@@ -1139,7 +1139,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2); // ignore 2nd ("add @SW")
+		assertNumberOfProposals(proposals, 3); // ignore 2nd ("add @SW")
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
@@ -1189,7 +1189,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 2);
+			assertNumberOfProposals(proposals, 3);
 
 			CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
@@ -1245,7 +1245,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
@@ -1285,7 +1285,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
 		assertEqualString(proposal.getDisplayString(), "Change return type of 'foo(..)' to '@NonNull'");
@@ -1342,7 +1342,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
@@ -1395,7 +1395,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 2);
+			assertNumberOfProposals(proposals, 3);
 
 			CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
@@ -1465,7 +1465,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
@@ -1537,7 +1537,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-			assertNumberOfProposals(proposals, 3); // includes "add @SW"
+			assertNumberOfProposals(proposals, 4); // includes "add @SW"
 
 			CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
@@ -1611,7 +1611,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
@@ -1663,7 +1663,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
@@ -1694,7 +1694,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
@@ -1726,7 +1726,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
@@ -1757,7 +1757,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
@@ -1787,7 +1787,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
@@ -1819,7 +1819,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
@@ -1853,7 +1853,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
@@ -1884,7 +1884,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 		String preview= getPreviewContent(proposal);
 

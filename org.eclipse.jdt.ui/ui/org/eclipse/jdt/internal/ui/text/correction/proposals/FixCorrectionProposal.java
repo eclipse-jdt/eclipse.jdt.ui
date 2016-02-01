@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,6 +92,8 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 			int flag= JavaElementImageDescriptor.WARNING;
 			if (status.getSeverity() == IStatus.ERROR) {
 				flag= JavaElementImageDescriptor.ERROR;
+			} else if (status.getSeverity() == IStatus.INFO) {
+				flag= JavaElementImageDescriptor.INFO;
 			}
 
 			ImageDescriptor composite= new JavaElementImageDescriptor(image, flag, new Point(image.getImageData().width, image.getImageData().height));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2014 IBM Corporation and others.
+ * Copyright (c) 2012, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -293,6 +293,8 @@ public interface IProposalRelevance {
 	public static final int ADD_PARANOIDAL_PARENTHESES= -9;
 
 	public static final int ADD_PARENTHESES_FOR_EXPRESSION= -10;
+
+	public static final int CONFIGURE_PROBLEM_SEVERITY= -11;
 
 	//Be careful while tweaking these values because WordCorrectionProposal uses -distance (between the words) as relevance.
 	public static final int DISABLE_SPELL_CHECKING= Integer.MIN_VALUE + 1;

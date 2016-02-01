@@ -105,6 +105,8 @@ org.sat4j.pb/*
 
 org.w3c.*/*
 
+org.mockito/*
+
 Git/eclipse/*
 Git/pde/*
 Git/news/*
@@ -143,3 +145,6 @@ zz*/*
 config/*
 org.eclipse.osgi.tests/*
 org.eclipse.e4.sdk/*
+
+rt.equinox.bundles/*
+rt.equinox.p2/*

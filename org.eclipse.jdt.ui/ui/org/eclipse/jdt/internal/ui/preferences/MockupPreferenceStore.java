@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 public class MockupPreferenceStore implements IPreferenceStore {
 
 	/** Listeners on this store */
-	private ListenerList fListeners= new ListenerList(ListenerList.IDENTITY);
+	private ListenerList<IPropertyChangeListener> fListeners= new ListenerList<>(ListenerList.IDENTITY);
 
 	@Override
 	public void addPropertyChangeListener(IPropertyChangeListener listener) {
@@ -62,9 +62,9 @@ public class MockupPreferenceStore implements IPreferenceStore {
 	 */
 	public void firePropertyChangeEvent(Object source, String name, Object oldValue, Object newValue) {
 		PropertyChangeEvent event= new PropertyChangeEvent(source, name, oldValue, newValue);
-		Object[] listeners= fListeners.getListeners();
-		for (int i= 0; i < listeners.length; i++)
-			((IPropertyChangeListener) listeners[i]).propertyChange(event);
+		for (IPropertyChangeListener listener : fListeners) {
+			listener.propertyChange(event);
+		}
 	}
 
 	@Override

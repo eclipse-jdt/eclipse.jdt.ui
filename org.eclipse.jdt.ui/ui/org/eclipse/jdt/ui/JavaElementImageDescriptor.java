@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -117,6 +117,13 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 */
 	public final static int ANNOTATION_DEFAULT= 0x20000;
 
+	/**
+	 * Flag to render the info adornment.
+	 * 
+	 * @since 3.12
+	 */
+	public final static int INFO= 0x40000;
+
 	private ImageDescriptor fBaseImage;
 	private int fFlags;
 	private Point fSize;
@@ -140,7 +147,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 
 	/**
 	 * Sets the descriptors adornments. Valid values are: {@link #ABSTRACT}, {@link #FINAL},
-	 * {@link #SYNCHRONIZED}, {@link #STATIC}, {@link #RUNNABLE}, {@link #WARNING},
+	 * {@link #SYNCHRONIZED}, {@link #STATIC}, {@link #RUNNABLE}, {@link #INFO}, {@link #WARNING},
 	 * {@link #ERROR}, {@link #OVERRIDES}, {@link #IMPLEMENTS}, {@link #CONSTRUCTOR},
 	 * {@link #DEPRECATED}, {@link #VOLATILE}, {@link #TRANSIENT}, {@link #BUILDPATH_ERROR},
 	 * {@link #NATIVE}, or any combination of those.
@@ -337,6 +344,8 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		if ((fFlags & IGNORE_OPTIONAL_PROBLEMS) != 0) {
 			addBottomLeftImage(JavaPluginImages.DESC_OVR_IGNORE_OPTIONAL_PROBLEMS, pos);
 		}
-
+		if ((fFlags & INFO) != 0) {
+			addBottomLeftImage(JavaPluginImages.DESC_OVR_INFO, pos);
+		}
 	}
 }
