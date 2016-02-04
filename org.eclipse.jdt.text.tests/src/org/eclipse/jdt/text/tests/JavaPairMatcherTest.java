@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,8 +11,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.After;
+import org.junit.Before;
+import static org.junit.Assert.*;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -52,8 +53,8 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 		return new JavaPairMatcher(chars.toCharArray());
 	}
 
-	@Override
-	protected void setUp() {
+	@Before
+	public void setUp() {
 		Document document= new Document("xx(yy(xx)yy)xx()/*  */");
 		String[] types= new String[] {
 				IJavaPartitions.JAVA_DOC,
@@ -71,12 +72,8 @@ public class JavaPairMatcherTest extends AbstractPairMatcherTest {
 		fPairMatcher= new JavaPairMatcher(new char[] { '(', ')' });
 	}
 
-	public static Test suite() {
-		return new TestSuite(JavaPairMatcherTest.class);
-	}
-
-	@Override
-	protected void tearDown () {
+	@After
+	public void tearDown () {
 		fDocument= null;
 		fPairMatcher= null;
 	}
