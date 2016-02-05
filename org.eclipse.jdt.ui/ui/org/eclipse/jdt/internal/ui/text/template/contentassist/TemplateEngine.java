@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Nicolaj Hoess <nicohoess@gmail.com> - Make some internal methods accessible to help Postfix Code Completion plug-in - https://bugs.eclipse.org/433500
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 486899
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
@@ -16,6 +17,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -44,8 +47,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class TemplateEngine {
 
-	private static final String $_LINE_SELECTION= "${" + GlobalTemplateVariables.LineSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
-	private static final String $_WORD_SELECTION= "${" + GlobalTemplateVariables.WordSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final Pattern $_LINE_SELECTION_PATTERN  = Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.LineSelection.NAME + "\\}"); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final Pattern $_WORD_SELECTION_PATTERN  = Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.WordSelection.NAME + "\\}"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	/** The context type. */
 	private TemplateContextType fContextType;
@@ -140,10 +143,13 @@ public class TemplateEngine {
 
 			for (int i= 0; i != templates.length; i++) {
 				Template template= templates[i];
-				if (context.canEvaluate(template) &&
-					(!multipleLinesSelected && template.getPattern().indexOf($_WORD_SELECTION) != -1 || (multipleLinesSelected && template.getPattern().indexOf($_LINE_SELECTION) != -1)))
+				if (context.canEvaluate(template))
 				{
-					fProposals.add(new TemplateProposal(templates[i], context, region, getImage()));
+					Matcher wordSelectionMatcher = $_WORD_SELECTION_PATTERN.matcher(template.getPattern());
+					Matcher lineSelectionMatcher = $_LINE_SELECTION_PATTERN.matcher(template.getPattern());
+					if ((!multipleLinesSelected && wordSelectionMatcher.find()) || (multipleLinesSelected && lineSelectionMatcher.find())) {
+						fProposals.add(new TemplateProposal(templates[i], context, region, getImage()));
+					}
 				}
 			}
 		}
