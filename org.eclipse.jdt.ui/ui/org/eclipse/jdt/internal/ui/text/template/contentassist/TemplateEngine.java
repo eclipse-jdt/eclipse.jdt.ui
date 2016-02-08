@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Nicolaj Hoess <nicohoess@gmail.com> - Make some internal methods accessible to help Postfix Code Completion plug-in - https://bugs.eclipse.org/433500
- *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 486899
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 486899, 486903
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
@@ -47,8 +47,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class TemplateEngine {
 
-	private static final Pattern $_LINE_SELECTION_PATTERN  = Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.LineSelection.NAME + "\\}"); //$NON-NLS-1$ //$NON-NLS-2$
-	private static final Pattern $_WORD_SELECTION_PATTERN  = Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.WordSelection.NAME + "\\}"); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final Pattern $_LINE_SELECTION_PATTERN  = Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.LineSelection.NAME + "(\\(.*\\))?\\}"); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final Pattern $_WORD_SELECTION_PATTERN  = Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.WordSelection.NAME + "(\\(.*\\))?\\}"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	/** The context type. */
 	private TemplateContextType fContextType;
