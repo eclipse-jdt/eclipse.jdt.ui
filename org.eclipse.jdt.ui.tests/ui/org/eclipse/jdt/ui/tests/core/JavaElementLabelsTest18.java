@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2014 IBM Corporation and others.
+ * Copyright (c) 2011, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,9 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -31,6 +28,9 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 public class JavaElementLabelsTest18 extends CoreTests {
@@ -132,7 +132,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		assertEqualString(lab, "invoke()");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "Object invoke()");
+		assertEqualString(lab, "void invoke()");
 	}
 
 	public void testMethodLabelPolymorphicSignatureReference0Ret() throws Exception {
@@ -162,7 +162,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		assertEqualString(lab, "invoke(int)");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "Object invoke(int arg00)");
+		assertEqualString(lab, "void invoke(int arg00)");
 	}
 	
 	public void testMethodLabelPolymorphicSignatureReference1Array() throws Exception {
@@ -177,7 +177,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		assertEqualString(lab, "invoke(Object[])");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "Object invoke(Object[] arg00)");
+		assertEqualString(lab, "void invoke(Object[] arg00)");
 	}
 	
 	public void testMethodLabelPolymorphicSignatureReference2() throws Exception {
@@ -192,7 +192,7 @@ public class JavaElementLabelsTest18 extends CoreTests {
 		assertEqualString(lab, "invoke(char, Integer[][])");
 		
 		lab= JavaElementLabels.getTextLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
-		assertEqualString(lab, "Object invoke(char arg00, Integer[][] arg01)");
+		assertEqualString(lab, "void invoke(char arg00, Integer[][] arg01)");
 	}
 	
 	public void testMethodLabelPolymorphicSignatureReference3Ret() throws Exception {
