@@ -281,7 +281,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		if (res == null || !res.isAccessible()) {
 			return 0;
 		}
-		int severity= 0;
+		int severity= -1;
 		if (sourceElement == null) {
 			if (res instanceof IProject) {
 				severity= res.findMaxProblemSeverity(IJavaModelMarker.BUILDPATH_PROBLEM_MARKER, true, IResource.DEPTH_ZERO);
