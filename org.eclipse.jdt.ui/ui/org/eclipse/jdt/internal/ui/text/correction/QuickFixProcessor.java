@@ -773,6 +773,12 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.InheritedDefaultMethodConflictsWithOtherInherited:
 				LocalCorrectionsSubProcessor.addOverrideDefaultMethodProposal(context, problem, proposals);
 				break;
+			case IProblem.PotentialNullLocalVariableReference:
+				IJavaProject prj2= context.getCompilationUnit().getJavaProject();
+				if (prj2 != null && JavaCore.ENABLED.equals(prj2.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true))) {
+					NullAnnotationsCorrectionProcessor.addLocalVariableAnnotationProposal(context, problem, proposals);
+				}
+				break;
 			default:
 		}
 		if (JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {

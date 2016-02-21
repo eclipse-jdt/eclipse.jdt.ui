@@ -21,8 +21,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -30,6 +32,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsFix;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.ChangeKind;
 
@@ -41,6 +44,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.NullAnnotationsCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ExtractToNullCheckedLocalProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.MakeLocalVariableNonNullProposal;
 
 /**
  * Quick Fixes for null-annotation related problems.
@@ -48,7 +52,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
 public class NullAnnotationsCorrectionProcessor {
 
 	// pre: changeKind != OVERRIDDEN
-	public static void addReturnAndArgumentTypeProposal(IInvocationContext context, IProblemLocation problem, ChangeKind changeKind, 
+	public static void addReturnAndArgumentTypeProposal(IInvocationContext context, IProblemLocation problem, ChangeKind changeKind,
 			Collection<ICommandAccess> proposals) {
 		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
@@ -161,5 +165,35 @@ public class NullAnnotationsCorrectionProcessor {
 				return name;
 		}
 		return null;
+	}
+
+	public static void addLocalVariableAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) {
+		ICompilationUnit cu= context.getCompilationUnit();
+		CompilationUnit astRoot= context.getASTRoot();
+
+		String nonNullAnnotationName= NullAnnotationsFix.getNonNullAnnotationName(astRoot.getJavaElement(), false);
+
+		if (nonNullAnnotationName == null) {
+			return;
+		}
+
+		ASTNode selectedNode= problem.getCoveredNode(astRoot);
+		if (!(selectedNode instanceof Expression)) {
+			return;
+		}
+		Expression nodeToCast= (Expression) selectedNode;
+		IBinding callerBinding= Bindings.resolveExpressionBinding(nodeToCast, false);
+		if (callerBinding instanceof IVariableBinding) {
+			IVariableBinding variableBinding= (IVariableBinding) callerBinding;
+
+			if (variableBinding.isField()) {
+				return;
+			}
+			ITypeBinding type= variableBinding.getType();
+			if (type == null || type.isArray()) {
+				return;
+			}
+			proposals.add(new MakeLocalVariableNonNullProposal(cu, variableBinding, astRoot, IProposalRelevance.CHANGE_NULLNESS_ANNOTATION, nonNullAnnotationName));
+		}
 	}
 }
