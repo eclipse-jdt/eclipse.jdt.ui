@@ -492,7 +492,7 @@ public class TemplateProposal
 	}
 
 	@Override
-	public StyledString emphasizeMatch(IDocument document, int offset, final BoldStylerProvider boldStylerProvider) {
+	public StyledString getStyledDisplayString(IDocument document, int offset, final BoldStylerProvider boldStylerProvider) {
 		StyledString styledDisplayString= new StyledString();
 		styledDisplayString.append(getStyledDisplayString());
 		int start= getPrefixCompletionStart(document, offset);
