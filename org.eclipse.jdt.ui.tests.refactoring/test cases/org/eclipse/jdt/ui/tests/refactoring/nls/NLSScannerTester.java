@@ -372,6 +372,30 @@ public class NLSScannerTester extends TestCase {
 		assertEquals(0, l.length);
 	}
 
+	// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=xxx
+	public void test26() throws Exception {
+		String text=
+				"@interface Ann {\n" + 
+				"	String[] strings() default {\"a\", \"2\"};\n" + 
+				"	String string() default \"s\";\n" + 
+				"	String string2() default ((true) ? \"t\" : \"f\");\n" + 
+				"}\n" + 
+				"\n" + 
+				"public interface Intf {\n" + 
+				"	default void foo() {\n" + 
+				"		System.out.println(\"Hello\");\n" + 
+				"	}\n" + 
+				"}";
+		NLSLine[] l= NLSScanner.scan(text);
+		
+		assertEquals(1, l.length);
+		
+		NLSLine line= l[0];
+		assertEquals(1, line.size());
+		assertEquals(8, line.getLineNumber());
+		assertEquals("\"Hello\"", line.get(0).getValue());
+	}
+	
 	//regression test for bug 12600
 	public void test54() throws Exception{
 		String text=

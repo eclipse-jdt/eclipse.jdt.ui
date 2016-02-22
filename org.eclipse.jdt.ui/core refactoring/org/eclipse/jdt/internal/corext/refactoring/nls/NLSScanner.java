@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -126,6 +126,11 @@ public class NLSScanner {
 					break;
 				case ITerminalSymbols.TokenNameSEMICOLON:
 					defaultCounter= 0;
+					break;
+				case ITerminalSymbols.TokenNameLBRACE:
+					if (defaultCounter > 1)
+						defaultCounter= 0; // reset in default interface method declaration
+					// ... but not in String[]-typed annotation member default value
 					break;
 
 
