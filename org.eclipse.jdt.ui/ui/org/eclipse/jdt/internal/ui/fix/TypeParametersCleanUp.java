@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,18 +44,9 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 
 	@Override
 	public CleanUpRequirements getRequirements() {
-		boolean requireAST= requireAST();
+		boolean requireAST= isEnabled(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS) || isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS);
 		Map<String, String> requiredOptions= requireAST ? getRequiredOptions() : null;
 		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
-	}
-
-	private boolean requireAST() {
-		boolean useTypeArguments= isEnabled(CleanUpConstants.USE_TYPE_ARGUMENTS);
-		if (!useTypeArguments)
-			return false;
-
-		return isEnabled(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS) ||
-				isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS);
 	}
 
 	private Map<String, String> getRequiredOptions() {
@@ -72,10 +63,6 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 		if (compilationUnit == null)
 			return null;
 
-		boolean useTypeParameters= isEnabled(CleanUpConstants.USE_TYPE_ARGUMENTS);
-		if (!useTypeParameters)
-			return null;
-
 		return TypeParametersFix.createCleanUp(compilationUnit,
 				isEnabled(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS),
 				isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS));
@@ -86,10 +73,6 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 		if (compilationUnit == null)
 			return null;
 
-		boolean useTypeParameters= isEnabled(CleanUpConstants.USE_TYPE_ARGUMENTS);
-		if (!useTypeParameters)
-			return null;
-
 		return TypeParametersFix.createCleanUp(compilationUnit, problems,
 				isEnabled(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS),
 				isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS));
@@ -98,10 +81,10 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 	@Override
 	public String[] getStepDescriptions() {
 		List<String> result= new ArrayList<>();
-		if (isEnabled(CleanUpConstants.USE_TYPE_ARGUMENTS) && isEnabled(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS)) {
+		if (isEnabled(CleanUpConstants.INSERT_INFERRED_TYPE_ARGUMENTS)) {
 			result.add(MultiFixMessages.TypeParametersCleanUp_InsertInferredTypeArguments_description);
-		} else if (isEnabled(CleanUpConstants.USE_TYPE_ARGUMENTS) && isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS)) {
-			result.add(MultiFixMessages.TypeParametersCleanUp_RemoveRedundantTypeArguments_description);
+		} else if (isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS)) {
+			result.add(MultiFixMessages.TypeParametersCleanUp_RemoveUnnecessaryTypeArguments_description);
 		}
 
 		return result.toArray(new String[result.size()]);
@@ -134,4 +117,16 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 
 	}
 
+	@Override
+	public String getPreview() {
+		StringBuffer buf= new StringBuffer();
+
+		if (isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS)) {
+			buf.append("\nMap<Integer, String> map= new HashMap<>();"); //$NON-NLS-1$
+		} else {
+			buf.append("\nMap<Integer, String> map= new HashMap<Integer, String>();"); //$NON-NLS-1$
+		}
+
+		return buf.toString();
+	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -662,7 +662,9 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * @since 3.1
 	 */
 	void prepareDelayedProjection() {
-		Assert.isTrue(!fIsSetVisibleDocumentDelayed);
+		// This assertion sometimes fails, but we don't know why. Commented out, since it hurts users.
+		// See bug 400374: opening an editor when the maximum allowed is reached will result in an exception (and editor will not be opened)
+//		Assert.isTrue(!fIsSetVisibleDocumentDelayed);
 		fIsSetVisibleDocumentDelayed= true;
 	}
 

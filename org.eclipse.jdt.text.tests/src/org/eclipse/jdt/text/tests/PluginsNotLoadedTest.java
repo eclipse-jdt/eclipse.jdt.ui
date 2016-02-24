@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,7 +64,7 @@ public class PluginsNotLoadedTest extends TestCase {
 			"org.apache.lucene.analysis",
 			"org.eclipse.ant.core",
 			"org.eclipse.ant.ui",
-			"org.eclipse.compare",
+			"org.eclipse.compare", // caveat, see workaround for EGit in setUpTest below!
 			"org.eclipse.core.commands",
 			"org.eclipse.core.expressions.tests",
 			"org.eclipse.core.filebuffers.tests",
@@ -182,7 +182,27 @@ public class PluginsNotLoadedTest extends TestCase {
 
 
 	public static Test setUpTest(Test someTest) {
-		return new JUnitProjectTestSetup(someTest);
+		return new JUnitProjectTestSetup(someTest) {
+			@Override
+			protected void setUp() throws Exception {
+				super.setUp();
+				/* Since https://bugs.eclipse.org/484795 in EGit 4.2, org.eclipse.egit.ui/plugin.xml contributes:
+				 * <extension point="org.eclipse.ui.services">
+				 *   <sourceProvider provider="org.eclipse.egit.ui.internal.selection.RepositorySourceProvider">
+				 *   ...
+				 * This activates the EGit UI bundle very early.
+				 * Because of that, EGit's org.eclipse.egit.ui.team.MergeTool command's handler class is loaded,
+				 * which in turn activates the org.eclipse.compare bundle on startup.
+				 * 
+				 * org.eclipse.pde.ui also contributes a sourceProvider, that's why we don't test for it...
+				 * 
+				 * Workaround is to remove org.eclipse.compare iff EGit is present:
+				 */
+				if (Platform.getBundle("org.eclipse.egit.ui") != null) {
+					addLoadedPlugIns("org.eclipse.compare");
+				}
+			}
+		};
 	}
 
 	public static Test suite() {
@@ -196,7 +216,7 @@ public class PluginsNotLoadedTest extends TestCase {
 	 * @param loadedPlugins plug-ins that are additionally loaded by the caller
 	 * @since 3.5
 	 */
-	public static void addLoadedPlugIns(String[] loadedPlugins) {
+	public static void addLoadedPlugIns(String... loadedPlugins) {
 		Assert.isLegal(loadedPlugins != null);
 		List<String> l= new ArrayList<>(Arrays.asList(NOT_LOADED_BUNDLES));
 		l.removeAll(Arrays.asList(loadedPlugins));

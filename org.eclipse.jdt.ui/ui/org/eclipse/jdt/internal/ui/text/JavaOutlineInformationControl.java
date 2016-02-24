@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,6 +53,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -152,12 +153,19 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			if (fOutlineContentProvider.isShowingInheritedMembers()) {
 				if (element instanceof IJavaElement) {
 					IJavaElement je= (IJavaElement)element;
-					if (fInput.getElementType() == IJavaElement.CLASS_FILE)
-						je= je.getAncestor(IJavaElement.CLASS_FILE);
-					else
+					if (fInput.getElementType() == IJavaElement.COMPILATION_UNIT) {
 						je= je.getAncestor(IJavaElement.COMPILATION_UNIT);
-					if (fInput.equals(je)) {
-						return null;
+						if (fInput.equals(je)) {
+							return null;
+						}
+					} else {
+						do {
+							je= je.getAncestor(IJavaElement.CLASS_FILE);
+							if (fInput.equals(je) || je == null) {
+								return null;
+							}
+							je= ((IClassFile) je).getType().getDeclaringType();
+						} while (je != null);
 					}
 				}
 				return JFaceResources.getColorRegistry().get(ColoredViewersManager.INHERITED_COLOR_NAME);

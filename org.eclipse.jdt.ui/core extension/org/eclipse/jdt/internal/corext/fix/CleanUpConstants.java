@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -834,20 +834,6 @@ public class CleanUpConstants {
 	public static final String REMOVE_UNNECESSARY_NLS_TAGS= "cleanup.remove_unnecessary_nls_tags"; //$NON-NLS-1$
 
 	/**
-	 * Controls the usage of type arguments. For detailed settings use<br>
-	 * {@link #INSERT_INFERRED_TYPE_ARGUMENTS}<br>
-	 * {@link #REMOVE_REDUNDANT_TYPE_ARGUMENTS}<br>
-	 * <br>
-	 * Possible values: {TRUE, FALSE}<br>
-	 * <br>
-	 *
-	 * @see CleanUpOptions#TRUE
-	 * @see CleanUpOptions#FALSE
-	 * @since 3.10
-	 */
-	public static final String USE_TYPE_ARGUMENTS= "cleanup.use_type_arguments"; //$NON-NLS-1$
-
-	/**
 	 * Insert inferred type arguments for diamonds.<br>
 	 * <br>
 	 * Possible values: {TRUE, FALSE}<br>
@@ -1232,7 +1218,6 @@ public class CleanUpConstants {
 		//Unnecessary Code
 		options.setOption(REMOVE_UNNECESSARY_CASTS, CleanUpOptions.TRUE);
 		options.setOption(REMOVE_UNNECESSARY_NLS_TAGS, CleanUpOptions.TRUE);
-		options.setOption(USE_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
 		options.setOption(INSERT_INFERRED_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
 
@@ -1320,7 +1305,6 @@ public class CleanUpConstants {
 		//Unnecessary Code
 		options.setOption(REMOVE_UNNECESSARY_CASTS, CleanUpOptions.TRUE);
 		options.setOption(REMOVE_UNNECESSARY_NLS_TAGS, CleanUpOptions.FALSE);
-		options.setOption(USE_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
 		options.setOption(INSERT_INFERRED_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.TRUE);
 

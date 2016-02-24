@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 IBM Corporation and others.
+ * Copyright (c) 2015, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -128,7 +128,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertEqualString(lab, "invoke()");
 		
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
-		assertLinkMatch(lab, "{{java.lang|Object}} invoke()");
+		assertLinkMatch(lab, "void invoke()");
 	}
 
 	public void testMethodLabelPolymorphicSignatureReference0Ret() throws Exception {
@@ -158,7 +158,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertEqualString(lab, "invoke(int)");
 		
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
-		assertLinkMatch(lab, "{{java.lang|Object}} invoke(int arg00)");
+		assertLinkMatch(lab, "void invoke(int arg00)");
 	}
 	
 	public void testMethodLabelPolymorphicSignatureReference1Array() throws Exception {
@@ -173,7 +173,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "invoke({{java.lang|Object}}[])");
 		
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
-		assertLinkMatch(lab, "{{java.lang|Object}} invoke({{java.lang|Object}}[] arg00)");
+		assertLinkMatch(lab, "void invoke({{java.lang|Object}}[] arg00)");
 	}
 	
 	public void testMethodLabelPolymorphicSignatureReference2() throws Exception {
@@ -188,7 +188,7 @@ public class BindingLabels18Test extends AbstractBindingLabelsTest {
 		assertLinkMatch(lab, "invoke(char, {{java.lang|Integer}}[][])");
 		
 		lab= getBindingLabel(elem, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.USE_RESOLVED);
-		assertLinkMatch(lab, "{{java.lang|Object}} invoke(char arg00, {{java.lang|Integer}}[][] arg01)");
+		assertLinkMatch(lab, "void invoke(char arg00, {{java.lang|Integer}}[][] arg01)");
 	}
 	
 	public void testMethodLabelPolymorphicSignatureReference3Ret() throws Exception {
