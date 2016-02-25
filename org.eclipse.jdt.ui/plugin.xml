@@ -367,7 +367,8 @@
 		id="TemplateProposalComputer">
 		<javaCompletionProposalComputer
 			class="org.eclipse.jdt.internal.ui.text.java.TemplateCompletionProposalComputer"
-			categoryId="org.eclipse.jdt.ui.templateProposalCategory">
+			categoryId="org.eclipse.jdt.ui.templateProposalCategory"
+			needsSortingAfterFiltering="true">
 			<partition type="__dftl_partition_content_type"/>
 			<partition type="__java_singleline_comment"/> <!-- to get NLS templates -->
 			<partition type="__java_javadoc"/>
@@ -378,7 +379,8 @@
          id="swtBuilderCompletionProposalComputer">
       <javaCompletionProposalComputer
             class="org.eclipse.jdt.internal.ui.text.java.SWTTemplateCompletionProposalComputer"
-			categoryId="org.eclipse.jdt.ui.swtProposalCategory">
+			categoryId="org.eclipse.jdt.ui.swtProposalCategory"
+			needsSortingAfterFiltering="true">
 			<partition type="__dftl_partition_content_type"/>
       </javaCompletionProposalComputer>
     </extension>

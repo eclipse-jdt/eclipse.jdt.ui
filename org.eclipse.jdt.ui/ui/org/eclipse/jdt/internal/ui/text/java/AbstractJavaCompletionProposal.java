@@ -845,7 +845,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	@Override
 	public int getRelevance() {
 		if (fPatternMatchRule == SearchPattern.R_SUBSTRING_MATCH) {
-			return fRelevance - 1;
+			return fRelevance - 400;
 		}
 		return fRelevance;
 	}
