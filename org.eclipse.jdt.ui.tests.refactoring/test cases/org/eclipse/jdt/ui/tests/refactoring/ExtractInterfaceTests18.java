@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -112,4 +112,19 @@ public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 	public void testExtractInterfaceFromAbstractClass() throws Exception {
 		validatePassingTest("A", "B", true, true);
 	}
+
+	public void testLambda1() throws Exception {
+		// bug 488420 
+		String[] names= new String[] { "m1" };
+		String[][] signatures= new String[][] { new String[0] };
+		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);
+	}
+
+	public void testLambda2() throws Exception {
+		// bug 488420 
+		String[] names= new String[] { "m1" };
+		String[][] signatures= new String[][] { new String[0] };
+		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);
+	}
+
 }
