@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids: sdavids@gmx.de - see bug 25376
  *     Lukas Hanke <hanke@yatta.de> - [templates][content assist] Content assist for 'for' loop should suggest member variables - https://bugs.eclipse.org/117215
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 488432
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
@@ -326,7 +327,7 @@ public abstract class AbstractJavaContextType extends CompilationUnitContextType
 		// global
 		addResolver(new GlobalTemplateVariables.Cursor());
 		addResolver(new GlobalTemplateVariables.WordSelection());
-		addResolver(new SurroundWithLineSelection());
+		addResolver(new GlobalTemplateVariables.Selection(GlobalTemplateVariables.LineSelection.NAME, JavaTemplateMessages.CompilationUnitContextType_variable_description_line_selection));
 		addResolver(new GlobalTemplateVariables.Dollar());
 		addResolver(new GlobalTemplateVariables.Date());
 		addResolver(new GlobalTemplateVariables.Year());
