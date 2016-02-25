@@ -131,13 +131,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 			super("enclosing_type", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_type, IJavaElement.TYPE);  //$NON-NLS-1$
 		}
 	}
-/*
-	protected static class SuperClass extends EnclosingJavaElement {
-		public Type() {
-			super("super_class", TemplateMessages.getString("JavaContextType.variable.description.type"), IJavaElement.TYPE);
-		}
-	}
-*/
+
 	protected static class Package extends EnclosingJavaElement {
 		public Package() {
 			super("enclosing_package", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_package, IJavaElement.PACKAGE_FRAGMENT);  //$NON-NLS-1$
@@ -149,17 +143,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 			super("enclosing_project", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_project, IJavaElement.JAVA_PROJECT);  //$NON-NLS-1$
 		}
 	}
-/*
-	protected static class Project2 extends TemplateVariableResolver {
-		public Project2() {
-			super("project", TemplateMessages.getString("JavaContextType.variable.description.project"));
-		}
-		public String evaluate(TemplateContext context) {
-			ICompilationUnit unit= ((JavaContext) context).getUnit();
-			return (unit == null) ? null : unit.getJavaProject().getElementName();
-		}
-	}
-*/
+
 	protected static class Arguments extends TemplateVariableResolver {
 		public Arguments() {
 			super("enclosing_method_arguments", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_method_arguments);  //$NON-NLS-1$
@@ -189,17 +173,6 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 			}
 		}
 	}
-
-/*
-	protected static class Line extends TemplateVariableResolver {
-		public Line() {
-			super("line", TemplateMessages.getString("CompilationUnitContextType.variable.description.line"));
-		}
-		public String evaluate(TemplateContext context) {
-			return ((JavaTemplateContext) context).guessLineNumber();
-		}
-	}
-*/
 
 	/*
 	 * @see ContextType#ContextType(String)
