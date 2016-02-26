@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.text.template.contentassist;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -62,7 +64,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 
 	private static class SurroundWithTemplate extends SurroundWith {
 
-		private static final String $_LINE_SELECTION= "${" + GlobalTemplateVariables.LineSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+		private static final Pattern $_LINE_SELECTION_PATTERN= Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.LineSelection.NAME + "(\\(.*\\))?\\}"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		private final Template fTemplate;
 		private final IJavaProject fCurrentProject;
@@ -87,12 +89,14 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 			final String templateVariableRegEx= "\\$\\{[^\\}]*\\}"; //$NON-NLS-1$
 
 			String template= fTemplate.getPattern();
-			int currentPosition= template.indexOf($_LINE_SELECTION);
+			Matcher lineSelectionMatcher= $_LINE_SELECTION_PATTERN.matcher(template);
+			int currentPosition= lineSelectionMatcher.find() ? lineSelectionMatcher.start() : -1;
 			int insertionPosition= -1;
 			while (currentPosition != -1) {
 				insertionPosition= currentPosition;
 				template= template.replaceFirst(templateVariableRegEx, ""); //$NON-NLS-1$
-				currentPosition= template.indexOf($_LINE_SELECTION);
+				lineSelectionMatcher= $_LINE_SELECTION_PATTERN.matcher(template);
+				currentPosition= lineSelectionMatcher.find() ? lineSelectionMatcher.start() : -1;
 			}
 			template= template.replaceAll(templateVariableRegEx, ""); //$NON-NLS-1$
 
