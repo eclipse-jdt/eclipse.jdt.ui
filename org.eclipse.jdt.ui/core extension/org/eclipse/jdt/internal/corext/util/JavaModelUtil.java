@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -110,6 +110,12 @@ public final class JavaModelUtil {
 	 * @since 3.9
 	 */
 	public static final String PACKAGE_HTML= "package.html"; //$NON-NLS-1$
+
+	/**
+	 * The name of the module-info.java file.
+	 * @since 3.12 BETA_JAVA9
+	 */
+	public static final String MODULE_INFO_JAVA= "module-info.java"; //$NON-NLS-1$
 
 	/**
 	 * Finds a type container by container name. The returned element will be of type
@@ -808,6 +814,17 @@ public final class JavaModelUtil {
 	 */
 	public static boolean is18OrHigher(IJavaProject project) {
 		return is18OrHigher(getSourceCompliance(project));
+	}
+
+	/**
+	 * Checks if the given project or workspace has source compliance 1.9 or greater.
+	 * 
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 1.9 or
+	 *         greater.
+	 */
+	public static boolean is19OrHigher(IJavaProject project) {
+		return is19OrHigher(getSourceCompliance(project));
 	}
 
 	private static String getSourceCompliance(IJavaProject project) {

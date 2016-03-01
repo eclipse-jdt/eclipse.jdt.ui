@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -37,7 +41,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -53,27 +56,22 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocCommentReader;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.InfoFilesUtil;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
-import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -525,61 +523,12 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	}
 
 	private void createPackageInfoJava(IProgressMonitor monitor) throws CoreException {
-		String lineDelimiter= StubUtility.getLineDelimiterUsed(fCreatedPackageFragment.getJavaProject());
-		StringBuilder content = new StringBuilder();
-		String fileComment= getFileComment(lineDelimiter);
-		String typeComment= getTypeComment(lineDelimiter);
-		
-		if (fileComment != null) {
-			content.append(fileComment);
-			content.append(lineDelimiter);
-		}
+		StringBuilder fileContent= new StringBuilder();
+		fileContent.append("package "); //$NON-NLS-1$
+		fileContent.append(fCreatedPackageFragment.getElementName());
+		fileContent.append(";"); //$NON-NLS-1$
 
-		if (typeComment != null) {
-			content.append(typeComment);
-			content.append(lineDelimiter);
-		} else if (fileComment != null) {
-			// insert an empty file comment to avoid that the file comment becomes the type comment
-			content.append("/**");  //$NON-NLS-1$
-			content.append(lineDelimiter);
-			content.append(" *"); //$NON-NLS-1$
-			content.append(lineDelimiter);
-			content.append(" */"); //$NON-NLS-1$
-			content.append(lineDelimiter);
-		}
-
-		content.append("package "); //$NON-NLS-1$
-		content.append(fCreatedPackageFragment.getElementName());
-		content.append(";"); //$NON-NLS-1$
-
-		ICompilationUnit compilationUnit= fCreatedPackageFragment.createCompilationUnit(PACKAGE_INFO_JAVA_FILENAME, content.toString(), true, monitor);
-
-		JavaModelUtil.reconcile(compilationUnit);
-
-		compilationUnit.becomeWorkingCopy(monitor);
-		try {
-			IBuffer buffer= compilationUnit.getBuffer();
-			ISourceRange sourceRange= compilationUnit.getSourceRange();
-			String originalContent= buffer.getText(sourceRange.getOffset(), sourceRange.getLength());
-
-			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, originalContent, 0, lineDelimiter, fCreatedPackageFragment.getJavaProject());
-			formattedContent= Strings.trimLeadingTabsAndSpaces(formattedContent);
-			buffer.replace(sourceRange.getOffset(), sourceRange.getLength(), formattedContent);
-			compilationUnit.commitWorkingCopy(true, new SubProgressMonitor(monitor, 1));
-		} finally {
-			compilationUnit.discardWorkingCopy();
-		}
-	}
-
-	private String getFileComment(String lineDelimiterUsed) throws CoreException {
-		ICompilationUnit cu= fCreatedPackageFragment.getCompilationUnit(PACKAGE_INFO_JAVA_FILENAME);
-		return CodeGeneration.getFileComment(cu, lineDelimiterUsed);
-	}
-
-	private String getTypeComment(String lineDelimiterUsed) throws CoreException {
-		ICompilationUnit cu= fCreatedPackageFragment.getCompilationUnit(PACKAGE_INFO_JAVA_FILENAME);
-		String typeName= PACKAGE_INFO_JAVA_FILENAME.substring(0, PACKAGE_INFO_JAVA_FILENAME.length() - JavaModelUtil.DEFAULT_CU_SUFFIX.length());
-		return CodeGeneration.getTypeComment(cu, typeName, lineDelimiterUsed);
+		InfoFilesUtil.createInfoJavaFile(PACKAGE_INFO_JAVA_FILENAME, fileContent.toString(), fCreatedPackageFragment, monitor);
 	}
 
 	private void createPackageHtml(IPackageFragmentRoot root, IProgressMonitor monitor) throws CoreException {
@@ -599,8 +548,8 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	private String buildPackageHtmlContent(IPackageFragmentRoot root, String charset) throws CoreException {
 		String lineDelimiter= StubUtility.getLineDelimiterUsed(root.getJavaProject());
 		StringBuilder content = new StringBuilder();
-		String fileComment= getFileComment(lineDelimiter);
-		String typeComment= getTypeComment(lineDelimiter);
+		String fileComment= InfoFilesUtil.getFileComment(PACKAGE_INFO_JAVA_FILENAME, fCreatedPackageFragment, lineDelimiter);
+		String typeComment= InfoFilesUtil.getTypeComment(PACKAGE_INFO_JAVA_FILENAME, fCreatedPackageFragment, lineDelimiter);
 
 		content.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">"); //$NON-NLS-1$
 		content.append(lineDelimiter);
