@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,13 +7,13 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 487901, 488432
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
-import org.eclipse.jface.text.templates.SimpleTemplateVariableResolver;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.TemplateException;
@@ -131,13 +131,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 			super("enclosing_type", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_type, IJavaElement.TYPE);  //$NON-NLS-1$
 		}
 	}
-/*
-	protected static class SuperClass extends EnclosingJavaElement {
-		public Type() {
-			super("super_class", TemplateMessages.getString("JavaContextType.variable.description.type"), IJavaElement.TYPE);
-		}
-	}
-*/
+
 	protected static class Package extends EnclosingJavaElement {
 		public Package() {
 			super("enclosing_package", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_package, IJavaElement.PACKAGE_FRAGMENT);  //$NON-NLS-1$
@@ -149,17 +143,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 			super("enclosing_project", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_project, IJavaElement.JAVA_PROJECT);  //$NON-NLS-1$
 		}
 	}
-/*
-	protected static class Project2 extends TemplateVariableResolver {
-		public Project2() {
-			super("project", TemplateMessages.getString("JavaContextType.variable.description.project"));
-		}
-		public String evaluate(TemplateContext context) {
-			ICompilationUnit unit= ((JavaContext) context).getUnit();
-			return (unit == null) ? null : unit.getJavaProject().getElementName();
-		}
-	}
-*/
+
 	protected static class Arguments extends TemplateVariableResolver {
 		public Arguments() {
 			super("enclosing_method_arguments", JavaTemplateMessages.CompilationUnitContextType_variable_description_enclosing_method_arguments);  //$NON-NLS-1$
@@ -187,44 +171,6 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 			} catch (JavaModelException e) {
 				return null;
 			}
-		}
-	}
-
-/*
-	protected static class Line extends TemplateVariableResolver {
-		public Line() {
-			super("line", TemplateMessages.getString("CompilationUnitContextType.variable.description.line"));
-		}
-		public String evaluate(TemplateContext context) {
-			return ((JavaTemplateContext) context).guessLineNumber();
-		}
-	}
-*/
-
-	/**
-	 * The line selection variable determines templates that work on selected
-	 * lines.
-	 * <p>
-	 * This class contains additional description that tells about the
-	 * 'Source &gt; Surround With > ...' menu.</p>
-	 * 
-	 * @since 3.7
-	 * @see org.eclipse.jface.text.templates.GlobalTemplateVariables.LineSelection
-	 */
-	protected static class SurroundWithLineSelection extends SimpleTemplateVariableResolver {
-	
-		/**
-		 * Creates a new line selection variable
-		 */
-		public SurroundWithLineSelection() {
-			super(org.eclipse.jface.text.templates.GlobalTemplateVariables.LineSelection.NAME, JavaTemplateMessages.CompilationUnitContextType_variable_description_line_selection);
-		}
-		@Override
-		protected String resolve(TemplateContext context) {
-			String selection= context.getVariable(org.eclipse.jface.text.templates.GlobalTemplateVariables.SELECTION);
-			if (selection == null)
-				return ""; //$NON-NLS-1$
-			return selection;
 		}
 	}
 

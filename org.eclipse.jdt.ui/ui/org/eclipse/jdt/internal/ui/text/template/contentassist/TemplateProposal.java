@@ -96,6 +96,7 @@ public class TemplateProposal
 	private final Image fImage;
 	private final IRegion fRegion;
 	private int fRelevance;
+	private boolean fIsSubstringMatch;
 
 	private IRegion fSelectedRegion; // initialized by apply()
 	private StyledString fDisplayString;
@@ -140,19 +141,24 @@ public class TemplateProposal
 		final int R_INLINE_TAG = 31;
 
 		int base= R_DEFAULT + R_INTERESTING + R_NON_RESTRICTED;
-
+		boolean isSubstring= false;
 		try {
 			if (fContext instanceof DocumentTemplateContext) {
 				DocumentTemplateContext templateContext= (DocumentTemplateContext) fContext;
 				IDocument document= templateContext.getDocument();
 
 				String content= document.get(fRegion.getOffset(), fRegion.getLength());
-				if (content.length() > 0 && fTemplate.getName().startsWith(content))
+				String templateName= fTemplate.getName();
+				if (content.length() > 0 && templateName.startsWith(content))
 					base += R_CASE;
-				if (fTemplate.getName().equalsIgnoreCase(content))
+				if (templateName.equalsIgnoreCase(content))
 					base += R_EXACT_NAME;
 				if (fContext instanceof JavaDocContext)
 					base += R_INLINE_TAG;
+
+				String templateNameLC= templateName.toLowerCase();
+				String contentLC= content.toLowerCase();
+				isSubstring= content.length() > 0 && !templateNameLC.startsWith(contentLC) && templateNameLC.contains(contentLC);
 			}
 		} catch (BadLocationException e) {
 			// ignore - not a case sensitive match then
@@ -161,7 +167,8 @@ public class TemplateProposal
 		// see CompletionProposalCollector.computeRelevance
 		// just under keywords, but better than packages
 		final int TEMPLATE_RELEVANCE= 1;
-		return base * 16 + TEMPLATE_RELEVANCE;
+		int rel= base * 16 + TEMPLATE_RELEVANCE;
+		return isSubstring ? rel - 400 : rel;
 	}
 
 	/**
@@ -485,7 +492,7 @@ public class TemplateProposal
 	}
 
 	@Override
-	public StyledString emphasizeMatch(IDocument document, int offset, final BoldStylerProvider boldStylerProvider) {
+	public StyledString getStyledDisplayString(IDocument document, int offset, final BoldStylerProvider boldStylerProvider) {
 		StyledString styledDisplayString= new StyledString();
 		styledDisplayString.append(getStyledDisplayString());
 		int start= getPrefixCompletionStart(document, offset);
@@ -556,7 +563,7 @@ public class TemplateProposal
 	 */
 	@Override
 	public int getRelevance() {
-		return fRelevance;
+		return fIsSubstringMatch ? fRelevance - 400 : fRelevance;
 	}
 
 	public void setRelevance(int relevance) {
@@ -602,12 +609,20 @@ public class TemplateProposal
 				String content= document.get(replaceOffset, offset - replaceOffset).toLowerCase();
 				String templateName= fTemplate.getName().toLowerCase();
 				boolean isSubstringEnabled= JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CODEASSIST_SUBSTRING_MATCH));
-				boolean valid= isSubstringEnabled ? templateName.contains(content) : templateName.startsWith(content);
+				boolean valid= false;
+				fIsSubstringMatch= false;
+				if (templateName.startsWith(content)) {
+					valid= true;
+				} else if (isSubstringEnabled && templateName.contains(content)) {
+					valid= true;
+					fIsSubstringMatch= true;
+				}
 				if (!valid && fContext instanceof JavaDocContext && templateName.startsWith("<")) { //$NON-NLS-1$
-					if (isSubstringEnabled) {
-						valid= CharOperation.substringMatch(content.indexOf('<') == 0 ? content.substring(1) : content, templateName.substring(1));
-					} else {
-						valid= templateName.startsWith(content, 1);
+					if (templateName.startsWith(content, 1)) {
+						valid= true;
+					} else if (isSubstringEnabled && CharOperation.substringMatch(content.indexOf('<') == 0 ? content.substring(1) : content, templateName.substring(1))) {
+						valid= true;
+						fIsSubstringMatch= true;
 					}
 				}
 				return valid;

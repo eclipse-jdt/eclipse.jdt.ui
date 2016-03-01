@@ -47,8 +47,9 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class TemplateEngine {
 
-	private static final Pattern $_LINE_SELECTION_PATTERN  = Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.LineSelection.NAME + "(\\(.*\\))?\\}"); //$NON-NLS-1$ //$NON-NLS-2$
-	private static final Pattern $_WORD_SELECTION_PATTERN  = Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.WordSelection.NAME + "(\\(.*\\))?\\}"); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final Pattern $_LINE_SELECTION_PATTERN= Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.LineSelection.NAME + "(\\(.*\\))?\\}"); //$NON-NLS-1$ //$NON-NLS-2$
+
+	private static final Pattern $_WORD_SELECTION_PATTERN= Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.WordSelection.NAME + "(\\(.*\\))?\\}"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	/** The context type. */
 	private TemplateContextType fContextType;
@@ -145,8 +146,8 @@ public class TemplateEngine {
 				Template template= templates[i];
 				if (context.canEvaluate(template))
 				{
-					Matcher wordSelectionMatcher = $_WORD_SELECTION_PATTERN.matcher(template.getPattern());
-					Matcher lineSelectionMatcher = $_LINE_SELECTION_PATTERN.matcher(template.getPattern());
+					Matcher wordSelectionMatcher= $_WORD_SELECTION_PATTERN.matcher(template.getPattern());
+					Matcher lineSelectionMatcher= $_LINE_SELECTION_PATTERN.matcher(template.getPattern());
 					if ((!multipleLinesSelected && wordSelectionMatcher.find()) || (multipleLinesSelected && lineSelectionMatcher.find())) {
 						fProposals.add(new TemplateProposal(templates[i], context, region, getImage()));
 					}

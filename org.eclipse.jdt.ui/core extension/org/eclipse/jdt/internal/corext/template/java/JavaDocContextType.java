@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,14 +7,13 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 488432
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
-import org.eclipse.jface.text.templates.SimpleTemplateVariableResolver;
-import org.eclipse.jface.text.templates.TemplateContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -24,32 +23,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
  */
 public class JavaDocContextType extends CompilationUnitContextType {
 
-	/**
-	 * The word selection variable determines templates that work on a full
-	 * lines selection.
-	 * <p>
-	 * This class contains additional description that tells about the
-	 * 'Source &gt; Surround With > ...' menu.</p>
-	 * 
-	 * @since 3.7
-	 * @see org.eclipse.jface.text.templates.GlobalTemplateVariables.WordSelection
-	 */
-	protected static class SurroundWithWordSelection extends SimpleTemplateVariableResolver {
-	
-		/**
-		 * Creates a new word selection variable
-		 */
-		public SurroundWithWordSelection() {
-			super(org.eclipse.jface.text.templates.GlobalTemplateVariables.WordSelection.NAME, JavaTemplateMessages.JavaDocContextType_variable_description_word_selection);
-		}
-		@Override
-		protected String resolve(TemplateContext context) {
-			String selection= context.getVariable(org.eclipse.jface.text.templates.GlobalTemplateVariables.SELECTION);
-			if (selection == null)
-				return ""; //$NON-NLS-1$
-			return selection;
-		}
-	}
 
 	/**
 	 * The id under which this context type is registered
@@ -63,8 +36,8 @@ public class JavaDocContextType extends CompilationUnitContextType {
 
 		// global
 		addResolver(new GlobalTemplateVariables.Cursor());
-		addResolver(new SurroundWithLineSelection());
-		addResolver(new SurroundWithWordSelection());
+		addResolver(new GlobalTemplateVariables.Selection(GlobalTemplateVariables.LineSelection.NAME, JavaTemplateMessages.CompilationUnitContextType_variable_description_line_selection));
+		addResolver(new GlobalTemplateVariables.Selection(GlobalTemplateVariables.WordSelection.NAME, JavaTemplateMessages.JavaDocContextType_variable_description_word_selection));
 		addResolver(new GlobalTemplateVariables.Dollar());
 		addResolver(new GlobalTemplateVariables.Date());
 		addResolver(new GlobalTemplateVariables.Year());

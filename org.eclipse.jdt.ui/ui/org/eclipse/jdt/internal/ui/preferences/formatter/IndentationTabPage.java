@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,17 +12,27 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 public class IndentationTabPage extends FormatterTabPage {
@@ -32,6 +42,7 @@ public class IndentationTabPage extends FormatterTabPage {
 	"class Example {" +	//$NON-NLS-1$
 	"  int [] myArray= {1,2,3,4,5,6};" + //$NON-NLS-1$
 	"  int theInt= 1;" + //$NON-NLS-1$
+	"\n\n" + //$NON-NLS-1$
 	"  String someString= \"Hello\";" + //$NON-NLS-1$
 	"  double aDouble= 3.0;" + //$NON-NLS-1$
 	"  void foo(int a, int b, int c, int d, int e, int f) {" + //$NON-NLS-1$
@@ -61,6 +72,8 @@ public class IndentationTabPage extends FormatterTabPage {
 
 	private CompilationUnitPreview fPreview;
 	private String fOldTabChar= null;
+
+	private IStatus fCurrentStatus;
 
 	public IndentationTabPage(ModifyDialog modifyDialog, Map<String, String> workingValues) {
 		super(modifyDialog, workingValues);
@@ -97,8 +110,7 @@ public class IndentationTabPage extends FormatterTabPage {
 			}
 		});
 
-		final Group typeMemberGroup= createGroup(numColumns, composite, FormatterMessages.IndentationTabPage_field_alignment_group_title);
-		createCheckboxPref(typeMemberGroup, numColumns, FormatterMessages.IndentationTabPage_field_alignment_group_align_fields_in_columns, DefaultCodeFormatterConstants.FORMATTER_ALIGN_TYPE_MEMBERS_ON_COLUMNS, FALSE_TRUE);
+		createAlignFieldsGroup(composite, numColumns);
 
 		final Group classGroup = createGroup(numColumns, composite, FormatterMessages.IndentationTabPage_indent_group_title);
 		createCheckboxPref(classGroup, numColumns, FormatterMessages.IndentationTabPage_class_group_option_indent_declarations_within_class_body, DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_TYPE_HEADER, FALSE_TRUE);
@@ -120,6 +132,72 @@ public class IndentationTabPage extends FormatterTabPage {
         createCheckboxPref(classGroup, numColumns, FormatterMessages.IndentationTabPage_indent_empty_lines, DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES, FALSE_TRUE);
 	}
 
+	private void createAlignFieldsGroup(Composite parent, int numColumns) {
+		final Map<String, String> fieldGroupingValuesDummy= new HashMap<>();
+		final String GROUPING_KEY= "grouping"; //$NON-NLS-1$
+		final String GROUPING_LINES_KEY= "grouping.lines"; //$NON-NLS-1$
+		int groupingBlankLines;
+		try {
+			groupingBlankLines= Integer.parseInt(fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_ALIGN_FIELDS_GROUPING_BLANK_LINES));
+		} catch (NumberFormatException e) {
+			groupingBlankLines= Integer.MAX_VALUE;
+		}
+		fieldGroupingValuesDummy.put(GROUPING_KEY, groupingBlankLines == Integer.MAX_VALUE ? DefaultCodeFormatterConstants.FALSE : DefaultCodeFormatterConstants.TRUE);
+		fieldGroupingValuesDummy.put(GROUPING_LINES_KEY, Integer.toString(groupingBlankLines == Integer.MAX_VALUE ? 1 : groupingBlankLines));
+
+		final Group alignFieldsGroup= createGroup(numColumns, parent, FormatterMessages.IndentationTabPage_field_alignment_group_title);
+		final CheckboxPreference alignFieldsPref= createCheckboxPref(alignFieldsGroup, numColumns, FormatterMessages.IndentationTabPage_field_alignment_group_align_fields_in_columns,
+				DefaultCodeFormatterConstants.FORMATTER_ALIGN_TYPE_MEMBERS_ON_COLUMNS, FALSE_TRUE);
+
+		final Label indent= new Label(alignFieldsGroup, SWT.NONE);
+		GridData gd= new GridData();
+		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(4);
+		indent.setLayoutData(gd);
+
+		final CheckboxPreference fieldGroupingPref= new CheckboxPreference(alignFieldsGroup, numColumns - 2, fieldGroupingValuesDummy, GROUPING_KEY, FALSE_TRUE,
+				FormatterMessages.IndentationTabPage_field_alignment_group_blank_lines_separating_independent_groups);
+		fieldGroupingPref.setEnabled(alignFieldsPref.getChecked());
+		fDefaultFocusManager.add(fieldGroupingPref);
+		final NumberPreference fieldGroupingBlankLinesPref= new NumberPreference(alignFieldsGroup, 1, fieldGroupingValuesDummy, GROUPING_LINES_KEY, 1, 99, null);
+		fieldGroupingBlankLinesPref.setEnabled(alignFieldsPref.getChecked() && fieldGroupingPref.getChecked());
+		fDefaultFocusManager.add(fieldGroupingBlankLinesPref);
+
+		fieldGroupingBlankLinesPref.addObserver(new Observer() {
+			@Override
+			public void update(Observable o, Object arg) {
+				if (fCurrentStatus == null) {
+					try {
+						final int blankLinesToPreserve= Integer.parseInt(fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE));
+						final int groupingLines= Integer.parseInt(fieldGroupingValuesDummy.get(GROUPING_LINES_KEY));
+						if (groupingLines > blankLinesToPreserve) {
+							updateStatus(new Status(IStatus.INFO, JavaPlugin.getPluginId(), 0,
+									Messages.format(FormatterMessages.IndentationTabPage_field_alignment_group_blank_lines_to_preserve_info, Integer.valueOf(blankLinesToPreserve)), null));
+						}
+					} catch (NumberFormatException e) {
+						// settings corrupted, don't add info
+					}
+				}
+			}
+		});
+
+		final Observer alignGroupingObserver= new Observer() {
+			@Override
+			public void update(Observable o, Object arg) {
+				fieldGroupingPref.setEnabled(alignFieldsPref.getChecked());
+				fieldGroupingBlankLinesPref.setEnabled(alignFieldsPref.getChecked() && fieldGroupingPref.getChecked());
+
+				fWorkingValues.put(DefaultCodeFormatterConstants.FORMATTER_ALIGN_FIELDS_GROUPING_BLANK_LINES,
+						fieldGroupingPref.getChecked() ? fieldGroupingValuesDummy.get(GROUPING_LINES_KEY) : Integer.toString(Integer.MAX_VALUE));
+				doUpdatePreview();
+				notifyValuesModified();
+			}
+		};
+		alignFieldsPref.deleteObserver(fUpdater);
+		alignFieldsPref.addObserver(alignGroupingObserver);
+		fieldGroupingPref.addObserver(alignGroupingObserver);
+		fieldGroupingBlankLinesPref.addObserver(alignGroupingObserver);
+	}
+
 	@Override
 	public void initializePage() {
 	    fPreview.setPreviewText(PREVIEW);
@@ -136,6 +214,12 @@ public class IndentationTabPage extends FormatterTabPage {
     	super.doUpdatePreview();
         fPreview.update();
     }
+
+	@Override
+	protected void updateStatus(IStatus status) {
+		super.updateStatus(status);
+		this.fCurrentStatus= status;
+	}
 
 	private void updateTabPreferences(String tabPolicy, NumberPreference tabPreference, NumberPreference indentPreference, CheckboxPreference onlyForLeading) {
 		/*

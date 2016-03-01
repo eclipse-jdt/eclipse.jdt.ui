@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -341,14 +341,14 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		 * @param key The key to store the values.
 		 * @param minValue The minimum value which is valid input.
 		 * @param maxValue The maximum value which is valid input.
-		 * @param text The label text for this Preference.
+		 * @param text The label text for this Preference or {@code null} if none.
 		 */
 		public NumberPreference(Composite composite, int numColumns,
 							   Map<String, String> preferences, String key,
 							   int minValue, int maxValue, String text) {
 		    super(preferences, key);
 
-			fNumberLabel= createLabel(numColumns - 1, composite, text, GridData.FILL_HORIZONTAL);
+			fNumberLabel= text == null ? null : createLabel(numColumns - 1, composite, text, GridData.FILL_HORIZONTAL);
 			fNumberText= new Text(composite, SWT.SINGLE | SWT.BORDER | SWT.RIGHT);
 			fNumberText.setFont(composite.getFont());
 
@@ -442,7 +442,9 @@ public abstract class ModifyDialogTabPage implements IModifyDialogTabPage {
 		protected void updateWidget() {
 		    final boolean hasKey= getKey() != null;
 
-		    fNumberLabel.setEnabled(hasKey && getEnabled());
+			if (fNumberLabel != null)
+				fNumberLabel.setEnabled(hasKey && getEnabled());
+
 			fNumberText.setEnabled(hasKey && getEnabled());
 
 			if (hasKey) {

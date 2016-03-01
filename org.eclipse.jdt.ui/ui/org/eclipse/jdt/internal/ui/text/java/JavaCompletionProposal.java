@@ -148,7 +148,7 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	}
 
 	@Override
-	public StyledString emphasizeMatch(IDocument document, int offset, BoldStylerProvider boldStylerProvider) {
+	public StyledString getStyledDisplayString(IDocument document, int offset, BoldStylerProvider boldStylerProvider) {
 		StyledString styledDisplayString= new StyledString();
 		styledDisplayString.append(getStyledDisplayString());
 		String displayString= styledDisplayString.getString();
@@ -180,6 +180,6 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 			}
 			return styledDisplayString;
 		}
-		return super.emphasizeMatch(document, offset, boldStylerProvider);
+		return super.getStyledDisplayString(document, offset, boldStylerProvider);
 	}
 }

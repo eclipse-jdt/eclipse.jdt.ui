@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -79,7 +79,7 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 		 */
 		for (int k= 0; k < templateProposals.length; k++) {
 			TemplateProposal curr= templateProposals[k];
-			String name= curr.getTemplate().getPattern();
+			String name= curr.getTemplate().getName();
 			for (int i= 0; i < keyWordResults.length; i++) {
 				String keyword= keyWordResults[i].getDisplayString();
 				if (name.startsWith(keyword)) {

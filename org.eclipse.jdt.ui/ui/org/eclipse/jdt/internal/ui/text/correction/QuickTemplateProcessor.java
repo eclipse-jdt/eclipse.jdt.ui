@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.ibm.icu.text.Collator;
 
@@ -70,8 +72,8 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
  */
 public class QuickTemplateProcessor implements IQuickAssistProcessor {
 
-	private static final String $_LINE_SELECTION= "${" + GlobalTemplateVariables.LineSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
-	private static final String $_WORD_SELECTION= "${" + GlobalTemplateVariables.WordSelection.NAME + "}"; //$NON-NLS-1$ //$NON-NLS-2$
+	private static final Pattern $_LINE_SELECTION_PATTERN= Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.LineSelection.NAME + "(\\(.*\\))?\\}"); //$NON-NLS-1$ //$NON-NLS-2$
+	private static final Pattern $_WORD_SELECTION_PATTERN= Pattern.compile("\\$\\{(.*:)?" + GlobalTemplateVariables.WordSelection.NAME + "(\\(.*\\))?\\}"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	public QuickTemplateProcessor() {
 	}
@@ -218,11 +220,13 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 
 	private boolean canEvaluate(TemplateContext context, Template template) {
 		String contextId= context.getContextType().getId();
+		Matcher wordSelectionMatcher= $_WORD_SELECTION_PATTERN.matcher(template.getPattern());
+		Matcher lineSelectionMatcher= $_LINE_SELECTION_PATTERN.matcher(template.getPattern());
 		if (JavaDocContextType.ID.equals(contextId)) {
-			if (!template.matches("", contextId) || template.getPattern().indexOf($_LINE_SELECTION) == -1 && template.getPattern().indexOf($_WORD_SELECTION) == -1) //$NON-NLS-1$
+			if (!template.matches("", contextId) || !lineSelectionMatcher.find() && !wordSelectionMatcher.find()) //$NON-NLS-1$
 				return false;
 		} else {
-			if (template.matches("", JavaDocContextType.ID) || template.getPattern().indexOf($_LINE_SELECTION) == -1) //$NON-NLS-1$
+			if (template.matches("", JavaDocContextType.ID) || !lineSelectionMatcher.find()) //$NON-NLS-1$
 				return false;
 		}
 		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(template.getContextTypeId());

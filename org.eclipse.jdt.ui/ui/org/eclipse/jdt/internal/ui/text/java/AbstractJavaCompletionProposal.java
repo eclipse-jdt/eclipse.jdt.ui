@@ -845,7 +845,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	@Override
 	public int getRelevance() {
 		if (fPatternMatchRule == SearchPattern.R_SUBSTRING_MATCH) {
-			return fRelevance - 1;
+			return fRelevance - 400;
 		}
 		return fRelevance;
 	}
@@ -1232,7 +1232,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	}
 
 	@Override
-	public StyledString emphasizeMatch(IDocument document, int offset, BoldStylerProvider boldStylerProvider) {
+	public StyledString getStyledDisplayString(IDocument document, int offset, BoldStylerProvider boldStylerProvider) {
 		StyledString styledDisplayString= new StyledString();
 		styledDisplayString.append(getStyledDisplayString());
 
