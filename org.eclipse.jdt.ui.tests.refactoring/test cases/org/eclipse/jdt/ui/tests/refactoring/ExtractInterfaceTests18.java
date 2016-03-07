@@ -127,4 +127,24 @@ public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);
 	}
 
+	public void testMethodRef1() throws Exception {
+		// bug 489170
+		String[] names= new String[] { "methodN" };
+		String[][] signatures= new String[][] { new String[0] };
+		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);
+	}
+
+	public void testMethodRef2() throws Exception {
+		// bug 489170
+		String[] names= new String[] { "m1" };
+		String[][] signatures= new String[][] { new String[0] };
+		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);
+	}
+
+	public void testMethodRef3() throws Exception {
+		// bug 489170
+		String[] names= new String[] { "m1" };
+		String[][] signatures= new String[][] { new String[0] };
+		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);
+	}
 }

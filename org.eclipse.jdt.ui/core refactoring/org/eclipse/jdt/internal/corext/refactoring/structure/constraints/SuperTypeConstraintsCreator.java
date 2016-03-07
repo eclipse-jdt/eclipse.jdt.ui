@@ -34,8 +34,10 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -47,6 +49,7 @@ import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
@@ -61,6 +64,7 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.TypeMethodReference;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -586,7 +590,77 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 			}
 		}
 	}
-
+	
+	@Override
+	public void endVisit(MethodReference node) {
+		IMethodBinding methodBinding= node.resolveMethodBinding();
+		if (methodBinding != null) {
+			ITypeBinding typeBinding= node.resolveTypeBinding();
+			if (typeBinding != null) {
+				IMethodBinding samBinding= typeBinding.getFunctionalInterfaceMethod();
+				ConstraintVariable2 descendant;
+				if (node instanceof CreationReference) {
+					CreationReference creationReference= (CreationReference) node;
+					ITypeBinding creationTypeBinding= creationReference.getType().resolveBinding();
+					descendant= creationTypeBinding == null ? null : fModel.createDeclaringTypeVariable(creationTypeBinding);
+				} else {
+					descendant= fModel.createReturnTypeVariable(methodBinding);
+				}
+				ConstraintVariable2 ancestor= fModel.createReturnTypeVariable(samBinding);
+				if (descendant != null && ancestor != null) {
+					fModel.createSubtypeConstraint(descendant, ancestor);
+				}
+				ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+				ITypeBinding[] samParameterTypes= samBinding.getParameterTypes();
+				if (parameterTypes.length == samParameterTypes.length) {
+					// expression::method or Type::new or super::method or Type::method1 for static method1
+					if (node instanceof ExpressionMethodReference) {
+						Expression expression= ((ExpressionMethodReference) node).getExpression();
+						descendant= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+						if (descendant != null) {
+							// expression::method
+							endVisit(methodBinding, descendant);
+						} else {
+							// Type::method1 for static method1
+						}
+					}
+					for (int i= 0; i < parameterTypes.length; i++) {
+						descendant= fModel.createMethodParameterVariable(samBinding, i);
+						ancestor= fModel.createMethodParameterVariable(methodBinding, i);
+						if (descendant != null && ancestor != null) {
+							fModel.createSubtypeConstraint(descendant, ancestor);
+						}
+					}
+				} else if (parameterTypes.length + 1 == samParameterTypes.length) {
+					// Type::method1 for non-static method1: first param is receiver
+					ITypeBinding receiverType= null;
+					if (node instanceof ExpressionMethodReference) {
+						// always, as TypeMethodReference is currently not returned by the parser
+						receiverType= ((ExpressionMethodReference) node).getExpression().resolveTypeBinding();
+					} else if (node instanceof TypeMethodReference) {
+						// untested, might be used in the future
+						receiverType= ((TypeMethodReference) node).getType().resolveBinding();
+					}
+					if (receiverType != null) {
+						descendant= fModel.createMethodParameterVariable(samBinding, 0);
+						ancestor= fModel.createDeclaringTypeVariable(receiverType);
+						if (ancestor != null && descendant != null) {
+							fModel.createSubtypeConstraint(descendant, ancestor);
+						}
+					}
+					for (int i= 0; i < parameterTypes.length; i++) {
+						descendant= fModel.createMethodParameterVariable(samBinding, i + 1);
+						ancestor= fModel.createMethodParameterVariable(methodBinding, i);
+						if (descendant != null && ancestor != null) {
+							fModel.createSubtypeConstraint(descendant, ancestor);
+						}
+					}
+				}
+			}
+		}
+		super.endVisit(node);
+	}
+	
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.MethodInvocation)
 	 */
@@ -800,7 +874,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	@Override
 	public final void endVisit(final Type node) {
 		final ASTNode parent= node.getParent();
-		if (!(parent instanceof AbstractTypeDeclaration) && !(parent instanceof ClassInstanceCreation) && !(parent instanceof TypeLiteral) && (!(parent instanceof InstanceofExpression) || fInstanceOf))
+		if (!(parent instanceof AbstractTypeDeclaration) && !(parent instanceof ClassInstanceCreation) && !(parent instanceof CreationReference) && !(parent instanceof TypeLiteral) && (!(parent instanceof InstanceofExpression) || fInstanceOf))
 			node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, fModel.createTypeVariable(node));
 	}
 
