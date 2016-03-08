@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,10 +20,9 @@ import org.osgi.framework.Bundle;
 
 import org.eclipse.swt.SWT;
 
-import org.eclipse.core.filesystem.IFileStore;
-
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
@@ -44,6 +43,7 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -763,17 +763,17 @@ public class EditorUtility {
 				@Override
 				public void run() throws Exception {
 					monitor.beginTask(JavaEditorMessages.CompilationUnitDocumentProvider_calculatingChangedRegions_message, 20);
-					IFileStore fileStore= buffer.getFileStore();
+					IPath location= buffer.getLocation();
 
 					ITextFileBufferManager fileBufferManager= FileBuffers.createTextFileBufferManager();
-					fileBufferManager.connectFileStore(fileStore, getSubProgressMonitor(monitor, 15));
+					fileBufferManager.connect(location, LocationKind.NORMALIZE, getSubProgressMonitor(monitor, 15));
 					try {
 						IDocument currentDocument= buffer.getDocument();
-						IDocument oldDocument= ((ITextFileBuffer) fileBufferManager.getFileStoreFileBuffer(fileStore)).getDocument();
+						IDocument oldDocument= fileBufferManager.getTextFileBuffer(location, LocationKind.NORMALIZE).getDocument();
 
 						result[0]= getChangedLineRegions(oldDocument, currentDocument);
 					} finally {
-						fileBufferManager.disconnectFileStore(fileStore, getSubProgressMonitor(monitor, 5));
+						fileBufferManager.disconnect(location, LocationKind.NORMALIZE, getSubProgressMonitor(monitor, 5));
 						monitor.done();
 					}
 				}
