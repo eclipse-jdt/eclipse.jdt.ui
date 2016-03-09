@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,12 +7,9 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Harald Albers <eclipse@albersweb.de> - [type wizards] New Annotation dialog could allow generating @Documented, @Retention and @Target - https://bugs.eclipse.org/339292
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.dialogs;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DialogCheck;
@@ -32,10 +29,15 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard;
 import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
+import org.eclipse.jdt.internal.ui.wizards.NewAnnotationCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewPackageCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class WizardsTest extends TestCase {
 
@@ -45,6 +47,7 @@ public class WizardsTest extends TestCase {
 		TestSuite suite= new TestSuite(WizardsTest.class.getName());
 		suite.addTest(new WizardsTest("testClassWizard"));
 		suite.addTest(new WizardsTest("testInterfaceWizard"));
+		suite.addTest(new WizardsTest("testAnnotationWizard"));
 		suite.addTest(new WizardsTest("testJarPackageWizard"));
 		suite.addTest(new WizardsTest("testNewProjectWizard"));
 		suite.addTest(new WizardsTest("testPackageWizard"));
@@ -127,6 +130,22 @@ public class WizardsTest extends TestCase {
 		wizard.init(getWorkbench(), new StructuredSelection(pack));
 		wizard.setForcePreviousAndNextButtons(true);
 		WizardDialog dialog = new WizardDialog(getShell(), wizard);
+		dialog.create();
+		DialogCheck.assertDialog(dialog);
+
+		JavaProjectHelper.delete(jproject);
+	}
+
+	public void testAnnotationWizard() throws Exception {
+		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
+		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(jproject, "src1");
+		IPackageFragment pack= root.createPackageFragment("org.eclipse.jdt.internal.ui.hello", true, null);
+		JavaProjectHelper.addRTJar(jproject);
+
+		NewAnnotationCreationWizard wizard= new NewAnnotationCreationWizard();
+		wizard.init(getWorkbench(), new StructuredSelection(pack));
+		wizard.setForcePreviousAndNextButtons(true);
+		WizardDialog dialog= new WizardDialog(getShell(), wizard);
 		dialog.create();
 		DialogCheck.assertDialog(dialog);
 

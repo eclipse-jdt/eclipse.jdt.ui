@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@
  *     Stephan Herrmann - Contributions for
  *								Bug 463936 - ExternalAnnotationsAttachmentDialog should not allow virtual folders
  *								Bug 465293 - External annotation path per container and project
+ *     Harald Albers <eclipse@albersweb.de> - [type wizards] New Annotation dialog could allow generating @Documented, @Retention and @Target - https://bugs.eclipse.org/339292
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
@@ -191,6 +192,9 @@ public final class NewWizardMessages extends NLS {
 	public static String NewEnumWizardPage_description;
 
 	public static String NewAnnotationCreationWizard_title;
+	public static String NewAnnotationWizardPage_add_documented;
+	public static String NewAnnotationWizardPage_add_retention;
+	public static String NewAnnotationWizardPage_add_target;
 	public static String NewAnnotationWizardPage_title;
 	public static String NewAnnotationWizardPage_description;
 
