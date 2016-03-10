@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class OverrideCompletionProposal extends JavaTypeCompletionProposal implements ICompletionProposalExtension4 {
 
@@ -140,6 +141,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 		ITypeBinding declaringType= null;
 		ChildListPropertyDescriptor descriptor= null;
 		ASTNode node= NodeFinder.perform(unit, offset, 1);
+		node= ASTResolving.findParentType(node);
 		if (node instanceof AnonymousClassDeclaration) {
 			declaringType= ((AnonymousClassDeclaration) node).resolveBinding();
 			descriptor= AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY;
@@ -169,6 +171,11 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 
 					String indent= getIndentAt(document, getReplacementOffset(), settings);
 					setReplacementString(IndentManipulation.changeIndent(generatedCode, generatedIndent, settings.tabWidth, settings.indentWidth, indent, TextUtilities.getDefaultLineDelimiter(document)));
+
+					int replacementLength= getReplacementLength();
+					if (document.get(getReplacementOffset() + replacementLength, 1).equals(")")) { //$NON-NLS-1$
+						setReplacementLength(replacementLength + 1);
+					}
 
 				} catch (MalformedTreeException exception) {
 					JavaPlugin.log(exception);

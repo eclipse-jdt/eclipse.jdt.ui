@@ -66,6 +66,8 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TabsToSpacesConverter;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
@@ -137,8 +139,10 @@ import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
 import org.eclipse.jdt.internal.ui.text.Symbols;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandInstaller;
+import org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingContext;
+import org.eclipse.jdt.internal.ui.text.java.OverrideCompletionProposal;
 
 
 /**
@@ -273,10 +277,24 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				// when entering an anonymous class between the parenthesis', we don't want
 				// to jump after the closing parenthesis when return is pressed
 				if (event.character == SWT.CR && offset > 0) {
-					IDocument document= getSourceViewer().getDocument();
+					ISourceViewer sourceViewer= getSourceViewer();
+					IDocument document= sourceViewer.getDocument();
 					try {
 						if (document.getChar(offset - 1) == '{')
 							return new ExitFlags(ILinkedModeListener.EXIT_ALL, true);
+
+						// see bug 308217: while overriding a method and using '(' followed by parameter type to filter the content assist proposals, if ')' is added 
+						// automatically on typing '(', pressing return key should not result in jumping after ')' instead of applying the selected proposal.
+						if (document.getChar(offset) == ')' && sourceViewer instanceof AdaptedSourceViewer && ((AdaptedSourceViewer) sourceViewer).getContentAssistant() instanceof ContentAssistant) {
+							ContentAssistant contentAssistant= (ContentAssistant) ((AdaptedSourceViewer) sourceViewer).getContentAssistant();
+							IContentAssistProcessor processor= contentAssistant.getContentAssistProcessor(IDocument.DEFAULT_CONTENT_TYPE);
+							if (processor instanceof ContentAssistProcessor) {
+								ICompletionProposal proposal= ((ContentAssistProcessor) processor).getSelectedProposal();
+								if (proposal instanceof OverrideCompletionProposal) {
+									return new ExitFlags(ILinkedModeListener.EXIT_ALL, true);
+								}
+							}
+						}
 					} catch (BadLocationException e) {
 					}
 				}
