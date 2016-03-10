@@ -1239,16 +1239,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		String pattern= getPatternToEmphasizeMatch(document, offset);
 		if (pattern != null && pattern.length() > 0) {
 			String displayString= styledDisplayString.getString();
-			int index= displayString.indexOf('(');
-			if (index == -1) {
-				index= displayString.indexOf(':');
-				if (index == -1) {
-					index= displayString.indexOf('-');
-				}
-			}
-			if (index != -1) {
-				displayString= displayString.substring(0, index);
-			}
 			int patternMatchRule= getPatternMatchRule(pattern, displayString);
 			int[] matchingRegions= SearchPattern.getMatchingRegions(pattern, displayString, patternMatchRule);
 			Strings.markMatchingRegions(styledDisplayString, 0, matchingRegions, boldStylerProvider.getBoldStyler());
