@@ -810,29 +810,23 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		String label= FormatterMessages.LineWrappingTabPage_force_split_checkbox_text;
 		fForceSplit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, numColumns - 1, 1));
 		fForceSplit.setText(label);
-		
+
+		// button "Wrap before operators" in conditional expression
+		fConditionalExpressionCategory.addPreference(createWrapBeforeButton(numColumns, FormatterMessages.LineWrappingTabPage_conditional_expression_wrap_operator,
+				DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_CONDITIONAL_OPERATOR));
+
 		// button "Wrap before operator"
-		Preference expressionWrapPositionPreference= createCheckboxPref(fOptionsGroup, 1, FormatterMessages.LineWrappingTabPage_binary_expression_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_BINARY_OPERATOR, FALSE_TRUE);
-		Control control= expressionWrapPositionPreference.getControl();
-		control.setVisible(false);
-		GridData layoutData= (GridData)control.getLayoutData();
-		layoutData.exclude= true;
-		layoutData.horizontalAlignment= SWT.BEGINNING;
-		layoutData.horizontalSpan= numColumns - 1;
-		layoutData.grabExcessHorizontalSpace= false;
-		fBinaryExpressionCategory.addPreference(expressionWrapPositionPreference);
-		
+		fBinaryExpressionCategory.addPreference(
+				createWrapBeforeButton(numColumns, FormatterMessages.LineWrappingTabPage_binary_expression_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_BINARY_OPERATOR));
+
 		// button "Wrap before '|' operator" in multi-catch
-		Preference expressionWrapMulticatchPositionPreference= createCheckboxPref(fOptionsGroup, 1, FormatterMessages.LineWrappingTabPage_multicatch_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_OR_OPERATOR_MULTICATCH, FALSE_TRUE);
-		control= expressionWrapMulticatchPositionPreference.getControl();
-		control.setVisible(false);
-		layoutData= (GridData)control.getLayoutData();
-		layoutData.exclude= true;
-		layoutData.horizontalAlignment= SWT.BEGINNING;
-		layoutData.horizontalSpan= numColumns - 1;
-		layoutData.grabExcessHorizontalSpace= false;
-		fCatchCategory.addPreference(expressionWrapMulticatchPositionPreference);
-		
+		fCatchCategory.addPreference(
+				createWrapBeforeButton(numColumns, FormatterMessages.LineWrappingTabPage_multicatch_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_OR_OPERATOR_MULTICATCH));
+
+		// button "Wrap before operator" in assignment
+		fAssignmentCategory.addPreference(
+				createWrapBeforeButton(numColumns, FormatterMessages.LineWrappingTabPage_binary_expression_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_ASSIGNMENT_OPERATOR));
+
 		// label "Select indentation style:"
 		fIndentStylePolicy= createLabel(numColumns, fOptionsGroup, FormatterMessages.LineWrappingTabPage_indentation_policy_label_text);
 
@@ -847,6 +841,17 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 	}
 
+	private Preference createWrapBeforeButton(int numColumns, String message, String setting) {
+		Preference preference= createCheckboxPref(fOptionsGroup, 1, message, setting, FALSE_TRUE);
+		Control control= preference.getControl();
+		control.setVisible(false);
+		GridData layoutData= (GridData)control.getLayoutData();
+		layoutData.exclude= true;
+		layoutData.horizontalAlignment= SWT.BEGINNING;
+		layoutData.horizontalSpan= numColumns - 1;
+		layoutData.grabExcessHorizontalSpace= false;
+		return preference;
+	}
 
 	@Override
 	protected Composite doCreatePreviewPane(Composite composite, int numColumns) {
@@ -1007,5 +1012,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		fForceSplit.setEnabled(isEnabled);
 		fBinaryExpressionCategory.setEnabled(isEnabled);
 		fCatchCategory.setEnabled(isEnabled);
+		fAssignmentCategory.setEnabled(isEnabled);
+		fConditionalExpressionCategory.setEnabled(isEnabled);
 	}
 }
