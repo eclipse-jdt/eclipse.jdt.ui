@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.ui.navigator.IExtensionStateConstants.Values;
  *
  * <ul>
  * <li>{@link CommonLayoutActionGroup}. Contributes the "Package Presentation>" submenu in the View's drop down menu (not right-click).</li>
+ * <li>{@link ShowLibrariesNodeActionGroup}. Contributes the "Show 'Referenced Libraries' Node" action in the View's drop down menu (not right-click).</li>
  * </ul>
  */
 public class JavaNavigatorViewActionProvider extends CommonActionProvider {
@@ -42,9 +43,13 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 
 	private static final String TAG_LAYOUT= "org.eclipse.jdt.internal.ui.navigator.layout"; //$NON-NLS-1$
 
+	private static final String TAG_LIBRARIES_NODE= "org.eclipse.jdt.internal.ui.navigator.librariesnode"; //$NON-NLS-1$
+
 	private IExtensionStateModel fStateModel;
 
 	private CommonLayoutActionGroup fLayoutActionGroup;
+
+	private ShowLibrariesNodeActionGroup fShowLibrariesNodeActionGroup;
 
 	private ICommonActionExtensionSite fExtensionSite;
 
@@ -64,12 +69,13 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 				int search= Arrays.binarySearch(theNavigatorExtensionIds, fExtensionId);
 				if (search > -1) {
 					if (isMyViewer(viewerId)) {
-						if (wasEnabled(isCurrentlyActive))
+						if (wasEnabled(isCurrentlyActive)) {
 							fLayoutActionGroup.fillActionBars(fActionBars);
-
-						else
-							if (wasDisabled(isCurrentlyActive))
-								fLayoutActionGroup.unfillActionBars(fActionBars);
+							fShowLibrariesNodeActionGroup.fillActionBars(fActionBars);
+						} else if (wasDisabled(isCurrentlyActive)) {
+							fLayoutActionGroup.unfillActionBars(fActionBars);
+							fShowLibrariesNodeActionGroup.unfillActionBars(fActionBars);
+						}
 						// else no change
 					}
 					fEnabled= isCurrentlyActive;
@@ -97,6 +103,7 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 	public void fillActionBars(IActionBars actionBars) {
 		fActionBars= actionBars;
 		fLayoutActionGroup.fillActionBars(actionBars);
+		fShowLibrariesNodeActionGroup.fillActionBars(actionBars);
 	}
 
 	@Override
@@ -106,6 +113,7 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 
 		fStateModel= fExtensionSite.getExtensionStateModel();
 		fLayoutActionGroup= new CommonLayoutActionGroup(fExtensionSite.getStructuredViewer(), fStateModel);
+		fShowLibrariesNodeActionGroup = new ShowLibrariesNodeActionGroup(fExtensionSite.getStructuredViewer(), fStateModel);
 
 		INavigatorActivationService activationService= fExtensionSite.getContentService().getActivationService();
 		activationService.addExtensionActivationListener(fMenuUpdater);
@@ -118,6 +126,7 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 
 	@Override
 	public void dispose() {
+		fShowLibrariesNodeActionGroup.dispose();
 		fLayoutActionGroup.dispose();
 		fExtensionSite.getContentService().getActivationService().removeExtensionActivationListener(fMenuUpdater);
 		super.dispose();
@@ -149,16 +158,32 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 
 		fStateModel.setBooleanProperty(Values.IS_LAYOUT_FLAT, isCurrentLayoutFlat);
 		fLayoutActionGroup.setFlatLayout(isCurrentLayoutFlat);
+
+		Boolean showLibrariesNodeState= null;
+		if (memento != null) {
+			showLibrariesNodeState= memento.getBoolean(TAG_LIBRARIES_NODE);
+		}
+
+		// If no memento try to restore from preference store
+		if (showLibrariesNodeState == null) {
+			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+			showLibrariesNodeState= new Boolean(store.getString(TAG_LIBRARIES_NODE).equals(IPreferenceStore.STRING_DEFAULT_DEFAULT) || store.getBoolean((TAG_LIBRARIES_NODE)));
+		}
+
+		boolean showLibrariesNode = showLibrariesNodeState.booleanValue();
+		fStateModel.setBooleanProperty(Values.IS_LIBRARIES_NODE_SHOWN, showLibrariesNode);
+		fShowLibrariesNodeActionGroup.setShowLibrariesNode(showLibrariesNode);
 	}
 
 	@Override
 	public void saveState(IMemento aMemento) {
 		super.saveState(aMemento);
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		if (fStateModel.getBooleanProperty(Values.IS_LAYOUT_FLAT))
+		if (fStateModel.getBooleanProperty(Values.IS_LAYOUT_FLAT)) {
 			store.setValue(TAG_LAYOUT, FLAT_LAYOUT);
-		else
+		} else {
 			store.setValue(TAG_LAYOUT, HIERARCHICAL_LAYOUT);
-
+		}
+		store.setValue(TAG_LIBRARIES_NODE, fStateModel.getBooleanProperty(Values.IS_LIBRARIES_NODE_SHOWN));
 	}
 }
