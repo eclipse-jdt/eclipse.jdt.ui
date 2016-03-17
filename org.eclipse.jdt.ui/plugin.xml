@@ -6887,4 +6887,25 @@
         </bundle>
      </component>
   </extension>
+  <extension
+        point="org.eclipse.ui.ide.projectConfigurators">
+     <projectConfigurator
+           class="org.eclipse.jdt.internal.ui.wizards.importer.ProjectWithJavaResourcesImportConfigurator"
+           label="%projectConfigurator.java">
+        <activeWhen>
+           <hasFileWithSuffixRecursively
+                 suffix=".java">
+           </hasFileWithSuffixRecursively>
+        </activeWhen>
+     </projectConfigurator>
+     <projectConfigurator
+           class="org.eclipse.jdt.internal.ui.wizards.importer.JDTProjectNatureImportConfigurator"
+           label="%projectConfigurator.jdt">
+        <activeWhen>
+           <hasFileRecursively
+                 filename=".classpath">
+           </hasFileRecursively>
+        </activeWhen>
+     </projectConfigurator>
+  </extension>
 </plugin>
