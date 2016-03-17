@@ -96,6 +96,7 @@ Export-Package: org.eclipse.jdt.internal.corext;x-friends:="org.eclipse.jdt.juni
  org.eclipse.jdt.internal.ui.wizards.buildpaths;x-internal:=true,
  org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;x-internal:=true,
  org.eclipse.jdt.internal.ui.wizards.dialogfields;x-friends:="org.eclipse.jdt.apt.ui",
+ org.eclipse.jdt.internal.ui.wizards.importer;x-internal:=true,
  org.eclipse.jdt.internal.ui.workingsets;x-internal:=true,
  org.eclipse.jdt.ui,
  org.eclipse.jdt.ui.actions,
