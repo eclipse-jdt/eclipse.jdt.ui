@@ -526,7 +526,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 	private final Category fConditionalExpressionCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_CONDITIONAL_EXPRESSION,
-	    "class Example extends AnotherClass {int Example(boolean Argument) {return argument ? 100000 : 200000;}}", //$NON-NLS-1$
+	    "class Example extends AnotherClass {int foo(boolean argument) {return argument ? 100000 : 200000;}}", //$NON-NLS-1$
 	    FormatterMessages.LineWrappingTabPage_conditionals
 	);
 
