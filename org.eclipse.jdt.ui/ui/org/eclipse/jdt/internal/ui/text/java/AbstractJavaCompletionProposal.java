@@ -35,8 +35,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
@@ -907,7 +909,14 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @since 3.12
 	 */
 	protected int getPatternMatchRule(String pattern, String string) {
-		String start= string.substring(0, pattern.length());
+		String start;
+		try {
+			start= string.substring(0, pattern.length());
+		} catch (StringIndexOutOfBoundsException e) {
+			String message= "Error retrieving proposal text.\nDisplay string:\n" + string + "\nPattern:\n" + pattern; //$NON-NLS-1$//$NON-NLS-2$
+			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, message, e));
+			return -1;
+		}
 		if (start.equalsIgnoreCase(pattern)) {
 			return SearchPattern.R_PREFIX_MATCH;
 		} else if (isCamelCaseMatching() && CharOperation.camelCaseMatch(pattern.toCharArray(), string.toCharArray())) {
