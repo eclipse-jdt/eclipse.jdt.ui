@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -177,6 +177,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 				cat.sessionEnded();
 			}
 
+			fSelectedProposal= null;
 			fCategoryIteration= null;
 			fRepetition= -1;
 			fIterationGesture= null;
@@ -197,6 +198,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		 */
 		@Override
 		public void selectionChanged(ICompletionProposal proposal, boolean smartToggle) {
+			fSelectedProposal= proposal;
 		}
 
 		/*
@@ -229,6 +231,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	private final List<CompletionProposalCategory> fCategories;
 	private final String fPartition;
 	private final ContentAssistant fAssistant;
+	private ICompletionProposal fSelectedProposal;
 
 	private char[] fCompletionAutoActivationCharacters;
 
@@ -696,6 +699,16 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		} catch (RuntimeException x) {
 			JavaPlugin.log(currentSorter.createExceptionStatus(x));
 		}
+	}
+
+	/**
+	 * Returns the proposal selected in the proposal selector.
+	 *
+	 * @return the selected proposal or <code>null</code> if none
+	 * @since 3.12
+	 */
+	public ICompletionProposal getSelectedProposal() {
+		return fSelectedProposal;
 	}
 
 }

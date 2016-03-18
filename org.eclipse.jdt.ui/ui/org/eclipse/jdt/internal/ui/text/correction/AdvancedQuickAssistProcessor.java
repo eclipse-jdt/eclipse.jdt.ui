@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -100,6 +100,7 @@ import org.eclipse.jdt.internal.corext.fix.ExpressionsFix;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
+import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -914,6 +915,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				newIf.setExpression(condition);
 				Statement bodyPlaceholder= (Statement) rewrite.createCopyTarget(ifStatement.getThenStatement());
 				newIf.setThenStatement(bodyPlaceholder);
+				rewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 				rewrite.replace(outerIf, newIf, null);
 				// add correction proposal
 				String label= CorrectionMessages.AdvancedQuickAssistProcessor_joinWithOuter_description;
@@ -953,6 +955,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				newIf.setExpression(condition);
 				Statement bodyPlaceholder= (Statement) rewrite.createCopyTarget(innerIf.getThenStatement());
 				newIf.setThenStatement(bodyPlaceholder);
+				rewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 				rewrite.replace(ifStatement, newIf, null);
 				// add correction proposal
 				String label= CorrectionMessages.AdvancedQuickAssistProcessor_joinWithInner_description;

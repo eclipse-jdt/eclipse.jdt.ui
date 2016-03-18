@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
@@ -60,6 +61,7 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -117,8 +119,8 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 		}
 	}
 
-	/** The current method declarations being processed (element type: <code>MethodDeclaration</code>) */
-	private final Stack<MethodDeclaration> fCurrentMethods= new Stack<>();
+	/** The current method declarations and lambda expressions being processed (element type: <code>MethodDeclaration or LambdaExpression</code>) */
+	private final Stack<ASTNode> fCurrentMethodsAndLambdas= new Stack<>();
 
 	/** Should instanceof expressions be rewritten? */
 	private final boolean fInstanceOf;
@@ -451,12 +453,75 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 		}
 	}
 
+	@Override
+	public boolean visit(LambdaExpression node) {
+		fCurrentMethodsAndLambdas.push(node);
+		return super.visit(node);
+	}
+
+	@Override
+	public void endVisit(LambdaExpression node) {
+		fCurrentMethodsAndLambdas.pop();
+		final IMethodBinding binding= node.resolveMethodBinding();
+		if (binding != null) {
+			ASTNode body= node.getBody();
+			// note: body of type "Block" is handled via endVisit(ReturnStatement)
+			if (body instanceof Expression) {
+				Expression expression= (Expression) body;
+				final ConstraintVariable2 descendant= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+				if (descendant != null) {
+					final ConstraintVariable2 ancestor= fModel.createReturnTypeVariable(binding);
+					if (ancestor != null) {
+						fModel.createSubtypeConstraint(descendant, ancestor);
+					}
+				}
+			}
+
+			endVisit(binding);
+			ConstraintVariable2 ancestor= null;
+			ConstraintVariable2 descendant= null;
+			IVariableBinding variable= null;
+			final List<VariableDeclaration> parameters= node.parameters();
+			if (!parameters.isEmpty()) {
+				final Collection<IMethodBinding> originals= getOriginalMethods(binding);
+				VariableDeclaration declaration= null;
+				for (int index= 0; index < parameters.size(); index++) {
+					declaration= parameters.get(index);
+					ancestor= fModel.createMethodParameterVariable(binding, index);
+					if (ancestor != null) {
+						if (declaration instanceof SingleVariableDeclaration) {
+							descendant= (ConstraintVariable2) ((SingleVariableDeclaration) declaration).getType().getProperty(PROPERTY_CONSTRAINT_VARIABLE);
+							if (descendant != null)
+								fModel.createEqualityConstraint(descendant, ancestor);
+						}
+						variable= declaration.resolveBinding();
+						if (variable != null) {
+							descendant= fModel.createVariableVariable(variable);
+							if (descendant != null)
+								fModel.createEqualityConstraint(ancestor, descendant);
+						}
+						IMethodBinding method= null;
+						for (final Iterator<IMethodBinding> iterator= originals.iterator(); iterator.hasNext();) {
+							method= iterator.next();
+							if (!method.getKey().equals(binding.getKey())) {
+								descendant= fModel.createMethodParameterVariable(method, index);
+								if (descendant != null)
+									fModel.createEqualityConstraint(ancestor, descendant);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+
 	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#endVisit(org.eclipse.jdt.core.dom.MethodDeclaration)
 	 */
 	@Override
 	public final void endVisit(final MethodDeclaration node) {
-		fCurrentMethods.pop();
+		fCurrentMethodsAndLambdas.pop();
 		final IMethodBinding binding= node.resolveBinding();
 		if (binding != null) {
 			if (!binding.isConstructor()) {
@@ -599,15 +664,18 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 		if (expression != null) {
 			final ConstraintVariable2 descendant= (ConstraintVariable2) expression.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
 			if (descendant != null) {
-				final MethodDeclaration declaration= fCurrentMethods.peek();
-				if (declaration != null) {
-					final IMethodBinding binding= declaration.resolveBinding();
-					if (binding != null) {
-						final ConstraintVariable2 ancestor= fModel.createReturnTypeVariable(binding);
-						if (ancestor != null) {
-							node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
-							fModel.createSubtypeConstraint(descendant, ancestor);
-						}
+				ASTNode methodOrLambda= fCurrentMethodsAndLambdas.peek();
+				IMethodBinding binding = null;
+				if (methodOrLambda instanceof MethodDeclaration) {
+					binding= ((MethodDeclaration) methodOrLambda).resolveBinding();
+				} else if (methodOrLambda instanceof LambdaExpression) {
+					binding= ((LambdaExpression) methodOrLambda).resolveMethodBinding();
+				}
+				if (binding != null) {
+					final ConstraintVariable2 ancestor= fModel.createReturnTypeVariable(binding);
+					if (ancestor != null) {
+						node.setProperty(PROPERTY_CONSTRAINT_VARIABLE, ancestor);
+						fModel.createSubtypeConstraint(descendant, ancestor);
 					}
 				}
 			}
@@ -700,9 +768,9 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 		final IMethodBinding superBinding= node.resolveMethodBinding();
 		if (superBinding != null) {
 			endVisit(node.arguments(), superBinding);
-			final MethodDeclaration declaration= fCurrentMethods.peek();
-			if (declaration != null) {
-				final IMethodBinding subBinding= declaration.resolveBinding();
+			ASTNode methodOrLambda= fCurrentMethodsAndLambdas.peek();
+			if (methodOrLambda instanceof MethodDeclaration){
+				final IMethodBinding subBinding= ((MethodDeclaration) methodOrLambda).resolveBinding();
 				if (subBinding != null) {
 					final ConstraintVariable2 ancestor= fModel.createReturnTypeVariable(superBinding);
 					if (ancestor != null) {
@@ -807,7 +875,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	 */
 	@Override
 	public final boolean visit(final MethodDeclaration node) {
-		fCurrentMethods.push(node);
+		fCurrentMethodsAndLambdas.push(node);
 		return super.visit(node);
 	}
 

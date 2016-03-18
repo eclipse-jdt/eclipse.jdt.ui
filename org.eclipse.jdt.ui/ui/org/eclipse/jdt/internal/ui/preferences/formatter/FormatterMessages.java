@@ -279,6 +279,7 @@ final class FormatterMessages extends NLS {
 	public static String LineWrappingTabPage_parameters;
 	public static String LineWrappingTabPage_arguments;
 	public static String LineWrappingTabPage_qualified_invocations;
+	public static String LineWrappingTabPage_for;
 	public static String LineWrappingTabPage_throws_clause;
 	public static String LineWrappingTabPage_try;
 	public static String LineWrappingTabPage_object_allocation;
@@ -461,6 +462,7 @@ final class FormatterMessages extends NLS {
 	public static String NewLinesTabPage_annotations_group_packages;
 	public static String NewLinesTabPage_annotations_group_types;
 	public static String NewLinesTabPage_annotations_group_type_annotations;
+	public static String NewLinesTabPage_annotations_group_enum_constants;
 	public static String NewLinesTabPage_annotations_group_fields;
 	public static String NewLinesTabPage_annotations_group_methods;
 	public static String NewLinesTabPage_annotations_group_title;

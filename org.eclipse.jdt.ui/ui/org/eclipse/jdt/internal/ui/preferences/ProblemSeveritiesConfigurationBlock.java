@@ -627,6 +627,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_PB_NULL_SPECIFICATION_VIOLATION= getJDTCoreKey(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION);
 	private static final Key PREF_PB_POTENTIAL_NULL_ANNOTATION_INFERENCE_CONFLICT= getJDTCoreKey(JavaCore.COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT);
 	private static final Key PREF_PB_NULL_UNCHECKED_CONVERSION= getJDTCoreKey(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION);
+	private static final Key PREF_PB_PESSIMISTIC_NULL_ANALYSIS_FOR_FREE_TYPE_VARIABLES= getJDTCoreKey(JavaCore.COMPILER_PB_PESSIMISTIC_NULL_ANALYSIS_FOR_FREE_TYPE_VARIABLES);
+	private static final Key PREF_PB_NONNULL_TYPEVAR_FROM_LEGACY_INVOCATION= getJDTCoreKey(JavaCore.COMPILER_PB_NONNULL_TYPEVAR_FROM_LEGACY_INVOCATION);
 	private static final Key PREF_PB_REDUNDANT_NULL_ANNOTATION= getJDTCoreKey(JavaCore.COMPILER_PB_REDUNDANT_NULL_ANNOTATION);
 	private static final Key PREF_PB_NONNULL_PARAMETER_ANNOTATION_DROPPED= getJDTCoreKey(JavaCore.COMPILER_PB_NONNULL_PARAMETER_ANNOTATION_DROPPED);
 
@@ -721,6 +723,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_PB_NULL_SPECIFICATION_VIOLATION,
 				PREF_PB_POTENTIAL_NULL_ANNOTATION_INFERENCE_CONFLICT,
 				PREF_PB_NULL_UNCHECKED_CONVERSION,
+				PREF_PB_PESSIMISTIC_NULL_ANALYSIS_FOR_FREE_TYPE_VARIABLES,
+				PREF_PB_NONNULL_TYPEVAR_FROM_LEGACY_INVOCATION,
 				PREF_PB_REDUNDANT_NULL_ANNOTATION,
 				PREF_PB_NONNULL_PARAMETER_ANNOTATION_DROPPED,
 				PREF_PB_REDUNDANT_NULL_CHECK, PREF_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS,
@@ -1134,7 +1138,13 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_null_unchecked_conversion;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NULL_UNCHECKED_CONVERSION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, extraIndent, node);
-		
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_pessimistic_analysis_for_free_type_variables;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_PESSIMISTIC_NULL_ANALYSIS_FOR_FREE_TYPE_VARIABLES, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, extraIndent, node);
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_nonnull_typevar_maybe_legacy;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_NONNULL_TYPEVAR_FROM_LEGACY_INVOCATION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, extraIndent, node);
+
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_redundant_null_annotation;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_REDUNDANT_NULL_ANNOTATION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, extraIndent, node);
 		
@@ -1348,6 +1358,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		setComboEnabled(PREF_PB_NULL_SPECIFICATION_VIOLATION, enableAnnotationNullAnalysis);
 		setComboEnabled(PREF_PB_POTENTIAL_NULL_ANNOTATION_INFERENCE_CONFLICT, enableAnnotationNullAnalysis);
 		setComboEnabled(PREF_PB_NULL_UNCHECKED_CONVERSION, enableAnnotationNullAnalysis);
+		setComboEnabled(PREF_PB_PESSIMISTIC_NULL_ANALYSIS_FOR_FREE_TYPE_VARIABLES, enableAnnotationNullAnalysis);
+		setComboEnabled(PREF_PB_NONNULL_TYPEVAR_FROM_LEGACY_INVOCATION, enableAnnotationNullAnalysis);
 		setComboEnabled(PREF_PB_REDUNDANT_NULL_ANNOTATION, enableAnnotationNullAnalysis);
 		setComboEnabled(PREF_PB_NONNULL_PARAMETER_ANNOTATION_DROPPED, enableAnnotationNullAnalysis);
 		setComboEnabled(PREF_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, enableAnnotationNullAnalysis);
