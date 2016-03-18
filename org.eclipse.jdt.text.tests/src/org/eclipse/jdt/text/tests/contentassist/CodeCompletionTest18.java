@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2015 GK Software AG, IBM Corporation and others.
+ * Copyright (c) 2014, 2016 GK Software AG, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -612,6 +612,158 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 		buf.append("\n");
 		buf.append("interface A {\n");
 		buf.append("    void myAbstractM();\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testOverride11() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pp;\n");
+		buf.append("\n");
+		buf.append("public class CC implements I2 {\n");
+		buf.append("    dispose\n");
+		buf.append("}\n");
+		buf.append("interface I2 {\n");
+		buf.append("    default void dispose2() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("CC.java", buf.toString(), false, null);
+
+		String str= "dispose";
+		int offset= buf.toString().indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+		assertEquals(2, proposals.length);
+		IEditorPart part= JavaUI.openInEditor(cu);
+		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+
+		proposals[0].apply(doc);
+		buf= new StringBuffer();
+		buf.append("package pp;\n");
+		buf.append("\n");
+		buf.append("public class CC implements I2 {\n");
+		buf.append("    /* (non-Javadoc)\n");
+		buf.append("     * @see pp.I2#dispose2()\n");
+		buf.append("     */\n");
+		buf.append("    @Override\n");
+		buf.append("    public void dispose2() {\n");
+		buf.append("        //TODO\n");
+		buf.append("        I2.super.dispose2();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I2 {\n");
+		buf.append("    default void dispose2() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testOverride12() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pp;\n");
+		buf.append("\n");
+		buf.append("public class CC extends S1 {\n");
+		buf.append("    dispose\n");
+		buf.append("}\n");
+		buf.append("class S1 {\n");
+		buf.append("    void dispose1() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("CC.java", buf.toString(), false, null);
+
+		String str= "dispose";
+		int offset= buf.toString().indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+		assertEquals(2, proposals.length);
+		IEditorPart part= JavaUI.openInEditor(cu);
+		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+
+		proposals[0].apply(doc);
+		buf= new StringBuffer();
+		buf.append("package pp;\n");
+		buf.append("\n");
+		buf.append("public class CC extends S1 {\n");
+		buf.append("    /* (non-Javadoc)\n");
+		buf.append("     * @see pp.S1#dispose1()\n");
+		buf.append("     */\n");
+		buf.append("    @Override\n");
+		buf.append("    void dispose1() {\n");
+		buf.append("        //TODO\n");
+		buf.append("        super.dispose1();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class S1 {\n");
+		buf.append("    void dispose1() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void _testOverride13() throws CoreException { // TODO enable after bug 489962 is fixed
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pp;\n");
+		buf.append("\n");
+		buf.append("public class CC extends S1 {\n");
+		buf.append("    dispose\n");
+		buf.append("}\n");
+		buf.append("class S1 implements I1 {\n");
+		buf.append("    void dispose1() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I1 {\n");
+		buf.append("    default void dispose() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("CC.java", buf.toString(), false, null);
+
+		String str= "dispose";
+		int offset= buf.toString().indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+		assertEquals(3, proposals.length);
+		IEditorPart part= JavaUI.openInEditor(cu);
+		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+
+		proposals[1].apply(doc);
+		buf= new StringBuffer();
+		buf.append("package pp;\n");
+		buf.append("\n");
+		buf.append("public class CC extends S1 {\n");
+		buf.append("    /* (non-Javadoc)\n");
+		buf.append("     * @see pp.I1#dispose()\n");
+		buf.append("     */\n");
+		buf.append("    @Override\n");
+		buf.append("    public void dispose() {\n");
+		buf.append("        //TODO\n");
+		buf.append("        super.dispose();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class S1 implements I1 {\n");
+		buf.append("    void dispose1() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface I1 {\n");
+		buf.append("    default void dispose() {\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		assertEquals(buf.toString(), doc.get());
 	}

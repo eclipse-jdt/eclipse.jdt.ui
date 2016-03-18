@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -383,9 +383,11 @@ public final class StubUtility2 {
 					if (supertype == null) { // should not happen, but better use the type we have rather than failing
 						supertype= declaringType;
 					}
-					String qualifier= imports.addImport(supertype.getTypeDeclaration(), context);
-					Name name= ASTNodeFactory.newName(ast, qualifier);
-					invocation.setQualifier(name);
+					if (supertype.isInterface()) {
+						String qualifier= imports.addImport(supertype.getTypeDeclaration(), context);
+						Name name= ASTNodeFactory.newName(ast, qualifier);
+						invocation.setQualifier(name);
+					}
 				}
 				invocation.setName(ast.newSimpleName(binding.getName()));
 				SingleVariableDeclaration varDecl= null;
