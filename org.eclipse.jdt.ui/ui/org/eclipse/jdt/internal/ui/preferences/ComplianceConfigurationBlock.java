@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -125,7 +125,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String VERSION_1_6= JavaCore.VERSION_1_6;
 	private static final String VERSION_1_7= JavaCore.VERSION_1_7;
 	private static final String VERSION_1_8= JavaCore.VERSION_1_8;
-	private static final String VERSION_1_9= JavaCore.VERSION_1_9;
+	private static final String VERSION_9= JavaCore.VERSION_9;
 	private static final String VERSION_JSR14= "jsr14"; //$NON-NLS-1$
 
 	private static final String ERROR= JavaCore.ERROR;
@@ -265,7 +265,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private Composite createComplianceTabContent(Composite folder) {
 
 		final String[] complianceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_1_9 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9 };
 		final String[] complianceLabels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_version13,
 			PreferencesMessages.ComplianceConfigurationBlock_version14,
@@ -293,14 +293,14 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			targetVersions= append(targetVersions, ComplianceConfigurationBlock.VERSION_JSR14);
 			targetLabels= append(targetLabels, ComplianceConfigurationBlock.VERSION_JSR14);
 		}
-		if (ComplianceConfigurationBlock.VERSION_1_9.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM))) {
+		if (ComplianceConfigurationBlock.VERSION_9.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM))) {
 			//TODO(BETA_JAVA9) at the moment, runtime doesn't support a new class file version
-			targetVersions= append(targetVersions, ComplianceConfigurationBlock.VERSION_1_9);
+			targetVersions= append(targetVersions, ComplianceConfigurationBlock.VERSION_9);
 			targetLabels= append(targetLabels, PreferencesMessages.ComplianceConfigurationBlock_version19);
 		}
 		
 		String[] sourceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_1_9 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9 };
 		String[] sourceLabels= new String[] {
 				PreferencesMessages.ComplianceConfigurationBlock_version13,
 				PreferencesMessages.ComplianceConfigurationBlock_version14,
@@ -309,9 +309,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.ComplianceConfigurationBlock_version17,
 				PreferencesMessages.ComplianceConfigurationBlock_version18,
 		};
-		if (ComplianceConfigurationBlock.VERSION_1_9.equals(getValue(PREF_SOURCE_COMPATIBILITY))) {
+		if (ComplianceConfigurationBlock.VERSION_9.equals(getValue(PREF_SOURCE_COMPATIBILITY))) {
 			//TODO(BETA_JAVA9) at the moment, there's no new Java language feature
-			sourceVersions= append(sourceVersions, ComplianceConfigurationBlock.VERSION_1_9);
+			sourceVersions= append(sourceVersions, ComplianceConfigurationBlock.VERSION_9);
 			sourceLabels= append(sourceLabels, PreferencesMessages.ComplianceConfigurationBlock_version19);
 		}
 
@@ -636,7 +636,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			
 			//TODO: Remove once Java SE 9 has been shipped:
 			String selectedCompliance= getValue(PREF_COMPLIANCE);
-			if (VERSION_1_9.equals(selectedCompliance)) {
+			if (VERSION_9.equals(selectedCompliance)) {
 				fJRE50InfoText.setText("This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
 				isVisible= true;
 			}
@@ -682,7 +682,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 		// target must not be smaller than source
 		if (!VERSION_1_3.equals(source) && JavaModelUtil.isVersionLessThan(target, source)) {
-			if (VERSION_1_9.equals(source) && VERSION_1_8.equals(target)) {
+			if (VERSION_9.equals(source) && VERSION_1_8.equals(target)) {
 				// TODO(BETA_JAVA9): not clear yet whether there will be a 1.9 class file version. Allow mismatch for now:
 				return status;
 			}

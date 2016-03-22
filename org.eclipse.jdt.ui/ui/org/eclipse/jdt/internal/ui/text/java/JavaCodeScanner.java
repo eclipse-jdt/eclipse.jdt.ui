@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -539,7 +539,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 	private List<IRule> create19ModuleInfoRules(Token defaultToken, String version) {
 		// Add word rule for new keywords
-		VersionedWordMatcher j19ModuleInfoMatcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_1_9, version);
+		VersionedWordMatcher j19ModuleInfoMatcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_9, version);
 		Token token= getToken(IJavaColorConstants.JAVA_KEYWORD);
 		for (int i= 0; i < fgJava19ModuleInfoKeywords.length; i++)
 			j19ModuleInfoMatcher.addWord(fgJava19ModuleInfoKeywords[i], token);

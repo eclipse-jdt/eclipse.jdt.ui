@@ -75,7 +75,7 @@ public final class JavaModelUtil {
 	 */
 	public static final String VERSION_LATEST;
 	static {
-		VERSION_LATEST= JavaCore.VERSION_1_9; // make sure it is not inlined
+		VERSION_LATEST= JavaCore.VERSION_9; // make sure it is not inlined
 	}
 	
 	/**
@@ -782,7 +782,7 @@ public final class JavaModelUtil {
 	}
 
 	public static boolean is19OrHigher(String compliance) {
-		return !isVersionLessThan(compliance, JavaCore.VERSION_1_9);
+		return !isVersionLessThan(compliance, JavaCore.VERSION_9);
 	}
 	
 	/**
@@ -860,8 +860,8 @@ public final class JavaModelUtil {
 		String version= vMInstall.getJavaVersion();
 		if (version == null) {
 			return defaultCompliance;
-		} else if (version.startsWith(JavaCore.VERSION_1_9)) {
-			return JavaCore.VERSION_1_9;
+		} else if (version.startsWith(JavaCore.VERSION_9)) {
+			return JavaCore.VERSION_9;
 		} else if (version.startsWith(JavaCore.VERSION_1_8)) {
 			return JavaCore.VERSION_1_8;
 		} else if (version.startsWith(JavaCore.VERSION_1_7)) {
@@ -892,8 +892,8 @@ public final class JavaModelUtil {
 		
 		// fallback:
 		String desc= executionEnvironment.getId();
-		if (desc.indexOf(JavaCore.VERSION_1_9) != -1) {
-			return JavaCore.VERSION_1_9;
+		if (desc.indexOf(JavaCore.VERSION_9) != -1) {
+			return JavaCore.VERSION_9;
 		} else if (desc.indexOf(JavaCore.VERSION_1_8) != -1) {
 			return JavaCore.VERSION_1_8;
 		} else if (desc.indexOf(JavaCore.VERSION_1_7) != -1) {
