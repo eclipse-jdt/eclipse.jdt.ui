@@ -395,6 +395,7 @@ public final class CorrectionMessages extends NLS {
 	public static String FixCorrectionProposal_MultiFixChange_label;
 	public static String FixCorrectionProposal_HitCtrlEnter_description;
 	public static String FixCorrectionProposal_hitCtrlEnter_variable_description;
+	public static String LocalCorrectionsSubProcessor_implement_method_description;
 	public static String LocalCorrectionsSubProcessor_insert_break_statement;
 	public static String LocalCorrectionsSubProcessor_insert_cases_omitted;
 	public static String LocalCorrectionsSubProcessor_insert_fall_through;
