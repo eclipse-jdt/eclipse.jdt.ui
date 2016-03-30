@@ -3652,6 +3652,12 @@
             id="org.eclipse.jdt.ui.correction.assignParamToField.assist">
       </command>
       <command
+            name="%ActionDefinition.corrections.assignAllParamsToNewFields.name"
+            description="%ActionDefinition.corrections.assignAllParamsToNewFields.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.assignAllParamsToNewFields.assist">
+      </command>
+      <command
             name="%ActionDefinition.corrections.addBlock.name"
             description="%ActionDefinition.corrections.addBlock.description"
             categoryId="org.eclipse.jdt.ui.category.source"

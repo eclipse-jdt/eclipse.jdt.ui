@@ -261,6 +261,7 @@ public final class CorrectionMessages extends NLS {
 	public static String AssignToVariableAssistProposal_assigntolocal_description;
 	public static String AssignToVariableAssistProposal_assigntofield_description;
 	public static String AssignToVariableAssistProposal_assignparamtofield_description;
+	public static String AssignToVariableAssistProposal_assignallparamstofields_description;
 	public static String QuickAssistProcessor_catchclausetothrows_description;
 	public static String QuickAssistProcessor_change_lambda_body_to_block;
 	public static String QuickAssistProcessor_change_lambda_body_to_expression;

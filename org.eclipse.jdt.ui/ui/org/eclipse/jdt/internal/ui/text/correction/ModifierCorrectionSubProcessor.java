@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -901,7 +901,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 
-	private static final String KEY_MODIFIER= "modifier"; //$NON-NLS-1$
+	public static final String KEY_MODIFIER= "modifier"; //$NON-NLS-1$
 
 	private static class ModifierLinkedModeProposal extends LinkedProposalPositionGroup.Proposal {
 
@@ -956,12 +956,12 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 
-	public static void installLinkedVisibilityProposals(LinkedProposalModel linkedProposalModel, ASTRewrite rewrite, List<IExtendedModifier> modifiers, boolean inInterface) {
+	public static void installLinkedVisibilityProposals(LinkedProposalModel linkedProposalModel, ASTRewrite rewrite, List<IExtendedModifier> modifiers, boolean inInterface, String groupId) {
 		ASTNode modifier= findVisibilityModifier(modifiers);
 		if (modifier != null) {
 			int selected= ((Modifier) modifier).getKeyword().toFlagValue();
 
-			LinkedProposalPositionGroup positionGroup= linkedProposalModel.getPositionGroup(KEY_MODIFIER, true);
+			LinkedProposalPositionGroup positionGroup= linkedProposalModel.getPositionGroup(groupId, true);
 			positionGroup.addPosition(rewrite.track(modifier), false);
 			positionGroup.addProposal(new ModifierLinkedModeProposal(selected, 10));
 
@@ -973,6 +973,10 @@ public class ModifierCorrectionSubProcessor {
 				}
 			}
 		}
+	}
+
+	public static void installLinkedVisibilityProposals(LinkedProposalModel linkedProposalModel, ASTRewrite rewrite, List<IExtendedModifier> modifiers, boolean inInterface) {
+		ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(linkedProposalModel, rewrite, modifiers, inInterface, KEY_MODIFIER);
 	}
 
 	private static Modifier findVisibilityModifier(List<IExtendedModifier> modifiers) {
