@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,11 +23,13 @@ import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -48,6 +50,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
@@ -69,13 +73,10 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 		if (getSenderBinding().isAnnotation()) {
 			return 0;
 		}
-		if (getSenderBinding().isInterface()) {
-			// for interface and annotation members copy the modifiers from an existing field
-			MethodDeclaration[] methodDecls= ((TypeDeclaration) targetTypeDecl).getMethods();
-			if (methodDecls.length > 0) {
-				return methodDecls[0].getModifiers();
-			}
-			return 0;
+		boolean isTargetInterface= getSenderBinding().isInterface();
+		if (isTargetInterface && !JavaModelUtil.is18OrHigher(getCompilationUnit().getJavaProject())) {
+			// only abstract methods are allowed for interface present in less than Java 1.8
+			return getInterfaceMethodModifiers(targetTypeDecl, true);
 		}
 		ASTNode invocationNode= getInvocationNode();
 		if (invocationNode instanceof MethodInvocation) {
@@ -89,7 +90,21 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 				modifiers |= Modifier.STATIC;
 			}
 			ASTNode node= ASTResolving.findParentType(invocationNode);
-			if (targetTypeDecl.equals(node)) {
+			boolean isParentInterface= node instanceof TypeDeclaration && ((TypeDeclaration) node).isInterface();
+			if (isTargetInterface || isParentInterface) {
+				if (expression == null && !targetTypeDecl.equals(node)) {
+					modifiers|= Modifier.STATIC;
+					if (isTargetInterface) {
+						modifiers|= getInterfaceMethodModifiers(targetTypeDecl, false);
+					} else {
+						modifiers|= Modifier.PROTECTED;
+					}
+				} else if (modifiers == Modifier.STATIC) {
+					modifiers= getInterfaceMethodModifiers(targetTypeDecl, false) | Modifier.STATIC;
+				} else {
+					modifiers= getInterfaceMethodModifiers(targetTypeDecl, true);
+				}
+			} else if (targetTypeDecl.equals(node)) {
 				modifiers |= Modifier.PRIVATE;
 			} else if (node instanceof AnonymousClassDeclaration && ASTNodes.isParent(node, targetTypeDecl)) {
 				modifiers |= Modifier.PROTECTED;
@@ -102,6 +117,30 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 			return modifiers;
 		}
 		return Modifier.PUBLIC;
+	}
+
+	private int getInterfaceMethodModifiers(ASTNode targetTypeDecl, boolean createAbstractMethod) {
+		// for interface and annotation members copy the modifiers from an existing member
+		if (targetTypeDecl instanceof TypeDeclaration) {
+			TypeDeclaration type= (TypeDeclaration) targetTypeDecl;
+			MethodDeclaration[] methodDecls= type.getMethods();
+			if (methodDecls.length > 0) {
+				if (createAbstractMethod) {
+					for (MethodDeclaration methodDeclaration : methodDecls) {
+						IMethodBinding methodBinding= methodDeclaration.resolveBinding();
+						if (methodBinding != null && JdtFlags.isAbstract(methodBinding)) {
+							return methodDeclaration.getModifiers();
+						}
+					}
+				}
+				return methodDecls[0].getModifiers() & Modifier.PUBLIC;
+			}
+			List<BodyDeclaration> bodyDecls= type.bodyDeclarations();
+			if (bodyDecls.size() > 0) {
+				return bodyDecls.get(0).getModifiers() & Modifier.PUBLIC;
+			}
+		}
+		return 0;
 	}
 
 	@Override

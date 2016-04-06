@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -139,12 +140,13 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 		}
 
 		String bodyStatement= ""; //$NON-NLS-1$
+		boolean isAbstractMethod= Modifier.isAbstract(decl.getModifiers()) || (fSenderBinding.isInterface() && !Modifier.isStatic(decl.getModifiers()) && !Modifier.isDefault(decl.getModifiers()));
 		if (!isConstructor()) {
 			Type returnType= getNewMethodType(rewrite);
 			decl.setReturnType2(returnType);
 
 			boolean isVoid= returnType instanceof PrimitiveType && PrimitiveType.VOID.equals(((PrimitiveType)returnType).getPrimitiveTypeCode());
-			if (!fSenderBinding.isInterface() && !isVoid) {
+			if (!isAbstractMethod && !isVoid) {
 				ReturnStatement returnStatement= ast.newReturnStatement();
 				returnStatement.setExpression(ASTNodeFactory.newDefaultExpression(ast, returnType, 0));
 				bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, String.valueOf('\n'), getCompilationUnit().getJavaProject().getOptions(true));
@@ -155,7 +157,7 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 		addNewExceptions(rewrite, decl.thrownExceptionTypes());
 
 		Block body= null;
-		if (!fSenderBinding.isInterface() && !Flags.isAbstract(decl.getModifiers())) {
+		if (!isAbstractMethod && !Flags.isAbstract(decl.getModifiers())) {
 			body= ast.newBlock();
 			String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), fSenderBinding.getName(), newNameNode.getIdentifier(), isConstructor(), bodyStatement, String.valueOf('\n'));
 			if (placeHolder != null) {
@@ -204,7 +206,7 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 
 	protected abstract boolean isConstructor();
 
-	protected abstract void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> exceptions);
+	protected abstract void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> modifiers);
 	protected abstract void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params) throws CoreException;
 	protected abstract void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params) throws CoreException;
 	protected abstract void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions) throws CoreException;
