@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -23,6 +23,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -82,6 +84,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -509,11 +512,13 @@ public class SourceProvider {
 				if (vb.isField()) {
 					Expression receiver= createReceiver(rewriter, context, vb, importRewriteContext);
 					if (receiver != null) {
-						FieldAccess access= node.getAST().newFieldAccess();
-						ASTNode target= rewriter.createMoveTarget(node);
-						access.setName((SimpleName)target);
-						access.setExpression(receiver);
-						rewriter.replace(node, access, null);
+						if (!vb.isEnumConstant() || node.getLocationInParent() != SwitchCase.EXPRESSIONS2_PROPERTY) {
+							FieldAccess access= node.getAST().newFieldAccess();
+							ASTNode target= rewriter.createMoveTarget(node);
+							access.setName((SimpleName)target);
+							access.setExpression(receiver);
+							rewriter.replace(node, access, null);
+						}
 					}
 				}
 			}
@@ -533,9 +538,22 @@ public class SourceProvider {
 				if (binding.isParameterizedType()) {
 					binding= binding.getTypeDeclaration();
 				}
-				String s= importer.addImport(binding);
-				if (!ASTNodes.asString(element).equals(s)) {
-					rewriter.replace(element, rewriter.createStringPlaceholder(s, ASTNode.SIMPLE_NAME), null);
+				String[] bindingNameComponents= Bindings.getNameComponents(binding);
+				try {
+					IType[] types= context.compilationUnit.getAllTypes();
+					for (IType type : types) {
+						String typeName= type.getFullyQualifiedName();
+						String[] typeNameComponents= typeName.split("\\.|\\$"); //$NON-NLS-1$
+						if (Arrays.equals(bindingNameComponents, typeNameComponents)) {
+							return;
+						}
+					}
+					String s= importer.addImport(binding);
+					if (!ASTNodes.asString(element).equals(s)) {
+						rewriter.replace(element, rewriter.createStringPlaceholder(s, ASTNode.SIMPLE_NAME), null);
+					}
+				} catch (JavaModelException e) {
+					// do nothing
 				}
 			}
 		}
@@ -574,6 +592,11 @@ public class SourceProvider {
 		String receiver= context.receiver;
 		ITypeBinding invocationType= ASTNodes.getEnclosingType(context.invocation);
 		ITypeBinding sourceType= fDeclaration.resolveBinding().getDeclaringClass();
+
+		if (invocationType != null && invocationType.getName().equals(receiver)) {
+			return null;
+		}
+
 		if (!context.receiverIsStatic && Modifier.isStatic(modifiers)) {
 			if ("this".equals(receiver) && invocationType != null && Bindings.equals(invocationType, sourceType)) { //$NON-NLS-1$
 				receiver= null;
