@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2014 IBM Corporation and others.
+ * Copyright (c) 2006, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -273,5 +273,49 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 		};
 		String[] actual= runTreeTest(aTestCase, 4);
 		assertEqualLog(expectedTree, actual);
+	}
+
+	public void testParametrizedWithNewLine() throws Exception {
+		String source=
+				"package pack;\n"+
+				"\n"+
+				"import java.util.Arrays;\n"+
+				"\n"+
+				"import org.junit.Assert;\n"+
+				"import org.junit.Test;\n"+
+				"import org.junit.runner.RunWith;\n"+
+				"import org.junit.runners.Parameterized;\n"+
+				"import org.junit.runners.Parameterized.Parameter;\n"+
+				"import org.junit.runners.Parameterized.Parameters;\n"+
+				"\n" +
+				"@RunWith(Parameterized.class)\n"+
+				"public class ATestCase {\n"+
+				"\n"+
+				"	@Parameters(name = \"{index}: testEven({0})\")\n"+
+				"	public static Iterable<String[]> data() {\n"+
+				"		return Arrays.asList(new String[][] { { \"2\" }, { \"4\\n\" } });\n"+
+				"	}\n"+
+				"\n"+
+				"	@Parameter\n"+
+				"	public String param;\n"+
+				"\n"+
+				"	@Test\n"+
+				"	public void testEven() {\n"+
+				"		Assert.assertEquals(0, Integer.parseInt(param.trim()) % 2);\n"+
+				"	}\n"+
+				"}\n";
+		System.out.println(source);
+		IType aTestCase= createType(source, "pack", "ATestCase.java");
+
+		String[] expectedSequence= new String[] {
+				TestRunListeners.sessionAsString("ATestCase", ProgressState.COMPLETED, Result.OK, 0),
+				TestRunListeners.suiteAsString("pack.ATestCase", ProgressState.COMPLETED, Result.OK, null, 1),
+				TestRunListeners.suiteAsString("[0: testEven(2)]", ProgressState.COMPLETED, Result.OK, null, 2),
+				TestRunListeners.testCaseAsString("testEven[0: testEven(2)]", "pack.ATestCase", ProgressState.COMPLETED, Result.OK, null, 3),
+				TestRunListeners.suiteAsString("[1: testEven(4 )]", ProgressState.COMPLETED, Result.OK, null, 2),
+				TestRunListeners.testCaseAsString("testEven[1: testEven(4 )]", "pack.ATestCase", ProgressState.COMPLETED, Result.OK, null, 3),
+		};
+		String[] actual= runTreeTest(aTestCase, 6);
+		assertEqualLog(expectedSequence, actual);
 	}
 }

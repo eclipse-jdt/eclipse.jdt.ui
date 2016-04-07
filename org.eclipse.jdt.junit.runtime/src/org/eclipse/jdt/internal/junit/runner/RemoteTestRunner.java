@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -511,7 +511,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	private String escapeComma(String s) {
-		if ((s.indexOf(',') < 0) && (s.indexOf('\\') < 0))
+		if ((s.indexOf(',') < 0) && (s.indexOf('\\') < 0) && s.indexOf('\n') < 0)
 			return s;
 		StringBuffer sb= new StringBuffer(s.length()+10);
 		for (int i= 0; i < s.length(); i++) {
@@ -520,6 +520,8 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 				sb.append("\\,"); //$NON-NLS-1$
 			else if (c == '\\')
 				sb.append("\\\\"); //$NON-NLS-1$
+			else if (c == '\n')
+				sb.append(" "); //$NON-NLS-1$
 			else
 				sb.append(c);
 		}
