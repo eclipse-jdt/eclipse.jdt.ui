@@ -55,6 +55,7 @@ org.eclipse.ant.tests.ui/*
 org.eclipse.ant.ui/Ant*Editor*Content*Assist*Dev/XDOCtasks.xml
 org.eclipse.ant.ui/templates/ant.xml
 org.eclipse.pde.ui.templates/templates_3.0/help/toc.xml
+org.eclipse.pde.ui.templates/templates_3.1/help/toc.xml
 org.eclipse.pde.build.tests/*
 org.eclipse.releng.basebuilder/plugins/org.eclipse.pde.build_3.8.0.v20120523-1555/templates/*
 org.eclipse.releng.tools/*
