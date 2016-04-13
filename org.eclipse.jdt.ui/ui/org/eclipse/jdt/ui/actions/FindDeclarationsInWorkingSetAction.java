@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -105,10 +105,16 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 
 		IWorkingSet[] workingSets= fWorkingSet;
-		if (fWorkingSet == null) {
+		if (fWorkingSet == null && isFirstElement()) {
 			workingSets= factory.queryWorkingSets();
 			if (workingSets == null)
 				return super.createQuery(element); // in workspace
+			if (isMultiSelect()) {
+				fWorkingSet= workingSets;
+			}
+			
+		} else if (isMultiSelect() && isLastElement()) {
+			fWorkingSet= null;
 		}
 		SearchUtil.updateLRUWorkingSets(workingSets);
 		IJavaSearchScope scope= factory.createJavaSearchScope(workingSets, JavaSearchScopeFactory.NO_PROJ);

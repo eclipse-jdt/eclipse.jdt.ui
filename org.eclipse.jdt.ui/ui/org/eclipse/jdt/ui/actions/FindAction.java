@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,9 @@
 package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
@@ -71,6 +74,9 @@ public abstract class FindAction extends SelectionDispatchAction {
 
 	private Class<?>[] fValidTypes;
 	private JavaEditor fEditor;
+	
+	private int numberOfElements;
+	private int processedElementIndex;
 
 
 	FindAction(IWorkbenchSite site) {
@@ -98,8 +104,17 @@ public abstract class FindAction extends SelectionDispatchAction {
 	 */
 	abstract Class<?>[] getValidTypes();
 
-	private boolean canOperateOn(IStructuredSelection sel) {
-		return sel != null && !sel.isEmpty() && canOperateOn(getJavaElement(sel, true));
+	boolean canOperateOn(IStructuredSelection sel) {
+		if (sel == null || sel.isEmpty()) {
+			return false;
+		}
+		IJavaElement[] elements= getJavaElements(sel, true);
+		for (IJavaElement iJavaElement : elements) {
+			if (!canOperateOn(iJavaElement)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	boolean canOperateOn(IJavaElement element) {
@@ -139,20 +154,26 @@ public abstract class FindAction extends SelectionDispatchAction {
 		}
 	}
 
-	IJavaElement getJavaElement(IStructuredSelection selection, boolean silent) {
-		if (selection.size() == 1) {
-			Object firstElement= selection.getFirstElement();
+	IJavaElement[] getJavaElements(IStructuredSelection selection, boolean silent) {
+		IJavaElement[] javaElements= new IJavaElement[selection.size()];
+		int index= 0;
+		for (Iterator<?> iter= selection.iterator(); iter.hasNext();) {
+			Object firstElement= iter.next();
 			IJavaElement elem= null;
 			if (firstElement instanceof IJavaElement)
 				elem= (IJavaElement) firstElement;
 			else if (firstElement instanceof IAdaptable)
 				elem= ((IAdaptable) firstElement).getAdapter(IJavaElement.class);
 			if (elem != null) {
-				return getTypeIfPossible(elem, silent);
+				elem= getTypeIfPossible(elem, silent);
+				javaElements[index++]= elem;
+				if (elem == RETURN_WITHOUT_BEEP) {
+					return javaElements;
+				}
 			}
 
 		}
-		return null;
+		return javaElements;
 	}
 
 	private void showOperationUnavailableDialog() {
@@ -201,15 +222,19 @@ public abstract class FindAction extends SelectionDispatchAction {
 	 */
 	@Override
 	public void run(IStructuredSelection selection) {
-		IJavaElement element= getJavaElement(selection, false);
-		if (element == null || !element.exists()) {
-			showOperationUnavailableDialog();
-			return;
+		IJavaElement[] elements= getJavaElements(selection, false);
+		for (int i= 0; i < elements.length; i++) {
+			IJavaElement element= elements[i];
+			if (element == null || !element.exists()) {
+				showOperationUnavailableDialog();
+				return;
+			} else if (element == RETURN_WITHOUT_BEEP) {
+				return;
+			} else if (!ActionUtil.isProcessable(getShell(), element)) {
+				return;
+			}
 		}
-		else if (element == RETURN_WITHOUT_BEEP)
-			return;
-
-		run(element);
+		run(elements);
 	}
 
 	/*
@@ -266,18 +291,36 @@ public abstract class FindAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
 
+		run(new IJavaElement[] {element});
+	}
+
+	/**
+	 * Executes this action for the given Java element List.
+	 * 
+	 * @param elements the Java elements to be found
+	 * @since 3.12
+	 */
+	public void run(IJavaElement[] elements) {
 		// will return true except for debugging purposes.
 		try {
-			performNewSearch(element);
+			List<QuerySpecification> queryList= new ArrayList<>(elements.length);
+			numberOfElements= elements.length;
+			processedElementIndex= 0;
+			for (IJavaElement element : elements) {
+				processedElementIndex++;
+				queryList.add(createQuery(element));
+			}
+			performNewSearch(new JavaSearchQuery(queryList));
 		} catch (JavaModelException ex) {
 			ExceptionHandler.handle(ex, getShell(), SearchMessages.Search_Error_search_notsuccessful_title, SearchMessages.Search_Error_search_notsuccessful_message);
 		} catch (InterruptedException e) {
 			// cancelled
+		} catch (IllegalArgumentException e) {
+			//no element
 		}
 	}
 
-	private void performNewSearch(IJavaElement element) throws JavaModelException, InterruptedException {
-		JavaSearchQuery query= new JavaSearchQuery(createQuery(element));
+	private void performNewSearch(JavaSearchQuery query) {
 		if (query.canRunInBackground()) {
 			/*
 			 * This indirection with Object as parameter is needed to prevent the loading
@@ -338,4 +381,15 @@ public abstract class FindAction extends SelectionDispatchAction {
 		return fEditor;
 	}
 
+	boolean isMultiSelect() {
+		return numberOfElements > 1 ? true : false;
+	}
+
+	boolean isLastElement() {
+		return numberOfElements == processedElementIndex;
+	}
+	
+	boolean isFirstElement() {
+		return processedElementIndex == 1 ? true : false;
+	}
 }
