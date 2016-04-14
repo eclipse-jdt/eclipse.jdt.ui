@@ -243,7 +243,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 
 		int count= computeNumberOfFixesForCleanUp(fCleanUp);
 
-		if (count == -1) {
+		if (count == -1 && fCleanUp instanceof IMultiFix) {
 			return CorrectionMessages.FixCorrectionProposal_HitCtrlEnter_description;
 		} else if (count < 2) {
 			return null;
