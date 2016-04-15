@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -576,6 +576,11 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		helper1(new String[] { "A" }, "A", 6, 14, 6, 15, FIELD, "b", true, true);
 	}
 	
+	// bug 441217
+	public void test68() throws Exception {
+		helper1(new String[] { "A" }, "A", 6, 16, 6, 17, PARAMETER, "d", true, true);
+	}
+
 	// Move mA1 to field fB, do not inline delegator
 	public void test3() throws Exception {
 		helper1(new String[] { "p1.A", "p2.B", "p3.C"}, "p1.A", 9, 17, 9, 20, FIELD, "fB", false, false);

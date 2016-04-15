@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -660,12 +660,21 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			else if (binding instanceof IVariableBinding) {
 				final IVariableBinding variable= (IVariableBinding) binding;
 				final IMethodBinding method= fDeclaration.resolveBinding();
-				ITypeBinding declaring= variable.getDeclaringClass();
-				if (method != null && declaring != null) {
-					declaring= declaring.getTypeDeclaration();
-					if (Bindings.isSuperType(declaring, method.getDeclaringClass(), false)) {
+				ITypeBinding targetType= variable.getDeclaringClass();
+				if (variable.isField()) {
+					ITypeBinding enclosingType= ASTNodes.getEnclosingType(node);
+					if (enclosingType != null) {
+						IVariableBinding fieldInHierarchy= Bindings.findFieldInHierarchy(enclosingType, node.getIdentifier());
+						if (fieldInHierarchy != null) {
+							targetType= enclosingType;
+						}
+					}
+				}
+				if (method != null && targetType != null) {
+					targetType= targetType.getTypeDeclaration();
+					if (Bindings.isSuperType(targetType, method.getDeclaringClass(), false)) {
 						if (JdtFlags.isStatic(variable))
-							rewrite.replace(node, ast.newQualifiedName(ASTNodeFactory.newName(ast, fTargetRewrite.getImportRewrite().addImport(declaring)), ast.newSimpleName(node.getFullyQualifiedName())), null);
+							rewrite.replace(node, ast.newQualifiedName(ASTNodeFactory.newName(ast, fTargetRewrite.getImportRewrite().addImport(targetType)), ast.newSimpleName(node.getFullyQualifiedName())), null);
 						else {
 							final FieldAccess access= ast.newFieldAccess();
 							access.setExpression(ast.newSimpleName(fTargetName));
@@ -673,7 +682,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 							rewrite.replace(node, access, null);
 						}
 					} else if (!(node.getParent() instanceof QualifiedName) && JdtFlags.isStatic(variable) && !fStaticImports.contains(variable) && !Checks.isEnumCase(node.getParent())) {
-						rewrite.replace(node, ast.newQualifiedName(ASTNodeFactory.newName(ast, fTargetRewrite.getImportRewrite().addImport(declaring)), ast.newSimpleName(node.getFullyQualifiedName())), null);
+						rewrite.replace(node, ast.newQualifiedName(ASTNodeFactory.newName(ast, fTargetRewrite.getImportRewrite().addImport(targetType)), ast.newSimpleName(node.getFullyQualifiedName())), null);
 					}
 				}
 			}
