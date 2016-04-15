@@ -871,7 +871,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		if (!isStaticFinal(field))
 			return null;
 
-		Object constantValue= null;
+		Object constantValue;
 		if (editorInputElement == null || hoverRegion == null) {
 			constantValue= JavadocView.computeFieldConstantFromTypeAST(field, null);
 		} else {
