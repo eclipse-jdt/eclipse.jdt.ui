@@ -170,7 +170,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
@@ -584,7 +583,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Map<String, String> options= new Hashtable<>();
 		options.put(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.USE_LAMBDA, CleanUpOptions.TRUE);
-		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_LAMBDA_EXPRESSION, image, context);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new LambdaExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_LAMBDA_EXPRESSION, image, context);
 		resultingCollections.add(proposal);
 		return true;
 	}
