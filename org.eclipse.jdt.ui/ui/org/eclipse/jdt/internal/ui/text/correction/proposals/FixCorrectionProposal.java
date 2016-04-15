@@ -158,7 +158,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 
 	@Override
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
-		if (stateMask == SWT.CONTROL && fCleanUp != null){
+		if ((stateMask & SWT.MODIFIER_MASK) == SWT.CONTROL && fCleanUp != null) {
 			CleanUpRefactoring refactoring= new CleanUpRefactoring();
 			refactoring.addCompilationUnit(getCompilationUnit());
 			refactoring.addCleanUp(fCleanUp);
