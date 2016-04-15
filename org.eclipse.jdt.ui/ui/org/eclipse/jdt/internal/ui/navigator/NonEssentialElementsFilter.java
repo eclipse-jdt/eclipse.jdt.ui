@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,10 @@ public abstract class NonEssentialElementsFilter extends ViewerFilter {
 
 	private ViewerFilter fDelegateFilter;
 
+	/**
+	 *
+	 * @param delegateFilter A filter to delegate to, can be null
+	 */
 	protected NonEssentialElementsFilter(ViewerFilter delegateFilter) {
 		fDelegateFilter = delegateFilter;
 	}
@@ -68,30 +72,30 @@ public abstract class NonEssentialElementsFilter extends ViewerFilter {
 		return doSelect(viewer, parent, element);
 	}
 
-	private boolean hasFilteredChildren(StructuredViewer viewer, IPackageFragment fragment) {
-		Object[] children= getRawChildren(viewer, fragment);
+	protected boolean hasFilteredChildren(StructuredViewer viewer, Object element) {
+		Object[] children= getRawChildren(viewer, element);
 		ViewerFilter[] filters= viewer.getFilters();
 		for (int i= 0; i < filters.length; i++) {
-			children= filters[i].filter(viewer, fragment, children);
+			children= filters[i].filter(viewer, element, children);
 			if (children.length == 0)
 				return false;
 		}
 		return true;
 	}
 
-	private Object[] getRawChildren(StructuredViewer viewer, IPackageFragment fragment) {
+	private Object[] getRawChildren(StructuredViewer viewer, Object element) {
 		IStructuredContentProvider provider = (IStructuredContentProvider) viewer.getContentProvider();
 		if (provider instanceof ITreeContentProvider) {
-			return ((ITreeContentProvider)provider).getChildren(fragment);
+			return ((ITreeContentProvider)provider).getChildren(element);
 		}
-		return provider.getElements(fragment);
+		return provider.getElements(element);
 	}
 
 	protected boolean doSelect(Viewer viewer, Object parent, Object element) {
-		return fDelegateFilter.select(viewer, parent, element);
+		return fDelegateFilter != null ? fDelegateFilter.select(viewer, parent, element) : true;
 	}
 
-	private boolean isApplicable() {
+	protected boolean isApplicable() {
 		return fContentService != null && fContentService.isVisible(JAVA_EXTENSION_ID) && fContentService.isActive(JAVA_EXTENSION_ID);
 	}
 

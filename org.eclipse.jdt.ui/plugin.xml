@@ -6038,6 +6038,13 @@
 		        name="%HideEmptyInnerPackages.label"
 		        description="%HideEmptyInnerPackages.description"
 		        id="org.eclipse.jdt.java.ui.filters.HideEmptyInnerPackages"/>
+    	<commonFilter
+          		activeByDefault="true"
+	            class="org.eclipse.jdt.internal.ui.navigator.NonEssentialEmptyLibraryContainerFilter"
+	            description="%HideEmptyLibraryContainers.description"
+	            id="org.eclipse.jdt.java.ui.filters.HideEmptyLibraryContainers"
+	            name="%HideEmptyLibraryContainers.label">
+	    </commonFilter>
   		<commonFilter 
 		        class="org.eclipse.jdt.internal.ui.filters.AnnotationFilter"
 		        name="%HideAnnotation.label"
