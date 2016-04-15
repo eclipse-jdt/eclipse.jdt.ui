@@ -95,6 +95,9 @@ public class JavaNavigatorContentProvider extends
 		};
 		fStateModel.addPropertyChangeListener(fLayoutPropertyListener);
 
+		setIsFlatLayout(fStateModel.getBooleanProperty(Values.IS_LAYOUT_FLAT));
+		setShowLibrariesNode(fStateModel.getBooleanProperty(Values.IS_LIBRARIES_NODE_SHOWN));
+
 		IPreferenceStore store = PreferenceConstants.getPreferenceStore();
 		boolean showCUChildren = store
 				.getBoolean(PreferenceConstants.SHOW_CU_CHILDREN);
