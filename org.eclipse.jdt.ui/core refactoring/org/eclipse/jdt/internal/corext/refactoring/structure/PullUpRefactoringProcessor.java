@@ -59,7 +59,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
@@ -78,7 +77,6 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
-import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -104,6 +102,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -1015,11 +1014,10 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 	private void createAbstractMethod(final IMethod sourceMethod, final CompilationUnitRewrite sourceRewriter, final CompilationUnit declaringCuNode, final AbstractTypeDeclaration destination, final TypeVariableMaplet[] mapping, final CompilationUnitRewrite targetRewrite, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
 		final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode(sourceMethod, declaringCuNode);
-		if (JavaModelUtil.is50OrHigher(sourceMethod.getJavaProject()) && (fSettings.overrideAnnotation || JavaCore.ERROR.equals(sourceMethod.getJavaProject().getOption(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION, true)))) {
-			final MarkerAnnotation annotation= sourceRewriter.getAST().newMarkerAnnotation();
-			annotation.setTypeName(sourceRewriter.getAST().newSimpleName("Override")); //$NON-NLS-1$
-			sourceRewriter.getASTRewrite().getListRewrite(oldMethod, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(annotation, sourceRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.PullUpRefactoring_add_override_annotation, SET_PULL_UP));
-		}
+		ITypeBinding destinationBinding= destination.resolveBinding();
+		StubUtility2.addOverrideAnnotation(fSettings, sourceMethod.getJavaProject(), sourceRewriter.getASTRewrite(), sourceRewriter.getImportRewrite(), oldMethod,
+				destinationBinding == null ? false : destinationBinding.isInterface(),
+				sourceRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.PullUpRefactoring_add_override_annotation, SET_PULL_UP));
 		final MethodDeclaration newMethod= targetRewrite.getAST().newMethodDeclaration();
 		newMethod.setBody(null);
 		newMethod.setConstructor(false);

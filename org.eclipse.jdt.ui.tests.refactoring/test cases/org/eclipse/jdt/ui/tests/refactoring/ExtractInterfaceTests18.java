@@ -109,6 +109,14 @@ public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 		validatePassingTest("A", "B", true, true);
 	}
 
+	// bug 394551
+	public void testExtractInterfaceFromClass2() throws Exception {
+		fGenerateAnnotations= true;
+		String[] names= new String[] { "m" };
+		String[][] signatures= new String[][] { new String[0], new String[0] };
+		validatePassingTest("A", new String[] { "A" }, "I", true, names, signatures, null);
+	}
+
 	public void testExtractInterfaceFromAbstractClass() throws Exception {
 		validatePassingTest("A", "B", true, true);
 	}

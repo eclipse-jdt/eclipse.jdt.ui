@@ -248,7 +248,7 @@ public class PullUpTests extends RefactoringTest {
 		assertTrue("precondition was supposed to fail", !checkInputResult.isOK());
 	}
 
-	private void declareAbstractHelper(String[] selectedMethodNames, String[][] selectedMethodSignatures,
+	protected void declareAbstractHelper(String[] selectedMethodNames, String[][] selectedMethodSignatures,
 			String[] selectedFieldNames,
 			String[] selectedTypeNames, String[] namesOfMethodsToPullUp,
 			String[][] signaturesOfMethodsToPullUp, String[] namesOfFieldsToPullUp,
@@ -1042,6 +1042,25 @@ public class PullUpTests extends RefactoringTest {
 				new String[][] {},
 				new String[] {}, selectedMethodNames,
 				selectedMethodSignatures, new String[] {}, false, false, 0);
+	}
+
+	// bug 396524
+	public void test53() throws Exception {
+		String[] selectedMethodNames= { "m" };
+		String[][] selectedMethodSignatures= { new String[0] };
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPullUp= {};
+		String[][] signaturesOfMethodsToPullUp= {};
+		String[] namesOfFieldsToPullUp= {};
+		String[] namesOfMethodsToDeclareAbstract= selectedMethodNames;
+		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
+
+		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void testFail0() throws Exception{

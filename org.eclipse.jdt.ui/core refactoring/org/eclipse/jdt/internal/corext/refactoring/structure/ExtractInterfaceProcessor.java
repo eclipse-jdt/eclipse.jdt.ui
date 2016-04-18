@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -94,6 +94,7 @@ import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -623,11 +624,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 						}
 					}
 					if (annotations) {
-						ASTRewrite rewrite= sourceRewrite.getASTRewrite();
-						AST ast= rewrite.getAST();
-						Annotation marker= ast.newMarkerAnnotation();
-						marker.setTypeName(ast.newSimpleName("Override")); //$NON-NLS-1$
-						rewrite.getListRewrite(declaration, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(marker, null);
+						StubUtility2.createOverrideAnnotation(sourceRewrite.getASTRewrite(), sourceRewrite.getImportRewrite(), declaration, null);
 					}
 					if (fComments)
 						createMethodComment(sourceRewrite, declaration, replacements, javadoc);
