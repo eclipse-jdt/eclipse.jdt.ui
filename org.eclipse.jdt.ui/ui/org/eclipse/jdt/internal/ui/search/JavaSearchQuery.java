@@ -150,19 +150,16 @@ public class JavaSearchQuery implements ISearchQuery {
 				}
 			} else {
 				for (QuerySpecification querySpecification : fPatternDataList) {
-					if (!(querySpecification instanceof ElementQuerySpecification))
+					if (!(querySpecification instanceof ElementQuerySpecification)) {
 						break;
+					}
 					IJavaElement element= ((ElementQuerySpecification) querySpecification).getElement();
 					stringPattern= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
 					if (!element.exists()) {
 						return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(SearchMessages.JavaSearchQuery_error_element_does_not_exist, stringPattern), null);
 					}
 					SearchPattern elementPattern= SearchPattern.createPattern(element, getFirstSpecification().getLimitTo(), SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
-					if (pattern == null) {
-						pattern= elementPattern;
-					} else {
-						pattern= SearchPattern.createOrPattern(pattern, elementPattern);
-					}
+					pattern= pattern == null ? elementPattern : SearchPattern.createOrPattern(pattern, elementPattern);
 				}
 			}
 
@@ -274,23 +271,16 @@ public class JavaSearchQuery implements ISearchQuery {
 	}
 
 	private String getSearchPatternDescription() {
-		if (fPatternDataList.size() == 1) {
-			if (getFirstSpecification() instanceof ElementQuerySpecification) {
-				IJavaElement element= ((ElementQuerySpecification) getFirstSpecification()).getElement();
-				return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT
-						| JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.USE_RESOLVED | JavaElementLabels.P_COMPRESSED);
-			} else if (getFirstSpecification() instanceof PatternQuerySpecification) {
-				return BasicElementLabels.getFilePattern(((PatternQuerySpecification) getFirstSpecification()).getPattern());
-			}
-		} else {
-			if (!(getFirstSpecification() instanceof ElementQuerySpecification)) {
-				return new String(""); //$NON-NLS-1$
-			}
-			IJavaElement element= ((ElementQuerySpecification) getFirstSpecification()).getElement();
+		QuerySpecification firstSpecification= getFirstSpecification();
+		if (firstSpecification instanceof ElementQuerySpecification) {
+			IJavaElement element= ((ElementQuerySpecification) firstSpecification).getElement();
 			return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT
 					| JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.USE_RESOLVED | JavaElementLabels.P_COMPRESSED);
+		} else if (firstSpecification instanceof PatternQuerySpecification) {
+			return BasicElementLabels.getFilePattern(((PatternQuerySpecification) firstSpecification).getPattern());
+		} else {
+			return new String(""); //$NON-NLS-1$
 		}
-		return new String(""); //$NON-NLS-1$
 	}
 
 	private int getMaskedLimitTo() {

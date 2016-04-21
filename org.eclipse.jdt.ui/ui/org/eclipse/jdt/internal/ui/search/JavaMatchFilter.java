@@ -253,8 +253,9 @@ abstract class VariableFilter extends JavaMatchFilter {
 				ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
 				IJavaElement element= elementSpec.getElement();
 				isApplicable= element instanceof IField || element instanceof ILocalVariable;
-				if (!isApplicable)
+				if (!isApplicable) {
 					return false;
+				}
 			} else if (spec instanceof PatternQuerySpecification) {
 				PatternQuerySpecification patternSpec= (PatternQuerySpecification) spec;
 				return patternSpec.getSearchFor() == IJavaSearchConstants.FIELD;
@@ -398,8 +399,9 @@ abstract class GenericTypeFilter extends JavaMatchFilter {
 				ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
 				IJavaElement element= elementSpec.getElement();
 				isApplicable= isParameterizedElement(element);
-				if (!isApplicable)
+				if (!isApplicable) {
 					return false;
+				}
 			} else {
 				return false;
 			}

@@ -41,7 +41,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 public class WorkingSetFindAction extends FindAction {
 
 	private FindAction fAction;
-	
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -90,7 +89,7 @@ public class WorkingSetFindAction extends FindAction {
 	public void run(IJavaElement element) {
 		fAction.run(element);
 	}
-	
+
 	@Override
 	public void run(IJavaElement[] elements) {
 		fAction.run(elements);
@@ -114,7 +113,7 @@ public class WorkingSetFindAction extends FindAction {
 		}
 		return true;
 	}
-	
+
 	@Override
 	int getLimitTo() {
 		return -1;

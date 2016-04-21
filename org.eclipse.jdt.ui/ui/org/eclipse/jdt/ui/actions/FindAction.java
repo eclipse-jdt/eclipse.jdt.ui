@@ -74,7 +74,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 
 	private Class<?>[] fValidTypes;
 	private JavaEditor fEditor;
-	
+
 	private int numberOfElements;
 	private int processedElementIndex;
 
@@ -168,7 +168,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 				elem= getTypeIfPossible(elem, silent);
 				javaElements[index++]= elem;
 				if (elem == RETURN_WITHOUT_BEEP) {
-					return javaElements;
+					break;
 				}
 			}
 
@@ -303,8 +303,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 	public void run(IJavaElement[] elements) {
 		// will return true except for debugging purposes.
 		try {
-			List<QuerySpecification> queryList= new ArrayList<>(elements.length);
 			numberOfElements= elements.length;
+			List<QuerySpecification> queryList= new ArrayList<>(numberOfElements);
 			processedElementIndex= 0;
 			for (IJavaElement element : elements) {
 				processedElementIndex++;
@@ -316,7 +316,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 		} catch (InterruptedException e) {
 			// cancelled
 		} catch (IllegalArgumentException e) {
-			//no element
+			// no element
 		}
 	}
 
@@ -382,7 +382,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	}
 
 	boolean isMultiSelect() {
-		return numberOfElements > 1 ? true : false;
+		return numberOfElements > 1;
 	}
 
 	boolean isLastElement() {
@@ -390,6 +390,6 @@ public abstract class FindAction extends SelectionDispatchAction {
 	}
 	
 	boolean isFirstElement() {
-		return processedElementIndex == 1 ? true : false;
+		return processedElementIndex == 1;
 	}
 }

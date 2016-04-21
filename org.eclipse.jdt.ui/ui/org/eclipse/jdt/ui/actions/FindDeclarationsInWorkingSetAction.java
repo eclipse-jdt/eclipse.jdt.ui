@@ -112,7 +112,6 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 			if (isMultiSelect()) {
 				fWorkingSet= workingSets;
 			}
-			
 		} else if (isMultiSelect() && isLastElement()) {
 			fWorkingSet= null;
 		}

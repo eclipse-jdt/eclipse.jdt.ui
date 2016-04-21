@@ -120,5 +120,4 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 		String description= factory.getWorkingSetScopeDescription(workingSets, JavaSearchScopeFactory.NO_PROJ);
 		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
 	}
-	
 }
