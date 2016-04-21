@@ -712,7 +712,7 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 		assertEquals(buf.toString(), doc.get());
 	}
 
-	public void _testOverride13() throws CoreException { // TODO enable after bug 489962 is fixed
+	public void testOverride13() throws CoreException {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -739,7 +739,7 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 		codeComplete(cu, offset, collector);
 
 		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
-		assertEquals(3, proposals.length);
+		assertEquals(2, proposals.length);
 		IEditorPart part= JavaUI.openInEditor(cu);
 		IDocument doc= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 
