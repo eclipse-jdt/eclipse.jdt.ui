@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.test.OrderedTestSuite;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -33,6 +34,8 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -42,6 +45,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -55,6 +59,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -2384,6 +2389,40 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("   }                                                         \n");
 		buf.append("}                                                             \n");
 		assertEquals(buf.toString(), doc.get());
+	}
+
+	public void testBug466252() throws CoreException {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("p", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("        } \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("CC.java", buf.toString(), false, null);
+
+
+		String str= "}";
+		int offset= buf.toString().indexOf(str) + str.length();
+
+		TemplateStore templateStore= JavaPlugin.getDefault().getTemplateStore();
+		int tokenLocation= createContext(offset, cu).getCoreContext().getTokenLocation();
+		assertTrue((tokenLocation & CompletionContext.TL_STATEMENT_START) != 0);
+
+		Template[] templates= templateStore.getTemplates(JavaContextType.ID_STATEMENTS);
+
+		boolean finallyTemplateFound= false;
+		for (Template template : templates) {
+			if (template.getName().equals("finally")) {
+				finallyTemplateFound= true;
+				break;
+			}
+		}
+		assertTrue(finallyTemplateFound);
 	}
 
 	private static void assertNumberOf(String name, int is, int expected) {
