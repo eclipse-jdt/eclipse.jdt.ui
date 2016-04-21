@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,7 +81,10 @@ public class AssertionVMArg {
 	}
 
 	public static boolean getEnableAssertionsPreference() {
-		return Platform.getPreferencesService().getBoolean(JUnitCorePlugin.CORE_PLUGIN_ID, JUnitPreferencesConstants.ENABLE_ASSERTIONS, false, null);
+		return Platform.getPreferencesService().getBoolean(JUnitCorePlugin.CORE_PLUGIN_ID,
+				JUnitPreferencesConstants.ENABLE_ASSERTIONS,
+				JUnitPreferencesConstants.ENABLE_ASSERTIONS_DEFAULT,
+				null);
 	}
 
 	public static void setEnableAssertionsPreference(boolean preference) {
