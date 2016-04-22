@@ -921,7 +921,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		String[] expected= new String[1];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("\n"); 
+		buf.append("\n");
 		buf.append("enum E {\n");
 		buf.append("    A {\n");
 		buf.append("        public void foo() {}\n");
@@ -2956,6 +2956,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 	public void testSuppressWarningsAnonymousClass1() throws Exception {
 		Hashtable<String, String> options= JavaCore.getOptions();
 		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE, JavaCore.INSERT);
 		JavaCore.setOptions(options);
 
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
