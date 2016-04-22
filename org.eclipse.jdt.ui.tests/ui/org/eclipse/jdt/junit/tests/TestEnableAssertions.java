@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2009 IBM Corporation and others.
+ * Copyright (c) 2006, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,8 +40,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class TestEnableAssertions extends TestCase {
 	private static final String configName = "NoOneWouldEverThinkOfUsingANameLikeThis"; //$NON-NLS-1$
 
-	public void testAssertionsOffByDefault() {
-		assertFalse(AssertionVMArg.getEnableAssertionsPreference());
+	public void testAssertionsOnByDefault() {
+		assertTrue(AssertionVMArg.getEnableAssertionsPreference());
 	}
 
 	public void testEnableAssertionsInWizard() {
