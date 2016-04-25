@@ -275,7 +275,7 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 		assertEqualLog(expectedTree, actual);
 	}
 
-	public void testParametrizedWithNewLine() throws Exception {
+	public void testParametrizedWithEvilChars() throws Exception {
 		String source=
 				"package pack;\n"+
 				"\n"+
@@ -293,7 +293,7 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 				"\n"+
 				"	@Parameters(name = \"{index}: testEven({0})\")\n"+
 				"	public static Iterable<String[]> data() {\n"+
-				"		return Arrays.asList(new String[][] { { \"2\" }, { \"4\\n\" }, { \"6\\r\" }, { \"8\\r\\n\" } });\n"+
+				"		return Arrays.asList(new String[][] { { \"2\" }, { \"4\\n\" }, { \"6\\r\" }, { \"8\\r\\n\" }, { \"0\\\\,\" } });\n"+
 				"	}\n"+
 				"\n"+
 				"	@Parameter\n"+
@@ -307,8 +307,8 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedSequence= new String[] {
-				TestRunListeners.sessionAsString("ATestCase", ProgressState.COMPLETED, Result.OK, 0),
-				TestRunListeners.suiteAsString("pack.ATestCase", ProgressState.COMPLETED, Result.OK, null, 1),
+				TestRunListeners.sessionAsString("ATestCase", ProgressState.COMPLETED, Result.ERROR, 0),
+				TestRunListeners.suiteAsString("pack.ATestCase", ProgressState.COMPLETED, Result.ERROR, null, 1),
 				TestRunListeners.suiteAsString("[0: testEven(2)]", ProgressState.COMPLETED, Result.OK, null, 2),
 				TestRunListeners.testCaseAsString("testEven[0: testEven(2)]", "pack.ATestCase", ProgressState.COMPLETED, Result.OK, null, 3),
 				TestRunListeners.suiteAsString("[1: testEven(4 )]", ProgressState.COMPLETED, Result.OK, null, 2),
@@ -317,8 +317,10 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 				TestRunListeners.testCaseAsString("testEven[2: testEven(6 )]", "pack.ATestCase", ProgressState.COMPLETED, Result.OK, null, 3),
 				TestRunListeners.suiteAsString("[3: testEven(8 )]", ProgressState.COMPLETED, Result.OK, null, 2),
 				TestRunListeners.testCaseAsString("testEven[3: testEven(8 )]", "pack.ATestCase", ProgressState.COMPLETED, Result.OK, null, 3),
+				TestRunListeners.suiteAsString("[4: testEven(0\\,)]", ProgressState.COMPLETED, Result.ERROR, null, 2),
+				TestRunListeners.testCaseAsString("testEven[4: testEven(0\\,)]", "pack.ATestCase", ProgressState.COMPLETED, Result.ERROR, new FailureTrace("java.lang.NumberFormatException", null, null), 3),
 		};
-		String[] actual= runTreeTest(aTestCase, 10);
+		String[] actual= runTreeTest(aTestCase, 12);
 		assertEqualLog(expectedSequence, actual);
 	}
 }

@@ -56,7 +56,7 @@ public class FirstRunExecutionListener implements IListensToTestExecutions {
 	}
 
 	private void sendMessage(ITestIdentifier test, String status) {
-		fSender.sendMessage(status + getTestId(test) + ',' + RemoteTestRunner.replaceLineDelimiters(test.getName()));
+		fSender.sendMessage(status + getTestId(test) + ',' + RemoteTestRunner.escapeTestName(test.getName()));
 	}
 
 }

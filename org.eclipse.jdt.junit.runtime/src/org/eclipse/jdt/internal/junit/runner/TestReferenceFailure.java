@@ -55,7 +55,7 @@ public class TestReferenceFailure {
 	}
 
 	public String toString() {
-		return fStatus + " " + RemoteTestRunner.replaceLineDelimiters(fTest.getName()); //$NON-NLS-1$
+		return fStatus + " " + RemoteTestRunner.escapeTestName(fTest.getName()); //$NON-NLS-1$
 	}
 
 	public void setComparison(FailedComparison comparison) {
