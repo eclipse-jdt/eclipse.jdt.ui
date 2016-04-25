@@ -507,11 +507,11 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	public void visitTreeEntry(ITestIdentifier id, boolean b, int i) {
-		notifyTestTreeEntry(getTestId(id) + ',' + escapeComma(id.getName()) + ',' + b + ',' + i);
+		notifyTestTreeEntry(getTestId(id) + ',' + escapeComma(replaceLineDelimiters(id.getName())) + ',' + b + ',' + i);
 	}
 
 	private String escapeComma(String s) {
-		if ((s.indexOf(',') < 0) && (s.indexOf('\\') < 0) && s.indexOf('\n') < 0)
+		if ((s.indexOf(',') < 0) && (s.indexOf('\\') < 0))
 			return s;
 		StringBuffer sb= new StringBuffer(s.length()+10);
 		for (int i= 0; i < s.length(); i++) {
@@ -520,12 +520,14 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 				sb.append("\\,"); //$NON-NLS-1$
 			else if (c == '\\')
 				sb.append("\\\\"); //$NON-NLS-1$
-			else if (c == '\n')
-				sb.append(" "); //$NON-NLS-1$
 			else
 				sb.append(c);
 		}
 		return sb.toString();
+	}
+
+	public static String replaceLineDelimiters(String name) {
+		return name.replaceAll("\\r\\n",  " ").replace('\n', ' ').replace('\r', ' '); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	// WANT: work in bug fixes since RC2?

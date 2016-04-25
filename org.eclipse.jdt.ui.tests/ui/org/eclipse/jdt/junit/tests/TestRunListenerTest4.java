@@ -293,7 +293,7 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 				"\n"+
 				"	@Parameters(name = \"{index}: testEven({0})\")\n"+
 				"	public static Iterable<String[]> data() {\n"+
-				"		return Arrays.asList(new String[][] { { \"2\" }, { \"4\\n\" } });\n"+
+				"		return Arrays.asList(new String[][] { { \"2\" }, { \"4\\n\" }, { \"6\\r\" }, { \"8\\r\\n\" } });\n"+
 				"	}\n"+
 				"\n"+
 				"	@Parameter\n"+
@@ -304,7 +304,6 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 				"		Assert.assertEquals(0, Integer.parseInt(param.trim()) % 2);\n"+
 				"	}\n"+
 				"}\n";
-		System.out.println(source);
 		IType aTestCase= createType(source, "pack", "ATestCase.java");
 
 		String[] expectedSequence= new String[] {
@@ -314,8 +313,12 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 				TestRunListeners.testCaseAsString("testEven[0: testEven(2)]", "pack.ATestCase", ProgressState.COMPLETED, Result.OK, null, 3),
 				TestRunListeners.suiteAsString("[1: testEven(4 )]", ProgressState.COMPLETED, Result.OK, null, 2),
 				TestRunListeners.testCaseAsString("testEven[1: testEven(4 )]", "pack.ATestCase", ProgressState.COMPLETED, Result.OK, null, 3),
+				TestRunListeners.suiteAsString("[2: testEven(6 )]", ProgressState.COMPLETED, Result.OK, null, 2),
+				TestRunListeners.testCaseAsString("testEven[2: testEven(6 )]", "pack.ATestCase", ProgressState.COMPLETED, Result.OK, null, 3),
+				TestRunListeners.suiteAsString("[3: testEven(8 )]", ProgressState.COMPLETED, Result.OK, null, 2),
+				TestRunListeners.testCaseAsString("testEven[3: testEven(8 )]", "pack.ATestCase", ProgressState.COMPLETED, Result.OK, null, 3),
 		};
-		String[] actual= runTreeTest(aTestCase, 6);
+		String[] actual= runTreeTest(aTestCase, 10);
 		assertEqualLog(expectedSequence, actual);
 	}
 }
