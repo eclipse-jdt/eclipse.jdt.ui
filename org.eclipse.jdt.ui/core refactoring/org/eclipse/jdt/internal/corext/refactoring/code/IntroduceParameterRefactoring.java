@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -382,7 +382,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		//TODO: adjust error messages (or generalize for all refactorings on expression-selections?)
 		Expression selectedExpression= fSelectedExpression;
 
-		if (selectedExpression instanceof Name && selectedExpression.getParent() instanceof ClassInstanceCreation)
+		if (selectedExpression instanceof Name && selectedExpression.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_name_in_new);
 			//TODO: let's just take the CIC automatically (no ambiguity -> no problem -> no dialog ;-)
 
