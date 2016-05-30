@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.search.ui.text.MatchFilter;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.search.IMatchPresentation;
 
@@ -44,7 +46,9 @@ public class JavaSearchResult extends AbstractJavaSearchResult {
 
 	@Override
 	public String getLabel() {
-		return fQuery.getResultLabel(getMatchCount());
+		return fQuery.getSpecification().size() == 1
+				? fQuery.getResultLabel(getMatchCount())
+				: Messages.format(SearchMessages.JavaSearchQuery_multi_selection_search_description, fQuery.getResultLabel(getMatchCount()));
 	}
 
 	@Override

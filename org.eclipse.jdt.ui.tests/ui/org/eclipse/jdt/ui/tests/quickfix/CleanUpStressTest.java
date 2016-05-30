@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -4714,8 +4714,8 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("import java.lang.reflect.Modifier;\n");
         buf.append("\n");
         buf.append("/**\n");
-        buf.append(" * A test case defines the fixture to run multiple tests. To define a test case\n");
-        buf.append(" * <br>\n");
+        buf.append(" * A test case defines the fixture to run multiple tests. To define a test\n");
+        buf.append(" * case<br>\n");
         buf.append(" * 1) implement a subclass of TestCase<br>\n");
         buf.append(" * 2) define instance variables that store the state of the fixture<br>\n");
         buf.append(" * 3) initialize the fixture state by overriding <code>setUp</code><br>\n");

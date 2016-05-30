@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -976,7 +976,14 @@ public class ASTNodes {
 		return false;
 	}
 
-	private static boolean isExplicitlyTypedLambda(Expression expression) {
+	/**
+	 * Checks whether the given expression is a lambda expression with explicitly typed parameters.
+	 * 
+	 * @param expression the expression to check
+	 * @return <code>true</code> if the expression is a lambda expression with explicitly typed
+	 *         parameters or no parameters, <code>false</code> otherwise
+	 */
+	public static boolean isExplicitlyTypedLambda(Expression expression) {
 		if (!(expression instanceof LambdaExpression))
 			return false;
 		LambdaExpression lambda= (LambdaExpression) expression;

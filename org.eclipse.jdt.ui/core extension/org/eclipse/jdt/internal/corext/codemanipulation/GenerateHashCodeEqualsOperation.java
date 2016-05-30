@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1058,8 +1058,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			}
 		}
 		IJavaProject project= fUnit.getJavaElement().getJavaProject();
-		if (fSettings.overrideAnnotation && JavaModelUtil.is50OrHigher(project))
-			StubUtility2.addOverrideAnnotation(project, fRewrite.getASTRewrite(), newDeclaration, copyFrom);
+		StubUtility2.addOverrideAnnotation(fSettings, project, fRewrite.getASTRewrite(), fRewrite.getImportRewrite(), newDeclaration, copyFrom.getDeclaringClass().isInterface(), null);
 	}
 
 	private boolean needsNoSuperCall(ITypeBinding typeBinding, String name, ITypeBinding[] parameters) {

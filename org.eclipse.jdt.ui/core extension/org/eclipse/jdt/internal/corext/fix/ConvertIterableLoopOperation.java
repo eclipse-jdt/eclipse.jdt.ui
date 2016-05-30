@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -314,7 +315,9 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 		pg.addPosition(astRewrite.track(simple), true);
 		declaration.setName(simple);
 		final ITypeBinding elementType= getElementType(fIteratorVariable.getType());
-		declaration.setType(importType(elementType, getForStatement(), importRewrite, getRoot()));
+		Type importType= importType(elementType, getForStatement(), importRewrite, getRoot());
+		remover.registerAddedImports(importType);
+		declaration.setType(importType);
 		if (fMakeFinal) {
 			ModifierRewrite.create(astRewrite, declaration).setModifiers(Modifier.FINAL, 0, group);
 		}

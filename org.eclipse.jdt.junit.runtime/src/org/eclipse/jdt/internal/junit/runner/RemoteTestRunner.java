@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -507,21 +507,29 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	public void visitTreeEntry(ITestIdentifier id, boolean b, int i) {
-		notifyTestTreeEntry(getTestId(id) + ',' + escapeComma(id.getName()) + ',' + b + ',' + i);
+		notifyTestTreeEntry(getTestId(id) + ',' + escapeTestName(id.getName()) + ',' + b + ',' + i);
 	}
 
-	private String escapeComma(String s) {
-		if ((s.indexOf(',') < 0) && (s.indexOf('\\') < 0))
+	public static String escapeTestName(String s) {
+		if ((s.indexOf(',') < 0) && (s.indexOf('\\') < 0) && (s.indexOf('\r') < 0) && (s.indexOf('\n') < 0))
 			return s;
 		StringBuffer sb= new StringBuffer(s.length()+10);
 		for (int i= 0; i < s.length(); i++) {
 			char c= s.charAt(i);
-			if (c == ',')
+			if (c == ',') {
 				sb.append("\\,"); //$NON-NLS-1$
-			else if (c == '\\')
+			} else if (c == '\\') {
 				sb.append("\\\\"); //$NON-NLS-1$
-			else
+			} else if (c == '\r') {
+				if (i + 1 < s.length() && s.charAt(i + 1) == '\n') {
+					i++;
+				}
+				sb.append(' ');
+			} else if (c == '\n') {
+				sb.append(' ');
+			} else {
 				sb.append(c);
+			}
 		}
 		return sb.toString();
 	}

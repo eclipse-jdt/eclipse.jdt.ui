@@ -170,7 +170,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
@@ -195,6 +194,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	public static final String ASSIGN_TO_LOCAL_ID= "org.eclipse.jdt.ui.correction.assignToLocal.assist"; //$NON-NLS-1$
 	public static final String ASSIGN_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.assignToField.assist"; //$NON-NLS-1$
 	public static final String ASSIGN_PARAM_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.assignParamToField.assist"; //$NON-NLS-1$
+	public static final String ASSIGN_ALL_PARAMS_TO_NEW_FIELDS_ID= "org.eclipse.jdt.ui.correction.assignAllParamsToNewFields.assist"; //$NON-NLS-1$
 	public static final String ADD_BLOCK_ID= "org.eclipse.jdt.ui.correction.addBlock.assist"; //$NON-NLS-1$
 	public static final String EXTRACT_LOCAL_ID= "org.eclipse.jdt.ui.correction.extractLocal.assist"; //$NON-NLS-1$
 	public static final String EXTRACT_LOCAL_NOT_REPLACE_ID= "org.eclipse.jdt.ui.correction.extractLocalNotReplaceOccurrences.assist"; //$NON-NLS-1$
@@ -224,6 +224,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getAssignToVariableProposals(context, coveringNode, null, null)
 				|| getUnWrapProposals(context, coveringNode, null)
 				|| getAssignParamToFieldProposals(context, coveringNode, null)
+				|| getAssignAllParamsToFieldsProposals(context, coveringNode, null)
 				|| getJoinVariableProposals(context, coveringNode, null)
 				|| getAddFinallyProposals(context, coveringNode, null)
 				|| getAddElseProposals(context, coveringNode, null)
@@ -271,6 +272,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			getRenameRefactoringProposal(context, coveringNode, locations, resultingCollections);
 			getAssignToVariableProposals(context, coveringNode, locations, resultingCollections);
 			getAssignParamToFieldProposals(context, coveringNode, resultingCollections);
+			getAssignAllParamsToFieldsProposals(context, coveringNode, resultingCollections);
 			getInferDiamondArgumentsProposal(context, coveringNode, locations, resultingCollections);
 			getGenerateForLoopProposals(context, coveringNode, locations, resultingCollections);
 
@@ -581,7 +583,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Map<String, String> options= new Hashtable<>();
 		options.put(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.USE_LAMBDA, CleanUpOptions.TRUE);
-		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_LAMBDA_EXPRESSION, image, context);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new LambdaExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_LAMBDA_EXPRESSION, image, context);
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -2034,6 +2036,40 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, null, typeBinding, IProposalRelevance.ASSIGN_PARAM_TO_NEW_FIELD);
 		fieldProposal.setCommandId(ASSIGN_PARAM_TO_FIELD_ID);
+		resultingCollections.add(fieldProposal);
+		return true;
+	}
+
+	private static boolean getAssignAllParamsToFieldsProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> resultingCollections) {
+		node= ASTNodes.getNormalizedNode(node);
+		ASTNode parent= node.getParent();
+		if (!(parent instanceof SingleVariableDeclaration) || !(parent.getParent() instanceof MethodDeclaration)) {
+			return false;
+		}
+		MethodDeclaration methodDecl= (MethodDeclaration) parent.getParent();
+		if (methodDecl.getBody() == null) {
+			return false;
+		}
+		List<SingleVariableDeclaration> parameters= methodDecl.parameters();
+		if (parameters.size() <= 1) {
+			return false;
+		}
+		ITypeBinding parentType= Bindings.getBindingOfParentType(node);
+		if (parentType == null || parentType.isInterface()) {
+			return false;
+		}
+		for (SingleVariableDeclaration param : parameters) {
+			IVariableBinding binding= param.resolveBinding();
+			if (binding == null || binding.getType() == null) {
+				return false;
+			}
+		}
+		if (resultingCollections == null) {
+			return true;
+		}
+
+		AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(context.getCompilationUnit(), parameters, IProposalRelevance.ASSIGN_ALL_PARAMS_TO_NEW_FIELDS);
+		fieldProposal.setCommandId(ASSIGN_ALL_PARAMS_TO_NEW_FIELDS_ID);
 		resultingCollections.add(fieldProposal);
 		return true;
 	}

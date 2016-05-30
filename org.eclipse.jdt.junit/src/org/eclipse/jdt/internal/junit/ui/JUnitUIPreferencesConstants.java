@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,12 +28,14 @@ public class JUnitUIPreferencesConstants {
 	 */
 	public static final String SHOW_IN_ALL_VIEWS= JUnitPlugin.PLUGIN_ID + ".show_in_all_views"; //$NON-NLS-1$
 
+	public static final boolean SHOW_IN_ALL_VIEWS_DEFAULT= false; // would need a PreferenceInitializer if this was changed to true!
+
 	private JUnitUIPreferencesConstants() {
 		// no instance
 	}
 
 	public static boolean getShowInAllViews() {
-		return Platform.getPreferencesService().getBoolean(JUnitPlugin.PLUGIN_ID, SHOW_IN_ALL_VIEWS, false, null);
+		return Platform.getPreferencesService().getBoolean(JUnitPlugin.PLUGIN_ID, SHOW_IN_ALL_VIEWS, SHOW_IN_ALL_VIEWS_DEFAULT, null);
 	}
 
 	public static void setShowInAllViews(boolean show) {

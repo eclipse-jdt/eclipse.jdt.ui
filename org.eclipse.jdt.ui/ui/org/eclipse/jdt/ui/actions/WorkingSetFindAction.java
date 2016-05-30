@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.core.runtime.Assert;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
@@ -89,8 +91,27 @@ public class WorkingSetFindAction extends FindAction {
 	}
 
 	@Override
+	public void run(IJavaElement[] elements) {
+		fAction.run(elements);
+	}
+
+	@Override
 	boolean canOperateOn(IJavaElement element) {
 		return fAction.canOperateOn(element);
+	}
+
+	@Override
+	boolean canOperateOn(IStructuredSelection sel) {
+		if (sel == null || sel.isEmpty()) {
+			return false;
+		}
+		IJavaElement[] elements= getJavaElements(sel, true);
+		for (IJavaElement iJavaElement : elements) {
+			if (!fAction.canOperateOn(iJavaElement)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override
@@ -103,4 +124,5 @@ public class WorkingSetFindAction extends FindAction {
 		return fAction.getOperationUnavailableMessage();
 	}
 
+	
 }

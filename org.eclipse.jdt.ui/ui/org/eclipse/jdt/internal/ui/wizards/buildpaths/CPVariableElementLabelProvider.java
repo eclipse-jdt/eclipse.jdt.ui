@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,16 +12,12 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
-import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.LabelProvider;
 
@@ -36,7 +32,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 
-public class CPVariableElementLabelProvider extends LabelProvider implements IColorProvider {
+public class CPVariableElementLabelProvider extends LabelProvider {
 
 	// shared, do not dispose:
 	private Image fJARImage;
@@ -58,9 +54,6 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 		fHighlightReadOnly= highlightReadOnly;
 	}
 
-	/*
-	 * @see LabelProvider#getImage(java.lang.Object)
-	 */
 	@Override
 	public Image getImage(Object element) {
 		if (element instanceof CPVariableElement) {
@@ -74,9 +67,6 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 		return super.getImage(element);
 	}
 
-	/*
-	 * @see LabelProvider#getText(java.lang.Object)
-	 */
 	@Override
 	public String getText(Object element) {
 		if (element instanceof CPVariableElement) {
@@ -114,34 +104,6 @@ public class CPVariableElementLabelProvider extends LabelProvider implements ICo
 
 
 		return super.getText(element);
-	}
-
-	@Override
-	public Color getForeground(Object element) {
-		if (isUnmodifiable(element)) {
-			Display display= Display.getCurrent();
-			return display.getSystemColor(SWT.COLOR_INFO_FOREGROUND);
-		}
-		return null;
-	}
-
-	@Override
-	public Color getBackground(Object element) {
-		if (isUnmodifiable(element)) {
-			Display display= Display.getCurrent();
-			return display.getSystemColor(SWT.COLOR_INFO_BACKGROUND);
-		}
-		return null;
-	}
-
-	private boolean isUnmodifiable(Object element) {
-		if (element instanceof CPVariableElement) {
-			CPVariableElement curr= (CPVariableElement) element;
-			if (fHighlightReadOnly && curr.isReadOnly()) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	@Override

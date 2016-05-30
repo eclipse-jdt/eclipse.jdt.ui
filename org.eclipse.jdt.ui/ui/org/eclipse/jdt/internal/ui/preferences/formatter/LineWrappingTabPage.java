@@ -526,7 +526,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 	private final Category fConditionalExpressionCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_CONDITIONAL_EXPRESSION,
-	    "class Example extends AnotherClass {int Example(boolean Argument) {return argument ? 100000 : 200000;}}", //$NON-NLS-1$
+	    "class Example extends AnotherClass {int foo(boolean argument) {return argument ? 100000 : 200000;}}", //$NON-NLS-1$
 	    FormatterMessages.LineWrappingTabPage_conditionals
 	);
 
@@ -581,6 +581,31 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		    "s = \"TextTextText\";}}", //$NON-NLS-1$
 	        FormatterMessages.LineWrappingTabPage_assignment_alignment
 		);
+
+	private final Category fParameterizedTypeReference= new Category(
+		DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERIZED_TYPE_REFERENCES,
+		"class Example {\n" +  //$NON-NLS-1$
+		"	Map<String, ? extends java.lang.Object> map = new HashMap<String, java.lang.Object>();\n" +  //$NON-NLS-1$
+		"}", //$NON-NLS-1$
+		FormatterMessages.LineWrappingTabPage_param_type_ref
+	);
+
+	private final Category fTypeArguments= new Category(
+		DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_TYPE_ARGUMENTS,
+		"class Example {\n" +  //$NON-NLS-1$
+		"	void foo(Some someArgument) {\n" +  //$NON-NLS-1$
+		"		someArgument.<String, SomeElement, Example>bar();\n" +  //$NON-NLS-1$
+		"	}\n" +  //$NON-NLS-1$
+		"}", //$NON-NLS-1$
+		FormatterMessages.LineWrappingTabPage_type_arguments
+	);
+	
+	private final Category fTypeParameters= new Category(
+		DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_TYPE_PARAMETERS,
+		"class Example<S, T extends Element & List, U> {\n" + //$NON-NLS-1$
+		"}\n", //$NON-NLS-1$
+		FormatterMessages.LineWrappingTabPage_type_parameters
+	);
 
 	/**
 	 * The default preview line width.
@@ -707,6 +732,11 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		statements.children.add(fTryCategory);
 		statements.children.add(fCatchCategory);
 
+		final Category parameterizedTypes= new Category(FormatterMessages.LineWrappingTabPage_parameterized_types);
+		parameterizedTypes.children.add(fParameterizedTypeReference);
+		parameterizedTypes.children.add(fTypeArguments);
+		parameterizedTypes.children.add(fTypeParameters);
+
 		final List<Category> root= new ArrayList<>();
 		root.add(annotations);
 		root.add(classDeclarations);
@@ -716,6 +746,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		root.add(functionCalls);
 		root.add(expressions);
 		root.add(statements);
+		root.add(parameterizedTypes);
 
 		return root;
 	}
@@ -779,29 +810,23 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		String label= FormatterMessages.LineWrappingTabPage_force_split_checkbox_text;
 		fForceSplit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, numColumns - 1, 1));
 		fForceSplit.setText(label);
-		
+
+		// button "Wrap before operators" in conditional expression
+		fConditionalExpressionCategory.addPreference(createWrapBeforeButton(numColumns, FormatterMessages.LineWrappingTabPage_conditional_expression_wrap_operator,
+				DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_CONDITIONAL_OPERATOR));
+
 		// button "Wrap before operator"
-		Preference expressionWrapPositionPreference= createCheckboxPref(fOptionsGroup, 1, FormatterMessages.LineWrappingTabPage_binary_expression_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_BINARY_OPERATOR, FALSE_TRUE);
-		Control control= expressionWrapPositionPreference.getControl();
-		control.setVisible(false);
-		GridData layoutData= (GridData)control.getLayoutData();
-		layoutData.exclude= true;
-		layoutData.horizontalAlignment= SWT.BEGINNING;
-		layoutData.horizontalSpan= numColumns - 1;
-		layoutData.grabExcessHorizontalSpace= false;
-		fBinaryExpressionCategory.addPreference(expressionWrapPositionPreference);
-		
+		fBinaryExpressionCategory.addPreference(
+				createWrapBeforeButton(numColumns, FormatterMessages.LineWrappingTabPage_binary_expression_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_BINARY_OPERATOR));
+
 		// button "Wrap before '|' operator" in multi-catch
-		Preference expressionWrapMulticatchPositionPreference= createCheckboxPref(fOptionsGroup, 1, FormatterMessages.LineWrappingTabPage_multicatch_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_OR_OPERATOR_MULTICATCH, FALSE_TRUE);
-		control= expressionWrapMulticatchPositionPreference.getControl();
-		control.setVisible(false);
-		layoutData= (GridData)control.getLayoutData();
-		layoutData.exclude= true;
-		layoutData.horizontalAlignment= SWT.BEGINNING;
-		layoutData.horizontalSpan= numColumns - 1;
-		layoutData.grabExcessHorizontalSpace= false;
-		fCatchCategory.addPreference(expressionWrapMulticatchPositionPreference);
-		
+		fCatchCategory.addPreference(
+				createWrapBeforeButton(numColumns, FormatterMessages.LineWrappingTabPage_multicatch_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_OR_OPERATOR_MULTICATCH));
+
+		// button "Wrap before operator" in assignment
+		fAssignmentCategory.addPreference(
+				createWrapBeforeButton(numColumns, FormatterMessages.LineWrappingTabPage_binary_expression_wrap_operator, DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_ASSIGNMENT_OPERATOR));
+
 		// label "Select indentation style:"
 		fIndentStylePolicy= createLabel(numColumns, fOptionsGroup, FormatterMessages.LineWrappingTabPage_indentation_policy_label_text);
 
@@ -816,6 +841,17 @@ public class LineWrappingTabPage extends FormatterTabPage {
 
 	}
 
+	private Preference createWrapBeforeButton(int numColumns, String message, String setting) {
+		Preference preference= createCheckboxPref(fOptionsGroup, 1, message, setting, FALSE_TRUE);
+		Control control= preference.getControl();
+		control.setVisible(false);
+		GridData layoutData= (GridData)control.getLayoutData();
+		layoutData.exclude= true;
+		layoutData.horizontalAlignment= SWT.BEGINNING;
+		layoutData.horizontalSpan= numColumns - 1;
+		layoutData.grabExcessHorizontalSpace= false;
+		return preference;
+	}
 
 	@Override
 	protected Composite doCreatePreviewPane(Composite composite, int numColumns) {
@@ -976,5 +1012,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		fForceSplit.setEnabled(isEnabled);
 		fBinaryExpressionCategory.setEnabled(isEnabled);
 		fCatchCategory.setEnabled(isEnabled);
+		fAssignmentCategory.setEnabled(isEnabled);
+		fConditionalExpressionCategory.setEnabled(isEnabled);
 	}
 }

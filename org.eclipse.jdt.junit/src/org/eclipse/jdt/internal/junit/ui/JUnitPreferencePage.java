@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -777,8 +778,10 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	}
 
 	private void setDefaultValues() {
-		fEnableAssertionsCheckBox.setSelection(false);
-		fShowInAllViewsCheckBox.setSelection(false);
+		fEnableAssertionsCheckBox.setSelection(DefaultScope.INSTANCE.getNode(JUnitCorePlugin.CORE_PLUGIN_ID)
+				.getBoolean(JUnitPreferencesConstants.ENABLE_ASSERTIONS, JUnitPreferencesConstants.ENABLE_ASSERTIONS_DEFAULT));
+		fShowInAllViewsCheckBox.setSelection(DefaultScope.INSTANCE.getNode(JUnitPlugin.PLUGIN_ID)
+				.getBoolean(JUnitUIPreferencesConstants.SHOW_IN_ALL_VIEWS, JUnitUIPreferencesConstants.SHOW_IN_ALL_VIEWS_DEFAULT));
 		fStackFilterContentProvider.setDefaults();
 	}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
+ *     Stefan Xenos <sxenos@gmail.com> (Google) - Bug 479286 - NullPointerException in JavaElementLabelComposer
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
@@ -1008,14 +1009,21 @@ public class JavaElementLabelComposer {
 					if (parent instanceof IField && type.isEnum()) {
 						typeName= '{' + JavaElementLabels.ELLIPSIS_STRING + '}';
 					} else {
-						String supertypeName;
+						String supertypeName= null;
 						String[] superInterfaceSignatures= type.getSuperInterfaceTypeSignatures();
 						if (superInterfaceSignatures.length > 0) {
 							supertypeName= getSimpleTypeName(type, superInterfaceSignatures[0]);
 						} else {
-							supertypeName= getSimpleTypeName(type, type.getSuperclassTypeSignature());
+							String supertypeSignature= type.getSuperclassTypeSignature();
+							if (supertypeSignature != null) {
+								supertypeName= getSimpleTypeName(type, supertypeSignature);
+							}
 						}
-						typeName= Messages.format(JavaUIMessages.JavaElementLabels_anonym_type , supertypeName);
+						if (supertypeName == null) {
+							typeName= JavaUIMessages.JavaElementLabels_anonym;
+						} else {
+							typeName= Messages.format(JavaUIMessages.JavaElementLabels_anonym_type, supertypeName);
+						}
 					}
 				} catch (JavaModelException e) {
 					//ignore

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2013 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1029,6 +1029,55 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf.append("        NavigableSet<String> set= null;\n");
 		buf.append("        for (Object element : set) {\n");
 		buf.append("            System.out.println(element);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected= buf.toString();
+		assertEqualString(preview, expected);
+	}
+
+	public void test487429() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import java.util.Map.Entry;\n");
+		buf.append("\n");
+		buf.append("public class Snippet {\n");
+		buf.append("    private Map<Integer, String> fPositions= new HashMap<>();\n");
+		buf.append("    {\n");
+		buf.append("        for (Iterator<Entry<Integer, String>> it= fPositions.entrySet().iterator(); it.hasNext();) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit unit= pack.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, unit);
+
+		assertTrue(fConvertLoopProposal.getFixStatus() != null && fConvertLoopProposal.getFixStatus().isOK());
+
+		assertCorrectLabels(proposals);
+
+		assertNotNull(fConvertLoopProposal.getStatusMessage());
+
+		String preview= getPreviewContent(fConvertLoopProposal);
+
+		buf= new StringBuffer();
+		buf.append("package p;\n");
+		buf.append("\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import java.util.Map.Entry;\n");
+		buf.append("\n");
+		buf.append("public class Snippet {\n");
+		buf.append("    private Map<Integer, String> fPositions= new HashMap<>();\n");
+		buf.append("    {\n");
+		buf.append("        for (Entry<Integer, String> entry : fPositions.entrySet()) {\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");

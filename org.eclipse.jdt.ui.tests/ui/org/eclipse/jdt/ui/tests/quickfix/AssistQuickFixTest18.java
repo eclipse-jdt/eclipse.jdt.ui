@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2015 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1010,6 +1010,384 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf1.append("}\n");
 		buf1.append("@interface A {}\n");
 		expected= buf1.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testConvertToLambda20() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class C1 {\n");
+		buf.append("    FI fi= new  FI() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public void foo(@A String... strs) {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		buf.append("interface FI {\n");
+		buf.append("    void foo(String... strs);\n");
+		buf.append("}\n");
+		buf.append("@interface A {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("new");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class C1 {\n");
+		buf.append("    FI fi= (@A String... strs) -> {\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		buf.append("interface FI {\n");
+		buf.append("    void foo(String... strs);\n");
+		buf.append("}\n");
+		buf.append("@interface A {}\n");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testConvertToLambda21() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("public class C1 {\n");
+		buf.append("    FI fi= new  FI() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public void foo(@A String... strs) {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		buf.append("interface FI {\n");
+		buf.append("    void foo(String... strs);\n");
+		buf.append("}\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface A {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("new");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("public class C1 {\n");
+		buf.append("    FI fi= (@A String... strs) -> {\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		buf.append("interface FI {\n");
+		buf.append("    void foo(String... strs);\n");
+		buf.append("}\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface A {}\n");
+		String expected= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testConvertToLambda22() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("public class C1 {\n");
+		buf.append("    FI fi1 = new/*[1]*/ FI() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public void foo(java.util.@T ArrayList<IOException> x) {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("    FI fi2 = new/*[2]*/ FI() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public void foo(ArrayList<@T(val1=0, val2=8) IOException> x) {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("    FI fi3 = new/*[3]*/ FI() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public void foo(ArrayList<@T(val1=0) IOException> x) {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		buf.append("interface FI {\n");
+		buf.append("    void foo(ArrayList<IOException> x);\n");
+		buf.append("}\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface T {\n");
+		buf.append("    int val1() default 1;\n");
+		buf.append("    int val2() default -1;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("new/*[1]*/");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test;\n");
+		buf1.append("import java.io.IOException;\n");
+		buf1.append("import java.lang.annotation.ElementType;\n");
+		buf1.append("import java.lang.annotation.Target;\n");
+		buf1.append("import java.util.ArrayList;\n");
+		buf1.append("public class C1 {\n");
+		buf1.append("    FI fi1 = (java.util.@T ArrayList<IOException> x) -> {\n");
+		buf1.append("    };\n");
+		buf1.append("    FI fi2 = new/*[2]*/ FI() {\n");
+		buf1.append("        @Override\n");
+		buf1.append("        public void foo(ArrayList<@T(val1=0, val2=8) IOException> x) {\n");
+		buf1.append("        }\n");
+		buf1.append("    };\n");
+		buf1.append("    FI fi3 = new/*[3]*/ FI() {\n");
+		buf1.append("        @Override\n");
+		buf1.append("        public void foo(ArrayList<@T(val1=0) IOException> x) {\n");
+		buf1.append("        }\n");
+		buf1.append("    };\n");
+		buf1.append("}\n");
+		buf1.append("interface FI {\n");
+		buf1.append("    void foo(ArrayList<IOException> x);\n");
+		buf1.append("}\n");
+		buf1.append("@Target(ElementType.TYPE_USE)\n");
+		buf1.append("@interface T {\n");
+		buf1.append("    int val1() default 1;\n");
+		buf1.append("    int val2() default -1;\n");
+		buf1.append("}\n");
+		String expected= buf1.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+		offset= buf.toString().indexOf("new/*[2]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf1= new StringBuffer();
+		buf1.append("package test;\n");
+		buf1.append("import java.io.IOException;\n");
+		buf1.append("import java.lang.annotation.ElementType;\n");
+		buf1.append("import java.lang.annotation.Target;\n");
+		buf1.append("import java.util.ArrayList;\n");
+		buf1.append("public class C1 {\n");
+		buf1.append("    FI fi1 = new/*[1]*/ FI() {\n");
+		buf1.append("        @Override\n");
+		buf1.append("        public void foo(java.util.@T ArrayList<IOException> x) {\n");
+		buf1.append("        }\n");
+		buf1.append("    };\n");
+		buf1.append("    FI fi2 = (ArrayList<@T(val1=0, val2=8) IOException> x) -> {\n");
+		buf1.append("    };\n");
+		buf1.append("    FI fi3 = new/*[3]*/ FI() {\n");
+		buf1.append("        @Override\n");
+		buf1.append("        public void foo(ArrayList<@T(val1=0) IOException> x) {\n");
+		buf1.append("        }\n");
+		buf1.append("    };\n");
+		buf1.append("}\n");
+		buf1.append("interface FI {\n");
+		buf1.append("    void foo(ArrayList<IOException> x);\n");
+		buf1.append("}\n");
+		buf1.append("@Target(ElementType.TYPE_USE)\n");
+		buf1.append("@interface T {\n");
+		buf1.append("    int val1() default 1;\n");
+		buf1.append("    int val2() default -1;\n");
+		buf1.append("}\n");
+		expected= buf1.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+		offset= buf.toString().indexOf("new/*[3]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf1= new StringBuffer();
+		buf1.append("package test;\n");
+		buf1.append("import java.io.IOException;\n");
+		buf1.append("import java.lang.annotation.ElementType;\n");
+		buf1.append("import java.lang.annotation.Target;\n");
+		buf1.append("import java.util.ArrayList;\n");
+		buf1.append("public class C1 {\n");
+		buf1.append("    FI fi1 = new/*[1]*/ FI() {\n");
+		buf1.append("        @Override\n");
+		buf1.append("        public void foo(java.util.@T ArrayList<IOException> x) {\n");
+		buf1.append("        }\n");
+		buf1.append("    };\n");
+		buf1.append("    FI fi2 = new/*[2]*/ FI() {\n");
+		buf1.append("        @Override\n");
+		buf1.append("        public void foo(ArrayList<@T(val1=0, val2=8) IOException> x) {\n");
+		buf1.append("        }\n");
+		buf1.append("    };\n");
+		buf1.append("    FI fi3 = (ArrayList<@T(val1=0) IOException> x) -> {\n");
+		buf1.append("    };\n");
+		buf1.append("}\n");
+		buf1.append("interface FI {\n");
+		buf1.append("    void foo(ArrayList<IOException> x);\n");
+		buf1.append("}\n");
+		buf1.append("@Target(ElementType.TYPE_USE)\n");
+		buf1.append("@interface T {\n");
+		buf1.append("    int val1() default 1;\n");
+		buf1.append("    int val2() default -1;\n");
+		buf1.append("}\n");
+		expected= buf1.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testConvertToLambda23() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("public class C1 {\n");
+		buf.append("    FI1 fi1 = new/*[1]*/ FI1() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public void foo(String @T [] x[]) {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("    FI1 fi2 = new/*[2]*/ FI1() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public void foo(String [] x @T[]) {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		buf.append("interface FI1 {\n");
+		buf.append("    void foo(String[] x []);\n");
+		buf.append("}\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface T {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("new/*[1]*/");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test;\n");
+		buf1.append("import java.lang.annotation.ElementType;\n");
+		buf1.append("import java.lang.annotation.Target;\n");
+		buf1.append("public class C1 {\n");
+		buf1.append("    FI1 fi1 = (String @T [] x[]) -> {\n");
+		buf1.append("    };\n");
+		buf1.append("    FI1 fi2 = new/*[2]*/ FI1() {\n");
+		buf1.append("        @Override\n");
+		buf1.append("        public void foo(String [] x @T[]) {\n");
+		buf1.append("        }\n");
+		buf1.append("    };\n");
+		buf1.append("}\n");
+		buf1.append("interface FI1 {\n");
+		buf1.append("    void foo(String[] x []);\n");
+		buf1.append("}\n");
+		buf1.append("@Target(ElementType.TYPE_USE)\n");
+		buf1.append("@interface T {}\n");
+		String expected= buf1.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+
+		offset= buf.toString().indexOf("new/*[2]*/");
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf1= new StringBuffer();
+		buf1.append("package test;\n");
+		buf1.append("import java.lang.annotation.ElementType;\n");
+		buf1.append("import java.lang.annotation.Target;\n");
+		buf1.append("public class C1 {\n");
+		buf1.append("    FI1 fi1 = new/*[1]*/ FI1() {\n");
+		buf1.append("        @Override\n");
+		buf1.append("        public void foo(String @T [] x[]) {\n");
+		buf1.append("        }\n");
+		buf1.append("    };\n");
+		buf1.append("    FI1 fi2 = (String [] x @T[]) -> {\n");
+		buf1.append("    };\n");
+		buf1.append("}\n");
+		buf1.append("interface FI1 {\n");
+		buf1.append("    void foo(String[] x []);\n");
+		buf1.append("}\n");
+		buf1.append("@Target(ElementType.TYPE_USE)\n");
+		buf1.append("@interface T {}\n");
+		expected= buf1.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected });
+	}
+
+	public void testConvertToLambda24() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("public class C1 {\n");
+		buf.append("    FI1 fi1 = new FI1() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public void foo(int i, String[] @T... x) {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		buf.append("interface FI1 {\n");
+		buf.append("    void foo(int i, String[] ... x);\n");
+		buf.append("}\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface T {}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("new");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("public class C1 {\n");
+		buf.append("    FI1 fi1 = (int i, String[] @T... x) -> {\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		buf.append("interface FI1 {\n");
+		buf.append("    void foo(int i, String[] ... x);\n");
+		buf.append("}\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface T {}\n");
+		String expected= buf.toString();
 
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}

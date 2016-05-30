@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -5085,6 +5085,129 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		expected[0]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testStaticMethodInInterface1() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface Snippet {\n");
+		buf.append("    public abstract String name();\n");
+		buf.append("}\n");
+		buf.append("class Ref {\n");
+		buf.append("    void foo(Snippet c) {\n");
+		buf.append("        int[] v= Snippet.values();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 0);
+	}
+
+	public void testStaticMethodInInterface2() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface Snippet {\n");
+		buf.append("    public abstract String name();\n");
+		buf.append("}\n");
+		buf.append("interface Ref {\n");
+		buf.append("   int[] v= Snippet.values();\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 0);
+	}
+
+	public void testStaticMethodInInterface3() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class XX {\n");
+		buf.append("    interface I {\n");
+		buf.append("        int i= n();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("XX.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class XX {\n");
+		buf.append("    interface I {\n");
+		buf.append("        int i= n();\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    protected static int n() {\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+	}
+
+	public void testStaticMethodInInterface4() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface I {\n");
+		buf.append("    int i= n();\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("I.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 0);
+	}
+
+	public void testAbstractMehodInInterface() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface Snippet {\n");
+		buf.append("    abstract String name();\n");
+		buf.append("}\n");
+		buf.append("class Ref {\n");
+		buf.append("    void foo(Snippet c) {\n");
+		buf.append("        int[] v= c.values();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface Snippet {\n");
+		buf.append("    abstract String name();\n");
+		buf.append("\n");
+		buf.append("    abstract int[] values();\n");
+		buf.append("}\n");
+		buf.append("class Ref {\n");
+		buf.append("    void foo(Snippet c) {\n");
+		buf.append("        int[] v= c.values();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
 	}
 
 }

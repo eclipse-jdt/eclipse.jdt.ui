@@ -1936,8 +1936,8 @@ public class LocalCorrectionsSubProcessor {
 				parameters2= args[2].split(", "); //$NON-NLS-1$
 			}
 
-			addOverrideProposal(typeNode, typeBinding, methodName, parameters1, args[3], context, proposals, true);
-			addOverrideProposal(typeNode, typeBinding, methodName, parameters2, args[4], context, proposals, true);
+			addOverrideProposal(typeNode, typeBinding, methodName, parameters1, args[3], context, proposals);
+			addOverrideProposal(typeNode, typeBinding, methodName, parameters2, args[4], context, proposals);
 
 		} else if (problem.getProblemId() == IProblem.InheritedDefaultMethodConflictsWithOtherInherited) {
 			String[] args= problem.getProblemArguments();
@@ -1966,14 +1966,14 @@ public class LocalCorrectionsSubProcessor {
 				parameters= paramString.split(", "); //$NON-NLS-1$
 			}
 
-			addOverrideProposal(typeNode, typeBinding, methodName, parameters, args[1], context, proposals, true);
-			addOverrideProposal(typeNode, typeBinding, methodName, parameters, args[2], context, proposals, false);
+			addOverrideProposal(typeNode, typeBinding, methodName, parameters, args[1], context, proposals);
+			addOverrideProposal(typeNode, typeBinding, methodName, parameters, args[2], context, proposals);
 
 		}
 	}
 
 	private static void addOverrideProposal(ASTNode typeNode, ITypeBinding typeBinding, String methodName, String[] parameters, String superType,
-			IInvocationContext context, Collection<ICommandAccess> proposals, boolean isDefaultMethod) {
+			IInvocationContext context, Collection<ICommandAccess> proposals) {
 		ITypeBinding superTypeBinding= null;
 		if (superType != null) {
 			int i= superType.indexOf('<');
@@ -1992,8 +1992,11 @@ public class LocalCorrectionsSubProcessor {
 		}
 
 		String label;
-		if (isDefaultMethod) {
+		int modifiers= methodToOverride.getModifiers();
+		if (Modifier.isDefault(modifiers)) {
 			label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_override_default_method_description, superTypeBinding.getName());
+		} else if (Modifier.isAbstract(modifiers)) {
+			label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_implement_method_description, superTypeBinding.getName());
 		} else {
 			label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_override_method_description, superTypeBinding.getName());
 		}

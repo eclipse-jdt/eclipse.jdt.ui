@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,6 +90,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -824,7 +825,7 @@ public class ASTResolving {
 		} else if (decl instanceof Initializer) {
 			return Modifier.isStatic(((Initializer)decl).getModifiers());
 		} else if (decl instanceof FieldDeclaration) {
-			return Modifier.isStatic(((FieldDeclaration)decl).getModifiers());
+			return JdtFlags.isStatic(decl);
 		}
 		return false;
 	}

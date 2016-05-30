@@ -261,6 +261,7 @@ public final class CorrectionMessages extends NLS {
 	public static String AssignToVariableAssistProposal_assigntolocal_description;
 	public static String AssignToVariableAssistProposal_assigntofield_description;
 	public static String AssignToVariableAssistProposal_assignparamtofield_description;
+	public static String AssignToVariableAssistProposal_assignallparamstofields_description;
 	public static String QuickAssistProcessor_catchclausetothrows_description;
 	public static String QuickAssistProcessor_change_lambda_body_to_block;
 	public static String QuickAssistProcessor_change_lambda_body_to_expression;
@@ -395,6 +396,7 @@ public final class CorrectionMessages extends NLS {
 	public static String FixCorrectionProposal_MultiFixChange_label;
 	public static String FixCorrectionProposal_HitCtrlEnter_description;
 	public static String FixCorrectionProposal_hitCtrlEnter_variable_description;
+	public static String LocalCorrectionsSubProcessor_implement_method_description;
 	public static String LocalCorrectionsSubProcessor_insert_break_statement;
 	public static String LocalCorrectionsSubProcessor_insert_cases_omitted;
 	public static String LocalCorrectionsSubProcessor_insert_fall_through;
@@ -408,4 +410,5 @@ public final class CorrectionMessages extends NLS {
 	public static String VarargsWarningsSubProcessor_add_safevarargs_label;
 	public static String VarargsWarningsSubProcessor_add_safevarargs_to_method_label;
 	public static String VarargsWarningsSubProcessor_remove_safevarargs_label;
+	public static String NullAnnotationsCorrectionProcessor_change_local_variable_to_nonNull;
 }

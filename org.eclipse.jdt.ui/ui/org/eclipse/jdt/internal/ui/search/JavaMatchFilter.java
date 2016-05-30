@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.search;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.search.ui.text.Match;
@@ -213,23 +214,27 @@ class ImportFilter extends JavaMatchFilter {
 
 	@Override
 	public boolean isApplicable(JavaSearchQuery query) {
-		QuerySpecification spec= query.getSpecification();
-		if (spec instanceof ElementQuerySpecification) {
-			ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
-			IJavaElement element= elementSpec.getElement();
-			switch (element.getElementType()) {
-				case IJavaElement.TYPE:
-				case IJavaElement.METHOD:
-				case IJavaElement.FIELD:
-				case IJavaElement.PACKAGE_FRAGMENT:
-					return true;
-				default:
-					return false;
+		List<QuerySpecification> specList= query.getSpecification();
+		boolean isApplicable= false;
+		for (QuerySpecification spec : specList) {
+			if (spec instanceof ElementQuerySpecification) {
+				ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
+				IJavaElement element= elementSpec.getElement();
+				switch (element.getElementType()) {
+					case IJavaElement.TYPE:
+					case IJavaElement.METHOD:
+					case IJavaElement.FIELD:
+					case IJavaElement.PACKAGE_FRAGMENT:
+						isApplicable= true;
+						break;
+					default:
+						return false;
+				}
+			} else if (spec instanceof PatternQuerySpecification) {
+				return true;
 			}
-		} else if (spec instanceof PatternQuerySpecification) {
-			return true;
 		}
-		return false;
+		return isApplicable;
 	}
 
 	@Override
@@ -241,16 +246,22 @@ class ImportFilter extends JavaMatchFilter {
 abstract class VariableFilter extends JavaMatchFilter {
 	@Override
 	public boolean isApplicable(JavaSearchQuery query) {
-		QuerySpecification spec= query.getSpecification();
-		if (spec instanceof ElementQuerySpecification) {
-			ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
-			IJavaElement element= elementSpec.getElement();
-			return element instanceof IField || element instanceof ILocalVariable;
-		} else if (spec instanceof PatternQuerySpecification) {
-			PatternQuerySpecification patternSpec= (PatternQuerySpecification) spec;
-			return patternSpec.getSearchFor() == IJavaSearchConstants.FIELD;
+		List<QuerySpecification> speclist= query.getSpecification();
+		boolean isApplicable= false;
+		for (QuerySpecification spec : speclist) {
+			if (spec instanceof ElementQuerySpecification) {
+				ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
+				IJavaElement element= elementSpec.getElement();
+				isApplicable= element instanceof IField || element instanceof ILocalVariable;
+				if (!isApplicable) {
+					return false;
+				}
+			} else if (spec instanceof PatternQuerySpecification) {
+				PatternQuerySpecification patternSpec= (PatternQuerySpecification) spec;
+				return patternSpec.getSearchFor() == IJavaSearchConstants.FIELD;
+			}
 		}
-		return false;
+		return isApplicable;
 	}
 
 }
@@ -351,20 +362,26 @@ class PolymorphicFilter extends JavaMatchFilter {
 
     @Override
 	public boolean isApplicable(JavaSearchQuery query) {
-        QuerySpecification spec= query.getSpecification();
-        switch (spec.getLimitTo()) {
-			case IJavaSearchConstants.REFERENCES:
-			case IJavaSearchConstants.ALL_OCCURRENCES:
-                if (spec instanceof ElementQuerySpecification) {
-                    ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
-                    return elementSpec.getElement() instanceof IMethod;
-                } else if (spec instanceof PatternQuerySpecification) {
-                    PatternQuerySpecification patternSpec= (PatternQuerySpecification) spec;
-                    return patternSpec.getSearchFor() == IJavaSearchConstants.METHOD;
-                }
-        }
-        return false;
-    }
+		List<QuerySpecification> speclist= query.getSpecification();
+		boolean isApplicable= false;
+		for (QuerySpecification spec : speclist) {
+			switch (spec.getLimitTo()) {
+				case IJavaSearchConstants.REFERENCES:
+				case IJavaSearchConstants.ALL_OCCURRENCES:
+					if (spec instanceof ElementQuerySpecification) {
+						ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
+						isApplicable= elementSpec.getElement() instanceof IMethod;
+						if (!isApplicable) {
+							return false;
+						}
+					} else if (spec instanceof PatternQuerySpecification) {
+						PatternQuerySpecification patternSpec= (PatternQuerySpecification) spec;
+						return patternSpec.getSearchFor() == IJavaSearchConstants.METHOD;
+					}
+			}
+		}
+		return isApplicable;
+	}
 
     @Override
 	public String getID() {
@@ -375,13 +392,21 @@ class PolymorphicFilter extends JavaMatchFilter {
 abstract class GenericTypeFilter extends JavaMatchFilter {
 	@Override
 	public boolean isApplicable(JavaSearchQuery query) {
-		QuerySpecification spec= query.getSpecification();
-		if (spec instanceof ElementQuerySpecification) {
-			ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
-			IJavaElement element= elementSpec.getElement();
-			return isParameterizedElement(element);
+		List<QuerySpecification> specList= query.getSpecification();
+		boolean isApplicable= false;
+		for (QuerySpecification spec : specList) {
+			if (spec instanceof ElementQuerySpecification) {
+				ElementQuerySpecification elementSpec= (ElementQuerySpecification) spec;
+				IJavaElement element= elementSpec.getElement();
+				isApplicable= isParameterizedElement(element);
+				if (!isApplicable) {
+					return false;
+				}
+			} else {
+				return false;
+			}
 		}
-		return false;
+		return isApplicable;
 	}
 
 	private static boolean isParameterizedElement(IJavaElement element) {

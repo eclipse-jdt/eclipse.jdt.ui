@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
@@ -93,4 +95,11 @@ public class FindReferencesInHierarchyAction extends FindReferencesAction {
 		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
 	}
 
+	@Override
+	boolean canOperateOn(IStructuredSelection sel) {
+		if (sel == null || sel.isEmpty() || sel.size() > 1) {
+			return false;
+		}
+		return super.canOperateOn(sel);
+	}
 }

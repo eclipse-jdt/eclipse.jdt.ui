@@ -41,7 +41,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	private static final Class<ExtractInterfaceTests> clazz= ExtractInterfaceTests.class;
 	private static final String REFACTORING_PATH= "ExtractInterface/";
     private Hashtable<String, String> fOldOptions;
-    private boolean fGenerateAnnotations= false;
+    protected boolean fGenerateAnnotations= false;
 
 	public ExtractInterfaceTests(String name) {
 		super(name);

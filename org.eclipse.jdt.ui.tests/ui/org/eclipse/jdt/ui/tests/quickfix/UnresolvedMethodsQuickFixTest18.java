@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
@@ -109,4 +110,287 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 
 		assertProposalDoesNotExist(proposals, Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changemethod_description, "bar"));
 	}
+
+	public void testCreateMethodQuickFix1() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface Snippet {\n");
+		buf.append("    public abstract String name();\n");
+		buf.append("}\n");
+		buf.append("class Ref {\n");
+		buf.append("    void foo(Snippet c) {\n");
+		buf.append("        int[] v= c.values();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface Snippet {\n");
+		buf.append("    public abstract String name();\n");
+		buf.append("\n");
+		buf.append("    public abstract int[] values();\n");
+		buf.append("}\n");
+		buf.append("class Ref {\n");
+		buf.append("    void foo(Snippet c) {\n");
+		buf.append("        int[] v= c.values();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+	}
+
+	public void testCreateMethodQuickFix2() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface Snippet {\n");
+		buf.append("    public abstract String name();\n");
+		buf.append("}\n");
+		buf.append("class Ref {\n");
+		buf.append("    void foo(Snippet c) {\n");
+		buf.append("        int[] v= Snippet.values();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("interface Snippet {\n");
+		buf.append("    public abstract String name();\n");
+		buf.append("\n");
+		buf.append("    public static int[] values() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class Ref {\n");
+		buf.append("    void foo(Snippet c) {\n");
+		buf.append("        int[] v= Snippet.values();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+	}
+
+	public void testCreateMethodQuickFix3() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf.append("package test1;\n");
+		buf.append("public interface NestedInterfaceInInterface {\n");
+		buf.append("    interface Interface {\n");
+		buf.append("        default void foo() {\n");
+		buf.append("            int[] a = values1();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("NestedInterfaceInInterface.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal1= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal2= (CUCorrectionProposal) proposals.get(1);
+
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("public interface NestedInterfaceInInterface {\n");
+		buf1.append("    interface Interface {\n");
+		buf1.append("        default void foo() {\n");
+		buf1.append("            int[] a = values1();\n");
+		buf1.append("        }\n\n");
+		buf1.append("        int[] values1();\n");
+		buf1.append("    }\n");
+		buf1.append("}\n");
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface NestedInterfaceInInterface {\n");
+		buf.append("    interface Interface {\n");
+		buf.append("        default void foo() {\n");
+		buf.append("            int[] a = values1();\n");
+		buf.append("        }\n");
+		buf.append("    }\n\n");
+		buf.append("    static int[] values1() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal1), getPreviewContent(proposal2) }, new String[] { buf1.toString(), buf.toString() });
+	}
+
+	public void testCreateMethodQuickFix4() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("public interface NestedInterfaceInInterface {\n");
+		buf.append("    interface Interface {\n");
+		buf.append("        public default void foo() {\n");
+		buf.append("            Arrays.sort(this.values2());\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("NestedInterfaceInInterface.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Arrays;\n");
+		buf.append("public interface NestedInterfaceInInterface {\n");
+		buf.append("    interface Interface {\n");
+		buf.append("        public default void foo() {\n");
+		buf.append("            Arrays.sort(this.values2());\n");
+		buf.append("        }\n\n");
+		buf.append("        public int[] values2();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+	}
+
+	public void testCreateMethodQuickFix5() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface NestedInterfaceInInterface {\n");
+		buf.append("    interface Interface {\n");
+		buf.append("        public default void foo() {\n");
+		buf.append("            Object o = Interface.getGlobal();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("NestedInterfaceInInterface.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface NestedInterfaceInInterface {\n");
+		buf.append("    interface Interface {\n");
+		buf.append("        public default void foo() {\n");
+		buf.append("            Object o = Interface.getGlobal();\n");
+		buf.append("        }\n\n");
+		buf.append("        public static Object getGlobal() {\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+	}
+
+	public void testCreateMethodQuickFix6() throws Exception {
+		StringBuffer buf1= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf1.append("package test1;\n");
+		buf1.append("public class NestedInterfaceInClass {\n");
+		buf1.append("    public static final int total= 10;\n");
+		buf1.append("    interface Interface {\n");
+		buf1.append("        public default void foo() {\n");
+		buf1.append("            int[] a = values1();\n");
+		buf1.append("        }\n");
+		buf1.append("    }\n");
+		buf1.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("NestedInterfaceInClass.java", buf1.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal1= (CUCorrectionProposal) proposals.get(0);
+		CUCorrectionProposal proposal2= (CUCorrectionProposal) proposals.get(1);
+
+		buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("public class NestedInterfaceInClass {\n");
+		buf1.append("    public static final int total= 10;\n");
+		buf1.append("    interface Interface {\n");
+		buf1.append("        public default void foo() {\n");
+		buf1.append("            int[] a = values1();\n");
+		buf1.append("        }\n");
+		buf1.append("\n");
+		buf1.append("        public int[] values1();\n");
+		buf1.append("    }\n");
+		buf1.append("}\n");
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class NestedInterfaceInClass {\n");
+		buf.append("    public static final int total= 10;\n");
+		buf.append("    interface Interface {\n");
+		buf.append("        public default void foo() {\n");
+		buf.append("            int[] a = values1();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    protected static int[] values1() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal1), getPreviewContent(proposal2) }, new String[] { buf1.toString(), buf.toString() });
+	}
+
+	public void testCreateMethodQuickFix7() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class NestedInterfaceInClass {\n");
+		buf.append("    int total= 10;\n");
+		buf.append("    interface Interface {\n");
+		buf.append("            int[] a = NestedInterfaceInClass.values1();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("NestedInterfaceInClass.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class NestedInterfaceInClass {\n");
+		buf.append("    int total= 10;\n");
+		buf.append("    interface Interface {\n");
+		buf.append("            int[] a = NestedInterfaceInClass.values1();\n");
+		buf.append("    }\n");
+		buf.append("    static int[] values1() {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+	}
+
 }

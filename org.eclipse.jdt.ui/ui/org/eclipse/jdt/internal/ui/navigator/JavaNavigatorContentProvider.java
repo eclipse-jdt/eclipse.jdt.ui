@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2014 IBM Corporation and others.
+ * Copyright (c) 2003, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,11 +85,18 @@ public class JavaNavigatorContentProvider extends
 								.booleanValue() ? true : false;
 						setIsFlatLayout(newValue);
 					}
+				} else if (Values.IS_LIBRARIES_NODE_SHOWN.equals(event.getProperty())) {
+					if (event.getNewValue() != null) {
+						boolean newValue = ((Boolean) event.getNewValue()).booleanValue();
+						setShowLibrariesNode(newValue);
+					}
 				}
-
 			}
 		};
 		fStateModel.addPropertyChangeListener(fLayoutPropertyListener);
+
+		setIsFlatLayout(fStateModel.getBooleanProperty(Values.IS_LAYOUT_FLAT));
+		setShowLibrariesNode(fStateModel.getBooleanProperty(Values.IS_LIBRARIES_NODE_SHOWN));
 
 		IPreferenceStore store = PreferenceConstants.getPreferenceStore();
 		boolean showCUChildren = store
@@ -303,7 +310,7 @@ public class JavaNavigatorContentProvider extends
 
 	/**
 	 * Adapted from the Common Navigator Content Provider
-	 * 
+	 *
 	 * @param javaElements the java elements
 	 * @param proposedChildren the proposed children
 	 */

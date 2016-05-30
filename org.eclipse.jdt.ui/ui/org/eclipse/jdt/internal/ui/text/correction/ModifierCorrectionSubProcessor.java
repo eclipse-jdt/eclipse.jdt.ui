@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,6 +69,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -863,7 +864,7 @@ public class ModifierCorrectionSubProcessor {
 			return;
 		}
 		MethodDeclaration methodDecl= (MethodDeclaration) selectedNode;
-		Annotation annot= findAnnotation("java.lang.Override", methodDecl.modifiers()); //$NON-NLS-1$
+		Annotation annot= StubUtility2.findAnnotation("java.lang.Override", methodDecl.modifiers()); //$NON-NLS-1$
 		if (annot != null) {
 			ASTRewrite rewrite= ASTRewrite.create(annot.getAST());
 			rewrite.remove(annot, null);
@@ -901,7 +902,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 
-	private static final String KEY_MODIFIER= "modifier"; //$NON-NLS-1$
+	public static final String KEY_MODIFIER= "modifier"; //$NON-NLS-1$
 
 	private static class ModifierLinkedModeProposal extends LinkedProposalPositionGroup.Proposal {
 
@@ -956,12 +957,12 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 
-	public static void installLinkedVisibilityProposals(LinkedProposalModel linkedProposalModel, ASTRewrite rewrite, List<IExtendedModifier> modifiers, boolean inInterface) {
+	public static void installLinkedVisibilityProposals(LinkedProposalModel linkedProposalModel, ASTRewrite rewrite, List<IExtendedModifier> modifiers, boolean inInterface, String groupId) {
 		ASTNode modifier= findVisibilityModifier(modifiers);
 		if (modifier != null) {
 			int selected= ((Modifier) modifier).getKeyword().toFlagValue();
 
-			LinkedProposalPositionGroup positionGroup= linkedProposalModel.getPositionGroup(KEY_MODIFIER, true);
+			LinkedProposalPositionGroup positionGroup= linkedProposalModel.getPositionGroup(groupId, true);
 			positionGroup.addPosition(rewrite.track(modifier), false);
 			positionGroup.addProposal(new ModifierLinkedModeProposal(selected, 10));
 
@@ -975,6 +976,10 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 
+	public static void installLinkedVisibilityProposals(LinkedProposalModel linkedProposalModel, ASTRewrite rewrite, List<IExtendedModifier> modifiers, boolean inInterface) {
+		ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(linkedProposalModel, rewrite, modifiers, inInterface, KEY_MODIFIER);
+	}
+
 	private static Modifier findVisibilityModifier(List<IExtendedModifier> modifiers) {
 		for (int i= 0; i < modifiers.size(); i++) {
 			IExtendedModifier curr= modifiers.get(i);
@@ -983,20 +988,6 @@ public class ModifierCorrectionSubProcessor {
 				ModifierKeyword keyword= modifier.getKeyword();
 				if (keyword == ModifierKeyword.PUBLIC_KEYWORD || keyword == ModifierKeyword.PROTECTED_KEYWORD || keyword == ModifierKeyword.PRIVATE_KEYWORD) {
 					return modifier;
-				}
-			}
-		}
-		return null;
-	}
-
-	private static Annotation findAnnotation(String qualifiedTypeName, List<IExtendedModifier> modifiers) {
-		for (int i= 0; i < modifiers.size(); i++) {
-			IExtendedModifier curr= modifiers.get(i);
-			if (curr instanceof Annotation) {
-				Annotation annot= (Annotation) curr;
-				ITypeBinding binding= annot.getTypeName().resolveTypeBinding();
-				if (binding != null && qualifiedTypeName.equals(binding.getQualifiedName())) {
-					return annot;
 				}
 			}
 		}

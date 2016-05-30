@@ -297,6 +297,7 @@ final class FormatterMessages extends NLS {
 	public static String LineWrappingTabPage_function_calls;
 	public static String LineWrappingTabPage_expressions;
 	public static String LineWrappingTabPage_statements;
+	public static String LineWrappingTabPage_parameterized_types;
 	public static String LineWrappingTabPage_enum_decls;
 	public static String LineWrappingTabPage_wrapping_policy_label_text;
 	public static String LineWrappingTabPage_indentation_policy_label_text;
@@ -320,11 +321,15 @@ final class FormatterMessages extends NLS {
 	public static String LineWrappingTabPage_error_invalid_value;
 	public static String LineWrappingTabPage_enum_superinterfaces;
 	public static String LineWrappingTabPage_assignment_alignment;
+	public static String LineWrappingTabPage_conditional_expression_wrap_operator;
 	public static String LineWrappingTabPage_binary_expression_wrap_operator;
 	public static String LineWrappingTabPage_multicatch_wrap_operator;
 	public static String LineWrappingTabPage_annotations;
 	public static String LineWrappingTabPage_annotations_arguments;
 	public static String LineWrappingTabPage_wrap_outer_expressions_when_nested;
+	public static String LineWrappingTabPage_param_type_ref;
+	public static String LineWrappingTabPage_type_arguments;
+	public static String LineWrappingTabPage_type_parameters;
 
 	public static String BlankLinesTabPage_preview_header;
 	public static String BlankLinesTabPage_compilation_unit_group_title;
@@ -440,6 +445,7 @@ final class FormatterMessages extends NLS {
 	public static String ModifyDialog_tabpage_line_wrapping_title;
 	public static String ModifyDialog_tabpage_comments_title;
 	public static String ModifyDialog_tabpage_OffOnTags_title;
+	public static String ModifyDialog_tabpage_parentheses_title;
 
 	public static String NewLinesTabPage_preview_header;
 	public static String NewLinesTabPage_newlines_group_title;
@@ -528,6 +534,24 @@ final class FormatterMessages extends NLS {
 	public static String ModifyDialogTabPage_error_msg_values_items_text_unassigned;
 	public static String ModifyDialogTabPage_NumberPreference_error_invalid_key;
 	public static String ModifyDialogTabPage_NumberPreference_error_invalid_value;
+
+	public static String ParenthesesTabPage_preview_header;
+	public static String ParenthesesTabPage_group_parentheses_positions;
+	public static String ParenthesesTabPage_positions_common_lines;
+	public static String ParenthesesTabPage_positions_separate_lines_if_not_empty;
+	public static String ParenthesesTabPage_positions_separate_lines_if_wrapped;
+	public static String ParenthesesTabPage_positions_separate_lines;
+	public static String ParenthesesTabPage_positions_preserve_positions;
+	public static String ParenthesesTabPage_option_method_declaration;
+	public static String ParenthesesTabPage_option_method_invocation;
+	public static String ParenthesesTabPage_option_enum_constant_declaration;
+	public static String ParenthesesTabPage_option_if_while_statement;
+	public static String ParenthesesTabPage_option_for_statement;
+	public static String ParenthesesTabPage_option_switch_statement;
+	public static String ParenthesesTabPage_option_try_clause;
+	public static String ParenthesesTabPage_option_catch_clause;
+	public static String ParenthesesTabPage_option_annotation;
+	public static String ParenthesesTabPage_option_lambda_declaration;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, FormatterMessages.class);

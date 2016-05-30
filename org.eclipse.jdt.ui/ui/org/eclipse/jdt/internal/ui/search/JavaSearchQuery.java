@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,13 +58,21 @@ public class JavaSearchQuery implements ISearchQuery {
 	private static final String PERF_SEARCH_PARTICIPANT= "org.eclipse.jdt.ui/perf/search/participants"; //$NON-NLS-1$
 
 	private ISearchResult fResult;
-	private final QuerySpecification fPatternData;
+	private final List<QuerySpecification> fPatternDataList;
 
 	public JavaSearchQuery(QuerySpecification data) {
 		if (data == null) {
 			throw new IllegalArgumentException("data must not be null"); //$NON-NLS-1$
 		}
-		fPatternData= data;
+		fPatternDataList= new ArrayList<>();
+		fPatternDataList.add(data);
+	}
+
+	public JavaSearchQuery(List<QuerySpecification> dataList) {
+		if (dataList == null || dataList.isEmpty()) {
+			throw new IllegalArgumentException("data must not be null"); //$NON-NLS-1$
+		}
+		fPatternDataList= dataList;
 	}
 
 	private static class SearchRequestor implements ISearchRequestor {
@@ -93,7 +104,7 @@ public class JavaSearchQuery implements ISearchQuery {
 		try {
 
 			int totalTicks= 1000;
-			IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(fPatternData.getScope());
+			IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(getFirstSpecification().getScope());
 			final SearchParticipantRecord[] participantDescriptors= SearchParticipantsExtensionPoint.getInstance().getSearchParticipants(projects);
 			final int[] ticks= new int[participantDescriptors.length];
 			for (int i= 0; i < participantDescriptors.length; i++) {
@@ -108,7 +119,9 @@ public class JavaSearchQuery implements ISearchQuery {
 
 					@Override
 					public void run() throws Exception {
-						ticks[iPrime]= participantDescriptors[iPrime].getParticipant().estimateTicks(fPatternData);
+						for (QuerySpecification querySpecification : fPatternDataList) {
+							ticks[iPrime]+= participantDescriptors[iPrime].getParticipant().estimateTicks(querySpecification);
+						}
 					}
 				};
 
@@ -116,23 +129,38 @@ public class JavaSearchQuery implements ISearchQuery {
 				totalTicks+= ticks[i];
 			}
 
-			SearchPattern pattern;
-			String stringPattern;
-
-			if (fPatternData instanceof ElementQuerySpecification) {
-				IJavaElement element= ((ElementQuerySpecification) fPatternData).getElement();
-				stringPattern= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
-				if (!element.exists()) {
-					return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(SearchMessages.JavaSearchQuery_error_element_does_not_exist, stringPattern), null);
+			SearchPattern pattern= null;
+			String stringPattern= null;
+			
+			if (fPatternDataList.size() == 1) {
+				if (getFirstSpecification() instanceof ElementQuerySpecification) {
+					IJavaElement element= ((ElementQuerySpecification) getFirstSpecification()).getElement();
+					stringPattern= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
+					if (!element.exists()) {
+						return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(SearchMessages.JavaSearchQuery_error_element_does_not_exist, stringPattern), null);
+					}
+					pattern= SearchPattern.createPattern(element, getFirstSpecification().getLimitTo(), SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+				} else if (getFirstSpecification() instanceof PatternQuerySpecification) {
+					PatternQuerySpecification patternSpec= (PatternQuerySpecification) getFirstSpecification();
+					stringPattern= patternSpec.getPattern();
+					int matchMode= getMatchMode(stringPattern) | SearchPattern.R_ERASURE_MATCH;
+					if (patternSpec.isCaseSensitive())
+						matchMode|= SearchPattern.R_CASE_SENSITIVE;
+					pattern= SearchPattern.createPattern(patternSpec.getPattern(), patternSpec.getSearchFor(), patternSpec.getLimitTo(), matchMode);
 				}
-				pattern= SearchPattern.createPattern(element, fPatternData.getLimitTo(), SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 			} else {
-				PatternQuerySpecification patternSpec = (PatternQuerySpecification) fPatternData;
-				stringPattern= patternSpec.getPattern();
-				int matchMode= getMatchMode(stringPattern) | SearchPattern.R_ERASURE_MATCH;
-				if (patternSpec.isCaseSensitive())
-					matchMode |= SearchPattern.R_CASE_SENSITIVE;
-				pattern= SearchPattern.createPattern(patternSpec.getPattern(), patternSpec.getSearchFor(), patternSpec.getLimitTo(), matchMode);
+				for (QuerySpecification querySpecification : fPatternDataList) {
+					if (!(querySpecification instanceof ElementQuerySpecification)) {
+						break;
+					}
+					IJavaElement element= ((ElementQuerySpecification) querySpecification).getElement();
+					stringPattern= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
+					if (!element.exists()) {
+						return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(SearchMessages.JavaSearchQuery_error_element_does_not_exist, stringPattern), null);
+					}
+					SearchPattern elementPattern= SearchPattern.createPattern(element, getFirstSpecification().getLimitTo(), SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+					pattern= pattern == null ? elementPattern : SearchPattern.createOrPattern(pattern, elementPattern);
+				}
 			}
 
 			if (pattern == null) {
@@ -145,7 +173,7 @@ public class JavaSearchQuery implements ISearchQuery {
 			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, ignorePotentials);
 
 
-			engine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, fPatternData.getScope(), collector, mainSearchPM);
+			engine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, getFirstSpecification().getScope(), collector, mainSearchPM);
 			for (int i= 0; i < participantDescriptors.length; i++) {
 				final ISearchRequestor requestor= new SearchRequestor(participantDescriptors[i].getParticipant(), textResult);
 				final IProgressMonitor participantPM= new SubProgressMonitor(monitor, ticks[i]);
@@ -167,7 +195,9 @@ public class JavaSearchQuery implements ISearchQuery {
 						final PerformanceStats stats= PerformanceStats.getStats(PERF_SEARCH_PARTICIPANT, participant);
 						stats.startRun();
 
-						participant.search(requestor, fPatternData, participantPM);
+						for (QuerySpecification querySpecification : fPatternDataList) {
+							participant.search(requestor, querySpecification, participantPM);
+						}
 
 						stats.endRun();
 					}
@@ -200,7 +230,7 @@ public class JavaSearchQuery implements ISearchQuery {
 	public String getResultLabel(int nMatches) {
 		int limitTo= getMaskedLimitTo();
 		if (nMatches == 1) {
-			String[] args= { getSearchPatternDescription(), fPatternData.getScopeDescription() };
+			String[] args= { getSearchPatternDescription(), getFirstSpecification().getScopeDescription() };
 			switch (limitTo) {
 				case IJavaSearchConstants.IMPLEMENTORS:
 					return Messages.format(SearchMessages.JavaSearchOperation_singularImplementorsPostfix, args);
@@ -219,7 +249,7 @@ public class JavaSearchQuery implements ISearchQuery {
 					return Messages.format(SearchMessages.JavaSearchQuery_singularReferencesWithMatchLocations, new Object[] { args[0], args[1], matchLocations });
 			}
 		} else {
-			Object[] args= { getSearchPatternDescription(), new Integer(nMatches), fPatternData.getScopeDescription() };
+			Object[] args= { getSearchPatternDescription(), new Integer(nMatches), getFirstSpecification().getScopeDescription() };
 			switch (limitTo) {
 				case IJavaSearchConstants.IMPLEMENTORS:
 					return Messages.format(SearchMessages.JavaSearchOperation_pluralImplementorsPostfix, args);
@@ -241,16 +271,20 @@ public class JavaSearchQuery implements ISearchQuery {
 	}
 
 	private String getSearchPatternDescription() {
-		if (fPatternData instanceof ElementQuerySpecification) {
-			IJavaElement element= ((ElementQuerySpecification) fPatternData).getElement();
+		QuerySpecification firstSpecification= getFirstSpecification();
+		if (firstSpecification instanceof ElementQuerySpecification) {
+			IJavaElement element= ((ElementQuerySpecification) firstSpecification).getElement();
 			return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT
 					| JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.USE_RESOLVED | JavaElementLabels.P_COMPRESSED);
+		} else if (firstSpecification instanceof PatternQuerySpecification) {
+			return BasicElementLabels.getFilePattern(((PatternQuerySpecification) firstSpecification).getPattern());
+		} else {
+			return new String(""); //$NON-NLS-1$
 		}
-		return BasicElementLabels.getFilePattern(((PatternQuerySpecification) fPatternData).getPattern());
 	}
 
 	private int getMaskedLimitTo() {
-		return fPatternData.getLimitTo() & ~(IJavaSearchConstants.IGNORE_RETURN_TYPE | IJavaSearchConstants.IGNORE_DECLARING_TYPE);
+		return getFirstSpecification().getLimitTo() & ~(IJavaSearchConstants.IGNORE_RETURN_TYPE | IJavaSearchConstants.IGNORE_DECLARING_TYPE);
 	}
 
 	ImageDescriptor getImageDescriptor() {
@@ -281,7 +315,11 @@ public class JavaSearchQuery implements ISearchQuery {
 		return fResult;
 	}
 
-	QuerySpecification getSpecification() {
-		return fPatternData;
+	private QuerySpecification getFirstSpecification() {
+		return fPatternDataList.get(0);
+	}
+
+	List<QuerySpecification> getSpecification() {
+		return fPatternDataList;
 	}
 }

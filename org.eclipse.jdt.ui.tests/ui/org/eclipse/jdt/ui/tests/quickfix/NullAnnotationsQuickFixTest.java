@@ -1897,4 +1897,44 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+	public void testAddNonNull() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public <T extends Number> double foo(boolean b) {\n");
+		buf.append("        Number n=Integer.valueOf(1);\n");
+		buf.append("        if(b) {\n");
+		buf.append("          n = null;\n");
+		buf.append("        };\n");
+		buf.append("        return n.doubleValue();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public <T extends Number> double foo(boolean b) {\n");
+		buf.append("        @NonNull\n");
+		buf.append("        Number n=Integer.valueOf(1);\n");
+		buf.append("        if(b) {\n");
+		buf.append("          n = null;\n");
+		buf.append("        };\n");
+		buf.append("        return n.doubleValue();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
 }

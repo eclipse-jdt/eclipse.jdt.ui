@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -248,7 +248,7 @@ public class PullUpTests extends RefactoringTest {
 		assertTrue("precondition was supposed to fail", !checkInputResult.isOK());
 	}
 
-	private void declareAbstractHelper(String[] selectedMethodNames, String[][] selectedMethodSignatures,
+	protected void declareAbstractHelper(String[] selectedMethodNames, String[][] selectedMethodSignatures,
 			String[] selectedFieldNames,
 			String[] selectedTypeNames, String[] namesOfMethodsToPullUp,
 			String[][] signaturesOfMethodsToPullUp, String[] namesOfFieldsToPullUp,
@@ -1030,6 +1030,37 @@ public class PullUpTests extends RefactoringTest {
 
 		assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
 		assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+	}
+
+	public void test52() throws Exception {
+		String[] selectedMethodNames= new String[] { "baz1", "baz2", "baz3", "baz4" };
+		String[][] selectedMethodSignatures= new String[][] { new String[0], new String[0], new String[0], new String[0] };
+
+		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
+				new String[] {},
+				new String[] {}, new String[] {},
+				new String[][] {},
+				new String[] {}, selectedMethodNames,
+				selectedMethodSignatures, new String[] {}, false, false, 0);
+	}
+
+	// bug 396524
+	public void test53() throws Exception {
+		String[] selectedMethodNames= { "m" };
+		String[][] selectedMethodSignatures= { new String[0] };
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPullUp= {};
+		String[][] signaturesOfMethodsToPullUp= {};
+		String[] namesOfFieldsToPullUp= {};
+		String[] namesOfMethodsToDeclareAbstract= selectedMethodNames;
+		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
+
+		declareAbstractHelper(selectedMethodNames, selectedMethodSignatures,
+				selectedFieldNames,
+				new String[0], namesOfMethodsToPullUp,
+				signaturesOfMethodsToPullUp,
+				namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract,
+				signaturesOfMethodsToDeclareAbstract, new String[0], true, true, 0);
 	}
 
 	public void testFail0() throws Exception{

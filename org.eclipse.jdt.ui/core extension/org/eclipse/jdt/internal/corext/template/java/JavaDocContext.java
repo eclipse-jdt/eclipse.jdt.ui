@@ -75,6 +75,9 @@ public class JavaDocContext extends CompilationUnitContext {
 	 */
 	@Override
 	public boolean canEvaluate(Template template) {
+		if (!template.getContextTypeId().equals(getContextType().getId()))
+			return false;
+
 		if (fForceEvaluation)
 			return true;
 

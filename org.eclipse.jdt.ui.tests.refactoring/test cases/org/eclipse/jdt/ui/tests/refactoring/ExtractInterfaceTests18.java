@@ -109,6 +109,14 @@ public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 		validatePassingTest("A", "B", true, true);
 	}
 
+	// bug 394551
+	public void testExtractInterfaceFromClass2() throws Exception {
+		fGenerateAnnotations= true;
+		String[] names= new String[] { "m" };
+		String[][] signatures= new String[][] { new String[0], new String[0] };
+		validatePassingTest("A", new String[] { "A" }, "I", true, names, signatures, null);
+	}
+
 	public void testExtractInterfaceFromAbstractClass() throws Exception {
 		validatePassingTest("A", "B", true, true);
 	}
@@ -127,4 +135,24 @@ public class ExtractInterfaceTests18 extends ExtractInterfaceTests {
 		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);
 	}
 
+	public void testMethodRef1() throws Exception {
+		// bug 489170
+		String[] names= new String[] { "methodN" };
+		String[][] signatures= new String[][] { new String[0] };
+		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);
+	}
+
+	public void testMethodRef2() throws Exception {
+		// bug 489170
+		String[] names= new String[] { "m1" };
+		String[][] signatures= new String[][] { new String[0] };
+		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);
+	}
+
+	public void testMethodRef3() throws Exception {
+		// bug 489170
+		String[] names= new String[] { "m1" };
+		String[][] signatures= new String[][] { new String[0] };
+		validatePassingTest("X", new String[] { "X", "Util" }, "I", true, names, signatures, null);
+	}
 }

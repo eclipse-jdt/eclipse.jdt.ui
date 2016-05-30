@@ -3667,6 +3667,12 @@
             id="org.eclipse.jdt.ui.correction.assignParamToField.assist">
       </command>
       <command
+            name="%ActionDefinition.corrections.assignAllParamsToNewFields.name"
+            description="%ActionDefinition.corrections.assignAllParamsToNewFields.description"
+            categoryId="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.correction.assignAllParamsToNewFields.assist">
+      </command>
+      <command
             name="%ActionDefinition.corrections.addBlock.name"
             description="%ActionDefinition.corrections.addBlock.description"
             categoryId="org.eclipse.jdt.ui.category.source"
@@ -6047,6 +6053,13 @@
 		        name="%HideEmptyInnerPackages.label"
 		        description="%HideEmptyInnerPackages.description"
 		        id="org.eclipse.jdt.java.ui.filters.HideEmptyInnerPackages"/>
+    	<commonFilter
+          		activeByDefault="true"
+	            class="org.eclipse.jdt.internal.ui.navigator.NonEssentialEmptyLibraryContainerFilter"
+	            description="%HideEmptyLibraryContainers.description"
+	            id="org.eclipse.jdt.java.ui.filters.HideEmptyLibraryContainers"
+	            name="%HideEmptyLibraryContainers.label">
+	    </commonFilter>
   		<commonFilter 
 		        class="org.eclipse.jdt.internal.ui.filters.AnnotationFilter"
 		        name="%HideAnnotation.label"

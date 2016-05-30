@@ -1299,13 +1299,13 @@ public class JavadocView extends AbstractInfoView {
 	 * Retrieve a constant initializer value of a field by (AST) parsing field's type.
 	 *
 	 * @param constantField the constant field
-	 * @param monitor the progress monitor
+	 * @param monitor the progress monitor or null
 	 * @return the constant value of the field, or <code>null</code> if it could not be computed
 	 *   (or if the progress was cancelled).
 	 * @since 3.4
 	 */
-	private Object computeFieldConstantFromTypeAST(IField constantField, IProgressMonitor monitor) {
-		if (monitor.isCanceled())
+	public static Object computeFieldConstantFromTypeAST(IField constantField, IProgressMonitor monitor) {
+		if (monitor != null && monitor.isCanceled())
 			return null;
 
 		CompilationUnit ast= SharedASTProvider.getAST(constantField.getTypeRoot(), SharedASTProvider.WAIT_NO, monitor);
@@ -1326,7 +1326,7 @@ public class JavadocView extends AbstractInfoView {
 			}
 		}
 
-		if (monitor.isCanceled())
+		if (monitor != null && monitor.isCanceled())
 			return null;
 
 		ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
