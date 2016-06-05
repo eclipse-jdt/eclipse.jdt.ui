@@ -802,7 +802,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_version16;
 	public static String ComplianceConfigurationBlock_version17;
 	public static String ComplianceConfigurationBlock_version18;
-	public static String ComplianceConfigurationBlock_version19;
+	public static String ComplianceConfigurationBlock_version9;
 	public static String ComplianceConfigurationBlock_versionCLDC11;
 	public static String ComplianceConfigurationBlock_src_greater_compliance;
 	public static String ComplianceConfigurationBlock_classfile_greater_compliance;

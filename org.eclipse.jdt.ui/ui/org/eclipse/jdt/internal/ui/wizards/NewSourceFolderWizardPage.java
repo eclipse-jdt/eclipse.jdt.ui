@@ -543,7 +543,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 	 * @return <code>true</code> if module-info.java should be created, <code>false</code> otherwise
 	 */
 	private boolean isCreateModuleInfoJava() {
-		return JavaModelUtil.is19OrHigher(fCurrJProject) && fCreateModuleInfoJavaField.isSelected();
+		return JavaModelUtil.is9OrHigher(fCurrJProject) && fCreateModuleInfoJavaField.isSelected();
 	}
 
 	public IResource getCorrespondingResource() {

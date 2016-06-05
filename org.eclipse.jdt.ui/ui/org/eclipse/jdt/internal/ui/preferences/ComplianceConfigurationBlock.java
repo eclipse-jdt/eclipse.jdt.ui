@@ -273,11 +273,11 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.ComplianceConfigurationBlock_version16,
 			PreferencesMessages.ComplianceConfigurationBlock_version17,
 			PreferencesMessages.ComplianceConfigurationBlock_version18,
-			PreferencesMessages.ComplianceConfigurationBlock_version19,
+			PreferencesMessages.ComplianceConfigurationBlock_version9,
 		};
 		
 		String[] targetVersions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9 };
 		String[] targetLabels= new String[] {
 				PreferencesMessages.ComplianceConfigurationBlock_versionCLDC11,
 				PreferencesMessages.ComplianceConfigurationBlock_version11,
@@ -288,15 +288,11 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.ComplianceConfigurationBlock_version16,
 				PreferencesMessages.ComplianceConfigurationBlock_version17,
 				PreferencesMessages.ComplianceConfigurationBlock_version18,
+				PreferencesMessages.ComplianceConfigurationBlock_version9,
 		};
 		if (ComplianceConfigurationBlock.VERSION_JSR14.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM))) {
 			targetVersions= append(targetVersions, ComplianceConfigurationBlock.VERSION_JSR14);
 			targetLabels= append(targetLabels, ComplianceConfigurationBlock.VERSION_JSR14);
-		}
-		if (ComplianceConfigurationBlock.VERSION_9.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM))) {
-			//TODO(BETA_JAVA9) at the moment, runtime doesn't support a new class file version
-			targetVersions= append(targetVersions, ComplianceConfigurationBlock.VERSION_9);
-			targetLabels= append(targetLabels, PreferencesMessages.ComplianceConfigurationBlock_version19);
 		}
 		
 		String[] sourceVersions= new String[] { VERSION_1_3, VERSION_1_4,
@@ -308,13 +304,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.ComplianceConfigurationBlock_version16,
 				PreferencesMessages.ComplianceConfigurationBlock_version17,
 				PreferencesMessages.ComplianceConfigurationBlock_version18,
+				PreferencesMessages.ComplianceConfigurationBlock_version9,
 		};
-		if (ComplianceConfigurationBlock.VERSION_9.equals(getValue(PREF_SOURCE_COMPATIBILITY))) {
-			//TODO(BETA_JAVA9) at the moment, there's no new Java language feature
-			sourceVersions= append(sourceVersions, ComplianceConfigurationBlock.VERSION_9);
-			sourceLabels= append(sourceLabels, PreferencesMessages.ComplianceConfigurationBlock_version19);
-		}
-
+		
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
 		Composite composite= sc1.getBody();
 		GridLayout layout= new GridLayout();
@@ -682,10 +674,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 		// target must not be smaller than source
 		if (!VERSION_1_3.equals(source) && JavaModelUtil.isVersionLessThan(target, source)) {
-			if (VERSION_9.equals(source) && VERSION_1_8.equals(target)) {
-				// TODO(BETA_JAVA9): not clear yet whether there will be a 1.9 class file version. Allow mismatch for now:
-				return status;
-			}
 			status.setError(PreferencesMessages.ComplianceConfigurationBlock_classfile_greater_source);
 			return status;
 		}

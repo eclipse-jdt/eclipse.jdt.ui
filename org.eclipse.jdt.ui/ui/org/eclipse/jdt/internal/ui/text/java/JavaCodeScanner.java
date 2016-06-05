@@ -399,7 +399,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	private static final String RETURN= "return"; //$NON-NLS-1$
 	private static String[] fgJava14Keywords= { "assert" }; //$NON-NLS-1$
 	private static String[] fgJava15Keywords= { "enum" }; //$NON-NLS-1$
-	private static String[] fgJava19ModuleInfoKeywords= { "module", "requires", "exports", "public", "to", "provides", "with", "uses" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+	private static String[] fgJava9ModuleInfoKeywords= { "module", "requires", "exports", "public", "to", "provides", "with", "uses" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 
 	private static String[] fgTypes= { "void", "boolean", "char", "byte", "short", "strictfp", "int", "long", "float", "double" }; //$NON-NLS-1$ //$NON-NLS-5$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-8$ //$NON-NLS-9$  //$NON-NLS-10$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-2$
 
@@ -467,7 +467,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 		// Create rules for JLS9 module-info.java editor
 		if (fIsModuleInfoEditor) {
-			return create19ModuleInfoRules(defaultToken, version);
+			return create9ModuleInfoRules(defaultToken, version);
 		}
 
 		// Add rule for character constants.
@@ -537,17 +537,17 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		return rules;
 	}
 
-	private List<IRule> create19ModuleInfoRules(Token defaultToken, String version) {
+	private List<IRule> create9ModuleInfoRules(Token defaultToken, String version) {
 		// Add word rule for new keywords
-		VersionedWordMatcher j19ModuleInfoMatcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_9, version);
+		VersionedWordMatcher j9ModuleInfoMatcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_9, version);
 		Token token= getToken(IJavaColorConstants.JAVA_KEYWORD);
-		for (int i= 0; i < fgJava19ModuleInfoKeywords.length; i++)
-			j19ModuleInfoMatcher.addWord(fgJava19ModuleInfoKeywords[i], token);
+		for (int i= 0; i < fgJava9ModuleInfoKeywords.length; i++)
+			j9ModuleInfoMatcher.addWord(fgJava9ModuleInfoKeywords[i], token);
 
 		CombinedWordRule combinedWordRule= new CombinedWordRule(new JavaWordDetector(), defaultToken);
-		combinedWordRule.addWordMatcher(j19ModuleInfoMatcher);
+		combinedWordRule.addWordMatcher(j9ModuleInfoMatcher);
 
-		fVersionDependentRules.add(j19ModuleInfoMatcher);
+		fVersionDependentRules.add(j9ModuleInfoMatcher);
 
 		setDefaultReturnToken(defaultToken);
 		return new ArrayList<IRule>(Arrays.asList(combinedWordRule));
