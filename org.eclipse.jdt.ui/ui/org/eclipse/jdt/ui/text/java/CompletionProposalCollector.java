@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -54,6 +58,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaFieldWithCastedReceiverCompleti
 import org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.LazyModuleCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyPackageCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.MethodDeclarationCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.MethodProposalInfo;
@@ -403,6 +408,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
 				return createKeywordProposal(proposal);
 			case CompletionProposal.PACKAGE_REF:
 				return createPackageProposal(proposal);
+			case CompletionProposal.MODULE_REF:
+				return createModuleProposal(proposal);
 			case CompletionProposal.TYPE_REF:
 				return createTypeProposal(proposal);
 			case CompletionProposal.JAVADOC_TYPE_REF:
@@ -589,6 +596,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 					return "java.lang.Object".toCharArray(); //$NON-NLS-1$
 				return Signature.toCharArray(declaration);
 			case CompletionProposal.PACKAGE_REF:
+			case CompletionProposal.MODULE_REF:
 				return proposal.getDeclarationSignature();
 			case CompletionProposal.JAVADOC_TYPE_REF:
 			case CompletionProposal.TYPE_REF:
@@ -807,6 +815,10 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		if (fUserReplacementLength != -1) {
 			proposal.setReplacementLength(getLength(coreProposal));
 		}
+	}
+
+	private IJavaCompletionProposal createModuleProposal(CompletionProposal proposal) {
+		return new LazyModuleCompletionProposal(proposal, getInvocationContext());
 	}
 
 	private IJavaCompletionProposal createPackageProposal(CompletionProposal proposal) {

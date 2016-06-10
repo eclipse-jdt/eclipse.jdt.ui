@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -14,6 +18,8 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
+
+import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
@@ -27,6 +33,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -508,6 +515,11 @@ public class CompletionProposalLabelProvider {
 		return Strings.markJavaElementLabelLTR(buf);
 	}
 
+	StyledString createModuleProposalLabel(CompletionProposal proposal) {
+		Assert.isTrue(proposal.getKind() == CompletionProposal.MODULE_REF);
+		return Strings.markJavaElementLabelLTR(new StyledString(String.valueOf(proposal.getDeclarationSignature())));
+	}
+
 	StyledString createPackageProposalLabel(CompletionProposal proposal) {
 		Assert.isTrue(proposal.getKind() == CompletionProposal.PACKAGE_REF);
 		return Strings.markJavaElementLabelLTR(new StyledString(String.valueOf(proposal.getDeclarationSignature())));
@@ -587,6 +599,8 @@ public class CompletionProposalLabelProvider {
 				return createJavadocMethodProposalLabel(proposal);
 			case CompletionProposal.PACKAGE_REF:
 				return createPackageProposalLabel(proposal);
+			case CompletionProposal.MODULE_REF:
+				return createModuleProposalLabel(proposal);
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
 			case CompletionProposal.FIELD_REF:
 			case CompletionProposal.FIELD_REF_WITH_CASTED_RECEIVER:
@@ -647,6 +661,9 @@ public class CompletionProposalLabelProvider {
 				break;
 			case CompletionProposal.PACKAGE_REF:
 				descriptor= JavaPluginImages.DESC_OBJS_PACKAGE;
+				break;
+			case CompletionProposal.MODULE_REF:
+				descriptor= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
 				break;
 			case CompletionProposal.KEYWORD:
 			case CompletionProposal.LABEL_REF:
