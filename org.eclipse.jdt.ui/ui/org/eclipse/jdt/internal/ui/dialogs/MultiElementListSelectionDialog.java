@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,6 +59,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	private Button fFinishButton;
 	private Button fBackButton;
 	private Button fNextButton;
+	private Button fSkipButton;
 
 	private Label fPageInfoLabel;
 	private String fPageInfoMessage= JavaUIMessages.MultiElementListSelectionDialog_pageInfoMessage;
@@ -134,6 +135,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 */
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
+		fSkipButton= createButton(parent, IDialogConstants.SKIP_ID, IDialogConstants.SKIP_LABEL, false);
 		fBackButton= createButton(parent, IDialogConstants.BACK_ID, IDialogConstants.BACK_LABEL, false);
 		
 		// XXX: Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=279425
@@ -198,10 +200,16 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 */
 	@Override
 	protected void buttonPressed(int buttonId) {
-		if (buttonId == IDialogConstants.BACK_ID) {
-			turnPage(false);
+		if (buttonId == IDialogConstants.SKIP_ID) {
+			boolean isLastPage= fCurrentPage == fNumberOfPages - 1 ? true : false;
+			turnPage(true, true);
+			if (isLastPage) {
+				buttonPressed(IDialogConstants.OK_ID);
+			}
+		} else if (buttonId == IDialogConstants.BACK_ID) {
+			turnPage(false, false);
 		} else if (buttonId == IDialogConstants.NEXT_ID) {
-			turnPage(true);
+			turnPage(true, false);
 		} else {
 			super.buttonPressed(buttonId);
 		}
@@ -240,6 +248,9 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		fNextButton.setEnabled(nextButtonEnabled);
 		fBackButton.setEnabled(fCurrentPage != 0);
 
+		// since there will always be a default selection - see FilteredList.TableUpdateJob.defaultSelect()
+		fSkipButton.setEnabled(true);
+
 		if (nextButtonEnabled) {
 			getShell().setDefaultButton(fNextButton);
 		} else if (isAllOK) {
@@ -247,7 +258,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		}
 	}
 
-	private void turnPage(boolean toNextPage) {
+	private void turnPage(boolean toNextPage, boolean skipSelection) {
 		Page page= fPages[fCurrentPage];
 
 		// store filter
@@ -255,6 +266,10 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		if (filter == null)
 			filter= ""; //$NON-NLS-1$
 		page.filter= filter;
+
+		if (skipSelection) {
+			setSelection(null);
+		}
 
 		// store selection
 		Object[] selectedElements= getSelectedElements();
