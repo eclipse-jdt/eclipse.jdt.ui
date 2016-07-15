@@ -19,7 +19,10 @@ public class B {
 		/* (non-Javadoc)
 		 * @see p.B.Foo#b()
 		 */
+		@Override
 		public void b() {
+			// TODO Auto-generated method stub
+			
 		}
 	}
 }

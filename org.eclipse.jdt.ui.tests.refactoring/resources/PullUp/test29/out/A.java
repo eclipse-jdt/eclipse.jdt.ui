@@ -14,7 +14,9 @@ class C extends A{
 	/* (non-Javadoc)
 	 * @see p.A#m(int[])
 	 */
+	@Override
 	public boolean m(int[] a) throws Exception {
+		// TODO Auto-generated method stub
 		return false;
 	}
 }
