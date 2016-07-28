@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1288,12 +1288,19 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	/**
-	 * Returns the type name entered into the type input field.
+	 * Returns the type name entered into the type input field (without the default file extension
+	 * <code>java</code>, if entered).
 	 *
 	 * @return the type name
 	 */
 	public String getTypeName() {
-		return fTypeNameDialogField.getText();
+		String typeNameWithExtension= fTypeNameDialogField.getText();
+		if (!typeNameWithExtension.endsWith(JavaModelUtil.DEFAULT_CU_SUFFIX)) {
+			return typeNameWithExtension;
+		} else {
+			int extensionOffset= typeNameWithExtension.lastIndexOf(JavaModelUtil.DEFAULT_CU_SUFFIX);
+			return typeNameWithExtension.substring(0, extensionOffset);
+		}
 	}
 
 	/**
@@ -1726,12 +1733,19 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected IStatus typeNameChanged() {
 		StatusInfo status= new StatusInfo();
 		fCurrType= null;
-		String typeNameWithParameters= getTypeName();
+
+		String typeNameWithExtension = fTypeNameDialogField.getText();
 		// must not be empty
-		if (typeNameWithParameters.length() == 0) {
+		if (typeNameWithExtension.length() == 0) {
 			status.setError(NewWizardMessages.NewTypeWizardPage_error_EnterTypeName);
 			return status;
 		}
+
+		if (typeNameWithExtension.endsWith(JavaModelUtil.DEFAULT_CU_SUFFIX)) {
+			status.setInfo(NewWizardMessages.NewTypeWizardPage_info_FileExtensionNotRequired);
+		}
+
+		String typeNameWithParameters= getTypeName();
 
 		String typeName= getTypeNameWithoutParameters();
 		if (typeName.indexOf('.') != -1) {
