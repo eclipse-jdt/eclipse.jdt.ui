@@ -840,7 +840,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			@Override
 			public void verifyText(VerifyEvent e) {
 				if (fCanModifyPackage && ! fEnclosingTypeSelection.isSelected() && e.start == 0 && e.end == ((Text) e.widget).getCharCount()) {
-					String typeNameWithoutParameters= getTypeNameWithoutParameters(e.text);
+					String typeNameWithoutParameters= getTypeNameWithoutParameters(getTypeNameWithoutExtension(e.text));
 					int lastDot= typeNameWithoutParameters.lastIndexOf('.');
 					if (lastDot == -1 || lastDot == typeNameWithoutParameters.length() - 1)
 						return;
@@ -1295,6 +1295,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	public String getTypeName() {
 		String typeNameWithExtension= fTypeNameDialogField.getText();
+		return getTypeNameWithoutExtension(typeNameWithExtension);
+	}
+
+	private String getTypeNameWithoutExtension(String typeNameWithExtension) {
 		if (!typeNameWithExtension.endsWith(JavaModelUtil.DEFAULT_CU_SUFFIX)) {
 			return typeNameWithExtension;
 		} else {
