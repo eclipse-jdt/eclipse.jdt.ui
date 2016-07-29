@@ -125,7 +125,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 	public void testInnerTypeOfGenericOuter2() throws Exception {
 		addMembers("static class Outer<E> { class Inner {} }");
 		expectImport("test1.Completion_" + getName() + ".Outer.Inner");
-		assertMethodBodyProposal("Inner|", "Completion_" + getName() +"<T>.Outer<E>.Inner", "Inner|");
+		assertMethodBodyProposal("Inner|", "Outer<E>.Inner", "Inner|");
 	}
 
 	public void testInnerTypeOfGenericOuterImported() throws Exception {
@@ -139,7 +139,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		addMembers("static class Outer<E> { class Inner {} }");
 		addImport("test1.Completion_" + getName() + ".Outer.Inner");
 		expectImport("test1.Completion_" + getName() + ".Outer.Inner");
-		assertMethodBodyProposal("Inner|", "Completion_" + getName() +"<T>.Outer<E>.Inner", "Inner|");
+		assertMethodBodyProposal("Inner|", "Outer<E>.Inner", "Inner|");
 	}
 
 	public void testGeneric() throws Exception {
