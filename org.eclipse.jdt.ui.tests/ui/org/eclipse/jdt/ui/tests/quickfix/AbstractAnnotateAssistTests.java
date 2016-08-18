@@ -125,23 +125,20 @@ public abstract class AbstractAnnotateAssistTests extends QuickFixTest {
 	// === from PropertiesFileQuickAssistTest: ===
 
 	protected static void checkContentOfFile(String message, IFile file, String content) throws Exception {
-		InputStream in= file.getContents();
-		try {
+		try (InputStream in= file.getContents()) {
 			assertEqualLines(message, content, copyToString(in));
-		} finally {
-			in.close();
 		}
 	}
 
 	protected static String copyToString(InputStream in) throws Exception {
-		ByteArrayOutputStream out= new ByteArrayOutputStream();
-		int read= in.read();
-		while (read != -1) {
-			out.write(read);
-			read= in.read();
+		try (ByteArrayOutputStream out= new ByteArrayOutputStream()) {
+			int read= in.read();
+			while (read != -1) {
+				out.write(read);
+				read= in.read();
+			}
+			return out.toString();
 		}
-		out.close();
-		return out.toString();
 	}
 
 	protected static void assertEqualLines(String message, String expected, String actual) {

@@ -96,6 +96,8 @@ import org.eclipse.jdt.internal.ui.text.correction.IProposalRelevance;
  */
 public class ExternalNullAnnotationChangeProposals {
 
+	static final String CONSTRUCTOR_SELECTOR= "<init>"; //$NON-NLS-1$
+
 	static abstract class SignatureAnnotationChangeProposal implements IJavaCompletionProposal, ICommandAccess {
 
 		protected String fLabel;
@@ -200,7 +202,7 @@ public class ExternalNullAnnotationChangeProposals {
 		public String getAdditionalProposalInfo() {
 			StringBuffer buffer= new StringBuffer();
 			buffer.append("<dl>"); //$NON-NLS-1$
-			buffer.append("<dt>").append(fSelector).append("</dt>"); //$NON-NLS-1$ //$NON-NLS-2$
+			buffer.append("<dt>").append(getHtmlRepresentation(fSelector)).append("</dt>"); //$NON-NLS-1$ //$NON-NLS-2$
 			buffer.append("<dd>").append(getHtmlRepresentation(fSignature)).append("</dd>"); //$NON-NLS-1$ //$NON-NLS-2$
 			buffer.append("<dd>").append(getFullAnnotatedSignatureHTML()).append("</dd>"); //$NON-NLS-1$ //$NON-NLS-2$
 			buffer.append("</dl>"); //$NON-NLS-1$
@@ -341,7 +343,7 @@ public class ExternalNullAnnotationChangeProposals {
 		return binding;
 	}
 
-	/* Quick assist on class file, propose changes an any type detail. */
+	/* Quick assist on class file, propose changes on any type detail. */
 	public static void collectExternalAnnotationProposals(ICompilationUnit cu, ASTNode coveringNode, int offset, ArrayList<IJavaCompletionProposal> resultingCollection) {
 
 		IJavaProject javaProject= cu.getJavaProject();
@@ -392,7 +394,7 @@ public class ExternalNullAnnotationChangeProposals {
 				if (coveringNode == null)
 					return;
 			}
-			if (inner.getNodeType() == ASTNode.PRIMITIVE_TYPE)
+			if (inner == null || inner.getNodeType() == ASTNode.PRIMITIVE_TYPE)
 				return; // cannot be annotated
 			outer= inner;
 			ASTNode next;
@@ -539,7 +541,9 @@ public class ExternalNullAnnotationChangeProposals {
 		int fParamIdx;
 
 		ParameterProposalCreator(ICompilationUnit cu, IMethodBinding methodBinding, int paramIdx) {
-			super(cu, methodBinding.getDeclaringClass(), methodBinding.getName(), extractGenericSignature(methodBinding));
+			super(cu, methodBinding.getDeclaringClass(),
+					methodBinding.isConstructor() ? CONSTRUCTOR_SELECTOR : methodBinding.getName(),
+					extractGenericSignature(methodBinding));
 			fParamIdx= paramIdx;
 		}
 
