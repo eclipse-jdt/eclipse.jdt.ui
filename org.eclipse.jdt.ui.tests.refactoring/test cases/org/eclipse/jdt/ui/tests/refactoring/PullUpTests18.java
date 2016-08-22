@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import junit.framework.Test;
-
 import java.util.Hashtable;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -37,6 +35,8 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import junit.framework.Test;
 
 public class PullUpTests18 extends PullUpTests {
 
@@ -206,5 +206,31 @@ public class PullUpTests18 extends PullUpTests {
 			store.setValue(PreferenceConstants.CODEGEN_USE_OVERRIDE_ANNOTATION, previousValue);
 			JavaCore.setOptions(options);
 		}
+	}
+
+	// bug 497368
+	public void test54() throws Exception {
+		ICompilationUnit cuFoo= createCUfromTestFile(getPackageP(), "Foo");
+		ICompilationUnit cuIFoo= createCUfromTestFile(getPackageP(), "IFoo");
+		ICompilationUnit cuFooImpl= createCUfromTestFile(getPackageP(), "FooImpl");
+
+		String[] methodNames= new String[] { "log" };
+		String[][] signatures= new String[][] { new String[] { "QField;", "QString;" } };
+
+		IType type= getType(cuFoo, "Foo");
+		IMethod[] methods= getMethods(type, methodNames, signatures);
+
+		PullUpRefactoringProcessor processor= createRefactoringProcessor(methods);
+		Refactoring ref= processor.getRefactoring();
+
+		assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+		setSuperclassAsTargetClass(processor);
+
+		RefactoringStatus result= performRefactoring(ref);
+		assertTrue("precondition was supposed to pass", result == null || !result.hasError());
+
+		assertEqualLines("IFoo", getFileContents(getOutputTestFileName("IFoo")), cuIFoo.getSource());
+		assertEqualLines("FooImpl", getFileContents(getOutputTestFileName("FooImpl")), cuFooImpl.getSource());
+		assertEqualLines("Foo", getFileContents(getOutputTestFileName("Foo")), cuFoo.getSource());
 	}
 }

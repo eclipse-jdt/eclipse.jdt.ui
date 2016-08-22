@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -234,6 +234,9 @@ public final class JUnitMessages extends NLS {
 	public static String ShowNextFailureAction_tooltip;
 	public static String ShowPreviousFailureAction_label;
 	public static String ShowPreviousFailureAction_tooltip;
+	public static String ShowStackTraceInConsoleViewAction_description;
+	public static String ShowStackTraceInConsoleViewAction_label;
+	public static String ShowStackTraceInConsoleViewAction_tooltip;
 	public static String TestMethodSelectionDialog_dialog_title;
 	public static String TestMethodSelectionDialog_error_notfound_message;
 	public static String TestMethodSelectionDialog_error_notfound_title;

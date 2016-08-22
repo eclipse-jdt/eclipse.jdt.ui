@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,18 +50,11 @@ public class LocaleSensitiveSpellDictionary extends AbstractSpellDictionary {
 		return fLocale;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#getURL()
-	 */
 	@Override
 	protected final URL getURL() throws MalformedURLException {
 		return new URL(fLocation, fLocale.toString() + ".dictionary");  //$NON-NLS-1$
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.AbstractSpellDictionary#getInitialSize()
-	 * @since 3.6
-	 */
 	@Override
 	protected int getInitialSize() {
 		return 32 * 1024;

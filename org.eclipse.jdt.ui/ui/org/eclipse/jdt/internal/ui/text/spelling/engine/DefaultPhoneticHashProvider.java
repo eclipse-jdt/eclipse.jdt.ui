@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -201,9 +201,6 @@ public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider 
 		return false;
 	}
 
-	/*
-	 * @see org.eclipse.spelling.done.IPhoneticHasher#getHash(java.lang.String)
-	 */
 	@Override
 	public final String getHash(final String word) {
 
@@ -675,9 +672,6 @@ public final class DefaultPhoneticHashProvider implements IPhoneticHashProvider 
 		return buffer.toString();
 	}
 
-	/*
-	 * @see org.eclipse.spelling.done.IPhoneticHasher#getMutators()
-	 */
 	@Override
 	public final char[] getMutators() {
 		return MUTATOR_CHARACTERS;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -346,9 +346,6 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		return fHashProvider;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#getProposals(java.lang.String,boolean)
-	 */
 	@Override
 	public Set<RankedWordProposal> getProposals(final String word, final boolean sentence) {
 
@@ -504,9 +501,6 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#isCorrect(java.lang.String)
-	 */
 	@Override
 	public boolean isCorrect(String word) {
 		word= stripNonLetters(word);
@@ -559,10 +553,6 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		return false;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#setStripNonLetters(boolean)
-	 * @since 3.3
-	 */
 	@Override
 	public void setStripNonLetters(boolean state) {
 		fIsStrippingNonLetters= state;
@@ -595,9 +585,6 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		return word.substring(i, j+1);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellDictionary#isLoaded()
-	 */
 	@Override
 	public synchronized final boolean isLoaded() {
 		return fLoaded || fHashBuckets.size() > 0;
@@ -717,9 +704,6 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		fHashProvider= provider;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellDictionary#unload()
-	 */
 	@Override
 	public synchronized void unload() {
 		fLoaded= false;
@@ -727,17 +711,11 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		fHashBuckets.clear();
 	}
 
-	/*
-	 * @see org.eclipse.jdt.ui.text.spelling.engine.ISpellDictionary#acceptsWords()
-	 */
 	@Override
 	public boolean acceptsWords() {
 		return false;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellDictionary#addWord(java.lang.String)
-	 */
 	@Override
 	public void addWord(final String word) {
 		// Do nothing

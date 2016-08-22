@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -136,6 +137,12 @@ public class TypeMismatchSubProcessor {
 		}
 
 		ITypeBinding currBinding= nodeToCast.resolveTypeBinding();
+		if (currBinding == null && nodeToCast instanceof MethodInvocation) {
+			IMethodBinding methodBinding= ((MethodInvocation) nodeToCast).resolveMethodBinding();
+			if (methodBinding != null) {
+				currBinding= methodBinding.getReturnType();
+			}
+		}
 		
 		if (!(nodeToCast instanceof ArrayInitializer)) {
 			ITypeBinding castFixType= null;

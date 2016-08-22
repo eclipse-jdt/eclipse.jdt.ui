@@ -60,7 +60,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Assert two proposals ("@NonNull" and "@Nullable") on a type argument of a parameter.
 	 * The parameterized type already has a @NonNull annotation.
 	 * Apply the second proposal and check the effect.
-	 * @throws Exception
+	 * @throws Exception multiple causes
 	 */
 	public void testAnnotateParameter_TypeArgument() throws Exception {
 		
@@ -130,7 +130,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 
 	/**
 	 * Assert NO proposals on the primitive leaf type of an array type.
-	 * @throws Exception
+	 * @throws Exception multiple causes
 	 */
 	public void testAnnotateParameter_ArrayOfPrimitive() throws Exception {
 		
@@ -163,7 +163,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * The parameterized type and the wildcard already has a @NonNull annotation.
 	 * Annotation entry already exists, with @NonNull on the wildcard itself.
 	 * Apply the second proposal and check the effect.
-	 * @throws Exception
+	 * @throws Exception multiple causes
 	 */
 	public void testAnnotateParameter_WildcardBound() throws Exception {
 		
@@ -237,7 +237,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Apply the second proposal and check the effect.
 	 * 
 	 * Cf. {@link AnnotateAssistTest15#testAnnotateParameter_Array1()}
-	 * @throws Exception
+	 * @throws Exception multiple causes
 	 */
 	public void testAnnotateParameter_Array2() throws Exception {
 		
@@ -309,7 +309,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Apply the second proposal and check the effect.
 	 * 
 	 * Cf. {@link AnnotateAssistTest15#testAnnotateParameter_Array1()}
-	 * @throws Exception
+	 * @throws Exception multiple causes
 	 */
 	public void testAnnotateParameter_Array3() throws Exception {
 		
@@ -383,7 +383,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Apply the second proposal and check the effect.
 	 * 
 	 * Cf. {@link AnnotateAssistTest18#testAnnotateParameter_Array3()}
-	 * @throws Exception
+	 * @throws Exception multiple causes
 	 */
 	public void testAnnotateParameter_Array4() throws Exception {
 		
@@ -457,7 +457,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Apply the second proposal and check the effect.
 	 * 
 	 * Cf. {@link AnnotateAssistTest18#testAnnotateParameter_Array3()}
-	 * @throws Exception
+	 * @throws Exception multiple causes
 	 */
 	public void testAnnotateParameter_Array5() throws Exception {
 		
@@ -530,7 +530,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Apply the second proposal and check the effect.
 	 * 
 	 * Cf. {@link AnnotateAssistTest18#testAnnotateParameter_Array3()}
-	 * @throws Exception
+	 * @throws Exception multiple causes
 	 */
 	public void testAnnotateParameter_Varargs1() throws Exception {
 		
@@ -603,7 +603,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * Apply the second proposal and check the effect.
 	 * 
 	 * Cf. {@link AnnotateAssistTest18#testAnnotateParameter_Varargs1()}
-	 * @throws Exception
+	 * @throws Exception multiple causes
 	 */
 	public void testAnnotateParameter_Varargs2() throws Exception {
 		
@@ -676,7 +676,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	 * The parameterized type and the wildcard already has a @NonNull annotation.
 	 * Annotation entry already exists, with @NonNull on the wildcard itself.
 	 * Apply the second proposal and check the effect.
-	 * @throws Exception
+	 * @throws Exception multiple causes
 	 */
 	// FIXME(stephan): enable once implemented
 	public void _testAnnotateParameter_TypeParameter() throws Exception {
@@ -739,7 +739,7 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	/**
 	 * Assert two proposals ("@NonNull" and "@Nullable") on a complex field type (list of array)
 	 * Apply the second proposal and check the effect.
-	 * @throws Exception
+	 * @throws Exception multiple causes
 	 */
 	public void testAnnotateField1() throws Exception {
 		

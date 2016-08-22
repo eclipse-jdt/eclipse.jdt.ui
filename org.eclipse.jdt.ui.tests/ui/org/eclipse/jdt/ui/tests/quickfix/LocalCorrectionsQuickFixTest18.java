@@ -1306,5 +1306,49 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+	public void testCorrectVariableType() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Collections;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("public class Test {\n");
+		buf.append("\n");
+		buf.append("    public void method() {\n");
+		buf.append("        List<String> strings1 = strings().toArray(new String[0]);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public List<String> strings() {\n");
+		buf.append("        return Collections.emptyList();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Collections;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("public class Test {\n");
+		buf.append("\n");
+		buf.append("    public void method() {\n");
+		buf.append("        String[] strings1 = strings().toArray(new String[0]);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public List<String> strings() {\n");
+		buf.append("        return Collections.emptyList();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
 
 }

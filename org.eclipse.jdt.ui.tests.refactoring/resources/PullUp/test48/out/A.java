@@ -6,6 +6,7 @@ public class A {
 	}
 }
 class B extends A {
+	@Override
 	public final void method() {
 		
 	}

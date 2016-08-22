@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,49 +65,31 @@ public class SpellEvent implements ISpellEvent {
 		fMatch= match;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent#getBegin()
-	 */
 	@Override
 	public final int getBegin() {
 		return fBegin;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent#getEnd()
-	 */
 	@Override
 	public final int getEnd() {
 		return fEnd;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent#getProposals()
-	 */
 	@Override
 	public final Set<RankedWordProposal> getProposals() {
 		return fChecker.getProposals(fWord, fSentence);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent#getWord()
-	 */
 	@Override
 	public final String getWord() {
 		return fWord;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent#isMatch()
-	 */
 	@Override
 	public final boolean isMatch() {
 		return fMatch;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent#isStart()
-	 */
 	@Override
 	public final boolean isStart() {
 		return fSentence;

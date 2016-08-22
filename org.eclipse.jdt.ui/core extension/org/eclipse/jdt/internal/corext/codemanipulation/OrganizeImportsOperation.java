@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -326,18 +327,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 			}
 
-			Set<String> matchingUnresolvableImports= fUnresolvableImportMatcher.matchTypeImports(typeName);
-			if (!matchingUnresolvableImports.isEmpty()) {
-				// If there are matching unresolvable import(s), rely on them to provide the type.
-				fImportsAdded.add(typeName);
-				for (String string : matchingUnresolvableImports) {
-					fImpStructure.addImport(string, UNRESOLVABLE_IMPORT_CONTEXT);
-				}
-			} else {
-				// Only resort to search results if there are no matching unresolvable imports.
-				fImportsAdded.add(typeName);
-				fUnresolvedTypes.put(typeName, new UnresolvedTypeData(ref));
-			}
+			fImportsAdded.add(typeName);
+			fUnresolvedTypes.put(typeName, new UnresolvedTypeData(ref));
 		}
 
 		public boolean process(IProgressMonitor monitor) throws JavaModelException {
@@ -365,6 +356,18 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					if (data != null && isVisible(curr) && isOfKind(curr, data.typeKinds, is50OrHigher)) {
 						if (fAllowDefaultPackageImports || curr.getPackageName().length() > 0) {
 							data.addInfo(curr);
+						}
+					}
+				}
+
+				for (Entry<String, UnresolvedTypeData> entry : fUnresolvedTypes.entrySet()) {
+					if (entry.getValue().foundInfos.size() == 0) { // No result found in search
+						Set<String> matchingUnresolvableImports= fUnresolvableImportMatcher.matchTypeImports(entry.getKey());
+						if (!matchingUnresolvableImports.isEmpty()) {
+							// If there are matching unresolvable import(s), rely on them to provide the type.
+							for (String string : matchingUnresolvableImports) {
+								fImpStructure.addImport(string, UNRESOLVABLE_IMPORT_CONTEXT);
+							}
 						}
 					}
 				}
@@ -590,7 +593,18 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 				for (int i= 0; i < chosen.length; i++) {
 					TypeNameMatch typeInfo= chosen[i];
-					importsRewrite.addImport(typeInfo.getFullyQualifiedName());
+					if (typeInfo != null) {
+						importsRewrite.addImport(typeInfo.getFullyQualifiedName());
+					} else { // Skipped by user
+						String typeName= choices[i][0].getSimpleTypeName();
+						Set<String> matchingUnresolvableImports= unresolvableImportMatcher.matchTypeImports(typeName);
+						if (!matchingUnresolvableImports.isEmpty()) {
+							// If there are matching unresolvable import(s), rely on them to provide the type.
+							for (String string : matchingUnresolvableImports) {
+								importsRewrite.addImport(string, UNRESOLVABLE_IMPORT_CONTEXT);
+							}
+						}
+					}
 				}
 			}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -144,7 +144,7 @@ public final class HintTextGroup implements ISelectionChangedListener {
 			}
 			formText.marginHeight= 2;
 			formText.marginWidth= 0;
-			formText.setBackground(null);
+			formText.setBackground(parent.getBackground());
 			formText.setLayoutData(new TableWrapData(TableWrapData.FILL_GRAB));
 			return formText;
 		} finally {

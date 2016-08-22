@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,12 +75,16 @@ public class FailureTrace implements IMenuListener {
     private CompareResultsAction fCompareAction;
 	private final FailureTableDisplay fFailureTableDisplay;
 	private IPropertyChangeListener fFontPropertyChangeListener;
+	private ShowStackTraceInConsoleViewAction fShowTraceInConsoleAction;
 
 	public FailureTrace(Composite parent, Clipboard clipboard, TestRunnerViewPart testRunner, ToolBar toolBar) {
 		Assert.isNotNull(clipboard);
 
 		// fill the failure trace viewer toolbar
 		ToolBarManager failureToolBarmanager= new ToolBarManager(toolBar);
+		fShowTraceInConsoleAction= new ShowStackTraceInConsoleViewAction(this);
+		fShowTraceInConsoleAction.setEnabled(false);
+		failureToolBarmanager.add(fShowTraceInConsoleAction);
 		failureToolBarmanager.add(new EnableStackFilterAction(this));
 		fCompareAction = new CompareResultsAction(this);
 		fCompareAction.setEnabled(false);
@@ -202,6 +206,9 @@ public class FailureTrace implements IMenuListener {
 		if (enableCompare) {
 			fCompareAction.updateOpenDialog(test);
 		}
+
+		boolean enableShowTraceInConsole= test != null && test.getFailureTrace() != null;
+		fShowTraceInConsoleAction.setEnabled(enableShowTraceInConsole);
 	}
 
 	private void updateTable(String trace) {

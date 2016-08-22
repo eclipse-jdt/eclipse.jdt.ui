@@ -414,6 +414,75 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 	}
 
 	/*
+	 * Assert two proposals ("@NonNull" and "@Nullable") on a parameter of a constructor.
+	 * Apply the second proposal and check the effect.
+	 */
+	public void testAnnotateConstructorParameter() throws Exception {
+		
+		String X_PATH= "pack/age/X";
+		String[] pathAndContents= new String[] {
+					X_PATH+".java",
+					"package pack.age;\n" +
+					"import java.util.List;\n" +
+					"public class X {\n" +
+					"    public X(String p) {}\n" +
+					"}\n"
+				};
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_5, null);
+		
+		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
+		String initialContent=
+				"class pack/age/X\n" +
+				"<init>\n" +
+				" (Ljava/lang/String;)V\n";
+		ensureExists(annotationFile.getParent());
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+
+		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
+		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+
+		try {
+			int offset= pathAndContents[1].indexOf("String");
+
+			List<ICompletionProposal> list= collectAnnotateProposals(javaEditor, offset);
+			
+			assertCorrectLabels(list);
+			assertNumberOfProposals(list, 2);
+			
+			ICompletionProposal proposal= findProposalByName("Annotate as '@NonNull String'", list);
+			String expectedInfo=
+					"<dl><dt>&lt;init&gt;</dt>" +
+					"<dd>(Ljava/lang/String;)V</dd>" +
+					"<dd>(L<b>1</b>java/lang/String;)V</dd>" + // <= 1
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			proposal= findProposalByName("Annotate as '@Nullable String'", list);
+			expectedInfo=
+					"<dl><dt>&lt;init&gt;</dt>" +
+					"<dd>(Ljava/lang/String;)V</dd>" +
+					"<dd>(L<b>0</b>java/lang/String;)V</dd>" + // <= 0
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
+			proposal.apply(document);
+			
+			annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
+			assertTrue("Annotation file should have been created", annotationFile.exists());
+
+			String expectedContent=
+					"class pack/age/X\n" +
+					"<init>\n" +
+					" (Ljava/lang/String;)V\n" +
+					" (L0java/lang/String;)V\n";
+			checkContentOfFile("annotation file content", annotationFile, expectedContent);
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+	}
+
+	/*
 	 * Assert two proposals ("@NonNull" and "@Nullable") on a simple field type (type variable).
 	 * Apply the second proposal and check the effect.
 	 */

@@ -18,7 +18,9 @@ class D extends C{
 	/* (non-Javadoc)
 	 * @see p.A#m(int[])
 	 */
+	@Override
 	public boolean m(int[] a) throws Exception {
+		// TODO Auto-generated method stub
 		return false;
 	}
 }
@@ -27,7 +29,9 @@ class D1 extends C{
 	/* (non-Javadoc)
 	 * @see p.A#m(int[])
 	 */
+	@Override
 	public boolean m(int[] a) throws Exception {
+		// TODO Auto-generated method stub
 		return false;
 	}
 }

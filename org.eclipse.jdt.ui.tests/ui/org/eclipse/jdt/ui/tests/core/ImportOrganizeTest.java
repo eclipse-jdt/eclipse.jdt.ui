@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -3388,12 +3388,12 @@ public class ImportOrganizeTest extends CoreTests {
 
 		createOperation(cu, new String[] {}, 99, true, true, true, null).run(null);
 
-		// FromEitherPackage could be imported from com.notimported, but the existing
-		// (though unresolvable) import from com.notfound is preserved instead.
+		// FromEitherPackage is imported from com.notimported, instead of preserving the existing
+		// unresolvable import from com.notfound.
 		StringBuilder expected= new StringBuilder();
 		expected.append("package pack;\n");
 		expected.append("\n");
-		expected.append("import com.notfound.FromEitherPackage;\n");
+		expected.append("import com.notimported.FromEitherPackage;\n");
 		expected.append("import com.notimported.FromNotImportedOnly;\n");
 		expected.append("\n");
 		expected.append("public class Cu {\n");
