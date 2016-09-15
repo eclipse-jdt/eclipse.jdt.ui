@@ -377,6 +377,7 @@ public class JavadocView extends AbstractInfoView {
 	private boolean fIsUsingBrowserWidget;
 
 	private RGB fBackgroundColorRGB;
+	private RGB fForegroundColorRGB;
 	/**
 	 * The font listener.
 	 * @since 3.3
@@ -757,6 +758,8 @@ public class JavadocView extends AbstractInfoView {
 	@Override
 	protected void setForeground(Color color) {
 		getControl().setForeground(color);
+		fForegroundColorRGB= color.getRGB();
+		refresh();
 	}
 
 	/*
@@ -785,6 +788,11 @@ public class JavadocView extends AbstractInfoView {
 	@Override
 	protected String getBackgroundColorKey() {
 		return "org.eclipse.jdt.ui.JavadocView.backgroundColor";		 //$NON-NLS-1$
+	}
+
+	@Override
+	protected String getForegroundColorKey() {
+		return "org.eclipse.jdt.ui.JavadocView.foregroundColor";		 //$NON-NLS-1$
 	}
 
 	/*
@@ -921,7 +929,7 @@ public class JavadocView extends AbstractInfoView {
 			javadocHtml= (String) input;
 		} else {
 			StringBuffer buffer= new StringBuffer();
-			HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, fgStyleSheet);
+			HTMLPrinter.insertPageProlog(buffer, 0, fForegroundColorRGB, fBackgroundColorRGB, fgStyleSheet);
 			HTMLPrinter.addPageEpilog(buffer);
 			javadocHtml= buffer.toString();
 		}
@@ -1105,7 +1113,7 @@ public class JavadocView extends AbstractInfoView {
 		if (buffer.length() == 0)
 			return null;
 
-		HTMLPrinter.insertPageProlog(buffer, 0, null, fBackgroundColorRGB, fgStyleSheet);
+		HTMLPrinter.insertPageProlog(buffer, 0, fForegroundColorRGB, fBackgroundColorRGB, fgStyleSheet);
 		if (base != null) {
 			int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
 			buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$

@@ -162,6 +162,9 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	private Color fBackgroundColor;
 	private RGB fBackgroundColorRGB;
 
+	private Color fForegroundColor;
+	private RGB fForegroundColorRGB;
+
 	/**
 	 * True if linking with selection is enabled, false otherwise.
 	 * @since 3.4
@@ -378,10 +381,19 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		if (display == null || display.isDisposed())
 			return;
 
-		setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-
 		ColorRegistry registry= JFaceResources.getColorRegistry();
 		registry.addListener(this);
+
+		Color fgColor;
+		fForegroundColorRGB = (getForegroundColorKey() != null) ? registry.getRGB(getForegroundColorKey()) : null;
+		if (fForegroundColorRGB == null) {
+			fgColor = display.getSystemColor(SWT.COLOR_INFO_FOREGROUND);
+			fForegroundColorRGB= fgColor.getRGB();
+		} else {
+			fgColor = new Color(display, fForegroundColorRGB);
+			fForegroundColor= fgColor;
+		}
+		setForeground(fgColor);
 
 		fBackgroundColorRGB= registry.getRGB(getBackgroundColorKey());
 		Color bgColor;
@@ -392,7 +404,6 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 			bgColor= new Color(display, fBackgroundColorRGB);
 			fBackgroundColor= bgColor;
 		}
-
 		setBackground(bgColor);
 	}
 
@@ -404,10 +415,23 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 	 */
 	abstract protected String getBackgroundColorKey();
 
+  	/**
+	 * The preference key for the foreground color.
+	 * 
+	 * @return the foreground color key or <code>null</code> if none
+	 */
+	protected String getForegroundColorKey() {
+		return null;
+	}
+
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
-		if (getBackgroundColorKey().equals(event.getProperty()))
+		String property= event.getProperty();
+		if (property.equals(getBackgroundColorKey())
+				|| property.equals(getForegroundColorKey())) {
 			inititalizeColors();
+		}
+
 	}
 
 	/**
@@ -645,6 +669,12 @@ public abstract class AbstractInfoView extends ViewPart implements ISelectionLis
 		if (fBackgroundColor != null) {
 			fBackgroundColor.dispose();
 			fBackgroundColor= null;
+		}
+
+		fForegroundColorRGB= null;
+		if (fForegroundColor != null) {
+			fForegroundColor.dispose();
+			fForegroundColor= null;
 		}
 
 		internalDispose();

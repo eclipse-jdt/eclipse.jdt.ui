@@ -1066,6 +1066,15 @@
          </description>
       </colorDefinition>
       <colorDefinition
+            label="%JavadocViewForegroundColor.label"
+            categoryId="org.eclipse.jdt.ui.presentation"
+            value="COLOR_INFO_FOREGROUND"
+            id="org.eclipse.jdt.ui.JavadocView.foregroundColor">
+         <description>
+            %JavadocViewForegroundColor.description
+         </description>
+      </colorDefinition>
+      <colorDefinition
             label="%DeclarationViewBackgroundColor.label"
             categoryId="org.eclipse.jdt.ui.presentation"
             id="org.eclipse.jdt.ui.DeclarationView.backgroundColor">
