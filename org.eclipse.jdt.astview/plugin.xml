@@ -6,7 +6,7 @@
          point="org.eclipse.ui.views">
       <view
             name="ASTView"
-            icon="$nl$/icons/view.gif"
+            icon="$nl$/icons/view.png"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.astview.views.ASTView"
             id="org.eclipse.jdt.astview.views.ASTView">
@@ -42,8 +42,8 @@
      </parameter>
   </key>
   </extension>
-  
-  
+
+
   <extension
         point="org.eclipse.ui.perspectiveExtensions">
      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
@@ -56,5 +56,5 @@
         <viewShortcut id="org.eclipse.jdt.astview.views.ASTView"/>
      </perspectiveExtension>
   </extension>
-  
+
 </plugin>
