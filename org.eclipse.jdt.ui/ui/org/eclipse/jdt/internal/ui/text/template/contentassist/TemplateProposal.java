@@ -133,7 +133,7 @@ public class TemplateProposal
 	 */
 	private int computeRelevance() {
 		// see org.eclipse.jdt.internal.codeassist.RelevanceConstants
-		final int R_DEFAULT= 0;
+		final int R_DEFAULT= 30;
 		final int R_INTERESTING= 5;
 		final int R_CASE= 10;
 		final int R_NON_RESTRICTED= 3;

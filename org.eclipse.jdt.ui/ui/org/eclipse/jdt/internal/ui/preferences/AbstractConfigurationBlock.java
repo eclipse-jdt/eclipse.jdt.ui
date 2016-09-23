@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -405,7 +405,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
         Iterator<SelectionListener> iter3= fMasterSlaveListeners.iterator();
         while (iter3.hasNext()) {
             SelectionListener listener= iter3.next();
-            listener.widgetSelected(null);
+			listener.widgetSelected((SelectionEvent) null);
         }
 
         updateStatus(new StatusInfo());

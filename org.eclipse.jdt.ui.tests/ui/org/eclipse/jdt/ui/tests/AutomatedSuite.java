@@ -29,6 +29,7 @@ import org.eclipse.jdt.ui.tests.packageHover.PackageJavadocTests;
 import org.eclipse.jdt.ui.tests.packageview.PackageExplorerTests;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
 import org.eclipse.jdt.ui.tests.search.SearchTest;
+import org.eclipse.jdt.ui.tests.wizardapi.ImporterTest;
 import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
 import org.eclipse.jdt.ui.tests.wizardapi.NewTypeWizardTest;
 
@@ -56,7 +57,8 @@ public class AutomatedSuite extends TestSuite {
 
 		addTest(NewJavaProjectWizardTest.suite());
 		addTest(NewTypeWizardTest.suite());
-
+		addTest(ImporterTest.suite());
+		
 		addTest(PackageExplorerTests.suite());
 
 		addTest(PackagesViewContentProviderTests.suite());
