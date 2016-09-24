@@ -18,9 +18,9 @@ class ShowPreviousFailureAction extends Action {
 
 	public ShowPreviousFailureAction(TestRunnerViewPart part) {
 		super(JUnitMessages.ShowPreviousFailureAction_label);
-		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/select_prev.gif")); //$NON-NLS-1$
-		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/select_prev.gif")); //$NON-NLS-1$
-		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/select_prev.gif")); //$NON-NLS-1$
+		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/select_prev.png")); //$NON-NLS-1$
+		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/select_prev.png")); //$NON-NLS-1$
+		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/select_prev.png")); //$NON-NLS-1$
 		setToolTipText(JUnitMessages.ShowPreviousFailureAction_tooltip);
 		fPart= part;
 	}

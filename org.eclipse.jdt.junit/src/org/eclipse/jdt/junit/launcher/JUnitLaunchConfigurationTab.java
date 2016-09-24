@@ -142,7 +142,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	// Test class UI widgets
 	private Text fTestText;
 	private Button fSearchButton;
-	private final Image fTestIcon= createImage("obj16/test.gif"); //$NON-NLS-1$
+	private final Image fTestIcon= createImage("obj16/test.png"); //$NON-NLS-1$
 	private String fOriginalTestMethodName;
 	private Label fTestMethodLabel;
 	private Text fTestMethodText;
@@ -161,10 +161,10 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	private ILaunchConfiguration fLaunchConfiguration;
 
 	private boolean fIsValid= true;
-	
+
 	private Set<String> fMethodsCache;
 	private String fMethodsCacheKey;
-	
+
 	/**
 	 * Creates a JUnit launch configuration tab.
 	 */
@@ -183,7 +183,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 		createSingleTestSection(comp);
 		createSpacer(comp);
-		
+
 		createTestContainerSelectionGroup(comp);
 		createSpacer(comp);
 
@@ -307,7 +307,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fTestMethodLabel.setLayoutData(gd);
 		fTestMethodLabel.setText(JUnitMessages.JUnitLaunchConfigurationTab_label_method);
 
-		
+
 		fTestMethodText= new Text(comp, SWT.SINGLE | SWT.BORDER);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		fTestMethodText.setLayoutData(gd);
@@ -608,7 +608,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			JUnitPlugin.log(e);
 			return;
 		}
-		
+
 		dialog.setTitle(JUnitMessages.JUnitLaunchConfigurationTab_testdialog_title);
 		dialog.setMessage(JUnitMessages.JUnitLaunchConfigurationTab_testdialog_message);
 		if (dialog.open() == Window.CANCEL) {
@@ -649,7 +649,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			IType testType= javaProject.findType(fTestText.getText());
 			Set<String> methodNames= getMethodsForType(javaProject, testType, getSelectedTestKind());
 			String methodName= chooseMethodName(methodNames);
-			
+
 			if (methodName != null) {
 				fTestMethodText.setText(methodName);
 				validatePage();
@@ -663,11 +663,11 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	private Set<String> getMethodsForType(IJavaProject javaProject, IType type, TestKind testKind) throws JavaModelException {
 		if (javaProject == null || type == null || testKind == null)
 			return Collections.emptySet();
-		
+
 		String methodsCacheKey= javaProject.getElementName() + '\n' + type.getFullyQualifiedName() + '\n' + testKind.getId();
 		if (methodsCacheKey.equals(fMethodsCacheKey))
 			return fMethodsCache;
-		
+
 		Set<String> methodNames= new HashSet<>();
 		fMethodsCache= methodNames;
 		fMethodsCacheKey= methodsCacheKey;
@@ -694,7 +694,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			String superclassName= type.getSuperclassName();
 			if (superclassName != null) {
 				int pos= superclassName.indexOf('<');
-				if (pos != -1) 
+				if (pos != -1)
 					superclassName= superclassName.substring(0, pos);
 				String[][] resolvedSupertype= type.resolveType(superclassName);
 				if (resolvedSupertype != null && resolvedSupertype.length > 0) {
@@ -739,7 +739,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		}
 		return null;
 	}
-	
+
 	/*
 	 * Realize a Java Project selection dialog and return the first selected project,
 	 * or null if there was none.
@@ -817,7 +817,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		validatePage();
 		updateLaunchConfigurationDialog();
 	}
-	
+
 	/*
 	 * @see org.eclipse.debug.ui.AbstractLaunchConfigurationTab#setErrorMessage(java.lang.String)
 	 * @since 3.6

@@ -248,11 +248,11 @@ public class TestRunnerViewPart extends ViewPart {
 	final Image fTestRunningIcon;
 	final Image fTestIgnoredIcon;
 
-	final ImageDescriptor fSuiteIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuite.gif"); //$NON-NLS-1$
-	final ImageDescriptor fSuiteOkIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuiteok.gif"); //$NON-NLS-1$
-	final ImageDescriptor fSuiteErrorIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuiteerror.gif"); //$NON-NLS-1$
-	final ImageDescriptor fSuiteFailIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuitefail.gif"); //$NON-NLS-1$
-	final ImageDescriptor fSuiteRunningIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuiterun.gif"); //$NON-NLS-1$
+	final ImageDescriptor fSuiteIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuite.png"); //$NON-NLS-1$
+	final ImageDescriptor fSuiteOkIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuiteok.png"); //$NON-NLS-1$
+	final ImageDescriptor fSuiteErrorIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuiteerror.png"); //$NON-NLS-1$
+	final ImageDescriptor fSuiteFailIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuitefail.png"); //$NON-NLS-1$
+	final ImageDescriptor fSuiteRunningIconDescriptor= JUnitPlugin.getImageDescriptor("obj16/tsuiterun.png"); //$NON-NLS-1$
 
 	final Image fSuiteIcon;
 	final Image fSuiteOkIcon;
@@ -295,7 +295,7 @@ public class TestRunnerViewPart extends ViewPart {
 	 * @since 3.6
 	 */
 	static final String PREF_LAST_URL= "lastImportURL"; //$NON-NLS-1$
-	
+
 	//orientations
 	static final int VIEW_ORIENTATION_VERTICAL= 0;
 	static final int VIEW_ORIENTATION_HORIZONTAL= 1;
@@ -368,7 +368,7 @@ public class TestRunnerViewPart extends ViewPart {
 		@Override
 		public void configureHistoryDropDownAction(IAction action) {
 			action.setToolTipText(JUnitMessages.TestRunnerViewPart_test_run_history);
-			JUnitPlugin.setLocalImageDescriptors(action, "history_list.gif"); //$NON-NLS-1$
+			JUnitPlugin.setLocalImageDescriptors(action, "history_list.png"); //$NON-NLS-1$
 		}
 
 		@Override
@@ -512,18 +512,18 @@ public class TestRunnerViewPart extends ViewPart {
 			}
 		}
 	}
-	
+
 	private static class JUnitPasteAction extends Action {
 		private final Shell fShell;
 		private Clipboard fClipboard;
-		
+
 		public JUnitPasteAction(Shell shell, Clipboard clipboard) {
 			super(JUnitMessages.TestRunnerViewPart_JUnitPasteAction_label);
 			Assert.isNotNull(clipboard);
 			fShell= shell;
 			fClipboard= clipboard;
 		}
-		
+
 		@Override
 		public void run() {
 			String urlData= (String) fClipboard.getContents(URLTransfer.getInstance());
@@ -552,7 +552,7 @@ public class TestRunnerViewPart extends ViewPart {
 			return true;
 		}
 	}
-	
+
 	private static class ImportTestRunSessionFromURLAction extends Action {
 		private static class URLValidator implements IInputValidator {
 			@Override
@@ -570,24 +570,24 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		private static final String DIALOG_SETTINGS= "ImportTestRunSessionFromURLAction"; //$NON-NLS-1$
-		
+
 		private final Shell fShell;
-		
+
 		public ImportTestRunSessionFromURLAction(Shell shell) {
 			super(JUnitMessages.TestRunnerViewPart_ImportTestRunSessionFromURLAction_import_from_url);
 			fShell= shell;
 		}
-		
+
 		@Override
 		public void run() {
 			String title= JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_title;
 			String message= JUnitMessages.TestRunnerViewPart_ImportTestRunSessionFromURLAction_url;
-			
+
 			final IDialogSettings dialogSettings= JUnitPlugin.getDefault().getDialogSettings();
 			String url= dialogSettings.get(PREF_LAST_URL);
-			
+
 			IInputValidator validator= new URLValidator();
-			
+
 			InputDialog inputDialog= new InputDialog(fShell, title, message, url, validator) {
 				@Override
 				protected Control createDialogArea(Composite parent) {
@@ -613,7 +613,7 @@ public class TestRunnerViewPart extends ViewPart {
 					return true;
 				}
 			};
-			
+
 			int res= inputDialog.open();
 			if (res == IDialogConstants.OK_ID) {
 				url= inputDialog.getValue();
@@ -688,7 +688,7 @@ public class TestRunnerViewPart extends ViewPart {
 							}
 							registerInfoMessage(msg);
 						}
-						
+
 						TestRunSession deactivatedSession= setActiveTestRunSession(testRunSession);
 						if (deactivatedSession != null)
 							deactivatedSession.swapOut();
@@ -732,7 +732,7 @@ public class TestRunnerViewPart extends ViewPart {
 		@Override
 		public void sessionEnded(long elapsedTime){
 			deregisterTestSessionListener(false);
-			
+
 			fTestViewer.registerAutoScrollTarget(null);
 
 			String[] keys= {elapsedTimeAsString(elapsedTime)};
@@ -763,7 +763,7 @@ public class TestRunnerViewPart extends ViewPart {
 		@Override
 		public void sessionStopped(final long elapsedTime) {
 			deregisterTestSessionListener(false);
-			
+
 			fTestViewer.registerAutoScrollTarget(null);
 
 			registerInfoMessage(JUnitMessages.TestRunnerViewPart_message_stopped);
@@ -773,7 +773,7 @@ public class TestRunnerViewPart extends ViewPart {
 		@Override
 		public void sessionTerminated() {
 			deregisterTestSessionListener(true);
-			
+
 			fTestViewer.registerAutoScrollTarget(null);
 
 			registerInfoMessage(JUnitMessages.TestRunnerViewPart_message_terminated);
@@ -921,7 +921,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public StopAction() {
 			setText(JUnitMessages.TestRunnerViewPart_stopaction_text);
 			setToolTipText(JUnitMessages.TestRunnerViewPart_stopaction_tooltip);
-			JUnitPlugin.setLocalImageDescriptors(this, "stop.gif"); //$NON-NLS-1$
+			JUnitPlugin.setLocalImageDescriptors(this, "stop.png"); //$NON-NLS-1$
 		}
 
 		@Override
@@ -935,7 +935,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public RerunLastAction() {
 			setText(JUnitMessages.TestRunnerViewPart_rerunaction_label);
 			setToolTipText(JUnitMessages.TestRunnerViewPart_rerunaction_tooltip);
-			JUnitPlugin.setLocalImageDescriptors(this, "relaunch.gif"); //$NON-NLS-1$
+			JUnitPlugin.setLocalImageDescriptors(this, "relaunch.png"); //$NON-NLS-1$
 			setEnabled(false);
 			setActionDefinitionId(RERUN_LAST_COMMAND);
 		}
@@ -950,7 +950,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public RerunLastFailedFirstAction() {
 			setText(JUnitMessages.TestRunnerViewPart_rerunfailuresaction_label);
 			setToolTipText(JUnitMessages.TestRunnerViewPart_rerunfailuresaction_tooltip);
-			JUnitPlugin.setLocalImageDescriptors(this, "relaunchf.gif"); //$NON-NLS-1$
+			JUnitPlugin.setLocalImageDescriptors(this, "relaunchf.png"); //$NON-NLS-1$
 			setEnabled(false);
 			setActionDefinitionId(RERUN_FAILED_FIRST_COMMAND);
 		}
@@ -968,13 +968,13 @@ public class TestRunnerViewPart extends ViewPart {
 			super("", AS_RADIO_BUTTON); //$NON-NLS-1$
 			if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_HORIZONTAL) {
 				setText(JUnitMessages.TestRunnerViewPart_toggle_horizontal_label);
-				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_horizontal.gif")); //$NON-NLS-1$
+				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_horizontal.png")); //$NON-NLS-1$
 			} else if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_VERTICAL) {
 				setText(JUnitMessages.TestRunnerViewPart_toggle_vertical_label);
-				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_vertical.gif")); //$NON-NLS-1$
+				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_vertical.png")); //$NON-NLS-1$
 			} else if (orientation == TestRunnerViewPart.VIEW_ORIENTATION_AUTOMATIC) {
 				setText(JUnitMessages.TestRunnerViewPart_toggle_automatic_label);
-				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_automatic.gif")); //$NON-NLS-1$
+				setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/th_automatic.png")); //$NON-NLS-1$
 			}
 			fActionOrientation= orientation;
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.RESULTS_VIEW_TOGGLE_ORIENTATION_ACTION);
@@ -1051,7 +1051,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public FailuresOnlyFilterAction() {
 			super(JUnitMessages.TestRunnerViewPart_show_failures_only, AS_CHECK_BOX);
 			setToolTipText(JUnitMessages.TestRunnerViewPart_show_failures_only);
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/failures.gif")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/failures.png")); //$NON-NLS-1$
 		}
 
 		@Override
@@ -1059,14 +1059,14 @@ public class TestRunnerViewPart extends ViewPart {
 			setShowFailuresOnly(isChecked());
 		}
 	}
-	
+
 	private class IgnoredOnlyFilterAction extends Action {
 		public IgnoredOnlyFilterAction() {
 			super(JUnitMessages.TestRunnerViewPart_show_ignored_only, AS_CHECK_BOX);
 			setToolTipText(JUnitMessages.TestRunnerViewPart_show_ignored_only);
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/testignored.gif")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/testignored.png")); //$NON-NLS-1$
 		}
-		
+
 		@Override
 		public void run() {
 			setShowIgnoredOnly(isChecked());
@@ -1089,7 +1089,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 		public ShowTestHierarchyAction() {
 			super(JUnitMessages.TestRunnerViewPart_hierarchical_layout, IAction.AS_CHECK_BOX);
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/hierarchicalLayout.gif")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/hierarchicalLayout.png")); //$NON-NLS-1$
 		}
 
 		@Override
@@ -1102,7 +1102,7 @@ public class TestRunnerViewPart extends ViewPart {
 	private class ActivateOnErrorAction extends Action {
 		public ActivateOnErrorAction() {
 			super(JUnitMessages.TestRunnerViewPart_activate_on_failure_only, IAction.AS_CHECK_BOX);
-			//setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/failures.gif")); //$NON-NLS-1$
+			//setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/failures.png")); //$NON-NLS-1$
 			update();
 		}
 		public void update() {
@@ -1119,19 +1119,19 @@ public class TestRunnerViewPart extends ViewPart {
 	public TestRunnerViewPart() {
 		fImagesToDispose= new ArrayList<>();
 
-		fStackViewIcon= createManagedImage("eview16/stackframe.gif");//$NON-NLS-1$
-		fTestRunOKIcon= createManagedImage("eview16/junitsucc.gif"); //$NON-NLS-1$
-		fTestRunFailIcon= createManagedImage("eview16/juniterr.gif"); //$NON-NLS-1$
-		fTestRunOKDirtyIcon= createManagedImage("eview16/junitsuccq.gif"); //$NON-NLS-1$
-		fTestRunFailDirtyIcon= createManagedImage("eview16/juniterrq.gif"); //$NON-NLS-1$
+		fStackViewIcon= createManagedImage("eview16/stackframe.png");//$NON-NLS-1$
+		fTestRunOKIcon= createManagedImage("eview16/junitsucc.png"); //$NON-NLS-1$
+		fTestRunFailIcon= createManagedImage("eview16/juniterr.png"); //$NON-NLS-1$
+		fTestRunOKDirtyIcon= createManagedImage("eview16/junitsuccq.png"); //$NON-NLS-1$
+		fTestRunFailDirtyIcon= createManagedImage("eview16/juniterrq.png"); //$NON-NLS-1$
 
-		fTestIcon= createManagedImage("obj16/test.gif"); //$NON-NLS-1$
-		fTestOkIcon= createManagedImage("obj16/testok.gif"); //$NON-NLS-1$
-		fTestErrorIcon= createManagedImage("obj16/testerr.gif"); //$NON-NLS-1$
-		fTestFailIcon= createManagedImage("obj16/testfail.gif"); //$NON-NLS-1$
-		fTestRunningIcon= createManagedImage("obj16/testrun.gif"); //$NON-NLS-1$
-		fTestIgnoredIcon= createManagedImage("obj16/testignored.gif"); //$NON-NLS-1$
-		fTestAssumptionFailureIcon = createManagedImage("obj16/testassumptionfailed.gif"); //$NON-NLS-1$
+		fTestIcon= createManagedImage("obj16/test.png"); //$NON-NLS-1$
+		fTestOkIcon= createManagedImage("obj16/testok.png"); //$NON-NLS-1$
+		fTestErrorIcon= createManagedImage("obj16/testerr.png"); //$NON-NLS-1$
+		fTestFailIcon= createManagedImage("obj16/testfail.png"); //$NON-NLS-1$
+		fTestRunningIcon= createManagedImage("obj16/testrun.png"); //$NON-NLS-1$
+		fTestIgnoredIcon= createManagedImage("obj16/testignored.png"); //$NON-NLS-1$
+		fTestAssumptionFailureIcon = createManagedImage("obj16/testassumptionfailed.png"); //$NON-NLS-1$
 
 		fSuiteIcon= createManagedImage(fSuiteIconDescriptor);
 		fSuiteOkIcon= createManagedImage(fSuiteOkIconDescriptor);
@@ -1550,7 +1550,7 @@ action enablement
 			}
 			if (!fTestRunSession.isStarting() && !fShowOnErrorOnly)
 				showTestResultsView();
-			
+
 			setTitleToolTip();
 
 			clearStatus();
@@ -1808,15 +1808,15 @@ action enablement
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		IActionBars actionBars= getViewSite().getActionBars();
-		
+
 		fCopyAction = new JUnitCopyAction(fFailureTrace, fClipboard);
 		fCopyAction.setActionDefinitionId(ActionFactory.COPY.getCommandId());
 		actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
-		
+
 		fPasteAction= new JUnitPasteAction(parent.getShell(), fClipboard);
 		fPasteAction.setActionDefinitionId(ActionFactory.PASTE.getCommandId());
 		actionBars.setGlobalActionHandler(ActionFactory.PASTE.getId(), fPasteAction);
-		
+
 		initPageSwitcher();
 		addDropAdapter(parent);
 
@@ -1835,7 +1835,7 @@ action enablement
 
 		fTestRunSessionListener= new TestRunSessionListener();
 		JUnitCorePlugin.getModel().addTestRunSessionListener(fTestRunSessionListener);
-		
+
 		// always show youngest test run in view. simulate "sessionAdded" event to do that
 		List<TestRunSession> testRunSessions= JUnitCorePlugin.getModel().getTestRunSessions();
 		if (!testRunSessions.isEmpty()) {
@@ -2248,7 +2248,7 @@ action enablement
 	void setShowFailuresOnly(boolean failuresOnly) {
 		setFilterAndLayout(failuresOnly, false /*ignoredOnly must be off*/, fLayout);
 	}
-	
+
 	void setShowIgnoredOnly(boolean ignoredOnly) {
 		setFilterAndLayout( false /*failuresOnly must be off*/, ignoredOnly, fLayout);
 	}

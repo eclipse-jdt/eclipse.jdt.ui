@@ -23,9 +23,9 @@ import org.eclipse.swt.widgets.TableItem;
 public class FailureTableDisplay implements ITraceDisplay {
 	private final Table fTable;
 
-	private final Image fExceptionIcon= JUnitPlugin.createImage("obj16/exc_catch.gif"); //$NON-NLS-1$
+	private final Image fExceptionIcon= JUnitPlugin.createImage("obj16/exc_catch.png"); //$NON-NLS-1$
 
-	private final Image fStackIcon= JUnitPlugin.createImage("obj16/stkfrm_obj.gif"); //$NON-NLS-1$
+	private final Image fStackIcon= JUnitPlugin.createImage("obj16/stkfrm_obj.png"); //$NON-NLS-1$
 
 	public FailureTableDisplay(Table table) {
 		fTable = table;
