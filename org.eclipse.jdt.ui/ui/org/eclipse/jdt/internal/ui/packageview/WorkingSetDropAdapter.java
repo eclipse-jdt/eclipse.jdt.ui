@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -246,7 +246,7 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 		// only move if target isn't the other working set. If this is the case
 		// the move will happenn automatically by refreshing the other working set
 		if (!isOthersWorkingSet(fWorkingSet)) {
-			List<Object> elements= new ArrayList<Object>(Arrays.asList(fWorkingSet.getElements()));
+			List<Object> elements= new ArrayList<>(Arrays.asList(fWorkingSet.getElements()));
 			elements.addAll(Arrays.asList(fElementsToAdds));
 			fWorkingSet.setElements(elements.toArray(new IAdaptable[elements.size()]));
 		}

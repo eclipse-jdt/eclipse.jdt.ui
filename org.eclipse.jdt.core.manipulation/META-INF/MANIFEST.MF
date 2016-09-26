@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.core.manipulation; singleton:=true
-Bundle-Version: 1.7.0.qualifier
+Bundle-Version: 1.8.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin
 Bundle-Localization: plugin
@@ -20,4 +20,4 @@ Export-Package: org.eclipse.jdt.core.manipulation,
  org.eclipse.jdt.internal.core.manipulation;x-internal:=true,
  org.eclipse.jdt.internal.core.refactoring.descriptors;x-friends:="org.eclipse.jdt.ui"
 Import-Package: com.ibm.icu.text
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8

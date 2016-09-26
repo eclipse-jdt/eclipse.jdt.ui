@@ -2160,7 +2160,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		Assert.isNotNull(declaration);
 		final Javadoc comment= declaration.getJavadoc();
 		if (comment != null) {
-			final List<TagElement> tags= new LinkedList<>(comment.tags());
+			final List<TagElement> tags= new LinkedList<TagElement>(comment.tags());
 			final IVariableBinding[] bindings= getArgumentBindings(declaration);
 			final Map<String, TagElement> elements= new HashMap<>(bindings.length);
 			String name= null;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 Mateusz Matela and others.
+ * Copyright (c) 2008, 2016 Mateusz Matela and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1201,7 +1201,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 		super(shell, new BindingLabelProvider(), new GenerateToStringContentProvider(fields, inheritedFields, methods, inheritededMethods), editor, type, false);
 		setEmptyListMessage(JavaUIMessages.GenerateHashCodeEqualsDialog_no_entries);
 
-		List<Object> selected= new ArrayList<Object>(Arrays.asList(selectedFields));
+		List<Object> selected= new ArrayList<>(Arrays.asList(selectedFields));
 		if (selectedFields.length == fields.length && selectedFields.length > 0)
 			selected.add(getContentProvider().getParent(selectedFields[0]));
 		setInitialElementSelections(selected);

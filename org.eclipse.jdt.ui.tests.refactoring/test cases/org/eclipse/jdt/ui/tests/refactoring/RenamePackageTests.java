@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -700,7 +700,7 @@ public class RenamePackageTests extends RefactoringTest {
 		IPackageFragment thisPackage= rename.fPackages[0];
 
 		ParticipantTesting.reset();
-		List<IAdaptable> toRename= new ArrayList<IAdaptable>(Arrays.asList(JavaElementUtil.getPackageAndSubpackages(thisPackage)));
+		List<IAdaptable> toRename= new ArrayList<>(Arrays.asList(JavaElementUtil.getPackageAndSubpackages(thisPackage)));
 		toRename.add(thisPackage.getResource());
 		String[] renameHandles= ParticipantTesting.createHandles(toRename.toArray());
 
@@ -761,7 +761,7 @@ public class RenamePackageTests extends RefactoringTest {
 
 		ParticipantTesting.reset();
 
-		List<IAdaptable> toRename= new ArrayList<IAdaptable>(Arrays.asList(JavaElementUtil.getPackageAndSubpackages(thisPackage)));
+		List<IAdaptable> toRename= new ArrayList<>(Arrays.asList(JavaElementUtil.getPackageAndSubpackages(thisPackage)));
 		toRename.add(thisPackage.getResource());
 		String[] createHandles= {};
 		String[] deleteHandles= {};
@@ -935,7 +935,7 @@ public class RenamePackageTests extends RefactoringTest {
 
 		ParticipantTesting.reset();
 
-		List<IAdaptable> toRename= new ArrayList<IAdaptable>(Arrays.asList(JavaElementUtil.getPackageAndSubpackages(thisPackage)));
+		List<IAdaptable> toRename= new ArrayList<>(Arrays.asList(JavaElementUtil.getPackageAndSubpackages(thisPackage)));
 		toRename.add(thisPackage.getResource());
 		String[] renameHandles= ParticipantTesting.createHandles(toRename.toArray());
 

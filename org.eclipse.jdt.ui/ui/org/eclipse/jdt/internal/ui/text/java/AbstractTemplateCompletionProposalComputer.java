@@ -67,7 +67,7 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 		fEngine.complete(javaContext.getViewer(), javaContext.getInvocationOffset(), unit);
 
 		TemplateProposal[] templateProposals= fEngine.getResults();
-		List<ICompletionProposal> result= new ArrayList<ICompletionProposal>(Arrays.asList(templateProposals));
+		List<ICompletionProposal> result= new ArrayList<>(Arrays.asList(templateProposals));
 
 		IJavaCompletionProposal[] keyWordResults= javaContext.getKeywordProposals();
 		if (keyWordResults.length == 0)
