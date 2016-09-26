@@ -1057,21 +1057,21 @@
          </description>
       </fontDefinition>
       <colorDefinition
-            label="%JavadocViewBackgroundColor.label"
+            label="%JavadocBackgroundColor.label"
             categoryId="org.eclipse.jdt.ui.presentation"
             value="COLOR_INFO_BACKGROUND"
-            id="org.eclipse.jdt.ui.JavadocView.backgroundColor">
+            id="org.eclipse.jdt.ui.Javadoc.backgroundColor">
          <description>
-            %JavadocViewBackgroundColor.description
+            %JavadocBackgroundColor.description
          </description>
       </colorDefinition>
       <colorDefinition
-            label="%JavadocViewForegroundColor.label"
+            label="%JavadocForegroundColor.label"
             categoryId="org.eclipse.jdt.ui.presentation"
             value="COLOR_INFO_FOREGROUND"
-            id="org.eclipse.jdt.ui.JavadocView.foregroundColor">
+            id="org.eclipse.jdt.ui.Javadoc.foregroundColor">
          <description>
-            %JavadocViewForegroundColor.description
+            %JavadocForegroundColor.description
          </description>
       </colorDefinition>
       <colorDefinition

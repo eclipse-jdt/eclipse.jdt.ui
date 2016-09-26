@@ -787,12 +787,12 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	@Override
 	protected String getBackgroundColorKey() {
-		return "org.eclipse.jdt.ui.JavadocView.backgroundColor";		 //$NON-NLS-1$
+		return "org.eclipse.jdt.ui.Javadoc.backgroundColor";		 //$NON-NLS-1$
 	}
 
 	@Override
 	protected String getForegroundColorKey() {
-		return "org.eclipse.jdt.ui.JavadocView.foregroundColor";		 //$NON-NLS-1$
+		return "org.eclipse.jdt.ui.Javadoc.foregroundColor";		 //$NON-NLS-1$
 	}
 
 	/*
