@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -137,7 +137,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 
 	@Override
 	protected void initializeDefaultPageImageDescriptor() {
-		setDefaultPageImageDescriptor(JUnitPlugin.getImageDescriptor("wizban/newtest_wiz.png")); //$NON-NLS-1$
+		setDefaultPageImageDescriptor(JUnitPlugin.getImageDescriptor("wizban/newsuite_wiz.png")); //$NON-NLS-1$
 	}
 
 	public IRunnableWithProgress getRunnableSave(final IEditorPart cu_ep) {

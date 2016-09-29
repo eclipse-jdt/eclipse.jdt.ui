@@ -6,7 +6,7 @@
          point="org.eclipse.ui.views">
       <view
             name="JavaElement View"
-            icon="icons/view.gif"
+            icon="icons/view.png"
             category="org.eclipse.jdt.ui.java"
             class="org.eclipse.jdt.jeview.views.JavaElementView"
             id="org.eclipse.jdt.jeview.views.JavaElementView">
@@ -41,14 +41,14 @@
      </parameter>
   </key>
   </extension>
-  
-  
+
+
   <extension
         point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
             <viewShortcut id="org.eclipse.jdt.jeview.views.JavaElementView"/>
       </perspectiveExtension>
-      
+
       <perspectiveExtension
             targetID="org.eclipse.jdt.ui.JavaPerspective">
          <showInPart
@@ -74,6 +74,6 @@
          </showInPart>
       </perspectiveExtension>
   </extension>
-  
-  
+
+
 </plugin>

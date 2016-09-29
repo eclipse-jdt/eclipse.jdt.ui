@@ -8,7 +8,7 @@
          point="org.eclipse.ui.views">
       <view
             name="%View.label"
-            icon="$nl$/icons/full/eview16/junit.gif"
+            icon="$nl$/icons/full/eview16/junit.png"
             category="org.eclipse.jdt.ui.java"
             fastViewWidthRatio="0.40"
             class="org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart"
@@ -67,7 +67,7 @@
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
-            icon="$nl$/icons/full/obj16/julaunch.gif"
+            icon="$nl$/icons/full/obj16/julaunch.png"
             configTypeID="org.eclipse.jdt.junit.launchconfig"
             id="org.eclipse.jdt.junit.launchimage">
       </launchConfigurationTypeImage>
@@ -99,7 +99,7 @@
       </category>
       <wizard
             name="%TestCaseWizard.name"
-            icon="$nl$/icons/full/etool16/new_testcase.gif"
+            icon="$nl$/icons/full/etool16/new_testcase.png"
             category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
             id="org.eclipse.jdt.junit.wizards.NewTestCaseCreationWizard">
          <class
@@ -117,7 +117,7 @@
       </wizard>
       <wizard
             name="%TestSuiteWizard.name"
-            icon="$nl$/icons/full/etool16/new_testsuite.gif"
+            icon="$nl$/icons/full/etool16/new_testsuite.png"
             category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
             class="org.eclipse.jdt.internal.junit.wizards.NewTestSuiteCreationWizard"
             id="org.eclipse.jdt.junit.wizards.NewTestSuiteCreationWizard">
@@ -213,7 +213,7 @@
          point="org.eclipse.debug.ui.launchShortcuts">
       <shortcut
             label="%JUnitShortcut.label"
-            icon="$nl$/icons/full/obj16/julaunch.gif"
+            icon="$nl$/icons/full/obj16/julaunch.png"
             helpContextId="org.eclipse.jdt.junit.launch_shortcut"
             class="org.eclipse.jdt.junit.launcher.JUnitLaunchShortcut"
             modes="run, debug"
@@ -245,7 +245,7 @@
          </description>
       </shortcut>
    </extension>
-   
+
    <extension
          point="org.eclipse.jdt.ui.quickFixProcessors">
       <quickFixProcessor
@@ -254,7 +254,7 @@
             id="org.eclipse.jdt.junit.JUnitQuickFixProcessor">
       </quickFixProcessor>
    </extension>
-   
+
    <extension
          point="org.eclipse.jdt.ui.classpathFixProcessors">
       <classpathFixProcessor
@@ -266,10 +266,10 @@
             </overrides>
       </classpathFixProcessor>
    </extension>
-   
+
    <extension
          point="org.eclipse.ui.ide.markerResolution">
-      <markerResolutionGenerator 
+      <markerResolutionGenerator
             markerType="org.eclipse.jdt.core.buildpath_problem"
             class="org.eclipse.jdt.internal.junit.buildpath.ClasspathVariableMarkerResolutionGenerator"
             >
@@ -281,7 +281,7 @@
             </attribute>
       </markerResolutionGenerator>
    </extension>
-   
+
    <extension
          point="org.eclipse.ltk.core.refactoring.renameParticipants">
       <renameParticipant
@@ -316,7 +316,7 @@
            </with>
          </enablement>
       </renameParticipant>
-      
+
    </extension>
    <extension
          point="org.eclipse.jdt.junit.junitLaunchConfigs">
@@ -356,9 +356,9 @@
             description="%JUnitShortcut.description.rerunFailedFirst"
             categoryId="org.eclipse.debug.ui.category.run"
             id="org.eclipse.jdt.junit.junitShortcut.rerunFailedFirst">
-      </command>       
+      </command>
    </extension>
-   
+
    <extension
          point="org.eclipse.ui.bindings">
       <key
@@ -389,9 +389,9 @@
             commandId="org.eclipse.jdt.junit.junitShortcut.run"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
    </extension>
-   
+
     <!-- JUnit Container -->
-      
+
    <extension
          point="org.eclipse.jdt.ui.classpathContainerPage">
       <classpathContainerPage
@@ -406,7 +406,7 @@
       <editor
             default="false"
             id="org.eclipse.jdt.junit.JUnitResultEditor"
-            icon="$nl$/icons/full/obj16/testfile_obj.gif"
+            icon="$nl$/icons/full/obj16/testfile_obj.png"
             launcher="org.eclipse.jdt.internal.junit.ui.JUnitViewEditorLauncher"
             name="%JUnitView.editor.name">
          <contentTypeBinding
@@ -441,7 +441,7 @@
             plugin="org.eclipse.jdt.junit.core">
       </statusHandler>
    </extension>
-   
+
    <extension
          point="org.eclipse.jdt.junit.testRunListeners">
       <testRunListener
