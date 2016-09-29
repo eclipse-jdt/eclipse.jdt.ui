@@ -85,6 +85,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 	private class HashCodeEqualsGenerationSettings extends CodeGenerationSettings {
 		public boolean useInstanceOf= false;
 		public boolean useBlocks= false;
+		public boolean useJ7HashEquals= false;
 	}
 
 	private List<IVariableBinding> allFields;
@@ -209,6 +210,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		GenerateHashCodeEqualsDialog generateHashCodeEqualsDialog= (GenerateHashCodeEqualsDialog)dialog;
 		settings.useInstanceOf= generateHashCodeEqualsDialog.isUseInstanceOf();
 		settings.useBlocks= generateHashCodeEqualsDialog.isUseBlocks();
+		settings.useJ7HashEquals= generateHashCodeEqualsDialog.isUseJ7HashEquals();
 		return settings;
 	}
 
@@ -281,7 +283,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		final IVariableBinding[] selectedVariableBindings= Arrays.asList(selectedBindings).toArray(new IVariableBinding[0]);
 		HashCodeEqualsGenerationSettings hashCodeEqualsGenerationSettings= (HashCodeEqualsGenerationSettings)settings;
 		GenerateHashCodeEqualsOperation operation= new GenerateHashCodeEqualsOperation(fTypeBinding, selectedVariableBindings, fUnit, elementPosition, settings,
-				hashCodeEqualsGenerationSettings.useInstanceOf, regenerate, true, false);
+				hashCodeEqualsGenerationSettings.useInstanceOf, hashCodeEqualsGenerationSettings.useJ7HashEquals, regenerate, true, false);
 		operation.setUseBlocksForThen(hashCodeEqualsGenerationSettings.useBlocks);
 		return operation;
 	}

@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - Generation of equals and hashcode with java 7 Objects.equals and Objects.hashcode - https://bugs.eclipse.org/424214
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
@@ -144,6 +145,8 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 	private static final String METHODNAME_HASH_CODE= "hashCode"; //$NON-NLS-1$
 
+	private static final String METHODNAME_HASH= "hash"; //$NON-NLS-1$
+
 	private static final String METHODNAME_DEEP_HASH_CODE= "deepHashCode"; //$NON-NLS-1$
 
 	private static final String METHODNAME_OUTER_TYPE= "getOuterType"; //$NON-NLS-1$
@@ -165,6 +168,14 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private static final String VARIABLE_NAME_EQUALS_CASTED= "other"; //$NON-NLS-1$
 
 	private static final String VARIABLE_NAME_INDEX= "index"; //$NON-NLS-1$
+
+	private static final String JAVA_UTIL_OBJECTS= "java.util.Objects"; //$NON-NLS-1$
+
+	private static final String TYPE_NAME_CLONEABLE= "Cloneable"; //$NON-NLS-1$
+
+	private static final String TYPE_NAME_SERIALIZABLE= "Serializable"; //$NON-NLS-1$
+
+	private static final String TYPE_NAME_OBJECT= "Object"; //$NON-NLS-1$
 
 	/** Should the resulting edit be applied? */
 	private final boolean fApply;
@@ -208,6 +219,12 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	/** <code>true</code> to use 'instanceof' to compare types, <code>false</code> otherwise */
 	private final boolean fUseInstanceOf;
 
+	/**
+	 * <code>true</code> to use newer hashcode and equals method generation, using Java 7+
+	 * Objects.hash and Objects.equals, <code>false</code> to generate default methods
+	 */
+	private final boolean fUseJ7HashEquals;
+
 	/** <code>true</code> to use blocks for then */
 	private boolean fUseBlocksForThen;
 
@@ -223,6 +240,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	 * @param insert the insertion point, or <code>null</code>
 	 * @param settings the code generation settings to use
 	 * @param useInstanceof <code>true</code> to use 'instanceof' to compare types, <code>false</code> otherwise
+	 * @param useJ7HashEquals <code>true</code> to use Java 7+ Objects.hash and Objects.equals methods, <code>false</code> otherwise
 	 * @param force <code>true</code> to force the regeneration of existing methods,
 	 *            <code>false</code> otherwise
 	 * @param apply <code>true</code> if the resulting edit should be applied,
@@ -231,7 +249,8 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	 *            saved, <code>false</code> otherwise
 	 */
 	public GenerateHashCodeEqualsOperation(final ITypeBinding type, final IVariableBinding[] fields, final CompilationUnit unit,
-			final IJavaElement insert, final CodeGenerationSettings settings, final boolean useInstanceof, final boolean force, final boolean apply, final boolean save) {
+			final IJavaElement insert, final CodeGenerationSettings settings, final boolean useInstanceof, final boolean useJ7HashEquals, final boolean force, final boolean apply,
+			final boolean save) {
 		Assert.isNotNull(type);
 		Assert.isNotNull(fields);
 		Assert.isNotNull(unit);
@@ -244,6 +263,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		fFields= fields;
 		fSettings= settings;
 		fUseInstanceOf= useInstanceof;
+		fUseJ7HashEquals= useJ7HashEquals;
 		fSave= save;
 		fApply= apply;
 		fDoubleCount= 0;
@@ -396,7 +416,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		Block body= fAst.newBlock();
 		hashCodeMethod.setBody(body);
-
+	
 		// PRIME NUMBER
 		VariableDeclarationFragment frag= fAst.newVariableDeclarationFragment();
 		frag.setName(fAst.newSimpleName(VARIABLE_NAME_PRIME));
@@ -405,15 +425,16 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		VariableDeclarationStatement primeNumberDeclaration= fAst.newVariableDeclarationStatement(frag);
 		primeNumberDeclaration.modifiers().add(fAst.newModifier(ModifierKeyword.FINAL_KEYWORD));
 		primeNumberDeclaration.setType(fAst.newPrimitiveType(PrimitiveType.INT));
-		body.statements().add(primeNumberDeclaration);
+		if (!fUseJ7HashEquals)
+			body.statements().add(primeNumberDeclaration);
 
-		// RESULT
 		VariableDeclarationFragment fragment= fAst.newVariableDeclarationFragment();
 		fragment.setName(fAst.newSimpleName(VARIABLE_NAME_RESULT));
 
 		VariableDeclarationStatement resultDeclaration= fAst.newVariableDeclarationStatement(fragment);
 		resultDeclaration.setType(fAst.newPrimitiveType(PrimitiveType.INT));
-		body.statements().add(resultDeclaration);
+		if (!fUseJ7HashEquals)
+			body.statements().add(resultDeclaration);
 
 		if (needsNoSuperCall(fType, METHODNAME_HASH_CODE, new ITypeBinding[0])) {
 			fragment.setInitializer(fAst.newNumberLiteral(INITIAL_HASHCODE_VALUE));
@@ -427,28 +448,56 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			body.statements().add(createAddOuterHashCode());
 		}
 
-		for (int i= 0; i < fFields.length; i++) {
-			if (fFields[i].getType().isPrimitive()) {
-				Statement[] sts= createAddSimpleHashCode(fFields[i].getType(), new IHashCodeAccessProvider() {
+		ReturnStatement endReturn= fAst.newReturnStatement();
+		if (fUseJ7HashEquals) {
+			MethodInvocation j7Invoc= fAst.newMethodInvocation();
+			List<Statement> arrayStatements= new ArrayList<>();
 
-					@Override
-					public Expression getThisAccess(String name) {
-						return getThisAccessForHashCode(name);
+			for (int i= 0; i < fFields.length; i++) {
+				if (fFields[i].getType().isArray())
+					arrayStatements.add(createAddArrayHashCode(fFields[i]));
+				else
+					j7Invoc.arguments().add(fAst.newSimpleName(fFields[i].getName()));
+			}
+
+			if (!j7Invoc.arguments().isEmpty()) {
+				j7Invoc.setExpression(getQualifiedName(JAVA_UTIL_OBJECTS));
+				j7Invoc.setName(fAst.newSimpleName(METHODNAME_HASH));
+			}
+
+			if (arrayStatements.isEmpty()) {
+				endReturn.setExpression(j7Invoc);
+			} else {
+				body.statements().add(primeNumberDeclaration);
+				body.statements().add(resultDeclaration);
+				if (!j7Invoc.arguments().isEmpty())
+					body.statements().add(prepareAssignment(j7Invoc));
+				body.statements().addAll(arrayStatements);
+				endReturn.setExpression(fAst.newSimpleName(VARIABLE_NAME_RESULT));
+			}
+		} else {
+			for (int i= 0; i < fFields.length; i++) {
+				if (fFields[i].getType().isPrimitive()) {
+					Statement[] sts= createAddSimpleHashCode(fFields[i].getType(), new IHashCodeAccessProvider() {
+
+						@Override
+						public Expression getThisAccess(String name) {
+							return getThisAccessForHashCode(name);
+						}
+
+					}, fFields[i].getName(), false);
+					for (int j= 0; j < sts.length; j++) {
+						body.statements().add(sts[j]);
 					}
-
-				}, fFields[i].getName(), false);
-				for (int j= 0; j < sts.length; j++) {
-					body.statements().add(sts[j]);
-				}
-			} else if (fFields[i].getType().isArray())
-				body.statements().add(createAddArrayHashCode(fFields[i]));
-			else
-				body.statements().add(createAddQualifiedHashCode(fFields[i]));
+				} else if (fFields[i].getType().isArray())
+					body.statements().add(createAddArrayHashCode(fFields[i]));
+				else
+					body.statements().add(createAddQualifiedHashCode(fFields[i]));
+			}
+			endReturn.setExpression(fAst.newSimpleName(VARIABLE_NAME_RESULT));
 		}
 
 		// the last return:
-		ReturnStatement endReturn= fAst.newReturnStatement();
-		endReturn.setExpression(fAst.newSimpleName(VARIABLE_NAME_RESULT));
 		body.statements().add(endReturn);
 
 		// method comment
@@ -546,7 +595,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private Statement createAddArrayHashCode(IVariableBinding binding) {
 		MethodInvocation invoc= fAst.newMethodInvocation();
 		if (JavaModelUtil.is50OrHigher(fRewrite.getCu().getJavaProject())) {
-			if (binding.getType().getDimensions() > 1) {
+			if (needsDeepMethod(binding.getType())) {
 				invoc.setName(fAst.newSimpleName(METHODNAME_DEEP_HASH_CODE));
 			} else {
 				invoc.setName(fAst.newSimpleName(METHODNAME_HASH_CODE));
@@ -860,32 +909,36 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		body.statements().add(otherDeclaration);
 
-		if (isMemberType()) { // test outer type
-			body.statements().add(createOuterComparison());
+		if (fUseJ7HashEquals) {
+			body.statements().add(createJ7EqualsStatement());
+		} else {
+			if (isMemberType()) { // test outer type
+				body.statements().add(createOuterComparison());
+			}
+
+			for (int i= 0; i < fFields.length; i++) {
+				IVariableBinding field= fFields[i];
+				ITypeBinding type= field.getType();
+				if (type.isPrimitive() || type.isEnum())
+					body.statements().add(createSimpleComparison(field));
+				else if (type.isArray()) {
+					IJavaProject project= fUnit.getJavaElement().getJavaProject();
+					if (needsDeepMethod(type) && JavaModelUtil.is50OrHigher(project)) {
+						body.statements().add(createMultiArrayComparison(field.getName()));
+					} else {
+						body.statements().add(createArrayComparison(field.getName()));
+					}
+				} else
+					body.statements().add(createQualifiedComparison(field.getName()));
+
+			}
+
+			// the last return true:
+			ReturnStatement endReturn= fAst.newReturnStatement();
+			endReturn.setExpression(fAst.newBooleanLiteral(true));
+
+			body.statements().add(endReturn);
 		}
-
-		for (int i= 0; i < fFields.length; i++) {
-			IVariableBinding field= fFields[i];
-			ITypeBinding type= field.getType();
-			if (type.isPrimitive() || type.isEnum())
-				body.statements().add(createSimpleComparison(field));
-			else if (type.isArray()) {
-				IJavaProject project= fUnit.getJavaElement().getJavaProject();
-				if (type.getDimensions() > 1 && JavaModelUtil.is50OrHigher(project)) {
-					body.statements().add(createMultiArrayComparison(field.getName()));
-				} else {
-					body.statements().add(createArrayComparison(field.getName()));
-				}
-			} else
-				body.statements().add(createQualifiedComparison(field.getName()));
-
-		}
-
-		// the last return true:
-		ReturnStatement endReturn= fAst.newReturnStatement();
-		endReturn.setExpression(fAst.newBooleanLiteral(true));
-
-		body.statements().add(endReturn);
 
 		// method comment
 		if (fSettings != null) {
@@ -901,6 +954,72 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		}
 
 		return equalsMethodDeclaration;
+	}
+
+	private Statement createJ7EqualsStatement() {
+		// return Object.equals(anObjet, other.anObject) && ... ;
+		ReturnStatement returnStatement= fAst.newReturnStatement();
+
+		Expression equalsExp= createJ7EqualsExpression(fFields[0]);
+		if (fFields.length == 1) {
+			returnStatement.setExpression(equalsExp);
+		} else {
+			InfixExpression exp= fAst.newInfixExpression();
+			exp.setLeftOperand(equalsExp);
+			InfixExpression refExp= exp;
+			for (int i= 1; i < fFields.length; i++) {
+				equalsExp= createJ7EqualsExpression(fFields[i]);
+
+				refExp.setOperator(Operator.CONDITIONAL_AND);
+				if (i == fFields.length - 1) {
+					refExp.setRightOperand(equalsExp);
+				} else {
+					InfixExpression infixExp= fAst.newInfixExpression();
+					infixExp.setLeftOperand(equalsExp);
+					refExp.setRightOperand(infixExp);
+					refExp= infixExp;
+				}
+			}
+			returnStatement.setExpression(exp);
+		}
+		return returnStatement;
+	}
+
+	private Expression createJ7EqualsExpression(IVariableBinding variable) {
+		ITypeBinding type= variable.getType();
+		String name= variable.getName();
+		if (type.isPrimitive() || type.isEnum()) {
+			InfixExpression expression= fAst.newInfixExpression();
+			expression.setOperator(Operator.EQUALS);
+			if (isPrimitiveType(type, PrimitiveType.FLOAT)) {
+				// Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat)
+				expression.setLeftOperand(createFloatInvocation(getThisAccessForEquals(name)));
+				expression.setRightOperand(createFloatInvocation(getOtherAccess(name)));
+			} else if (isPrimitiveType(type, PrimitiveType.DOUBLE)) {
+				// Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble)
+				expression.setLeftOperand(createDoubleInvocation(getThisAccessForEquals(name)));
+				expression.setRightOperand(createDoubleInvocation(getOtherAccess(name)));
+			} else {
+				// anInt == other.anInt
+				expression.setLeftOperand(getThisAccessForEquals(name));
+				expression.setRightOperand(getOtherAccess(name));
+			}
+			return expression;
+		} else {
+			MethodInvocation invoc= fAst.newMethodInvocation();
+			if (type.isArray()) {
+				// Arrays.equals(anArray, other.anArray) or Arrays.deepEquals(anArray, other.anArray)
+				invoc.setExpression(getQualifiedName(JAVA_UTIL_ARRAYS));
+				invoc.setName(needsDeepMethod(type) ? fAst.newSimpleName(METHODNAME_DEEP_EQUALS) : fAst.newSimpleName(METHODNAME_EQUALS));
+			} else {
+				// Objects.equals(anObj, other.anObj)
+				invoc.setExpression(getQualifiedName(JAVA_UTIL_OBJECTS));
+				invoc.setName(fAst.newSimpleName(METHODNAME_EQUALS));
+			}
+			invoc.arguments().add(fAst.newSimpleName(name));
+			invoc.arguments().add(getOtherAccess(name));
+			return invoc;
+		}
 	}
 
 	private Statement createOuterComparison() {
@@ -1156,6 +1275,11 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			return ( (fDoubleCount > 0 && name.equals(VARIABLE_NAME_DOUBLE_TEMPORARY)) || (name.equals(VARIABLE_NAME_PRIME)) || (name
 					.equals(VARIABLE_NAME_RESULT)));
 		return ( (name.equals(VARIABLE_NAME_EQUALS_CASTED)) || (name.equals(VARIABLE_NAME_EQUALS_PARAM)));
+	}
+
+	private boolean needsDeepMethod(ITypeBinding type) {
+		String elementTypeName= type.getErasure().getElementType().getName();
+		return type.getDimensions() > 1 || TYPE_NAME_CLONEABLE.equals(elementTypeName) || TYPE_NAME_SERIALIZABLE.equals(elementTypeName) || TYPE_NAME_OBJECT.equals(elementTypeName);
 	}
 
 }
