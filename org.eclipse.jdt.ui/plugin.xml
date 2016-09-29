@@ -5108,6 +5108,14 @@
             class="org.eclipse.jdt.internal.ui.filters.LocalTypesFilter"
             id="org.eclipse.jdt.ui.PackageExplorer.LocalTypesFilter">
       </filter>
+      <filter
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
+            name="%HideDeprecatedFieldsAndMethods.label"
+            enabled="false"
+            description="%HideDeprecatedFieldsAndMethods.description"
+            class="org.eclipse.jdt.internal.ui.filters.DeprecatedFieldsAndMethodsFilter"
+            id="org.eclipse.jdt.ui.PackageExplorer.DeprecatedMembersFilter">
+      </filter>
 <!-- Types view -->
       <filter
             targetId="org.eclipse.jdt.ui.TypesView"
@@ -5216,6 +5224,14 @@
             class="org.eclipse.jdt.internal.ui.filters.SyntheticMembersFilter"
             id="org.eclipse.jdt.ui.MembersView.SyntheticMembersFilter">
       </filter>
+      <filter
+            targetId="org.eclipse.jdt.ui.MembersView"
+            name="%HideDeprecatedFieldsAndMethods.label"
+            enabled="false"
+            description="%HideDeprecatedFieldsAndMethods.description"
+            class="org.eclipse.jdt.internal.ui.filters.DeprecatedFieldsAndMethodsFilter"
+            id="org.eclipse.jdt.ui.MembersView.DeprecatedMembersFilter">
+      </filter>
 <!-- Outline Page -->
       <filter
             targetId="org.eclipse.jdt.ui.JavaOutlinePage"
@@ -5240,6 +5256,14 @@
             description="%HideSyntheticMembers.description"
             class="org.eclipse.jdt.internal.ui.filters.SyntheticMembersFilter"
             id="org.eclipse.jdt.ui.JavaOutlinePage.SyntheticMembersFilter">
+      </filter>
+      <filter
+            targetId="org.eclipse.jdt.ui.JavaOutlinePage"
+            name="%HideDeprecatedFieldsAndMethods.label"
+            enabled="false"
+            description="%HideDeprecatedFieldsAndMethods.description"
+            class="org.eclipse.jdt.internal.ui.filters.DeprecatedFieldsAndMethodsFilter"
+            id="org.eclipse.jdt.ui.JavaOutlinePage.DeprecatedMembersFilter">
       </filter>
 <!-- Quick Outline -->
       <filter
@@ -5297,6 +5321,14 @@
             description="%HideSyntheticMembers.description"
             class="org.eclipse.jdt.internal.ui.filters.SyntheticMembersFilter"
             id="org.eclipse.jdt.internal.ui.text.QuickOutline.SyntheticMembersFilter">
+      </filter>
+      <filter
+            targetId="org.eclipse.jdt.internal.ui.text.QuickOutline"
+            name="%HideDeprecatedFieldsAndMethods.label"
+            enabled="false"
+            description="%HideDeprecatedFieldsAndMethods.description"
+            class="org.eclipse.jdt.internal.ui.filters.DeprecatedFieldsAndMethodsFilter"
+            id="org.eclipse.jdt.internal.ui.text.QuickOutline.DeprecatedMembersFilter">
       </filter>
       <filter
             targetId="org.eclipse.jdt.internal.ui.text.QuickOutline"
@@ -6160,6 +6192,12 @@
 		        name="%HideJavaOutputFolder.label"
 		        description="%HideOutputFolder.description"
 		        id="org.eclipse.jdt.java.ui.filters.HideOutputFolder"/>
+        <commonFilter
+                activeByDefault="false"
+                class="org.eclipse.jdt.internal.ui.filters.DeprecatedFieldsAndMethodsFilter"
+                name="%HideDeprecatedFieldsAndMethods.label"
+                description="%HideDeprecatedFieldsAndMethods.description"
+                id="org.eclipse.jdt.java.ui.filters.HideDeprecatedFieldsAndMethods"/>
    </extension>
    <extension
        point="org.eclipse.ui.navigator.linkHelper">
