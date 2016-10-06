@@ -30,9 +30,9 @@ public class ProgressImages {
 			return;
 
 		for (int i= 0; i < PROGRESS_STEPS; i++) {
-			String okname= BASE+OK+Integer.toString(i+1)+".gif"; //$NON-NLS-1$
+			String okname= BASE+OK+Integer.toString(i+1)+".png"; //$NON-NLS-1$
 			fOKImages[i]= createImage(okname);
-			String failurename= BASE+FAILURE+Integer.toString(i+1)+".gif"; //$NON-NLS-1$
+			String failurename= BASE+FAILURE+Integer.toString(i+1)+".png"; //$NON-NLS-1$
 			fFailureImages[i]= createImage(failurename);
 		}
 	}
