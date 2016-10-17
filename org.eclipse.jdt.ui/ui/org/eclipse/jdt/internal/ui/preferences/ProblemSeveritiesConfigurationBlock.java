@@ -646,6 +646,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_15_PB_UNCHECKED_TYPE_OPERATION= getJDTCoreKey(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION);
 	private static final Key PREF_15_PB_FINAL_PARAM_BOUND= getJDTCoreKey(JavaCore.COMPILER_PB_FINAL_PARAMETER_BOUND);
 	private static final Key PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST= getJDTCoreKey(JavaCore.COMPILER_PB_VARARGS_ARGUMENT_NEED_CAST);
+	private static final Key PREF_15_PB_UNLIKELY_COLLECTION_METHOD_ARGUMENT_TYPE= getJDTCoreKey(JavaCore.COMPILER_PB_UNLIKELY_COLLECTION_METHOD_ARGUMENT_TYPE);
+	private static final Key PREF_15_PB_UNLIKELY_COLLECTION_METHOD_ARGUMENT_TYPE_STRICT= getJDTCoreKey(JavaCore.COMPILER_PB_UNLIKELY_COLLECTION_METHOD_ARGUMENT_TYPE_STRICT);
+	private static final Key PREF_15_PB_UNLIKELY_EQUALS_ARGUMENT_TYPE= getJDTCoreKey(JavaCore.COMPILER_PB_UNLIKELY_EQUALS_ARGUMENT_TYPE);
 	private static final Key PREF_15_PB_AUTOBOXING_PROBLEM= getJDTCoreKey(JavaCore.COMPILER_PB_AUTOBOXING);
 
 	private static final Key PREF_15_PB_MISSING_OVERRIDE_ANNOTATION= getJDTCoreKey(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION);
@@ -745,7 +748,10 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_PB_UNHANDLED_WARNING_TOKEN,
 				PREF_PB_COMPARING_IDENTICAL, PREF_PB_MISSING_SYNCHRONIZED_ON_INHERITED_METHOD, PREF_PB_MISSING_HASHCODE_METHOD,
 				PREF_PB_DEAD_CODE, PREF_PB_UNUSED_OBJECT_ALLOCATION,
-				PREF_PB_MISSING_STATIC_ON_METHOD, PREF_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD
+				PREF_PB_MISSING_STATIC_ON_METHOD, PREF_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD,
+				PREF_15_PB_UNLIKELY_COLLECTION_METHOD_ARGUMENT_TYPE,
+				PREF_15_PB_UNLIKELY_COLLECTION_METHOD_ARGUMENT_TYPE_STRICT,
+				PREF_15_PB_UNLIKELY_EQUALS_ARGUMENT_TYPE
 			};
 	}
 
@@ -891,6 +897,15 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		// - affecting method invocations
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_inexact_vararg_label;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unlikely_collection_method_argument_type_label;
+		node= fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_UNLIKELY_COLLECTION_METHOD_ARGUMENT_TYPE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unlikely_collection_method_argument_type_strict_label;
+		fFilteredPrefTree.addCheckBox(inner, label, PREF_15_PB_UNLIKELY_COLLECTION_METHOD_ARGUMENT_TYPE_STRICT, enabledDisabled, extraIndent, node);
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unlikely_equals_argument_type_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_15_PB_UNLIKELY_EQUALS_ARGUMENT_TYPE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		// - affecting single statements
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_empty_statement_label;
@@ -1223,6 +1238,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 					PREF_PB_DEPRECATION.equals(changedKey) ||
 					PREF_PB_LOCAL_VARIABLE_HIDING.equals(changedKey) ||
 					PREF_15_PB_INCOMPLETE_ENUM_SWITCH.equals(changedKey) ||
+					PREF_15_PB_UNLIKELY_COLLECTION_METHOD_ARGUMENT_TYPE.equals(changedKey) ||
 					PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION.equals(changedKey) ||
 					PREF_PB_SUPPRESS_WARNINGS.equals(changedKey) ||
 					PREF_ANNOTATION_NULL_ANALYSIS.equals(changedKey)) {
@@ -1348,6 +1364,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		boolean enableMissingEnumDespiteDefault= !checkValue(PREF_15_PB_INCOMPLETE_ENUM_SWITCH, IGNORE);
 		getCheckBox(PREF_15_PB_MISSING_ENUM_CASE_DESPITE_DEFAULT).setEnabled(enableMissingEnumDespiteDefault);
 		
+		boolean enableUnlikelyCollectionMethodArgumentTypeStrict= !checkValue(PREF_15_PB_UNLIKELY_COLLECTION_METHOD_ARGUMENT_TYPE, IGNORE);
+		getCheckBox(PREF_15_PB_UNLIKELY_COLLECTION_METHOD_ARGUMENT_TYPE_STRICT).setEnabled(enableUnlikelyCollectionMethodArgumentTypeStrict);
+
 		boolean enableSuppressWarnings= checkValue(PREF_PB_SUPPRESS_WARNINGS, ENABLED);
 		getCheckBox(PREF_PB_SUPPRESS_OPTIONAL_ERRORS).setEnabled(enableSuppressWarnings);
 		setComboEnabled(PREF_PB_UNUSED_WARNING_TOKEN, enableSuppressWarnings);
