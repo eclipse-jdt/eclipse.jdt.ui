@@ -1937,4 +1937,63 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+	// Attempt to override an unspec'ed argument with a @NonNull argument
+	// -> change to @Nullable
+	// -> change overridden to @NonNull
+	// Specific for this test: arg name is different in overridden method. 
+	public void testBug506108() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Exception e, Exception e1, Exception e2) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E2 extends E {\n");
+		buf.append("    void foo(Exception e1, @NonNull Exception e2, Exception e) {\n");
+		buf.append("        e2.printStackTrace();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Change parameter 'e2' to '@Nullable'");
+
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E2 extends E {\n");
+		buf.append("    void foo(Exception e1, @Nullable Exception e2, Exception e) {\n"); // change override to accept @Nullable
+		buf.append("        e2.printStackTrace();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+
+		assertEqualString(proposal.getDisplayString(), "Change parameter in overridden 'foo(..)' to '@NonNull'");
+
+		preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(Exception e, @NonNull Exception e1, Exception e2) {\n"); // change the overridden method to force @NonNull
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
 }
