@@ -13,13 +13,12 @@ package org.eclipse.jdt.internal.ui.filters;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 
 /**
- * Filters out members (method and fields) of {@link java.lang.Object}.
+ * Filters out members of {@link java.lang.Object}.
  *
  * @author Björn Michael
  * @since 3.13
@@ -27,13 +26,6 @@ import org.eclipse.jdt.core.ITypeRoot;
 public class JavaLangObjectMembersFilter extends ViewerFilter {
 
 	private static final String JAVA_LANG_OBJECT_CLASS_NAME= Object.class.getName();
-
-	/**
-	 * Creates a new filter instance.
-	 */
-	public JavaLangObjectMembersFilter() { // instantiated by org.eclipse.jdt.ui.javaElementFilters extension
-		super();
-	}
 
 	@Override
 	public boolean select(final Viewer viewer, final Object parentElement, final Object element) {
@@ -51,17 +43,12 @@ public class JavaLangObjectMembersFilter extends ViewerFilter {
 		}
 
 		if (element instanceof IMember) {
-			IMember member= (IMember) element;
-			switch (member.getElementType()) {
-				case IJavaElement.FIELD: // may be in future versions of JDK
-				case IJavaElement.METHOD:
-					IType declaringType= member.getDeclaringType();
-					if (declaringType != null) {
-						String fullyQualifiedName= declaringType.getFullyQualifiedName();
-						if (JAVA_LANG_OBJECT_CLASS_NAME.equals(fullyQualifiedName)) {
-							return false;
-						}
-					}
+			IType declaringType= ((IMember) element).getDeclaringType();
+			if (declaringType != null) {
+				String fullyQualifiedName= declaringType.getFullyQualifiedName();
+				if (JAVA_LANG_OBJECT_CLASS_NAME.equals(fullyQualifiedName)) {
+					return false;
+				}
 			}
 		}
 
