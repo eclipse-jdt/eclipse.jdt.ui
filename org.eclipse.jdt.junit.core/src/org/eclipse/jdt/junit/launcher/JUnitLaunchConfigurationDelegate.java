@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -19,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -38,6 +43,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.URIUtil;
 
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -388,20 +394,20 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			for (int i= 0; i < entries.length; i++) {
 				try {
 					addEntry(junitEntries, entries[i]);
-				} catch (IOException e) {
+				} catch (IOException | URISyntaxException e) {
 					Assert.isTrue(false, entries[i].getPluginId() + " is available (required JAR)"); //$NON-NLS-1$
 				}
 			}
 			return junitEntries;
 		}
 
-		private void addEntry(List<String> junitEntries, final JUnitRuntimeClasspathEntry entry) throws IOException, MalformedURLException {
+		private void addEntry(List<String> junitEntries, final JUnitRuntimeClasspathEntry entry) throws IOException, MalformedURLException, URISyntaxException {
 			String entryString= entryString(entry);
 			if (entryString != null)
 				junitEntries.add(entryString);
 		}
 
-		private String entryString(final JUnitRuntimeClasspathEntry entry) throws IOException, MalformedURLException {
+		private String entryString(final JUnitRuntimeClasspathEntry entry) throws IOException, MalformedURLException, URISyntaxException {
 			if (inDevelopmentMode()) {
 				try {
 					return localURL(entry.developmentModeEntry());
@@ -416,7 +422,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			return fInDevelopmentMode;
 		}
 
-		private String localURL(JUnitRuntimeClasspathEntry jar) throws IOException, MalformedURLException {
+		private String localURL(JUnitRuntimeClasspathEntry jar) throws IOException, MalformedURLException, URISyntaxException {
 			Bundle bundle= JUnitCorePlugin.getDefault().getBundle(jar.getPluginId());
 			URL url;
 			if (jar.getPluginRelativePath() == null)
@@ -425,7 +431,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 				url= bundle.getEntry(jar.getPluginRelativePath());
 			if (url == null)
 				throw new IOException();
-			return FileLocator.toFileURL(url).getFile();
+			return URIUtil.toFile(URIUtil.toURI(FileLocator.toFileURL(url))).getAbsolutePath();
 		}
 	}
 
