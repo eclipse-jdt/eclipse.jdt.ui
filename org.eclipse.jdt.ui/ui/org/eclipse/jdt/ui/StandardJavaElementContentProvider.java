@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
@@ -188,7 +189,8 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 				return ((IJarEntryResource) element).getChildren();
 			}
 
-			if (getProvideMembers() && element instanceof ISourceReference && element instanceof IParent) {
+			if (getProvideMembers() && element instanceof ISourceReference && element instanceof IParent
+					&& !(element instanceof IModuleDescription)) {
 				return ((IParent)element).getChildren();
 			}
 		} catch (CoreException e) {
@@ -220,7 +222,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			}
 		}
 
-		if (element instanceof IParent) {
+		if (element instanceof IParent && !(element instanceof IModuleDescription)) {
 			try {
 				// when we have Java children return true, else we fetch all the children
 				if (((IParent)element).hasChildren())

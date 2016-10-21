@@ -100,6 +100,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
@@ -296,7 +297,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 				@Override
 				public Object[] getChildren(Object parent) {
-					if (parent instanceof IParent) {
+					if (parent instanceof IParent && !(parent instanceof IModuleDescription)) {
 						IParent c= (IParent) parent;
 						try {
 							return filter(c.getChildren());
@@ -338,7 +339,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 				@Override
 				public boolean hasChildren(Object parent) {
-					if (parent instanceof IParent) {
+					if (parent instanceof IParent && !(parent instanceof IModuleDescription)) {
 						IParent c= (IParent) parent;
 						try {
 							IJavaElement[] children= filter(c.getChildren());

@@ -130,6 +130,7 @@ public class JavaPluginImages {
 
 	public static final String IMG_OBJS_ENV_VAR= NAME_PREFIX + "envvar_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_OBJS_JAVA_MODEL= NAME_PREFIX + "java_model_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_MODULE= NAME_PREFIX + "module_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_ERROR_ALT= NAME_PREFIX + "error_alt_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_WARNING_ALT= NAME_PREFIX + "warning_alt_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_INFO_ALT= NAME_PREFIX + "info_alt_obj.gif"; //$NON-NLS-1$
@@ -229,6 +230,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_PROJECT_SETTINGS= createManagedFromKey(T_OBJ, IMG_OBJS_PROJECT_SETTINGS);
 
 	public static final ImageDescriptor DESC_OBJS_JAVA_MODEL= createManagedFromKey(T_OBJ, IMG_OBJS_JAVA_MODEL);
+	public static final ImageDescriptor DESC_OBJS_MODULE= createManagedFromKey(T_OBJ, IMG_OBJS_MODULE);
 
 	public static final ImageDescriptor DESC_OBJS_CLASS= createManagedFromKey(T_OBJ, IMG_OBJS_CLASS);
 	public static final ImageDescriptor DESC_OBJS_CLASS_DEFAULT= createManagedFromKey(T_OBJ, IMG_OBJS_CLASS_DEFAULT);
