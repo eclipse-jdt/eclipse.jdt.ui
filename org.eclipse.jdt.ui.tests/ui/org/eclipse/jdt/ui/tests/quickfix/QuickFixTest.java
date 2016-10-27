@@ -109,6 +109,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(NullAnnotationsQuickFixTest18Mix.suite());
 		suite.addTest(AnnotateAssistTest15.suite());
 		suite.addTest(AnnotateAssistTest18.suite());
+		suite.addTest(TypeAnnotationQuickFixTest.suite());
 
 		return new ProjectTestSetup(suite);
 	}

@@ -279,6 +279,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.InvalidUsageOfTypeAnnotations:
 			case IProblem.DuplicateInheritedDefaultMethods:
 			case IProblem.InheritedDefaultMethodConflictsWithOtherInherited:
+			case IProblem.IllegalTypeAnnotationsInStaticMemberAccess:
+			case IProblem.TypeAnnotationAtQualifiedName:
+			case IProblem.NullAnnotationAtQualifyingType:
+			case IProblem.IllegalAnnotationForBaseType:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -782,6 +786,12 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				if (prj2 != null && JavaCore.ENABLED.equals(prj2.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true))) {
 					NullAnnotationsCorrectionProcessor.addLocalVariableAnnotationProposal(context, problem, proposals);
 				}
+				break;
+			case IProblem.TypeAnnotationAtQualifiedName:
+			case IProblem.IllegalTypeAnnotationsInStaticMemberAccess:
+			case IProblem.NullAnnotationAtQualifyingType:
+			case IProblem.IllegalAnnotationForBaseType:
+				TypeAnnotationSubProcessor.addMoveTypeAnnotationToTypeProposal(context, problem, proposals);
 				break;
 			default:
 		}
