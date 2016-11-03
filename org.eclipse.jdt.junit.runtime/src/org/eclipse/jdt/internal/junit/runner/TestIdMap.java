@@ -29,7 +29,7 @@ public class TestIdMap {
 		return newId;
 	}
 
-	public String getTestId(ITestReference ref) {
+	public String getTestId(ITestReference ref) { // not used
 		return getTestId(ref.getIdentifier());
 	}
 }

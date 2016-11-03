@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -141,6 +141,7 @@ import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
+import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.model.ITestRunSessionListener;
 import org.eclipse.jdt.internal.junit.model.ITestSessionListener;
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
@@ -758,6 +759,7 @@ public class TestRunnerViewPart extends ViewPart {
 				}
 			});
 			stopUpdateJobs();
+			showMessageIfNoTests();
 		}
 
 		@Override
@@ -1456,6 +1458,19 @@ public class TestRunnerViewPart extends ViewPart {
 			}
 		});
 		stopUpdateJobs();
+		showMessageIfNoTests();
+	}
+
+	private void showMessageIfNoTests() {
+		if (fTestRunSession != null && TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(fTestRunSession.getTestRunnerKind().getId()) && fTestRunSession.getTotalCount() == 0) {
+			Display.getDefault().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					String msg= Messages.format(JUnitMessages.TestRunnerViewPart_error_notests_kind, fTestRunSession.getTestRunnerKind().getDisplayName());
+					MessageDialog.openInformation(JUnitPlugin.getActiveWorkbenchShell(), JUnitMessages.TestRunnerViewPart__error_cannotrun, msg);
+				}
+			});
+		}
 	}
 
 	private void resetViewIcon() {
@@ -2161,9 +2176,7 @@ action enablement
 						tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, className);
 						// reset the container
 						tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
-						if (testName != null) {
-							tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME, testName);
-						}
+						tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME, testName);
 						relaunch(tmp, launchMode);
 						return;
 						} catch (CoreException e) {

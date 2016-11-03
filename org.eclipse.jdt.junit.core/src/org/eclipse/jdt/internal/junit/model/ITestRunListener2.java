@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,18 +69,22 @@ public interface ITestRunListener2 {
 	public void testRunTerminated();
 
 	/**
-	 * Information about a member of the test suite that is about to be run. The
-	 * format of the string is:
+	 * Information about a member of the test suite that is about to be run. The format of the
+	 * string is:
 	 *
 	 * <pre>
-	 *  testId,testName,isSuite,testcount
+	 *  testId,testName,isSuite,testcount,isTestFactory,isDynamicTest,parentId,displayName
 	 *
 	 *  testId: a unique id for the test
 	 *  testName: the name of the test
 	 *  isSuite: true or false depending on whether the test is a suite
 	 *  testCount: an integer indicating the number of tests
-	 *
-	 *  Example: &quot;324968,testPass(junit.tests.MyTest),false,1&quot;
+	 *  isTestFactory: true or false
+	 *  isDynamicTest: true or false
+	 *  parentId: the unique id of its parent, otherwise "-1"
+	 *  displayName: the display name of the test
+	 *  
+	 *  Example: &quot;324968,testPass(junit.tests.MyTest),false,1,false,false,245613,A simple test case&quot;
 	 * </pre>
 	 *
 	 * @param description a string describing a tree entry

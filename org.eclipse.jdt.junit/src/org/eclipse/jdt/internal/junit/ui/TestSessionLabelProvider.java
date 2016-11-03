@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,25 +15,23 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import java.text.NumberFormat;
 
-import org.eclipse.jdt.junit.model.ITestCaseElement;
 import org.eclipse.jdt.junit.model.ITestElement;
 import org.eclipse.jdt.junit.model.ITestRunSession;
-import org.eclipse.jdt.junit.model.ITestSuiteElement;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
-import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
+import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
 
 public class TestSessionLabelProvider extends LabelProvider implements IStyledLabelProvider {
 
@@ -74,13 +72,26 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 			}
 
 		} else {
-			if (element instanceof ITestCaseElement) {
-				String className= BasicElementLabels.getJavaElementName(((ITestCaseElement) element).getTestClassName());
-				String decorated= Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, className });
+			if (element instanceof TestCaseElement) {
+				String decorated= getTextForFlatLayout((TestCaseElement) testElement, label);
 				text= StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, text);
 			}
 		}
 		return addElapsedTime(text, testElement.getElapsedTimeInSeconds());
+	}
+
+	private String getTextForFlatLayout(TestCaseElement testCaseElement, String label) {
+		TestSuiteElement parent= testCaseElement.getParent();
+		String parentDisplayName= parent.getDisplayName();
+		String parentName= BasicElementLabels.getJavaElementName(parentDisplayName != null ? parentDisplayName : testCaseElement.getTestMethodName());
+		if (!parent.isTestFactory()) {
+			return Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, parentName });
+		} else {
+			TestSuiteElement testSuiteElement= parent.getParent();
+			String displayName= testSuiteElement.getDisplayName();
+			String parentClassName= BasicElementLabels.getJavaElementName(displayName != null ? displayName : testSuiteElement.getSuiteTypeName());
+			return Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_factoryMethodName_className, new Object[] { label, parentName, parentClassName });
+		}
 	}
 
 	private StyledString addElapsedTime(StyledString styledString, double time) {
@@ -98,10 +109,14 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 	}
 
 	private String getSimpleLabel(Object element) {
-		if (element instanceof ITestCaseElement) {
-			return BasicElementLabels.getJavaElementName(((ITestCaseElement) element).getTestMethodName());
-		} else if (element instanceof ITestSuiteElement) {
-			return BasicElementLabels.getJavaElementName(((ITestSuiteElement) element).getSuiteTypeName());
+		if (element instanceof TestCaseElement) {
+			TestCaseElement testCaseElement= (TestCaseElement) element;
+			String displayName= testCaseElement.getDisplayName();
+			return BasicElementLabels.getJavaElementName(displayName != null ? displayName : testCaseElement.getTestMethodName());
+		} else if (element instanceof TestSuiteElement) {
+			TestSuiteElement testSuiteElement= (TestSuiteElement) element;
+			String displayName= testSuiteElement.getDisplayName();
+			return BasicElementLabels.getJavaElementName(displayName != null ? displayName : testSuiteElement.getSuiteTypeName());
 		}
 		return null;
 	}
@@ -121,9 +136,8 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 				}
 			}
 		} else {
-			if (element instanceof ITestCaseElement) {
-				String className=  BasicElementLabels.getJavaElementName(((ITestCaseElement) element).getTestClassName());
-				label= Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, className });
+			if (element instanceof TestCaseElement) {
+				label= getTextForFlatLayout((TestCaseElement) testElement, label);
 			}
 		}
 		return addElapsedTime(label, testElement.getElapsedTimeInSeconds());

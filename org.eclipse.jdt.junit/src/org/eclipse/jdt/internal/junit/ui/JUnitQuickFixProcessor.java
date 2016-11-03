@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,11 +66,11 @@ import org.eclipse.jdt.ui.CodeStyleConfiguration;
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor;
+import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
-import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
 
 public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 
@@ -131,6 +131,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 		try {
 			ICompilationUnit unit= context.getCompilationUnit();
 			String qualifiedName= null;
+			String qualifiedName1= null;
 
 			String s= unit.getBuffer().getText(location.getOffset(), location.getLength());
 			if (s.equals("TestCase") || s.equals("TestSuite")) { //$NON-NLS-1$ //$NON-NLS-2$
@@ -141,26 +142,44 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 				ASTNode node= location.getCoveredNode(context.getASTRoot());
 				if (node != null && node.getLocationInParent() == MarkerAnnotation.TYPE_NAME_PROPERTY) {
 					qualifiedName= "org.junit.Test"; //$NON-NLS-1$
+					qualifiedName1= "org.junit.jupiter.api.Test"; //$NON-NLS-1$
 				} else {
 					qualifiedName= "junit.framework.Test"; //$NON-NLS-1$
 				}
+			} else if (s.equals("TestFactory")) { //$NON-NLS-1$
+				qualifiedName= "org.junit.jupiter.api.TestFactory"; //$NON-NLS-1$
+			} else if (s.equals("Testable")) { //$NON-NLS-1$
+				qualifiedName= "org.junit.platform.commons.annotation.Testable"; //$NON-NLS-1$				
 			}
-			if (qualifiedName != null) {
-				IJavaProject javaProject= unit.getJavaProject();
-				if (javaProject.findType(qualifiedName) != null) {
-					return proposals;
+			IJavaProject javaProject= unit.getJavaProject();
+			if (!(foundInProjectClasspath(javaProject, qualifiedName) && foundInProjectClasspath(javaProject, qualifiedName1))) {
+				if (qualifiedName != null) {
+					proposals= addProposal(context, proposals, qualifiedName, javaProject);
 				}
-				ClasspathFixProposal[] fixProposals= ClasspathFixProcessor.getContributedFixImportProposals(javaProject, qualifiedName, null);
-				for (ClasspathFixProposal fixProposal : fixProposals) {
-					if (proposals == null)
-						proposals= new ArrayList<>();
-					proposals.add(new JUnitClasspathFixCorrectionProposal(javaProject, fixProposal, getImportRewrite(context.getASTRoot(), qualifiedName)));
+				if (qualifiedName1 != null) {
+					proposals= addProposal(context, proposals, qualifiedName1, javaProject);
 				}
+			} else {
+				return proposals;
 			}
 		} catch (JavaModelException e) {
 		    JUnitPlugin.log(e.getStatus());
 		}
 		return proposals;
+	}
+
+	private ArrayList<IJavaCompletionProposal> addProposal(IInvocationContext context, ArrayList<IJavaCompletionProposal> proposals, String qualifiedName, IJavaProject javaProject) {
+		ClasspathFixProposal[] fixProposals= ClasspathFixProcessor.getContributedFixImportProposals(javaProject, qualifiedName, null);
+		for (ClasspathFixProposal fixProposal : fixProposals) {
+			if (proposals == null)
+				proposals= new ArrayList<>();
+			proposals.add(new JUnitClasspathFixCorrectionProposal(javaProject, fixProposal, getImportRewrite(context.getASTRoot(), qualifiedName)));
+		}
+		return proposals;
+	}
+
+	private boolean foundInProjectClasspath(IJavaProject javaProject, String qualifiedName) throws JavaModelException {
+		return qualifiedName != null && javaProject.findType(qualifiedName) != null;
 	}
 
 	private ImportRewrite getImportRewrite(CompilationUnit astRoot, String typeToImport) {

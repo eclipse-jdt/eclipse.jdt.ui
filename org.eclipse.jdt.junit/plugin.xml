@@ -224,9 +224,14 @@
                   <count value="1"/>
                	  <iterate>
                      <adapt type="org.eclipse.jdt.core.IJavaElement">
-		                <test property="org.eclipse.jdt.core.isInJavaProject"/>
-		                <test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="junit.framework.Test"/>
-		                <test property="org.eclipse.jdt.junit.canLaunchAsJUnit" forcePluginActivation="true"/>
+                     	<and>
+		                	<test property="org.eclipse.jdt.core.isInJavaProject"/>
+		                	<or>
+		                	<test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="junit.framework.Test"/>
+		                	<test property="org.eclipse.jdt.core.hasTypeOnClasspath" value="org.junit.platform.commons.annotation.Testable"/>
+		                	</or>
+		                	<test property="org.eclipse.jdt.junit.canLaunchAsJUnit" forcePluginActivation="true"/>
+                  		</and>
 		             </adapt>
 		          </iterate>
                </with>

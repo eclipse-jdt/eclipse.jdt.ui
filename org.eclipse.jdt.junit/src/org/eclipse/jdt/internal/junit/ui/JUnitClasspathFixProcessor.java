@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2010 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,18 +37,21 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 
 	private static class JUnitClasspathFixProposal extends ClasspathFixProposal {
 
-		private final boolean fIsJunit4;
+		private final int fJunitVersion;
 		private final int fRelevance;
 		private final IJavaProject fProject;
-		public JUnitClasspathFixProposal(IJavaProject project, boolean isJunit4, int relevance) {
+		public JUnitClasspathFixProposal(IJavaProject project, int junitVersion, int relevance) {
 			fProject= project;
-			fIsJunit4= isJunit4;
+			fJunitVersion= junitVersion;
 			fRelevance= relevance;
 		}
 
 		@Override
 		public String getAdditionalProposalInfo() {
-			if (fIsJunit4) {
+			if (fJunitVersion == 5) {
+				return JUnitMessages.JUnitAddLibraryProposal_junit5_info;
+			}
+			if (fJunitVersion == 4) {
 				return JUnitMessages.JUnitAddLibraryProposal_junit4_info;
 			}
 			return JUnitMessages.JUnitAddLibraryProposal_info;
@@ -62,7 +65,9 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 			monitor.beginTask(JUnitMessages.JUnitClasspathFixProcessor_progress_desc, 1);
 			try {
 				IClasspathEntry entry= null;
-				if (fIsJunit4) {
+				if (fJunitVersion == 5) {
+					entry= BuildPathSupport.getJUnit5ClasspathEntry();
+				} else if (fJunitVersion == 4) {
 					entry= BuildPathSupport.getJUnit4ClasspathEntry();
 				} else {
 					entry= BuildPathSupport.getJUnit3ClasspathEntry();
@@ -116,7 +121,10 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 
 		@Override
 		public String getDisplayString() {
-			if (fIsJunit4) {
+			if (fJunitVersion == 5) {
+				return JUnitMessages.JUnitAddLibraryProposa_junit5_label;
+			}
+			if (fJunitVersion == 4) {
 				return JUnitMessages.JUnitAddLibraryProposa_junit4_label;
 			}
 			return JUnitMessages.JUnitAddLibraryProposal_label;
@@ -135,28 +143,36 @@ public class JUnitClasspathFixProcessor extends ClasspathFixProcessor {
 
 	private static final int JUNIT3= 1;
 	private static final int JUNIT4= 2;
+	private static final int JUNIT5= 4;
 
 
 	@Override
 	public ClasspathFixProposal[] getFixImportProposals(IJavaProject project, String missingType) throws CoreException {
 		String s= missingType;
 		int res= 0;
-		if (s.startsWith("org.junit.")) { //$NON-NLS-1$
+		if (s.startsWith("org.junit.jupiter") || s.startsWith("org.junit.platform")) { //$NON-NLS-1$ //$NON-NLS-2$
+			res= JUNIT5;
+		} else if (s.startsWith("org.junit.")) { //$NON-NLS-1$
 			res= JUNIT4;
 		} else if (s.equals("TestCase") || s.equals("TestSuite") || s.startsWith("junit.")) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			res= JUNIT3;
 		} else if (s.equals("Test")) { //$NON-NLS-1$
-			res= JUNIT3 | JUNIT4;
+			res= JUNIT3 | JUNIT4 | JUNIT5;
+		} else if (s.equals("TestFactory") || s.equals("Testable")) { //$NON-NLS-1$ //$NON-NLS-2$
+			res= JUNIT5;
 		} else if (s.equals("RunWith")) { //$NON-NLS-1$
 			res= JUNIT4;
 		}
 		if (res != 0) {
 			ArrayList<JUnitClasspathFixProposal> proposals= new ArrayList<>();
+			if ((res & JUNIT5) != 0 && JUnitStubUtility.is18OrHigher(project)) {
+				proposals.add(new JUnitClasspathFixProposal(project, 5, 15));
+			}
 			if ((res & JUNIT4) != 0 && JUnitStubUtility.is50OrHigher(project)) {
-				proposals.add(new JUnitClasspathFixProposal(project, true, 15));
+				proposals.add(new JUnitClasspathFixProposal(project, 4, 15));
 			}
 			if ((res & JUNIT3) != 0) {
-				proposals.add(new JUnitClasspathFixProposal(project, false, 15));
+				proposals.add(new JUnitClasspathFixProposal(project, 3, 15));
 			}
 			return proposals.toArray(new ClasspathFixProposal[proposals.size()]);
 		}

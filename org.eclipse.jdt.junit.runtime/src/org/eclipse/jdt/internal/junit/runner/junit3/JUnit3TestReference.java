@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 IBM Corporation and others.
+ * Copyright (c) 2006, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,12 +22,6 @@ import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.List;
 
-import junit.extensions.TestDecorator;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestResult;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.internal.junit.runner.FailedComparison;
 import org.eclipse.jdt.internal.junit.runner.IClassifiesThrowables;
 import org.eclipse.jdt.internal.junit.runner.IListensToTestExecutions;
@@ -38,6 +32,12 @@ import org.eclipse.jdt.internal.junit.runner.IVisitsTestTrees;
 import org.eclipse.jdt.internal.junit.runner.MessageIds;
 import org.eclipse.jdt.internal.junit.runner.TestExecution;
 import org.eclipse.jdt.internal.junit.runner.TestReferenceFailure;
+
+import junit.extensions.TestDecorator;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestResult;
+import junit.framework.TestSuite;
 
 public class JUnit3TestReference implements ITestReference {
 
@@ -124,22 +124,22 @@ public class JUnit3TestReference implements ITestReference {
 	public void sendTree(IVisitsTestTrees notified) {
 		if (fTest instanceof TestDecorator) {
 			TestDecorator decorator= (TestDecorator) fTest;
-			notified.visitTreeEntry(getIdentifier(), true, 1);
+			notified.visitTreeEntry(getIdentifier(), true, 1, false, false, "-1"); //$NON-NLS-1$
 			sendTreeOfChild(decorator.getTest(), notified);
 		} else if (fTest instanceof TestSuite) {
 			TestSuite suite= (TestSuite) fTest;
-			notified.visitTreeEntry(getIdentifier(), true, suite.testCount());
+			notified.visitTreeEntry(getIdentifier(), true, suite.testCount(), false, false, "-1"); //$NON-NLS-1$
 			for (int i= 0; i < suite.testCount(); i++) {
 				sendTreeOfChild(suite.testAt(i), notified);
 			}
 		} else if (isJUnit4TestSuiteAdapter(fTest)) {
 			List tests= (List) callJUnit4GetterMethod(fTest, "getTests"); //$NON-NLS-1$
-			notified.visitTreeEntry(getIdentifier(), true, tests.size());
+			notified.visitTreeEntry(getIdentifier(), true, tests.size(), false, false, "-1"); //$NON-NLS-1$
 			for (Iterator iter= tests.iterator(); iter.hasNext();) {
 				sendTreeOfChild((Test) iter.next(), notified);
 			}
 		} else {
-			notified.visitTreeEntry(getIdentifier(), false, fTest.countTestCases());
+			notified.visitTreeEntry(getIdentifier(), false, fTest.countTestCases(), false, false, "-1"); //$NON-NLS-1$
 		}
 	}
 

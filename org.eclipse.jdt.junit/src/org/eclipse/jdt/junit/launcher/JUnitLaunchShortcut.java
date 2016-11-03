@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,9 +13,11 @@ package org.eclipse.jdt.junit.launcher;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -60,6 +62,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.junit.launcher.AssertionVMArg;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
@@ -344,10 +347,18 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 				break;
 			}
 			case IJavaElement.METHOD: {
-				testName= element.getElementName(); // Test-names can not be specified when launching a Java method.
 				IMethod method= (IMethod)element;
+				testName= method.getElementName(); // Test-names can not be specified when launching a Java method.
 				containerHandleId= EMPTY_STRING;
-				mainTypeQualifiedName= method.getDeclaringType().getFullyQualifiedName('.');
+				IType declaringType= method.getDeclaringType();
+				mainTypeQualifiedName= declaringType.getFullyQualifiedName('.');
+				if (method.getNumberOfParameters() > 0) {
+					// TODO - JUnit5: needs fully qualified type names for the parameter types (check int[] etc.) 
+					// use new API from jdt.core - https://bugs.eclipse.org/bugs/show_bug.cgi?id=502563
+					String[] parameterTypeNames= StubUtility.getParameterTypeNamesForSeeTag(method);
+					String paramTypes= Arrays.stream(parameterTypeNames).collect(Collectors.joining(",", "(", ")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					testName+= paramTypes;
+				}
 				break;
 			}
 			default:

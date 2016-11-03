@@ -14,5 +14,5 @@
 package org.eclipse.jdt.internal.junit.runner;
 
 public interface IVisitsTestTrees {
-	public abstract void visitTreeEntry(ITestIdentifier identifier, boolean hasChildren, int testCount);
+	public abstract void visitTreeEntry(ITestIdentifier identifier, boolean hasChildren, int testCount, boolean isTestFactory, boolean isDynamicTest, String parentId);
 }

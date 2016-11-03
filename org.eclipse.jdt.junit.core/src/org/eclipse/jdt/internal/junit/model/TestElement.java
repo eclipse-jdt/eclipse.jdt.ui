@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -169,6 +169,12 @@ public abstract class TestElement implements ITestElement {
 	private final String fId;
 	private String fTestName;
 
+	/**
+	 * The display name of the test element, can be <code>null</code>. In that case, use
+	 * {@link TestElement#fTestName fTestName}.
+	 */
+	private String fDisplayName;
+
 	private Status fStatus;
 	private String fTrace;
 	private String fExpected;
@@ -191,13 +197,15 @@ public abstract class TestElement implements ITestElement {
 	 * @param parent the parent, can be <code>null</code>
 	 * @param id the test id
 	 * @param testName the test name
+	 * @param displayName the test display name, can be <code>null</code>
 	 */
-	public TestElement(TestSuiteElement parent, String id, String testName) {
+	public TestElement(TestSuiteElement parent, String id, String testName, String displayName) {
 		Assert.isNotNull(id);
 		Assert.isNotNull(testName);
 		fParent= parent;
 		fId= id;
 		fTestName= testName;
+		fDisplayName= displayName;
 		fStatus= Status.NOT_RUN;
 		if (parent != null)
 			parent.addChild(this);
@@ -362,5 +370,15 @@ public abstract class TestElement implements ITestElement {
 	@Override
 	public String toString() {
 		return getProgressState() + " - " + getTestResult(true); //$NON-NLS-1$
+	}
+
+	/**
+	 * Returns the display name of the test. Can be <code>null</code>. In that case, use
+	 * {@link TestElement#getTestName() getTestName()}.
+	 * 
+	 * @return the test display name, can be <code>null</code>
+	 */
+	public String getDisplayName() {
+		return fDisplayName;
 	}
 }

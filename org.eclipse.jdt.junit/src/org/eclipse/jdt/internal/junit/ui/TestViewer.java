@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -265,10 +265,9 @@ public class TestViewer {
 		if (! selection.isEmpty()) {
 			TestElement testElement= (TestElement) selection.getFirstElement();
 
-			String testLabel= testElement.getTestName();
 			String className= testElement.getClassName();
 			if (testElement instanceof TestSuiteElement) {
-				manager.add(new OpenTestAction(fTestRunnerPart, testLabel));
+				manager.add(getAction((TestSuiteElement) testElement));
 				manager.add(new Separator());
 				if (!fTestRunnerPart.lastLaunchIsKeptAlive()) {
 					IType testType= findTestClass(testElement);
@@ -282,6 +281,14 @@ public class TestViewer {
 			} else {
 				TestCaseElement testCaseElement= (TestCaseElement) testElement;
 				String testMethodName= testCaseElement.getTestMethodName();
+				String testName= testCaseElement.getTestName();
+				int indexOfColon= testName.indexOf(":"); //$NON-NLS-1$
+				if (indexOfColon != -1) {
+					String paramTypesStr= testName.substring(indexOfColon + 1);
+					if (!paramTypesStr.isEmpty()) {
+						testMethodName= testMethodName + "(" + paramTypesStr + ")";  //$NON-NLS-1$//$NON-NLS-2$
+					}
+				}
 				manager.add(new OpenTestAction(fTestRunnerPart, testCaseElement));
 				manager.add(new Separator());
 				if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
@@ -359,15 +366,7 @@ public class TestViewer {
 
 		OpenTestAction action;
 		if (testElement instanceof TestSuiteElement) {
-			String testName= testElement.getTestName();
-			ITestElement[] children= ((TestSuiteElement) testElement).getChildren();
-			if (testName.startsWith("[") && testName.endsWith("]") //$NON-NLS-1$ //$NON-NLS-2$
-					&& children.length > 0 && children[0] instanceof TestCaseElement) {
-				// a group of parameterized tests
-				action= new OpenTestAction(fTestRunnerPart, (TestCaseElement) children[0]);
-			} else {
-				action= new OpenTestAction(fTestRunnerPart, testName);
-			}
+			action= getAction((TestSuiteElement) testElement);
 		} else if (testElement instanceof TestCaseElement) {
 			TestCaseElement testCase= (TestCaseElement)testElement;
 			action= new OpenTestAction(fTestRunnerPart, testCase);
@@ -377,6 +376,28 @@ public class TestViewer {
 
 		if (action.isEnabled())
 			action.run();
+	}
+
+	private OpenTestAction getAction(TestSuiteElement testElement) {
+		String testName= testElement.getTestName();
+		ITestElement[] children= testElement.getChildren();
+		if (testName.startsWith("[") && testName.endsWith("]") //$NON-NLS-1$ //$NON-NLS-2$
+				&& children.length > 0 && children[0] instanceof TestCaseElement) {
+			// a group of parameterized tests
+			return new OpenTestAction(fTestRunnerPart, (TestCaseElement) children[0]);
+		} else {
+			int index= testName.indexOf('(');
+			if (testElement.isTestFactory() && index != 0) {
+				if (children.length > 0 && children[0] instanceof TestCaseElement) {
+					return new OpenTestAction(fTestRunnerPart, (TestCaseElement) children[0]);
+				} else {
+					// based on MessageIds.TEST_IDENTIFIER_MESSAGE_FORMAT
+					return new OpenTestAction(fTestRunnerPart, testElement.getClassName(), testName.substring(0, index), OpenTestAction.extractMethodParameterTypeSignatures(testName), true);
+				}
+			} else {
+				return new OpenTestAction(fTestRunnerPart, testName);
+			}
+		}
 	}
 
 	private void handleSelected() {

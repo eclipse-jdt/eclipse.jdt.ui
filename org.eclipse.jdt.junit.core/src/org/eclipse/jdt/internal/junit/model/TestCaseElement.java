@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,8 +21,8 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 
 	private boolean fIgnored;
 
-	public TestCaseElement(TestSuiteElement parent, String id, String testName) {
-		super(parent, id, testName);
+	public TestCaseElement(TestSuiteElement parent, String id, String testName, String displayName) {
+		super(parent, id, testName, displayName);
 		Assert.isNotNull(parent);
 	}
 

@@ -42,6 +42,7 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 		prefs.put(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST, ""); //$NON-NLS-1$
 		prefs.putInt(JUnitPreferencesConstants.MAX_TEST_RUNS, 10);
 
+		// TODO - JUnit5
 		// see https://github.com/junit-team/junit/issues/570
 		prefs.put(JUnitPreferencesConstants.JUNIT3_JAVADOC, "http://junit.sourceforge.net/junit3.8.1/javadoc/"); //$NON-NLS-1$
 		prefs.put(JUnitPreferencesConstants.JUNIT4_JAVADOC, "http://junit-team.github.io/junit/javadoc/latest/"); //$NON-NLS-1$

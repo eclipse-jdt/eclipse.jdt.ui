@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -205,6 +205,27 @@ public class BuildPathSupport {
 	private static final JUnitPluginDescription HAMCREST_CORE_PLUGIN= new JUnitPluginDescription(
 			"org.hamcrest.core", new VersionRange("[1.1.0,2.0.0)"), null, "org.hamcrest.core_1.*.jar", "org.hamcrest.core.source", "source-bundle/", JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 
+	// TODO - JUnit5
+	public static final JUnitPluginDescription JUNIT_JUPITER_API_PLUGIN= new JUnitPluginDescription(
+			"org.junit.jupiter.api", new VersionRange("[1.0.0,2.0.0)"), "org.junit.jupiter.api.jar", "org.junit.jupiter.api.jar", "org.junit.jupiter.api.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
+			JUnitPreferencesConstants.JUNIT_JUPITER_API_JAVADOC);
+
+	public static final JUnitPluginDescription JUNIT_JUPITER_ENGINE_PLUGIN= new JUnitPluginDescription(
+			"org.junit.jupiter.engine", new VersionRange("[1.0.0,2.0.0)"), "org.junit.jupiter.engine.jar", "org.junit.jupiter.engine.jar", "org.junit.jupiter.engine.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
+			JUnitPreferencesConstants.JUNIT_JUPITER_ENGINE_JAVADOC);
+
+	public static final JUnitPluginDescription JUNIT_VINTAGE_ENGINE_PLUGIN= new JUnitPluginDescription(
+			"org.junit.vintage.engine", new VersionRange("[1.0.0,2.0.0)"), "org.junit.vintage.engine.jar", "org.junit.vintage.engine.jar", "org.junit.vintage.engine.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
+			JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC);
+
+	public static final JUnitPluginDescription JUNIT_PLATFORM_PLUGIN= new JUnitPluginDescription(
+			"org.junit.platform", new VersionRange("[1.0.0,2.0.0)"), "org.junit.platform.jar", "org.junit.platform.jar", "org.junit.platform.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
+			JUnitPreferencesConstants.JUNIT_PLATFORM_JAVADOC);
+
+	public static final JUnitPluginDescription JUNIT_OPENTEST4J_PLUGIN= new JUnitPluginDescription(
+			"org.opentest4j", new VersionRange("[1.0.0,2.0.0)"), "org.opentest4j.jar", "org.opentest4j.jar", "org.opentest4j.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
+			JUnitPreferencesConstants.JUNIT_OPENTEST4J_JAVADOC);
+
 	public static final JUnitPluginDescription JUNIT4_AS_3_PLUGIN= new JUnitPluginDescription(
 			JUNIT4_PLUGIN.bundleId, JUNIT4_PLUGIN.versionRange, JUNIT4_PLUGIN.bundleRoot, JUNIT4_PLUGIN.binaryImportedRoot,
 			JUNIT4_PLUGIN.sourceBundleId, JUNIT4_PLUGIN.repositorySource, JUNIT3_PLUGIN.javadocPreferenceKey) {
@@ -232,6 +253,13 @@ public class BuildPathSupport {
 	}
 
 	/**
+	 * @return the JUnit5 classpath container
+	 */
+	public static IClasspathEntry getJUnit5ClasspathEntry() {
+		return JavaCore.newContainerEntry(JUnitCore.JUNIT5_CONTAINER_PATH);
+	}
+
+	/**
 	 * @return the org.junit version 3 library, or <code>null</code> if not available
 	 */
 	public static IClasspathEntry getJUnit3LibraryEntry() {
@@ -246,7 +274,8 @@ public class BuildPathSupport {
 	}
 
 	/**
-	 * @return the org.junit version 4 library with access rules for JUnit 3, or <code>null</code> if not available
+	 * @return the org.junit version 4 library with access rules for JUnit 3, or <code>null</code>
+	 *         if not available
 	 */
 	public static IClasspathEntry getJUnit4as3LibraryEntry() {
 		return JUNIT4_AS_3_PLUGIN.getLibraryEntry();
@@ -259,4 +288,39 @@ public class BuildPathSupport {
 		return HAMCREST_CORE_PLUGIN.getLibraryEntry();
 	}
 
+	// TODO - JUnit5
+	/**
+	 * @return the org.junit.jupiter.api library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnitJupiterApiLibraryEntry() {
+		return JUNIT_JUPITER_API_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.junit.jupiter.engine library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnitJupiterEngineLibraryEntry() {
+		return JUNIT_JUPITER_ENGINE_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.junit.vintage.engine library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnitVintageEngineLibraryEntry() {
+		return JUNIT_VINTAGE_ENGINE_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.junit.platform library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnitPlatformLibraryEntry() {
+		return JUNIT_PLATFORM_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.opentest4j library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnitOpentest4jLibraryEntry() {
+		return JUNIT_OPENTEST4J_PLUGIN.getLibraryEntry();
+	}
 }

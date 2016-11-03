@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,8 +75,8 @@ public class CoreTestSearchEngine {
 		}
 	}
 
-	public static boolean isAccessibleClass(ITypeBinding type) {
-		if (type.isInterface()) {
+	public static boolean isAccessibleClass(ITypeBinding type) { // not used
+			if (type.isInterface()) {
 			return false;
 		}
 		int modifiers= type.getModifiers();
@@ -105,7 +105,7 @@ public class CoreTestSearchEngine {
 		return false;
 	}
 
-	public static boolean hasTestAnnotation(IJavaProject project) {
+	public static boolean hasJUnit4TestAnnotation(IJavaProject project) {
 		try {
 			if (project != null) {
 				IType type= project.findType(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME);
@@ -115,6 +115,24 @@ public class CoreTestSearchEngine {
 					IPackageFragmentRoot root= (IPackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					IClasspathEntry cpEntry= root.getRawClasspathEntry();
 					return ! JUnitCore.JUNIT3_CONTAINER_PATH.equals(cpEntry.getPath());
+				}
+			}
+		} catch (JavaModelException e) {
+			// not available
+		}
+		return false;
+	}
+
+	public static boolean hasJUnit5TestAnnotation(IJavaProject project) {
+		try {
+			if (project != null) {
+				IType type= project.findType(JUnitCorePlugin.JUNIT5_ANNOTATION_NAME);
+				if (type != null) {
+					// @Test annotation is not accessible if the JUnit classpath container is set to JUnit 3 or JUnit 4
+					// (although it may resolve to a JUnit 5 JAR)
+					IPackageFragmentRoot root= (IPackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					IClasspathEntry cpEntry= root.getRawClasspathEntry();
+					return ! JUnitCore.JUNIT3_CONTAINER_PATH.equals(cpEntry.getPath()) && ! JUnitCore.JUNIT4_CONTAINER_PATH.equals(cpEntry.getPath());
 				}
 			}
 		} catch (JavaModelException e) {
@@ -262,6 +280,22 @@ public class CoreTestSearchEngine {
 	public static boolean is50OrHigher(IJavaProject project) {
 		String source= project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
 		return is50OrHigher(source);
+	}
+
+	public static boolean is18OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_1_8);
+	}
+
+	/**
+	 * Checks if the given project or workspace has source compliance 1.8 or greater.
+	 * 
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 1.8 or
+	 *         greater.
+	 */
+	public static boolean is18OrHigher(IJavaProject project) {
+		String source= project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
+		return is18OrHigher(source);
 	}
 // ---
 

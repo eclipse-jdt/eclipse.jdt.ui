@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -89,6 +89,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
@@ -672,7 +673,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fMethodsCache= methodNames;
 		fMethodsCacheKey= methodsCacheKey;
 
-		boolean isJUnit4= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId());
+		boolean isJUnit3= TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKind.getId());
 
 		while (type != null) {
 			IMethod[] methods= type.getMethods();
@@ -684,7 +685,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 						method.getElementName().startsWith("test")) { //$NON-NLS-1$
 					methodNames.add(method.getElementName());
 				}
-				if (isJUnit4) {
+				if (!isJUnit3) {
 					IAnnotation annotation= method.getAnnotation("Test"); //$NON-NLS-1$
 					if (annotation.exists()) {
 						methodNames.add(method.getElementName());
@@ -895,14 +896,20 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	}
 
 	private void validateJavaProject(IJavaProject javaProject) {
-		if (! CoreTestSearchEngine.hasTestCaseType(javaProject)) {
-			setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testcasenotonpath);
-			return;
-		}
 		TestKind testKind = getSelectedTestKind();
-		if (testKind != null && TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId())) {
-			if (! CoreTestSearchEngine.hasTestAnnotation(javaProject)) {
-				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testannotationnotonpath);
+		if (testKind != null) {
+			if (!TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKind.getId()) && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
+				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testcasenotonpath);
+				return;
+			}
+
+			String msg= JUnitMessages.JUnitLaunchConfigurationTab_error_testannotationnotonpath;
+			if (TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId()) && !CoreTestSearchEngine.hasJUnit4TestAnnotation(javaProject)) {
+				setErrorMessage(Messages.format(msg, JUnitCorePlugin.JUNIT4_ANNOTATION_NAME));
+				return;
+			}
+			if (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKind.getId()) && !CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
+				setErrorMessage(Messages.format(msg, JUnitCorePlugin.JUNIT5_ANNOTATION_NAME));
 				return;
 			}
 		}

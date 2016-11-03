@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,10 +22,12 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 
 	private List<TestElement> fChildren;
 	private Status fChildrenStatus;
+	private boolean fIsTestFactory;
 
-	public TestSuiteElement(TestSuiteElement parent, String id, String testName, int childrenCount) {
-		super(parent, id, testName);
+	public TestSuiteElement(TestSuiteElement parent, String id, String testName, int childrenCount, String displayName, boolean isTestFactory) {
+		super(parent, id, testName, displayName);
 		fChildren= new ArrayList<>(childrenCount);
+		fIsTestFactory= isTestFactory;
 	}
 
 	@Override
@@ -145,6 +147,10 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 	@Override
 	public String toString() {
 		return "TestSuite: " + getSuiteTypeName() + " : " + super.toString() + " (" + fChildren.size() + ")";   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	}
+
+	public boolean isTestFactory() {
+		return fIsTestFactory;
 	}
 
 }

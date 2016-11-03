@@ -75,7 +75,32 @@ public class JUnitPreferencesConstants {
 	 * Javadoc location for org.hamcrest.core (JUnit 4)
 	 */
 	public static final String HAMCREST_CORE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit4.hamcrest.core.javadoclocation"; //$NON-NLS-1$
-	
+
+	// TODO - JUnit5
+	/**
+	 * Javadoc location for org.junit.jupiter.api (JUnit 5)
+	 */
+	public static final String JUNIT_JUPITER_API_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.jupiter.api.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.jupiter.engine (JUnit 5)
+	 */
+	public static final String JUNIT_JUPITER_ENGINE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.jupiter.engine.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.vintage.engine (JUnit 5)
+	 */
+	public static final String JUNIT_VINTAGE_ENGINE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.vintage.engine.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.platform (JUnit 5)
+	 */
+	public static final String JUNIT_PLATFORM_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.opentest4j (JUnit 5)
+	 */
+	public static final String JUNIT_OPENTEST4J_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.opentest4j.javadoclocation"; //$NON-NLS-1$
 
 	private static final String[] fgDefaultFilterPatterns= new String[] {
 		"org.eclipse.jdt.internal.junit.runner.*", //$NON-NLS-1$

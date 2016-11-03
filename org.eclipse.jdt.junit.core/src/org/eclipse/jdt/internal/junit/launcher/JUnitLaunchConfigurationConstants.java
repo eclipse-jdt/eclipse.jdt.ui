@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,8 @@ public class JUnitLaunchConfigurationConstants {
 	public static final String ATTR_PORT= JUnitCorePlugin.PLUGIN_ID+".PORT"; //$NON-NLS-1$
 
 	/**
-	 * The test name, or "" iff running the whole test type.
+	 * The test method name (followed by a comma-separated list of fully qualified parameter type
+	 * names in parentheses, if exists), or "" iff running the whole test type.
 	 */
 	public static final String ATTR_TEST_NAME= JUnitCorePlugin.PLUGIN_ID + ".TESTNAME"; //$NON-NLS-1$
 

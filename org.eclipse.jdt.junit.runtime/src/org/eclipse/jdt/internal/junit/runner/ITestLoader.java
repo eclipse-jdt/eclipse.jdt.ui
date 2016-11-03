@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,9 +18,10 @@ public interface ITestLoader {
 	 * @param testClasses classes to be run
 	 * @param testName individual method to be run
 	 * @param failureNames may want to run these first, since they failed
+	 * @param packages packages containing tests
 	 * @param listener to be notified if tests could not be loaded
 	 * @return the loaded test references
 	 */
-	public abstract ITestReference[] loadTests(Class[] testClasses, String testName, String[] failureNames, RemoteTestRunner listener);
+	public abstract ITestReference[] loadTests(Class[] testClasses, String testName, String[] failureNames, String[] packages, RemoteTestRunner listener);
 }
 

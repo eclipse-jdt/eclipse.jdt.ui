@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -101,6 +101,12 @@ public class TestRunSessionSerializer implements XMLReader {
 				addCDATA(atts, IXMLTags.ATTR_TIME, timeFormat.format(testSuiteElement.getElapsedTimeInSeconds()));
 			if (testElement.getProgressState() != ProgressState.COMPLETED || testElement.getTestResult(false) != Result.UNDEFINED)
 				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
+			if (testSuiteElement.getDisplayName() != null) {
+				addCDATA(atts, IXMLTags.ATTR_DISPLAY_NAME, testSuiteElement.getDisplayName());
+			}
+			if (testSuiteElement.isTestFactory()) {
+				addCDATA(atts, IXMLTags.ATTR_TEST_FACTORY, Boolean.TRUE.toString());
+			}
 
 			startElement(IXMLTags.NODE_TESTSUITE, atts);
 			addFailure(testSuiteElement);
@@ -123,6 +129,9 @@ public class TestRunSessionSerializer implements XMLReader {
 				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
 			if (testCaseElement.isIgnored())
 				addCDATA(atts, IXMLTags.ATTR_IGNORED, Boolean.TRUE.toString());
+			if (testCaseElement.getDisplayName() != null) {
+				addCDATA(atts, IXMLTags.ATTR_DISPLAY_NAME, testCaseElement.getDisplayName());
+			}
 
 			startElement(IXMLTags.NODE_TESTCASE, atts);
 			addFailure(testCaseElement);

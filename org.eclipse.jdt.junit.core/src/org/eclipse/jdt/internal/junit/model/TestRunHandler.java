@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -128,7 +128,9 @@ public class TestRunHandler extends DefaultHandler {
 
 			String pack= attributes.getValue(IXMLTags.ATTR_PACKAGE);
 			String suiteName= pack == null ? name : pack + "." + name; //$NON-NLS-1$
-			fTestSuite= (TestSuiteElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), suiteName, true, 0);
+			String displayName= attributes.getValue(IXMLTags.ATTR_DISPLAY_NAME);
+			boolean isTestFactory= Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_TEST_FACTORY)).booleanValue();
+			fTestSuite= (TestSuiteElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), suiteName, true, 0, isTestFactory, displayName);
 			readTime(fTestSuite, attributes);
 			fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
 
@@ -138,7 +140,8 @@ public class TestRunHandler extends DefaultHandler {
 		} else if (qName.equals(IXMLTags.NODE_TESTCASE)) {
 			String name= attributes.getValue(IXMLTags.ATTR_NAME);
 			String classname= attributes.getValue(IXMLTags.ATTR_CLASSNAME);
-			fTestCase= (TestCaseElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), name + '(' + classname + ')', false, 0);
+			String displayName= attributes.getValue(IXMLTags.ATTR_DISPLAY_NAME);
+			fTestCase= (TestCaseElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), name + '(' + classname + ')', false, 0, false, displayName);
 			fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
 			fTestCase.setIgnored(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_IGNORED)).booleanValue());
 			readTime(fTestCase, attributes);
