@@ -1097,6 +1097,65 @@ public class AssistQuickFixTest extends QuickFixTest {
 			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
 		}
 
+	// bug 506799
+	public void testAssignToLocal17() throws Exception {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("interface WorkItem { }\n");
+			buf.append("enum RebaseWorkItem implements WorkItem {\n");
+			buf.append("    PREPARE, APPLY_COMMIT\n");
+			buf.append("}\n");
+			buf.append("\n");
+			buf.append("public class Snippet {\n");
+			buf.append("    void foo(Class<? extends WorkItem> workItemType) throws Exception {\n");
+			buf.append("        workItemType.getEnumConstants();\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("Snippet.java", buf.toString(), false, null);
+	
+			String str= "workItemType.getEnumConstants();";
+			AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str) + str.length(), 0);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+			assertNumberOfProposals(proposals, 4);
+			assertCorrectLabels(proposals);
+	
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("interface WorkItem { }\n");
+			buf.append("enum RebaseWorkItem implements WorkItem {\n");
+			buf.append("    PREPARE, APPLY_COMMIT\n");
+			buf.append("}\n");
+			buf.append("\n");
+			buf.append("public class Snippet {\n");
+			buf.append("    void foo(Class<? extends WorkItem> workItemType) throws Exception {\n");
+			buf.append("        WorkItem[] enumConstants = workItemType.getEnumConstants();\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected1= buf.toString();
+	
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("interface WorkItem { }\n");
+			buf.append("enum RebaseWorkItem implements WorkItem {\n");
+			buf.append("    PREPARE, APPLY_COMMIT\n");
+			buf.append("}\n");
+			buf.append("\n");
+			buf.append("public class Snippet {\n");
+			buf.append("    private WorkItem[] enumConstants;\n");
+			buf.append("\n");
+			buf.append("    void foo(Class<? extends WorkItem> workItemType) throws Exception {\n");
+			buf.append("        enumConstants = workItemType.getEnumConstants();\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			String expected2= buf.toString();
+	
+			assertExpectedExistInProposals(proposals, new String[] { expected1, expected2 });
+		}
+
 	public void testAssignParamToField() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

@@ -104,11 +104,8 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		fVariableKind= variableKind;
 		fNodesToAssign= new ArrayList<>();
 		fNodesToAssign.add(node);
-		if (typeBinding.isWildcardType()) {
-			typeBinding= ASTResolving.normalizeWildcardType(typeBinding, true, node.getAST());
-		}
 
-		fTypeBinding= typeBinding;
+		fTypeBinding= Bindings.normalizeForDeclarationUse(typeBinding, node.getAST());
 		if (variableKind == LOCAL) {
 			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assigntolocal_description);
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL));

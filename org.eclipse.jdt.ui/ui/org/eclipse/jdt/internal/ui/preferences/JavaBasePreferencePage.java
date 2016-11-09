@@ -24,6 +24,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.core.runtime.preferences.InstanceScope;
+
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -33,6 +35,9 @@ import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.ScopedPreferenceStore;
+
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -61,12 +66,16 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	private ArrayList<Button> fCheckBoxes;
 	private ArrayList<Button> fRadioButtons;
 	private ArrayList<Text> fTextControls;
+	private static final String PREFERENCE_STORE_KEY = "preferenceStore";
+
+	private IPreferenceStore fJavaCorePreferences;
 
 	public JavaBasePreferencePage() {
 		super();
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setDescription(PreferencesMessages.JavaBasePreferencePage_description);
 
+		fJavaCorePreferences = new ScopedPreferenceStore(InstanceScope.INSTANCE, JavaCore.PLUGIN_ID);
 		fRadioButtons= new ArrayList<>();
 		fCheckBoxes= new ArrayList<>();
 		fTextControls= new ArrayList<>();
@@ -102,15 +111,19 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		return button;
 	}
 
-	private Button addCheckBox(Composite parent, String label, String key) {
+	private Button addCheckBox(Composite parent, String label, IPreferenceStore preferenceStore, String key) {
+		if (preferenceStore == null) {
+			preferenceStore = getPreferenceStore();
+		}
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 
 		Button button= new Button(parent, SWT.CHECK);
 		button.setText(label);
 		button.setData(key);
+		button.setData(PREFERENCE_STORE_KEY, preferenceStore);
 		button.setLayoutData(gd);
 
-		button.setSelection(getPreferenceStore().getBoolean(key));
+		button.setSelection(preferenceStore.getBoolean(key));
 
 		fCheckBoxes.add(button);
 		return button;
@@ -161,9 +174,11 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		refactoringGroup.setText(PreferencesMessages.JavaBasePreferencePage_refactoring_title);
 		addCheckBox(refactoringGroup,
 			PreferencesMessages.JavaBasePreferencePage_refactoring_auto_save,
+			null,
 			RefactoringSavePreferences.PREF_SAVE_ALL_EDITORS);
 		addCheckBox(refactoringGroup,
 				PreferencesMessages.JavaBasePreferencePage_refactoring_lightweight,
+				null,
 				PreferenceConstants.REFACTOR_LIGHTWEIGHT);
 
 		Group group= new Group(result, SWT.NONE);
@@ -171,8 +186,8 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setText(PreferencesMessages.JavaBasePreferencePage_search);
 
-		addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_search_small_menu, PreferenceConstants.SEARCH_USE_REDUCED_MENU);
-
+		addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_search_small_menu, null, PreferenceConstants.SEARCH_USE_REDUCED_MENU);
+		addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_DisableNewJavaIndex, fJavaCorePreferences, "disableNewJavaIndex"); //$NON-NLS-1$
 
 		layout= new GridLayout();
 		layout.numColumns= 2;
@@ -218,12 +233,13 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	 */
 	@Override
 	protected void performDefaults() {
-		IPreferenceStore store= getPreferenceStore();
 		for (int i= 0; i < fCheckBoxes.size(); i++) {
 			Button button= fCheckBoxes.get(i);
 			String key= (String) button.getData();
-			button.setSelection(store.getDefaultBoolean(key));
+			IPreferenceStore buttonPreferenceStore = (IPreferenceStore) button.getData(PREFERENCE_STORE_KEY);
+			button.setSelection(buttonPreferenceStore.getDefaultBoolean(key));
 		}
+		IPreferenceStore store= getPreferenceStore();
 		for (int i= 0; i < fRadioButtons.size(); i++) {
 			Button button= fRadioButtons.get(i);
 			String[] info= (String[]) button.getData();
@@ -242,12 +258,13 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	 */
 	@Override
 	public boolean performOk() {
-		IPreferenceStore store= getPreferenceStore();
 		for (int i= 0; i < fCheckBoxes.size(); i++) {
 			Button button= fCheckBoxes.get(i);
 			String key= (String) button.getData();
-			store.setValue(key, button.getSelection());
+			IPreferenceStore buttonPreferenceStore = (IPreferenceStore) button.getData(PREFERENCE_STORE_KEY);
+			buttonPreferenceStore.setValue(key, button.getSelection());
 		}
+		IPreferenceStore store= getPreferenceStore();
 		for (int i= 0; i < fRadioButtons.size(); i++) {
 			Button button= fRadioButtons.get(i);
 			if (button.getSelection()) {

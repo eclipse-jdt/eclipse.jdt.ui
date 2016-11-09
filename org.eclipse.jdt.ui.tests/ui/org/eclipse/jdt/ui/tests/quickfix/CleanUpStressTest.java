@@ -3671,10 +3671,9 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("        } else {\n");
         buf.append("            this.getWriter().println();\n");
         buf.append("            this.getWriter().println(\"FAILURES!!!\"); //$NON-NLS-1$\n");
-        buf.append("            this.getWriter()\n");
-        buf.append("                    .println(\"Tests run: \" + result.runCount() + //$NON-NLS-1$\n");
-        buf.append("                            \",  Failures: \" + result.failureCount() + //$NON-NLS-1$\n");
-        buf.append("                            \",  Errors: \" + result.errorCount()); //$NON-NLS-1$\n");
+        buf.append("            this.getWriter().println(\"Tests run: \" + result.runCount() + //$NON-NLS-1$\n");
+        buf.append("                    \",  Failures: \" + result.failureCount() + //$NON-NLS-1$\n");
+        buf.append("                    \",  Errors: \" + result.errorCount()); //$NON-NLS-1$\n");
         buf.append("        }\n");
         buf.append("        this.getWriter().println();\n");
         buf.append("    }\n");
