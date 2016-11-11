@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2011 IBM Corporation and others.
+ * Copyright (c) 2009, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,6 +34,7 @@ import org.eclipse.jface.text.hyperlink.IHyperlink;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -78,7 +79,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	
 	private final IRegion fRegion;
 	private final SelectionDispatchAction fOpenAction;
-	private final IMethod fMethod;
+	private final IJavaElement fElement;
 	private final boolean fQualify;
 
 	/**
@@ -87,66 +88,145 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	private IEditorPart fEditor;
 
 	/**
-	 * Creates a new Java element implementation hyperlink for methods.
+	 * Creates a new Java element implementation hyperlink for types and methods.
 	 * 
 	 * @param region the region of the link
 	 * @param openAction the action to use to open the java elements
-	 * @param method the method to open
+	 * @param javaElement the element (type or method) to open
 	 * @param qualify <code>true</code> if the hyperlink text should show a qualified name for
-	 *            element.
+	 *            element
 	 * @param editor the editor
 	 */
-	public JavaElementImplementationHyperlink(IRegion region, SelectionDispatchAction openAction, IMethod method, boolean qualify, IEditorPart editor) {
+	public JavaElementImplementationHyperlink(IRegion region, SelectionDispatchAction openAction, IJavaElement javaElement, boolean qualify, IEditorPart editor) {
 		Assert.isNotNull(openAction);
 		Assert.isNotNull(region);
-		Assert.isNotNull(method);
+		Assert.isNotNull(javaElement);
+		Assert.isTrue(javaElement instanceof IType || javaElement instanceof IMethod);
 
 		fRegion= region;
 		fOpenAction= openAction;
-		fMethod= method;
+		fElement= javaElement;
 		fQualify= qualify;
 		fEditor= editor;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkRegion()
-	 */
 	@Override
 	public IRegion getHyperlinkRegion() {
 		return fRegion;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getHyperlinkText()
-	 */
 	@Override
 	public String getHyperlinkText() {
 		if (fQualify) {
-			String methodLabel= JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED);
-			return Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_hyperlinkText_qualified, new Object[] { methodLabel });
+			String elementLabel= JavaElementLabels.getElementLabel(fElement, JavaElementLabels.ALL_FULLY_QUALIFIED);
+			return Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_hyperlinkText_qualified, new Object[] { elementLabel });
 		} else {
 			return JavaEditorMessages.JavaElementImplementationHyperlink_hyperlinkText;
 		}
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.IHyperlink#getTypeLabel()
-	 */
 	@Override
 	public String getTypeLabel() {
 		return null;
 	}
 
 	/**
-	 * Opens the given implementation hyperlink for methods.
+	 * Opens the given implementation hyperlink for types and methods.
 	 * <p>
-	 * If there's only one implementor that hyperlink is opened in the editor, otherwise the
-	 * Quick Hierarchy is opened.
+	 * If there's only one implementor that hyperlink is opened in the editor, otherwise the Quick
+	 * Hierarchy is opened.
 	 * </p>
 	 */
 	@Override
 	public void open() {
-		openImplementations(fEditor, fRegion, fMethod, fOpenAction);
+		if (fElement instanceof IMethod) {
+			openImplementations(fEditor, fRegion, (IMethod) fElement, fOpenAction);
+		} else if (fElement instanceof IType) {
+			openImplementations(fEditor, fRegion, (IType) fElement, fOpenAction);
+		}
+	}
+
+	/**
+	 * Finds the implementations for the type.
+	 * <p>
+	 * If there's only one implementor that type is opened in the editor, otherwise the Quick
+	 * Hierarchy is opened.
+	 * </p>
+	 * 
+	 * @param editor the editor
+	 * @param region the region of the selection
+	 * @param type the type
+	 * @param openAction the action to use to open the types
+	 * @since 3.13
+	 */
+	public static void openImplementations(IEditorPart editor, IRegion region, final IType type, SelectionDispatchAction openAction) {
+		final String dummyString= new String();
+		final ArrayList<IType> links= new ArrayList<>();
+		IRunnableWithProgress runnable= new IRunnableWithProgress() {
+
+			@Override
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				if (monitor == null) {
+					monitor= new NullProgressMonitor();
+				}
+				try {
+					String typeLabel= JavaElementLabels.getElementLabel(type, JavaElementLabels.DEFAULT_QUALIFIED);
+					monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, typeLabel), 10);
+					SearchRequestor requestor= new SearchRequestor() {
+						@Override
+						public void acceptSearchMatch(SearchMatch match) throws CoreException {
+							if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
+								Object element= match.getElement();
+								if (element instanceof IType) {
+									links.add((IType) element);
+									if (links.size() > 1) {
+										throw new OperationCanceledException(dummyString);
+									}
+								}
+							}
+						}
+					};
+
+					IJavaSearchScope hierarchyScope= SearchEngine.createHierarchyScope(type);
+					SearchPattern pattern= SearchPattern.createPattern(type, IJavaSearchConstants.IMPLEMENTORS);
+					Assert.isNotNull(pattern);
+					SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+					SearchEngine engine= new SearchEngine();
+					engine.search(pattern, participants, hierarchyScope, requestor, new SubProgressMonitor(monitor, 7));
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+				} catch (CoreException e) {
+					throw new InvocationTargetException(e);
+				} finally {
+					monitor.done();
+				}
+			}
+		};
+
+		try {
+			IRunnableContext context= editor.getSite().getWorkbenchWindow();
+			context.run(true, true, runnable);
+		} catch (InvocationTargetException e) {
+			IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK,
+					Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_error_status_message, type.getElementName()), e.getCause());
+			JavaPlugin.log(status);
+			ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+					JavaEditorMessages.JavaElementImplementationHyperlink_hyperlinkText,
+					JavaEditorMessages.JavaElementImplementationHyperlink_error_no_implementations_found_message, status);
+		} catch (InterruptedException e) {
+			if (e.getMessage() != dummyString) {
+				return;
+			}
+		}
+
+		if (links.isEmpty()) {
+			openAction.run(new StructuredSelection(type));
+		} else if (links.size() == 1) {
+			openAction.run(new StructuredSelection(links.get(0)));
+		} else {
+			openQuickHierarchy(editor);
+		}
 	}
 
 	/**
