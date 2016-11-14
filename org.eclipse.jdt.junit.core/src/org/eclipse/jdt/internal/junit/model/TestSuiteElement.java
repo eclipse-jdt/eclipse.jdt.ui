@@ -53,6 +53,10 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 		fChildren.add(child);
 	}
 
+	public void removeChild(TestElement child) {
+		fChildren.remove(child);
+	}
+
 	@Override
 	public Status getStatus() {
 		Status suiteStatus= getSuiteStatus();

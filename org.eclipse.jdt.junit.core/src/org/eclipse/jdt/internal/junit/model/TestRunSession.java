@@ -734,9 +734,14 @@ public class TestRunSession implements ITestRunSession {
 			}
 
 			if (testElement instanceof TestSuiteElement && ((TestSuiteElement) testElement).isTestFactory()) {
-				// Since the test factory method failed, its children won't run. Hence, updating its status here.
-				testElement.setStatus(Status.convert(statusCode), trace, expected, actual);
-				return;
+				// Since the test factory method failed, its children won't be created. So, convert it into a TestCaseElement. See bug 507171.
+				TestSuiteElement parent= testElement.getParent();
+				TestCaseElement testCaseElement= new TestCaseElement(parent, testId, testElement.getTestName(), testElement.getDisplayName());
+				parent.removeChild(testElement);
+				fIdToTest.put(testId, testCaseElement);
+				fTotalCount++;
+				fStartedCount++;
+				testElement= testCaseElement;
 			}
 
 			Status status;

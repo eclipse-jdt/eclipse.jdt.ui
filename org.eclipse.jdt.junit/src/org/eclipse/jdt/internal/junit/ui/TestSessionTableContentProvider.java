@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,8 +40,7 @@ public class TestSessionTableContentProvider implements IStructuredContentProvid
 		ITestElement[] children= suite.getChildren();
 		for (ITestElement element : children) {
 			if (element instanceof TestSuiteElement) {
-				TestSuiteElement suiteElement= (TestSuiteElement) element;
-				if (suiteElement.getSuiteStatus().isErrorOrFailure() && !suiteElement.isTestFactory())
+				if (((TestSuiteElement) element).getSuiteStatus().isErrorOrFailure())
 					all.add(element); // add failed suite to flat list too
 				addAll(all, (TestSuiteElement) element);
 			} else if (element instanceof TestCaseElement) {
