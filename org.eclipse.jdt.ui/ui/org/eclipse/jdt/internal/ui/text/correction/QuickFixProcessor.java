@@ -229,6 +229,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.FallthroughCase:
 			case IProblem.NonGenericType:
 			case IProblem.UnhandledWarningToken:
+			case IProblem.ProblemNotAnalysed:
 			case IProblem.UnusedWarningToken:
 			case IProblem.RedundantSuperinterface:
 			case IProblem.JavadocInvalidMemberTypeQualification:
@@ -689,6 +690,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.UnhandledWarningToken:
 				SuppressWarningsSubProcessor.addUnknownSuppressWarningProposals(context, problem, proposals);
+				break;
+			case IProblem.ProblemNotAnalysed:
+				SuppressWarningsSubProcessor.addRemoveUnusedSuppressWarningProposals(context, problem, proposals);
 				break;
 			case IProblem.UnusedWarningToken:
 				SuppressWarningsSubProcessor.addRemoveUnusedSuppressWarningProposals(context, problem, proposals);
