@@ -33,13 +33,22 @@ public class JavaElementHyperlinkImplementationDetector extends JavaElementHyper
 
 	@Override
 	protected void addHyperlinks(List<IHyperlink> hyperlinksCollector, IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
-		int elementType= element.getElementType();
 		try {
-			if ((elementType == IJavaElement.METHOD || (elementType == IJavaElement.TYPE && ((IType) element).isInterface())) && SelectionConverter.canOperateOn(editor)) {
+			if ((element.getElementType() == IJavaElement.METHOD || isImplementableType(element)) && SelectionConverter.canOperateOn(editor)) {
 				hyperlinksCollector.add(new JavaElementImplementationHyperlink(wordRegion, openAction, element, qualify, editor));
 			}
 		} catch (JavaModelException e) {
 			// do nothing
 		}
+	}
+
+	private boolean isImplementableType(IJavaElement element) throws JavaModelException {
+		if (element.getElementType() == IJavaElement.TYPE) {
+			IType type= (IType) element;
+			if (type.isClass() || type.isInterface() && !type.isAnnotation()) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
