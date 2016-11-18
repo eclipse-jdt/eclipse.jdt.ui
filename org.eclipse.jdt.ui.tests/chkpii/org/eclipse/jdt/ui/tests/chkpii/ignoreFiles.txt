@@ -99,6 +99,10 @@ org.apache.felix.gogo.*/*
 org.apache.jasper/*
 org.apache.lucene/*
 org.apache.lucene.analysis/*
+org.apache.lucene.analyzers-common/*
+org.apache.lucene.analyzers-smartcn/*
+org.apache.lucene.core/*
+org.apache.lucene.misc/*
 org.junit4/*
 org.objectweb.asm/*
 org.sat4j.core/*
