@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -139,77 +140,162 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 	 */
 	@Override
 	public void open() {
-		if (fElement instanceof IMethod) {
-			openImplementations(fEditor, fRegion, (IMethod) fElement, fOpenAction);
-		} else if (fElement instanceof IType) {
-			openImplementations(fEditor, fRegion, (IType) fElement, fOpenAction);
-		}
+		openImplementations(fEditor, fRegion, fElement, fOpenAction);
 	}
 
 	/**
-	 * Finds the implementations for the type.
+	 * Finds the implementations for the method or type.
 	 * <p>
-	 * If there's only one implementor that type is opened in the editor, otherwise the Quick
+	 * If there's only one implementor that element is opened in the editor, otherwise the Quick
 	 * Hierarchy is opened.
 	 * </p>
 	 * 
 	 * @param editor the editor
 	 * @param region the region of the selection
-	 * @param type the type
-	 * @param openAction the action to use to open the types
-	 * @since 3.13
+	 * @param javaElement the method or type
+	 * @param openAction the action to use to open the elements
+	 * @since 3.6
 	 */
-	public static void openImplementations(IEditorPart editor, IRegion region, final IType type, SelectionDispatchAction openAction) {
+	public static void openImplementations(IEditorPart editor, IRegion region, final IJavaElement javaElement, SelectionDispatchAction openAction) {
+		final boolean isMethodAbstract[]= new boolean[1];
 		final String dummyString= new String();
-		final ArrayList<IType> links= new ArrayList<>();
-		IRunnableWithProgress runnable= new IRunnableWithProgress() {
+		final ArrayList<IJavaElement> links= new ArrayList<>();
+		IRunnableWithProgress runnable;
 
-			@Override
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				if (monitor == null) {
-					monitor= new NullProgressMonitor();
+		if (javaElement instanceof IMethod) {
+			IMethod method= (IMethod) javaElement;
+			try {
+				if (cannotBeOverriddenMethod(method)) {
+					openAction.run(new StructuredSelection(method));
+					return;
 				}
-				try {
-					String typeLabel= JavaElementLabels.getElementLabel(type, JavaElementLabels.DEFAULT_QUALIFIED);
-					monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, typeLabel), 10);
-					SearchRequestor requestor= new SearchRequestor() {
-						@Override
-						public void acceptSearchMatch(SearchMatch match) throws CoreException {
-							if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
-								Object element= match.getElement();
-								if (element instanceof IType) {
-									links.add((IType) element);
-									if (links.size() > 1) {
-										throw new OperationCanceledException(dummyString);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+				return;
+			}
+			ITypeRoot editorInput= EditorUtility.getEditorInputJavaElement(editor, false);
+
+			CompilationUnit ast= SharedASTProvider.getAST(editorInput, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
+			if (ast == null) {
+				openQuickHierarchy(editor);
+				return;
+			}
+
+			ASTNode node= NodeFinder.perform(ast, region.getOffset(), region.getLength());
+			ITypeBinding parentTypeBinding= null;
+			if (node instanceof SimpleName) {
+				ASTNode parent= node.getParent();
+				if (parent instanceof MethodInvocation) {
+					Expression expression= ((MethodInvocation) parent).getExpression();
+					if (expression == null) {
+						parentTypeBinding= Bindings.getBindingOfParentType(node);
+					} else {
+						parentTypeBinding= expression.resolveTypeBinding();
+					}
+				} else if (parent instanceof SuperMethodInvocation) {
+					// Directly go to the super method definition
+					openAction.run(new StructuredSelection(method));
+					return;
+				} else if (parent instanceof MethodDeclaration) {
+					parentTypeBinding= Bindings.getBindingOfParentType(node);
+				}
+			}
+			final IType receiverType= parentTypeBinding != null ? (IType) parentTypeBinding.getJavaElement() : null;
+			if (receiverType == null) {
+				openQuickHierarchy(editor);
+				return;
+			}
+			runnable= new IRunnableWithProgress() {
+
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					if (monitor == null) {
+						monitor= new NullProgressMonitor();
+					}
+					try {
+						String methodLabel= JavaElementLabels.getElementLabel(method, JavaElementLabels.DEFAULT_QUALIFIED);
+						monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, methodLabel), 10);
+						SearchRequestor requestor= new SearchRequestor() {
+							@Override
+							public void acceptSearchMatch(SearchMatch match) throws CoreException {
+								if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
+									Object element= match.getElement();
+									if (element instanceof IMethod) {
+										IMethod methodFound= (IMethod) element;
+										if (!JdtFlags.isAbstract(methodFound)) {
+											links.add(methodFound);
+											if (links.size() > 1) {
+												throw new OperationCanceledException(dummyString);
+											}
+										}
 									}
 								}
 							}
-						}
-					};
+						};
 
-					IJavaSearchScope hierarchyScope= SearchEngine.createHierarchyScope(type);
-					SearchPattern pattern= SearchPattern.createPattern(type, IJavaSearchConstants.IMPLEMENTORS);
-					Assert.isNotNull(pattern);
-					SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
-					SearchEngine engine= new SearchEngine();
-					engine.search(pattern, participants, hierarchyScope, requestor, new SubProgressMonitor(monitor, 7));
-					if (monitor.isCanceled()) {
-						throw new OperationCanceledException();
+						IJavaSearchScope hierarchyScope;
+						if (receiverType.isInterface()) {
+							hierarchyScope= SearchEngine.createHierarchyScope(method.getDeclaringType());
+						} else {
+							if (isFullHierarchyNeeded(new SubProgressMonitor(monitor, 3), method, receiverType))
+								hierarchyScope= SearchEngine.createHierarchyScope(receiverType);
+							else {
+								isMethodAbstract[0]= JdtFlags.isAbstract(method);
+								hierarchyScope= SearchEngine.createStrictHierarchyScope(null, receiverType, true, !isMethodAbstract[0], null);
+							}
+						}
+
+						int limitTo= IJavaSearchConstants.DECLARATIONS | IJavaSearchConstants.IGNORE_DECLARING_TYPE | IJavaSearchConstants.IGNORE_RETURN_TYPE;
+						SearchPattern pattern= SearchPattern.createPattern(method, limitTo);
+						Assert.isNotNull(pattern);
+						SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+						SearchEngine engine= new SearchEngine();
+						engine.search(pattern, participants, hierarchyScope, requestor, new SubProgressMonitor(monitor, 7));
+						if (monitor.isCanceled()) {
+							throw new OperationCanceledException();
+						}
+					} catch (CoreException e) {
+						throw new InvocationTargetException(e);
+					} finally {
+						monitor.done();
 					}
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				} finally {
-					monitor.done();
 				}
-			}
-		};
+			};
+
+		} else if (javaElement instanceof IType) {
+			IType type= (IType) javaElement;
+			runnable= new IRunnableWithProgress() {
+
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					if (monitor == null) {
+						monitor= new NullProgressMonitor();
+					}
+					try {
+						String typeLabel= JavaElementLabels.getElementLabel(type, JavaElementLabels.DEFAULT_QUALIFIED);
+						monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, typeLabel), 10);
+						links.addAll(Arrays.asList(type.newTypeHierarchy(monitor).getAllSubtypes(type)));
+						if (monitor.isCanceled()) {
+							throw new OperationCanceledException();
+						}
+					} catch (CoreException e) {
+						throw new InvocationTargetException(e);
+					} finally {
+						monitor.done();
+					}
+				}
+			};
+
+		} else {
+			return;
+		}
 
 		try {
 			IRunnableContext context= editor.getSite().getWorkbenchWindow();
 			context.run(true, true, runnable);
 		} catch (InvocationTargetException e) {
 			IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK,
-					Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_error_status_message, type.getElementName()), e.getCause());
+					Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_error_status_message, javaElement.getElementName()), e.getCause());
 			JavaPlugin.log(status);
 			ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
 					JavaEditorMessages.JavaElementImplementationHyperlink_hyperlinkText,
@@ -220,153 +306,13 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 			}
 		}
 
-		if (links.isEmpty()) {
-			openAction.run(new StructuredSelection(type));
+		if (links.isEmpty() && (javaElement instanceof IMethod && isMethodAbstract[0] || javaElement instanceof IType)) {
+			openAction.run(new StructuredSelection(javaElement));
 		} else if (links.size() == 1) {
 			openAction.run(new StructuredSelection(links.get(0)));
 		} else {
 			openQuickHierarchy(editor);
 		}
-	}
-
-	/**
-	 * Finds the implementations for the method.
-	 * <p>
-	 * If there's only one implementor that method is opened in the editor, otherwise the Quick
-	 * Hierarchy is opened.
-	 * </p>
-	 * 
-	 * @param editor the editor
-	 * @param region the region of the selection
-	 * @param method the method
-	 * @param openAction the action to use to open the methods
-	 * @since 3.6
-	 */
-	public static void openImplementations(IEditorPart editor, IRegion region, final IMethod method, SelectionDispatchAction openAction) {
-		try {
-			if (cannotBeOverriddenMethod(method)) {
-				openAction.run(new StructuredSelection(method));
-				return;
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-			return;
-		}
-		ITypeRoot editorInput= EditorUtility.getEditorInputJavaElement(editor, false);
-
-		CompilationUnit ast= SharedASTProvider.getAST(editorInput, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
-		if (ast == null) {
-			openQuickHierarchy(editor);
-			return;
-		}
-
-		ASTNode node= NodeFinder.perform(ast, region.getOffset(), region.getLength());
-		ITypeBinding parentTypeBinding= null;
-		if (node instanceof SimpleName) {
-			ASTNode parent= node.getParent();
-			if (parent instanceof MethodInvocation) {
-				Expression expression= ((MethodInvocation)parent).getExpression();
-				if (expression == null) {
-					parentTypeBinding= Bindings.getBindingOfParentType(node);
-				} else {
-					parentTypeBinding= expression.resolveTypeBinding();
-				}
-			} else if (parent instanceof SuperMethodInvocation) {
-				// Directly go to the super method definition
-				openAction.run(new StructuredSelection(method));
-				return;
-			} else if (parent instanceof MethodDeclaration) {
-				parentTypeBinding= Bindings.getBindingOfParentType(node);
-			}
-		}
-		final IType receiverType= parentTypeBinding != null ? (IType)parentTypeBinding.getJavaElement() : null;
-		if (receiverType == null) {
-			openQuickHierarchy(editor);
-			return;
-		}
-
-		final boolean isMethodAbstract[]= new boolean[1];
-		final String dummyString= new String();
-		final ArrayList<IMethod> links= new ArrayList<>();
-		IRunnableWithProgress runnable= new IRunnableWithProgress() {
-
-			@Override
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-				if (monitor == null) {
-					monitor= new NullProgressMonitor();
-				}
-				try {
-					String methodLabel= JavaElementLabels.getElementLabel(method, JavaElementLabels.DEFAULT_QUALIFIED);
-					monitor.beginTask(Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_search_method_implementors, methodLabel), 10);
-					SearchRequestor requestor= new SearchRequestor() {
-						@Override
-						public void acceptSearchMatch(SearchMatch match) throws CoreException {
-							if (match.getAccuracy() == SearchMatch.A_ACCURATE) {
-								Object element= match.getElement();
-								if (element instanceof IMethod) {
-									IMethod methodFound= (IMethod)element;
-									if (!JdtFlags.isAbstract(methodFound)) {
-										links.add(methodFound);
-										if (links.size() > 1) {
-											throw new OperationCanceledException(dummyString);
-										}
-									}
-								}
-							}
-						}
-					};
-
-					IJavaSearchScope hierarchyScope;
-					if (receiverType.isInterface()) {
-						hierarchyScope= SearchEngine.createHierarchyScope(method.getDeclaringType());
-					} else {
-						if (isFullHierarchyNeeded(new SubProgressMonitor(monitor, 3), method, receiverType))
-							hierarchyScope= SearchEngine.createHierarchyScope(receiverType);
-						else {
-							isMethodAbstract[0]= JdtFlags.isAbstract(method);
-							hierarchyScope= SearchEngine.createStrictHierarchyScope(null, receiverType, true, !isMethodAbstract[0], null);
-						}
-					}
-
-					int limitTo= IJavaSearchConstants.DECLARATIONS | IJavaSearchConstants.IGNORE_DECLARING_TYPE | IJavaSearchConstants.IGNORE_RETURN_TYPE;
-					SearchPattern pattern= SearchPattern.createPattern(method, limitTo);
-					Assert.isNotNull(pattern);
-					SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
-					SearchEngine engine= new SearchEngine();
-					engine.search(pattern, participants, hierarchyScope, requestor, new SubProgressMonitor(monitor, 7));
-					if (monitor.isCanceled()) {
-						throw new OperationCanceledException();
-					}
-				} catch (CoreException e) {
-					throw new InvocationTargetException(e);
-				} finally {
-					monitor.done();
-				}
-			}
-		};
-
-		try {
-			IRunnableContext context= editor.getSite().getWorkbenchWindow();
-			context.run(true, true, runnable);
-		} catch (InvocationTargetException e) {
-			IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK,
-					Messages.format(JavaEditorMessages.JavaElementImplementationHyperlink_error_status_message, method.getElementName()), e.getCause());
-			JavaPlugin.log(status);
-			ErrorDialog.openError(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
-					JavaEditorMessages.JavaElementImplementationHyperlink_hyperlinkText,
-					JavaEditorMessages.JavaElementImplementationHyperlink_error_no_implementations_found_message, status);
-		} catch (InterruptedException e) {
-			if (e.getMessage() != dummyString) {
-				return;
-			}
-		}
-
-		if (links.isEmpty() && isMethodAbstract[0])
-			openAction.run(new StructuredSelection(method));
-		else if (links.size() == 1)
-			openAction.run(new StructuredSelection(links.get(0)));
-		else
-			openQuickHierarchy(editor);
 	}
 
 	/**

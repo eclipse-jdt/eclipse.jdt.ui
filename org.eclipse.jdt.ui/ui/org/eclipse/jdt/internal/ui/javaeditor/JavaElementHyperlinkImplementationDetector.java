@@ -33,20 +33,24 @@ public class JavaElementHyperlinkImplementationDetector extends JavaElementHyper
 
 	@Override
 	protected void addHyperlinks(List<IHyperlink> hyperlinksCollector, IRegion wordRegion, SelectionDispatchAction openAction, IJavaElement element, boolean qualify, JavaEditor editor) {
-		try {
-			if ((element.getElementType() == IJavaElement.METHOD || isImplementableType(element)) && SelectionConverter.canOperateOn(editor)) {
-				hyperlinksCollector.add(new JavaElementImplementationHyperlink(wordRegion, openAction, element, qualify, editor));
-			}
-		} catch (JavaModelException e) {
-			// do nothing
+		if (canOpenImplementation(element) && SelectionConverter.canOperateOn(editor)) {
+			hyperlinksCollector.add(new JavaElementImplementationHyperlink(wordRegion, openAction, element, qualify, editor));
 		}
 	}
 
-	private boolean isImplementableType(IJavaElement element) throws JavaModelException {
+	public static boolean canOpenImplementation(IJavaElement element) {
+		return element.getElementType() == IJavaElement.METHOD || isImplementableType(element);
+	}
+
+	private static boolean isImplementableType(IJavaElement element) {
 		if (element.getElementType() == IJavaElement.TYPE) {
 			IType type= (IType) element;
-			if (type.isClass() || type.isInterface() && !type.isAnnotation()) {
-				return true;
+			try {
+				if (type.isClass() || type.isInterface() && !type.isAnnotation()) {
+					return true;
+				}
+			} catch (JavaModelException e) {
+				// cannot check the type
 			}
 		}
 		return false;
