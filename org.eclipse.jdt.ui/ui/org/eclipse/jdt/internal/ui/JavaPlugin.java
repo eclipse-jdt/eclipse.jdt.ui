@@ -387,6 +387,12 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			}
 		});
 
+		IPreferenceStore store= getPreferenceStore();
+
+		// must add here to guarantee that it is the first in the listener list
+		fMembersOrderPreferenceCache= new MembersOrderPreferenceCache();
+		fMembersOrderPreferenceCache.install(store);
+
 		// make sure org.eclipse.jdt.core.manipulation is loaded too
 		// can be removed if JavaElementPropertyTester is moved down to jdt.core (bug 127085)
 		JavaManipulation.class.toString();
