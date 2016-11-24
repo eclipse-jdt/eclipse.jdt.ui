@@ -103,6 +103,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.SaveParticipantRegistry;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileStore;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.folding.JavaFoldingStructureProviderRegistry;
@@ -393,6 +394,8 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		fMembersOrderPreferenceCache= new MembersOrderPreferenceCache();
 		fMembersOrderPreferenceCache.install(store);
 
+		FormatterProfileStore.checkCurrentOptionsVersion();
+		
 		// make sure org.eclipse.jdt.core.manipulation is loaded too
 		// can be removed if JavaElementPropertyTester is moved down to jdt.core (bug 127085)
 		JavaManipulation.class.toString();
