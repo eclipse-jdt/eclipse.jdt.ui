@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,7 +48,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
@@ -212,13 +211,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	private ImageDescriptorRegistry fImageDescriptorRegistry;
 
 	private MembersOrderPreferenceCache fMembersOrderPreferenceCache;
-	private IPropertyChangeListener fFontPropertyChangeListener;
-
-	/**
-	 * Property change listener on this plugin's preference store.
-	 * @since 3.0
-	 */
-	private IPropertyChangeListener fPropertyChangeListener;
 
 	private JavaEditorTextHoverDescriptor[] fJavaEditorTextHoverDescriptors;
 
@@ -419,37 +411,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		OpenTypeHistory.getInstance().checkConsistency(monitor);
 	}
 
-	/**
-	 * Private deprecated method to avoid deprecation warnings
-	 * 
-	 * @return the deprecated preference store
-	 * @deprecated to avoid deprecation warnings
-	 */
-	@Deprecated
-	private static IPreferenceStore getDeprecatedWorkbenchPreferenceStore() {
-		return PlatformUI.getWorkbench().getPreferenceStore();
-	}
-
-	/** @deprecated to avoid deprecation warnings */
-	@Deprecated
-	private static final String DEPRECATED_EDITOR_TAB_WIDTH= PreferenceConstants.EDITOR_TAB_WIDTH;
-
-	/** @deprecated to avoid deprecation warnings */
-	@Deprecated
-	private static final String DEPRECATED_REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD= PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD;
-
-	/** @deprecated to avoid deprecation warnings */
-	@Deprecated
-	private static final String DEPRECATED_CODEASSIST_ORDER_PROPOSALS= PreferenceConstants.CODEASSIST_ORDER_PROPOSALS;
-
-	/**
-	 * Uninstalls backwards compatibility for the preference store.
-	 */
-	private void uninstallPreferenceStoreBackwardsCompatibility() {
-		JFaceResources.getFontRegistry().removeListener(fFontPropertyChangeListener);
-		getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
-	}
-
 	/*
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#createImageRegistry()
 	 */
@@ -500,8 +461,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 				ContentAssistHistory.store(fContentAssistHistory, getPluginPreferences(), PreferenceConstants.CODEASSIST_LRU_HISTORY);
 				fContentAssistHistory= null;
 			}
-
-			uninstallPreferenceStoreBackwardsCompatibility();
 
 			if (fTemplateStore != null) {
 				fTemplateStore.stopListeningForPreferenceChanges();
