@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,14 +65,14 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.OverrideMethodDialog;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
@@ -158,7 +158,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 
 			workingCopy.getBuffer().setContents(workingCopyContents.toString());
 
-			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+			ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 			parser.setResolveBindings(true);
 			parser.setStatementsRecovery(true);
 			parser.setSource(workingCopy);

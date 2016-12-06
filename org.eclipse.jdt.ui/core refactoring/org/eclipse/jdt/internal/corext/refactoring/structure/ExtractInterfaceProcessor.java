@@ -91,11 +91,14 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractInterfaceDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
@@ -120,16 +123,12 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextEditBasedChangeManag
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
-
 
 /**
  * Refactoring processor to extract interfaces.
@@ -1062,7 +1061,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			}
 			JavaModelUtil.reconcile(subUnit);
 			final IJavaProject project= subUnit.getJavaProject();
-			final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+			final ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 			parser.setWorkingCopyOwner(fOwner);
 			parser.setResolveBindings(true);
 			parser.setProject(project);

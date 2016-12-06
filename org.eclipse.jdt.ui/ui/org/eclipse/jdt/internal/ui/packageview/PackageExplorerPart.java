@@ -728,7 +728,7 @@ public class PackageExplorerPart extends ViewPart
 			if (path.isRoot()) {
 				result= PackagesMessages.PackageExplorer_title;
 			} else {
-				result= BasicElementLabels.getPathLabel(path, false);
+				result= org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getPathLabel(path, false);
 			}
 		}
 

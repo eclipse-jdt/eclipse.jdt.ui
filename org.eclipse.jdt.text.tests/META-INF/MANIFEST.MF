@@ -33,6 +33,7 @@ Require-Bundle:
  org.eclipse.core.filebuffers.tests,
  org.eclipse.jdt.ui.tests,
  org.eclipse.test.performance,
- com.ibm.icu
+ com.ibm.icu,
+ org.eclipse.jdt.core.manipulation
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BundleShape: dir

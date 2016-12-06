@@ -172,7 +172,9 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingAnnotationAt
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
   */

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,7 +48,7 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 import junit.framework.Test;
@@ -1417,7 +1417,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		map.put(CleanUpConstants.VARIABLE_DECLARATION_USE_TYPE_ARGUMENTS_FOR_RAW_TYPE_REFERENCES, CleanUpOptions.TRUE);
 		Java50CleanUp cleanUp= new Java50CleanUp(map);
 
-		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setResolveBindings(true);
 		parser.setProject(fJProject1);
 

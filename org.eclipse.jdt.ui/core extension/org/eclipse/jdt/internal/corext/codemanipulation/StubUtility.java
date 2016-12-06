@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -101,7 +101,8 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
-import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.CodeStyleConfiguration;
@@ -109,8 +110,8 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+
 import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
 
 /**
@@ -332,7 +333,7 @@ public class StubUtility {
 	 */
 	private static String[] getParameterTypeNamesForSeeTag(IMethod overridden) {
 		try {
-			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+			ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 			parser.setProject(overridden.getJavaProject());
 			IBinding[] bindings= parser.createBindings(new IJavaElement[] { overridden }, null);
 			if (bindings.length == 1 && bindings[0] instanceof IMethodBinding) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -112,8 +112,8 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
@@ -240,7 +240,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		result.merge(Checks.checkAvailability(fField));
 		if (result.hasFatalError())
 			return result;
-		fRoot= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(fField.getCompilationUnit(), true, pm);
+		fRoot= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(fField.getCompilationUnit(), true, pm);
 		ISourceRange sourceRange= fField.getNameRange();
 		ASTNode node= NodeFinder.perform(fRoot, sourceRange.getOffset(), sourceRange.getLength());
 		if (node == null) {
@@ -381,7 +381,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				importRewrite= fImportRewrite;
 				descriptions= ownerDescriptions;
 			} else {
-				root= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, true);
+				root= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(unit, true);
 				rewriter= ASTRewrite.create(root.getAST());
 				descriptions= new ArrayList<>();
 				importRewrite= StubUtility.createImportRewrite(root, true);

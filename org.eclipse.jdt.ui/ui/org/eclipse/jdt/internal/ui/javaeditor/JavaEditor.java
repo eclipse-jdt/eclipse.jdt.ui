@@ -218,11 +218,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPr
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
-import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder;
-import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
+import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder;
+import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.ui.search.ImplementOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
-import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
+import org.eclipse.jdt.internal.core.manipulation.search.OccurrencesFinder;
 import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;

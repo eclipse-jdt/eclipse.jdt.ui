@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,9 +36,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
-import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 /**
  * A tuple used to keep source of an element and its type.
@@ -159,7 +159,7 @@ public class TypedSource {
 				return source;
 		} else {
 			if (tuple.node == null) {
-				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+				ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 				parser.setSource(tuple.unit);
 				tuple.node= (CompilationUnit) parser.createAST(null);
 			}

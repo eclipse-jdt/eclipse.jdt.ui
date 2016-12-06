@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2015 IBM Corporation and others.
+ * Copyright (c) 2011, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,10 +27,10 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.Java17ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
-import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder;
-import org.eclipse.jdt.internal.ui.search.IOccurrencesFinder.OccurrenceLocation;
+import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder;
+import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
 
 import junit.framework.Test;
@@ -64,7 +64,7 @@ public class MarkOccurrenceTest17 extends TestCase {
 	 */
 	@Override
 	protected void setUp() throws Exception {
-		fParser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		fParser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 
 		fJProject1= Java17ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");

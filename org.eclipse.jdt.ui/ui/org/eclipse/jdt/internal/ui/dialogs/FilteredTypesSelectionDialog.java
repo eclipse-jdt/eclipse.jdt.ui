@@ -116,7 +116,7 @@ import org.eclipse.jdt.internal.ui.preferences.TypeFilterPreferencePage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 
@@ -1263,9 +1263,11 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			int result= leftString.compareToIgnoreCase(rightString);
 			if (result != 0 || rightString.length() == 0) {
 				return result;
-			} else if (Strings.isLowerCase(leftString.charAt(0)) && !Strings.isLowerCase(rightString.charAt(0))) {
+			} else if (org.eclipse.jdt.internal.core.manipulation.util.Strings.isLowerCase(leftString.charAt(0))
+					&& !org.eclipse.jdt.internal.core.manipulation.util.Strings.isLowerCase(rightString.charAt(0))) {
 				return +1;
-			} else if (Strings.isLowerCase(rightString.charAt(0)) && !Strings.isLowerCase(leftString.charAt(0))) {
+			} else if (org.eclipse.jdt.internal.core.manipulation.util.Strings.isLowerCase(rightString.charAt(0))
+					&& !org.eclipse.jdt.internal.core.manipulation.util.Strings.isLowerCase(leftString.charAt(0))) {
 				return -1;
 			} else {
 				return leftString.compareTo(rightString);

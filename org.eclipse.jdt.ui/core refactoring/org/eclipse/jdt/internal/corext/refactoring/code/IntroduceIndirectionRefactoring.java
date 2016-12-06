@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,6 +91,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -118,9 +119,9 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  *
@@ -400,7 +401,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					selectionNode= getSelectedNode(fSelectionCompilationUnit, selectionCURoot, fSelectionStart, fSelectionLength);
 				} else {
 					// binary class file - no cu rewrite
-					ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+					ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 					parser.setResolveBindings(true);
 					parser.setSource(fSelectionClassFile);
 					selectionCURoot= (CompilationUnit) parser.createAST(null);
@@ -443,7 +444,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					fTargetMethodBinding= declaration.resolveBinding().getMethodDeclaration();
 				} else {
 					// binary method - no CURewrite available (and none needed as we cannot update the method anyway)
-					ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+					ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 					parser.setProject(fTargetMethod.getJavaProject());
 					IBinding[] bindings= parser.createBindings(new IJavaElement[] { fTargetMethod }, null);
 					fTargetMethodBinding= ((IMethodBinding) bindings[0]).getMethodDeclaration();
@@ -875,7 +876,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		ChildListPropertyDescriptor typeBodyDeclarationsProperty= typeToBodyDeclarationProperty(fIntermediaryType, imRewrite.getRoot());
 
 		ListRewrite bodyDeclarationsListRewrite= imRewrite.getASTRewrite().getListRewrite(type, typeBodyDeclarationsProperty);
-		bodyDeclarationsListRewrite.insertAt(intermediary, ASTNodes.getInsertionIndex(intermediary, type.bodyDeclarations()), imRewrite
+		bodyDeclarationsListRewrite.insertAt(intermediary, BodyDeclarationRewrite.getInsertionIndex(intermediary, type.bodyDeclarations()), imRewrite
 				.createGroupDescription(RefactoringCoreMessages.IntroduceIndirectionRefactoring_group_description_create_new_method));
 	}
 

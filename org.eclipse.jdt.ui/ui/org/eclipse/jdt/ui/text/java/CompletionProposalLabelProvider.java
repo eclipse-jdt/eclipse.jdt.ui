@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,7 +28,7 @@ import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 
@@ -84,15 +84,15 @@ public class CompletionProposalLabelProvider {
 			case CompletionProposal.METHOD_REF:
 			case CompletionProposal.CONSTRUCTOR_INVOCATION:
 				paramList= appendUnboundedParameterList(new StyledString(), proposal).getString();
-				return Strings.markJavaElementLabelLTR(paramList);
+				return org.eclipse.jdt.internal.core.manipulation.util.Strings.markJavaElementLabelLTR(paramList);
 			case CompletionProposal.TYPE_REF:
 			case CompletionProposal.JAVADOC_TYPE_REF:
 				paramList= appendTypeParameterList(new StyledString(), proposal).getString();
-				return Strings.markJavaElementLabelLTR(paramList);
+				return org.eclipse.jdt.internal.core.manipulation.util.Strings.markJavaElementLabelLTR(paramList);
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
 			case CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION:
 				paramList= appendUnboundedParameterList(new StyledString(), proposal).getString();
-				return Strings.markJavaElementLabelLTR(paramList);
+				return org.eclipse.jdt.internal.core.manipulation.util.Strings.markJavaElementLabelLTR(paramList);
 			default:
 				Assert.isLegal(false);
 				return null; // dummy
@@ -294,7 +294,7 @@ public class CompletionProposalLabelProvider {
 
 		declaringType= Signature.getSimpleName(declaringType);
 		nameBuffer.append(declaringType, StyledString.QUALIFIER_STYLER);
-		return Strings.markJavaElementLabelLTR(nameBuffer);
+		return org.eclipse.jdt.internal.corext.util.Strings.markJavaElementLabelLTR(nameBuffer);
 	}
 
 	/**
@@ -327,7 +327,7 @@ public class CompletionProposalLabelProvider {
 		declaringType= Signature.getSimpleName(declaringType);
 		nameBuffer.append(declaringType, StyledString.QUALIFIER_STYLER);
 
-		return Strings.markJavaElementLabelLTR(nameBuffer);
+		return org.eclipse.jdt.internal.corext.util.Strings.markJavaElementLabelLTR(nameBuffer);
 	}
 
 	StyledString createOverrideMethodProposalLabel(CompletionProposal methodProposal) {
@@ -421,7 +421,7 @@ public class CompletionProposalLabelProvider {
 			buf.append(JavaElementLabels.CONCAT_STRING, StyledString.QUALIFIER_STYLER);
 			buf.append(new String(fullName, 0, qIndex - 1), StyledString.QUALIFIER_STYLER);
 		}
-		return Strings.markJavaElementLabelLTR(buf);
+		return org.eclipse.jdt.internal.corext.util.Strings.markJavaElementLabelLTR(buf);
 	}
 
 	StyledString createJavadocTypeProposalLabel(char[] fullName) {
@@ -436,7 +436,7 @@ public class CompletionProposalLabelProvider {
 			buf.append(JavaElementLabels.CONCAT_STRING, StyledString.QUALIFIER_STYLER);
 			buf.append(new String(fullName, 0, qIndex - 1), StyledString.QUALIFIER_STYLER);
 		}
-		return Strings.markJavaElementLabelLTR(buf);
+		return org.eclipse.jdt.internal.corext.util.Strings.markJavaElementLabelLTR(buf);
 	}
 
 	private int findSimpleNameStart(char[] array) {

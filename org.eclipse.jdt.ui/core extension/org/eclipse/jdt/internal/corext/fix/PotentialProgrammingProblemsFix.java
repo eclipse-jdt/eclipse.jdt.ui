@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,10 +63,10 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashOperation;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOperationsFix {
@@ -112,7 +112,7 @@ public class PotentialProgrammingProblemsFix extends CompilationUnitRewriteOpera
 					throw new OperationCanceledException();
 
 				result= new RefactoringStatus();
-				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+				ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 				parser.setProject(fProject);
 				IBinding[] bindings= parser.createBindings(types, new SubProgressMonitor(monitor, 1));
 				for (int i= 0; i < bindings.length; i++) {

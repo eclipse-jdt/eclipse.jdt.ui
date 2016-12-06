@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -162,8 +162,8 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 public class ChangeSignatureProcessor extends RefactoringProcessor implements IDelegateUpdating {
@@ -668,7 +668,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		int offset= cuBuff.length();
 		cuBuff.append(trimmed)
 			  .append(CONST_CLOSE);
-		ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		ASTParser p= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		p.setSource(cuBuff.toString().toCharArray());
 		CompilationUnit cu= (CompilationUnit) p.createAST(null);
 		Selection selection= Selection.createFromStartLength(offset, trimmed.length());
@@ -688,7 +688,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		int offset= cuBuff.length();
 		cuBuff.append(trimmed)
 			  .append(");}}"); //$NON-NLS-1$
-		ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		ASTParser p= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		p.setSource(cuBuff.toString().toCharArray());
 		CompilationUnit cu= (CompilationUnit) p.createAST(null);
 		Selection selection= Selection.createFromStartLength(offset, trimmed.length());
@@ -1010,7 +1010,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		ICompilationUnit cu= getCu();
 		TextChange change= fChangeManager.get(cu);
 		String newCuSource= change.getPreviewContent(new NullProgressMonitor());
-		CompilationUnit newCUNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(newCuSource, cu, true, false, null);
+		CompilationUnit newCUNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(newCuSource, cu, true, false, null);
 		IProblem[] problems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fBaseCuRewrite.getRoot());
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problems.length; i++) {

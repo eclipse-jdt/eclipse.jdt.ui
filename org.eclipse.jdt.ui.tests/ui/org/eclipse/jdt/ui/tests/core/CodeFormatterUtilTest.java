@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,7 +42,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 public class CodeFormatterUtilTest extends CoreTests {
 
@@ -281,7 +281,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("  package   com . test1;");
 		String contents= buf.toString();
 
-		AST ast= AST.newAST(ASTProvider.SHARED_AST_LEVEL);
+		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL);
 		PackageDeclaration decl= ast.newPackageDeclaration();
 
 		TextEdit edit= CodeFormatterUtil.format2(decl, contents, 0, "\n", null);
@@ -299,7 +299,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("package   com . test1;");
 		String contents= buf.toString();
 
-		AST ast= AST.newAST(ASTProvider.SHARED_AST_LEVEL);
+		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL);
 		PackageDeclaration node= ast.newPackageDeclaration();
 
 		String word1= "com";
@@ -333,7 +333,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("x[ ]=\nnew  int[ offset]");
 		String contents= buf.toString();
 
-		AST ast= AST.newAST(ASTProvider.SHARED_AST_LEVEL);
+		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL);
 		VariableDeclarationFragment node= ast.newVariableDeclarationFragment();
 
 		String word1= "new";
@@ -369,7 +369,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append(" */\n");
 		String contents= buf.toString();
 
-		AST ast= AST.newAST(ASTProvider.SHARED_AST_LEVEL);
+		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL);
 		Javadoc node= ast.newJavadoc();
 
 		String word1= "bar";
@@ -407,7 +407,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append(" */");
 		String contents= buf.toString();
 
-		AST ast= AST.newAST(ASTProvider.SHARED_AST_LEVEL);
+		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL);
 		Javadoc node= ast.newJavadoc();
 
 		String word1= "bar";
@@ -445,7 +445,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append(" */");
 		String contents= buf.toString();
 
-		AST ast= AST.newAST(ASTProvider.SHARED_AST_LEVEL);
+		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL);
 		Javadoc node= ast.newJavadoc();
 
 		String word1= "bar";
@@ -484,7 +484,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("}");
 		String contents= buf.toString();
 
-		AST ast= AST.newAST(ASTProvider.SHARED_AST_LEVEL);
+		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL);
 		CatchClause node= ast.newCatchClause();
 
 		String word1= "catch";
@@ -519,7 +519,7 @@ public class CodeFormatterUtilTest extends CoreTests {
 		buf.append("\"Hello\" ");
 		String contents= buf.toString();
 
-		AST ast= AST.newAST(ASTProvider.SHARED_AST_LEVEL);
+		AST ast= AST.newAST(IASTSharedValues.SHARED_AST_LEVEL);
 		StringLiteral node= ast.newStringLiteral();
 
 		TextEdit edit= CodeFormatterUtil.format2(node, contents, 0, "\n", null);

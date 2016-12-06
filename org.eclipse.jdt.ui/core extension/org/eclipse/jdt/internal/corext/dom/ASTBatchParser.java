@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,8 +26,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.IBinding;
-
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * Creates AST from a set of compilation units. Uses the
@@ -113,7 +111,7 @@ public class ASTBatchParser {
 	 * @return an AST parser capable of creating ASTs of compilation units in project
 	 */
 	protected ASTParser createParser(IJavaProject project) {
-		ASTParser result= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		ASTParser result= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		result.setResolveBindings(true);
 		result.setProject(project);
 

@@ -131,14 +131,6 @@ public final class SearchMessages extends NLS {
 	public static String Search_FindOccurrencesInFile_tooltip;
 	public static String FindOccurrencesEngine_noSource_text;
 	public static String FindOccurrencesEngine_cannotParse_text;
-	public static String OccurrencesFinder_no_element;
-	public static String OccurrencesFinder_no_binding;
-	public static String OccurrencesFinder_searchfor;
-	public static String OccurrencesFinder_label_singular;
-	public static String OccurrencesFinder_label_plural;
-	public static String OccurrencesFinder_occurrence_description;
-	public static String OccurrencesFinder_occurrence_write_description;
-	public static String OccurrencesSearchLabelProvider_line_number;
 	public static String ExceptionOccurrencesFinder_no_exception;
 	public static String ExceptionOccurrencesFinder_searchfor;
 	public static String ExceptionOccurrencesFinder_label_singular;

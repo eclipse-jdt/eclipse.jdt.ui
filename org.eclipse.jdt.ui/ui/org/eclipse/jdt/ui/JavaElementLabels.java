@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,7 +46,8 @@ import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
 
 
@@ -412,7 +413,7 @@ public class JavaElementLabels {
 		} else if (obj instanceof IAdaptable) {
 			IWorkbenchAdapter wbadapter= ((IAdaptable)obj).getAdapter(IWorkbenchAdapter.class);
 			if (wbadapter != null) {
-				return Strings.markLTR(wbadapter.getLabel(obj));
+				return org.eclipse.jdt.internal.core.manipulation.util.Strings.markLTR(wbadapter.getLabel(obj));
 			}
 		}
 		return ""; //$NON-NLS-1$
@@ -489,7 +490,7 @@ public class JavaElementLabels {
 	public static String getElementLabel(IJavaElement element, long flags) {
 		StringBuffer result= new StringBuffer();
 		getElementLabel(element, flags, result);
-		return Strings.markJavaElementLabelLTR(result.toString());
+		return org.eclipse.jdt.internal.core.manipulation.util.Strings.markJavaElementLabelLTR(result.toString());
 	}
 
 	/**
@@ -814,11 +815,11 @@ public class JavaElementLabels {
 	public static String getContainerEntryLabel(IPath containerPath, IJavaProject project) throws JavaModelException {
 		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, project);
 		if (container != null) {
-			return Strings.markLTR(container.getDescription());
+			return org.eclipse.jdt.internal.core.manipulation.util.Strings.markLTR(container.getDescription());
 		}
 		ClasspathContainerInitializer initializer= JavaCore.getClasspathContainerInitializer(containerPath.segment(0));
 		if (initializer != null) {
-			return Strings.markLTR(initializer.getDescription(containerPath, project));
+			return org.eclipse.jdt.internal.core.manipulation.util.Strings.markLTR(initializer.getDescription(containerPath, project));
 		}
 		return BasicElementLabels.getPathLabel(containerPath, false);
 	}
