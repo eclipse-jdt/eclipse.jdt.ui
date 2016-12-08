@@ -88,6 +88,11 @@ public class JUnitPreferencesConstants {
 	public static final String JUNIT_JUPITER_ENGINE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.jupiter.engine.javadoclocation"; //$NON-NLS-1$
 
 	/**
+	 * Javadoc location for org.junit.jupiter.migration.support (JUnit 5)
+	 */
+	public static final String JUNIT_JUPITER_MIGRATION_SUPPORT_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.jupiter.migration.support.javadoclocation"; //$NON-NLS-1$
+
+	/**
 	 * Javadoc location for org.junit.vintage.engine (JUnit 5)
 	 */
 	public static final String JUNIT_VINTAGE_ENGINE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.vintage.engine.javadoclocation"; //$NON-NLS-1$

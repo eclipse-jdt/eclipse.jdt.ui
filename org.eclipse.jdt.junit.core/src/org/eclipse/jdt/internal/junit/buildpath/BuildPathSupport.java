@@ -214,6 +214,10 @@ public class BuildPathSupport {
 			"org.junit.jupiter.engine", new VersionRange("[1.0.0,2.0.0)"), "org.junit.jupiter.engine.jar", "org.junit.jupiter.engine.jar", "org.junit.jupiter.engine.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
 			JUnitPreferencesConstants.JUNIT_JUPITER_ENGINE_JAVADOC);
 
+	public static final JUnitPluginDescription JUNIT_JUPITER_MIGRATION_SUPPORT_PLUGIN= new JUnitPluginDescription(
+			"org.junit.jupiter.migration.support", new VersionRange("[1.0.0,2.0.0)"), "org.junit.jupiter.migration.support.jar", "org.junit.jupiter.migration.support.jar", "org.junit.jupiter.migration.support.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
+			JUnitPreferencesConstants.JUNIT_JUPITER_MIGRATION_SUPPORT_JAVADOC);
+
 	public static final JUnitPluginDescription JUNIT_VINTAGE_ENGINE_PLUGIN= new JUnitPluginDescription(
 			"org.junit.vintage.engine", new VersionRange("[1.0.0,2.0.0)"), "org.junit.vintage.engine.jar", "org.junit.vintage.engine.jar", "org.junit.vintage.engine.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
 			JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC);
@@ -301,6 +305,13 @@ public class BuildPathSupport {
 	 */
 	public static IClasspathEntry getJUnitJupiterEngineLibraryEntry() {
 		return JUNIT_JUPITER_ENGINE_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.junit.jupiter.migration.support library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnitJupiterMigrationSupportLibraryEntry() {
+		return JUNIT_JUPITER_MIGRATION_SUPPORT_PLUGIN.getLibraryEntry();
 	}
 
 	/**

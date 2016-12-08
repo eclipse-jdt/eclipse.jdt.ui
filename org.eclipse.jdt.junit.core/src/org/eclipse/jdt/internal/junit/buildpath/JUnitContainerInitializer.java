@@ -120,6 +120,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			entriesList.add(BuildPathSupport.getJUnitOpentest4jLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitJupiterApiLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitJupiterEngineLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitJupiterMigrationSupportLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitVintageEngineLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnit4LibraryEntry());
 			entriesList.add(BuildPathSupport.getHamcrestCoreLibraryEntry());
@@ -230,6 +231,8 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 					return JUnitPreferencesConstants.JUNIT_JUPITER_API_JAVADOC;
 				} else if (lastSegment.indexOf("jupiter.engine") != -1) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_JUPITER_ENGINE_JAVADOC;
+				} else if (lastSegment.indexOf("jupiter.migration.support") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_JUPITER_MIGRATION_SUPPORT_JAVADOC;
 				} else if (lastSegment.indexOf("vintage.engine") != -1) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC;
 				} else if (lastSegment.indexOf("junit4") != -1) { //$NON-NLS-1$
