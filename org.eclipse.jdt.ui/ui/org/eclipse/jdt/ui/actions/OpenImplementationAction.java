@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2011 IBM Corporation and others.
+ * Copyright (c) 2009, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,22 +23,22 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkImplementationDetector;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaElementImplementationHyperlink;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 /**
- * The action allows to open the implementation for a method in its hierarchy.
+ * The action allows to open the implementation for a method or a type in its hierarchy.
  * <p>
  * The action is applicable to selections containing elements of type <code>
- * IMethod</code>.
+ * IMethod</code> or <code>IType</code>.
  * </p>
  * 
  * @since 3.6
@@ -78,24 +78,15 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 		setEnabled(SelectionConverter.canOperateOn(fEditor) && fEditor.getSelectionProvider().getSelection() instanceof ITextSelection);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.text.ITextSelection)
-	 */
 	@Override
 	public void selectionChanged(ITextSelection selection) {
 	}
 
-	/*
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
-	 */
 	@Override
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(false);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
-	 */
 	@Override
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(fEditor))
@@ -112,7 +103,7 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 			return;
 		}
 
-		if (element == null || !(element instanceof IMethod)) {
+		if (element == null || !JavaElementHyperlinkImplementationDetector.canOpenImplementation(element)) {
 			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OpenImplementationAction_not_applicable);
 			return;
 		}
@@ -123,7 +114,7 @@ public class OpenImplementationAction extends SelectionDispatchAction {
 			return;
 
 		IRegion region= new Region(selection.getOffset(), 0);
-		JavaElementImplementationHyperlink.openImplementations(fEditor, region, (IMethod)element, openAction);
+		JavaElementImplementationHyperlink.openImplementations(fEditor, region, element, openAction);
 
 	}
 

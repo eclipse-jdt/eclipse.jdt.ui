@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,6 +53,7 @@ import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.jface.text.AbstractInformationControl;
@@ -282,7 +283,17 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			fillToolbar();
 
 			createAnnotationInformation(fParent, getAnnotationInfo().annotation);
-			setColorAndFont(fParent, fParent.getForeground(), fParent.getBackground(), JFaceResources.getDialogFont());
+
+			ColorRegistry colorRegistry= JFaceResources.getColorRegistry();
+			Color foreground= colorRegistry.get("org.eclipse.ui.workbench.HOVER_FOREGROUND"); //$NON-NLS-1$
+			if (foreground == null) {
+				foreground= fParent.getForeground();
+			}
+			Color background= colorRegistry.get("org.eclipse.ui.workbench.HOVER_BACKGROUND"); //$NON-NLS-1$
+			if (background == null) {
+				background= fParent.getBackground();
+			}
+			setColorAndFont(fParent, foreground, background, JFaceResources.getDialogFont());
 
 			ICompletionProposal[] proposals= getAnnotationInfo().getCompletionProposals();
 			if (proposals.length > 0)

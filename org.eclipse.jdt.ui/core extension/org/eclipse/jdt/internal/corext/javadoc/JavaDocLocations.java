@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,16 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.javadoc;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.SocketException;
@@ -27,38 +19,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.HashMap;
 import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.URIUtil;
-import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -87,12 +56,8 @@ import org.eclipse.jdt.internal.corext.CorextMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIException;
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
@@ -101,86 +66,8 @@ public class JavaDocLocations {
 
 	private static final String JAR_PROTOCOL= "jar"; //$NON-NLS-1$
 	public static final String ARCHIVE_PREFIX= "jar:"; //$NON-NLS-1$
-	private static final String PREF_JAVADOCLOCATIONS= "org.eclipse.jdt.ui.javadoclocations"; //$NON-NLS-1$
-	public static final String PREF_JAVADOCLOCATIONS_MIGRATED= "org.eclipse.jdt.ui.javadoclocations.migrated"; //$NON-NLS-1$
-
-
-	private static final String NODE_ROOT= "javadoclocation"; //$NON-NLS-1$
-	private static final String NODE_ENTRY= "location_01"; //$NON-NLS-1$
-	private static final String NODE_PATH= "path"; //$NON-NLS-1$
-	private static final String NODE_URL= "url"; //$NON-NLS-1$
 
 	private static final QualifiedName PROJECT_JAVADOC= new QualifiedName(JavaUI.ID_PLUGIN, "project_javadoc_location"); //$NON-NLS-1$
-
-	public static void migrateToClasspathAttributes() {
-		final Map<IPath, String> oldLocations= loadOldForCompatibility();
-		if (oldLocations.isEmpty()) {
-			IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
-			preferenceStore.setValue(PREF_JAVADOCLOCATIONS, ""); //$NON-NLS-1$
-			preferenceStore.setValue(PREF_JAVADOCLOCATIONS_MIGRATED, true);
-			return;
-		}
-
-		Job job= new Job(CorextMessages.JavaDocLocations_migratejob_name) {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
-						@Override
-						public void run(IProgressMonitor pm) throws CoreException {
-							updateClasspathEntries(oldLocations, pm);
-							IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
-							preferenceStore.setValue(PREF_JAVADOCLOCATIONS, ""); //$NON-NLS-1$
-							preferenceStore.setValue(PREF_JAVADOCLOCATIONS_MIGRATED, true);
-						}
-					};
-					new WorkbenchRunnableAdapter(runnable).run(monitor);
-				} catch (InvocationTargetException e) {
-					JavaPlugin.log(e);
-				} catch (InterruptedException e) {
-					// should not happen, cannot cancel
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		job.schedule();
-	}
-
-	final static void updateClasspathEntries(Map<IPath, String> oldLocationMap, IProgressMonitor monitor) throws JavaModelException {
-		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		IJavaProject[] javaProjects= JavaCore.create(root).getJavaProjects();
-		try {
-			monitor.beginTask(CorextMessages.JavaDocLocations_migrate_operation, javaProjects.length);
-			for (int i= 0; i < javaProjects.length; i++) {
-				IJavaProject project= javaProjects[i];
-				String projectJavadoc= oldLocationMap.get(project.getPath());
-				if (projectJavadoc != null) {
-					try {
-						setProjectJavadocLocation(project, projectJavadoc);
-					} catch (CoreException e) {
-						// ignore
-					}
-				}
-
-				IClasspathEntry[] rawClasspath= project.getRawClasspath();
-				boolean hasChange= false;
-				for (int k= 0; k < rawClasspath.length; k++) {
-					IClasspathEntry updated= getConvertedEntry(rawClasspath[k], project, oldLocationMap);
-					if (updated != null) {
-						rawClasspath[k]= updated;
-						hasChange= true;
-					}
-				}
-				if (hasChange) {
-					project.setRawClasspath(rawClasspath, new SubProgressMonitor(monitor, 1));
-				} else {
-					monitor.worked(1);
-				}
-			}
-		} finally {
-			monitor.done();
-		}
-	}
 
 	private static IClasspathEntry getConvertedEntry(IClasspathEntry entry, IJavaProject project, Map<IPath, String> oldLocationMap) {
 		IPath path= null;
@@ -323,127 +210,6 @@ public class JavaDocLocations {
 			}
 		} else {
 			return getProjectJavadocLocation(root.getJavaProject());
-		}
-	}
-
-	private static JavaUIException createException(Throwable t, String message) {
-		return new JavaUIException(JavaUIStatus.createError(IStatus.ERROR, message, t));
-	}
-
-	private static Map<IPath, String> loadOldForCompatibility() {
-		HashMap<IPath, String> resultingOldLocations= new HashMap<>();
-
-		// in 3.0, the javadoc locations were stored as one big string in the preferences
-		String string= PreferenceConstants.getPreferenceStore().getString(PREF_JAVADOCLOCATIONS);
-		if (string != null && string.length() > 0) {
-			byte[] bytes;
-			try {
-				bytes= string.getBytes("UTF-8"); //$NON-NLS-1$
-			} catch (UnsupportedEncodingException e) {
-				bytes= string.getBytes();
-			}
-			InputStream is= new ByteArrayInputStream(bytes);
-			try {
-				loadFromStream(new InputSource(is), resultingOldLocations);
-				PreferenceConstants.getPreferenceStore().setValue(PREF_JAVADOCLOCATIONS, ""); //$NON-NLS-1$
-				return resultingOldLocations;
-			} catch (CoreException e) {
-				JavaPlugin.log(e); // log but ignore
-			} finally {
-				try {
-					is.close();
-				} catch (IOException e) {
-					// ignore
-				}
-			}
-		}
-
-		// in 2.1, the Javadoc locations were stored in a file in the meta data
-		// note that it is wrong to use a stream reader with XML declaring to be UTF-8
-		try {
-			final String STORE_FILE= "javadoclocations.xml"; //$NON-NLS-1$
-			File file= JavaPlugin.getDefault().getStateLocation().append(STORE_FILE).toFile();
-			if (file.exists()) {
-				Reader reader= null;
-				try {
-					reader= new FileReader(file);
-					loadFromStream(new InputSource(reader), resultingOldLocations);
-					file.delete(); // remove file after successful store
-					return resultingOldLocations;
-				} catch (IOException e) {
-					JavaPlugin.log(e); // log but ignore
-				} finally {
-					try {
-						if (reader != null) {
-							reader.close();
-						}
-					} catch (IOException e) {}
-				}
-			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e); // log but ignore
-		}
-
-		// in 2.0, the Javadoc locations were stored as one big string in the persistent properties
-		// note that it is wrong to use a stream reader with XML declaring to be UTF-8
-		try {
-			final QualifiedName QUALIFIED_NAME= new QualifiedName(JavaUI.ID_PLUGIN, "jdoclocation"); //$NON-NLS-1$
-
-			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-			String xmlString= root.getPersistentProperty(QUALIFIED_NAME);
-			if (xmlString != null) { // only set when workspace is old
-				Reader reader= new StringReader(xmlString);
-				try {
-					loadFromStream(new InputSource(reader), resultingOldLocations);
-					root.setPersistentProperty(QUALIFIED_NAME, null); // clear property
-					return resultingOldLocations;
-				} finally {
-
-					try {
-						reader.close();
-					} catch (IOException e) {
-						// error closing reader: ignore
-					}
-				}
-			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e); // log but ignore
-		}
-		return resultingOldLocations;
-	}
-
-	private static void loadFromStream(InputSource inputSource, Map<IPath, String> oldLocations) throws CoreException {
-		Element cpElement;
-		try {
-			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			parser.setErrorHandler(new DefaultHandler());
-			cpElement = parser.parse(inputSource).getDocumentElement();
-		} catch (SAXException e) {
-			throw createException(e, CorextMessages.JavaDocLocations_error_readXML);
-		} catch (ParserConfigurationException e) {
-			throw createException(e, CorextMessages.JavaDocLocations_error_readXML);
-		} catch (IOException e) {
-			throw createException(e, CorextMessages.JavaDocLocations_error_readXML);
-		}
-
-		if (cpElement == null) return;
-		if (!cpElement.getNodeName().equalsIgnoreCase(NODE_ROOT)) {
-			return;
-		}
-		NodeList list= cpElement.getChildNodes();
-		int length= list.getLength();
-		for (int i= 0; i < length; ++i) {
-			Node node= list.item(i);
-			short type= node.getNodeType();
-			if (type == Node.ELEMENT_NODE) {
-				Element element= (Element) node;
-				if (element.getNodeName().equalsIgnoreCase(NODE_ENTRY)) {
-					String varPath = element.getAttribute(NODE_PATH);
-					String varURL = parseURL(element.getAttribute(NODE_URL)).toExternalForm();
-
-					oldLocations.put(Path.fromPortableString(varPath), varURL);
-				}
-			}
 		}
 	}
 

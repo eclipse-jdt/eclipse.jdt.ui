@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,9 +47,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
@@ -84,7 +82,6 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRegistry;
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
@@ -215,13 +212,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	private ImageDescriptorRegistry fImageDescriptorRegistry;
 
 	private MembersOrderPreferenceCache fMembersOrderPreferenceCache;
-	private IPropertyChangeListener fFontPropertyChangeListener;
-
-	/**
-	 * Property change listener on this plugin's preference store.
-	 * @since 3.0
-	 */
-	private IPropertyChangeListener fPropertyChangeListener;
 
 	private JavaEditorTextHoverDescriptor[] fJavaEditorTextHoverDescriptors;
 
@@ -398,8 +388,14 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			}
 		});
 
-		ensurePreferenceStoreBackwardsCompatibility();
+		IPreferenceStore store= getPreferenceStore();
 
+		// must add here to guarantee that it is the first in the listener list
+		fMembersOrderPreferenceCache= new MembersOrderPreferenceCache();
+		fMembersOrderPreferenceCache.install(store);
+
+		FormatterProfileStore.checkCurrentOptionsVersion();
+		
 		// make sure org.eclipse.jdt.core.manipulation is loaded too
 		// can be removed if JavaElementPropertyTester is moved down to jdt.core (bug 127085)
 		JavaManipulation.class.toString();
@@ -422,146 +418,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 	/* package */ static void initializeAfterLoad(IProgressMonitor monitor) {
 		OpenTypeHistory.getInstance().checkConsistency(monitor);
-	}
-
-	/**
-	 * Private deprecated method to avoid deprecation warnings
-	 * 
-	 * @return the deprecated preference store
-	 * @deprecated to avoid deprecation warnings
-	 */
-	@Deprecated
-	private static IPreferenceStore getDeprecatedWorkbenchPreferenceStore() {
-		return PlatformUI.getWorkbench().getPreferenceStore();
-	}
-
-	/** @deprecated to avoid deprecation warnings */
-	@Deprecated
-	private static final String DEPRECATED_EDITOR_TAB_WIDTH= PreferenceConstants.EDITOR_TAB_WIDTH;
-
-	/** @deprecated to avoid deprecation warnings */
-	@Deprecated
-	private static final String DEPRECATED_REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD= PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD;
-
-	/** @deprecated to avoid deprecation warnings */
-	@Deprecated
-	private static final String DEPRECATED_CODEASSIST_ORDER_PROPOSALS= PreferenceConstants.CODEASSIST_ORDER_PROPOSALS;
-
-	/**
-	 * Installs backwards compatibility for the preference store.
-	 */
-	private void ensurePreferenceStoreBackwardsCompatibility() {
-
-		IPreferenceStore store= getPreferenceStore();
-
-		// must add here to guarantee that it is the first in the listener list
-		fMembersOrderPreferenceCache= new MembersOrderPreferenceCache();
-		fMembersOrderPreferenceCache.install(store);
-
-
-		/*
-		 * Installs backwards compatibility: propagate the Java editor font from a
-		 * pre-2.1 plug-in to the Platform UI's preference store to preserve
-		 * the Java editor font from a pre-2.1 workspace. This is done only
-		 * once.
-		 */
-		String fontPropagatedKey= "fontPropagated"; //$NON-NLS-1$
-		if (store.contains(JFaceResources.TEXT_FONT) && !store.isDefault(JFaceResources.TEXT_FONT)) {
-			if (!store.getBoolean(fontPropagatedKey))
-				PreferenceConverter.setValue(
-						getDeprecatedWorkbenchPreferenceStore(), PreferenceConstants.EDITOR_TEXT_FONT, PreferenceConverter.getFontDataArray(store, JFaceResources.TEXT_FONT));
-		}
-		store.setValue(fontPropagatedKey, true);
-
-		/*
-		 * Backwards compatibility: set the Java editor font in this plug-in's
-		 * preference store to let older versions access it. Since 2.1 the
-		 * Java editor font is managed by the workbench font preference page.
-		 */
-		PreferenceConverter.putValue(store, JFaceResources.TEXT_FONT, JFaceResources.getFontRegistry().getFontData(PreferenceConstants.EDITOR_TEXT_FONT));
-
-		fFontPropertyChangeListener= new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (PreferenceConstants.EDITOR_TEXT_FONT.equals(event.getProperty()))
-					PreferenceConverter.putValue(getPreferenceStore(), JFaceResources.TEXT_FONT, JFaceResources.getFontRegistry().getFontData(PreferenceConstants.EDITOR_TEXT_FONT));
-			}
-		};
-		JFaceResources.getFontRegistry().addListener(fFontPropertyChangeListener);
-
-		/*
-		 * Backwards compatibility: propagate the Java editor tab width from a
-		 * pre-3.0 plug-in to the new preference key. This is done only once.
-		 */
-		final String oldTabWidthKey= DEPRECATED_EDITOR_TAB_WIDTH;
-		final String newTabWidthKey= AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH;
-		String tabWidthPropagatedKey= "tabWidthPropagated"; //$NON-NLS-1$
-		if (store.contains(oldTabWidthKey) && !store.isDefault(oldTabWidthKey)) {
-			if (!store.getBoolean(tabWidthPropagatedKey))
-				store.setValue(newTabWidthKey, store.getInt(oldTabWidthKey));
-		}
-		store.setValue(tabWidthPropagatedKey, true);
-
-		/*
-		 * Backwards compatibility: set the Java editor tab width in this plug-in's
-		 * preference store with the old key to let older versions access it.
-		 * Since 3.0 the tab width is managed by the extended text editor and
-		 * uses a new key.
-		 */
-		store.putValue(oldTabWidthKey, store.getString(newTabWidthKey));
-
-		fPropertyChangeListener= new IPropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent event) {
-				if (newTabWidthKey.equals(event.getProperty())) {
-					IPreferenceStore prefStore= getPreferenceStore();
-					prefStore.putValue(oldTabWidthKey, prefStore.getString(newTabWidthKey));
-				}
-			}
-		};
-		store.addPropertyChangeListener(fPropertyChangeListener);
-
-		/*
-		 * Backward compatibility for the refactoring preference key.
-		 */
-//		store.setValue(
-//			PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD,
-//			RefactoringCore.getConditionCheckingFailedSeverity());
-
-		// The commented call above triggers the eager loading of the LTK core plug-in
-		// Since the condition checking failed severity is guaranteed to be of RefactoringStatus.SEVERITY_WARNING,
-		// we directly insert the inlined value of this constant
-		store.setToDefault(DEPRECATED_REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD);
-
-		if (!store.getBoolean(JavaDocLocations.PREF_JAVADOCLOCATIONS_MIGRATED)) {
-			JavaDocLocations.migrateToClasspathAttributes();
-		}
-
-		FormatterProfileStore.checkCurrentOptionsVersion();
-
-		/*
-		 * Backward compatibility: migrate "alphabetic ordering" preference to point the sorter
-		 * preference to the alphabetic sorter.
-		 */
-		String proposalOrderMigrated= "proposalOrderMigrated"; //$NON-NLS-1$
-
-		if (store.contains(DEPRECATED_CODEASSIST_ORDER_PROPOSALS)) {
-			if (!store.getBoolean(proposalOrderMigrated)) {
-				boolean alphabetic= store.getBoolean(DEPRECATED_CODEASSIST_ORDER_PROPOSALS);
-				if (alphabetic)
-					store.setValue(PreferenceConstants.CODEASSIST_SORTER, "org.eclipse.jdt.ui.AlphabeticSorter"); //$NON-NLS-1$
-			}
-		}
-		store.setValue(proposalOrderMigrated, true);
-
-	}
-
-	/**
-	 * Uninstalls backwards compatibility for the preference store.
-	 */
-	private void uninstallPreferenceStoreBackwardsCompatibility() {
-		JFaceResources.getFontRegistry().removeListener(fFontPropertyChangeListener);
-		getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
 	}
 
 	/*
@@ -614,8 +470,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 				ContentAssistHistory.store(fContentAssistHistory, getPluginPreferences(), PreferenceConstants.CODEASSIST_LRU_HISTORY);
 				fContentAssistHistory= null;
 			}
-
-			uninstallPreferenceStoreBackwardsCompatibility();
 
 			if (fTemplateStore != null) {
 				fTemplateStore.stopListeningForPreferenceChanges();
