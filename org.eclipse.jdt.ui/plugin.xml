@@ -4078,7 +4078,14 @@
             categoryId="org.eclipse.ui.category.project"
             id="org.eclipse.jdt.ui.generate.javadoc">
       </command>
-      
+      <command
+            name="%ActionDefinition.indexRebuild.name"
+            description="%ActionDefinition.indexRebuild.description"
+            defaultHandler="org.eclipse.jdt.internal.ui.commands.RebuildIndexHandler"
+            categoryId="org.eclipse.ui.category.project"
+            id="org.eclipse.jdt.ui.index.rebuild">
+      </command>
+     
 <!-- search -->
       <command
             name="%ActionDefinition.referencesInWorkspace.name"
