@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -647,6 +648,10 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 			return false;
 		// generic lambda expressions are not allowed
 		if (methodBinding.isGenericMethod())
+			return false;
+
+		int modifiers= methodBinding.getModifiers();
+		if (Modifier.isSynchronized(modifiers) || Modifier.isStrictfp(modifiers))
 			return false;
 
 		// lambda cannot refer to 'this'/'super' literals
