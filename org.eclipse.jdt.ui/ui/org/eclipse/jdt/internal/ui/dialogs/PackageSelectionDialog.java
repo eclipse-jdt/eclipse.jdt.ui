@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -113,7 +113,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 					monitor= new NullProgressMonitor();
 				}
 				boolean hideEmpty= (fFlags & F_HIDE_EMPTY_INNER) != 0;
-				monitor.beginTask(JavaUIMessages.PackageSelectionDialog_progress_search, hideEmpty ? 2 : 1);
+				SubMonitor subMonitor= SubMonitor.convert(monitor, JavaUIMessages.PackageSelectionDialog_progress_search, hideEmpty ? 2 : 1);
 				try {
 					SearchRequestor requestor= new SearchRequestor() {
 						private HashSet<String> fSet= new HashSet<>();
@@ -150,21 +150,19 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 					SearchPattern pattern= SearchPattern.createPattern("*", //$NON-NLS-1$
 							IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS,
 							SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE);
-					new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), fScope, requestor, new SubProgressMonitor(monitor, 1));
+					new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), fScope, requestor, subMonitor.split(1));
 
 					if (monitor.isCanceled()) {
 						throw new InterruptedException();
 					}
 
 					if (hideEmpty) {
-						removeEmptyPackages(new SubProgressMonitor(monitor, 1));
+						removeEmptyPackages(subMonitor.split(1));
 					}
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				} catch (OperationCanceledException e) {
 					throw new InterruptedException();
-				} finally {
-					monitor.done();
 				}
 			}
 
