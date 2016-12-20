@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Lars Vogel and others.
+ * Copyright (c) 2014, 2016 Lars Vogel and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,3 +90,12 @@ IEclipsePreferences#org-eclipse-jdt-ui {
 		'semanticHighlighting.typeParameter.enabled=true'
 		'sourceHoverBackgroundColor=68,68,68'
 }
+
+BulletListBlock > StyledText {
+    background-color: #3f4447;
+    color: #BBBBBB;
+}
+
+
+
+
