@@ -113,7 +113,7 @@ public final class JavaModelUtil {
 
 	/**
 	 * The name of the module-info.java file.
-	 * @since 3.12 BETA_JAVA9
+	 * @since 3.13 BETA_JAVA9
 	 */
 	public static final String MODULE_INFO_JAVA= "module-info.java"; //$NON-NLS-1$
 
