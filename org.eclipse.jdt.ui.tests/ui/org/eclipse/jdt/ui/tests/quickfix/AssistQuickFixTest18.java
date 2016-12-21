@@ -4266,11 +4266,12 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		expected1= buf.toString();
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 
-		offset= buf1.toString().indexOf("-> /*[10]*/");
+		String match10= "-> /*[10]*/t.method2";
+		offset= buf1.toString().indexOf(match10) + match10.length();
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
