@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -100,8 +104,8 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 
 		String qualifiedTypeName= getQualifiedTypeName();
 
-		// Type in package info must be fully qualified.
-		if (fCompilationUnit != null && JavaModelUtil.isPackageInfo(fCompilationUnit))
+		// Type in package info and module info must be fully qualified.
+		if (fCompilationUnit != null && (JavaModelUtil.isPackageInfo(fCompilationUnit) || JavaModelUtil.isModuleInfo(fCompilationUnit)))
 			return qualifiedTypeName;
 
 		if (qualifiedTypeName.indexOf('.') == -1 && replacement.length() > 0)
@@ -163,7 +167,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	}
 
 	private ImportRewrite createImportRewrite() {
-		if (fCompilationUnit != null && allowAddingImports() && !JavaModelUtil.isPackageInfo(fCompilationUnit)) {
+		if (fCompilationUnit != null && allowAddingImports() && !JavaModelUtil.isPackageInfo(fCompilationUnit) && !JavaModelUtil.isModuleInfo(fCompilationUnit)) {
 			try {
 				CompilationUnit cu= getASTRoot(fCompilationUnit);
 				if (cu == null) {

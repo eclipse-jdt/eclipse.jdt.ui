@@ -239,7 +239,7 @@ public final class JavaModelUtil {
 	 * Returns whether the two names match. They match if they
 	 * are equal, or if they are the same name but one is missing a dot-separated qualifier.
 	 * 
-	 * @param nameA a potentially qualified name 
+	 * @param nameA a potentially qualified name
 	 * @param nameB a potentially qualified name
 	 * @return <code>true</code> iff the given names match
 	 * @since 3.8
@@ -989,6 +989,17 @@ public final class JavaModelUtil {
 	 */
 	public static boolean isPackageInfo(ICompilationUnit cu) {
 		return PACKAGE_INFO_JAVA.equals(cu.getElementName());
+	}
+
+	/**
+	 * Tells whether the given CU is the module-info.java.
+	 *
+	 * @param cu the compilation unit to test
+	 * @return <code>true</code> if the given CU is the module-info.java
+	 * @since 3.13 BETA_JAVA9
+	 */
+	public static boolean isModuleInfo(ICompilationUnit cu) {
+		return MODULE_INFO_JAVA.equals(cu.getElementName());
 	}
 
 	public static boolean isPolymorphicSignature(IMethod method) {
