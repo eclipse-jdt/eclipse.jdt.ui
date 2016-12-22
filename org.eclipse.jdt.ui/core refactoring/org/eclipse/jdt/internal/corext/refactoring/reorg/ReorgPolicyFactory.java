@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -114,6 +114,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
@@ -145,13 +146,13 @@ import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 public final class ReorgPolicyFactory {
 
@@ -701,7 +702,7 @@ public final class ReorgPolicyFactory {
 		private CompilationUnit createSourceCuNode() {
 			Assert.isTrue(getSourceCu() != null || getSourceClassFile() != null);
 			Assert.isTrue(getSourceCu() == null || getSourceClassFile() == null);
-			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+			ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 			parser.setBindingsRecovery(true);
 			parser.setResolveBindings(true);
 			if (getSourceCu() != null)
@@ -3737,7 +3738,7 @@ public final class ReorgPolicyFactory {
 			}
 
 			if (getLocation() == IReorgDestination.LOCATION_ON) {
-				listRewrite.insertAt(newMember, ASTNodes.getInsertionIndex(newMember, listRewrite.getRewrittenList()), null);
+				listRewrite.insertAt(newMember, BodyDeclarationRewrite.getInsertionIndex(newMember, listRewrite.getRewrittenList()), null);
 			} else {
 				insertRelative(newMember, nodeDestination, listRewrite);
 			}

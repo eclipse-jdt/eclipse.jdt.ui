@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,9 +32,9 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -94,31 +94,31 @@ public class ASTNodesInsertTest extends CoreTests {
 		AST ast = astRoot.getAST();
 
 		BodyDeclaration declaration= createNewField(ast, Modifier.PRIVATE);
-		int insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		int insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(1, insertionIndex); // after the first field
 
 		declaration= createNewField(ast, Modifier.STATIC);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(0, insertionIndex); // before the normal field
 
 		declaration= createNewField(ast, Modifier.STATIC | Modifier.FINAL);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(0, insertionIndex); // before the normal field
 
 		declaration= createNewMethod(ast, Modifier.PRIVATE, false);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(2, insertionIndex); // after the normal method
 
 		declaration= createNewMethod(ast, Modifier.STATIC, false);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(0, insertionIndex); // before the normal field
 
 		declaration= createNewMethod(ast, 0, true);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(1, insertionIndex); // before the normal method
 
 		declaration= createNewType(ast, 0);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(0, insertionIndex); // before all
 
 	}
@@ -144,31 +144,31 @@ public class ASTNodesInsertTest extends CoreTests {
 		AST ast = astRoot.getAST();
 
 		BodyDeclaration declaration= createNewField(ast, Modifier.PRIVATE);
-		int insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		int insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(2, insertionIndex); // after the const
 
 		declaration= createNewField(ast, Modifier.STATIC);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(2, insertionIndex); // after the const
 
 		declaration= createNewField(ast, Modifier.STATIC | Modifier.FINAL);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(2, insertionIndex); // after the const
 
 		declaration= createNewMethod(ast, Modifier.PRIVATE, false);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(3, insertionIndex); // after the constructor
 
 		declaration= createNewMethod(ast, Modifier.STATIC, false);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(2, insertionIndex); // before the constructor
 
 		declaration= createNewMethod(ast, 0, true);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(3, insertionIndex); // after the constructor
 
 		declaration= createNewType(ast, 0);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(1, insertionIndex); // after the inner
 	}
 
@@ -196,31 +196,31 @@ public class ASTNodesInsertTest extends CoreTests {
 		AST ast = astRoot.getAST();
 
 		BodyDeclaration declaration= createNewField(ast, Modifier.PRIVATE);
-		int insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		int insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(2, insertionIndex); // before the method
 
 		declaration= createNewField(ast, Modifier.STATIC);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(2, insertionIndex); // after the static
 
 		declaration= createNewField(ast, Modifier.STATIC | Modifier.FINAL);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(1, insertionIndex); // after the const
 
 		declaration= createNewMethod(ast, Modifier.PRIVATE, false);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(4, insertionIndex); // after the method
 
 		declaration= createNewMethod(ast, Modifier.STATIC, false);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(2, insertionIndex); // before the constructor
 
 		declaration= createNewMethod(ast, 0, true);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(3, insertionIndex); // after the constructor
 
 		declaration= createNewType(ast, 0);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(5, insertionIndex); // after the inner
 	}
 
@@ -248,31 +248,31 @@ public class ASTNodesInsertTest extends CoreTests {
 		AST ast = astRoot.getAST();
 
 		BodyDeclaration declaration= createNewField(ast, Modifier.PRIVATE);
-		int insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		int insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(3, insertionIndex); // after fInt2
 
 		declaration= createNewField(ast, Modifier.STATIC);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(0, insertionIndex); // before normal field
 
 		declaration= createNewField(ast, Modifier.STATIC | Modifier.FINAL);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(5, insertionIndex); // after the const
 
 		declaration= createNewMethod(ast, Modifier.PRIVATE, false);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(6, insertionIndex); // after the method
 
 		declaration= createNewMethod(ast, Modifier.STATIC, false);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(0, insertionIndex); // before the normal field
 
 		declaration= createNewMethod(ast, 0, true);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(5, insertionIndex); // after the constructor
 
 		declaration= createNewType(ast, 0);
-		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		insertionIndex= BodyDeclarationRewrite.getInsertionIndex(declaration, bodyDecls);
 		assertEquals(0, insertionIndex); // after the inner
 	}
 
@@ -302,7 +302,7 @@ public class ASTNodesInsertTest extends CoreTests {
 	}
 
 	private CompilationUnit createAST(ICompilationUnit compilationUnit) {
-		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setSource(compilationUnit);
 		parser.setResolveBindings(true);
 		return (CompilationUnit) parser.createAST(null);

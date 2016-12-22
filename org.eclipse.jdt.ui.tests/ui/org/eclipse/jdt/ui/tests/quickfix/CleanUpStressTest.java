@@ -5507,7 +5507,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 //	}
 //
 //	private void assertNoCompileErrors(ICompilationUnit[] units) throws JavaModelException, CoreException {
-//		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+//		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 //		parser.setResolveBindings(true);
 //		parser.setProject(fJProject1);
 //

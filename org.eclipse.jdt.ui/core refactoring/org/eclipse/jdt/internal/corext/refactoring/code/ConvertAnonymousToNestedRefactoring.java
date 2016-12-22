@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -104,6 +104,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -111,7 +112,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class ConvertAnonymousToNestedRefactoring extends Refactoring {
@@ -845,7 +846,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     private boolean isBindingToTemp(IVariableBinding variable) {
 		if (variable.isField())
 			return false;
-		if (!Modifier.isFinal(variable.getModifiers()))
+		if (!Modifier.isFinal(variable.getModifiers()) && !JavaModelUtil.is18OrHigher(fCu.getJavaProject()))
 			return false;
 		ASTNode declaringNode= fCompilationUnitNode.findDeclaringNode(variable);
 		if (declaringNode == null)

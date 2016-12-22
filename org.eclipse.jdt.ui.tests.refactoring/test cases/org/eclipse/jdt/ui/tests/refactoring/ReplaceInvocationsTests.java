@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2014 IBM Corporation and others.
+ * Copyright (c) 2006, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 public class ReplaceInvocationsTests extends AbstractSelectionTestCase {
 	private static RewriteMethodInvocationsTestSetup fgTestSetup;
@@ -63,7 +63,7 @@ public class ReplaceInvocationsTests extends AbstractSelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		int[] selection= getSelection();
 
-		CompilationUnit compilationUnit= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(unit, false);
+		CompilationUnit compilationUnit= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(unit, false);
 		Comment comment= (Comment) compilationUnit.getCommentList().get(0);
 		String commentString= unit.getBuffer().getText(comment.getStartPosition(), comment.getLength());
 		Matcher matcher= Pattern.compile("(?s)/\\*\\s*params:[^\\r\\n&&\\s]*" + "([^\\r\\n]*)" + "(\\r\\n?|\\n)" + "(.+)" + "\\*/").matcher(commentString);

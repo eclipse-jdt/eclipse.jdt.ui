@@ -80,7 +80,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 /**
  * Utilities for code generation based on AST rewrite.
@@ -738,7 +738,7 @@ public final class StubUtility2 {
 			// need an AST of the source method to preserve order of modifiers
 			IMethod iMethod= (IMethod) method.getJavaElement();
 			if (iMethod != null && JavaElementUtil.isSourceAvailable(iMethod)) {
-				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+				ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 				parser.setSource(iMethod.getTypeRoot());
 				parser.setIgnoreMethodBodies(true);
 				CompilationUnit otherCU= (CompilationUnit) parser.createAST(null);

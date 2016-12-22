@@ -119,13 +119,14 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
-import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -136,7 +137,7 @@ import org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TableTextCellEditor;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.CompletionContextRequestor;
@@ -144,7 +145,7 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssis
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPackageCompletionProcessor;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.SuperInterfaceSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -282,7 +283,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 		/* package */ void create(boolean needsSave, IProgressMonitor monitor) throws CoreException {
 			TextEdit edit= fImportsRewrite.rewriteImports(monitor);
-			JavaModelUtil.applyEdit(fImportsRewrite.getCompilationUnit(), edit, needsSave, null);
+			JavaElementUtil.applyEdit(fImportsRewrite.getCompilationUnit(), edit, needsSave, null);
 		}
 
 		/* package */ void removeImport(String qualifiedName) {
@@ -1815,7 +1816,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				return status;
 			}
 			String typeDeclaration= "class " + typeNameWithParameters + " {}"; //$NON-NLS-1$//$NON-NLS-2$
-			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+			ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 			parser.setSource(typeDeclaration.toCharArray());
 			parser.setProject(project);
 			CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
@@ -2273,7 +2274,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	private CompilationUnit createASTForImports(ICompilationUnit cu) {
-		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		parser.setFocalPosition(0);
@@ -2291,7 +2292,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	private void removeUnusedImports(ICompilationUnit cu, Set<String> existingImports, boolean needsSave) throws CoreException {
-		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 
@@ -2357,7 +2358,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
 		String content= CodeGeneration.getCompilationUnitContent(cu, fileComment, typeComment, typeContent, lineDelimiter);
 		if (content != null) {
-			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+			ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 			parser.setProject(cu.getJavaProject());
 			parser.setSource(content.toCharArray());
 			CompilationUnit unit= (CompilationUnit) parser.createAST(null);
@@ -2677,7 +2678,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		ArrayList<IMethod> newMethods= new ArrayList<>();
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 		settings.createComments= isAddComments();
-		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setResolveBindings(true);
 		parser.setSource(cu);
 		CompilationUnit unit= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 1));

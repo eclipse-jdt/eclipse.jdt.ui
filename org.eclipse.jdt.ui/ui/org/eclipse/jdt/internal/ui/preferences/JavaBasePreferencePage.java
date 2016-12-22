@@ -55,6 +55,8 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 
 	public static final String JAVA_BASE_PREF_PAGE_ID= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"; //$NON-NLS-1$
 
+	private static final String PREFERENCE_STORE_KEY= "preferenceStore"; //$NON-NLS-1$
+
 	private static final String OPEN_TYPE_HIERARCHY= PreferenceConstants.OPEN_TYPE_HIERARCHY;
 	private static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE;
 	private static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART;
@@ -66,7 +68,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	private ArrayList<Button> fCheckBoxes;
 	private ArrayList<Button> fRadioButtons;
 	private ArrayList<Text> fTextControls;
-	private static final String PREFERENCE_STORE_KEY = "preferenceStore";
 
 	private IPreferenceStore fJavaCorePreferences;
 

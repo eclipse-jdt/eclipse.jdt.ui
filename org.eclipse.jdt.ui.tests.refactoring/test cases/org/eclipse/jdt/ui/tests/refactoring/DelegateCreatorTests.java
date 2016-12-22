@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 
 public class DelegateCreatorTests extends RefactoringTest {
@@ -77,7 +77,7 @@ public class DelegateCreatorTests extends RefactoringTest {
 		if (newTypeName != null) {
 			ICompilationUnit cu2= createCUfromTestFile(getPackageP(), newTypeName);
 			IType classNew= getType(cu2, newTypeName);
-			CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(cu2, true, null);
+			CompilationUnit cuNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(cu2, true, null);
 			TypeDeclaration td= ASTNodeSearchUtil.getTypeDeclarationNode(classNew, cuNode);
 			destination= td.resolveBinding();
 		}
@@ -155,7 +155,7 @@ public class DelegateCreatorTests extends RefactoringTest {
 		IPackageFragment e= getRoot().createPackageFragment("e", true, null);
 		ICompilationUnit cu2= createCUfromTestFile(e, "E");
 		IType classNew= getType(cu2, "E");
-		CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(cu2, true, null);
+		CompilationUnit cuNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(cu2, true, null);
 		TypeDeclaration td= ASTNodeSearchUtil.getTypeDeclarationNode(classNew, cuNode);
 		ITypeBinding destination= td.resolveBinding();
 
@@ -219,7 +219,7 @@ public class DelegateCreatorTests extends RefactoringTest {
 		IPackageFragment e= getRoot().createPackageFragment("e", true, null);
 		ICompilationUnit cu2= createCUfromTestFile(e, "E");
 		IType classNew= getType(cu2, "E");
-		CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(cu2, true, null);
+		CompilationUnit cuNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(cu2, true, null);
 		TypeDeclaration td= ASTNodeSearchUtil.getTypeDeclarationNode(classNew, cuNode);
 		ITypeBinding destination= td.resolveBinding();
 

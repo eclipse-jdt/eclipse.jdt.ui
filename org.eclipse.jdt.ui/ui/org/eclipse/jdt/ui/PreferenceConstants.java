@@ -3914,6 +3914,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_BRACES, true);
 		store.setDefault(PreferenceConstants.EDITOR_CLOSE_JAVADOCS, true);
+		store.setDefault(PreferenceConstants.EDITOR_SMART_OPENING_BRACE, true);
 		store.setDefault(PreferenceConstants.EDITOR_WRAP_STRINGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_ESCAPE_STRINGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, true);

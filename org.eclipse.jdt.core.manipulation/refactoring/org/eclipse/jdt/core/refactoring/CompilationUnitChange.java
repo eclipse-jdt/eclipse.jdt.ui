@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,13 +7,14 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Lars Vogel <Lars.Vogel@vogella.com> - Bug 477789
  *******************************************************************************/
 package org.eclipse.jdt.core.refactoring;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -75,16 +76,17 @@ public class CompilationUnitChange extends TextFileChange {
 
 	@Override
 	protected IDocument acquireDocument(IProgressMonitor pm) throws CoreException {
-		pm.beginTask("", 2); //$NON-NLS-1$
-		fCUnit.becomeWorkingCopy(new SubProgressMonitor(pm, 1));
+		SubMonitor subMonitor= SubMonitor.convert(pm, 2);
+		fCUnit.becomeWorkingCopy(subMonitor.split(1));
 		Assert.isTrue(fCUnit.isWorkingCopy(), fCUnit.toString());
-		return super.acquireDocument(new SubProgressMonitor(pm, 1));
+		return super.acquireDocument(subMonitor.split(1));
 	}
 
 	@Override
 	protected void releaseDocument(IDocument document, IProgressMonitor pm) throws CoreException {
 		boolean isModified= isDocumentModified();
-		super.releaseDocument(document, pm);
+		SubMonitor subMonitor= SubMonitor.convert(pm, 2);
+		super.releaseDocument(document, subMonitor.split(1));
 		try {
 			fCUnit.discardWorkingCopy();
 		} finally {
@@ -94,10 +96,10 @@ public class CompilationUnitChange extends TextFileChange {
 							ICompilationUnit.NO_AST,
 							false /* don't force problem detection */,
 							null /* use primary owner */,
-							null /* no progress monitor */);
+							subMonitor.split(1, SubMonitor.SUPPRESS_BEGINTASK | SubMonitor.SUPPRESS_ISCANCELED));
 
 				else
-					fCUnit.makeConsistent(pm);
+					fCUnit.makeConsistent(subMonitor.split(1, SubMonitor.SUPPRESS_BEGINTASK | SubMonitor.SUPPRESS_ISCANCELED));
 			}
 		}
 	}

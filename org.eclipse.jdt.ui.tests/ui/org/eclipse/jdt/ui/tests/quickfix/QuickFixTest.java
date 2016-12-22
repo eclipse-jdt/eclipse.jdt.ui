@@ -45,6 +45,8 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -52,7 +54,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.GetterSetterCorrectionSubProcessor.SelfEncapsulateFieldProposal;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
@@ -109,6 +110,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(NullAnnotationsQuickFixTest18Mix.suite());
 		suite.addTest(AnnotateAssistTest15.suite());
 		suite.addTest(AnnotateAssistTest18.suite());
+		suite.addTest(TypeAnnotationQuickFixTest.suite());
 
 		return new ProjectTestSetup(suite);
 	}

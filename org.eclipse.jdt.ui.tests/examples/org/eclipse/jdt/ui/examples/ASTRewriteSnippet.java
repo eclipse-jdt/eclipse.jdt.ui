@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,7 +43,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 public class ASTRewriteSnippet extends TestCase {
 
@@ -86,7 +86,7 @@ public class ASTRewriteSnippet extends TestCase {
 			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 			// create an AST
-			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+			ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 			parser.setSource(cu);
 			parser.setResolveBindings(false);
 			CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);

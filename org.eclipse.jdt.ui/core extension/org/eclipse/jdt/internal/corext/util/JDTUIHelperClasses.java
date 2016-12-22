@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 IBM Corporation and others.
+ * Copyright (c) 2013, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,11 +34,19 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
-
 /**
  * The org.eclipse.jdt.ui bundle contains a few internal helper classes that simplify
- * common tasks when dealing with JDT Core or UI APIs. Here's a list of the most important ones:
+ * common tasks when dealing with JDT Core or UI APIs. With bug 508777, many of these
+ * classes have been moved to the org.eclipse.jdt.core.manipulation bundle. We've kept
+ * the original package/class names to reduce binary compatibility problems for bundles
+ * that illegally accessed these classes.
+ * <p>
+ * Some classes had to be split in two. They are listed with fully-qualified names here.
+ * Back-links in Javadoc from classes in org.eclipse.jdt.core.manipulation to this
+ * class are not possible, so we use line comments there: // @see JDTUIHelperClasses
+ * </p>
+ * 
+ * Here's a list of the most important helper classes:
  * 
  * <h2>Java Model</h2>
  * <p>
@@ -77,7 +85,8 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
  * <ul>
  * <li>{@link ASTNodes}</li>
  * <li>{@link ASTNodeSearchUtil}</li>
- * <li>{@link ASTResolving}</li>
+ * <li>{@link org.eclipse.jdt.internal.ui.text.correction.ASTResolving}</li>
+ * <li>{@link org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving}</li>
  * <li>{@link Bindings}</li>
  * <li>{@link TypeRules}</li>
  * </ul>
@@ -110,6 +119,16 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
  * <li>{@link ReplaceRewrite}</li>
  * <li>{@link StatementRewrite}</li>
  * <li>{@link VariableDeclarationRewrite}</li>
+ * </ul>
+ * 
+ * <p>
+ * Label and text manipulation helpers:
+ * </p>
+ * <ul>
+ * <li>{@link org.eclipse.jdt.internal.corext.util.Strings}</li>
+ * <li>{@link org.eclipse.jdt.internal.core.manipulation.util.Strings}</li>
+ * <li>{@link org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels}</li>
+ * <li>{@link org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels}</li>
  * </ul>
  * 
  * @noreference This class is not intended to be referenced by clients

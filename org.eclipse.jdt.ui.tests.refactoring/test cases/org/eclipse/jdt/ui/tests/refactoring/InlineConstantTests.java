@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 public class InlineConstantTests extends RefactoringTest {
 	private static final Class<InlineConstantTests> clazz = InlineConstantTests.class;
@@ -101,7 +101,7 @@ public class InlineConstantTests extends RefactoringTest {
 		ICompilationUnit selectionCu= cus[selectionCuIndex];
 
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
-		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(selectionCu, true), selection.getOffset(), selection.getLength());
+		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(selectionCu, true), selection.getOffset(), selection.getLength());
 		if (ref.checkStaticFinalConstantNameSelected().hasFatalError())
 			ref= null;
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
@@ -140,7 +140,7 @@ public class InlineConstantTests extends RefactoringTest {
 		ICompilationUnit selectionCu= cus[selectionCuIndex];
 
 		ISourceRange selection= TextRangeUtil.getSelection(selectionCu, startLine, startColumn, endLine, endColumn);
-		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(selectionCu, true), selection.getOffset(), selection.getLength());
+		InlineConstantRefactoring ref= new InlineConstantRefactoring(selectionCu, new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(selectionCu, true), selection.getOffset(), selection.getLength());
 		if (ref.checkStaticFinalConstantNameSelected().hasFatalError())
 			ref= null;
 		if (ref == null)

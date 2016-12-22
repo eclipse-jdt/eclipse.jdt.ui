@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -351,7 +352,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 			}
 			fEdit= astRewrite.rewriteAST();
 			if (fApply) {
-				JavaModelUtil.applyEdit(unit, fEdit, fSave, new SubProgressMonitor(monitor, 1));
+				JavaElementUtil.applyEdit(unit, fEdit, fSave, new SubProgressMonitor(monitor, 1));
 			}
 		} finally {
 			monitor.done();

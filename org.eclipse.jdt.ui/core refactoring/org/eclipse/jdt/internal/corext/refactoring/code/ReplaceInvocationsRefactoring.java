@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -85,8 +85,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class ReplaceInvocationsRefactoring extends Refactoring {
@@ -190,7 +190,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReplaceInvocationsRefactoring_cannot_replace_in_binary);
 
 			ICompilationUnit cu= (ICompilationUnit) fSelectionTypeRoot;
-			CompilationUnit root= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(cu, true);
+			CompilationUnit root= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(cu, true);
 			fSelectionNode= getTargetNode(cu, root, fSelectionStart, fSelectionLength);
 			if (fSelectionNode == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReplaceInvocationsRefactoring_select_method_to_apply);
@@ -209,7 +209,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 			fMethod= (IMethod) fMethodBinding.getJavaElement();
 
 		} else {
-			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+			ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 			parser.setProject(fMethod.getJavaProject());
 			IBinding[] bindings= parser.createBindings(new IJavaElement[] { fMethod }, null);
 			fMethodBinding= (IMethodBinding) bindings[0];
@@ -233,7 +233,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 		ICompilationUnit methodCu= (method).getCompilationUnit();
 		if (methodCu != null) {
 			typeRoot= methodCu;
-			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+			ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 			parser.setSource(methodCu);
 			parser.setFocalPosition(method.getNameRange().getOffset());
 			CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
@@ -259,7 +259,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 			}
 			source= document;
 
-			methodDeclarationAstRoot= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(source.get(), methodCu, true, true, null);
+			methodDeclarationAstRoot= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(source.get(), methodCu, true, true, null);
 
 		} else {
 			IClassFile classFile= method.getClassFile();
@@ -288,7 +288,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 
 			String stub= stubCreator.createStub(classFile.getType(), null);
 			source= new Document(stub);
-			methodDeclarationAstRoot= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(stub, classFile, true, true, null);
+			methodDeclarationAstRoot= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(stub, classFile, true, true, null);
 			typeRoot= classFile;
 		}
 		ASTNode node= methodDeclarationAstRoot.findDeclaringNode(methodBinding.getKey());

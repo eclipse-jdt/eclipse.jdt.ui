@@ -86,9 +86,9 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class TypeContextChecker {
 	private static class MethodTypesChecker {
@@ -171,7 +171,7 @@ public class TypeContextChecker {
 			ICompilationUnit wc= fMethod.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, new NullProgressMonitor());
 			try {
 				wc.getBuffer().setContents(cuString.toString());
-				CompilationUnit compilationUnit= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(wc, true);
+				CompilationUnit compilationUnit= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(wc, true);
 				ASTNode method= NodeFinder.perform(compilationUnit, offsetBeforeMethodName, METHOD_NAME.length()).getParent();
 				Type[] typeNodes= new Type[types.length];
 				if (method instanceof MethodDeclaration) {
@@ -437,7 +437,7 @@ public class TypeContextChecker {
 		int offset= cuBuff.length();
 		cuBuff.append(typeString).append(" m();}"); //$NON-NLS-1$
 
-		ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		ASTParser p= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		p.setSource(cuBuff.toString().toCharArray());
 		p.setProject(javaProject);
 		CompilationUnit cu= (CompilationUnit) p.createAST(null);
@@ -679,7 +679,7 @@ public class TypeContextChecker {
 				ISourceRange typeSourceRange= enclosingType.getSourceRange();
 				int focalPosition= typeSourceRange.getOffset() + typeSourceRange.getLength() - 1; // before closing brace
 
-				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+				ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 				parser.setSource(cu);
 				parser.setFocalPosition(focalPosition);
 				CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
@@ -741,7 +741,7 @@ public class TypeContextChecker {
 		int offset= cuBuff.length();
 		cuBuff.append(superType).append(" {}"); //$NON-NLS-1$
 
-		ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		ASTParser p= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		p.setSource(cuBuff.toString().toCharArray());
 		Map<String, String> options= new HashMap<>();
 		JavaModelUtil.setComplianceOptions(options, JavaModelUtil.VERSION_LATEST);
@@ -775,7 +775,7 @@ public class TypeContextChecker {
 			ICompilationUnit wc= typeHandle.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, new NullProgressMonitor());
 			try {
 				wc.getBuffer().setContents(cuString.toString());
-				CompilationUnit compilationUnit= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(wc, true);
+				CompilationUnit compilationUnit= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(wc, true);
 				ASTNode type= NodeFinder.perform(compilationUnit, superClassContext.getBeforeString().length(), superclass.length());
 				if (type instanceof Type) {
 					return handleBug84585(((Type) type).resolveBinding());
@@ -812,7 +812,7 @@ public class TypeContextChecker {
 			ICompilationUnit wc= typeHandle.getCompilationUnit().getWorkingCopy(new WorkingCopyOwner() {/*subclass*/}, new NullProgressMonitor());
 			try {
 				wc.getBuffer().setContents(cuString.toString());
-				CompilationUnit compilationUnit= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(wc, true);
+				CompilationUnit compilationUnit= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(wc, true);
 				for (int i= 0; i <= last; i++) {
 					ASTNode type= NodeFinder.perform(compilationUnit, interfaceOffsets[i], interfaces[i].length());
 					if (type instanceof Type) {

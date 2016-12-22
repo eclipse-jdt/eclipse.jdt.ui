@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -94,6 +94,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
@@ -116,7 +117,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
@@ -1147,7 +1148,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		AbstractTypeDeclaration	factoryOwner= (AbstractTypeDeclaration) unit.findDeclaringNode(fFactoryOwningClass.resolveBinding().getKey());
 		fImportRewriter.addImport(fCtorOwningClass.resolveBinding());
 
-		int	idx= ASTNodes.getInsertionIndex(fFactoryMethod, factoryOwner.bodyDeclarations());
+		int	idx= BodyDeclarationRewrite.getInsertionIndex(fFactoryMethod, factoryOwner.bodyDeclarations());
 
 		if (idx < 0) idx= 0; // Guard against bug in getInsertionIndex()
 		unitRewriter.getListRewrite(factoryOwner, factoryOwner.getBodyDeclarationsProperty()).insertAt(fFactoryMethod, idx, gd);

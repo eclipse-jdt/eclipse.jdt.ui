@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -124,7 +124,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.TypedSource;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
@@ -140,7 +140,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
@@ -159,14 +159,14 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 
@@ -365,7 +365,7 @@ public class PasteAction extends SelectionDispatchAction{
 			private final String fPackageName;
 
 			public static List<ParsedCu> parseCus(IJavaProject javaProject, String compilerCompliance, String text) {
-				ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+				ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 				if (javaProject != null) {
 					parser.setProject(javaProject);
 				} else if (compilerCompliance != null) {
@@ -810,7 +810,7 @@ public class PasteAction extends SelectionDispatchAction{
 						try {
 							IDocument document= fileBuffer.getDocument();
 
-							ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+							ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 							parser.setProject(cu.getJavaProject());
 							parser.setSource(document.get().toCharArray());
 							parser.setStatementsRecovery(true);
@@ -837,7 +837,7 @@ public class PasteAction extends SelectionDispatchAction{
 							cuContent= ""; //$NON-NLS-1$
 						IDocument document= new Document(cuContent);
 
-						ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+						ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 						parser.setProject(cu.getJavaProject());
 						parser.setSource(cuContent.toCharArray());
 						parser.setStatementsRecovery(true);
@@ -1525,7 +1525,7 @@ public class PasteAction extends SelectionDispatchAction{
 
 			@Override
 			public Change createChange(IProgressMonitor pm) throws CoreException {
-				ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+				ASTParser p= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 				p.setSource(getDestinationCu());
 				CompilationUnit cuNode= (CompilationUnit) p.createAST(pm);
 				ASTRewrite rewrite= ASTRewrite.create(cuNode.getAST());
@@ -1561,7 +1561,7 @@ public class PasteAction extends SelectionDispatchAction{
 					case ASTNode.METHOD_DECLARATION:
 					case ASTNode.FIELD_DECLARATION:
 					case ASTNode.INITIALIZER:
-						rewrite.getListRewrite(typeDeclaration, typeDeclaration.getBodyDeclarationsProperty()).insertAt(node, ASTNodes.getInsertionIndex((BodyDeclaration) node, typeDeclaration.bodyDeclarations()), null);
+						rewrite.getListRewrite(typeDeclaration, typeDeclaration.getBodyDeclarationsProperty()).insertAt(node, BodyDeclarationRewrite.getInsertionIndex((BodyDeclaration) node, typeDeclaration.bodyDeclarations()), null);
 						break;
 					default:
 						Assert.isTrue(false, String.valueOf(node.getNodeType()));
@@ -1573,7 +1573,7 @@ public class PasteAction extends SelectionDispatchAction{
 					case ASTNode.TYPE_DECLARATION:
 					case ASTNode.ENUM_DECLARATION:
 					case ASTNode.ANNOTATION_TYPE_DECLARATION:
-						rewrite.getListRewrite(cuNode, CompilationUnit.TYPES_PROPERTY).insertAt(node, ASTNodes.getInsertionIndex((AbstractTypeDeclaration) node, cuNode.types()), null);
+						rewrite.getListRewrite(cuNode, CompilationUnit.TYPES_PROPERTY).insertAt(node, BodyDeclarationRewrite.getInsertionIndex((AbstractTypeDeclaration) node, cuNode.types()), null);
 						break;
 					case ASTNode.IMPORT_DECLARATION:
 						rewrite.getListRewrite(cuNode, CompilationUnit.IMPORTS_PROPERTY).insertLast(node, null);

@@ -1392,6 +1392,48 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { expected });
 	}
 
+	public void testConvertToLambda25() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class C1 {\n");
+		buf.append("    Runnable run = new Runnable() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public synchronized void run() {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("new");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 0);
+	}
+
+	public void testConvertToLambda26() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class C1 {\n");
+		buf.append("    Runnable run = new Runnable() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public strictfp void run() {\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C1.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("new");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 0);
+	}
+
 	public void testConvertToLambdaAmbiguousOverridden() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -4224,11 +4266,12 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		expected1= buf.toString();
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 
-		offset= buf1.toString().indexOf("-> /*[10]*/");
+		String match10= "-> /*[10]*/t.method2";
+		offset= buf1.toString().indexOf(match10) + match10.length();
 		context= getCorrectionContext(cu, offset, 0);
 		assertNoErrors(context);
 		proposals= collectAssists(context, false);
-		assertNumberOfProposals(proposals, 5);
+		assertNumberOfProposals(proposals, 1);
 		assertCorrectLabels(proposals);
 		buf= new StringBuffer();
 		buf.append("package test1;\n");

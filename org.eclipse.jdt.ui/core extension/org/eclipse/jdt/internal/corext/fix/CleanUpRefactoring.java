@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,9 +86,9 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.IMultiFix.MultiFixContext;
 import org.eclipse.jdt.internal.ui.fix.MapCleanUpOptions;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.refactoring.IScheduledRefactoring;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class CleanUpRefactoring extends Refactoring implements IScheduledRefactoring {
 
@@ -854,11 +854,11 @@ public class CleanUpRefactoring extends Refactoring implements IScheduledRefacto
 	}
 
 	public static ASTParser createCleanUpASTParser() {
-		ASTParser result= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		ASTParser result= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 
 		result.setResolveBindings(true);
-		result.setStatementsRecovery(ASTProvider.SHARED_AST_STATEMENT_RECOVERY);
-		result.setBindingsRecovery(ASTProvider.SHARED_BINDING_RECOVERY);
+		result.setStatementsRecovery(IASTSharedValues.SHARED_AST_STATEMENT_RECOVERY);
+		result.setBindingsRecovery(IASTSharedValues.SHARED_BINDING_RECOVERY);
 
 		return result;
 	}

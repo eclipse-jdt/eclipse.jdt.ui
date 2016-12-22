@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,6 +62,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -190,19 +191,19 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 
 					if (parent instanceof ICompilationUnit) {	// top level
 						ListRewrite lw= rewriter.getListRewrite(root, CompilationUnit.TYPES_PROPERTY);
-						int index= ASTNodes.getInsertionIndex((BodyDeclaration)newNode, root.types());
+						int index= BodyDeclarationRewrite.getInsertionIndex((BodyDeclaration)newNode, root.types());
 						lw.insertAt(newNode, index, null);
 
 					} else if (parent instanceof IType) {
 						ASTNode declaration= getBodyContainer(root, (IType)parent);
 						if (declaration instanceof TypeDeclaration || declaration instanceof AnnotationTypeDeclaration) {
 							List<BodyDeclaration> container= ASTNodes.getBodyDeclarations(declaration);
-							int index= ASTNodes.getInsertionIndex((BodyDeclaration)newNode, container);
+							int index= BodyDeclarationRewrite.getInsertionIndex((BodyDeclaration)newNode, container);
 							ListRewrite lw= rewriter.getListRewrite(declaration, ASTNodes.getBodyDeclarationsProperty(declaration));
 							lw.insertAt(newNode, index, null);
 						} else if (declaration instanceof EnumDeclaration) {
 							List<EnumConstantDeclaration> container= ((EnumDeclaration)declaration).enumConstants();
-							int index= ASTNodes.getInsertionIndex((FieldDeclaration)newNode, container);
+							int index= BodyDeclarationRewrite.getInsertionIndex((FieldDeclaration)newNode, container);
 							ListRewrite lw= rewriter.getListRewrite(declaration, EnumDeclaration.ENUM_CONSTANTS_PROPERTY);
 							lw.insertAt(newNode, index, null);
 						}

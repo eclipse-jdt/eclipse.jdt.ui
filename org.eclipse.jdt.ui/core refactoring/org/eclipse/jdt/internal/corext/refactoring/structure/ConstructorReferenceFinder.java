@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 /**
  * This class is used to find references to constructors.
@@ -105,7 +105,7 @@ class ConstructorReferenceFinder {
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
-			CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(cu, false);
+			CompilationUnit cuNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(cu, false);
 			SearchMatch[] allSearchResults= group.getSearchResults();
 			List<SearchMatch> realConstructorReferences= new ArrayList<>(Arrays.asList(allSearchResults));
 			for (int j= 0; j < allSearchResults.length; j++) {
@@ -189,7 +189,7 @@ class ConstructorReferenceFinder {
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)
 				continue;
-			CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(cu, false);
+			CompilationUnit cuNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(cu, false);
 			SearchMatch[] results= group.getSearchResults();
 			for (int j= 0; j < results.length; j++) {
 				SearchMatch searchResult= results[j];
@@ -246,7 +246,7 @@ class ConstructorReferenceFinder {
 	//Collection of SearchResults
 	private static Collection<SearchMatch> getAllSuperConstructorInvocations(IType type) throws JavaModelException {
 		IMethod[] constructors= JavaElementUtil.getAllConstructors(type);
-		CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(type.getCompilationUnit(), false);
+		CompilationUnit cuNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(type.getCompilationUnit(), false);
 		List<SearchMatch> result= new ArrayList<>(constructors.length);
 		for (int i= 0; i < constructors.length; i++) {
 			ASTNode superCall= getSuperConstructorCallNode(constructors[i], cuNode);

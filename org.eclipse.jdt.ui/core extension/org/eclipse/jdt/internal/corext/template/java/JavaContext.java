@@ -72,11 +72,12 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.Variable;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -647,7 +648,7 @@ public class JavaContext extends CompilationUnitContext {
 			document.addPosition(position);
 
 			try {
-				JavaModelUtil.applyEdit(cu, fImportRewrite.rewriteImports(null), false, null);
+				JavaElementUtil.applyEdit(cu, fImportRewrite.rewriteImports(null), false, null);
 
 				setCompletionOffset(position.getOffset());
 			} catch (CoreException e) {

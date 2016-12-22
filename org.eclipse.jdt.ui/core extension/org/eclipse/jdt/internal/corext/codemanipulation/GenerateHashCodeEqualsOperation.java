@@ -76,6 +76,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
@@ -338,7 +339,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 				fEdit= fRewrite.createChange(true).getEdit();
 				if (fApply)
-					JavaModelUtil.applyEdit(cu, fEdit, fSave, monitor);
+					JavaElementUtil.applyEdit(cu, fEdit, fSave, monitor);
 			}
 		} finally {
 			monitor.done();

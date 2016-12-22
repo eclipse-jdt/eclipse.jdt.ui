@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -122,8 +122,8 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
 
@@ -890,7 +890,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	private RefactoringStatus analyseEnclosedTypes() throws CoreException {
 		final ISourceRange typeRange= fType.getSourceRange();
 		final RefactoringStatus result= new RefactoringStatus();
-		CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(fType.getCompilationUnit(), false);
+		CompilationUnit cuNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(fType.getCompilationUnit(), false);
 		cuNode.accept(new ASTVisitor(){
 
 			@Override
@@ -1345,7 +1345,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				final ILocalVariable currentLocal= (ILocalVariable) element;
 
 				if (currentResolvedCU == null)
-					currentResolvedCU= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(currentCU, true);
+					currentResolvedCU= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(currentCU, true);
 
 				processor= createLocalRenameProcessor(currentLocal, newName, currentResolvedCU);
 

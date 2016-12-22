@@ -96,6 +96,7 @@ import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -124,6 +125,8 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -182,7 +185,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistPr
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
@@ -1013,7 +1015,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		Block lambdaBody= (Block) lambda.getBody();
 
-		Expression exprBody= getExpressionFromLambdaBody(lambdaBody);
+		Expression exprBody= getSingleExpressionFromLambdaBody(lambdaBody);
 		if (exprBody == null)
 			return false;
 		
@@ -1034,7 +1036,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static Expression getExpressionFromLambdaBody(Block lambdaBody) {
+	private static Expression getSingleExpressionFromLambdaBody(Block lambdaBody) {
 		if (lambdaBody.statements().size() != 1)
 			return null;
 		Statement singleStatement= (Statement) lambdaBody.statements().get(0);
@@ -1042,14 +1044,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return ((ReturnStatement) singleStatement).getExpression();
 		} else if (singleStatement instanceof ExpressionStatement) {
 			Expression expression= ((ExpressionStatement) singleStatement).getExpression();
-			if (isValidExpressionBody(expression)) {
+			if (isValidLambdaExpressionBody(expression)) {
 				return expression;
 			}
 		}
 		return null;
 	}
 
-	private static boolean isValidExpressionBody(Expression expression) {
+	private static boolean isValidLambdaExpressionBody(Expression expression) {
 		if (expression instanceof Assignment
 				|| expression instanceof ClassInstanceCreation
 				|| expression instanceof MethodInvocation
@@ -1073,21 +1075,29 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		} else if (coveringNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY) {
 			lambda= (LambdaExpression) coveringNode.getParent();
 		} else {
-			return false;
+			lambda= ASTResolving.findEnclosingLambdaExpression(coveringNode);
+			if (lambda == null) {
+				return false;
+			}
 		}
 
 		ASTNode lambdaBody= lambda.getBody();
 		Expression exprBody;
 		if (lambdaBody instanceof Block) {
-			exprBody= getExpressionFromLambdaBody((Block) lambdaBody);
+			exprBody= getSingleExpressionFromLambdaBody((Block) lambdaBody);
 		} else {
 			exprBody= (Expression) lambdaBody;
 		}
 		while (exprBody instanceof ParenthesizedExpression) {
 			exprBody= ((ParenthesizedExpression) exprBody).getExpression();
 		}
-		if (exprBody == null || !isValidReferenceToMethod(exprBody))
+		if (exprBody == null || !isValidLambdaReferenceToMethod(exprBody))
 			return false;
+		
+		if (!(ASTNodes.isParent(exprBody, coveringNode)
+				|| representsDefiningNode(coveringNode, exprBody))) {
+			return false;
+		}
 
 		List<Expression> lambdaParameters= new ArrayList<>();
 		for (VariableDeclaration param : (List<VariableDeclaration>) lambda.parameters()) {
@@ -1244,7 +1254,41 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
-	private static boolean isValidReferenceToMethod(Expression expression) {
+	private static boolean representsDefiningNode(ASTNode innerNode, ASTNode definingNode) {
+		// Example: We want to enable the proposal when the method invocation node or
+		// the method name is near the caret. But not when the caret is on an argument of the method invocation.
+		if (innerNode == definingNode)
+			return true;
+		
+		switch (definingNode.getNodeType()) {
+			// types from isValidLambdaReferenceToMethod():
+			case ASTNode.CLASS_INSTANCE_CREATION:
+				return representsDefiningNode(innerNode, ((ClassInstanceCreation) definingNode).getType());
+			case ASTNode.ARRAY_CREATION:
+				return representsDefiningNode(innerNode, ((ArrayCreation) definingNode).getType());
+			case ASTNode.SUPER_METHOD_INVOCATION:
+				return innerNode == ((SuperMethodInvocation) definingNode).getName();
+			case ASTNode.METHOD_INVOCATION:
+				return innerNode == ((MethodInvocation) definingNode).getName();
+				
+			// subtypes of Type:
+			case ASTNode.NAME_QUALIFIED_TYPE:
+				return innerNode == ((NameQualifiedType) definingNode).getName();
+			case ASTNode.QUALIFIED_TYPE:
+				return innerNode == ((QualifiedType) definingNode).getName();
+			case ASTNode.SIMPLE_TYPE:
+				return innerNode == ((SimpleType) definingNode).getName();
+			case ASTNode.ARRAY_TYPE:
+				return representsDefiningNode(innerNode, ((ArrayType) definingNode).getElementType());
+			case ASTNode.PARAMETERIZED_TYPE:
+				return representsDefiningNode(innerNode, ((ParameterizedType) definingNode).getType());
+				
+			default:
+				return false;
+		}
+	}
+
+	private static boolean isValidLambdaReferenceToMethod(Expression expression) {
 		return expression instanceof ClassInstanceCreation
 				|| expression instanceof ArrayCreation
 				|| expression instanceof SuperMethodInvocation

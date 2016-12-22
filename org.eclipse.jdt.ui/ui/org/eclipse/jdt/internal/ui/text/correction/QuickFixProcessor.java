@@ -229,6 +229,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.FallthroughCase:
 			case IProblem.NonGenericType:
 			case IProblem.UnhandledWarningToken:
+			case IProblem.ProblemNotAnalysed:
 			case IProblem.UnusedWarningToken:
 			case IProblem.RedundantSuperinterface:
 			case IProblem.JavadocInvalidMemberTypeQualification:
@@ -278,6 +279,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.InvalidUsageOfTypeAnnotations:
 			case IProblem.DuplicateInheritedDefaultMethods:
 			case IProblem.InheritedDefaultMethodConflictsWithOtherInherited:
+			case IProblem.IllegalTypeAnnotationsInStaticMemberAccess:
+			case IProblem.TypeAnnotationAtQualifiedName:
+			case IProblem.NullAnnotationAtQualifyingType:
+			case IProblem.IllegalAnnotationForBaseType:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -690,6 +695,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnhandledWarningToken:
 				SuppressWarningsSubProcessor.addUnknownSuppressWarningProposals(context, problem, proposals);
 				break;
+			case IProblem.ProblemNotAnalysed:
+				SuppressWarningsSubProcessor.addRemoveUnusedSuppressWarningProposals(context, problem, proposals);
+				break;
 			case IProblem.UnusedWarningToken:
 				SuppressWarningsSubProcessor.addRemoveUnusedSuppressWarningProposals(context, problem, proposals);
 				break;
@@ -778,6 +786,12 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				if (prj2 != null && JavaCore.ENABLED.equals(prj2.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true))) {
 					NullAnnotationsCorrectionProcessor.addLocalVariableAnnotationProposal(context, problem, proposals);
 				}
+				break;
+			case IProblem.TypeAnnotationAtQualifiedName:
+			case IProblem.IllegalTypeAnnotationsInStaticMemberAccess:
+			case IProblem.NullAnnotationAtQualifyingType:
+			case IProblem.IllegalAnnotationForBaseType:
+				TypeAnnotationSubProcessor.addMoveTypeAnnotationToTypeProposal(context, problem, proposals);
 				break;
 			default:
 		}
