@@ -167,67 +167,69 @@ public class ASTResolving extends org.eclipse.jdt.internal.core.manipulation.dom
 			parent= parent.getParent();
 		}
 
-		switch (parent.getNodeType()) {
-			case ASTNode.TYPE_DECLARATION:
-				if (node.getLocationInParent() == TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY) {
+		if (parent != null) {
+			switch (parent.getNodeType()) {
+				case ASTNode.TYPE_DECLARATION:
+					if (node.getLocationInParent() == TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY) {
+						kind= SimilarElementsRequestor.INTERFACES;
+					} else if (node.getLocationInParent() == TypeDeclaration.SUPERCLASS_TYPE_PROPERTY) {
+						kind= SimilarElementsRequestor.CLASSES;
+					}
+					break;
+				case ASTNode.ENUM_DECLARATION:
 					kind= SimilarElementsRequestor.INTERFACES;
-				} else if (node.getLocationInParent() == TypeDeclaration.SUPERCLASS_TYPE_PROPERTY) {
-					kind= SimilarElementsRequestor.CLASSES;
-				}
-				break;
-			case ASTNode.ENUM_DECLARATION:
-				kind= SimilarElementsRequestor.INTERFACES;
-				break;
-			case ASTNode.METHOD_DECLARATION:
-				if (node.getLocationInParent() == MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY) {
-					kind= SimilarElementsRequestor.CLASSES;
-				} else if (node.getLocationInParent() == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
-					kind= SimilarElementsRequestor.ALL_TYPES | SimilarElementsRequestor.VOIDTYPE;
-				}
-				break;
-			case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
-				kind= SimilarElementsRequestor.PRIMITIVETYPES | SimilarElementsRequestor.ANNOTATIONS | SimilarElementsRequestor.ENUMS;
-				break;
-			case ASTNode.INSTANCEOF_EXPRESSION:
-				kind= SimilarElementsRequestor.REF_TYPES;
-				break;
-			case ASTNode.THROW_STATEMENT:
-				kind= SimilarElementsRequestor.CLASSES;
-				break;
-			case ASTNode.CLASS_INSTANCE_CREATION:
-				if (((ClassInstanceCreation) parent).getAnonymousClassDeclaration() == null) {
-					kind= SimilarElementsRequestor.CLASSES;
-				} else {
-					kind= SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
-				}
-				break;
-			case ASTNode.SINGLE_VARIABLE_DECLARATION:
-				int superParent= parent.getParent().getNodeType();
-				if (superParent == ASTNode.CATCH_CLAUSE) {
-					kind= SimilarElementsRequestor.CLASSES;
-				} else if (superParent == ASTNode.ENHANCED_FOR_STATEMENT) {
+					break;
+				case ASTNode.METHOD_DECLARATION:
+					if (node.getLocationInParent() == MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY) {
+						kind= SimilarElementsRequestor.CLASSES;
+					} else if (node.getLocationInParent() == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
+						kind= SimilarElementsRequestor.ALL_TYPES | SimilarElementsRequestor.VOIDTYPE;
+					}
+					break;
+				case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
+					kind= SimilarElementsRequestor.PRIMITIVETYPES | SimilarElementsRequestor.ANNOTATIONS | SimilarElementsRequestor.ENUMS;
+					break;
+				case ASTNode.INSTANCEOF_EXPRESSION:
 					kind= SimilarElementsRequestor.REF_TYPES;
-				}
-				break;
-			case ASTNode.TAG_ELEMENT:
-				kind= SimilarElementsRequestor.REF_TYPES;
-				break;
-			case ASTNode.MARKER_ANNOTATION:
-			case ASTNode.SINGLE_MEMBER_ANNOTATION:
-			case ASTNode.NORMAL_ANNOTATION:
-				kind= SimilarElementsRequestor.ANNOTATIONS;
-				break;
-			case ASTNode.TYPE_PARAMETER:
-				if (((TypeParameter) parent).typeBounds().indexOf(node) > 0) {
-					kind= SimilarElementsRequestor.INTERFACES;
-				} else {
-					kind= SimilarElementsRequestor.REF_TYPES_AND_VAR;
-				}
-				break;
-			case ASTNode.TYPE_LITERAL:
-				kind= SimilarElementsRequestor.REF_TYPES;
-				break;
-			default:
+					break;
+				case ASTNode.THROW_STATEMENT:
+					kind= SimilarElementsRequestor.CLASSES;
+					break;
+				case ASTNode.CLASS_INSTANCE_CREATION:
+					if (((ClassInstanceCreation) parent).getAnonymousClassDeclaration() == null) {
+						kind= SimilarElementsRequestor.CLASSES;
+					} else {
+						kind= SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
+					}
+					break;
+				case ASTNode.SINGLE_VARIABLE_DECLARATION:
+					int superParent= parent.getParent().getNodeType();
+					if (superParent == ASTNode.CATCH_CLAUSE) {
+						kind= SimilarElementsRequestor.CLASSES;
+					} else if (superParent == ASTNode.ENHANCED_FOR_STATEMENT) {
+						kind= SimilarElementsRequestor.REF_TYPES;
+					}
+					break;
+				case ASTNode.TAG_ELEMENT:
+					kind= SimilarElementsRequestor.REF_TYPES;
+					break;
+				case ASTNode.MARKER_ANNOTATION:
+				case ASTNode.SINGLE_MEMBER_ANNOTATION:
+				case ASTNode.NORMAL_ANNOTATION:
+					kind= SimilarElementsRequestor.ANNOTATIONS;
+					break;
+				case ASTNode.TYPE_PARAMETER:
+					if (((TypeParameter) parent).typeBounds().indexOf(node) > 0) {
+						kind= SimilarElementsRequestor.INTERFACES;
+					} else {
+						kind= SimilarElementsRequestor.REF_TYPES_AND_VAR;
+					}
+					break;
+				case ASTNode.TYPE_LITERAL:
+					kind= SimilarElementsRequestor.REF_TYPES;
+					break;
+				default:
+			}
 		}
 		return kind & mask;
 	}
