@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -160,7 +160,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 		reset();
 	}
 
-	public static Match[] perform(ASTNode start, ASTNode[] snippet) {
+	public static List<Match> perform(ASTNode start, ASTNode[] snippet) {
 		Assert.isTrue(start instanceof AbstractTypeDeclaration || start instanceof AnonymousClassDeclaration);
 		SnippetFinder finder= new SnippetFinder(snippet);
 		start.accept(finder);
@@ -174,10 +174,10 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 				iter.remove();
 			}
 		}
-		return finder.fResult.toArray(new Match[finder.fResult.size()]);
+		return finder.fResult;
 	}
 
-	private static boolean isLeftHandSideOfAssignment(ASTNode node) {
+	static boolean isLeftHandSideOfAssignment(ASTNode node) {
 		Assignment assignment= (Assignment)ASTNodes.getParent(node, ASTNode.ASSIGNMENT);
 		if (assignment != null) {
 			Expression leftHandSide= assignment.getLeftHandSide();

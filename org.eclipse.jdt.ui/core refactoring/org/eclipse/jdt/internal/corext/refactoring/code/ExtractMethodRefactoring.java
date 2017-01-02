@@ -83,6 +83,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -101,6 +102,8 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractMethodDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -119,6 +122,7 @@ import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptorUtil;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.code.SnippetFinder.Match;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRangeComputer;
@@ -129,9 +133,6 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
-
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
@@ -160,7 +161,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private Set<String> fUsedNames;
 	private boolean fGenerateJavadoc;
 	private boolean fReplaceDuplicates;
-	private SnippetFinder.Match[] fDuplicates;
+	private List<SnippetFinder.Match> fDuplicates;
 	private int fDestinationIndex= 0;
 	// either of type TypeDeclaration or AnonymousClassDeclaration
 	private ASTNode fDestination;
@@ -715,8 +716,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (fDuplicates == null)
 			return 0;
 		int result=0;
-		for (int i= 0; i < fDuplicates.length; i++) {
-			if (!fDuplicates[i].isInvalidNode())
+		for (Match duplicate : fDuplicates) {
+			if (!duplicate.isInvalidNode())
 				result++;
 		}
 		return result;
@@ -783,8 +784,116 @@ public class ExtractMethodRefactoring extends Refactoring {
 			start= start.getParent();
 		}
 
-		fDuplicates= SnippetFinder.perform(start, fAnalyzer.getSelectedNodes());
-		fReplaceDuplicates= fDuplicates.length > 0 && ! fAnalyzer.isLiteralNodeSelected();
+		fDuplicates= findValidDuplicates(start);
+		fReplaceDuplicates= fDuplicates.size() > 0 && !fAnalyzer.isLiteralNodeSelected();
+	}
+
+	private List<SnippetFinder.Match> findValidDuplicates(ASTNode startNode) {
+		List<Match> duplicates= SnippetFinder.perform(startNode, fAnalyzer.getSelectedNodes());
+		List<SnippetFinder.Match> validDuplicates= new ArrayList<>();
+
+		for (Match duplicate : duplicates) {
+			if (duplicate != null && !duplicate.isInvalidNode()) {
+				try {
+					ASTNode[] nodes= duplicate.getNodes();
+					int duplicateStart= nodes[0].getStartPosition();
+					ASTNode lastNode= nodes[nodes.length - 1];
+					int duplicateEnd= lastNode.getStartPosition() + lastNode.getLength();
+					int duplicateLength= duplicateEnd - duplicateStart;
+					ExtractMethodAnalyzer analyzer= new ExtractMethodAnalyzer(fCUnit, Selection.createFromStartLength(duplicateStart, duplicateLength));
+					fRoot.accept(analyzer);
+					RefactoringStatus result= new RefactoringStatus();
+					result.merge(analyzer.checkInitialConditions(fImportRewriter));
+
+					if (!result.hasFatalError()) {
+						ITypeBinding originalReturnTypeBinding= fAnalyzer.getReturnTypeBinding();
+						ITypeBinding duplicateReturnTypeBinding= analyzer.getReturnTypeBinding();
+
+						if (originalReturnTypeBinding == null && duplicateReturnTypeBinding == null) {
+							validDuplicates.add(duplicate);
+						} else if (originalReturnTypeBinding != null && duplicateReturnTypeBinding != null) {
+							if (!originalReturnTypeBinding.equals(duplicateReturnTypeBinding)) {
+								if (duplicateReturnTypeBinding.equals(startNode.getAST().resolveWellKnownType("void"))) { //$NON-NLS-1$
+									// extracted snippet returns non-void and duplicate snippet returns void => OK 
+									validDuplicates.add(duplicate);
+								}
+							} else {
+								IVariableBinding originalReturnValBinding= fAnalyzer.getReturnValue();
+								IVariableBinding duplicateReturnValBinding= analyzer.getReturnValue();
+
+								if (originalReturnValBinding == null && duplicateReturnValBinding == null) {
+									validDuplicates.add(duplicate);
+								} else if (originalReturnValBinding != null && duplicateReturnValBinding != null) {
+									BodyDeclaration originalEnclosingBodyDeclaration= fAnalyzer.getEnclosingBodyDeclaration();
+									BodyDeclaration duplicateEnclosingBodyDeclaration= analyzer.getEnclosingBodyDeclaration();
+									VariableDeclaration originalReturnNode= ASTNodes.findVariableDeclaration(originalReturnValBinding, originalEnclosingBodyDeclaration);
+									VariableDeclaration duplicateReturnNode= ASTNodes.findVariableDeclaration(duplicateReturnValBinding, duplicateEnclosingBodyDeclaration);
+
+									if (originalReturnNode != null && duplicateReturnNode != null) {
+										boolean matches;
+										if (!fAnalyzer.getSelection().covers(originalReturnNode) && !analyzer.getSelection().covers(duplicateReturnNode)) {
+											// returned variables are defined outside of the selection => always OK
+											matches= true;
+										} else {
+											matches= matchesLocationInEnclosingBodyDecl(originalEnclosingBodyDeclaration, duplicateEnclosingBodyDeclaration, originalReturnNode, duplicateReturnNode);
+										}
+										
+										if (matches) {
+											validDuplicates.add(duplicate);
+										}
+									}
+								}
+							}
+						}
+					}
+				} catch (CoreException e) {
+					// consider as invalid duplicate
+				}
+			}
+		}
+		return validDuplicates;
+	}
+
+	private boolean matchesLocationInEnclosingBodyDecl(BodyDeclaration originalEnclosingBodyDeclaration, BodyDeclaration duplicateEnclosingBodyDeclaration,
+			VariableDeclaration originalReturnNode, VariableDeclaration duplicateReturnNode) {
+		boolean matches= true;
+		ASTNode original= originalReturnNode;
+		ASTNode dupliacte= duplicateReturnNode;
+
+		// walk up the parent chains to check if the location of the return nodes in their respective parent chains is same
+		do {
+			ASTNode originalParent= original.getParent();
+			ASTNode duplicateParent= dupliacte.getParent();
+			StructuralPropertyDescriptor originalLoc= original.getLocationInParent();
+			StructuralPropertyDescriptor duplicateLoc= dupliacte.getLocationInParent();
+
+			if (originalParent != null && duplicateParent != null
+					&& originalLoc.getNodeClass().equals(duplicateLoc.getNodeClass())
+					&& originalLoc.getId().equals(duplicateLoc.getId())) {
+				if (originalLoc.isChildListProperty() && duplicateLoc.isChildListProperty()) {
+					int indexOfOriginal= ((List<?>) originalParent.getStructuralProperty(originalLoc)).indexOf(original);
+					int indexOfDuplicate= ((List<?>) duplicateParent.getStructuralProperty(duplicateLoc)).indexOf(dupliacte);
+					if (indexOfOriginal != indexOfDuplicate) {
+						matches= false;
+						break;
+					}
+				}
+			} else {
+				matches= false;
+				break;
+			}
+
+			original= originalParent;
+			dupliacte= duplicateParent;
+
+			if ((originalEnclosingBodyDeclaration.equals(original) && !duplicateEnclosingBodyDeclaration.equals(dupliacte))
+					|| (!originalEnclosingBodyDeclaration.equals(original) && duplicateEnclosingBodyDeclaration.equals(dupliacte))) {
+				matches= false;
+				break;
+			}
+		} while (!originalEnclosingBodyDeclaration.equals(original) && !duplicateEnclosingBodyDeclaration.equals(dupliacte));
+
+		return matches;
 	}
 
 	private void initializeDestinations() {
@@ -927,8 +1036,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		TextEditGroup description= new TextEditGroup(label);
 		result.addTextEditGroup(description);
 
-		for (int d= 0; d < fDuplicates.length; d++) {
-			SnippetFinder.Match duplicate= fDuplicates[d];
+		for (Match duplicate : fDuplicates) {
 			if (!duplicate.isInvalidNode()) {
 				if (isDestinationReachable(duplicate.getEnclosingMethod())) {
 					ASTNode[] callNodes= createCallNodes(duplicate, modifiers);
@@ -949,8 +1057,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if(!fReplaceDuplicates){
 			return false;
 		}
-		for(int i= 0;i < fDuplicates.length; i++) {
-			SnippetFinder.Match duplicate= fDuplicates[i];
+		for (Match duplicate : fDuplicates) {
 			if(!duplicate.isInvalidNode() && duplicate.isNodeInStaticContext()) {
 				return true;
 			}
