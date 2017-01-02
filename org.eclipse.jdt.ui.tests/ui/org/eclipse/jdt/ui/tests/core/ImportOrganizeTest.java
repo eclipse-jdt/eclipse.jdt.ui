@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -3431,6 +3431,47 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("    int i = Broken;\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	public void testBug508660() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package test1;\n");
+		buf1.append("public interface ISomeInterface {\n");
+		buf1.append("    class FirstInnerClass {}\n");
+		buf1.append("    public class SecondInnerClass {}\n");
+		buf1.append("}\n");
+		pack1.createCompilationUnit("ISomeInterface.java", buf1.toString(), false, null);
+
+		IPackageFragment pack2= sourceFolder.createPackageFragment("test2", false, null);
+		StringBuffer buf2= new StringBuffer();
+		buf2.append("package test2;\n");
+		buf2.append("public class Test {\n");
+		buf2.append("    private FirstInnerClass first;\n");
+		buf2.append("    private SecondInnerClass second;\n");
+		buf2.append("}\n");
+		ICompilationUnit cu2= pack2.createCompilationUnit("Test.java", buf2.toString(), false, null);
+
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu2, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf2= new StringBuffer();
+		buf2.append("package test2;\n");
+		buf2.append("\n");
+		buf2.append("import test1.ISomeInterface.FirstInnerClass;\n");
+		buf2.append("import test1.ISomeInterface.SecondInnerClass;\n");
+		buf2.append("\n");
+		buf2.append("public class Test {\n");
+		buf2.append("    private FirstInnerClass first;\n");
+		buf2.append("    private SecondInnerClass second;\n");
+		buf2.append("}\n");
+
+		assertEqualString(cu2.getSource(), buf2.toString());
 	}
 
 	protected OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) {
