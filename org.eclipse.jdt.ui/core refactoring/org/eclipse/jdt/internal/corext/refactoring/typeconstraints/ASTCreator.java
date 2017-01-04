@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,8 +18,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
-
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 public class ASTCreator {
 
@@ -36,7 +35,7 @@ public class ASTCreator {
 	}
 
 	private static CompilationUnit getCuNode(WorkingCopyOwner workingCopyOwner, ICompilationUnit cu) {
-		ASTParser p = ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		ASTParser p = ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		p.setSource(cu);
 		p.setResolveBindings(true);
 		p.setWorkingCopyOwner(workingCopyOwner);

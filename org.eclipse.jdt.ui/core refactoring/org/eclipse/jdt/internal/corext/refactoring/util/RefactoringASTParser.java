@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.SharedASTProvider;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 public class RefactoringASTParser {
 
@@ -120,7 +120,7 @@ public class RefactoringASTParser {
 		if (cuNode != null) {
 			return cuNode;
 		} else {
-			return new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(typeRoot, null, resolveBindings, ASTProvider.SHARED_AST_STATEMENT_RECOVERY, ASTProvider.SHARED_BINDING_RECOVERY, pm);
+			return new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(typeRoot, null, resolveBindings, IASTSharedValues.SHARED_AST_STATEMENT_RECOVERY, IASTSharedValues.SHARED_BINDING_RECOVERY, pm);
 		}
 	}
 

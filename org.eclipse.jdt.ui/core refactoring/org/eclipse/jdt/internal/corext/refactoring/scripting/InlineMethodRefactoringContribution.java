@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 /**
  * Refactoring contribution for the inline method refactoring.
@@ -97,7 +97,7 @@ public final class InlineMethodRefactoringContribution extends JavaUIRefactoring
 						unit= method.getCompilationUnit();
 					} else
 						throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { handle, JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT}), null));
-					final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+					final ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 					parser.setResolveBindings(true);
 					parser.setSource(unit);
 					node= (CompilationUnit) parser.createAST(null);

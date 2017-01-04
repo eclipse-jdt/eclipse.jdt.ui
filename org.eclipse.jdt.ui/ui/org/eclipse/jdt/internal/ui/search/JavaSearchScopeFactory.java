@@ -205,22 +205,22 @@ public class JavaSearchScopeFactory {
 		String scopeDescription;
 		if (projectNames.length == 1) {
 			String label= includeJRE ? SearchMessages.EnclosingProjectScope : SearchMessages.EnclosingProjectScopeNoJRE;
-			scopeDescription= Messages.format(label, BasicElementLabels.getJavaElementName(projectNames[0]));
+			scopeDescription= Messages.format(label, org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(projectNames[0]));
 		} else if (projectNames.length == 2) {
 			String label= includeJRE ? SearchMessages.EnclosingProjectsScope2 : SearchMessages.EnclosingProjectsScope2NoJRE;
-			scopeDescription= Messages.format(label, new String[] { BasicElementLabels.getJavaElementName(projectNames[0]), BasicElementLabels.getJavaElementName(projectNames[1])});
+			scopeDescription= Messages.format(label, new String[] { org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(projectNames[0]), org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(projectNames[1])});
 		} else {
 			String label= includeJRE ? SearchMessages.EnclosingProjectsScope : SearchMessages.EnclosingProjectsScopeNoJRE;
-			scopeDescription= Messages.format(label, new String[] { BasicElementLabels.getJavaElementName(projectNames[0]), BasicElementLabels.getJavaElementName(projectNames[1])});
+			scopeDescription= Messages.format(label, new String[] { org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(projectNames[0]), org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(projectNames[1])});
 		}
 		return scopeDescription;
 	}
 
 	public String getProjectScopeDescription(IJavaProject project, boolean includeJRE) {
 		if (includeJRE) {
-			return Messages.format(SearchMessages.ProjectScope, BasicElementLabels.getJavaElementName(project.getElementName()));
+			return Messages.format(SearchMessages.ProjectScope, org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(project.getElementName()));
 		} else {
-			return Messages.format(SearchMessages.ProjectScopeNoJRE, BasicElementLabels.getJavaElementName(project.getElementName()));
+			return Messages.format(SearchMessages.ProjectScopeNoJRE, org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels.getJavaElementName(project.getElementName()));
 		}
 	}
 

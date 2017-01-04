@@ -43,7 +43,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager;
 
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 /**
  * Utility methods for code generation.
@@ -305,7 +305,7 @@ public class JUnitStubUtility {
 
 	public static String[] getParameterTypeNamesForSeeTag(IMethod overridden) {
 		try {
-			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+			ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 			parser.setProject(overridden.getJavaProject());
 			IBinding[] bindings= parser.createBindings(new IJavaElement[] { overridden }, null);
 			if (bindings.length == 1 && bindings[0] instanceof IMethodBinding) {

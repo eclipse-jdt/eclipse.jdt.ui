@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IFile;
 
@@ -62,10 +62,10 @@ import org.eclipse.jdt.internal.core.manipulation.Messages;
 
 	@Override
 	public Change perform(IProgressMonitor pm) throws CoreException {
-		pm.beginTask("", 2); //$NON-NLS-1$
-		fCUnit.becomeWorkingCopy(new SubProgressMonitor(pm,1));
+		SubMonitor subMonitor= SubMonitor.convert(pm, 2);
+		fCUnit.becomeWorkingCopy(subMonitor.split(1));
 		try {
-			return super.perform(new SubProgressMonitor(pm,1));
+			return super.perform(subMonitor.split(1));
 		} finally {
 			fCUnit.discardWorkingCopy();
 		}

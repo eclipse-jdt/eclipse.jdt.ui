@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -129,15 +129,15 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
@@ -611,7 +611,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			fTypeImports= null;
 			fStaticImports= null;
 			TextEdit edits= rewrite.rewriteImports(new SubProgressMonitor(monitor, 1));
-			JavaModelUtil.applyEdit(targetUnit, edits, false, new SubProgressMonitor(monitor, 1));
+			JavaElementUtil.applyEdit(targetUnit, edits, false, new SubProgressMonitor(monitor, 1));
 		} finally {
 			monitor.done();
 		}
@@ -689,7 +689,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 	private RefactoringStatus checkConstructorParameterNames() {
 		RefactoringStatus result= new RefactoringStatus();
-		CompilationUnit cuNode= new RefactoringASTParser(ASTProvider.SHARED_AST_LEVEL).parse(fType.getCompilationUnit(), false);
+		CompilationUnit cuNode= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(fType.getCompilationUnit(), false);
 		MethodDeclaration[] nodes= getConstructorDeclarationNodes(findTypeDeclaration(fType, cuNode));
 		for (int i= 0; i < nodes.length; i++) {
 			MethodDeclaration constructor= nodes[i];
@@ -1049,7 +1049,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 		if (change == null)
 			change= new CompilationUnitChange("", unit); //$NON-NLS-1$
 		final String source= change.getPreviewContent(new NullProgressMonitor());
-		final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		final ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 		parser.setProject(fType.getJavaProject());
 		parser.setResolveBindings(false);
 		parser.setSource(source.toCharArray());

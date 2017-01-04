@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,13 +62,14 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
 
@@ -372,9 +373,9 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 
 
 	private ASTNode getDominantNode(SimpleName[] names) {
-		ASTNode dominator= names[0]; //ASTResolving.findParentStatement(names[0]);
+		ASTNode dominator= names[0]; //ASTResolvingUtil.findParentStatement(names[0]);
 		for (int i= 1; i < names.length; i++) {
-			ASTNode curr= names[i];// ASTResolving.findParentStatement(names[i]);
+			ASTNode curr= names[i];// ASTResolvingUtil.findParentStatement(names[i]);
 			if (curr != dominator) {
 				ASTNode parent= getCommonParent(curr, dominator);
 
@@ -463,12 +464,12 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			for (int i= decls.size() - 1; i >= 0; i--) {
 				BodyDeclaration curr= decls.get(i);
 				if (maxOffset > curr.getStartPosition() + curr.getLength()) {
-					return ASTNodes.getInsertionIndex(newDecl, decls.subList(0, i + 1));
+					return BodyDeclarationRewrite.getInsertionIndex(newDecl, decls.subList(0, i + 1));
 				}
 			}
 			return 0;
 		}
-		return ASTNodes.getInsertionIndex(newDecl, decls);
+		return BodyDeclarationRewrite.getInsertionIndex(newDecl, decls);
 	}
 
 	private Type evaluateVariableType(AST ast, ImportRewrite imports, ImportRewriteContext importRewriteContext, IBinding targetContext) {
@@ -505,7 +506,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			return imports.addImport(binding, ast, importRewriteContext);
 		}
 		// no binding, find type AST node instead -> ABC a= x-> use 'ABC' as is
-		Type type= ASTResolving.guessTypeForReference(ast, fOriginalNode);
+		Type type= org.eclipse.jdt.internal.ui.text.correction.ASTResolving.guessTypeForReference(ast, fOriginalNode);
 		if (type != null) {
 			return type;
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 GK Software AG and others.
+ * Copyright (c) 2011, 2016 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
@@ -54,8 +55,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class NullAnnotationsRewriteOperations {
 
@@ -181,60 +182,44 @@ public class NullAnnotationsRewriteOperations {
 
 	static class ParameterAnnotationRewriteOperation extends SignatureAnnotationRewriteOperation {
 
-		private SingleVariableDeclaration fArgument;
-
-		ParameterAnnotationRewriteOperation(CompilationUnit unit, MethodDeclaration method, String annotationToAdd, String annotationToRemove, String paramName, boolean allowRemove, String message) {
-			fUnit= unit;
-			fKey= method.resolveBinding().getKey();
-			fAnnotationToAdd= annotationToAdd;
-			fAnnotationToRemove= annotationToRemove;
-			fAllowRemove= allowRemove;
-			fMessage= message;
-			for (Object param : method.parameters()) {
-				SingleVariableDeclaration argument= (SingleVariableDeclaration) param;
-				if (argument.getName().getIdentifier().equals(paramName)) {
-					fArgument= argument;
-					fKey+= argument.getName().getIdentifier();
-					return;
-				}
+		static class IndexedParameter {
+			int index;
+			String name;
+			IndexedParameter(int index, String name) {
+				this.index= index;
+				this.name= name;
 			}
-			// shouldn't happen, we've checked that paramName indeed denotes a parameter.
-			throw new RuntimeException("Argument " + paramName + " not found in method " + method.getName().getIdentifier()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
-		static ParameterAnnotationRewriteOperation create(CompilationUnit unit, LambdaExpression lambda, String annotationToAdd, String annotationToRemove, String paramName, boolean allowRemove, String message) {
-			String key= lambda.resolveMethodBinding().getKey();
-			for (Object param : lambda.parameters()) {
+		private SingleVariableDeclaration fArgument;
+
+		// for lambda parameter (can return null):
+		static ParameterAnnotationRewriteOperation create(CompilationUnit unit, LambdaExpression lambda, String annotationToAdd, String annotationToRemove, IndexedParameter parameter, boolean allowRemove, String message) {
+			IMethodBinding lambdaMethodBinding= lambda.resolveMethodBinding();
+			List<?> parameters= lambda.parameters();
+			if (parameters.size() > parameter.index) {
+				Object param= parameters.get(parameter.index);
 				if (!(param instanceof SingleVariableDeclaration)) {
 					return null; // type elided lambda
 				}
-				SingleVariableDeclaration argument= (SingleVariableDeclaration) param;
-				if (argument.getName().getIdentifier().equals(paramName)) {
-					key+= argument.getName().getIdentifier();
-					return new ParameterAnnotationRewriteOperation(unit, key, argument, annotationToAdd, annotationToRemove, allowRemove, message);
-				}
+				return new ParameterAnnotationRewriteOperation(unit, lambdaMethodBinding, parameters, annotationToAdd, annotationToRemove, parameter.index, allowRemove, message);
 			}
 			// shouldn't happen, we've checked that paramName indeed denotes a parameter.
-			throw new RuntimeException("Argument " + paramName + " not found in method " + lambda.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new RuntimeException("Argument " + parameter.name + " not found in method " + lambda.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
-		private ParameterAnnotationRewriteOperation(CompilationUnit unit, String key, SingleVariableDeclaration argument, String annotationToAdd, String annotationToRemove, boolean allowRemove, String message) {
-			fUnit= unit;
-			fKey= key;
-			fArgument= argument;
-			fAnnotationToAdd= annotationToAdd;
-			fAnnotationToRemove= annotationToRemove;
-			fAllowRemove= allowRemove;
-			fMessage= message;
-		}
-
+		// for method parameter:
 		ParameterAnnotationRewriteOperation(CompilationUnit unit, MethodDeclaration method, String annotationToAdd, String annotationToRemove, int paramIdx, boolean allowRemove, String message) {
+			this(unit, method.resolveBinding(), method.parameters(), annotationToAdd, annotationToRemove, paramIdx, allowRemove, message);
+		}
+
+		private ParameterAnnotationRewriteOperation(CompilationUnit unit, IMethodBinding methodBinding, List<?> parameters, String annotationToAdd, String annotationToRemove, int paramIdx, boolean allowRemove, String message) {
 			fUnit= unit;
-			fKey= method.resolveBinding().getKey();
+			fKey= methodBinding.getKey();
 			fAnnotationToAdd= annotationToAdd;
 			fAnnotationToRemove= annotationToRemove;
 			fAllowRemove= allowRemove;
-			fArgument= (SingleVariableDeclaration) method.parameters().get(paramIdx);
+			fArgument= (SingleVariableDeclaration) parameters.get(paramIdx);
 			fKey+= fArgument.getName().getIdentifier();
 			fMessage= message;
 		}
@@ -398,28 +383,28 @@ public class NullAnnotationsRewriteOperations {
 				case IProblem.ParameterLackingNullableAnnotation:
 				case IProblem.IllegalDefinitionToNonNullParameter:
 				case IProblem.IllegalRedefinitionToNonNullParameter:
-				case IProblem.SpecdNonNullLocalVariableComparisonYieldsFalse:
-				case IProblem.RedundantNullCheckOnSpecdNonNullLocalVariable:
 					// problems regarding the argument declaration:
-					String paramName= findAffectedParameterName(selectedNode);
-					if (paramName != null) {
+					ParameterAnnotationRewriteOperation.IndexedParameter parameter= findParameterDeclaration(selectedNode);
+					if (parameter != null) {
 						switch (declaringNode.getNodeType()) {
 							case ASTNode.METHOD_DECLARATION:
 								MethodDeclaration method= (MethodDeclaration) declaringNode;
 								String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness,
-																new Object[] {paramName, annotationNameLabel});
-								return new ParameterAnnotationRewriteOperation(compilationUnit, method, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
+																new Object[] {parameter.name, annotationNameLabel});
+								return new ParameterAnnotationRewriteOperation(compilationUnit, method, annotationToAdd, annotationToRemove, parameter.index, allowRemove, message);
 							case ASTNode.LAMBDA_EXPRESSION:
 								LambdaExpression lambda = (LambdaExpression) declaringNode;
 								// TODO: specific message for lambda
 								message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness,
-																	new Object[] {paramName, annotationNameLabel});
-								return ParameterAnnotationRewriteOperation.create(compilationUnit, lambda, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
+																	new Object[] {parameter.name, annotationNameLabel});
+								return ParameterAnnotationRewriteOperation.create(compilationUnit, lambda, annotationToAdd, annotationToRemove, parameter, allowRemove, message);
 							default:
 								return null;
 						}
 					}
 					break;
+				case IProblem.SpecdNonNullLocalVariableComparisonYieldsFalse:
+				case IProblem.RedundantNullCheckOnSpecdNonNullLocalVariable:
 				case IProblem.RequiredNonNullButProvidedNull:
 				case IProblem.RequiredNonNullButProvidedPotentialNull:
 				case IProblem.RequiredNonNullButProvidedSpecdNullable:
@@ -429,21 +414,20 @@ public class NullAnnotationsRewriteOperations {
 					if (isArgumentProblem) {
 						// statement suggests changing parameters:
 						if (selectedNode instanceof SimpleName) {
-							// don't call findAffectedParameterName(), in this branch we're not interested in any target method
-							paramName= ((SimpleName) selectedNode).getIdentifier();
-							if (paramName != null) {
+							parameter= findReferencedParameter(selectedNode);
+							if (parameter != null) {
 								switch (declaringNode.getNodeType()) {
 									case ASTNode.METHOD_DECLARATION:
 										MethodDeclaration declaration= (MethodDeclaration) declaringNode;
 										String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness,
-												new Object[] { paramName, annotationNameLabel });
-										return new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
+												new Object[] { parameter.name, annotationNameLabel });
+										return new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, parameter.index, allowRemove, message);
 									case ASTNode.LAMBDA_EXPRESSION:
 										LambdaExpression lambda= (LambdaExpression) declaringNode;
 										// TODO: appropriate message for lambda
 										message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_parameter_nullness,
-												new Object[] { paramName, annotationNameLabel });
-										return ParameterAnnotationRewriteOperation.create(compilationUnit, lambda, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
+												new Object[] { parameter.name, annotationNameLabel });
+										return ParameterAnnotationRewriteOperation.create(compilationUnit, lambda, annotationToAdd, annotationToRemove, parameter, allowRemove, message);
 									default:
 										return null;
 								}
@@ -524,21 +508,54 @@ public class NullAnnotationsRewriteOperations {
 		ASTNode methodDecl= compilationUnit.findDeclaringNode(overridden.getKey());
 		if (methodDecl == null)
 			return null;
-		declaration= (MethodDeclaration) methodDecl;
+		MethodDeclaration overriddenDeclaration= (MethodDeclaration) methodDecl;
 		String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_overridden_parameter_nullness, new String[] { overridden.getName(), annotationNameLabel });
-		String paramName= findAffectedParameterName(selectedNode);
-		return new ParameterAnnotationRewriteOperation(compilationUnit, declaration, annotationToAdd, annotationToRemove, paramName, allowRemove, message);
+		ParameterAnnotationRewriteOperation.IndexedParameter parameter= findParameterDeclaration(selectedNode); // parameter.name is determined from the current method, but this name will not be used here
+		if (parameter == null)
+			return null;
+		return new ParameterAnnotationRewriteOperation(compilationUnit, overriddenDeclaration, annotationToAdd, annotationToRemove, parameter.index, allowRemove, message);
 	}
 
-	private static String findAffectedParameterName(ASTNode selectedNode) {
+	private static ParameterAnnotationRewriteOperation.IndexedParameter findParameterDeclaration(ASTNode selectedNode) {
 		VariableDeclaration argDecl= (selectedNode instanceof VariableDeclaration) ? (VariableDeclaration) selectedNode : (VariableDeclaration) ASTNodes.getParent(selectedNode,
 				VariableDeclaration.class);
-		if (argDecl != null)
-			return argDecl.getName().getIdentifier();
+		if (argDecl != null) {
+			StructuralPropertyDescriptor locationInParent= argDecl.getLocationInParent();
+			if (!locationInParent.isChildListProperty())
+				return null;
+			List<?> containingList= (List<?>) argDecl.getParent().getStructuralProperty(locationInParent);
+			return new ParameterAnnotationRewriteOperation.IndexedParameter(containingList.indexOf(argDecl), argDecl.getName().getIdentifier());
+		}
+		return null;
+	}
+
+	private static ParameterAnnotationRewriteOperation.IndexedParameter findReferencedParameter(ASTNode selectedNode) {
 		if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME) {
 			IBinding binding= ((SimpleName) selectedNode).resolveBinding();
-			if (binding.getKind() == IBinding.VARIABLE && ((IVariableBinding) binding).isParameter())
-				return ((SimpleName) selectedNode).getIdentifier();
+			if (binding.getKind() == IBinding.VARIABLE && ((IVariableBinding) binding).isParameter()) {
+				ASTNode current= selectedNode.getParent();
+				while (current != null) {
+					List<?> parameters= null;
+					switch (current.getNodeType()) {
+						case ASTNode.METHOD_DECLARATION:
+							parameters= ((MethodDeclaration) current).parameters();
+							break;
+						case ASTNode.LAMBDA_EXPRESSION:
+							parameters= ((LambdaExpression) current).parameters();
+							break;
+						default:
+							/* continue traversing outwards */
+					}
+					if (parameters != null) {
+						for (int i= 0; i < parameters.size(); i++) {
+							VariableDeclaration parameter= (VariableDeclaration) parameters.get(i);
+							if (parameter.resolveBinding() == binding)
+								return new ParameterAnnotationRewriteOperation.IndexedParameter(i, binding.getName());
+						}
+					}
+					current= current.getParent();
+				}
+			}
 		}
 		return null;
 	}

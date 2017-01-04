@@ -33,12 +33,14 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.ChangeKind;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.RemoveRedundantAnnotationRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.SignatureAnnotationRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.TypeAnnotationRewriteOperations.MoveTypeAnnotationRewriteOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.TypeAnnotationSubProcessor;
 
 public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 
@@ -155,13 +157,31 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 					locations[i]= new ProblemLocation(problems[i]);
 			}
 		}
-
-		createAddNullAnnotationOperations(compilationUnit, locations, operations);
-		createRemoveRedundantNullAnnotationsOperations(compilationUnit, locations, operations);
+		String message;
+		if (TypeAnnotationSubProcessor.hasFixFor(problemID)) {
+			boolean isMove= createMoveTypeAnnotationOperations(compilationUnit, locations, operations);
+			message= isMove ? FixMessages.TypeAnnotationFix_move : FixMessages.TypeAnnotationFix_remove;
+		} else {
+			createAddNullAnnotationOperations(compilationUnit, locations, operations);
+			createRemoveRedundantNullAnnotationsOperations(compilationUnit, locations, operations);
+			message= FixMessages.NullAnnotationsFix_add_annotation_change_name;
+		}
 		if (operations.size() == 0)
 			return null;
 		CompilationUnitRewriteOperation[] operationsArray= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
-		return new NullAnnotationsFix(FixMessages.NullAnnotationsFix_add_annotation_change_name, compilationUnit, operationsArray);
+		return new NullAnnotationsFix(message, compilationUnit, operationsArray);
+	}
+
+	private static boolean createMoveTypeAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> operations) {
+		boolean isMove= false;
+		for (IProblemLocation location: locations) {
+			if (location == null)
+				continue;
+			MoveTypeAnnotationRewriteOperation operation= new MoveTypeAnnotationRewriteOperation(compilationUnit, location);
+			operations.add(operation);
+			isMove|= operation.isMove();
+		}
+		return isMove;
 	}
 
 	private static void createAddNullAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List<CompilationUnitRewriteOperation> result) {

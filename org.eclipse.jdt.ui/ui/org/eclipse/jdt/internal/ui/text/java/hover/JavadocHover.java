@@ -113,11 +113,11 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.infoviews.JavadocView;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 
@@ -809,7 +809,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		if (element.getJavaProject().getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED)) {
 			if (node == null) {
 				if (element instanceof ISourceReference) {
-					ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+					ASTParser p= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 					p.setProject(element.getJavaProject());
 					p.setBindingsRecovery(true);
 					try {
@@ -1078,7 +1078,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		ASTNode node= getHoveredASTNode(editorInputElement, hoverRegion);
 		
 		if (node == null) {
-			ASTParser p= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+			ASTParser p= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 			p.setProject(element.getJavaProject());
 			p.setBindingsRecovery(true);
 			try {

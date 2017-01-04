@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,20 +59,22 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
 import org.eclipse.jdt.ui.SharedASTProvider;
 
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 
 public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	public static interface IChooseImportQuery {
@@ -192,7 +194,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 			public UnresolvedTypeData(SimpleName ref) {
 				this.ref= ref;
-				this.typeKinds= ASTResolving.getPossibleTypeKinds(ref, true);
+				this.typeKinds= org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getPossibleTypeKinds(ref, true);
 				this.foundInfos= new ArrayList<>(3);
 			}
 
@@ -348,7 +350,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				TypeNameMatchCollector collector= new TypeNameMatchCollector(typesFound);
 				new SearchEngine().searchAllTypeNames(null, allTypes, scope, collector, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 
-				boolean is50OrHigher= 	JavaModelUtil.is50OrHigher(project);
+				boolean is50OrHigher= JavaModelUtil.is50OrHigher(project);
 
 				for (i= 0; i < typesFound.size(); i++) {
 					TypeNameMatch curr= typesFound.get(i);
@@ -452,7 +454,13 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			if (Flags.isPrivate(flags)) {
 				return false;
 			}
-			if (Flags.isPublic(flags) || Flags.isProtected(flags)) {
+			boolean isPublic;
+			try {
+				isPublic= JdtFlags.isPublic(curr.getType());
+			} catch (JavaModelException e) {
+				isPublic= Flags.isPublic(flags);
+			}
+			if (isPublic || Flags.isProtected(flags)) {
 				return true;
 			}
 			return curr.getPackageName().equals(fCurrPackage.getElementName());
@@ -526,7 +534,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
     		if (edit == null)
     			return;
 
-    		JavaModelUtil.applyEdit(fCompilationUnit, edit, fDoSave, new SubProgressMonitor(monitor, 1));
+			JavaElementUtil.applyEdit(fCompilationUnit, edit, fDoSave, new SubProgressMonitor(monitor, 1));
 		} finally {
 			monitor.done();
 		}

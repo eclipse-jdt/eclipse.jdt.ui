@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -53,7 +54,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
-import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
 
 public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposal {
@@ -225,7 +225,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 				if (parent instanceof ExpressionStatement) {
 					newTypeNode= ast.newPrimitiveType(PrimitiveType.VOID);
 				} else {
-					newTypeNode= ASTResolving.guessTypeForReference(ast, node);
+					newTypeNode= org.eclipse.jdt.internal.ui.text.correction.ASTResolving.guessTypeForReference(ast, node);
 					if (newTypeNode == null) {
 						newTypeNode= ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 					}

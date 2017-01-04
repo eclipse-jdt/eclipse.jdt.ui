@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.PerformanceStats;
 import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -51,7 +51,7 @@ import org.eclipse.jdt.ui.search.QuerySpecification;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class JavaSearchQuery implements ISearchQuery {
 
@@ -166,17 +166,16 @@ public class JavaSearchQuery implements ISearchQuery {
 			if (pattern == null) {
 				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(SearchMessages.JavaSearchQuery_error_unsupported_pattern, stringPattern), null);
 			}
-			monitor.beginTask(Messages.format(SearchMessages.JavaSearchQuery_task_label, stringPattern), totalTicks);
-			IProgressMonitor mainSearchPM= new SubProgressMonitor(monitor, 1000);
+			SubMonitor subMonitor= SubMonitor.convert(monitor, Messages.format(SearchMessages.JavaSearchQuery_task_label, stringPattern), totalTicks);
 
 			boolean ignorePotentials= NewSearchUI.arePotentialMatchesIgnored();
 			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, ignorePotentials);
 
 
-			engine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, getFirstSpecification().getScope(), collector, mainSearchPM);
+			engine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, getFirstSpecification().getScope(), collector, subMonitor.split(1000));
 			for (int i= 0; i < participantDescriptors.length; i++) {
 				final ISearchRequestor requestor= new SearchRequestor(participantDescriptors[i].getParticipant(), textResult);
-				final IProgressMonitor participantPM= new SubProgressMonitor(monitor, ticks[i]);
+				final IProgressMonitor participantPM= subMonitor.split(ticks[i]);
 
 				final int iPrime= i;
 				ISafeRunnable runnable= new ISafeRunnable() {

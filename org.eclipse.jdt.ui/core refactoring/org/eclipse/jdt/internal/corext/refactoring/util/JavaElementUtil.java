@@ -18,8 +18,15 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.SubMonitor;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -37,11 +44,14 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.SourceRange;
 
+import org.eclipse.jdt.internal.corext.CorextMessages;
+import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Resources;
 
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 /**
@@ -254,6 +264,30 @@ public class JavaElementUtil {
 			return SourceRange.isAvailable(sourceReference.getSourceRange());
 		} catch (JavaModelException e) {
 			return false;
+		}
+	}
+
+	/**
+	 * Applies an text edit to a compilation unit. Filed bug 117694 against jdt.core.
+	 * 	@param cu the compilation unit to apply the edit to
+	 * 	@param edit the edit to apply
+	 * @param save is set, save the CU after the edit has been applied
+	 * @param monitor the progress monitor to use
+	 * @throws CoreException Thrown when the access to the CU failed
+	 * @throws ValidateEditException if validate edit fails
+	 */
+	public static void applyEdit(ICompilationUnit cu, TextEdit edit, boolean save, IProgressMonitor monitor) throws CoreException, ValidateEditException {
+		SubMonitor subMonitor= SubMonitor.convert(monitor, CorextMessages.JavaModelUtil_applyedit_operation, 2);
+		IFile file= (IFile) cu.getResource();
+		if (!save || !file.exists()) {
+			cu.applyTextEdit(edit, subMonitor.split(2));
+		} else {
+			IStatus status= Resources.makeCommittable(file, null);
+			if (!status.isOK()) {
+				throw new ValidateEditException(status);
+			}
+			cu.applyTextEdit(edit, subMonitor.split(1));
+			cu.save(subMonitor.split(1), true);
 		}
 	}
 }

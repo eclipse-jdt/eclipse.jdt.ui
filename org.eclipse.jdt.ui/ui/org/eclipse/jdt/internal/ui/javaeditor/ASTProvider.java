@@ -29,13 +29,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.SharedASTProvider;
@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  *
  * @since 3.0
  */
-public final class ASTProvider {
+public final class ASTProvider implements IASTSharedValues {
 
 	/**
 	 * @deprecated Use {@link SharedASTProvider#WAIT_YES} instead.
@@ -208,12 +208,7 @@ public final class ASTProvider {
 		}
 	}
 
-	public static final int SHARED_AST_LEVEL= AST.JLS8;
-	public static final boolean SHARED_AST_STATEMENT_RECOVERY= true;
-	public static final boolean SHARED_BINDING_RECOVERY= true;
-
 	private static final String DEBUG_PREFIX= "ASTProvider > "; //$NON-NLS-1$
-
 
 	private volatile ITypeRoot fReconcilingJavaElement;
 	private ITypeRoot fActiveJavaElement;

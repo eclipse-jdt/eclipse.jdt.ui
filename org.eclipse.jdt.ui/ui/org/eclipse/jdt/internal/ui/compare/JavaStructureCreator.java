@@ -58,10 +58,11 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 
 public class JavaStructureCreator extends StructureCreator {
@@ -275,7 +276,7 @@ public class JavaStructureCreator extends StructureCreator {
 				contents.getChars(0, n, buffer, 0);
 			}
 
-			ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+			ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 			if (compilerOptions != null)
 				parser.setCompilerOptions(compilerOptions);
 			parser.setSource(buffer);

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,7 +45,7 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
@@ -142,7 +142,7 @@ public class AccessorClassCreator {
 			is.addImport("java.util.ResourceBundle"); //$NON-NLS-1$
 		}
 		TextEdit edit= is.rewriteImports(pm);
-		JavaModelUtil.applyEdit(newCu, edit, false, null);
+		JavaElementUtil.applyEdit(newCu, edit, false, null);
 	}
 
 	private String createClass(String lineDelim) throws CoreException {

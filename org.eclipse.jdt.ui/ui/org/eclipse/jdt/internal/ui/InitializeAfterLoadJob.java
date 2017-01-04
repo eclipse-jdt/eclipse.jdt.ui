@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.ui.progress.UIJob;
@@ -31,10 +31,10 @@ public class InitializeAfterLoadJob extends UIJob {
 		}
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			monitor.beginTask("", 10); //$NON-NLS-1$
+			SubMonitor subMonitor= SubMonitor.convert(monitor, 10);
 			try {
-				JavaCore.initializeAfterLoad(new SubProgressMonitor(monitor, 6));
-				JavaPlugin.initializeAfterLoad(new SubProgressMonitor(monitor, 4));
+				JavaCore.initializeAfterLoad(subMonitor.split(6));
+				JavaPlugin.initializeAfterLoad(subMonitor.split(4));
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 				return e.getStatus();

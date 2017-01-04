@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IContainer;
@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 public class CoreUtility {
@@ -153,22 +153,19 @@ public class CoreUtility {
 		        	}
 				}
 			}
+			SubMonitor subMonitor= SubMonitor.convert(monitor, Messages.format(JavaUIMessages.CoreUtility_buildproject_taskname, BasicElementLabels.getResourceName(fProject)), 2);
 			try {
 				if (fProject != null) {
-					monitor.beginTask(Messages.format(JavaUIMessages.CoreUtility_buildproject_taskname, BasicElementLabels.getResourceName(fProject)), 2);
-					fProject.build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor,1));
-					JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor,1));
+					fProject.build(IncrementalProjectBuilder.FULL_BUILD, subMonitor.split(1));
+					JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, subMonitor.split(1));
 				} else {
 					monitor.beginTask(JavaUIMessages.CoreUtility_buildall_taskname, 2);
-					JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor, 2));
+					JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, subMonitor.split(2));
 				}
 			} catch (CoreException e) {
 				return e.getStatus();
 			} catch (OperationCanceledException e) {
 				return Status.CANCEL_STATUS;
-			}
-			finally {
-				monitor.done();
 			}
 			return Status.OK_STATUS;
 		}

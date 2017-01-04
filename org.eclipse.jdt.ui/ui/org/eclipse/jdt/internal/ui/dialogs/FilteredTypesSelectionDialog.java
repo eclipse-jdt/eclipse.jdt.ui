@@ -36,7 +36,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -116,7 +116,7 @@ import org.eclipse.jdt.internal.ui.preferences.TypeFilterPreferencePage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeNameMatchLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
 
@@ -584,13 +584,12 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			OpenTypeHistory history= OpenTypeHistory.getInstance();
 			if (fgFirstTime || history.isEmpty()) {
 				if (history.needConsistencyCheck()) {
-					monitor.beginTask(JavaUIMessages.TypeSelectionDialog_progress_consistency, 100);
-					refreshSearchIndices(new SubProgressMonitor(monitor, 90));
-					history.checkConsistency(new SubProgressMonitor(monitor, 10));
+					SubMonitor subMonitor= SubMonitor.convert(monitor,JavaUIMessages.TypeSelectionDialog_progress_consistency, 10 );
+					refreshSearchIndices(subMonitor.split(9));
+					history.checkConsistency(subMonitor.split(1));
 				} else {
 					refreshSearchIndices(monitor);
 				}
-				monitor.done();
 				fgFirstTime= false;
 			} else {
 				history.checkConsistency(monitor);
@@ -625,11 +624,12 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	@Override
 	public void reloadCache(boolean checkDuplicates, IProgressMonitor monitor) {
 		IProgressMonitor remainingMonitor;
+		SubMonitor subMonitor= SubMonitor.convert(monitor, JavaUIMessages.TypeSelectionDialog_progress_consistency, 10);
 		if (ConsistencyRunnable.needsExecution()) {
-			monitor.beginTask(JavaUIMessages.TypeSelectionDialog_progress_consistency, 10);
+			
 			try {
 				ConsistencyRunnable runnable= new ConsistencyRunnable();
-				runnable.run(new SubProgressMonitor(monitor, 1));
+				runnable.run(subMonitor.split(1));
 			} catch (InvocationTargetException e) {
 				ExceptionHandler.handle(e, JavaUIMessages.TypeSelectionDialog_error3Title, JavaUIMessages.TypeSelectionDialog_error3Message);
 				close();
@@ -639,12 +639,11 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 				close();
 				return;
 			}
-			remainingMonitor= new SubProgressMonitor(monitor, 9);
+			remainingMonitor= subMonitor.split(8);
 		} else {
-			remainingMonitor= monitor;
+			remainingMonitor= subMonitor;
 		}
 		super.reloadCache(checkDuplicates, remainingMonitor);
-		monitor.done();
 	}
 
 	/*
@@ -1264,9 +1263,11 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			int result= leftString.compareToIgnoreCase(rightString);
 			if (result != 0 || rightString.length() == 0) {
 				return result;
-			} else if (Strings.isLowerCase(leftString.charAt(0)) && !Strings.isLowerCase(rightString.charAt(0))) {
+			} else if (org.eclipse.jdt.internal.core.manipulation.util.Strings.isLowerCase(leftString.charAt(0))
+					&& !org.eclipse.jdt.internal.core.manipulation.util.Strings.isLowerCase(rightString.charAt(0))) {
 				return +1;
-			} else if (Strings.isLowerCase(rightString.charAt(0)) && !Strings.isLowerCase(leftString.charAt(0))) {
+			} else if (org.eclipse.jdt.internal.core.manipulation.util.Strings.isLowerCase(rightString.charAt(0))
+					&& !org.eclipse.jdt.internal.core.manipulation.util.Strings.isLowerCase(leftString.charAt(0))) {
 				return -1;
 			} else {
 				return leftString.compareTo(rightString);

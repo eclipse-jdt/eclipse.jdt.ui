@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -113,7 +113,7 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 /**
  * Partial implementation of a refactoring processor solving supertype
@@ -284,7 +284,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			buffer.append(delimiter);
 			buffer.append('}');
 			final IDocument document= new Document(buffer.toString());
-			final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+			final ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 			parser.setSource(document.get().toCharArray());
 			final CompilationUnit unit= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 100));
 			final ASTRewrite targetRewrite= ASTRewrite.create(unit.getAST());
@@ -1019,7 +1019,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					}
 					collection.add(current);
 				}
-				final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+				final ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 320);
 				try {
 					final Set<IJavaProject> keySet= projects.keySet();
@@ -1138,7 +1138,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 			IJavaProject project= null;
 			Collection<SearchResultGroup> collection= null;
 			try {
-				final ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+				final ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
 				Object element= null;
 				ICompilationUnit current= null;
 				SearchResultGroup group= null;
