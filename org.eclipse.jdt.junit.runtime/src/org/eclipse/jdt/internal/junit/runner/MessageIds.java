@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,9 +108,8 @@ public class MessageIds {
 	/**
 	 * Notification about a test inside the test suite. <br>
 	 * TEST_TREE + testId + "," + testName + "," + isSuite + "," + testcount + "," +
-	 * isTestFactory + "," + isDynamicTest + "," + parentFactoryId + "," + displayName <br>
+	 * isDynamicTest + "," + parentId + "," + displayName <br>
 	 * isSuite = "true" or "false" <br>
-	 * isTestFactory = "true" or "false" <br>
 	 * isDynamicTest = "true" or "false" <br>
 	 * parentId = the unique id of its parent, otherwise "-1" <br>
 	 * displayName = the display name of the test <br>
@@ -129,8 +128,10 @@ public class MessageIds {
 	public static final String TEST_RERUN=	">RERUN  "; //$NON-NLS-1$
 
 	/**
-	 * MessageFormat to encode test method identifiers:
-	 * testMethod(testClass)
+	 * MessageFormat to encode test method identifiers: <br>
+	 * <code>testMethod(testClass)</code> 
+	 * <br>or<br>
+	 * <code>testMethod(testClass): a comma-separated list of fully qualified parameter type names if parameters exist</code>
 	 */
 	public static final String TEST_IDENTIFIER_MESSAGE_FORMAT= "{0}({1})"; //$NON-NLS-1$
 

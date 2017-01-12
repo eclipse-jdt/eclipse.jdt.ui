@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,10 +20,12 @@ import org.eclipse.core.runtime.Assert;
 public class TestCaseElement extends TestElement implements ITestCaseElement {
 
 	private boolean fIgnored;
+	private boolean fIsDynamicTest;
 
-	public TestCaseElement(TestSuiteElement parent, String id, String testName, String displayName) {
+	public TestCaseElement(TestSuiteElement parent, String id, String testName, String displayName, boolean isDynamicTest) {
 		super(parent, id, testName, displayName);
 		Assert.isNotNull(parent);
+		fIsDynamicTest= isDynamicTest;
 	}
 
 	/**
@@ -76,5 +78,9 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 	@Override
 	public String toString() {
 		return "TestCase: " + getTestClassName() + "." + getTestMethodName() + " : " + super.toString(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	public boolean isDynamicTest() {
+		return fIsDynamicTest;
 	}
 }

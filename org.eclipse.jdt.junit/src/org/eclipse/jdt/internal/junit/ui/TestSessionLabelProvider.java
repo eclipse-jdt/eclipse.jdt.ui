@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,17 +81,18 @@ public class TestSessionLabelProvider extends LabelProvider implements IStyledLa
 	}
 
 	private String getTextForFlatLayout(TestCaseElement testCaseElement, String label) {
-		TestSuiteElement parent= testCaseElement.getParent();
-		String parentDisplayName= parent.getDisplayName();
-		String parentName= BasicElementLabels.getJavaElementName(parentDisplayName != null ? parentDisplayName : testCaseElement.getTestMethodName());
-		if (!parent.isTestFactory()) {
-			return Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, parentName });
+		String parentName;
+		String parentDisplayName= testCaseElement.getParent().getDisplayName();
+		if (parentDisplayName != null) {
+			parentName= parentDisplayName;
 		} else {
-			TestSuiteElement testSuiteElement= parent.getParent();
-			String displayName= testSuiteElement.getDisplayName();
-			String parentClassName= BasicElementLabels.getJavaElementName(displayName != null ? displayName : testSuiteElement.getSuiteTypeName());
-			return Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_factoryMethodName_className, new Object[] { label, parentName, parentClassName });
+			if (testCaseElement.isDynamicTest()) {
+				parentName= testCaseElement.getTestMethodName();
+			} else {
+				parentName= testCaseElement.getTestClassName();
+			}
 		}
+		return Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { label, BasicElementLabels.getJavaElementName(parentName) });
 	}
 
 	private StyledString addElapsedTime(StyledString styledString, double time) {

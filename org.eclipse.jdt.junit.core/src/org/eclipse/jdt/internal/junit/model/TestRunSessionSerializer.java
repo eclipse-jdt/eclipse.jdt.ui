@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -104,9 +104,6 @@ public class TestRunSessionSerializer implements XMLReader {
 			if (testSuiteElement.getDisplayName() != null) {
 				addCDATA(atts, IXMLTags.ATTR_DISPLAY_NAME, testSuiteElement.getDisplayName());
 			}
-			if (testSuiteElement.isTestFactory()) {
-				addCDATA(atts, IXMLTags.ATTR_TEST_FACTORY, Boolean.TRUE.toString());
-			}
 
 			startElement(IXMLTags.NODE_TESTSUITE, atts);
 			addFailure(testSuiteElement);
@@ -122,6 +119,11 @@ public class TestRunSessionSerializer implements XMLReader {
 
 			AttributesImpl atts= new AttributesImpl();
 			addCDATA(atts, IXMLTags.ATTR_NAME, testCaseElement.getTestMethodName());
+			String testName= testCaseElement.getTestName();
+			int indexOfParamTypes= testName.indexOf(':');
+			if (indexOfParamTypes != -1) { // See MessageIds.TEST_IDENTIFIER_MESSAGE_FORMAT
+				addCDATA(atts, IXMLTags.ATTR_PARAMETER_TYPES, testName.substring(indexOfParamTypes + 1));
+			}
 			addCDATA(atts, IXMLTags.ATTR_CLASSNAME, testCaseElement.getClassName());
 			if (! Double.isNaN(testCaseElement.getElapsedTimeInSeconds()))
 				addCDATA(atts, IXMLTags.ATTR_TIME, timeFormat.format(testCaseElement.getElapsedTimeInSeconds()));
@@ -132,7 +134,9 @@ public class TestRunSessionSerializer implements XMLReader {
 			if (testCaseElement.getDisplayName() != null) {
 				addCDATA(atts, IXMLTags.ATTR_DISPLAY_NAME, testCaseElement.getDisplayName());
 			}
-
+			if (testCaseElement.isDynamicTest()) {
+				addCDATA(atts, IXMLTags.ATTR_DYNAMIC_TEST, Boolean.TRUE.toString());
+			}
 			startElement(IXMLTags.NODE_TESTCASE, atts);
 			addFailure(testCaseElement);
 

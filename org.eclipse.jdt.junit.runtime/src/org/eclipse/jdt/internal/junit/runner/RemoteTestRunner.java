@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -494,7 +494,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 
 		notifyTestRunStarted(count);
 
-		// test count is 0 if only @TestFactory methods are present, hence test run should continue.
+		// test count is 0 if only dynamic tests will be run (i.e. only @TestFactory methods are present), hence test run should continue.
 		/*if (count == 0) {
 			notifyTestRunEnded(0);
 			return;
@@ -553,9 +553,9 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		return new DefaultClassifier();
 	}
 
-	public void visitTreeEntry(ITestIdentifier identifier, boolean hasChildren, int testCount, boolean isTestFactory, boolean isDynamicTest, String parentId) {
+	public void visitTreeEntry(ITestIdentifier identifier, boolean hasChildren, int testCount, boolean isDynamicTest, String parentId) {
 		String treeEntry= getTestId(identifier) + ',' + escapeTestName(identifier.getName()) + ',' + hasChildren + ',' + testCount 
-				+ ',' + isTestFactory + ',' + isDynamicTest + ',' + parentId + ',' + escapeTestName(identifier.getDisplayName());
+				+ ',' + isDynamicTest + ',' + parentId + ',' + escapeTestName(identifier.getDisplayName());
 		notifyTestTreeEntry(treeEntry);
 	}
 

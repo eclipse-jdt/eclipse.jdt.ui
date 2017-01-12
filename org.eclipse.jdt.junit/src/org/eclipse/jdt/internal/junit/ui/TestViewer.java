@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -387,7 +387,7 @@ public class TestViewer {
 			return new OpenTestAction(fTestRunnerPart, (TestCaseElement) children[0]);
 		} else {
 			int index= testName.indexOf('(');
-			if (testElement.isTestFactory() && index != 0) {
+			if (index != -1) {
 				if (children.length > 0 && children[0] instanceof TestCaseElement) {
 					return new OpenTestAction(fTestRunnerPart, (TestCaseElement) children[0]);
 				} else {
@@ -689,7 +689,7 @@ public class TestViewer {
 	}
 
 	public void selectFirstFailure() {
-		TestCaseElement firstFailure= getNextChildFailure(fTestRunSession.getTestRoot(), true);
+		TestElement firstFailure= getNextChildFailure(fTestRunSession.getTestRoot(), true);
 		if (firstFailure != null)
 			getActiveViewer().setSelection(new StructuredSelection(firstFailure), true);
 	}
@@ -718,7 +718,7 @@ public class TestViewer {
 		return getNextFailureSibling(selected, showNext);
 	}
 
-	private TestCaseElement getNextFailureSibling(TestElement current, boolean showNext) {
+	private TestElement getNextFailureSibling(TestElement current, boolean showNext) {
 		TestSuiteElement parent= current.getParent();
 		if (parent == null)
 			return null;
@@ -732,16 +732,20 @@ public class TestViewer {
 			TestElement sibling= (TestElement) siblings.get(i);
 			if (sibling.getStatus().isErrorOrFailure()) {
 				if (sibling instanceof TestCaseElement) {
-					return (TestCaseElement) sibling;
+					return sibling;
 				} else {
-					return getNextChildFailure((TestSuiteElement) sibling, showNext);
+					TestSuiteElement testSuiteElement= (TestSuiteElement) sibling;
+					if (testSuiteElement.getChildren().length == 0) {
+						return testSuiteElement;
+					}
+					return getNextChildFailure(testSuiteElement, showNext);
 				}
 			}
 		}
 		return getNextFailureSibling(parent, showNext);
 	}
 
-	private TestCaseElement getNextChildFailure(TestSuiteElement root, boolean showNext) {
+	private TestElement getNextChildFailure(TestSuiteElement root, boolean showNext) {
 		List<ITestElement> children= Arrays.asList(root.getChildren());
 		if (! showNext)
 			children= new ReverseList<>(children);
@@ -749,9 +753,13 @@ public class TestViewer {
 			TestElement child= (TestElement) children.get(i);
 			if (child.getStatus().isErrorOrFailure()) {
 				if (child instanceof TestCaseElement) {
-					return (TestCaseElement) child;
+					return child;
 				} else {
-					return getNextChildFailure((TestSuiteElement) child, showNext);
+					TestSuiteElement testSuiteElement= (TestSuiteElement) child;
+					if (testSuiteElement.getChildren().length == 0) {
+						return testSuiteElement;
+					}
+					return getNextChildFailure(testSuiteElement, showNext);
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006 IBM Corporation and others.
+ * Copyright (c) 2006, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,5 +14,5 @@
 package org.eclipse.jdt.internal.junit.runner;
 
 public interface IVisitsTestTrees {
-	public abstract void visitTreeEntry(ITestIdentifier identifier, boolean hasChildren, int testCount, boolean isTestFactory, boolean isDynamicTest, String parentId);
+	public abstract void visitTreeEntry(ITestIdentifier identifier, boolean hasChildren, int testCount, boolean isDynamicTest, String parentId);
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 IBM Corporation and others.
+ * Copyright (c) 2006, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -124,22 +124,22 @@ public class JUnit3TestReference implements ITestReference {
 	public void sendTree(IVisitsTestTrees notified) {
 		if (fTest instanceof TestDecorator) {
 			TestDecorator decorator= (TestDecorator) fTest;
-			notified.visitTreeEntry(getIdentifier(), true, 1, false, false, "-1"); //$NON-NLS-1$
+			notified.visitTreeEntry(getIdentifier(), true, 1, false, "-1"); //$NON-NLS-1$
 			sendTreeOfChild(decorator.getTest(), notified);
 		} else if (fTest instanceof TestSuite) {
 			TestSuite suite= (TestSuite) fTest;
-			notified.visitTreeEntry(getIdentifier(), true, suite.testCount(), false, false, "-1"); //$NON-NLS-1$
+			notified.visitTreeEntry(getIdentifier(), true, suite.testCount(), false, "-1"); //$NON-NLS-1$
 			for (int i= 0; i < suite.testCount(); i++) {
 				sendTreeOfChild(suite.testAt(i), notified);
 			}
 		} else if (isJUnit4TestSuiteAdapter(fTest)) {
 			List tests= (List) callJUnit4GetterMethod(fTest, "getTests"); //$NON-NLS-1$
-			notified.visitTreeEntry(getIdentifier(), true, tests.size(), false, false, "-1"); //$NON-NLS-1$
+			notified.visitTreeEntry(getIdentifier(), true, tests.size(), false, "-1"); //$NON-NLS-1$
 			for (Iterator iter= tests.iterator(); iter.hasNext();) {
 				sendTreeOfChild((Test) iter.next(), notified);
 			}
 		} else {
-			notified.visitTreeEntry(getIdentifier(), false, fTest.countTestCases(), false, false, "-1"); //$NON-NLS-1$
+			notified.visitTreeEntry(getIdentifier(), false, fTest.countTestCases(), false, "-1"); //$NON-NLS-1$
 		}
 	}
 

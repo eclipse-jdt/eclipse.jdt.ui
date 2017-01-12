@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -129,8 +129,7 @@ public class TestRunHandler extends DefaultHandler {
 			String pack= attributes.getValue(IXMLTags.ATTR_PACKAGE);
 			String suiteName= pack == null ? name : pack + "." + name; //$NON-NLS-1$
 			String displayName= attributes.getValue(IXMLTags.ATTR_DISPLAY_NAME);
-			boolean isTestFactory= Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_TEST_FACTORY)).booleanValue();
-			fTestSuite= (TestSuiteElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), suiteName, true, 0, isTestFactory, displayName);
+			fTestSuite= (TestSuiteElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), suiteName, true, 0, false, displayName);
 			readTime(fTestSuite, attributes);
 			fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
 
@@ -139,9 +138,15 @@ public class TestRunHandler extends DefaultHandler {
 
 		} else if (qName.equals(IXMLTags.NODE_TESTCASE)) {
 			String name= attributes.getValue(IXMLTags.ATTR_NAME);
+			String paramTypes= attributes.getValue(IXMLTags.ATTR_PARAMETER_TYPES);
 			String classname= attributes.getValue(IXMLTags.ATTR_CLASSNAME);
+			String testName= name + '(' + classname + ')';
+			if (paramTypes != null) { // See MessageIds.TEST_IDENTIFIER_MESSAGE_FORMAT
+				testName+= ':' + paramTypes;
+			}
 			String displayName= attributes.getValue(IXMLTags.ATTR_DISPLAY_NAME);
-			fTestCase= (TestCaseElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), name + '(' + classname + ')', false, 0, false, displayName);
+			boolean isDynamicTest= Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_DYNAMIC_TEST)).booleanValue();
+			fTestCase= (TestCaseElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), testName, false, 0, isDynamicTest, displayName);
 			fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
 			fTestCase.setIgnored(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_IGNORED)).booleanValue());
 			readTime(fTestCase, attributes);

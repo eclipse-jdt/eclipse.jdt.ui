@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 IBM Corporation and others.
+ * Copyright (c) 2006, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -98,9 +98,9 @@ public class JUnit4TestReference implements ITestReference {
 
 	private void sendTree(final IVisitsTestTrees notified, Description description) {
 		if (description.isTest()) {
-			notified.visitTreeEntry(new JUnit4Identifier(description), false, 1, false, false, "-1"); //$NON-NLS-1$
+			notified.visitTreeEntry(new JUnit4Identifier(description), false, 1, false, "-1"); //$NON-NLS-1$
 		} else {
-			notified.visitTreeEntry(new JUnit4Identifier(description), true, description.getChildren().size(), false, false, "-1"); //$NON-NLS-1$
+			notified.visitTreeEntry(new JUnit4Identifier(description), true, description.getChildren().size(), false, "-1"); //$NON-NLS-1$
 			for (Description child : description.getChildren()) {
 				sendTree(notified, child);
 			}

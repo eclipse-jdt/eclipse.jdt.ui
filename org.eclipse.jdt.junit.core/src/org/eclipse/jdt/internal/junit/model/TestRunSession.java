@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,7 +90,7 @@ public class TestRunSession implements ITestRunSession {
 	 */
 	private List<IncompleteTestSuite> fIncompleteTestSuites;
 
-	private List<IncompleteTestSuite> fIncompleteFactoryTestSuites;
+	private List<IncompleteTestSuite> fFactoryTestSuites;
 
 	/**
 	 * Suite for unrooted test case elements, or <code>null</code>.
@@ -361,7 +361,7 @@ public class TestRunSession implements ITestRunSession {
 			fTestRunnerClient= null;
 			fIdToTest= new HashMap<>();
 			fIncompleteTestSuites= null;
-			fIncompleteFactoryTestSuites= null;
+			fFactoryTestSuites= null;
 			fUnrootedSuite= null;
 
 		} catch (IllegalStateException e) {
@@ -469,7 +469,7 @@ public class TestRunSession implements ITestRunSession {
 	}
 
 	private TestElement addTreeEntry(String treeEntry) {
-		// format: testId","testName","isSuite","testcount","isTestFactory","isDynamicTest","parentId","displayName
+		// format: testId","testName","isSuite","testcount","isDynamicTest","parentId","displayName
 		int index0= treeEntry.indexOf(',');
 		String id= treeEntry.substring(0, index0);
 
@@ -481,7 +481,6 @@ public class TestRunSession implements ITestRunSession {
 		boolean isSuite= treeEntry.substring(index1 + 1, index2).equals("true"); //$NON-NLS-1$
 
 		int testCount;
-		boolean isTestFactory;
 		boolean isDynamicTest;
 		String parentId;
 		String displayName;
@@ -489,7 +488,6 @@ public class TestRunSession implements ITestRunSession {
 		int index3= treeEntry.indexOf(',', index2 + 1);
 		if (index3 == -1) {
 			testCount= Integer.parseInt(treeEntry.substring(index2 + 1));
-			isTestFactory= false;
 			isDynamicTest= false;
 			parentId= null;
 			displayName= null;
@@ -497,18 +495,15 @@ public class TestRunSession implements ITestRunSession {
 			testCount= Integer.parseInt(treeEntry.substring(index2 + 1, index3));
 
 			int index4= treeEntry.indexOf(',', index3 + 1);
-			isTestFactory= treeEntry.substring(index3 + 1, index4).equals("true"); //$NON-NLS-1$
+			isDynamicTest= treeEntry.substring(index3 + 1, index4).equals("true"); //$NON-NLS-1$
 
 			int index5= treeEntry.indexOf(',', index4 + 1);
-			isDynamicTest= treeEntry.substring(index4 + 1, index5).equals("true"); //$NON-NLS-1$
-
-			int index6= treeEntry.indexOf(',', index5 + 1);
-			parentId= treeEntry.substring(index5 + 1, index6);
+			parentId= treeEntry.substring(index4 + 1, index5);
 			if (parentId.equals("-1")) { //$NON-NLS-1$
 				parentId= null;
 			}
 
-			scanTestName(treeEntry, index6 + 1, displayNameBuffer);
+			scanTestName(treeEntry, index5 + 1, displayNameBuffer);
 			displayName= displayNameBuffer.toString().trim();
 			if (displayName.equals(testName)) {
 				displayName= null;
@@ -517,39 +512,39 @@ public class TestRunSession implements ITestRunSession {
 
 		if (isDynamicTest) {
 			if (parentId != null) {
-				for (IncompleteTestSuite suite : fIncompleteFactoryTestSuites) {
+				for (IncompleteTestSuite suite : fFactoryTestSuites) {
 					if (parentId.equals(suite.fTestSuiteElement.getId())) {
-						return createTestElement(suite.fTestSuiteElement, id, testName, isSuite, testCount, false, displayName);
+						return createTestElement(suite.fTestSuiteElement, id, testName, isSuite, testCount, isDynamicTest, displayName);
 					}
 				}
 			}
-			return createTestElement(getUnrootedSuite(), id, testName, isSuite, testCount, false, displayName); // should not reach here
+			return createTestElement(getUnrootedSuite(), id, testName, isSuite, testCount, isDynamicTest, displayName); // should not reach here
 		} else {
 			if (fIncompleteTestSuites.isEmpty()) {
-				return createTestElement(fTestRoot, id, testName, isSuite, testCount, isTestFactory, displayName);
+				return createTestElement(fTestRoot, id, testName, isSuite, testCount, isDynamicTest, displayName);
 			} else {
 				int suiteIndex= fIncompleteTestSuites.size() - 1;
 				IncompleteTestSuite openSuite= fIncompleteTestSuites.get(suiteIndex);
 				openSuite.fOutstandingChildren--;
 				if (openSuite.fOutstandingChildren <= 0)
 					fIncompleteTestSuites.remove(suiteIndex);
-				return createTestElement(openSuite.fTestSuiteElement, id, testName, isSuite, testCount, isTestFactory, displayName);
+				return createTestElement(openSuite.fTestSuiteElement, id, testName, isSuite, testCount, isDynamicTest, displayName);
 			}
 		}
 	}
 
-	public TestElement createTestElement(TestSuiteElement parent, String id, String testName, boolean isSuite, int testCount, boolean isTestFactory, String displayName) {
+	public TestElement createTestElement(TestSuiteElement parent, String id, String testName, boolean isSuite, int testCount, boolean isDynamicTest, String displayName) {
 		TestElement testElement;
 		if (isSuite) {
-			TestSuiteElement testSuiteElement= new TestSuiteElement(parent, id, testName, testCount, displayName, isTestFactory);
+			TestSuiteElement testSuiteElement= new TestSuiteElement(parent, id, testName, testCount, displayName);
 			testElement= testSuiteElement;
 			if (testCount > 0) {
 				fIncompleteTestSuites.add(new IncompleteTestSuite(testSuiteElement, testCount));
-			} else if (isTestFactory && fIncompleteFactoryTestSuites != null) {
-				fIncompleteFactoryTestSuites.add(new IncompleteTestSuite(testSuiteElement, testCount));
+			} else if (fFactoryTestSuites != null) {
+				fFactoryTestSuites.add(new IncompleteTestSuite(testSuiteElement, testCount));
 			}
 		} else {
-			testElement= new TestCaseElement(parent, id, testName, displayName);
+			testElement= new TestCaseElement(parent, id, testName, displayName, isDynamicTest);
 		}
 		fIdToTest.put(id, testElement);
 		return testElement;
@@ -600,7 +595,7 @@ public class TestRunSession implements ITestRunSession {
 		@Override
 		public void testRunStarted(int testCount) {
 			fIncompleteTestSuites= new ArrayList<>();
-			fIncompleteFactoryTestSuites= new ArrayList<>();
+			fFactoryTestSuites= new ArrayList<>();
 
 			fStartedCount= 0;
 			fIgnoredCount= 0;
@@ -683,7 +678,7 @@ public class TestRunSession implements ITestRunSession {
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
 			setStatus(testCaseElement, Status.RUNNING);
 
-			if (testCaseElement.getParent().isTestFactory()) {
+			if (testCaseElement.isDynamicTest()) {
 				fTotalCount++;
 			}
 
@@ -731,17 +726,6 @@ public class TestRunSession implements ITestRunSession {
 			TestElement testElement= getTestElement(testId);
 			if (testElement == null) {
 				testElement= createUnrootedTestElement(testId, testName);
-			}
-
-			if (testElement instanceof TestSuiteElement && ((TestSuiteElement) testElement).isTestFactory()) {
-				// Since the test factory method failed, its children won't be created. So, convert it into a TestCaseElement. See bug 507171.
-				TestSuiteElement parent= testElement.getParent();
-				TestCaseElement testCaseElement= new TestCaseElement(parent, testId, testElement.getTestName(), testElement.getDisplayName());
-				parent.removeChild(testElement);
-				fIdToTest.put(testId, testCaseElement);
-				fTotalCount++;
-				fStartedCount++;
-				testElement= testCaseElement;
 			}
 
 			Status status;
