@@ -2,7 +2,7 @@
 
 <!--
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -176,9 +176,14 @@ return ${name};</template>
 	${cursor}
 }</template>
 
-<template name="test" description="%Templates.test_junit4" id="org.eclipse.jdt.ui.templates.test_junit4" context="java-members" enabled="true" autoinsert="false">@${testType:newType(org.junit.Test)}
+<template name="test4" description="%Templates.test_junit4" id="org.eclipse.jdt.ui.templates.test_junit4" context="java-members" enabled="true" autoinsert="false">@${testType:newType(org.junit.Test)}
 public void ${testName}() throws Exception {
 	${staticImport:importStatic('org.junit.Assert.*')}${cursor}
+}</template>
+
+<template name="test5" description="%Templates.test_junit5" id="org.eclipse.jdt.ui.templates.test_junit5" context="java-members" enabled="true" autoinsert="false">@${testType:newType(org.junit.jupiter.api.Test)}
+void ${testName}() throws Exception {
+	${staticImport:importStatic('org.junit.jupiter.api.Assertions.*')}${cursor}
 }</template>
 
 <template name="nls" description="%Templates.non-nls" id="org.eclipse.jdt.ui.templates.non-nls" context="java" enabled="true" autoinsert="false">//$$NON-NLS-${N}$$</template>
