@@ -187,7 +187,7 @@ void ${testName}() throws Exception {
 }</template>
 
 <template name="testfactory" description="%Templates.testfactory_junit5" id="org.eclipse.jdt.ui.templates.testfactory_junit5" context="java-members" enabled="true" autoinsert="false">@${testfactoryType:newType(org.junit.jupiter.api.TestFactory)}
-${returnType:link('Stream&lt;DynamicTest&gt;', 'Collection&lt;DynamicTest&gt;', 'Iterable&lt;DynamicTest&gt;', 'Iterator&lt;DynamicTest&gt;')} ${testName}() throws Exception {
+${returnType:link('Stream&lt;DynamicTest&gt;', 'Collection&lt;DynamicTest&gt;', 'Iterable&lt;DynamicTest&gt;', 'Iterator&lt;DynamicTest&gt;')} ${testFactoryName}() throws Exception {
 	${cursor}return null;${typeImports:import('org.junit.jupiter.api.DynamicTest', 'java.util.stream.Stream', 'java.util.Collection', 'java.util.Iterator')}${staticImports:importStatic('org.junit.jupiter.api.Assertions.*', 'org.junit.jupiter.api.DynamicTest.*')}
 }</template>
 
