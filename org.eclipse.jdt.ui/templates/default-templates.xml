@@ -186,6 +186,11 @@ void ${testName}() throws Exception {
 	${staticImport:importStatic('org.junit.jupiter.api.Assertions.*')}${cursor}
 }</template>
 
+<template name="testfactory" description="%Templates.testfactory_junit5" id="org.eclipse.jdt.ui.templates.testfactory_junit5" context="java-members" enabled="true" autoinsert="false">@${testfactoryType:newType(org.junit.jupiter.api.TestFactory)}
+${returnType:link('Stream&lt;DynamicTest&gt;', 'Collection&lt;DynamicTest&gt;', 'Iterable&lt;DynamicTest&gt;', 'Iterator&lt;DynamicTest&gt;')} ${testName}() throws Exception {
+	${cursor}return null;${typeImports:import('org.junit.jupiter.api.DynamicTest', 'java.util.stream.Stream', 'java.util.Collection', 'java.util.Iterator')}${staticImports:importStatic('org.junit.jupiter.api.Assertions.*', 'org.junit.jupiter.api.DynamicTest.*')}
+}</template>
+
 <template name="nls" description="%Templates.non-nls" id="org.eclipse.jdt.ui.templates.non-nls" context="java" enabled="true" autoinsert="false">//$$NON-NLS-${N}$$</template>
 
 <template name="fall-through" description="%Templates.fall-through" id="org.eclipse.jdt.ui.templates.fall-through" context="java-statements" enabled="true" autoinsert="false">//$$FALL-THROUGH$$</template>
