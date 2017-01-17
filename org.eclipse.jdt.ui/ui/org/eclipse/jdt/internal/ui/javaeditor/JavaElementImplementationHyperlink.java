@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2009, 2016 IBM Corporation and others.
+ * Copyright (c) 2009, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -200,7 +200,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 					parentTypeBinding= Bindings.getBindingOfParentType(node);
 				}
 			}
-			final IType receiverType= parentTypeBinding != null ? (IType) parentTypeBinding.getJavaElement() : null;
+			final IType receiverType= getType(parentTypeBinding);
 			if (receiverType == null) {
 				openQuickHierarchy(editor);
 				return;
@@ -313,6 +313,21 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 		} else {
 			openQuickHierarchy(editor);
 		}
+	}
+
+	private static IType getType(ITypeBinding typeBinding) {
+		if (typeBinding == null) {
+			return null;
+		}
+		if (typeBinding.isTypeVariable()) {
+			ITypeBinding[] typeBounds= typeBinding.getTypeBounds();
+			if (typeBounds.length > 0) {
+				typeBinding= typeBounds[0].getTypeDeclaration();
+			} else {
+				return null;
+			}
+		}
+		return (IType) typeBinding.getJavaElement();
 	}
 
 	/**
