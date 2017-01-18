@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
  * Some classes had to be split in two. They are listed with fully-qualified names here.
  * Back-links in Javadoc from classes in org.eclipse.jdt.core.manipulation to this
  * class are not possible, so we use line comments there: // @see JDTUIHelperClasses
+ * </p>
+ * <p>
+ * New helpers preferably go into the o.e.jdt.core.manipulation bundle.
  * </p>
  * 
  * Here's a list of the most important helper classes:
