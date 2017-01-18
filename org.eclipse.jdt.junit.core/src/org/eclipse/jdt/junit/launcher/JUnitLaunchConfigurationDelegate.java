@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -228,7 +228,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junit4notonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
 			if (isJUnit5Configuration && !CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
-				String msg= Messages.format(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junit5notonpath, JUnitCorePlugin.JUNIT5_ANNOTATION_NAME);
+				String msg= Messages.format(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junit5notonpath, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME);
 				abort(msg, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
 		} finally {
