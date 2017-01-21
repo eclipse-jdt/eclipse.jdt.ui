@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -19,7 +21,12 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMemberValuePair;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -57,7 +64,17 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 public class NullAnnotationsRewriteOperations {
+
+	static final String TYPE_USE_NAME= ElementType.class.getName()+'.'+ElementType.TYPE_USE.name();
+
+	// reduced copy of org.eclipse.jdt.annotation.DefaultLocation:
+	enum DefaultLocation {
+		PARAMETER,
+		RETURN_TYPE
+	}
 
 	public enum ChangeKind {
 		LOCAL,		// do the normal thing locally in the current method
@@ -68,10 +85,12 @@ public class NullAnnotationsRewriteOperations {
 
 	static abstract class SignatureAnnotationRewriteOperation extends CompilationUnitRewriteOperation {
 		// initialized from the Builder:
-		CompilationUnit fUnit;
-		String fAnnotationToAdd;
-		String fAnnotationToRemove;
-		boolean fAllowRemove;
+		protected CompilationUnit fUnit;
+		protected String fAnnotationToAdd;
+		protected String fAnnotationToRemove;
+		protected boolean fAllowRemove;
+		protected boolean fUseNullTypeAnnotations;
+		protected boolean fRequireExplicitAnnotation;
 		// assigned within constructors:
 		protected String fKey;
 		protected String fMessage;
@@ -84,6 +103,8 @@ public class NullAnnotationsRewriteOperations {
 			fAnnotationToAdd= builder.fAnnotationToAdd;
 			fAnnotationToRemove= builder.fAnnotationToRemove;
 			fAllowRemove= builder.fAllowRemove;
+			fUseNullTypeAnnotations= builder.fUseNullTypeAnnotations;
+			fRequireExplicitAnnotation= builder.requiresExplicitAnnotation();
 		}
 
 		/* A globally unique key that identifies the position being annotated (for avoiding double annotations). */
@@ -117,7 +138,7 @@ public class NullAnnotationsRewriteOperations {
 			return true;
 		}
 
-		/* Is the given element affected by a @NonNullByDefault. */
+		/* Is the given element affected by a @NonNullByDefault v1.x? */
 		boolean hasNonNullDefault(IBinding enclosingElement) {
 			if (!fRemoveIfNonNullByDefault) return false;
 			IAnnotationBinding[] annotations = enclosingElement.getAnnotations();
@@ -144,6 +165,79 @@ public class NullAnnotationsRewriteOperations {
 					return hasNonNullDefault(typeBinding.getDeclaringClass());
 				else
 					return hasNonNullDefault(typeBinding.getPackage());
+			}
+			return false;
+		}
+
+		/* Is the given element affected by a 308-style @NonNullByDefault? */
+		boolean hasNonNullDefault308(IBinding enclosingElement, int parameterRank, DefaultLocation defaultLocation, boolean recursiveCall) {
+			if (!fRemoveIfNonNullByDefault) return false;
+			if (!recursiveCall) {
+				ITypeBinding affectedType= null;
+				if (enclosingElement instanceof IMethodBinding) {
+					switch (defaultLocation) {
+						case RETURN_TYPE:
+							affectedType= ((IMethodBinding) enclosingElement).getReturnType();
+							break;
+						case PARAMETER:
+							affectedType= ((IMethodBinding) enclosingElement).getParameterTypes()[parameterRank];
+							break;
+						default:
+							// no other locations supported yet (fields?)
+					}
+				} else if (enclosingElement instanceof IVariableBinding) {
+					affectedType= ((IVariableBinding) enclosingElement).getType();
+				}
+				if (affectedType != null) {
+					if (affectedType.isTypeVariable() || affectedType.isWildcardType()) {
+						return false; // not affected by @NonNullByDefault
+					}
+				}
+			}
+			IAnnotationBinding[] annotations= enclosingElement.getAnnotations();
+			for (int i= 0; i < annotations.length; i++) {
+				IAnnotationBinding annot= annotations[i];
+				ITypeBinding annotationType= annot.getAnnotationType();
+				if (annotationType != null && annotationType.getQualifiedName().equals(fNonNullByDefaultName)) {
+					IMemberValuePairBinding[] pairs= annot.getDeclaredMemberValuePairs();
+					if (pairs.length > 0) {
+						// does the default's set of locations contain `defaultLocation`?
+						for (int j= 0; j < pairs.length; j++)
+							if (pairs[j].getKey() == null || pairs[j].getKey().equals("value")) { //$NON-NLS-1$
+								return matchesLocation(pairs[j].getValue(), defaultLocation);
+							}
+					}
+					return true;
+				}
+			}
+			if (enclosingElement instanceof IVariableBinding) {
+				IVariableBinding variable= (IVariableBinding) enclosingElement;
+				enclosingElement= variable.isParameter() ? variable.getDeclaringMethod() : variable.getDeclaringClass();
+				return hasNonNullDefault308(enclosingElement, -1, defaultLocation, true);
+			} else if (enclosingElement instanceof IMethodBinding) {
+				return hasNonNullDefault308(((IMethodBinding)enclosingElement).getDeclaringClass(), -1, defaultLocation, true);
+			} else if (enclosingElement instanceof ITypeBinding) {
+				ITypeBinding typeBinding= (ITypeBinding)enclosingElement;
+				if (typeBinding.isLocal())
+					return hasNonNullDefault308(typeBinding.getDeclaringMethod(), -1, defaultLocation, true);
+				else if (typeBinding.isMember())
+					return hasNonNullDefault308(typeBinding.getDeclaringClass(), -1, defaultLocation, true);
+				else
+					return hasNonNullDefault308(typeBinding.getPackage(), -1, defaultLocation, true);
+			}
+			return false;
+		}
+		
+		private boolean matchesLocation(Object value, DefaultLocation location) {
+			if (value instanceof Object[]) {
+				Object[] values= (Object[]) value;
+				for (int i= 0; i < values.length; i++) {
+					if (matchesLocation(values[i], location))
+						return true;
+				}
+			} else if (value instanceof IVariableBinding) {
+				String name= ((IVariableBinding) value).getName();
+				return location.name().equals(name);
 			}
 			return false;
 		}
@@ -176,8 +270,12 @@ public class NullAnnotationsRewriteOperations {
 			TextEditGroup group= createTextEditGroup(fMessage, cuRewrite);
 			if (!checkExisting(fBodyDeclaration.modifiers(), listRewrite, group))
 				return;
-			if (hasNonNullDefault(fBodyDeclaration.resolveBinding()))
-				return; // should be safe, as in this case checkExisting() should've already produced a change (remove existing annotation).
+			if (!fRequireExplicitAnnotation) {
+				if (fUseNullTypeAnnotations
+						? hasNonNullDefault308(fBodyDeclaration.resolveBinding(), /*parameterRank*/-1, DefaultLocation.RETURN_TYPE, false)
+						: hasNonNullDefault(fBodyDeclaration.resolveBinding()))
+					return; // should be safe, as in this case checkExisting() should've already produced a change (remove existing annotation).
+			}
 			Annotation newAnnotation= ast.newMarkerAnnotation();
 			ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 			String resolvableName= importRewrite.addImport(fAnnotationToAdd);
@@ -198,6 +296,7 @@ public class NullAnnotationsRewriteOperations {
 		}
 
 		private SingleVariableDeclaration fArgument;
+		private int fParameterRank;
 
 		// for lambda parameter (can return null):
 		static ParameterAnnotationRewriteOperation create(LambdaExpression lambda, IndexedParameter parameter, String message, Builder builder) {
@@ -223,6 +322,7 @@ public class NullAnnotationsRewriteOperations {
 			super(builder);
 			fKey= methodBinding.getKey();
 			fArgument= (SingleVariableDeclaration) parameters.get(paramIdx);
+			fParameterRank= paramIdx;
 			fKey+= fArgument.getName().getIdentifier();
 			fMessage= message;
 		}
@@ -234,6 +334,12 @@ public class NullAnnotationsRewriteOperations {
 			TextEditGroup group= createTextEditGroup(fMessage, cuRewrite);
 			if (!checkExisting(fArgument.modifiers(), listRewrite, group))
 				return;
+			if (!fRequireExplicitAnnotation) {
+				if (fUseNullTypeAnnotations
+						? hasNonNullDefault308(fArgument.resolveBinding(), fParameterRank, DefaultLocation.PARAMETER, false)
+						: hasNonNullDefault(fArgument.resolveBinding()))
+					return; // should be safe, as in this case checkExisting() should've already produced a change (remove existing annotation).
+			}
 			Annotation newAnnotation= ast.newMarkerAnnotation();
 			ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 			String resolvableName= importRewrite.addImport(fAnnotationToAdd);
@@ -299,21 +405,62 @@ public class NullAnnotationsRewriteOperations {
 	public static class Builder {
 
 		IProblemLocation fProblem;
+		ChangeKind fChangeKind;
 		CompilationUnit fUnit;
 		String fAnnotationToAdd;
 		String fAnnotationToRemove;
 		boolean fAllowRemove;
 		boolean fAffectsParameter;
+		boolean fUseNullTypeAnnotations;
 
 		public Builder(IProblemLocation problem, CompilationUnit unit, String annotationToAdd, String annotationToRemove,
-				boolean allowRemove, boolean affectsParameter)
+				boolean allowRemove, boolean affectsParameter, ChangeKind changeKind)
 		{
-			fProblem= problem;
+			fChangeKind= changeKind;
 			fUnit= unit;
 			fAnnotationToAdd= annotationToAdd;
 			fAnnotationToRemove= annotationToRemove;
 			fAllowRemove= allowRemove;
 			fAffectsParameter= affectsParameter;
+			fProblem= problem;
+			fUseNullTypeAnnotations= usesNullTypeAnnotations(unit.getJavaElement(), annotationToAdd);
+		}
+
+		private boolean usesNullTypeAnnotations(IJavaElement cu, String annotationName) {
+			IJavaProject project= (IJavaProject) cu.getAncestor(IJavaElement.JAVA_PROJECT);
+			if (!JavaModelUtil.is18OrHigher(project)) {
+				return false;
+			}
+			try {
+				IType annotationType= project.findType(annotationName);
+				if (annotationType == null) {
+					return false;
+				}
+				IAnnotation[] annotations= annotationType.getAnnotations();
+				for (int i= 0; i < annotations.length; i++) {
+					if (annotations[i].getElementName().equals(Target.class.getName())) {
+						for (IMemberValuePair valuePair : annotations[i].getMemberValuePairs()) {
+							if (TYPE_USE_NAME.equals(valuePair.getValue())) {
+								return true;
+							}
+						}
+						return false;
+					}
+				}
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+			return false;
+		}
+
+		public boolean requiresExplicitAnnotation() {
+			switch (fProblem.getProblemId()) {
+				case IProblem.ConflictingInheritedNullAnnotations:
+				case IProblem.ConflictingNullAnnotations:
+					return fChangeKind != ChangeKind.OVERRIDDEN;
+				default:
+					return false;
+			}
 		}
 
 		public void swapAnnotations() {
@@ -498,6 +645,7 @@ public class NullAnnotationsRewriteOperations {
 				case IProblem.IllegalRedefinitionToNonNullParameter:
 					break;
 				case IProblem.IllegalReturnNullityRedefinition:
+				case IProblem.ConflictingNullAnnotations:
 					if (declaringNode == null)
 						declaringNode= selectedNode;
 					break;
@@ -515,16 +663,21 @@ public class NullAnnotationsRewriteOperations {
 				// complaint is in signature of this method
 				MethodDeclaration declaration= (MethodDeclaration) declaringNode;
 				switch (fProblem.getProblemId()) {
-					case IProblem.IllegalDefinitionToNonNullParameter:
-					case IProblem.IllegalRedefinitionToNonNullParameter:
+				case IProblem.IllegalReturnNullityRedefinition:
+					if (!hasNullAnnotation(declaration)) {
+						return null; // don't adjust super if local has no explicit annotation (?)
+					}
+					//$FALL-THROUGH$
+				case IProblem.IllegalDefinitionToNonNullParameter:
+				case IProblem.IllegalRedefinitionToNonNullParameter:
+				case IProblem.ConflictingNullAnnotations:
+					if (fAffectsParameter) {
 						return createChangeOverriddenParameterOperation(cu, declaration, selectedNode, annotationNameLabel);
-					case IProblem.IllegalReturnNullityRedefinition:
-						if (hasNullAnnotation(declaration)) { // don't adjust super if local has no explicit annotation (?)
-							return createChangeOverriddenReturnOperation(cu, declaration, annotationNameLabel);
-						}
-						break;
-					default:
-						return null;
+					} else {
+						return createChangeOverriddenReturnOperation(cu, declaration, annotationNameLabel);
+					}
+				default:
+					return null;
 				}
 			}
 			return null;
@@ -629,6 +782,7 @@ public class NullAnnotationsRewriteOperations {
 		}
 
 		private MethodDeclaration findMethodDeclarationInUnit(ICompilationUnit cu, IMethodBinding method, boolean sameUnitOnly) {
+			method= method.getMethodDeclaration();
 			CompilationUnit compilationUnit= findCUForMethod(fUnit, cu, method);
 			if (compilationUnit == null)
 				return null;

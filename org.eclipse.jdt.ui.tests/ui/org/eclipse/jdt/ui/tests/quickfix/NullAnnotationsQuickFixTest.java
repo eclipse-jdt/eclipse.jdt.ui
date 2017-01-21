@@ -1210,17 +1210,16 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 			proposal= (CUCorrectionProposal)proposals.get(1);
 
-			assertEqualString(proposal.getDisplayString(), "Change parameter 'o' to '@NonNull'");
+			assertEqualString(proposal.getDisplayString(), "Change parameter in overridden 'foo(..)' to '@NonNull'");
 
 			preview= getPreviewContent(proposal);
 
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("import org.eclipse.jdt.annotation.*;\n");
-			buf.append("@NonNullByDefault\n");
-			buf.append("public class E2 extends E {\n");
+			buf.append("public class E {\n");
 			buf.append("    void foo(@NonNull Object o) {\n");
-			buf.append("        System.out.print(\"E2\");\n");
+			buf.append("        // nop\n");
 			buf.append("    }\n");
 			buf.append("}\n");
 			assertEqualString(preview, buf.toString());

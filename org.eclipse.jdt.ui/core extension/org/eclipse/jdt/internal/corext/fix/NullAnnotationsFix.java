@@ -88,7 +88,8 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		IJavaElement javaElement= compilationUnit.getJavaElement();
 		String nullableAnnotationName= getNullableAnnotationName(javaElement, false);
 		String nonNullAnnotationName= getNonNullAnnotationName(javaElement, false);
-		Builder builder= new Builder(problem, compilationUnit, nullableAnnotationName, nonNullAnnotationName, /*allowRemove*/true, isArgumentProblem);
+		Builder builder= new Builder(problem, compilationUnit, nullableAnnotationName, nonNullAnnotationName,
+										/*allowRemove*/true, isArgumentProblem, changeKind);
 		boolean addNonNull= false;
 
 		switch (problem.getProblemId()) {
@@ -117,8 +118,12 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 				}
 				break;
 			case IProblem.ConflictingNullAnnotations:
+				if (isArgumentProblem && changeKind == ChangeKind.INVERSE) {
+					return null; // cannot redefine @Nullable param to @NonNull
+				}
+				//$FALL-THROUGH$
 			case IProblem.ConflictingInheritedNullAnnotations:
-				if (changeKind == ChangeKind.INVERSE) {
+				if (changeKind == ChangeKind.INVERSE || changeKind == ChangeKind.OVERRIDDEN) {
 					addNonNull= true;
 					builder.swapAnnotations();
 				}
@@ -198,7 +203,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 				continue; // problem was filtered out by createCleanUp()
 			boolean isArgumentProblem= isComplainingAboutArgument(problem.getCoveredNode(compilationUnit));
 			Builder builder= new Builder(problem, compilationUnit, nullableAnnotationName, nonNullAnnotationName,
-											/*allowRemove*/false, isArgumentProblem);
+											/*allowRemove*/false, isArgumentProblem, ChangeKind.LOCAL);
 			boolean addNonNull= false;
 			// cf. createNullAnnotationInSignatureFix() but changeKind is constantly LOCAL
 			switch (problem.getProblemId()) {
