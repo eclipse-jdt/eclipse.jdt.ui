@@ -95,14 +95,14 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 
 		fJProject1= ProjectTestSetup.getProject();
 
-		if (this.ANNOTATION_JAR_PATH == null) {
+		if (ANNOTATION_JAR_PATH == null) {
 			String version= "[1.1.0,2.0.0)"; // tests run at 1.5, need the "old" null annotations
 			Bundle[] bundles= Platform.getBundles("org.eclipse.jdt.annotation", version);
 			File bundleFile= FileLocator.getBundleFile(bundles[0]);
 			if (bundleFile.isDirectory())
-				this.ANNOTATION_JAR_PATH= bundleFile.getPath() + "/bin";
+				ANNOTATION_JAR_PATH= bundleFile.getPath() + "/bin";
 			else
-				this.ANNOTATION_JAR_PATH= bundleFile.getPath();
+				ANNOTATION_JAR_PATH= bundleFile.getPath();
 		}
 		JavaProjectHelper.addLibrary(fJProject1, new Path(ANNOTATION_JAR_PATH));
 
@@ -560,8 +560,8 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
-		
-		
+
+
 		// secondary proposal: Change return type of 'foo(..)' to '@Nullable'
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		preview= getPreviewContent(proposal);
@@ -861,7 +861,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
 		assertEqualString(proposal.getDisplayString(), "Change parameter 'e1' to '@Nullable'");
-		
+
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
@@ -1061,12 +1061,12 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			buf.append("    }\n");
 			buf.append("}\n");
 			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-	
+
 			CompilationUnit astRoot= getASTRoot(cu);
 			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 			assertNumberOfProposals(proposals, 2); // only "add @SW"
 		} finally {
-			fJProject1.setOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);			
+			fJProject1.setOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
 		}
 	}
 
@@ -1106,7 +1106,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3); // ignore 2nd ("add @SW")
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
 		assertEqualString(proposal.getDisplayString(), "Change parameter 'o' to '@Nullable'");
@@ -1140,7 +1140,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		CompilationUnit astRoot= getASTRoot(cu);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
 		assertNumberOfProposals(proposals, 3); // ignore 2nd ("add @SW")
-		
+
 		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
 
 		assertEqualString(proposal.getDisplayString(), "Change parameter 'o' to '@Nullable'");
@@ -1179,7 +1179,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("import org.eclipse.jdt.annotation.*;\n");
-			buf.append("@NonNullByDefault\n"); 
+			buf.append("@NonNullByDefault\n");
 			buf.append("public class E2 extends E {\n");
 			buf.append("    void foo(Object o) {\n");
 			buf.append("        System.out.print(\"E2\");\n");
@@ -1200,7 +1200,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("import org.eclipse.jdt.annotation.*;\n");
-			buf.append("@NonNullByDefault\n"); 
+			buf.append("@NonNullByDefault\n");
 			buf.append("public class E2 extends E {\n");
 			buf.append("    void foo(@Nullable Object o) {\n");
 			buf.append("        System.out.print(\"E2\");\n");
@@ -1217,7 +1217,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("import org.eclipse.jdt.annotation.*;\n");
-			buf.append("@NonNullByDefault\n"); 
+			buf.append("@NonNullByDefault\n");
 			buf.append("public class E2 extends E {\n");
 			buf.append("    void foo(@NonNull Object o) {\n");
 			buf.append("        System.out.print(\"E2\");\n");
@@ -1375,7 +1375,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			buf.append("    }\n");
 			buf.append("}\n");
 			pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-			
+
 			buf= new StringBuffer();
 			buf.append("package test1;\n");
 			buf.append("import org.eclipse.jdt.annotation.*;\n");
@@ -1482,7 +1482,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
-		
+
 		proposal= (CUCorrectionProposal)proposals.get(1);
 
 		assertEqualString(proposal.getDisplayString(), "Change return type of 'bar(..)' to '@NonNull'");
@@ -1506,9 +1506,9 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	// remove @Nullable without adding redundant @NonNull (due to @NonNullByDefault)
 	// variant: package-level default
 	public void testChangeReturn5() throws Exception {
-		String suppressOptionalErrors= this.fJProject1.getOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, true);
+		String suppressOptionalErrors= fJProject1.getOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, true);
 		try {
-			this.fJProject1.setOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, JavaCore.ENABLED);
+			fJProject1.setOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, JavaCore.ENABLED);
 			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 
 			StringBuffer buf= new StringBuffer();
@@ -1573,7 +1573,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			buf.append("}\n");
 			assertEqualString(preview, buf.toString());
 		} finally {
-			this.fJProject1.setOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, suppressOptionalErrors);
+			fJProject1.setOption(JavaCore.COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS, suppressOptionalErrors);
 		}
 	}
 
@@ -1940,7 +1940,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 	// Attempt to override an unspec'ed argument with a @NonNull argument
 	// -> change to @Nullable
 	// -> change overridden to @NonNull
-	// Specific for this test: arg name is different in overridden method. 
+	// Specific for this test: arg name is different in overridden method.
 	public void testBug506108() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

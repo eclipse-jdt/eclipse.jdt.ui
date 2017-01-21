@@ -95,14 +95,14 @@ public class NullAnnotationsQuickFixTest18Mix extends QuickFixTest {
 
 		fJProject1= Java18ProjectTestSetup.getProject();
 
-		if (this.ANNOTATION_JAR_PATH == null) {
+		if (ANNOTATION_JAR_PATH == null) {
 			String version= "[1.1.0,2.0.0)"; // tests run at 1.8, but still use "old" null annotations
 			Bundle[] bundles= Platform.getBundles("org.eclipse.jdt.annotation", version);
 			File bundleFile= FileLocator.getBundleFile(bundles[0]);
 			if (bundleFile.isDirectory())
-				this.ANNOTATION_JAR_PATH= bundleFile.getPath() + "/bin";
+				ANNOTATION_JAR_PATH= bundleFile.getPath() + "/bin";
 			else
-				this.ANNOTATION_JAR_PATH= bundleFile.getPath();
+				ANNOTATION_JAR_PATH= bundleFile.getPath();
 		}
 		JavaProjectHelper.addLibrary(fJProject1, new Path(ANNOTATION_JAR_PATH));
 
@@ -125,7 +125,7 @@ public class NullAnnotationsQuickFixTest18Mix extends QuickFixTest {
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
 		buf.append("\n");
-		buf.append("interface Consumer<T> {\n"); 
+		buf.append("interface Consumer<T> {\n");
 		buf.append("    void accept(T t);\n");
 		buf.append("}\n");
 		buf.append("public class Snippet {\n");
@@ -156,7 +156,7 @@ public class NullAnnotationsQuickFixTest18Mix extends QuickFixTest {
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
 		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
 		buf.append("\n");
-		buf.append("interface Consumer<T> {\n"); 
+		buf.append("interface Consumer<T> {\n");
 		buf.append("    void accept(T t);\n");
 		buf.append("}\n");
 		buf.append("public class Snippet {\n");
@@ -172,7 +172,7 @@ public class NullAnnotationsQuickFixTest18Mix extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
-		
+
 		proposal= (CUCorrectionProposal) proposals.get(1);
 		preview= getPreviewContent(proposal);
 
@@ -181,7 +181,7 @@ public class NullAnnotationsQuickFixTest18Mix extends QuickFixTest {
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
 		buf.append("\n");
-		buf.append("interface Consumer<T> {\n"); 
+		buf.append("interface Consumer<T> {\n");
 		buf.append("    void accept(T t);\n");
 		buf.append("}\n");
 		buf.append("public class Snippet {\n");
@@ -212,7 +212,7 @@ public class NullAnnotationsQuickFixTest18Mix extends QuickFixTest {
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
 		buf.append("\n");
-		buf.append("interface Consumer<T> {\n"); 
+		buf.append("interface Consumer<T> {\n");
 		buf.append("    void accept(T t);\n");
 		buf.append("}\n");
 		buf.append("public class Snippet {\n");
@@ -242,7 +242,7 @@ public class NullAnnotationsQuickFixTest18Mix extends QuickFixTest {
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
 		buf.append("\n");
-		buf.append("interface Consumer<T> {\n"); 
+		buf.append("interface Consumer<T> {\n");
 		buf.append("    void accept(T t);\n");
 		buf.append("}\n");
 		buf.append("public class Snippet {\n");
@@ -268,7 +268,7 @@ public class NullAnnotationsQuickFixTest18Mix extends QuickFixTest {
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
 		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
 		buf.append("\n");
-		buf.append("interface Consumer<T> {\n"); 
+		buf.append("interface Consumer<T> {\n");
 		buf.append("    void accept(T t);\n");
 		buf.append("}\n");
 		buf.append("public class Snippet {\n");
@@ -293,7 +293,7 @@ public class NullAnnotationsQuickFixTest18Mix extends QuickFixTest {
 		buf.append("\n");
 		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
 		buf.append("\n");
-		buf.append("interface Consumer<T> {\n"); 
+		buf.append("interface Consumer<T> {\n");
 		buf.append("    void accept(T t);\n");
 		buf.append("}\n");
 		buf.append("public class Snippet {\n");
