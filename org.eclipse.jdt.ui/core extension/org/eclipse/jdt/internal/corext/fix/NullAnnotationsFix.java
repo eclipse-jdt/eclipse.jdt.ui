@@ -88,7 +88,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		IJavaElement javaElement= compilationUnit.getJavaElement();
 		String nullableAnnotationName= getNullableAnnotationName(javaElement, false);
 		String nonNullAnnotationName= getNonNullAnnotationName(javaElement, false);
-		Builder builder= new Builder(compilationUnit, nullableAnnotationName, nonNullAnnotationName, /*allowRemove*/true, isArgumentProblem);
+		Builder builder= new Builder(problem, compilationUnit, nullableAnnotationName, nonNullAnnotationName, /*allowRemove*/true, isArgumentProblem);
 		boolean addNonNull= false;
 
 		switch (problem.getProblemId()) {
@@ -122,11 +122,13 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 					addNonNull= true;
 					builder.swapAnnotations();
 				}
-			// all others propose to add @Nullable
+				break;
+			default:
+				// all others propose to add @Nullable
 		}
 
 		// when performing one change at a time we can actually modify another CU than the current one:
-		NullAnnotationsRewriteOperations.SignatureAnnotationRewriteOperation operation= builder.createAddAnnotationOperation(problem, null, false/*thisUnitOnly*/, changeKind);
+		NullAnnotationsRewriteOperations.SignatureAnnotationRewriteOperation operation= builder.createAddAnnotationOperation(null, false/*thisUnitOnly*/, changeKind);
 		if (operation == null)
 			return null;
 
@@ -195,7 +197,8 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 			if (problem == null)
 				continue; // problem was filtered out by createCleanUp()
 			boolean isArgumentProblem= isComplainingAboutArgument(problem.getCoveredNode(compilationUnit));
-			Builder builder= new Builder(compilationUnit, nullableAnnotationName, nonNullAnnotationName, /*allowRemove*/false, isArgumentProblem);
+			Builder builder= new Builder(problem, compilationUnit, nullableAnnotationName, nonNullAnnotationName,
+											/*allowRemove*/false, isArgumentProblem);
 			boolean addNonNull= false;
 			// cf. createNullAnnotationInSignatureFix() but changeKind is constantly LOCAL
 			switch (problem.getProblemId()) {
@@ -216,10 +219,11 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 						builder.swapAnnotations();
 					}
 					break;
-				// all others propose to add @Nullable
+				default:
+					// all others propose to add @Nullable
 			}
 			// when performing multiple changes we can only modify the one CU that the CleanUp infrastructure provides to the operation.
-			SignatureAnnotationRewriteOperation fix= builder.createAddAnnotationOperation(problem, handledPositions, true/*thisUnitOnly*/, ChangeKind.LOCAL);
+			SignatureAnnotationRewriteOperation fix= builder.createAddAnnotationOperation(handledPositions, true/*thisUnitOnly*/, ChangeKind.LOCAL);
 			if (fix != null) {
 				if (addNonNull) {
 					fix.fRemoveIfNonNullByDefault= true;

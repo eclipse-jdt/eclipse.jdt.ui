@@ -298,13 +298,17 @@ public class NullAnnotationsRewriteOperations {
 
 	public static class Builder {
 
+		IProblemLocation fProblem;
 		CompilationUnit fUnit;
 		String fAnnotationToAdd;
 		String fAnnotationToRemove;
 		boolean fAllowRemove;
 		boolean fAffectsParameter;
 
-		public Builder(CompilationUnit unit, String annotationToAdd, String annotationToRemove, boolean allowRemove, boolean affectsParameter) {
+		public Builder(IProblemLocation problem, CompilationUnit unit, String annotationToAdd, String annotationToRemove,
+				boolean allowRemove, boolean affectsParameter)
+		{
+			fProblem= problem;
 			fUnit= unit;
 			fAnnotationToAdd= annotationToAdd;
 			fAnnotationToRemove= annotationToRemove;
@@ -324,19 +328,19 @@ public class NullAnnotationsRewriteOperations {
 			return JavaModelUtil.is50OrHigher(cu.getJavaProject());
 		}
 
-		public ASTNode getCoveringNode(IProblemLocation problem) {
-			return problem.getCoveringNode(fUnit);
+		public ASTNode getCoveringNode() {
+			return fProblem.getCoveringNode(fUnit);
 		}
 
 		// Entry for QuickFixes:
-		public SignatureAnnotationRewriteOperation createAddAnnotationOperation(IProblemLocation problem, Set<String> handledPositions, boolean thisUnitOnly, ChangeKind changeKind) {
+		public SignatureAnnotationRewriteOperation createAddAnnotationOperation(Set<String> handledPositions, boolean thisUnitOnly, ChangeKind changeKind) {
 			// precondition:
 			// thisUnitOnly => changeKind == LOCAL
 			SignatureAnnotationRewriteOperation result;
 			if (changeKind == ChangeKind.OVERRIDDEN)
-				result= createAddAnnotationToOverriddenOperation(problem);
+				result= createAddAnnotationToOverriddenOperation();
 			else
-				result= createAddAnnotationOperation(problem, changeKind == ChangeKind.TARGET, thisUnitOnly);
+				result= createAddAnnotationOperation(changeKind == ChangeKind.TARGET, thisUnitOnly);
 			if (handledPositions != null && result != null) {
 				if (handledPositions.contains(result.getKey()))
 					return null;
@@ -345,18 +349,18 @@ public class NullAnnotationsRewriteOperations {
 			return result;
 		}
 
-		private SignatureAnnotationRewriteOperation createAddAnnotationOperation(IProblemLocation problem, boolean changeTargetMethod, boolean thisUnitOnly) {
+		private SignatureAnnotationRewriteOperation createAddAnnotationOperation(boolean changeTargetMethod, boolean thisUnitOnly) {
 			if (!is50OrHigher())
 				return null;
 
-			ASTNode selectedNode= getCoveringNode(problem);
+			ASTNode selectedNode= getCoveringNode();
 			if (selectedNode == null)
 				return null;
 
 			ICompilationUnit cu= (ICompilationUnit) fUnit.getJavaElement();
 			ASTNode declaringNode= getDeclaringNode(selectedNode);
 
-			switch (problem.getProblemId()) {
+			switch (fProblem.getProblemId()) {
 				case IProblem.IllegalDefinitionToNonNullParameter:
 //			case IllegalRedefinitionToNonNullParameter:
 					// these affect another method
@@ -367,7 +371,7 @@ public class NullAnnotationsRewriteOperations {
 					break; // do propose changes even if we already have an annotation
 				default:
 					// if this method has annotations, don't change'em
-					if (!fAllowRemove && NullAnnotationsFix.hasExplicitNullAnnotation(cu, problem.getOffset()))
+					if (!fAllowRemove && NullAnnotationsFix.hasExplicitNullAnnotation(cu, fProblem.getOffset()))
 						return null;
 			}
 
@@ -406,7 +410,7 @@ public class NullAnnotationsRewriteOperations {
 				}
 			} else if (declaringNode instanceof MethodDeclaration || declaringNode instanceof LambdaExpression) {
 				// complaint is in signature of this method / lambda
-				switch (problem.getProblemId()) {
+				switch (fProblem.getProblemId()) {
 					case IProblem.ParameterLackingNonNullAnnotation:
 					case IProblem.ParameterLackingNullableAnnotation:
 					case IProblem.IllegalDefinitionToNonNullParameter:
@@ -471,22 +475,25 @@ public class NullAnnotationsRewriteOperations {
 							String message= Messages.format(FixMessages.NullAnnotationsRewriteOperations_change_method_return_nullness, new String[] { name, annotationNameLabel });
 							return new ReturnAnnotationRewriteOperation(declaration, message, this);
 						}
+						break;
+					default:
+						return null;
 				}
 			}
 			return null;
 		}
 
-		private SignatureAnnotationRewriteOperation createAddAnnotationToOverriddenOperation(IProblemLocation problem) {
+		private SignatureAnnotationRewriteOperation createAddAnnotationToOverriddenOperation() {
 			if (!is50OrHigher())
 				return null;
 
-			ASTNode selectedNode= getCoveringNode(problem);
+			ASTNode selectedNode= getCoveringNode();
 			if (selectedNode == null)
 				return null;
 
 			ICompilationUnit cu= (ICompilationUnit) fUnit.getJavaElement();
 			ASTNode declaringNode= getDeclaringNode(selectedNode);
-			switch (problem.getProblemId()) {
+			switch (fProblem.getProblemId()) {
 				case IProblem.IllegalDefinitionToNonNullParameter:
 				case IProblem.IllegalRedefinitionToNonNullParameter:
 					break;
@@ -507,7 +514,7 @@ public class NullAnnotationsRewriteOperations {
 			if (declaringNode instanceof MethodDeclaration) {
 				// complaint is in signature of this method
 				MethodDeclaration declaration= (MethodDeclaration) declaringNode;
-				switch (problem.getProblemId()) {
+				switch (fProblem.getProblemId()) {
 					case IProblem.IllegalDefinitionToNonNullParameter:
 					case IProblem.IllegalRedefinitionToNonNullParameter:
 						return createChangeOverriddenParameterOperation(cu, declaration, selectedNode, annotationNameLabel);
@@ -515,6 +522,9 @@ public class NullAnnotationsRewriteOperations {
 						if (hasNullAnnotation(declaration)) { // don't adjust super if local has no explicit annotation (?)
 							return createChangeOverriddenReturnOperation(cu, declaration, annotationNameLabel);
 						}
+						break;
+					default:
+						return null;
 				}
 			}
 			return null;
