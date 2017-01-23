@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -115,6 +115,12 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	 */
 	public final static String JUNIT4TOGGLE= PAGE_NAME + ".junit4toggle"; //$NON-NLS-1$
 
+	/**
+	 * Field ID of the JUnit5 toggle
+	 * @since 3.10
+	 */
+	public final static String JUNIT5TOGGLE= PAGE_NAME + ".junit5toggle"; //$NON-NLS-1$
+
 	private static final String COMPLIANCE_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"; //$NON-NLS-1$
 	private static final String BUILD_PATH_PAGE_ID= "org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"; //$NON-NLS-1$
 	private static final String BUILD_PATH_KEY_ADD_ENTRY= "add_classpath_entry"; //$NON-NLS-1$
@@ -161,6 +167,11 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	private Link fLink;
 	private Label fImage;
 
+	private Button fJUnit5Toggle;
+	private boolean fIsJunit5;
+	private IStatus fJunit5Status;
+	private boolean fIsJunit5Enabled;
+
 	/**
 	 * Creates a new <code>NewTestCaseCreationWizardPage</code>.
 	 * @param page2 The second page
@@ -200,6 +211,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 		fJunit4Status= new JUnitStatus();
 		fIsJunit4= false;
+
+		fJunit5Status= new JUnitStatus();
+		fIsJunit5= false;
 	}
 
 	/**
@@ -249,19 +263,30 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 		restoreWidgetValues();
 
+		boolean isJunit5= false;
 		boolean isJunit4= false;
 		if (element != null && element.getElementType() != IJavaElement.JAVA_MODEL) {
 			IJavaProject project= element.getJavaProject();
-			isJunit4= CoreTestSearchEngine.hasJUnit4TestAnnotation(project);
-			if (!isJunit4 && !CoreTestSearchEngine.hasTestCaseType(project) && JUnitStubUtility.is50OrHigher(project)) {
-				isJunit4= true;
+			isJunit5= CoreTestSearchEngine.hasJUnit5TestAnnotation(project);
+			if (!isJunit5) {
+				isJunit4= CoreTestSearchEngine.hasJUnit4TestAnnotation(project);
+				if (!isJunit4) {
+					if (!CoreTestSearchEngine.hasTestCaseType(project)) {
+						if (JUnitStubUtility.is18OrHigher(project)) {
+							isJunit5= true;
+						} else if (JUnitStubUtility.is50OrHigher(project)) {
+							isJunit4= true;
+						}
+					}
+				}
 			}
 		}
+		setJUnit5(isJunit5, true);
 		setJUnit4(isJunit4, true);
 		updateStatus(getStatusList());
 	}
 
-	private IStatus junit4Changed() {
+	private IStatus junitStatusChanged() {
 		JUnitStatus status= new JUnitStatus();
 		return status;
 	}
@@ -284,6 +309,23 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	}
 
 	/**
+	 * Specifies if the test should be created as JUnit 5 test.
+	 * @param isJUnit5 If set, a JUnit 5 test will be created
+	 * @param isEnabled if <code>true</code> the modifier fields are
+	 * editable; otherwise they are read-only
+	 *
+	 * @since 3.10
+	 */
+	public void setJUnit5(boolean isJUnit5, boolean isEnabled) {
+		fIsJunit5Enabled= isEnabled;
+		if (fJUnit5Toggle != null && !fJUnit5Toggle.isDisposed()) {
+			fJUnit5Toggle.setSelection(isJUnit5);
+			fJUnit5Toggle.setEnabled(isEnabled);
+		}
+		internalSetJUnit5(isJUnit5);
+	}
+
+	/**
 	 * Returns <code>true</code> if the test should be created as Junit 4 test
 	 * @return returns <code>true</code> if the test should be created as Junit 4 test
 	 *
@@ -293,13 +335,32 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		return fIsJunit4;
 	}
 
+	/**
+	 * Returns <code>true</code> if the test should be created as JUnit 5 test.
+	 * @return <code>true</code> if the test should be created as JUnit 5 test
+	 *
+	 * @since 3.10
+	 */
+	public boolean isJUnit5() {
+		return fIsJunit5;
+	}
+
 	private void internalSetJUnit4(boolean isJUnit4) {
 		fIsJunit4= isJUnit4;
-		fJunit4Status= junit4Changed();
+		fJunit4Status= junitStatusChanged();
 		if (isDefaultSuperClass() || getSuperClass().trim().equals("")) //$NON-NLS-1$
 			setSuperClass(getDefaultSuperClassName(), true);
 		fSuperClassStatus= superClassChanged(); //validate superclass field when toggled
 		handleFieldChanged(JUNIT4TOGGLE);
+	}
+
+	private void internalSetJUnit5(boolean isJUnit5) {
+		fIsJunit5= isJUnit5;
+		fJunit5Status= junitStatusChanged();
+		if (isDefaultSuperClass() || getSuperClass().trim().equals("")) //$NON-NLS-1$
+			setSuperClass(getDefaultSuperClassName(), true);
+		fSuperClassStatus= superClassChanged(); //validate superclass field when toggled
+		handleFieldChanged(JUNIT5TOGGLE);
 	}
 
 	/**
@@ -322,14 +383,15 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			if (fClassUnderTestButton != null && !fClassUnderTestButton.isDisposed()) {
 				fClassUnderTestButton.setEnabled(getPackageFragmentRoot() != null);
 			}
-			fJunit4Status= junit4Changed();
+			fJunit4Status= junitStatusChanged();
+			fJunit5Status= junitStatusChanged();
 
 			updateBuildPathMessage();
-		} else if (fieldName.equals(JUNIT4TOGGLE)) {
+		} else if (fieldName.equals(JUNIT4TOGGLE) || fieldName.equals(JUNIT5TOGGLE)) {
 			updateBuildPathMessage();
-			fMethodStubsButtons.setEnabled(IDX_SETUP_CLASS, isJUnit4());
-			fMethodStubsButtons.setEnabled(IDX_TEARDOWN_CLASS, isJUnit4());
-			fMethodStubsButtons.setEnabled(IDX_CONSTRUCTOR, !isJUnit4());
+			fMethodStubsButtons.setEnabled(IDX_SETUP_CLASS, isJUnit4() || isJUnit5());
+			fMethodStubsButtons.setEnabled(IDX_TEARDOWN_CLASS, isJUnit4() || isJUnit5());
+			fMethodStubsButtons.setEnabled(IDX_CONSTRUCTOR, !isJUnit4() && !isJUnit5());
 		}
 		updateStatus(getStatusList());
 	}
@@ -346,7 +408,8 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				fClassUnderTestStatus,
 				fModifierStatus,
 				fSuperClassStatus,
-				fJunit4Status
+				fJunit4Status,
+				fJunit5Status
 		};
 	}
 
@@ -454,7 +517,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	}
 
 	/**
-	 * Creates the controls for the JUnit 4 toggle control. Expects a <code>GridLayout</code> with
+	 * Creates the controls for the JUnit 4 and JUnit Jupiter toggle controls. Expects a <code>GridLayout</code> with
 	 * at least 3 columns.
 	 *
 	 * @param composite the parent composite
@@ -465,23 +528,15 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	protected void createJUnit4Controls(Composite composite, int nColumns) {
 		Composite inner= new Composite(composite, SWT.NONE);
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, nColumns, 1));
-		GridLayout layout= new GridLayout(2, false);
+		GridLayout layout= new GridLayout(3, false);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		inner.setLayout(layout);
 
-		SelectionAdapter listener= new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				boolean isSelected= ((Button) e.widget).getSelection();
-				internalSetJUnit4(isSelected);
-			}
-		};
-
 		Button junti3Toggle= new Button(inner, SWT.RADIO);
 		junti3Toggle.setText(WizardMessages.NewTestCaseWizardPageOne_junit3_radio_label);
 		junti3Toggle.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1));
-		junti3Toggle.setSelection(!fIsJunit4);
+		junti3Toggle.setSelection(!fIsJunit4 && !fIsJunit5);
 		junti3Toggle.setEnabled(fIsJunit4Enabled);
 
 		fJUnit4Toggle= new Button(inner, SWT.RADIO);
@@ -489,7 +544,26 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		fJUnit4Toggle.setSelection(fIsJunit4);
 		fJUnit4Toggle.setEnabled(fIsJunit4Enabled);
 		fJUnit4Toggle.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1));
-		fJUnit4Toggle.addSelectionListener(listener);
+		fJUnit4Toggle.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				boolean isSelected= ((Button) e.widget).getSelection();
+				internalSetJUnit4(isSelected);
+			}
+		});
+	
+		fJUnit5Toggle= new Button(inner, SWT.RADIO);
+		fJUnit5Toggle.setText(WizardMessages.NewTestCaseWizardPageOne_junit5_radio_label);
+		fJUnit5Toggle.setSelection(fIsJunit5);
+		fJUnit5Toggle.setEnabled(fIsJunit5Enabled);
+		fJUnit5Toggle.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1));
+		fJUnit5Toggle.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				boolean isSelected= ((Button) e.widget).getSelection();
+				internalSetJUnit5(isSelected);
+			}
+		});
 	}
 
 	/**
@@ -578,6 +652,10 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 				if (isJUnit4()) {
 					if (!JUnitStubUtility.is50OrHigher(project)) {
 						message= WizardMessages.NewTestCaseWizardPageOne_linkedtext_java5required;
+					}
+				} else if (isJUnit5()) {
+					if (!JUnitStubUtility.is18OrHigher(project)) {
+						message= WizardMessages.NewTestCaseWizardPageOne_linkedtext_java8required;
 					}
 				}
 			}
@@ -738,12 +816,14 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			createTearDown(type, imports);
 		}
 
-		if (fClassUnderTest != null || isJUnit4()) {
+		if (fClassUnderTest != null || isJUnit4() || isJUnit5()) {
 			createTestMethodStubs(type, imports);
 		}
 
 		if (isJUnit4()) {
 			imports.addStaticImport("org.junit.Assert", "*", false); //$NON-NLS-1$ //$NON-NLS-2$
+		} else if (isJUnit5()) {
+			imports.addStaticImport("org.junit.jupiter.api.Assertions", "*", false); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 	}
@@ -779,12 +859,12 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			buffer.append("public "); //$NON-NLS-1$
 			buffer.append(getTypeName());
 			buffer.append('(');
-			if (!isJUnit4()) {
+			if (!isJUnit4() && !isJUnit5()) {
 				buffer.append(imports.addImport("java.lang.String")).append(" name"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			buffer.append(") {"); //$NON-NLS-1$
 			buffer.append(delimiter);
-			if (!isJUnit4()) {
+			if (!isJUnit4() && !isJUnit5()) {
 				buffer.append("super(name);").append(delimiter); //$NON-NLS-1$
 			}
 			buffer.append('}');
@@ -816,7 +896,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		String content= null;
 		IMethod methodTemplate= findInHierarchy(type, methodName);
 		String annotation= null;
-		if (isJUnit4()) {
+		if (isJUnit4() || isJUnit5()) {
 			annotation= '@' + imports.addImport(annotationType);
 		}
 
@@ -843,7 +923,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 			if (isJUnit4()) {
 				buffer.append("public "); //$NON-NLS-1$
-			} else {
+			} else if (!isJUnit5()) {
 				buffer.append("protected "); //$NON-NLS-1$
 			}
 			if (isStatic) {
@@ -863,25 +943,29 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 
 
 	private void createSetUp(IType type, ImportsManager imports) throws CoreException {
-		createSetupStubs(type, "setUp", false, "org.junit.Before", imports); //$NON-NLS-1$ //$NON-NLS-2$
+		String annotationType= isJUnit4() ? "org.junit.Before" : "org.junit.jupiter.api.BeforeEach"; //$NON-NLS-1$ //$NON-NLS-2$
+		createSetupStubs(type, "setUp", false, annotationType, imports); //$NON-NLS-1$ 
 	}
 
 	private void createTearDown(IType type, ImportsManager imports) throws CoreException {
-		createSetupStubs(type, "tearDown", false, "org.junit.After", imports); //$NON-NLS-1$ //$NON-NLS-2$
+		String annotationType= isJUnit4() ? "org.junit.After" : "org.junit.jupiter.api.AfterEach"; //$NON-NLS-1$ //$NON-NLS-2$
+		createSetupStubs(type, "tearDown", false, annotationType, imports); //$NON-NLS-1$ 
 	}
 
 	private void createSetUpClass(IType type, ImportsManager imports) throws CoreException {
-		createSetupStubs(type, "setUpBeforeClass", true, "org.junit.BeforeClass", imports); //$NON-NLS-1$ //$NON-NLS-2$
+		String annotationType= isJUnit4() ? "org.junit.BeforeClass" : "org.junit.jupiter.api.BeforeAll"; //$NON-NLS-1$ //$NON-NLS-2$
+		createSetupStubs(type, "setUpBeforeClass", true, annotationType, imports); //$NON-NLS-1$ 
 	}
 
 	private void createTearDownClass(IType type, ImportsManager imports) throws CoreException {
-		createSetupStubs(type, "tearDownAfterClass", true, "org.junit.AfterClass", imports); //$NON-NLS-1$ //$NON-NLS-2$
+		String annotationType= isJUnit4() ? "org.junit.AfterClass" : "org.junit.jupiter.api.AfterAll"; //$NON-NLS-1$ //$NON-NLS-2$
+		createSetupStubs(type, "tearDownAfterClass", true, annotationType, imports); //$NON-NLS-1$ 
 	}
 
 	private void createTestMethodStubs(IType type, ImportsManager imports) throws CoreException {
 		IMethod[] methods= fPage2.getCheckedMethods();
 		if (methods.length == 0) {
-			if (isJUnit4()) {
+			if (isJUnit4() || isJUnit5()) {
 				List<String> names= new ArrayList<>();
 				createTestMethod(type, imports, null, null, names);
 			}
@@ -953,9 +1037,15 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			ISourceRange typeSourceRange= type.getSourceRange();
 			int pos= typeSourceRange.getOffset() + typeSourceRange.getLength() - 1;
 			buffer.append('@').append(imports.addImport(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME, pos)).append(getLineDelimiter());
+		} else if (isJUnit5()) {
+			ISourceRange typeSourceRange= type.getSourceRange();
+			int pos= typeSourceRange.getOffset() + typeSourceRange.getLength() - 1;
+			buffer.append('@').append(imports.addImport(JUnitCorePlugin.JUNIT5_JUPITER_TEST_ANNOTATION_NAME, pos)).append(getLineDelimiter());
 		}
 
-		buffer.append("public ");//$NON-NLS-1$
+		if (!isJUnit5()) {
+			buffer.append("public ");//$NON-NLS-1$
+		}
 		if (fPage2.getCreateFinalMethodStubsButtonSelection())
 			buffer.append("final "); //$NON-NLS-1$
 		buffer.append("void ");//$NON-NLS-1$
@@ -1103,7 +1193,16 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			try {
 				IJavaProject project= root.getJavaProject();
 				if (project.exists()) {
-					if (isJUnit4()) {
+					if (isJUnit5()) {
+						if (!JUnitStubUtility.is18OrHigher(project)) {
+							status.setError(WizardMessages.NewTestCaseWizardPageOne_error_java8required);
+							return status;
+						}
+						if (project.findType(JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME) == null) {
+							status.setWarning(WizardMessages.NewTestCaseWizardPageOne__error_junit5NotOnbuildpath);
+							return status;
+						}
+					} else if (isJUnit4()) {
 						if (!JUnitStubUtility.is50OrHigher(project)) {
 							status.setError(WizardMessages.NewTestCaseWizardPageOne_error_java5required);
 							return status;
@@ -1133,12 +1232,13 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		String superClassName= getSuperClass();
 		JUnitStatus status= new JUnitStatus();
 		boolean isJUnit4= isJUnit4();
+		boolean isJUnit5= isJUnit5();
 		if (superClassName == null || superClassName.trim().equals("")) { //$NON-NLS-1$
-			if (!isJUnit4)
+			if (!isJUnit4 && !isJUnit5)
 				status.setError(WizardMessages.NewTestCaseWizardPageOne_error_superclass_empty);
 			return status;
 		}
-		if (isJUnit4 && superClassName.equals("java.lang.Object")) //$NON-NLS-1$
+		if ((isJUnit4 || isJUnit5) && superClassName.equals("java.lang.Object")) //$NON-NLS-1$
 			return status;
 		if (getPackageFragmentRoot() != null) {
 			try {
@@ -1151,7 +1251,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 					status.setError(WizardMessages.NewTestCaseWizardPageOne_error_superclass_is_interface);
 					return status;
 				}
-				if (!isJUnit4 && !CoreTestSearchEngine.isTestImplementor(type)) { // TODO: expensive!
+				if (!isJUnit4 && !isJUnit5 && !CoreTestSearchEngine.isTestImplementor(type)) { // TODO: expensive!
 					status.setError(Messages.format(WizardMessages.NewTestCaseWizardPageOne_error_superclass_not_implementing_test_interface, BasicElementLabels.getJavaElementName(JUnitCorePlugin.TEST_INTERFACE_NAME)));
 					return status;
 				}
@@ -1243,7 +1343,15 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	 * @since 3.7
 	 */
 	private String getDefaultSuperClassName() {
-		return isJUnit4() ? "java.lang.Object" : getJUnit3TestSuperclassName(); //$NON-NLS-1$
+		return isJUnit4() || isJUnit5() ? "java.lang.Object" : getJUnit3TestSuperclassName(); //$NON-NLS-1$
 	}
 
+	@Override
+	public int getModifiers() {
+		int modifiers= super.getModifiers();
+		if (isJUnit5()) {
+			modifiers&= ~F_PUBLIC;
+		}
+		return modifiers;
+	}
 }
