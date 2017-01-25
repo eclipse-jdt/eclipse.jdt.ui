@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.junit.wizards.NewTestCaseWizardPageOne;
+import org.eclipse.jdt.junit.wizards.NewTestCaseWizardPageOne.JUnitVersion;
 import org.eclipse.jdt.junit.wizards.NewTestCaseWizardPageTwo;
 
 import org.eclipse.swt.SWT;
@@ -97,18 +98,24 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 		IJavaProject project= fPage1.getJavaProject();
 		IRunnableWithProgress runnable= fPage1.getRunnable();
 		try {
-			if (fPage1.isJUnit5()) {
-				if (project.findType(JUnitCorePlugin.JUNIT5_JUPITER_TEST_ANNOTATION_NAME) == null) {
-					runnable= addJUnitToClasspath(project, runnable, '5');
-				}
-			} else if (fPage1.isJUnit4()) {
-				if (project.findType(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME) == null) {
-					runnable= addJUnitToClasspath(project, runnable, '4');
-				}
-			} else {
-				if (project.findType(JUnitCorePlugin.TEST_SUPERCLASS_NAME) == null) {
-					runnable= addJUnitToClasspath(project, runnable, '3');
-				}
+			JUnitVersion jUnitVersion= fPage1.getJUnitVersion();
+			switch (jUnitVersion) {
+				case VERSION_5:
+					if (project.findType(JUnitCorePlugin.JUNIT5_JUPITER_TEST_ANNOTATION_NAME) == null) {
+						runnable= addJUnitToClasspath(project, runnable, jUnitVersion);
+					}
+					break;
+				case VERSION_4:
+					if (project.findType(JUnitCorePlugin.JUNIT4_ANNOTATION_NAME) == null) {
+						runnable= addJUnitToClasspath(project, runnable, jUnitVersion);
+					}
+					break;
+				case VERSION_3:
+				default:
+					if (project.findType(JUnitCorePlugin.TEST_SUPERCLASS_NAME) == null) {
+						runnable= addJUnitToClasspath(project, runnable, jUnitVersion);
+					}
+					break;
 			}
 		} catch (JavaModelException e) {
 			// ignore
@@ -128,15 +135,16 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 		return false;
 	}
 
-	private IRunnableWithProgress addJUnitToClasspath(IJavaProject project, final IRunnableWithProgress runnable, char junitVersion) {
+	private IRunnableWithProgress addJUnitToClasspath(IJavaProject project, final IRunnableWithProgress runnable, JUnitVersion junitVersion) {
 		String typeToLookup;
 		switch (junitVersion) {
-			case '5':
+			case VERSION_5:
 				typeToLookup= "org.junit.jupiter.*"; //$NON-NLS-1$
 				break;
-			case '4':
+			case VERSION_4:
 				typeToLookup= "org.junit.*"; //$NON-NLS-1$
 				break;
+			case VERSION_3:
 			default:
 				typeToLookup= "junit.awtui.*"; //$NON-NLS-1$
 				break;
@@ -211,7 +219,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 
 		private ClasspathFixProposal fSelectedFix;
 
-		public ClasspathFixSelectionDialog(Shell parent, char junitVersion, IJavaProject project, ClasspathFixProposal[] fixProposals) {
+		public ClasspathFixSelectionDialog(Shell parent, JUnitVersion junitVersion, IJavaProject project, ClasspathFixProposal[] fixProposals) {
 			super(parent, WizardMessages.Wizard_title_new_testcase, null, getDialogMessage(junitVersion), MessageDialog.QUESTION, new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
 			fProject= project;
 			fFixProposals= fixProposals;
@@ -223,12 +231,13 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 			return true;
 		}
 
-		private static String getDialogMessage(char junitVersion) {
+		private static String getDialogMessage(JUnitVersion junitVersion) {
 			switch (junitVersion) {
-				case '5':
+				case VERSION_5:
 					return WizardMessages.NewTestCaseCreationWizard_fix_selection_junit5_description;
-				case '4':
+				case VERSION_4:
 					return WizardMessages.NewTestCaseCreationWizard_fix_selection_junit4_description;
+				case VERSION_3:
 				default:
 					return WizardMessages.NewTestCaseCreationWizard_fix_selection_junit3_description;
 			}
