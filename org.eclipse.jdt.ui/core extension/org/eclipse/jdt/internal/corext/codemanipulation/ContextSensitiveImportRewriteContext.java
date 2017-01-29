@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,12 +24,15 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
@@ -49,6 +52,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 	private IBinding[] fDeclarationsInScope;
 	private Name[] fImportedNames;
 	private final ImportRewrite fImportRewrite;
+	private RedundantNullnessTypeAnnotationsFilter fRedundantTypeAnnotationsFilter;
 
 	/**
 	 * Creates an import rewrite context at the given node's start position.
@@ -59,7 +63,7 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 	 * @since 3.6
 	 */
 	public ContextSensitiveImportRewriteContext(ASTNode node, ImportRewrite importRewrite) {
-		this((CompilationUnit)node.getRoot(), node.getStartPosition(), importRewrite);
+		this((CompilationUnit) node.getRoot(), node.getStartPosition(), importRewrite, RedundantNullnessTypeAnnotationsFilter.createIfConfigured(node));
 	}
 	
 	/**
@@ -70,11 +74,17 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 	 * @param importRewrite the import rewrite
 	 */
 	public ContextSensitiveImportRewriteContext(CompilationUnit compilationUnit, int position, ImportRewrite importRewrite) {
+		this(compilationUnit, position, importRewrite, RedundantNullnessTypeAnnotationsFilter.createIfConfigured(new NodeFinder(compilationUnit, position, 0).getCoveringNode()));
+	}
+
+	private ContextSensitiveImportRewriteContext(CompilationUnit compilationUnit, int position, ImportRewrite importRewrite,
+			RedundantNullnessTypeAnnotationsFilter redundantNullnessTypeAnnotationsFilter) {
 		fCompilationUnit= compilationUnit;
 		fPosition= position;
 		fImportRewrite= importRewrite;
 		fDeclarationsInScope= null;
 		fImportedNames= null;
+		fRedundantTypeAnnotationsFilter= redundantNullnessTypeAnnotationsFilter;
 	}
 
 	@Override
@@ -227,5 +237,14 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 			fImportedNames= imports.toArray(new Name[imports.size()]);
 		}
 		return fImportedNames;
+	}
+	
+	@Override
+	public IAnnotationBinding[] removeRedundantTypeAnnotations(IAnnotationBinding[] annotations, TypeLocation location, ITypeBinding type) {
+		RedundantNullnessTypeAnnotationsFilter redundantTypeAnnotationsFilter= fRedundantTypeAnnotationsFilter;
+		if (redundantTypeAnnotationsFilter != null) {
+			annotations= redundantTypeAnnotationsFilter.removeUnwantedTypeAnnotations(annotations, location, type);
+		}
+		return super.removeRedundantTypeAnnotations(annotations, location, type);
 	}
 }
