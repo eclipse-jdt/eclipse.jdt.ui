@@ -48,8 +48,6 @@ org.eclipse.tomcat/conf/*
 org.eclipse.ui/plugin.xml
 org.eclipse.ui.navigator.resources/prepareforpii.xml
 org.eclipse.platform.source/*
-org.apache.ant/*
-org.apache.commons.codec/*
 org.eclipse.ant.tests.core/*
 org.eclipse.ant.tests.ui/*
 org.eclipse.ant.ui/Ant*Editor*Content*Assist*Dev/XDOCtasks.xml
@@ -94,7 +92,9 @@ javax.servlet/*
 javax.servlet.jsp/*
 javax.xml/*
 org.apache.ant/*
+org.apache.commons.codec/*
 org.apache.commons.el/*
+org.apache.felix/*
 org.apache.felix.gogo.*/*
 org.apache.jasper/*
 org.apache.lucene/*
@@ -153,3 +153,4 @@ org.eclipse.e4.sdk/*
 
 rt.equinox.bundles/*
 rt.equinox.p2/*
+org.eclipse.equinox.launcher.releng/*

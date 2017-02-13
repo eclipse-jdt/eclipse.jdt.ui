@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2016 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1385,7 +1385,7 @@ public class JavadocContentAccess2 {
 			if (child instanceof TextElement) {
 				String text= ((TextElement) child).getText();
 				if (skipLeadingWhitespace) {
-					text= text.replaceFirst("^\\s+", ""); //$NON-NLS-1$ //$NON-NLS-2$
+					text= text.replaceFirst("^\\s", ""); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=233481 :
 				text= text.replaceAll("(\r\n?|\n)([ \t]*\\*)", "$1"); //$NON-NLS-1$ //$NON-NLS-2$
