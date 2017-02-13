@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.junit.model.ITestElement;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
@@ -56,6 +57,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.PageBook;
 
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 
@@ -265,39 +267,18 @@ public class TestViewer {
 		if (! selection.isEmpty()) {
 			TestElement testElement= (TestElement) selection.getFirstElement();
 
-			String className= testElement.getClassName();
 			if (testElement instanceof TestSuiteElement) {
-				manager.add(getAction((TestSuiteElement) testElement));
+				TestSuiteElement testSuiteElement= (TestSuiteElement) testElement;
+				manager.add(getOpenTestAction(testSuiteElement));
 				manager.add(new Separator());
 				if (!fTestRunnerPart.lastLaunchIsKeptAlive()) {
-					IType testType= findTestClass(testElement);
-					if (testType != null) {
-						String qualifiedName= testType.getFullyQualifiedName();
-						String testName= qualifiedName.equals(className) ? null : testElement.getTestName();
-						manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testElement.getId(), qualifiedName, testName, ILaunchManager.RUN_MODE));
-						manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testElement.getId(), qualifiedName, testName, ILaunchManager.DEBUG_MODE));
-					}
+					addRerunActions(manager, testSuiteElement);
 				}
 			} else {
 				TestCaseElement testCaseElement= (TestCaseElement) testElement;
-				String testMethodName= testCaseElement.getTestMethodName();
-				String testName= testCaseElement.getTestName();
-				int indexOfColon= testName.indexOf(":"); //$NON-NLS-1$
-				if (indexOfColon != -1) {
-					String paramTypesStr= testName.substring(indexOfColon + 1);
-					if (!paramTypesStr.isEmpty()) {
-						testMethodName= testMethodName + "(" + paramTypesStr + ")";  //$NON-NLS-1$//$NON-NLS-2$
-					}
-				}
-				manager.add(new OpenTestAction(fTestRunnerPart, testCaseElement));
+				manager.add(getOpenTestAction(testCaseElement));
 				manager.add(new Separator());
-				if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
-					manager.add(new RerunAction(JUnitMessages.RerunAction_label_rerun, fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.RUN_MODE));
-
-				} else {
-					manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.RUN_MODE));
-					manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.DEBUG_MODE));
-				}
+				addRerunActions(manager, testCaseElement);
 			}
 			if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
 				manager.add(new Separator());
@@ -314,11 +295,69 @@ public class TestViewer {
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end")); //$NON-NLS-1$
 	}
 
+	private void addRerunActions(IMenuManager manager, TestCaseElement testCaseElement) {
+		String className= testCaseElement.getClassName();
+		String testMethodName= testCaseElement.getTestMethodName();
+		String[] parameterTypes= testCaseElement.getParameterTypes();
+		if (parameterTypes != null) {
+			String paramTypesStr= Arrays.stream(parameterTypes).collect(Collectors.joining(",")); //$NON-NLS-1$
+			testMethodName= testMethodName + "(" + paramTypesStr + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
+			manager.add(new RerunAction(JUnitMessages.RerunAction_label_rerun, fTestRunnerPart, testCaseElement.getId(), className, testMethodName, ILaunchManager.RUN_MODE));
+		} else {
+			manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testCaseElement.getId(), className, testMethodName, ILaunchManager.RUN_MODE));
+			manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testCaseElement.getId(), className, testMethodName, ILaunchManager.DEBUG_MODE));
+		}
+	}
+
+	private void addRerunActions(IMenuManager manager, TestSuiteElement testSuiteElement) {
+		String qualifiedName= null;
+		String testMethodName= null; // test method name is null when re-running a regular test class
+
+		String testName= testSuiteElement.getTestName();
+
+		IType testType= findTestClass(testSuiteElement, true);
+		if (testType != null) {
+			qualifiedName= testType.getFullyQualifiedName();
+
+			if (!qualifiedName.equals(testName)) {
+				int index= testName.indexOf('(');
+				if (index > 0) { // test factory method
+					testMethodName= testName.substring(0, index);
+				}
+			}
+			String[] parameterTypes= testSuiteElement.getParameterTypes();
+			if (testMethodName != null && parameterTypes != null) {
+				String paramTypesStr= Arrays.stream(parameterTypes).collect(Collectors.joining(",")); //$NON-NLS-1$
+				testMethodName= testMethodName + "(" + paramTypesStr + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		} else {
+			// see bug 443498
+			testType= findTestClass(testSuiteElement.getParent(), false);
+			if (testType != null) {
+				qualifiedName= testType.getFullyQualifiedName();
+
+				String className= testSuiteElement.getSuiteTypeName();
+				if (!qualifiedName.equals(className)) {
+					testMethodName= testName;
+				}
+			}
+		}
+		if (qualifiedName != null) {
+			manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testSuiteElement.getId(), qualifiedName, testMethodName, ILaunchManager.RUN_MODE));
+			manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testSuiteElement.getId(), qualifiedName, testMethodName, ILaunchManager.DEBUG_MODE));
+		}
+	}
+
 	/*
 	 * Returns the element's test class or the next container's test class, which exists, and for which ITestFinder.isTest() is true.
 	 */
-	private IType findTestClass(ITestElement element) {
+	private IType findTestClass(ITestElement element, boolean checkOnlyCurrentElement) {
 		ITestFinder finder= ((TestRunSession)element.getTestRunSession()).getTestRunnerKind().getFinder();
+		if (ITestFinder.NULL.equals(finder)) {
+			return null;
+		}
 		IJavaProject project= fTestRunnerPart.getLaunchedProject();
 		if (project == null)
 			return null;
@@ -327,15 +366,21 @@ public class TestViewer {
 			try {
 				String className= null;
 				if (current instanceof TestRoot) {
-					ILaunchConfiguration configuration= ((TestRunSession)element.getTestRunSession()).getLaunch().getLaunchConfiguration();
-					className= configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
+					ILaunch launch= ((TestRunSession) element.getTestRunSession()).getLaunch();
+					if (launch != null) {
+						ILaunchConfiguration configuration= launch.getLaunchConfiguration();
+						className= configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String) null);
+					}
 				} else if (current instanceof TestElement) {
 					className= ((TestElement)current).getClassName();
 				}
 				if (className != null) {
 					IType type= project.findType(className);
-					if (type != null && finder.isTest(type))
+					if (type != null && finder.isTest(type)) {
 						return type;
+					} else if (checkOnlyCurrentElement) {
+						return null;
+					}
 				}
 			} catch (JavaModelException e) {
 				// fall through
@@ -366,10 +411,9 @@ public class TestViewer {
 
 		OpenTestAction action;
 		if (testElement instanceof TestSuiteElement) {
-			action= getAction((TestSuiteElement) testElement);
+			action= getOpenTestAction((TestSuiteElement) testElement);
 		} else if (testElement instanceof TestCaseElement) {
-			TestCaseElement testCase= (TestCaseElement)testElement;
-			action= new OpenTestAction(fTestRunnerPart, testCase);
+			action= getOpenTestAction((TestCaseElement) testElement);
 		} else {
 			throw new IllegalStateException(String.valueOf(testElement));
 		}
@@ -378,26 +422,34 @@ public class TestViewer {
 			action.run();
 	}
 
-	private OpenTestAction getAction(TestSuiteElement testElement) {
-		String testName= testElement.getTestName();
-		ITestElement[] children= testElement.getChildren();
-		if (testName.startsWith("[") && testName.endsWith("]") //$NON-NLS-1$ //$NON-NLS-2$
-				&& children.length > 0 && children[0] instanceof TestCaseElement) {
+	private OpenTestAction getOpenTestAction(TestCaseElement testCase) {
+		return new OpenTestAction(fTestRunnerPart, testCase, testCase.getParameterTypeSignatures());
+	}
+
+	private OpenTestAction getOpenTestAction(TestSuiteElement testSuite) {
+		String testName= testSuite.getTestName();
+		ITestElement[] children= testSuite.getChildren();
+
+		if (testName.startsWith("[") && testName.endsWith("]") && children.length > 0 && children[0] instanceof TestCaseElement) { //$NON-NLS-1$ //$NON-NLS-2$
 			// a group of parameterized tests
-			return new OpenTestAction(fTestRunnerPart, (TestCaseElement) children[0]);
-		} else {
-			int index= testName.indexOf('(');
-			if (index != -1) {
-				if (children.length > 0 && children[0] instanceof TestCaseElement) {
-					return new OpenTestAction(fTestRunnerPart, (TestCaseElement) children[0]);
-				} else {
-					// based on MessageIds.TEST_IDENTIFIER_MESSAGE_FORMAT
-					return new OpenTestAction(fTestRunnerPart, testElement.getClassName(), testName.substring(0, index), OpenTestAction.extractMethodParameterTypeSignatures(testName), true);
-				}
+			return new OpenTestAction(fTestRunnerPart, (TestCaseElement) children[0], null);
+		}
+
+		int index= testName.indexOf('(');
+		// test factory method
+		if (index > 0) {
+			if (children.length > 0 && children[0] instanceof TestCaseElement) {
+				// has dynamic test case as child
+				TestCaseElement testCase= (TestCaseElement) children[0];
+				return new OpenTestAction(fTestRunnerPart, testCase, testCase.getParameterTypeSignatures());
 			} else {
-				return new OpenTestAction(fTestRunnerPart, testName);
+				// has no child
+				return new OpenTestAction(fTestRunnerPart, testSuite.getSuiteTypeName(), testName.substring(0, index), testSuite.getParameterTypeSignatures(), true);
 			}
 		}
+
+		// regular test class
+		return new OpenTestAction(fTestRunnerPart, testName);
 	}
 
 	private void handleSelected() {

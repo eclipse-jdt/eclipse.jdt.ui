@@ -108,11 +108,12 @@ public class MessageIds {
 	/**
 	 * Notification about a test inside the test suite. <br>
 	 * TEST_TREE + testId + "," + testName + "," + isSuite + "," + testcount + "," +
-	 * isDynamicTest + "," + parentId + "," + displayName <br>
+	 * isDynamicTest + "," + parentId + "," + displayName + "," + parameterTypes<br>
 	 * isSuite = "true" or "false" <br>
 	 * isDynamicTest = "true" or "false" <br>
-	 * parentId = the unique id of its parent, otherwise "-1" <br>
+	 * parentId = the unique id of its parent if it is a dynamic test, otherwise can be "-1" <br>
 	 * displayName = the display name of the test <br>
+	 * parameterTypes = comma-separated list of fully qualified type names of method parameters if applicable, otherwise an empty string <br>
 	 * See: ITestRunListener2#testTreeEntry
 	 * 
 	 */
@@ -128,10 +129,8 @@ public class MessageIds {
 	public static final String TEST_RERUN=	">RERUN  "; //$NON-NLS-1$
 
 	/**
-	 * MessageFormat to encode test method identifiers: <br>
-	 * <code>testMethod(testClass)</code> 
-	 * <br>or<br>
-	 * <code>testMethod(testClass): a comma-separated list of fully qualified parameter type names if parameters exist</code>
+	 * MessageFormat to encode test method identifiers:
+	 * testMethod(testClass)
 	 */
 	public static final String TEST_IDENTIFIER_MESSAGE_FORMAT= "{0}({1})"; //$NON-NLS-1$
 

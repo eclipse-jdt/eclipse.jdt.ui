@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,12 +14,15 @@
 
 package org.eclipse.jdt.internal.junit.model;
 
+import java.util.Arrays;
+
 import org.eclipse.jdt.junit.model.ITestElement;
 import org.eclipse.jdt.junit.model.ITestElementContainer;
 import org.eclipse.jdt.junit.model.ITestRunSession;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.jdt.core.Signature;
 
 public abstract class TestElement implements ITestElement {
 	public final static class Status {
@@ -175,6 +178,12 @@ public abstract class TestElement implements ITestElement {
 	 */
 	private String fDisplayName;
 
+	/**
+	 * The array of fully qualified type names of method parameters if applicable, otherwise
+	 * <code>null</code>.
+	 */
+	private String[] fParameterTypes;
+
 	private Status fStatus;
 	private String fTrace;
 	private String fExpected;
@@ -198,14 +207,17 @@ public abstract class TestElement implements ITestElement {
 	 * @param id the test id
 	 * @param testName the test name
 	 * @param displayName the test display name, can be <code>null</code>
+	 * @param parameterTypes the array of fully qualified type names of method parameters if
+	 *            applicable, otherwise <code>null</code>
 	 */
-	public TestElement(TestSuiteElement parent, String id, String testName, String displayName) {
+	public TestElement(TestSuiteElement parent, String id, String testName, String displayName, String[] parameterTypes) {
 		Assert.isNotNull(id);
 		Assert.isNotNull(testName);
 		fParent= parent;
 		fId= id;
 		fTestName= testName;
 		fDisplayName= displayName;
+		fParameterTypes= parameterTypes;
 		fStatus= Status.NOT_RUN;
 		if (parent != null)
 			parent.addChild(this);
@@ -380,5 +392,26 @@ public abstract class TestElement implements ITestElement {
 	 */
 	public String getDisplayName() {
 		return fDisplayName;
+	}
+
+	/**
+	 * @return the array of fully qualified type names of method parameters if applicable, otherwise
+	 *         <code>null</code>
+	 */
+	public String[] getParameterTypes() {
+		return fParameterTypes;
+	}
+
+	/**
+	 * Creates encoded type signatures from fully qualified type names provided by
+	 * {@link #getParameterTypes()}.
+	 * 
+	 * @return the array of parameter type signatures obtained by converting the fully qualified
+	 *         type names from {@link #getParameterTypes()}, can be <code>null</code>
+	 */
+	public String[] getParameterTypeSignatures() {
+		// TODO - JUnit5: Create encoded type signatures so that IType.getMethod(String name, String[] parameterTypeSignatures) can find the method 
+		// use new API from jdt.core - https://bugs.eclipse.org/bugs/show_bug.cgi?id=502563
+		return fParameterTypes == null ? null : Arrays.stream(fParameterTypes).map(t -> Signature.createTypeSignature(Signature.getSimpleName(t), false)).toArray(String[]::new);
 	}
 }

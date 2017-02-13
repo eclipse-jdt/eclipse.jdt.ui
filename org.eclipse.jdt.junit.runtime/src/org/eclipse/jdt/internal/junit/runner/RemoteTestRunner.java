@@ -554,12 +554,12 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	public void visitTreeEntry(ITestIdentifier identifier, boolean hasChildren, int testCount, boolean isDynamicTest, String parentId) {
-		String treeEntry= getTestId(identifier) + ',' + escapeTestName(identifier.getName()) + ',' + hasChildren + ',' + testCount 
-				+ ',' + isDynamicTest + ',' + parentId + ',' + escapeTestName(identifier.getDisplayName());
+		String treeEntry= getTestId(identifier) + ',' + escapeText(identifier.getName()) + ',' + hasChildren + ',' + testCount 
+				+ ',' + isDynamicTest + ',' + parentId + ',' + escapeText(identifier.getDisplayName()) + ',' + escapeText(identifier.getParameterTypes());
 		notifyTestTreeEntry(treeEntry);
 	}
 
-	public static String escapeTestName(String s) {
+	public static String escapeText(String s) {
 		if ((s.indexOf(',') < 0) && (s.indexOf('\\') < 0) && (s.indexOf('\r') < 0) && (s.indexOf('\n') < 0))
 			return s;
 		StringBuffer sb= new StringBuffer(s.length()+10);

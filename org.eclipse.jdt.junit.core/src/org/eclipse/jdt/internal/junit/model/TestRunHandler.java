@@ -129,7 +129,9 @@ public class TestRunHandler extends DefaultHandler {
 			String pack= attributes.getValue(IXMLTags.ATTR_PACKAGE);
 			String suiteName= pack == null ? name : pack + "." + name; //$NON-NLS-1$
 			String displayName= attributes.getValue(IXMLTags.ATTR_DISPLAY_NAME);
-			fTestSuite= (TestSuiteElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), suiteName, true, 0, false, displayName);
+			String paramTypesStr= attributes.getValue(IXMLTags.ATTR_PARAMETER_TYPES);
+			String[] paramTypes= paramTypesStr != null ? paramTypesStr.split(",") : null; //$NON-NLS-1$
+			fTestSuite= (TestSuiteElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), suiteName, true, 0, false, displayName, paramTypes);
 			readTime(fTestSuite, attributes);
 			fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
 
@@ -138,15 +140,13 @@ public class TestRunHandler extends DefaultHandler {
 
 		} else if (qName.equals(IXMLTags.NODE_TESTCASE)) {
 			String name= attributes.getValue(IXMLTags.ATTR_NAME);
-			String paramTypes= attributes.getValue(IXMLTags.ATTR_PARAMETER_TYPES);
 			String classname= attributes.getValue(IXMLTags.ATTR_CLASSNAME);
 			String testName= name + '(' + classname + ')';
-			if (paramTypes != null) { // See MessageIds.TEST_IDENTIFIER_MESSAGE_FORMAT
-				testName+= ':' + paramTypes;
-			}
-			String displayName= attributes.getValue(IXMLTags.ATTR_DISPLAY_NAME);
 			boolean isDynamicTest= Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_DYNAMIC_TEST)).booleanValue();
-			fTestCase= (TestCaseElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), testName, false, 0, isDynamicTest, displayName);
+			String displayName= attributes.getValue(IXMLTags.ATTR_DISPLAY_NAME);
+			String paramTypesStr= attributes.getValue(IXMLTags.ATTR_PARAMETER_TYPES);
+			String[] paramTypes= paramTypesStr != null ? paramTypesStr.split(",") : null; //$NON-NLS-1$
+			fTestCase= (TestCaseElement) fTestRunSession.createTestElement(fTestSuite, getNextId(), testName, false, 0, isDynamicTest, displayName, paramTypes);
 			fNotRun.push(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_INCOMPLETE)));
 			fTestCase.setIgnored(Boolean.valueOf(attributes.getValue(IXMLTags.ATTR_IGNORED)).booleanValue());
 			readTime(fTestCase, attributes);

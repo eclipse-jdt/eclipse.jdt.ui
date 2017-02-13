@@ -55,7 +55,8 @@ public class TestReferenceFailure {
 	}
 
 	public String toString() {
-		return fStatus + " " + RemoteTestRunner.escapeTestName(fTest.getName()); //$NON-NLS-1$
+		return fStatus + " " + RemoteTestRunner.escapeText(fTest.getName())  //$NON-NLS-1$
+			+ " " + RemoteTestRunner.escapeText(fTest.getParameterTypes()); //$NON-NLS-1$ 
 	}
 
 	public void setComparison(FailedComparison comparison) {

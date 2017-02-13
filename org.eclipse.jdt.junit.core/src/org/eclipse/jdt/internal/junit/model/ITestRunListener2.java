@@ -73,17 +73,18 @@ public interface ITestRunListener2 {
 	 * string is:
 	 *
 	 * <pre>
-	 *  testId,testName,isSuite,testcount,isDynamicTest,parentId,displayName
+	 *  testId,testName,isSuite,testcount,isDynamicTest,parentId,displayName,parameterTypes
 	 *
 	 *  testId: a unique id for the test
 	 *  testName: the name of the test
 	 *  isSuite: true or false depending on whether the test is a suite
 	 *  testCount: an integer indicating the number of tests
 	 *  isDynamicTest: true or false
-	 *  parentId: the unique id of its parent, otherwise "-1"
+	 *  parentId: the unique id of its parent if it is a dynamic test, otherwise can be "-1"
 	 *  displayName: the display name of the test
+	 *  parameterTypes: comma-separated list of fully qualified type names of method parameters if applicable, otherwise an empty string
 	 *  
-	 *  Example: &quot;324968,testPass(junit.tests.MyTest),false,1,false,245613,A simple test case&quot;
+	 *  Example: 324968,testPass(junit.tests.MyTest),false,1,false,-1,A simple test case,&quot;&quot;
 	 * </pre>
 	 *
 	 * @param description a string describing a tree entry
