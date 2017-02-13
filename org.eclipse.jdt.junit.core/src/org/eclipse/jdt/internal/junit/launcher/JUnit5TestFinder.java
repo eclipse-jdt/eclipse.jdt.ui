@@ -233,7 +233,7 @@ public class JUnit5TestFinder implements ITestFinder {
 	}
 
 	private boolean internalIsTest(IType type, IProgressMonitor monitor) throws JavaModelException {
-		if (CoreTestSearchEngine.isAccessibleClass(type)) {
+		if (CoreTestSearchEngine.isAccessibleClass(type, TestKindRegistry.JUNIT5_TEST_KIND_ID)) {
 			if (CoreTestSearchEngine.hasSuiteMethod(type)) { // since JUnit 4.3.1
 				return true;
 			}

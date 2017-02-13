@@ -57,7 +57,7 @@ public class CoreTestSearchEngine {
 		return testKind.getFinder().isTest(declaringType);
 	}
 
-	public static boolean isAccessibleClass(IType type) throws JavaModelException {
+	public static boolean isAccessibleClass(IType type, String testKindId) throws JavaModelException {
 		int flags= type.getFlags();
 		if (Flags.isInterface(flags)) {
 			return false;
@@ -67,7 +67,19 @@ public class CoreTestSearchEngine {
 			if (parent instanceof ICompilationUnit || parent instanceof IClassFile) {
 				return true;
 			}
-			if (!(parent instanceof IType) || !Flags.isStatic(flags) || !Flags.isPublic(flags)) {
+			if (!(parent instanceof IType)) {
+				return false;
+			}
+			if (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId)) {
+				// A nested/inner class need not be public in JUnit 5.
+				if (Flags.isPrivate(flags)) {
+					return false;
+				}
+				// If the inner class is non-static, it must be annotated with @Nested.
+				if (!Flags.isStatic(flags) && !type.getAnnotation("Nested").exists()) { //$NON-NLS-1$
+					return false;
+				}
+			} else if (!Flags.isStatic(flags) || !Flags.isPublic(flags)) {
 				return false;
 			}
 			flags= ((IType) parent).getFlags();
@@ -75,8 +87,12 @@ public class CoreTestSearchEngine {
 		}
 	}
 
+	public static boolean isAccessibleClass(IType type) throws JavaModelException {
+		return isAccessibleClass(type, null);
+	}
+
 	public static boolean isAccessibleClass(ITypeBinding type) { // not used
-			if (type.isInterface()) {
+		if (type.isInterface()) {
 			return false;
 		}
 		int modifiers= type.getModifiers();

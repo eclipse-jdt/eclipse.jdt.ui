@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -108,9 +109,9 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	public void launch(IEditorPart editor, String mode) {
 		ITypeRoot element= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 		if (element != null) {
-			IMethod selectedMethod= resolveSelectedMethodName(editor, element);
-			if (selectedMethod != null) {
-				launch(new Object[] { selectedMethod }, mode);
+			IMember selectedMember= resolveSelectedMemberName(editor, element);
+			if (selectedMember != null) {
+				launch(new Object[] { selectedMember }, mode);
 			} else {
 				launch(new Object[] { element }, mode);
 			}
@@ -119,7 +120,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 		}
 	}
 
-	private IMethod resolveSelectedMethodName(IEditorPart editor, ITypeRoot element) {
+	private IMember resolveSelectedMemberName(IEditorPart editor, ITypeRoot element) {
 		try {
 			ISelectionProvider selectionProvider= editor.getSite().getSelectionProvider();
 			if (selectionProvider == null)
@@ -132,15 +133,15 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			ITextSelection textSelection= (ITextSelection) selection;
 
 			IJavaElement elementAtOffset= SelectionConverter.getElementAtOffset(element, textSelection);
-			if (! (elementAtOffset instanceof IMethod))
+			if (!(elementAtOffset instanceof IMethod) && !(elementAtOffset instanceof IType))
 				return null;
 
-			IMethod method= (IMethod) elementAtOffset;
+			IMember member= (IMember) elementAtOffset;
 
-			ISourceRange nameRange= method.getNameRange();
+			ISourceRange nameRange= member.getNameRange();
 			if (nameRange.getOffset() <= textSelection.getOffset()
 					&& textSelection.getOffset() + textSelection.getLength() <= nameRange.getOffset() + nameRange.getLength())
-				return method;
+				return member;
 		} catch (JavaModelException e) {
 			// ignore
 		}
@@ -519,23 +520,23 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 	public ILaunchConfiguration[] getLaunchConfigurations(final IEditorPart editor) {
 		final ITypeRoot element= JavaUI.getEditorInputTypeRoot(editor.getEditorInput());
 		if (element != null) {
-			IMethod selectedMethod = null;
+			IMember selectedMember = null;
 			if (Display.getCurrent() == null) {
-				final IMethod[] temp = new IMethod[1];
+				final IMember[] temp = new IMember[1];
 				Runnable runnable= new Runnable() {
 					@Override
 					public void run() {
-						temp[0]= resolveSelectedMethodName(editor, element);
+						temp[0]= resolveSelectedMemberName(editor, element);
 					}
 				};
 				Display.getDefault().syncExec(runnable);
-				selectedMethod = temp[0];
+				selectedMember = temp[0];
 			} else {
-				selectedMethod= resolveSelectedMethodName(editor, element);
+				selectedMember= resolveSelectedMemberName(editor, element);
 			}
 			Object candidate = element;
-			if (selectedMethod != null) {
-				candidate = selectedMethod;
+			if (selectedMember != null) {
+				candidate = selectedMember;
 			}
 			return findExistingLaunchConfigurations(candidate);
 		}
