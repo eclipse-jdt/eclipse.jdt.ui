@@ -203,7 +203,10 @@ public class RedundantNullnessTypeAnnotationsFilter {
 	public IAnnotationBinding[] removeUnwantedTypeAnnotations(IAnnotationBinding[] annotations, TypeLocation location, ITypeBinding type) {
 		if (location == TypeLocation.OTHER)
 			return NO_ANNOTATIONS;
-		boolean excludeAllNullAnnotations = type.isTypeVariable() || type.isWildcardType() || NEVER_NULLNESS_LOCATIONS.contains(location);
+		if(type.isTypeVariable() || type.isWildcardType()) {
+			return annotations;
+		}
+		boolean excludeAllNullAnnotations = NEVER_NULLNESS_LOCATIONS.contains(location);
 		if (excludeAllNullAnnotations || fNonNullByDefaultLocations.contains(location)) {
 			ArrayList<IAnnotationBinding> list= new ArrayList<>(annotations.length);
 			for (IAnnotationBinding annotation : annotations) {
