@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
@@ -254,7 +255,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 
 				String name= fScope.createName(varName, false);
 				decl.setName(getAST().newSimpleName(name));
-				Type type= fImportRewrite.addImport(exception, getAST(), context);
+				Type type= fImportRewrite.addImport(exception, getAST(), context, TypeLocation.EXCEPTION);
 				decl.setType(type);
 				catchClause.setException(decl);
 				Statement st= getCatchBody(ASTNodes.getQualifiedTypeName(type), name, lineDelimiter);
@@ -276,7 +277,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			List<Type> types= unionType.types();
 			int i=0;
 			for (ITypeBinding exception : filteredExceptions) {
-				Type type= fImportRewrite.addImport(exception, getAST(), context);
+				Type type= fImportRewrite.addImport(exception, getAST(), context, TypeLocation.EXCEPTION);
 				types.add(type);
 				fLinkedProposalModel.getPositionGroup(GROUP_EXC_TYPE + i, true).addPosition(fRewriter.track(type), i == 0);
 				i++;

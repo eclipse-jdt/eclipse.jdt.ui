@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.core.runtime.Assert;
@@ -19,7 +18,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
@@ -42,7 +40,6 @@ public class CallHierarchyImageDescriptor extends CompositeImageDescriptor {
      * @param flags flags indicating which adornments are to be rendered. See <code>setAdornments</code>
      *  for valid values.
      * @param size the size of the resulting image
-     * @see #setAdornments(int)
      */
     public CallHierarchyImageDescriptor(ImageDescriptor baseImage, int flags, Point size) {
         fBaseImage= baseImage;
@@ -51,48 +48,6 @@ public class CallHierarchyImageDescriptor extends CompositeImageDescriptor {
         Assert.isTrue(fFlags >= 0);
         fSize= size;
         Assert.isNotNull(fSize);
-    }
-
-    /**
-     * Sets the descriptors adornments. Valid values are: <code>RECURSIVE</code>, <code>CALLER</code>,
-     * <code>CALLEE</code>, <code>MAX_LEVEL</code>, or any combination of those.
-     *
-     * @param adornments the image descritpors adornments
-     */
-    public void setAdornments(int adornments) {
-        Assert.isTrue(adornments >= 0);
-        fFlags= adornments;
-    }
-
-    /**
-     * Returns the current adornments.
-     *
-     * @return the current adornments
-     */
-    public int getAdronments() {
-        return fFlags;
-    }
-
-    /**
-     * Sets the size of the image created by calling <code>createImage()</code>.
-     *
-     * @param size the size of the image returned from calling <code>createImage()</code>
-     * @see ImageDescriptor#createImage()
-     */
-    public void setImageSize(Point size) {
-        Assert.isNotNull(size);
-        Assert.isTrue(size.x >= 0 && size.y >= 0);
-        fSize= size;
-    }
-
-    /**
-     * Returns the size of the image created by calling <code>createImage()</code>.
-     *
-     * @return the size of the image created by calling <code>createImage()</code>
-     * @see ImageDescriptor#createImage()
-     */
-    public Point getImageSize() {
-        return new Point(fSize.x, fSize.y);
     }
 
     @Override
@@ -116,34 +71,25 @@ public class CallHierarchyImageDescriptor extends CompositeImageDescriptor {
 
     @Override
 	protected void drawCompositeImage(int width, int height) {
-        ImageData bg= getImageData(fBaseImage);
+        CachedImageDataProvider bg= createCachedImageDataProvider(fBaseImage);
 
         drawImage(bg, 0, 0);
         drawBottomLeft();
     }
 
-	private ImageData getImageData(ImageDescriptor descriptor) {
-		ImageData data= descriptor.getImageData(); // see bug 51965: getImageData can return null
-		if (data == null) {
-			data= DEFAULT_IMAGE_DATA;
-			JavaPlugin.logErrorMessage("Image data not available: " + descriptor.toString()); //$NON-NLS-1$
-		}
-		return data;
-	}
-
-    private void drawBottomLeft() {
+	private void drawBottomLeft() {
         Point size= getSize();
         int x= 0;
-        ImageData data= null;
+        CachedImageDataProvider dataProvider= null;
         if ((fFlags & RECURSIVE) != 0) {
-            data= getImageData(JavaPluginImages.DESC_OVR_RECURSIVE);
-            drawImage(data, x, size.y - data.height);
-            x+= data.width;
+            dataProvider= createCachedImageDataProvider(JavaPluginImages.DESC_OVR_RECURSIVE);
+            drawImage(dataProvider, x, size.y - dataProvider.getHeight());
+            x+= dataProvider.getWidth();
         }
         if ((fFlags & MAX_LEVEL) != 0) {
-            data= getImageData(JavaPluginImages.DESC_OVR_MAX_LEVEL);
-            drawImage(data, x, size.y - data.height);
-            x+= data.width;
+            dataProvider= createCachedImageDataProvider(JavaPluginImages.DESC_OVR_MAX_LEVEL);
+            drawImage(dataProvider, x, size.y - dataProvider.getHeight());
+            x+= dataProvider.getWidth();
         }
     }
 }

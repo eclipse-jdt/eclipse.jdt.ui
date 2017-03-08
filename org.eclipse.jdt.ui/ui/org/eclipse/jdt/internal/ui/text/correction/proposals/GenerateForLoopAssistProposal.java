@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Yatta Solutions GmbH and others.
+ * Copyright (c) 2014, 2017 Yatta Solutions GmbH and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -160,7 +161,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		SimpleName forDeclarationName= resolveLinkedVariableNameWithProposals(rewrite, loopOverType.getName(), null, true);
 
 		SingleVariableDeclaration forLoopInitializer= ast.newSingleVariableDeclaration();
-		forLoopInitializer.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentStatement, getImportRewrite())));
+		forLoopInitializer.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentStatement, getImportRewrite()), TypeLocation.LOCAL_VARIABLE));
 		forLoopInitializer.setName(forDeclarationName);
 
 		loopStatement.setParameter(forLoopInitializer);
@@ -233,7 +234,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 
 		// declaration
 		VariableDeclarationExpression varDeclarationExpression= ast.newVariableDeclarationExpression(varDeclarationFragment);
-		varDeclarationExpression.setType(getImportRewrite().addImport(iteratorMethodBinding.getReturnType(), ast, new ContextSensitiveImportRewriteContext(fCurrentStatement, getImportRewrite())));
+		varDeclarationExpression.setType(getImportRewrite().addImport(iteratorMethodBinding.getReturnType(), ast, new ContextSensitiveImportRewriteContext(fCurrentStatement, getImportRewrite()), TypeLocation.LOCAL_VARIABLE));
 
 		return varDeclarationExpression;
 	}
@@ -258,7 +259,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		VariableDeclarationFragment resolvedVariableDeclarationFragment= ast.newVariableDeclarationFragment();
 		resolvedVariableDeclarationFragment.setName(resolvedVariableName);
 		VariableDeclarationExpression resolvedVariableDeclaration= ast.newVariableDeclarationExpression(resolvedVariableDeclarationFragment);
-		resolvedVariableDeclaration.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentStatement, getImportRewrite())));
+		resolvedVariableDeclaration.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentStatement, getImportRewrite()), TypeLocation.LOCAL_VARIABLE));
 		assignResolvedVariable.setLeftHandSide(resolvedVariableDeclaration);
 
 		// right hand side
@@ -324,7 +325,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		VariableDeclarationFragment resolvedVariableDeclarationFragment= ast.newVariableDeclarationFragment();
 		resolvedVariableDeclarationFragment.setName(resolvedVariableName);
 		VariableDeclarationExpression resolvedVariableDeclaration= ast.newVariableDeclarationExpression(resolvedVariableDeclarationFragment);
-		resolvedVariableDeclaration.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentStatement, getImportRewrite())));
+		resolvedVariableDeclaration.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentStatement, getImportRewrite()), TypeLocation.LOCAL_VARIABLE));
 		assignResolvedVariable.setLeftHandSide(resolvedVariableDeclaration);
 
 		// right hand side
@@ -460,7 +461,7 @@ public class GenerateForLoopAssistProposal extends LinkedCorrectionProposal {
 		VariableDeclarationFragment resolvedVariableDeclarationFragment= ast.newVariableDeclarationFragment();
 		resolvedVariableDeclarationFragment.setName(resolvedVariableName);
 		VariableDeclarationExpression resolvedVariableDeclaration= ast.newVariableDeclarationExpression(resolvedVariableDeclarationFragment);
-		resolvedVariableDeclaration.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentStatement, getImportRewrite())));
+		resolvedVariableDeclaration.setType(getImportRewrite().addImport(loopOverType, ast, new ContextSensitiveImportRewriteContext(fCurrentStatement, getImportRewrite()), TypeLocation.LOCAL_VARIABLE));
 		assignResolvedVariable.setLeftHandSide(resolvedVariableDeclaration);
 
 		// right hand side

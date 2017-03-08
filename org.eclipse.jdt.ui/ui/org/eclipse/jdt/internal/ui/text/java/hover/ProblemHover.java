@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -140,6 +140,7 @@ public class ProblemHover extends AbstractAnnotationHover {
 
 			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
 			JavaCorrectionProcessor.collectProposals(context, model, new Annotation[] { markerAnnotation }, true, false, proposals);
+			Collections.sort(proposals, new CompletionProposalComparator());
 
 			return proposals.toArray(new ICompletionProposal[proposals.size()]);
 		}

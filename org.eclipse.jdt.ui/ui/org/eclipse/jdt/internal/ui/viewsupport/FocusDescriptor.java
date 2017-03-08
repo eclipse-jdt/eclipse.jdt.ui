@@ -10,13 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -31,17 +29,8 @@ public class FocusDescriptor extends CompositeImageDescriptor {
 	}
 	@Override
 	protected void drawCompositeImage(int width, int height) {
-		drawImage(getImageData(fBase), 0, 0);
-		drawImage(getImageData(JavaPluginImages.DESC_OVR_FOCUS), 0, 0);
-	}
-
-	private ImageData getImageData(ImageDescriptor descriptor) {
-		ImageData data= descriptor.getImageData(); // see bug 51965: getImageData can return null
-		if (data == null) {
-			data= DEFAULT_IMAGE_DATA;
-			JavaPlugin.logErrorMessage("Image data not available: " + descriptor.toString()); //$NON-NLS-1$
-		}
-		return data;
+		drawImage(createCachedImageDataProvider(fBase), 0, 0);
+		drawImage(createCachedImageDataProvider(JavaPluginImages.DESC_OVR_FOCUS), 0, 0);
 	}
 
 	@Override

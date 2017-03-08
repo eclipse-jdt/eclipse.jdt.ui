@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -73,7 +74,7 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
 			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(declNode, imports);
-			Type newInterface= imports.addImport(fNewInterface, ast, importRewriteContext);
+			Type newInterface= imports.addImport(fNewInterface, ast, importRewriteContext, TypeLocation.OTHER);
 			ListRewrite listRewrite= rewrite.getListRewrite(declNode, TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY);
 			listRewrite.insertLast(newInterface, null);
 

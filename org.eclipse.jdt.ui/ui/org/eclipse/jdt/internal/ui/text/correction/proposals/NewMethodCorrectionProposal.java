@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -208,7 +209,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 			if (parent.getExpression() == node) {
 				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), parent.getName().getIdentifier(), parent.arguments(), getSenderBinding());
 				if (bindings.length > 0) {
-					newTypeNode= getImportRewrite().addImport(bindings[0], ast, importRewriteContext);
+					newTypeNode= getImportRewrite().addImport(bindings[0], ast, importRewriteContext, TypeLocation.RETURN_TYPE);
 					otherProposals= bindings;
 				}
 			}
@@ -219,7 +220,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 				binding= ASTResolving.normalizeWildcardType(binding, false, ast);
 			}
 			if (binding != null) {
-				newTypeNode= getImportRewrite().addImport(binding, ast, importRewriteContext);
+				newTypeNode= getImportRewrite().addImport(binding, ast, importRewriteContext, TypeLocation.RETURN_TYPE);
 			} else {
 				ASTNode parent= node.getParent();
 				if (parent instanceof ExpressionStatement) {
@@ -281,7 +282,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 			for (int i= 0; i < typeProposals.length; i++) {
 				addLinkedPositionProposal(key, typeProposals[i]);
 			}
-			return getImportRewrite().addImport(binding, ast, context);
+			return getImportRewrite().addImport(binding, ast, context, TypeLocation.PARAMETER);
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}

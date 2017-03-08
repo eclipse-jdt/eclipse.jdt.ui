@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,6 +75,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -294,7 +295,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 						ITypeBinding normalizedBinding= Bindings.normalizeForDeclarationUse(fExpressionBinding, ast);
 						if (normalizedBinding != null) {
 							ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fEnclosingBodyDeclaration, rewriter);
-							fReturnType= rewriter.addImport(normalizedBinding, ast, context);
+							fReturnType= rewriter.addImport(normalizedBinding, ast, context, TypeLocation.RETURN_TYPE);
 							fReturnTypeBinding= normalizedBinding;
 						}
 					}

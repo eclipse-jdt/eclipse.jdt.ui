@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2014 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Mickael Istria (Red Hat Inc.) - ContinuousTypingCompletionTest
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
@@ -37,6 +38,7 @@ public class ContentAssistTestSuite {
 		suite.addTest(SpecialMethodsCompletionTest.suite());
 		suite.addTest(CodeCompletionTest.suite());
 		suite.addTest(CodeCompletionTest18.suite());
+		suite.addTest(ContinuousTypingCompletionTest.suite());
 		//$JUnit-END$
 
 		return suite;

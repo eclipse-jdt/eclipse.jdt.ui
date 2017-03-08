@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2015 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1291,6 +1291,203 @@ public class QuickFixTest18 extends QuickFixTest {
 		buf.append("        Number n=t;\n");
 		buf.append("        return n.doubleValue();\n");
 		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	// remove redundant NonNullByDefault _caused_ by NonNullByDefault on field
+	public void testRemoveRedundantNonNullByDefault1() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		options.put(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_NULL_REFERENCE, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_REDUNDANT_NULL_CHECK, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.WARNING);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE, JavaCore.INSERT);
+		JavaCore.setOptions(options);
+
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @NonNullByDefault({DefaultLocation.PARAMETER})\n");
+		buf.append("    Runnable f=new Runnable() {\n");
+		buf.append("      @Override\n");
+		buf.append("      @NonNullByDefault({DefaultLocation.PARAMETER})\n");
+		buf.append("      public void run() {\n");
+		buf.append("      }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("    @NonNullByDefault({DefaultLocation.PARAMETER})\n");
+		buf.append("    Runnable f=new Runnable() {\n");
+		buf.append("      @Override\n");
+		buf.append("      public void run() {\n");
+		buf.append("      }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	// remove redundant NonNullByDefault _caused_ by NonNullByDefault on local
+	public void testRemoveRedundantNonNullByDefault2() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		options.put(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_NULL_REFERENCE, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_REDUNDANT_NULL_CHECK, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.WARNING);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE, JavaCore.INSERT);
+		JavaCore.setOptions(options);
+
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("  public void f() {\n");
+		buf.append("    @NonNullByDefault({DefaultLocation.PARAMETER})\n");
+		buf.append("    Runnable local=new Runnable() {\n");
+		buf.append("      @Override\n");
+		buf.append("      @NonNullByDefault({DefaultLocation.PARAMETER})\n");
+		buf.append("      public void run() {\n");
+		buf.append("      }\n");
+		buf.append("    };\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("  public void f() {\n");
+		buf.append("    @NonNullByDefault({DefaultLocation.PARAMETER})\n");
+		buf.append("    Runnable local=new Runnable() {\n");
+		buf.append("      @Override\n");
+		buf.append("      public void run() {\n");
+		buf.append("      }\n");
+		buf.append("    };\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	// remove redundant NonNullByDefault on field
+	public void testRemoveRedundantNonNullByDefault3() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		options.put(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_NULL_REFERENCE, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_REDUNDANT_NULL_CHECK, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.WARNING);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE, JavaCore.INSERT);
+		JavaCore.setOptions(options);
+
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class E {\n");
+		buf.append("    @NonNullByDefault\n");
+		buf.append("    Object f=new Object();\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class E {\n");
+		buf.append("    Object f=new Object();\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	// remove redundant NonNullByDefault on local
+	public void testRemoveRedundantNonNullByDefault4() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		options.put(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_NULL_REFERENCE, JavaCore.ERROR);
+		options.put(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_REDUNDANT_NULL_CHECK, JavaCore.WARNING);
+		options.put(JavaCore.COMPILER_PB_NULL_UNCHECKED_CONVERSION, JavaCore.WARNING);
+		options.put(DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE, JavaCore.INSERT);
+		JavaCore.setOptions(options);
+
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("  public void f() {\n");
+		buf.append("    @NonNullByDefault({DefaultLocation.PARAMETER})\n");
+		buf.append("    Object local=new Object() {\n");
+		buf.append("      public void g() {\n");
+		buf.append("        @NonNullByDefault(value={DefaultLocation.PARAMETER})\n");
+		buf.append("        Object nested;\n");
+		buf.append("      };\n");
+		buf.append("    };\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		System.out.println(buf);
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class E {\n");
+		buf.append("  public void f() {\n");
+		buf.append("    @NonNullByDefault({DefaultLocation.PARAMETER})\n");
+		buf.append("    Object local=new Object() {\n");
+		buf.append("      public void g() {\n");
+		buf.append("        Object nested;\n");
+		buf.append("      };\n");
+		buf.append("    };\n");
+		buf.append("  }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}

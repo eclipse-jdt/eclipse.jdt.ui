@@ -82,16 +82,16 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		@Override
 		protected void drawCompositeImage(int width, int height) {
 			if (fDeprecated) {
-				ImageData imageData= JavaPluginImages.DESC_OVR_DEPRECATED.getImageData();
-				drawImage(imageData, -1, 1); // looks better, esp. together with interface indicator
+				CachedImageDataProvider provider= createCachedImageDataProvider(JavaPluginImages.DESC_OVR_DEPRECATED);
+				drawImage(provider, -1, 1); // looks better, esp. together with interface indicator
 			}
 			if (fType != null) { // on top of deprecated indicator
-				ImageData imageData= fType.getImageData();
-				drawImage(imageData, width - imageData.width, 0);
+				CachedImageDataProvider provider= createCachedImageDataProvider(fType);
+				drawImage(provider, width - provider.getWidth(), 0);
 			}
 			if (fPackageDefault) {
-				ImageData imageData= JavaPluginImages.DESC_OVR_DEFAULT.getImageData();
-				drawImage(imageData, width - imageData.width, height - imageData.height);
+				CachedImageDataProvider provider= createCachedImageDataProvider(JavaPluginImages.DESC_OVR_DEFAULT);
+				drawImage(provider, width - provider.getWidth(), height - provider.getHeight());
 			}
 		}
 		
@@ -101,7 +101,7 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 		@Override
 		protected Point getSize() {
 			if (fgSize == null) {
-				ImageData imageData= JavaPluginImages.DESC_OVR_DEPRECATED.getImageData();
+				ImageData imageData= JavaPluginImages.DESC_OVR_DEPRECATED.getImageData(100);
 				fgSize= new Point(imageData.width, imageData.height);
 			}
 			return fgSize;

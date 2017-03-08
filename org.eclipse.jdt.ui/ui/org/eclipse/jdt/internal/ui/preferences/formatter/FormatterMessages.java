@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -388,6 +388,7 @@ final class FormatterMessages extends NLS {
 	public static String CommentsTabPage_group3_title;
 	public static String CommentsTabPage_group4_title;
 	public static String CommentsTabPage_line_width;
+	public static String CommentsTabPage_line_width_count_from_starting_position;
 	public static String CommentsTabPage_never_indent_block_comments_on_first_column;
 	public static String CommentsTabPage_never_indent_line_comments_on_first_column;
 	public static String CommentsTabPage_do_not_join_lines;

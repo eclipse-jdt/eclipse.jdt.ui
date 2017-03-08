@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -123,6 +123,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
@@ -3199,7 +3200,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, imports);
 			Type iterType= ast.newSimpleType(ast.newName(imports.addImport("java.util.Iterator", importRewriteContext))); //$NON-NLS-1$
 			if (initializerIterableType.getTypeArguments().length == 1) {
-				Type iterTypeArgument= imports.addImport(Bindings.normalizeTypeBinding(initializerIterableType.getTypeArguments()[0]), ast, importRewriteContext);
+				Type iterTypeArgument= imports.addImport(Bindings.normalizeTypeBinding(initializerIterableType.getTypeArguments()[0]), ast, importRewriteContext, TypeLocation.TYPE_ARGUMENT);
 				ParameterizedType parameterizedIterType= ast.newParameterizedType(iterType);
 				parameterizedIterType.typeArguments().add(iterTypeArgument);
 				iterType= parameterizedIterType;
@@ -3307,7 +3308,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				} else {
 					ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
 					ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, imports);
-					varType= imports.addImport(Bindings.normalizeForDeclarationUse(initializerTypeBinding, ast), ast, importRewriteContext);
+					varType= imports.addImport(Bindings.normalizeForDeclarationUse(initializerTypeBinding, ast), ast, importRewriteContext, TypeLocation.TYPE_ARGUMENT);
 				}
 				varDeclaration.setType(varType);
 				

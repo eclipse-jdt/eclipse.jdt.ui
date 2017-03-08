@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -148,7 +149,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 			ITypeBinding[] params= binding.getParameterTypes();
 			for (int i= 0; i < params.length; i++) {
 				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-				var.setType(getImportRewrite().addImport(params[i], ast, importRewriteContext));
+				var.setType(getImportRewrite().addImport(params[i], ast, importRewriteContext, TypeLocation.LOCAL_VARIABLE));
 				var.setName(ast.newSimpleName(paramNames[i]));
 				parameters.add(var);
 			}
@@ -156,7 +157,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 			List<Type> thrownExceptions= decl.thrownExceptionTypes();
 			ITypeBinding[] excTypes= binding.getExceptionTypes();
 			for (int i= 0; i < excTypes.length; i++) {
-				Type excType= getImportRewrite().addImport(excTypes[i], ast, importRewriteContext);
+				Type excType= getImportRewrite().addImport(excTypes[i], ast, importRewriteContext, TypeLocation.EXCEPTION);
 				thrownExceptions.add(excType);
 			}
 
@@ -193,7 +194,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();
 
 		SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-		var.setType(getImportRewrite().addImport(enclosingInstance, ast, importRewriteContext));
+		var.setType(getImportRewrite().addImport(enclosingInstance, ast, importRewriteContext, TypeLocation.PARAMETER));
 		String[] enclosingArgNames= StubUtility.getArgumentNameSuggestions(getCompilationUnit().getJavaProject(), enclosingInstance.getTypeDeclaration().getName(), 0, paramNames);
 		String firstName= enclosingArgNames[0];
 		var.setName(ast.newSimpleName(firstName));

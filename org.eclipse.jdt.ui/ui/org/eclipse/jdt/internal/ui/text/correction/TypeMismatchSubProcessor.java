@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -187,7 +188,7 @@ public class TypeMismatchSubProcessor {
 				ImportRewrite imports= proposal.createImportRewrite(astRoot);
 				ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(decl, imports);
 
-				Type newReturnType= imports.addImport(currBinding, ast, importRewriteContext);
+				Type newReturnType= imports.addImport(currBinding, ast, importRewriteContext, TypeLocation.RETURN_TYPE);
 				rewrite.replace(methodDeclaration.getReturnType2(), newReturnType, null);
 
 				String returnKey= "return"; //$NON-NLS-1$
@@ -496,7 +497,7 @@ public class TypeMismatchSubProcessor {
 
 		ImportRewrite importRewrite= proposal.createImportRewrite(astRoot);
 		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(selectedNode), importRewrite);
-		Type newType= importRewrite.addImport(expectedBinding, ast, importRewriteContext);
+		Type newType= importRewrite.addImport(expectedBinding, ast, importRewriteContext, TypeLocation.LOCAL_VARIABLE);
 		rewrite.replace(parameter.getType(), newType, null);
 
 		proposals.add(proposal);

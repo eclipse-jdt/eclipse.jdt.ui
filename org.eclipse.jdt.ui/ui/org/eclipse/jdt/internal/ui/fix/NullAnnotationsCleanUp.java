@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 GK Software AG and others.
+ * Copyright (c) 2011, 2017 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -106,6 +106,8 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 			case IProblem.RedundantNullDefaultAnnotationPackage:
 			case IProblem.RedundantNullDefaultAnnotationType:
 			case IProblem.RedundantNullDefaultAnnotationMethod:
+			case IProblem.RedundantNullDefaultAnnotationLocal:
+			case IProblem.RedundantNullDefaultAnnotationField:
 				result.add(MultiFixMessages.NullAnnotationsCleanUp_remove_redundant_nullness_annotation);
 				break;
 		}

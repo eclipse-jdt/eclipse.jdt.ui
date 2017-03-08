@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -178,7 +179,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		newDeclFrag.setName(ast.newSimpleName(varNames[0]));
 		newDeclFrag.setInitializer((Expression) rewrite.createCopyTarget(expression));
 
-		Type type= evaluateType(ast, nodeToAssign, fTypeBinding, KEY_TYPE);
+		Type type= evaluateType(ast, nodeToAssign, fTypeBinding, KEY_TYPE, TypeLocation.LOCAL_VARIABLE);
 
 		if (ASTNodes.isControlStatementBody(nodeToAssign.getLocationInParent())) {
 			Block block= ast.newBlock();
@@ -360,7 +361,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 		FieldDeclaration newDecl= ast.newFieldDeclaration(newDeclFrag);
 
-		Type type= evaluateType(ast, nodeToAssign, typeBinding, KEY_TYPE + index);
+		Type type= evaluateType(ast, nodeToAssign, typeBinding, KEY_TYPE + index, TypeLocation.FIELD);
 		newDecl.setType(type);
 		newDecl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers));
 
@@ -372,7 +373,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		return newDeclFrag;
 	}
 
-	private Type evaluateType(AST ast, ASTNode nodeToAssign, ITypeBinding typeBinding, String groupID) {
+	private Type evaluateType(AST ast, ASTNode nodeToAssign, ITypeBinding typeBinding, String groupID, TypeLocation location) {
 		ITypeBinding[] proposals= ASTResolving.getRelaxingTypes(ast, typeBinding);
 		for (int i= 0; i < proposals.length; i++) {
 			addLinkedPositionProposal(groupID, proposals[i]);
@@ -380,7 +381,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		ImportRewrite importRewrite= getImportRewrite();
 		CompilationUnit cuNode= (CompilationUnit) nodeToAssign.getRoot();
 		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(cuNode, nodeToAssign.getStartPosition(), importRewrite);
-		return importRewrite.addImport(typeBinding, ast, context);
+		return importRewrite.addImport(typeBinding, ast, context, location);
 	}
 
 	private String[] suggestLocalVariableNames(ITypeBinding binding, Expression expression) {
