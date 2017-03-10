@@ -359,17 +359,17 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 					ImportCompletionProposal proposal= new ImportCompletionProposal(requiredProposals[i], fInvocationContext, coreProposal.getKind());
 					proposal.setReplacementOffset(getReplacementOffset());
 					proposal.apply(document);
-					setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
+					setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen - proposal.getLengthOfImportsAddedBehindReplacementOffset());
 				} else if (requiredProposals[i].getKind() == CompletionProposal.METHOD_IMPORT) {
 					ImportCompletionProposal proposal= new ImportCompletionProposal(requiredProposals[i], fInvocationContext, coreProposal.getKind());
 					proposal.setReplacementOffset(getReplacementOffset());
 					proposal.apply(document);
-					setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
+					setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen - proposal.getLengthOfImportsAddedBehindReplacementOffset());
 				} else if (requiredProposals[i].getKind() == CompletionProposal.FIELD_IMPORT) {
 					ImportCompletionProposal proposal= new ImportCompletionProposal(requiredProposals[i], fInvocationContext, coreProposal.getKind());
 					proposal.setReplacementOffset(getReplacementOffset());
 					proposal.apply(document);
-					setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
+					setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen - proposal.getLengthOfImportsAddedBehindReplacementOffset());
 				} else {
 					/*
 					 * In 3.3 we only support the above required proposals, see

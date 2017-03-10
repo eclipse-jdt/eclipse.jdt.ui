@@ -54,6 +54,7 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 	private ContextSensitiveImportRewriteContext fImportContext;
 	private final CompletionProposal fProposal;
 	private boolean fReplacementStringComputed;
+	private int fLengthOfImportsAddedBehindReplacementOffset;
 
 
 	public ImportCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context, int parentProposalKind) {
@@ -137,7 +138,12 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 
 			if (fImportRewrite != null && fImportRewrite.hasRecordedChanges()) {
 				int oldLen= document.getLength();
-				fImportRewrite.rewriteImports(new NullProgressMonitor()).apply(document, TextEdit.UPDATE_REGIONS);
+				TextEdit textEdit= fImportRewrite.rewriteImports(new NullProgressMonitor());
+				textEdit.apply(document, TextEdit.UPDATE_REGIONS);
+				if (textEdit.getOffset() > getReplacementOffset())
+					fLengthOfImportsAddedBehindReplacementOffset= document.getLength() - oldLen;
+				else
+					fLengthOfImportsAddedBehindReplacementOffset= 0;
 				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
 			}
 		} catch (CoreException e) {
@@ -218,5 +224,14 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 		else
 			processJavadoc= JavaCore.ENABLED.equals(project.getOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, true));
 		return processJavadoc;
+	}
+
+	/**
+	 * Returns the number of characters inserted behind the replacementOffset by the last invocation of {@link #apply(IDocument, char, int)}
+	 *
+	 * @return the number of characters inserted behind the replacementOffset by the last invocation of {@link #apply(IDocument, char, int)}
+	 */
+	public int getLengthOfImportsAddedBehindReplacementOffset() {
+		return fLengthOfImportsAddedBehindReplacementOffset;
 	}
 }
