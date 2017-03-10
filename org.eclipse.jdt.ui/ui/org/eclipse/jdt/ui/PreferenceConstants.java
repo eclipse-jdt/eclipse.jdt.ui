@@ -1131,6 +1131,16 @@ public class PreferenceConstants {
 	public final static String EDITOR_ESCAPE_STRINGS= "escapeStrings"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether non-ascii characters are replaced by unicode escape
+	 * sequences when the 'escape strings' feature is used.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.14
+	 */
+	public final static String EDITOR_ESCAPE_STRINGS_NON_ASCII= "escapeStringsNonAscii"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls whether the 'close brackets' feature is
 	 * enabled.
 	 * <p>
@@ -3917,6 +3927,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_SMART_OPENING_BRACE, true);
 		store.setDefault(PreferenceConstants.EDITOR_WRAP_STRINGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_ESCAPE_STRINGS, true);
+		store.setDefault(PreferenceConstants.EDITOR_ESCAPE_STRINGS_NON_ASCII, false);
 		store.setDefault(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_FORMAT_JAVADOCS, false);
 		store.setDefault(PreferenceConstants.EDITOR_SMART_INDENT_AFTER_NEWLINE, true);

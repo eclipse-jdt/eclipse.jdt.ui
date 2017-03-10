@@ -69,6 +69,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_CLOSE_JAVADOCS),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_WRAP_STRINGS),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ESCAPE_STRINGS),
+				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ESCAPE_STRINGS_NON_ASCII),
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS),
 
 				new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_SEMICOLON),
@@ -148,7 +149,10 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		addCheckBox(composite, label, PreferenceConstants.EDITOR_WRAP_STRINGS, 0);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_escapeStrings;
-		addCheckBox(composite, label, PreferenceConstants.EDITOR_ESCAPE_STRINGS, 0);
+		Button master= addCheckBox(composite, label, PreferenceConstants.EDITOR_ESCAPE_STRINGS, 0);
+		label= PreferencesMessages.JavaEditorPreferencePage_escapeStringsNonAscii;
+		Button slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_ESCAPE_STRINGS_NON_ASCII, 0);
+		createDependency(master, slave);
 	}
 
 	private void addPasteSection(Composite composite) {

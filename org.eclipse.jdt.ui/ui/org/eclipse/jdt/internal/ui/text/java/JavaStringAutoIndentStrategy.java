@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,7 +57,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 	 * @param delimiter the line delimiter
 	 * @return the display string
 	 */
-	private String displayString(String inputString, String indentation, String delimiter) {
+	private String displayString(String inputString, String indentation, String delimiter, boolean escapeNonAscii) {
 
 		int length = inputString.length();
 		StringBuffer buffer = new StringBuffer(length);
@@ -118,7 +118,17 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 						tokenBuffer.append("\\\\"); //$NON-NLS-1$
 						break;
 					default :
-						tokenBuffer.append(c);
+						if(escapeNonAscii && (c < 0x20 || c >= 0x80)) {
+							String hex= "0123456789ABCDEF"; //$NON-NLS-1$
+							tokenBuffer.append('\\');
+							tokenBuffer.append('u');
+							tokenBuffer.append(hex.charAt((c >> 12) & 0xF));
+							tokenBuffer.append(hex.charAt((c >> 8) & 0xF));
+							tokenBuffer.append(hex.charAt((c >> 4) & 0xF));
+							tokenBuffer.append(hex.charAt(c & 0xF));
+						} else {
+							tokenBuffer.append(c);
+						}
 				}
 			}
 			buffer.append(tokenBuffer);
@@ -158,8 +168,8 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 		return document.get(start, end - start);
 	}
 
-	private String getModifiedText(String string, String indentation, String delimiter) {
-		return displayString(string, indentation, delimiter);
+	private String getModifiedText(String string, String indentation, String delimiter, boolean escapeNonAscii) {
+		return displayString(string, indentation, delimiter, escapeNonAscii);
 	}
 
 	private void javaStringIndentAfterNewLine(IDocument document, DocumentCommand command) throws BadLocationException {
@@ -187,7 +197,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 				command.text= "\" +" + command.text + indentation + "\"";  //$NON-NLS-1$//$NON-NLS-2$
 			}
 		} else if (command.text.length() > 1 && !isLineDelimiter && isEditorEscapeStrings()) {
-			command.text= getModifiedText(command.text, indentation, delimiter);
+			command.text= getModifiedText(command.text, indentation, delimiter, isEditorEscapeStringsNonAscii());
 		}
 	}
 
@@ -200,6 +210,12 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		return preferenceStore.getBoolean(PreferenceConstants.EDITOR_ESCAPE_STRINGS);
 	}
+	
+	private boolean isEditorEscapeStringsNonAscii() {
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		return preferenceStore.getBoolean(PreferenceConstants.EDITOR_ESCAPE_STRINGS_NON_ASCII);
+	}
+
 
 	private String getCoreFormatterOption(String key) {
 		if (fProject == null)
