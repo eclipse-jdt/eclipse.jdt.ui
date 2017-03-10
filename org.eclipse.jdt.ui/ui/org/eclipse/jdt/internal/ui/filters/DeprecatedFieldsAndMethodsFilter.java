@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Björn Michael and others.
+ * Copyright (c) 2017 Björn Michael and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,9 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
@@ -30,14 +31,12 @@ public class DeprecatedFieldsAndMethodsFilter extends ViewerFilter {
 	public boolean select(final Viewer viewer, final Object parentElement, final Object element) {
 		if (element instanceof IMember) {
 			IMember member= (IMember) element;
-			switch (member.getElementType()) {
-				case IJavaElement.FIELD:
-				case IJavaElement.METHOD:
-					try {
-						return !Flags.isDeprecated(member.getFlags());
-					} catch (final JavaModelException e) {
-						// flags aren't determinable so let element through this filter
-					}
+			if (member instanceof IField || member instanceof IMethod) {
+				try {
+					return !Flags.isDeprecated(member.getFlags());
+				} catch (final JavaModelException e) {
+					// flags aren't determinable so let element through this filter
+				}
 			}
 		}
 		return true;
