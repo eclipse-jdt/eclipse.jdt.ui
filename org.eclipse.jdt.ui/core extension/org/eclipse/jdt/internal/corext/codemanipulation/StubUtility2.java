@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,7 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation.DelegateEntry;
@@ -226,7 +227,7 @@ public final class StubUtility2 {
 		String[] excluded= null;
 		for (int i= 0; i < variableBindings.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
-			var.setType(imports.addImport(variableBindings[i].getType(), ast, context));
+			var.setType(imports.addImport(variableBindings[i].getType(), ast, context, TypeLocation.PARAMETER));
 			excluded= new String[list.size()];
 			list.toArray(excluded);
 			param= suggestParameterName(unit, variableBindings[i], excluded);
@@ -282,7 +283,7 @@ public final class StubUtility2 {
 
 		createTypeParameters(imports, context, ast, delegate, decl);
 
-		decl.setReturnType2(imports.addImport(delegate.getReturnType(), ast, context));
+		decl.setReturnType2(imports.addImport(delegate.getReturnType(), ast, context, TypeLocation.RETURN_TYPE));
 
 		List<SingleVariableDeclaration> params= createParameters(unit.getJavaProject(), imports, context, ast, delegate, null, decl);
 
@@ -383,7 +384,7 @@ public final class StubUtility2 {
 			bindingReturnType= bindingReturnType.getErasure();
 		}
 		
-		decl.setReturnType2(imports.addImport(bindingReturnType, ast, context));
+		decl.setReturnType2(imports.addImport(bindingReturnType, ast, context, TypeLocation.RETURN_TYPE));
 
 		List<SingleVariableDeclaration> parameters= createParameters(javaProject, imports, context, ast, binding, parameterNames, decl, nullnessDefault);
 
@@ -476,7 +477,7 @@ public final class StubUtility2 {
 			if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
 				List<Type> newTypeBounds= newTypeParam.typeBounds();
 				for (int k= 0; k < typeBounds.length; k++) {
-					newTypeBounds.add(imports.addImport(typeBounds[k], ast, context));
+					newTypeBounds.add(imports.addImport(typeBounds[k], ast, context, TypeLocation.TYPE_BOUND));
 				}
 			}
 			typeParameters.add(newTypeParam);
@@ -503,7 +504,7 @@ public final class StubUtility2 {
 			}
 			if (!is50OrHigher) {
 				type= type.getErasure();
-				var.setType(imports.addImport(type, ast, context));
+				var.setType(imports.addImport(type, ast, context, TypeLocation.PARAMETER));
 			} else if (binding.isVarargs() && type.isArray() && i == params.length - 1) {
 				var.setVarargs(true);
 				/*
@@ -539,7 +540,7 @@ public final class StubUtility2 {
 				List<Annotation> varargTypeAnnotations= dimensionAnnotations[dimensions - 1];
 				var.varargsAnnotations().addAll(varargTypeAnnotations);
 			} else {
-				var.setType(imports.addImport(type, ast, context));
+				var.setType(imports.addImport(type, ast, context, TypeLocation.PARAMETER));
 			}
 			var.setName(ast.newSimpleName(paramNames[i]));
 			IAnnotationBinding[] annotations= binding.getParameterAnnotations(i);
@@ -557,7 +558,7 @@ public final class StubUtility2 {
 		if (ast.apiLevel() >= AST.JLS8) {
 			List<Type> thrownExceptions= decl.thrownExceptionTypes();
 			for (int i= 0; i < excTypes.length; i++) {
-				Type excType= imports.addImport(excTypes[i], ast, context);
+				Type excType= imports.addImport(excTypes[i], ast, context, TypeLocation.EXCEPTION);
 				thrownExceptions.add(excType);
 			}
 		} else {

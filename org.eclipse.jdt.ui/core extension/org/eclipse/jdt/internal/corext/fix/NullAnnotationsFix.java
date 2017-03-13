@@ -247,7 +247,8 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 
 			int problemId= problem.getProblemId();
 			if (problemId == IProblem.RedundantNullAnnotation || problemId == IProblem.RedundantNullDefaultAnnotationPackage || problemId == IProblem.RedundantNullDefaultAnnotationType
-					|| problemId == IProblem.RedundantNullDefaultAnnotationMethod) {
+					|| problemId == IProblem.RedundantNullDefaultAnnotationMethod || problemId == IProblem.RedundantNullDefaultAnnotationLocal
+					|| problemId == IProblem.RedundantNullDefaultAnnotationField) {
 				RemoveRedundantAnnotationRewriteOperation operation= new RemoveRedundantAnnotationRewriteOperation(compilationUnit, problem);
 				result.add(operation);
 			}

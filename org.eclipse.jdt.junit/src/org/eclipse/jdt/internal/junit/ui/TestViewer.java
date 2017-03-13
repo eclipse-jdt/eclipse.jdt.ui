@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.PageBook;
 
+import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 
@@ -312,6 +313,9 @@ public class TestViewer {
 	 */
 	private IType findTestClass(ITestElement element) {
 		ITestFinder finder= ((TestRunSession)element.getTestRunSession()).getTestRunnerKind().getFinder();
+		if (ITestFinder.NULL.equals(finder)) {
+			return null;
+		}
 		IJavaProject project= fTestRunnerPart.getLaunchedProject();
 		if (project == null)
 			return null;
@@ -320,8 +324,11 @@ public class TestViewer {
 			try {
 				String className= null;
 				if (current instanceof TestRoot) {
-					ILaunchConfiguration configuration= ((TestRunSession)element.getTestRunSession()).getLaunch().getLaunchConfiguration();
-					className= configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String)null);
+					ILaunch launch= ((TestRunSession) element.getTestRunSession()).getLaunch();
+					if (launch != null) {
+						ILaunchConfiguration configuration= launch.getLaunchConfiguration();
+						className= configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String) null);
+					}
 				} else if (current instanceof TestElement) {
 					className= ((TestElement)current).getClassName();
 				}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -80,6 +80,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -453,7 +454,7 @@ public class SourceProvider {
 						}
 						cast.setExpression(newExpression);
 						ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(expression, importRewrite);
-						cast.setType(importRewrite.addImport(explicitCast, ast, importRewriteContext));
+						cast.setType(importRewrite.addImport(explicitCast, ast, importRewriteContext, TypeLocation.CAST));
 						expression= newExpression= cast;
 					}
 					if (NecessaryParenthesesChecker.needsParentheses(expression, element.getParent(), element.getLocationInParent())) {

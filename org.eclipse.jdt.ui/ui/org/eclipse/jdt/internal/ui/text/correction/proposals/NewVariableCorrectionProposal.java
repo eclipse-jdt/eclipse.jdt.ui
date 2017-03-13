@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -60,6 +60,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
@@ -135,7 +136,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(decl, imports);
 
 			SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
-			newDecl.setType(evaluateVariableType(ast, imports, importRewriteContext, methodDeclaration.resolveBinding()));
+			newDecl.setType(evaluateVariableType(ast, imports, importRewriteContext, methodDeclaration.resolveBinding(), TypeLocation.PARAMETER));
 			newDecl.setName(ast.newSimpleName(node.getIdentifier()));
 
 			ListRewrite listRewriter= rewrite.getListRewrite(decl, MethodDeclaration.PARAMETERS_PROPERTY);
@@ -246,7 +247,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			// and replace the assignment with an VariableDeclarationExpression
 			VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 			VariableDeclarationExpression newDecl= ast.newVariableDeclarationExpression(newDeclFrag);
-			newDecl.setType(evaluateVariableType(ast, imports, importRewriteContext, targetContext));
+			newDecl.setType(evaluateVariableType(ast, imports, importRewriteContext, targetContext, TypeLocation.LOCAL_VARIABLE));
 
 			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
 			newDeclFrag.setInitializer(placeholder);
@@ -269,7 +270,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			frag.setName(ast.newSimpleName(node.getIdentifier()));
 			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
 			frag.setInitializer(placeholder);
-			expression.setType(evaluateVariableType(ast, imports, importRewriteContext, targetContext));
+			expression.setType(evaluateVariableType(ast, imports, importRewriteContext, targetContext, TypeLocation.LOCAL_VARIABLE));
 
 			rewrite.replace(assignment, expression, null);
 
@@ -308,7 +309,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			}
 			Type type;
 			if (elementBinding != null) {
-				type= imports.addImport(elementBinding, ast, importRewriteContext);
+				type= imports.addImport(elementBinding, ast, importRewriteContext, TypeLocation.LOCAL_VARIABLE);
 			} else {
 				type= ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 			}
@@ -329,7 +330,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
 
 		newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
-		newDecl.setType(evaluateVariableType(ast, imports, importRewriteContext, targetContext));
+		newDecl.setType(evaluateVariableType(ast, imports, importRewriteContext, targetContext, TypeLocation.LOCAL_VARIABLE));
 //		newDeclFrag.setInitializer(ASTNodeFactory.newDefaultExpression(ast, newDecl.getType(), 0));
 
 		addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
@@ -423,7 +424,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 			fragment.setName(ast.newSimpleName(node.getIdentifier()));
 
-			Type type= evaluateVariableType(ast, imports, importRewriteContext, fSenderBinding);
+			Type type= evaluateVariableType(ast, imports, importRewriteContext, fSenderBinding, TypeLocation.FIELD);
 
 			FieldDeclaration newDecl= ast.newFieldDeclaration(fragment);
 			newDecl.setType(type);
@@ -472,7 +473,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 		return BodyDeclarationRewrite.getInsertionIndex(newDecl, decls);
 	}
 
-	private Type evaluateVariableType(AST ast, ImportRewrite imports, ImportRewriteContext importRewriteContext, IBinding targetContext) {
+	private Type evaluateVariableType(AST ast, ImportRewrite imports, ImportRewriteContext importRewriteContext, IBinding targetContext, TypeLocation location) {
 		if (fOriginalNode.getParent() instanceof MethodInvocation) {
 			MethodInvocation parent= (MethodInvocation) fOriginalNode.getParent();
 			if (parent.getExpression() == fOriginalNode) {
@@ -482,7 +483,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 					for (int i= 0; i < bindings.length; i++) {
 						addLinkedPositionProposal(KEY_TYPE, bindings[i]);
 					}
-					return imports.addImport(bindings[0], ast, importRewriteContext);
+					return imports.addImport(bindings[0], ast, importRewriteContext, location);
 				}
 			}
 		}
@@ -503,7 +504,7 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 					addLinkedPositionProposal(KEY_TYPE, typeProposals[i]);
 				}
 			}
-			return imports.addImport(binding, ast, importRewriteContext);
+			return imports.addImport(binding, ast, importRewriteContext, location);
 		}
 		// no binding, find type AST node instead -> ABC a= x-> use 'ABC' as is
 		Type type= org.eclipse.jdt.internal.ui.text.correction.ASTResolving.guessTypeForReference(ast, fOriginalNode);

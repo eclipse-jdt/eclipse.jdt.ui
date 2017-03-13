@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -87,6 +87,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
@@ -272,7 +273,7 @@ public class InlineConstantRefactoring extends Refactoring {
 						ITypeBinding[] typeArguments= Invocations.getInferredTypeArguments(invocation);
 						ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(fInitializerRewrite, invocation);
 						for (int i= 0; i < typeArguments.length; i++) {
-							Type typeArgument= fNewLocationCuRewrite.getImportRewrite().addImport(typeArguments[i], fNewLocationCuRewrite.getAST(), fNewLocationContext);
+							Type typeArgument= fNewLocationCuRewrite.getImportRewrite().addImport(typeArguments[i], fNewLocationCuRewrite.getAST(), fNewLocationContext, TypeLocation.TYPE_ARGUMENT);
 							fNewLocationCuRewrite.getImportRemover().registerAddedImports(typeArgument);
 							typeArgsRewrite.insertLast(typeArgument, null);
 						}
@@ -527,7 +528,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				}
 				cast.setExpression(modifiedInitializerExpr);
 				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(reference, fCuRewrite.getImportRewrite());
-				cast.setType(fCuRewrite.getImportRewrite().addImport(explicitCast, ast, context));
+				cast.setType(fCuRewrite.getImportRewrite().addImport(explicitCast, ast, context, TypeLocation.CAST));
 				newReference= cast;
 				
 			} else if (fInitializer instanceof ArrayInitializer) {

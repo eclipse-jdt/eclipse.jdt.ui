@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -173,6 +173,7 @@ public class CommentsTabPage extends FormatterTabPage {
 		// line width settings
 		final Group widthGroup= createGroup(numColumns, composite, FormatterMessages.CommentsTabPage_group3_title);
 		final NumberPreference lineWidth= createNumberPref(widthGroup, numColumns, FormatterMessages.CommentsTabPage_line_width, DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH, 0, 9999);
+		final CheckboxPreference lineWidthFromStrtingPos= createPrefFalseTrue(widthGroup, numColumns, FormatterMessages.CommentsTabPage_line_width_count_from_starting_position, DefaultCodeFormatterConstants.FORMATTER_COMMENT_COUNT_LINE_LENGTH_FROM_STARTING_POSITION, false);
 
 
 		ArrayList<CheckboxPreference> lineFirstColumnMasters= new ArrayList<>();
@@ -243,6 +244,7 @@ public class CommentsTabPage extends FormatterTabPage {
 		ArrayList<Object> lineWidthSlaves= new ArrayList<>();
 		lineWidthSlaves.add(widthGroup);
 		lineWidthSlaves.add(lineWidth);
+		lineWidthSlaves.add(lineWidthFromStrtingPos);
 
 		new OrController(lineWidthMasters, lineWidthSlaves);
 	}

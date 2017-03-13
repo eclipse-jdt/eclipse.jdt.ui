@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,6 +75,7 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
@@ -818,7 +819,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		if (!isStaticTarget()) {
 			// Add first param
 			SingleVariableDeclaration parameter= imRewrite.getAST().newSingleVariableDeclaration();
-			Type t= imRewrite.getImportRewrite().addImport(fIntermediaryFirstParameterType, imRewrite.getAST(), context);
+			Type t= imRewrite.getImportRewrite().addImport(fIntermediaryFirstParameterType, imRewrite.getAST(), context, TypeLocation.PARAMETER);
 			if (fIntermediaryFirstParameterType.isGenericType()) {
 				ParameterizedType parameterized= imRewrite.getAST().newParameterizedType(t);
 				ITypeBinding[] typeParameters= fIntermediaryFirstParameterType.getTypeParameters();
@@ -841,7 +842,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		copyTypeParameters(intermediary, imRewrite, context);
 
 		// Return type
-		intermediary.setReturnType2(imRewrite.getImportRewrite().addImport(fTargetMethodBinding.getReturnType(), ast, context));
+		intermediary.setReturnType2(imRewrite.getImportRewrite().addImport(fTargetMethodBinding.getReturnType(), ast, context, TypeLocation.RETURN_TYPE));
 
 		// Exceptions
 		copyExceptions(intermediary, imRewrite, context);
@@ -850,7 +851,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		MethodInvocation invocation= imRewrite.getAST().newMethodInvocation();
 		invocation.setName(imRewrite.getAST().newSimpleName(fTargetMethod.getElementName()));
 		if (isStaticTarget()) {
-			Type importedType= imRewrite.getImportRewrite().addImport(fTargetMethodBinding.getDeclaringClass(), ast, context);
+			Type importedType= imRewrite.getImportRewrite().addImport(fTargetMethodBinding.getDeclaringClass(), ast, context, TypeLocation.OTHER);
 			invocation.setExpression(ASTNodeFactory.newName(ast, ASTNodes.asString(importedType)));
 		} else {
 			invocation.setExpression(imRewrite.getAST().newSimpleName(targetParameterName));
@@ -893,7 +894,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			ITypeBinding[] bounds= typeParameters[i].getTypeBounds();
 			for (int j= 0; j < bounds.length; j++)
 				if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) //$NON-NLS-1$
-					ntp.typeBounds().add(imRewrite.getImportRewrite().addImport(bounds[j], imRewrite.getAST(), context));
+					ntp.typeBounds().add(imRewrite.getImportRewrite().addImport(bounds[j], imRewrite.getAST(), context, TypeLocation.TYPE_BOUND));
 			list.add(ntp);
 		}
 	}
@@ -929,7 +930,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					typeBinding= typeBinding.getComponentType();
 			}
 
-			newElement.setType(rew.getImportRewrite().addImport(typeBinding, rew.getAST(), context));
+			newElement.setType(rew.getImportRewrite().addImport(typeBinding, rew.getAST(), context, TypeLocation.PARAMETER));
 			intermediary.parameters().add(newElement);
 		}
 	}
@@ -944,7 +945,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			ITypeBinding[] bounds= current.getTypeBounds();
 			for (int j= 0; j < bounds.length; j++)
 				if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) //$NON-NLS-1$
-					parameter.typeBounds().add(rew.getImportRewrite().addImport(bounds[j], rew.getAST(), context));
+					parameter.typeBounds().add(rew.getImportRewrite().addImport(bounds[j], rew.getAST(), context, TypeLocation.TYPE_BOUND));
 
 			intermediary.typeParameters().add(parameter);
 		}
@@ -953,7 +954,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	private void copyExceptions(MethodDeclaration intermediary, CompilationUnitRewrite imRewrite,  ImportRewriteContext context) {
 		ITypeBinding[] exceptionTypes= fTargetMethodBinding.getExceptionTypes();
 		for (int i= 0; i < exceptionTypes.length; i++) {
-			Type exceptionType= imRewrite.getImportRewrite().addImport(exceptionTypes[i], imRewrite.getAST(), context);
+			Type exceptionType= imRewrite.getImportRewrite().addImport(exceptionTypes[i], imRewrite.getAST(), context, TypeLocation.EXCEPTION);
 			intermediary.thrownExceptionTypes().add(exceptionType);
 		}
 	}

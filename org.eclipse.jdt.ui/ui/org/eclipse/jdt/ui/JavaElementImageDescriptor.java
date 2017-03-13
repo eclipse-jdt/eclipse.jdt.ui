@@ -11,7 +11,6 @@
 package org.eclipse.jdt.ui;
 
 
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.core.runtime.Assert;
@@ -19,7 +18,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -209,57 +207,47 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 
 	@Override
 	protected void drawCompositeImage(int width, int height) {
-		ImageData bg= getImageData(fBaseImage);
+		CachedImageDataProvider bg= createCachedImageDataProvider(fBaseImage);
 
 		if ((fFlags & DEPRECATED) != 0) { // draw *behind* the full image
 			Point size= getSize();
-			ImageData data= getImageData(JavaPluginImages.DESC_OVR_DEPRECATED);
-			drawImage(data, 0, size.y - data.height);
+			CachedImageDataProvider deprecatedProvider= createCachedImageDataProvider(JavaPluginImages.DESC_OVR_DEPRECATED);
+			drawImage(deprecatedProvider, 0, size.y - deprecatedProvider.getHeight());
 		}
 		drawImage(bg, 0, 0);
 
 		drawTopRight();
 		drawBottomRight();
 		drawBottomLeft();
-
-
-	}
-
-	private ImageData getImageData(ImageDescriptor descriptor) {
-		ImageData data= descriptor.getImageData(); // see bug 51965: getImageData can return null
-		if (data == null) {
-			data= DEFAULT_IMAGE_DATA;
-			JavaPlugin.logErrorMessage("Image data not available: " + descriptor.toString()); //$NON-NLS-1$
-		}
-		return data;
 	}
 
 	private void addTopRightImage(ImageDescriptor desc, Point pos) {
-		ImageData data= getImageData(desc);
-		int x= pos.x - data.width;
+		CachedImageDataProvider provider= createCachedImageDataProvider(desc);
+		int x= pos.x - provider.getWidth();
 		if (x >= 0) {
-			drawImage(data, x, pos.y);
+			drawImage(provider, x, pos.y);
 			pos.x= x;
 		}
 	}
 
 	private void addBottomRightImage(ImageDescriptor desc, Point pos) {
-		ImageData data= getImageData(desc);
-		int x= pos.x - data.width;
-		int y= pos.y - data.height;
+		CachedImageDataProvider provider= createCachedImageDataProvider(desc);
+		int x= pos.x - provider.getWidth();
+		int y= pos.y - provider.getHeight();
 		if (x >= 0 && y >= 0) {
-			drawImage(data, x, y);
+			drawImage(provider, x, y);
 			pos.x= x;
 		}
 	}
 
 	private void addBottomLeftImage(ImageDescriptor desc, Point pos) {
-		ImageData data= getImageData(desc);
+		CachedImageDataProvider provider= createCachedImageDataProvider(desc);
 		int x= pos.x;
-		int y= pos.y - data.height;
-		if (x + data.width < getSize().x && y >= 0) {
-			drawImage(data, x, y);
-			pos.x= x + data.width;
+		int y= pos.y - provider.getHeight();
+		int x2= x + provider.getWidth();
+		if (x2 < getSize().x && y >= 0) {
+			drawImage(provider, x, y);
+			pos.x= x2;
 		}
 	}
 

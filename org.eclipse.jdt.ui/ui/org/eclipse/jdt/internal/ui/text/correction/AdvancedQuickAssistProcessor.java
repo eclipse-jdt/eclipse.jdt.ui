@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,6 +86,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
@@ -1870,7 +1871,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				CastExpression castException= ast.newCastExpression();
 				ImportRewrite importRewrite= proposal.createImportRewrite(context.getASTRoot());
 				ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, importRewrite);
-				castException.setType(importRewrite.addImport(exprBinding, ast, importRewriteContext));
+				castException.setType(importRewrite.addImport(exprBinding, ast, importRewriteContext, TypeLocation.CAST));
 				castException.setExpression(elseCopy);
 				elseCopy= castException;
 			}
@@ -1917,7 +1918,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			ListRewrite typeArgsRewrite= Invocations.getInferredTypeArgumentsRewrite(rewrite, invocation);
 			
 			for (int i= 0; i < typeArguments.length; i++) {
-				Type typeArgumentNode= importRewrite.addImport(typeArguments[i], ast, importRewriteContext);
+				Type typeArgumentNode= importRewrite.addImport(typeArguments[i], ast, importRewriteContext, TypeLocation.TYPE_ARGUMENT);
 				typeArgsRewrite.insertLast(typeArgumentNode, null);
 			}
 			
@@ -2437,7 +2438,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			variableDeclarationFragment.setStructuralProperty(VariableDeclarationFragment.INITIALIZER_PROPERTY, rewrite.createCopyTarget(switchExpression));
 
 			variableDeclarationStatement= ast.newVariableDeclarationStatement(variableDeclarationFragment);
-			Type type= importRewrite.addImport(expressionType, ast, importRewriteContext);
+			Type type= importRewrite.addImport(expressionType, ast, importRewriteContext, TypeLocation.LOCAL_VARIABLE);
 			variableDeclarationStatement.setType(type);
 		}
 

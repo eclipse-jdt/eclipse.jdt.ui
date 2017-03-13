@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -106,6 +106,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -280,7 +281,7 @@ public class LocalCorrectionsSubProcessor {
 					String name= scope.createName(varName, false);
 					SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 					var.setName(ast.newSimpleName(name));
-					var.setType(imports.addImport(excBinding, ast, importRewriteContext));
+					var.setType(imports.addImport(excBinding, ast, importRewriteContext, TypeLocation.EXCEPTION));
 					CatchClause newClause= ast.newCatchClause();
 					newClause.setException(var);
 					String catchBody= StubUtility.getCatchBodyContent(cu, excBinding.getName(), name, selectedNode, String.valueOf('\n'));
@@ -320,7 +321,7 @@ public class LocalCorrectionsSubProcessor {
 						ListRewrite listRewrite= rewrite.getListRewrite(unionType, UnionType.TYPES_PROPERTY);
 						for (int i= 0; i < filteredExceptions.size(); i++) {
 							ITypeBinding excBinding= filteredExceptions.get(i);
-							Type type2= imports.addImport(excBinding, ast, importRewriteContext);
+							Type type2= imports.addImport(excBinding, ast, importRewriteContext, TypeLocation.EXCEPTION);
 							listRewrite.insertLast(type2, null);
 
 							String typeKey= "type" + i; //$NON-NLS-1$
@@ -334,7 +335,7 @@ public class LocalCorrectionsSubProcessor {
 						types.add((Type) rewrite.createCopyTarget(type));
 						for (int i= 0; i < filteredExceptions.size(); i++) {
 							ITypeBinding excBinding= filteredExceptions.get(i);
-							Type type2= imports.addImport(excBinding, ast, importRewriteContext);
+							Type type2= imports.addImport(excBinding, ast, importRewriteContext, TypeLocation.EXCEPTION);
 							types.add(type2);
 
 							String typeKey= "type" + i; //$NON-NLS-1$
@@ -368,7 +369,7 @@ public class LocalCorrectionsSubProcessor {
 
 						for (int i= 0; i < filteredExceptions.size(); i++) {
 							ITypeBinding excBinding= filteredExceptions.get(i);
-							Type type2= imports.addImport(excBinding, ast, importRewriteContext);
+							Type type2= imports.addImport(excBinding, ast, importRewriteContext, TypeLocation.EXCEPTION);
 							types.add(type2);
 
 							String typeKey= "type" + i; //$NON-NLS-1$
@@ -1219,7 +1220,7 @@ public class LocalCorrectionsSubProcessor {
 				cast.setExpression(moved);
 				ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
 				ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(toRemove, imports);
-				cast.setType(imports.addImport(explicitCast, ast, importRewriteContext));
+				cast.setType(imports.addImport(explicitCast, ast, importRewriteContext, TypeLocation.CAST));
 				moved= cast;
 			}
 			rewrite.replace(toRemove, moved, null);

@@ -16,8 +16,10 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.function.IntFunction;
 
 import org.osgi.framework.Bundle;
 
@@ -485,20 +487,55 @@ public class JavaPluginImages {
 		createManagedFromKey(T_OBJ, IMG_BLANK);
 	}
 
+	private static class SmallIntMap<V> {
+		private static int fgSize = 1;
+		
+		private int[] keys = new int[fgSize];
+		@SuppressWarnings("unchecked")
+		private V[] values = (V[]) new Object[fgSize];
+		
+		/**
+		 * @param key any int except for 0
+		 * @param computer computes the value for the given key
+		 * @return the cached or computed value for the given key
+		 */
+		public V computeIfAbsent(int key, IntFunction<V> computer) {
+			int i= 0;
+			for (; i < keys.length; i++) {
+				if (keys[i] == key) {
+					return values[i];
+				} else if (keys[i] == 0) {
+					keys[i]= key;
+					V value= computer.apply(key);
+					values[i]= value;
+					return value;
+				}
+			}
+			V value= computer.apply(key);
+			int newLength= i + 1;
+			if (newLength > fgSize) {
+				fgSize++;
+			}
+			keys= Arrays.copyOf(keys, newLength);
+			keys[i]= key;
+			values= Arrays.copyOf(values, newLength);
+			values[i]= value;
+			return value;
+		}
+	}
+
 	private static final class CachedImageDescriptor extends ImageDescriptor {
 		private ImageDescriptor fDescriptor;
-		private ImageData fData;
+		private SmallIntMap<ImageData> fData= new SmallIntMap<>();
 
 		public CachedImageDescriptor(ImageDescriptor descriptor) {
-			fDescriptor = descriptor;
+			fDescriptor= descriptor;
 		}
 
 		@Override
-		public ImageData getImageData() {
-			if (fData == null) {
-				fData= fDescriptor.getImageData();
-			}
-			return fData;
+		public ImageData getImageData(int zoom) {
+			ImageData cached= fData.computeIfAbsent(zoom, fDescriptor::getImageData);
+			return cached;
 		}
 	}
 

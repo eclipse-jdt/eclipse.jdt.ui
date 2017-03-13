@@ -390,9 +390,9 @@ public class NullAnnotationsRewriteOperations {
 					}
 				}
 			} else {
-				if (!(selectedNode instanceof MarkerAnnotation))
+				if (!(selectedNode instanceof Annotation))
 					return;
-				MarkerAnnotation annotation= (MarkerAnnotation) selectedNode;
+				Annotation annotation= (Annotation) selectedNode;
 				IAnnotationBinding annotationBinding= annotation.resolveAnnotationBinding();
 				String name= annotationBinding.getName();
 				if (name.equals(NullAnnotationsFix.getNonNullByDefaultAnnotationName(fCompilationUnit.getJavaElement(), true))) {

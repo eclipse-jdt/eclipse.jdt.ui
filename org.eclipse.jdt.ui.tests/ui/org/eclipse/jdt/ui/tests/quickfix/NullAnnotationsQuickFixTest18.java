@@ -453,4 +453,503 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+
+
+	/*
+	 * Test that no redundant null annotations are created.
+	 * Variation 1: @NonNullByDefault applies everywhere, type is non-null
+	 */
+	public void test443146a() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+		buf.append("package test1;\n");
+		pack1.createCompilationUnit("package-info.java", buf.toString(), true, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test {\n");
+		buf.append("	abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
+		buf.append("\n");
+		buf.append("	public void g() {\n");
+		buf.append("		x=f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Create field 'x'");
+
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test {\n");
+		buf.append("	private Map<? extends Map<String, @Nullable Integer>, String[][]> x;\n");
+		buf.append("\n");
+		buf.append("    abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
+		buf.append("\n");
+		buf.append("	public void g() {\n");
+		buf.append("		x=f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+
+		assertEqualString(proposal.getDisplayString(), "Create parameter 'x'");
+
+		preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test {\n");
+		buf.append("	abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
+		buf.append("\n");
+		buf.append("	public void g(Map<? extends Map<String, @Nullable Integer>, String[][]> x) {\n");
+		buf.append("		x=f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+
+		proposal= (CUCorrectionProposal)proposals.get(2);
+
+		assertEqualString(proposal.getDisplayString(), "Create local variable 'x'");
+
+		preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test {\n");
+		buf.append("	abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
+		buf.append("\n");
+		buf.append("	public void g() {\n");
+		buf.append("		Map<? extends Map<String, @Nullable Integer>, String[][]> x = f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	/*
+	 * Test that no redundant null annotations are created.
+	 * Variation 2: @NonNullByDefault applies everywhere
+	 * Note, that there is no @Nullable generated for the 'local variable' case.
+	 */
+	public void test443146b() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+		buf.append("package test1;\n");
+		pack1.createCompilationUnit("package-info.java", buf.toString(), true, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test {\n");
+		buf.append("	abstract @Nullable Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
+		buf.append("\n");
+		buf.append("	public void g() {\n");
+		buf.append("		x=f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Create field 'x'");
+
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test {\n");
+		buf.append("	private @Nullable Map<? extends Map<String, @Nullable Integer>, String[][]> x;\n");
+		buf.append("\n");
+		buf.append("    abstract @Nullable Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
+		buf.append("\n");
+		buf.append("	public void g() {\n");
+		buf.append("		x=f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+
+		assertEqualString(proposal.getDisplayString(), "Create parameter 'x'");
+
+		preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test {\n");
+		buf.append("	abstract @Nullable Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
+		buf.append("\n");
+		buf.append("	public void g(@Nullable Map<? extends Map<String, @Nullable Integer>, String[][]> x) {\n");
+		buf.append("		x=f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+
+		proposal= (CUCorrectionProposal)proposals.get(2);
+
+		assertEqualString(proposal.getDisplayString(), "Create local variable 'x'");
+
+		preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test {\n");
+		buf.append("	abstract @Nullable Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
+		buf.append("\n");
+		buf.append("	public void g() {\n");
+		buf.append("		Map<? extends Map<String, @Nullable Integer>, String[][]> x = f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	/*
+	 * Test that no redundant null annotations are created.
+	 * Variation 3: @NonNullByDefault doesn't apply at the target locations (so annotations ARE expected, but not for the local variable)
+	 */
+	public void test443146c() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+		buf.append("package test1;\n");
+		pack1.createCompilationUnit("package-info.java", buf.toString(), true, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("@NonNullByDefault({})\n");
+		buf.append("abstract class Test {\n");
+		buf.append("	@NonNullByDefault\n");
+		buf.append("	abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
+		buf.append("\n");
+		buf.append("	public void g() {\n");
+		buf.append("		x=f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+	
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+	
+		assertEqualString(proposal.getDisplayString(), "Create field 'x'");
+	
+		String preview= getPreviewContent(proposal);
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("@NonNullByDefault({})\n");
+		buf.append("abstract class Test {\n");
+		buf.append("	private @NonNull Map<? extends @NonNull Map<@NonNull String, @Nullable Integer>, String @NonNull [][]> x;\n");
+		buf.append("\n");
+		buf.append("    @NonNullByDefault\n");
+		buf.append("	abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
+		buf.append("\n");
+		buf.append("	public void g() {\n");
+		buf.append("		x=f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	
+		proposal= (CUCorrectionProposal)proposals.get(1);
+	
+		assertEqualString(proposal.getDisplayString(), "Create parameter 'x'");
+	
+		preview= getPreviewContent(proposal);
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("@NonNullByDefault({})\n");
+		buf.append("abstract class Test {\n");
+		buf.append("	@NonNullByDefault\n");
+		buf.append("	abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
+		buf.append("\n");
+		buf.append("	public void g(@NonNull Map<? extends @NonNull Map<@NonNull String, @Nullable Integer>, String @NonNull [][]> x) {\n");
+		buf.append("		x=f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	
+		proposal= (CUCorrectionProposal)proposals.get(2);
+	
+		assertEqualString(proposal.getDisplayString(), "Create local variable 'x'");
+	
+		preview= getPreviewContent(proposal);
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("@NonNullByDefault({})\n");
+		buf.append("abstract class Test {\n");
+		buf.append("	@NonNullByDefault\n");
+		buf.append("	abstract Map<? extends Map<String, @Nullable Integer>, String[][]> f();\n");
+		buf.append("\n");
+		buf.append("	public void g() {\n");
+		buf.append("		Map<? extends @NonNull Map<@NonNull String, @Nullable Integer>, String @NonNull [][]> x = f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	/*
+	 * Test that no null annotations are created in inapplicable location, here: cast.
+	 */
+	public void test443146d() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test {\n");
+		buf.append("	@NonNull Map<@NonNull String, @Nullable Integer> f(Object o) {\n");
+		buf.append("		return o;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+	
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+	
+		assertEqualString(proposal.getDisplayString(), "Add cast to 'Map<String, Integer>'");
+	
+		String preview= getPreviewContent(proposal);
+	
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test {\n");
+		buf.append("	@NonNull Map<@NonNull String, @Nullable Integer> f(Object o) {\n");
+		buf.append("		return (Map<@NonNull String, @Nullable Integer>) o;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	/*
+	 * Variation: @NonNullByDefault applies everywhere, type is a type variable
+	 */
+	public void test443146e() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+		buf.append("package test1;\n");
+		pack1.createCompilationUnit("package-info.java", buf.toString(), true, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test<T> {\n");
+		buf.append("	abstract @NonNull T f();\n");
+		buf.append("\n");
+		buf.append("	public void g() {\n");
+		buf.append("		x=f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Create field 'x'");
+
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test<T> {\n");
+		buf.append("	private @NonNull T x;\n");
+		buf.append("\n");
+		buf.append("    abstract @NonNull T f();\n");
+		buf.append("\n");
+		buf.append("	public void g() {\n");
+		buf.append("		x=f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+
+		assertEqualString(proposal.getDisplayString(), "Create parameter 'x'");
+
+		preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test<T> {\n");
+		buf.append("	abstract @NonNull T f();\n");
+		buf.append("\n");
+		buf.append("	public void g(@NonNull T x) {\n");
+		buf.append("		x=f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+
+		proposal= (CUCorrectionProposal)proposals.get(2);
+
+		assertEqualString(proposal.getDisplayString(), "Create local variable 'x'");
+
+		preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test<T> {\n");
+		buf.append("	abstract @NonNull T f();\n");
+		buf.append("\n");
+		buf.append("	public void g() {\n");
+		buf.append("		@NonNull\n");
+		buf.append("        T x = f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	/*
+	 * Variation: @NonNullByDefault applies everywhere, type contains explicit @NonNull on wildcard and type variable
+	 */
+	public void test443146f() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+		buf.append("package test1;\n");
+		pack1.createCompilationUnit("package-info.java", buf.toString(), true, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test<T> {\n");
+		buf.append("	abstract Map<Map<@NonNull ?, Integer>, @NonNull T> f();\n");
+		buf.append("\n");
+		buf.append("	public void g() {\n");
+		buf.append("		x=f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Create field 'x'");
+
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test<T> {\n");
+		buf.append("	private Map<Map<@NonNull ?, Integer>, @NonNull T> x;\n");
+		buf.append("\n");
+		buf.append("    abstract Map<Map<@NonNull ?, Integer>, @NonNull T> f();\n");
+		buf.append("\n");
+		buf.append("	public void g() {\n");
+		buf.append("		x=f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+
+		proposal= (CUCorrectionProposal)proposals.get(1);
+
+		assertEqualString(proposal.getDisplayString(), "Create parameter 'x'");
+
+		preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test<T> {\n");
+		buf.append("	abstract Map<Map<@NonNull ?, Integer>, @NonNull T> f();\n");
+		buf.append("\n");
+		buf.append("	public void g(Map<Map<@NonNull ?, Integer>, @NonNull T> x) {\n");
+		buf.append("		x=f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+
+		proposal= (CUCorrectionProposal)proposals.get(2);
+
+		assertEqualString(proposal.getDisplayString(), "Create local variable 'x'");
+
+		preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("abstract class Test<T> {\n");
+		buf.append("	abstract Map<Map<@NonNull ?, Integer>, @NonNull T> f();\n");
+		buf.append("\n");
+		buf.append("	public void g() {\n");
+		buf.append("		Map<Map<@NonNull ?, Integer>, @NonNull T> x = f();\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
 }

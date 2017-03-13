@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,6 +70,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -786,7 +787,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		List<SingleVariableDeclaration> parameters= equalsMethodDeclaration.parameters();
 		SingleVariableDeclaration equalsParam= fAst.newSingleVariableDeclaration();
-		equalsParam.setType(fRewrite.getImportRewrite().addImport(fAst.resolveWellKnownType(JAVA_LANG_OBJECT), fAst, fImportRewriteContext));
+		equalsParam.setType(fRewrite.getImportRewrite().addImport(fAst.resolveWellKnownType(JAVA_LANG_OBJECT), fAst, fImportRewriteContext, TypeLocation.PARAMETER));
 		equalsParam.setName(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM));
 		parameters.add(equalsParam);
 
@@ -823,7 +824,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			// if (!(obj instanceof Type)) return false;
 			InstanceofExpression expression= fAst.newInstanceofExpression();
 			expression.setLeftOperand(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM));
-			expression.setRightOperand(fRewrite.getImportRewrite().addImport(fType, fAst, fImportRewriteContext));
+			expression.setRightOperand(fRewrite.getImportRewrite().addImport(fType, fAst, fImportRewriteContext, TypeLocation.INSTANCEOF));
 
 			PrefixExpression notExpression= fAst.newPrefixExpression();
 			notExpression.setOperator(org.eclipse.jdt.core.dom.PrefixExpression.Operator.NOT);

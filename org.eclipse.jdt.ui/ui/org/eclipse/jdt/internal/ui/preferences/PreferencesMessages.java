@@ -16,7 +16,9 @@
  *     Benjamin Muskalla <b.muskalla@gmx.net> - [preferences] Add preference for new compiler warning: MissingSynchronizedModifierInInheritedMethod - https://bugs.eclipse.org/bugs/show_bug.cgi?id=245240
  *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
  *     Thomas Reinhardt <thomas@reinhardt.com> - [build path] user library dialog should allow to select JAR from workspace - http://bugs.eclipse.org/300542
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - [compiler][null] inheritance of null annotations as an option - https://bugs.eclipse.org/388281
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for
+ *     				[compiler][null] inheritance of null annotations as an option - https://bugs.eclipse.org/388281
+ *     				Warning option for bug 410218 - https://bugs.eclipse.org/461999
  *     Gábor Kövesdán - Contribution for Bug 350000 - [content assist] Include non-prefix matches in auto-complete suggestions
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
@@ -408,6 +410,9 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_raw_type_reference;
 	public static String ProblemSeveritiesConfigurationBlock_pb_final_param_bound_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_inexact_vararg_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_unlikely_collection_method_argument_type_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_unlikely_collection_method_argument_type_strict_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_unlikely_equals_argument_type_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_accidential_assignement_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_local_variable_hiding_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_field_hiding_label;

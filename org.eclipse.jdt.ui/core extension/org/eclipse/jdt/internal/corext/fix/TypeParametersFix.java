@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 IBM Corporation and others.
+ * Copyright (c) 2014, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -96,7 +97,7 @@ public class TypeParametersFix extends CompilationUnitRewriteOperationsFix {
 				ListRewrite argumentsRewrite= rewrite.getListRewrite(createdType, ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
 				for (int j= 0; j < typeArguments.length; j++) {
 					ITypeBinding typeArgument= typeArguments[j];
-					Type argumentNode= importRewrite.addImport(typeArgument, ast, importContext);
+					Type argumentNode= importRewrite.addImport(typeArgument, ast, importContext, TypeLocation.TYPE_ARGUMENT);
 					argumentsRewrite.insertLast(argumentNode, group);
 				}
 			}
