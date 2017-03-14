@@ -952,4 +952,41 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+	public void testBug513682() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class Test {\n");
+		buf.append("    void foo(Object o) {\n");
+		buf.append("      if(o != null) {\n");
+		buf.append("          o.hashCode();\n");
+		buf.append("      }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu=pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Change parameter 'o' to '@Nullable'");
+
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class Test {\n");
+		buf.append("    void foo(@Nullable Object o) {\n");
+		buf.append("      if(o != null) {\n");
+		buf.append("          o.hashCode();\n");
+		buf.append("      }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
 }

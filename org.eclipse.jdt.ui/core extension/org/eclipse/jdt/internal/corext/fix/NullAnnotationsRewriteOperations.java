@@ -594,6 +594,7 @@ public class NullAnnotationsRewriteOperations {
 					case IProblem.RequiredNonNullButProvidedUnknown:
 					case IProblem.ConflictingNullAnnotations:
 					case IProblem.ConflictingInheritedNullAnnotations:
+					case IProblem.RedundantNullCheckAgainstNonNullType:
 						if (fAffectsParameter) {
 							// statement suggests changing parameters:
 							if (selectedNode instanceof SimpleName) {

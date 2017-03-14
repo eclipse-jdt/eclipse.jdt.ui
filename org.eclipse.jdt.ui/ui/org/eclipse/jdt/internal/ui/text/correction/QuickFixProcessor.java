@@ -263,6 +263,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ParameterLackingNonNullAnnotation:
 			case IProblem.ParameterLackingNullableAnnotation:
 			case IProblem.SpecdNonNullLocalVariableComparisonYieldsFalse:
+			case IProblem.RedundantNullCheckAgainstNonNullType:
 			case IProblem.RedundantNullCheckOnSpecdNonNullLocalVariable:
 			case IProblem.RedundantNullAnnotation:
 			case IProblem.UnusedTypeParameter:
@@ -750,6 +751,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, ChangeKind.LOCAL, proposals);
 				NullAnnotationsCorrectionProcessor.addReturnAndArgumentTypeProposal(context, problem, ChangeKind.TARGET, proposals);
 				break;
+			case IProblem.RedundantNullCheckAgainstNonNullType:
 			case IProblem.SpecdNonNullLocalVariableComparisonYieldsFalse:
 			case IProblem.RedundantNullCheckOnSpecdNonNullLocalVariable:
 				IJavaProject prj = context.getCompilationUnit().getJavaProject();
