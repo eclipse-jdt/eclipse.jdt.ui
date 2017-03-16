@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,12 +13,9 @@ package org.eclipse.jdt.internal.junit;
 
 import java.util.List;
 
-import org.osgi.service.prefs.BackingStoreException;
-
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 
 /**
  * Default preference value initialization for the
@@ -47,25 +44,5 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 		prefs.put(JUnitPreferencesConstants.JUNIT3_JAVADOC, "http://junit.sourceforge.net/junit3.8.1/javadoc/"); //$NON-NLS-1$
 		prefs.put(JUnitPreferencesConstants.JUNIT4_JAVADOC, "http://junit-team.github.io/junit/javadoc/latest/"); //$NON-NLS-1$
 		prefs.put(JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC, "http://hamcrest.org/JavaHamcrest/javadoc/1.3/"); //$NON-NLS-1$
-		
-		// migrate old instance scope prefs
-		try {
-			IEclipsePreferences newInstancePrefs= InstanceScope.INSTANCE.getNode(JUnitCorePlugin.CORE_PLUGIN_ID);
-			
-			if (newInstancePrefs.keys().length == 0) {
-				IEclipsePreferences oldInstancePrefs= InstanceScope.INSTANCE.getNode(JUnitCorePlugin.PLUGIN_ID);
-				
-				String[] oldKeys= oldInstancePrefs.keys();
-				for (int i= 0; i < oldKeys.length; i++ ) {
-					String key= oldKeys[i];
-					newInstancePrefs.put(key, oldInstancePrefs.get(key, null));
-					oldInstancePrefs.remove(key);
-				}
-				newInstancePrefs.flush();
-				oldInstancePrefs.flush();
-			}
-		} catch (BackingStoreException e) {
-			JUnitCorePlugin.log(e);
-		}
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.ui.CodeStyleConfiguration;
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor;
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -103,7 +104,10 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 			if (IProblem.UndefinedType == id) {
 				res= getAddJUnitToBuildPathProposals(context, problem, res);
 			} else if (id == IProblem.UndefinedMethod) {
-				res= getAddAssertImportProposals(context, problem, res);
+				String currentPreferenceValue= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+				if (!currentPreferenceValue.contains("org.junit.Assert.*")) { //$NON-NLS-1$
+					res= getAddAssertImportProposals(context, problem, res);
+				}
 			}
 		}
 		if (res == null || res.isEmpty()) {
