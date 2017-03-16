@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,7 +44,7 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 
 		// see https://github.com/junit-team/junit/issues/570
 		prefs.put(JUnitPreferencesConstants.JUNIT3_JAVADOC, "http://junit.sourceforge.net/junit3.8.1/javadoc/"); //$NON-NLS-1$
-		prefs.put(JUnitPreferencesConstants.JUNIT4_JAVADOC, "http://junit-team.github.io/junit/javadoc/latest/"); //$NON-NLS-1$
+		prefs.put(JUnitPreferencesConstants.JUNIT4_JAVADOC, "http://junit.org/junit4/javadoc/latest/"); //$NON-NLS-1$
 		prefs.put(JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC, "http://hamcrest.org/JavaHamcrest/javadoc/1.3/"); //$NON-NLS-1$
 		
 		// migrate old instance scope prefs
