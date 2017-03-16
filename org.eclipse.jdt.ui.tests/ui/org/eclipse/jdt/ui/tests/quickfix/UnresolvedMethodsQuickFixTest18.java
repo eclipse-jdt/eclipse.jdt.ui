@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 IBM Corporation and others.
+ * Copyright (c) 2014, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,12 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -23,6 +26,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -36,6 +40,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 import junit.framework.Test;
@@ -391,6 +396,212 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualStringsIgnoreOrder(new String[] { getPreviewContent(proposal) }, new String[] { buf.toString() });
+	}
+	public void testBug514213_avoidRedundantNonNullWhenCreatingMissingMethodForOverride() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		StringBuffer buf;
+
+		buf= new StringBuffer();
+		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+		buf.append("package test1;\n");
+		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Comparator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.NonNullByDefault;\n");
+		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
+		buf.append("\n");
+		buf.append("@NonNullByDefault({})\n");
+		buf.append("interface I1 {\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("interface I2 {\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class X implements I1, I2 {\n");
+		buf.append("	@Override\n");
+		buf.append("	public Comparator<List<? extends Map<@Nullable Number, String[]>>> @Nullable [] f(Number n1, @Nullable Number n2) {\n");
+		buf.append("		return null;\n");
+		buf.append("	}\n");
+		buf.append("}");
+		ICompilationUnit cu= pack1.createCompilationUnit("X.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("f("), 0);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Comparator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
+		buf.append("import org.eclipse.jdt.annotation.NonNullByDefault;\n");
+		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
+		buf.append("\n");
+		buf.append("@NonNullByDefault({})\n");
+		buf.append("interface I1 {\n");
+		buf.append("\n");
+		buf.append("    Comparator<@NonNull List<? extends @NonNull Map<@Nullable Number, String @NonNull []>>> @Nullable [] f(\n");
+		buf.append("            @NonNull Number n1, @Nullable Number n2);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("interface I2 {\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class X implements I1, I2 {\n");
+		buf.append("	@Override\n");
+		buf.append("	public Comparator<List<? extends Map<@Nullable Number, String[]>>> @Nullable [] f(Number n1, @Nullable Number n2) {\n");
+		buf.append("		return null;\n");
+		buf.append("	}\n");
+		buf.append("}");
+		assertProposalPreviewEquals(buf.toString(), "Create 'f()' in super type 'I1'", proposals);		
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Comparator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.NonNullByDefault;\n");
+		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
+		buf.append("\n");
+		buf.append("@NonNullByDefault({})\n");
+		buf.append("interface I1 {\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("interface I2 {\n");
+		buf.append("\n");
+		buf.append("    Comparator<List<? extends Map<@Nullable Number, String[]>>> @Nullable [] f(\n");
+		buf.append("            Number n1, @Nullable Number n2);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class X implements I1, I2 {\n");
+		buf.append("	@Override\n");
+		buf.append("	public Comparator<List<? extends Map<@Nullable Number, String[]>>> @Nullable [] f(Number n1, @Nullable Number n2) {\n");
+		buf.append("		return null;\n");
+		buf.append("	}\n");
+		buf.append("}");
+		assertProposalPreviewEquals(buf.toString(), "Create 'f()' in super type 'I2'", proposals);		
+	}
+
+	public void testBug514213_avoidRedundantNonNullWhenCreatingMissingMethodForInvocation() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		StringBuffer buf;
+
+		buf= new StringBuffer();
+		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+		buf.append("package test1;\n");
+		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Comparator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.NonNullByDefault;\n");
+		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
+		buf.append("\n");
+		buf.append("@NonNullByDefault({})\n");
+		buf.append("interface I1 {\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("interface I2 {\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class X {\n");
+		buf.append("	public boolean f(Number n1, @Nullable Number n2, I1 i1, I2 i2) {\n");
+		buf.append("		Comparator<List<? extends Map<@Nullable Number, String[]>>> @Nullable [] x1 = i1.g(n1, n2);\n");
+		buf.append("		Comparator<List<? extends Map<@Nullable Number, String[]>>> @Nullable [] x2 = i2.g(n1, n2);\n");
+		buf.append("		return x1 == x2;\n");
+		buf.append("	}\n");
+		buf.append("}");
+		ICompilationUnit cu= pack1.createCompilationUnit("X.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOfProblems(2, problems);
+		List<IJavaCompletionProposal> proposals1= collectCorrections(cu, problems[0], null);
+		List<IJavaCompletionProposal> proposals2= collectCorrections(cu, problems[1], null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Comparator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
+		buf.append("import org.eclipse.jdt.annotation.NonNullByDefault;\n");
+		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
+		buf.append("\n");
+		buf.append("@NonNullByDefault({})\n");
+		buf.append("interface I1 {\n");
+		buf.append("\n");
+		buf.append("    Comparator<@NonNull List<? extends @NonNull Map<@Nullable Number, String @NonNull []>>> @Nullable [] g(\n");
+		buf.append("            @NonNull Number n1, @Nullable Number n2);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("interface I2 {\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class X {\n");
+		buf.append("	public boolean f(Number n1, @Nullable Number n2, I1 i1, I2 i2) {\n");
+		buf.append("		Comparator<List<? extends Map<@Nullable Number, String[]>>> @Nullable [] x1 = i1.g(n1, n2);\n");
+		buf.append("		Comparator<List<? extends Map<@Nullable Number, String[]>>> @Nullable [] x2 = i2.g(n1, n2);\n");
+		buf.append("		return x1 == x2;\n");
+		buf.append("	}\n");
+		buf.append("}");
+		assertProposalPreviewEquals(buf.toString(), "Create method 'g(Number, Number)' in type 'I1'", proposals1);		
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Comparator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.NonNullByDefault;\n");
+		buf.append("import org.eclipse.jdt.annotation.Nullable;\n");
+		buf.append("\n");
+		buf.append("@NonNullByDefault({})\n");
+		buf.append("interface I1 {\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("interface I2 {\n");
+		buf.append("\n");
+		buf.append("    Comparator<List<? extends Map<@Nullable Number, String[]>>> @Nullable [] g(\n");
+		buf.append("            Number n1, @Nullable Number n2);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class X {\n");
+		buf.append("	public boolean f(Number n1, @Nullable Number n2, I1 i1, I2 i2) {\n");
+		buf.append("		Comparator<List<? extends Map<@Nullable Number, String[]>>> @Nullable [] x1 = i1.g(n1, n2);\n");
+		buf.append("		Comparator<List<? extends Map<@Nullable Number, String[]>>> @Nullable [] x2 = i2.g(n1, n2);\n");
+		buf.append("		return x1 == x2;\n");
+		buf.append("	}\n");
+		buf.append("}");
+		assertProposalPreviewEquals(buf.toString(), "Create method 'g(Number, Number)' in type 'I2'", proposals2);		
 	}
 
 }

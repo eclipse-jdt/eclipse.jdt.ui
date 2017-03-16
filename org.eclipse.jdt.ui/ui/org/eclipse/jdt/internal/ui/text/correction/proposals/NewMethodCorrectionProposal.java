@@ -48,7 +48,6 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -196,14 +195,13 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 	}
 
 	@Override
-	protected Type getNewMethodType(ASTRewrite rewrite) throws CoreException {
+	protected Type getNewMethodType(ASTRewrite rewrite, ImportRewriteContext importRewriteContext) throws CoreException {
 		ASTNode node= getInvocationNode();
 		AST ast= rewrite.getAST();
 
 		Type newTypeNode= null;
 		ITypeBinding[] otherProposals= null;
 
-		ImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(node, getImportRewrite());
 		if (node.getParent() instanceof MethodInvocation) {
 			MethodInvocation parent= (MethodInvocation) node.getParent();
 			if (parent.getExpression() == node) {
@@ -245,11 +243,10 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 	}
 
 	@Override
-	protected void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params) throws CoreException {
+	protected void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params, ImportRewriteContext context) throws CoreException {
 		AST ast= rewrite.getAST();
 
 		List<Expression> arguments= fArguments;
-		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(ASTResolving.findParentBodyDeclaration(getInvocationNode()), getImportRewrite());
 
 		for (int i= 0; i < arguments.size(); i++) {
 			Expression elem= arguments.get(i);
@@ -299,10 +296,10 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 	}
 
 	@Override
-	protected void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions) throws CoreException {
+	protected void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions, ImportRewriteContext context) throws CoreException {
 	}
 
 	@Override
-	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params) throws CoreException {
+	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params, ImportRewriteContext context) throws CoreException {
 	}
 }
