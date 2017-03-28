@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.dom.TypeAnnotationRewrite;
 
 import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
 
@@ -214,6 +215,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				Type newType= imports.addImport(newTypeBinding, ast, context, TypeLocation.PARAMETER);
 				rewrite.replace(decl.getType(), newType, null);
 				DimensionRewrite.removeAllChildren(decl, SingleVariableDeclaration.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
+				TypeAnnotationRewrite.removePureTypeAnnotations(decl, SingleVariableDeclaration.MODIFIERS2_PROPERTY, rewrite, null);
 
 				IBinding binding= decl.getName().resolveBinding();
 				if (binding != null) {
