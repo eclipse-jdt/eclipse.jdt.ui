@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 GK Software AG and others.
+ * Copyright (c) 2015, 2017 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -641,15 +641,18 @@ public class AnnotateAssistTest15 extends AbstractAnnotateAssistTests {
 					assertTrue("Only one status", resultingStatus[0] == null);
 					assertEquals("Expected status message",
 							"Error during computation of Annotate proposals: " +
-							"The type pack.age.Missing cannot be resolved.\n It is indirectly referenced from required .class files",
+							"Could not resolve type Missing",
 							status.getMessage());
+					resultingStatus[0] = status;
 				}
 			};
+			log.log(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, "Expecting an error message to be logged after this."));
 			log.addLogListener(logListener);
-			log.log(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, "Expecting an error message to be logged after this (3x)."));
 			List<ICompletionProposal> list= collectAnnotateProposals(javaEditor, offset);
 			
 			assertEquals("Expected number of proposals", 0, list.size());
+			
+			assertNotNull("Expected status", resultingStatus[0]);
 		} finally {
 			if (logListener != null) {
 				log.removeLogListener(logListener);
