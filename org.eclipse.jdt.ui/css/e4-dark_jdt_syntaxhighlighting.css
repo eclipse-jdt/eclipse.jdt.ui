@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 Lars Vogel and others.
+ * Copyright (c) 2014, 2017 Lars Vogel and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,7 @@
 
 /* ############################## JDT syntax highlighting ############################## */
 
-IEclipsePreferences#org-eclipse-jdt-ui {
+IEclipsePreferences#org-eclipse-jdt-ui:org-eclipse-jdt-ui { /* pseudo attribute added to allow contributions without replacing this node, see Bug 466075 */
 	preferences:
 		'content_assist_completion_replacement_background=200,200,0'
 		'content_assist_completion_replacement_foreground=200,0,0'
