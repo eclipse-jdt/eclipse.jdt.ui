@@ -104,6 +104,8 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractLocalDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRangeFactory;
@@ -111,6 +113,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
 import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
@@ -135,9 +138,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
@@ -672,10 +672,15 @@ public class ExtractTempRefactoring extends Refactoring {
 		Expression initializer= getSelectedExpression().createCopyTarget(fCURewrite.getASTRewrite(), true);
 		VariableDeclarationStatement vds= createTempDeclaration(initializer);
 
-		IASTFragment[] replacableMatches= retainOnlyReplacableMatches(getMatchingFragments());
-		if (!fReplaceAllOccurrences
-				|| replacableMatches.length == 0
-				|| replacableMatches.length == 1 && replacableMatches[0].equals(getSelectedExpression().getAssociatedExpression())) {
+		boolean insertAtSelection;
+		if (!fReplaceAllOccurrences) {
+			insertAtSelection= true;
+		} else {
+			IASTFragment[] replacableMatches= retainOnlyReplacableMatches(getMatchingFragments());
+			insertAtSelection= replacableMatches.length == 0
+					|| replacableMatches.length == 1 && replacableMatches[0].getAssociatedNode().equals(getSelectedExpression().getAssociatedExpression());
+		}
+		if (insertAtSelection) {
 			insertAt(getSelectedExpression().getAssociatedNode(), vds);
 			return;
 		}
