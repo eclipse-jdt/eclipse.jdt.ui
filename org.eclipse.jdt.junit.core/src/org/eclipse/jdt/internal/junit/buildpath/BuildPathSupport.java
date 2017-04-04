@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -207,19 +207,23 @@ public class BuildPathSupport {
 
 	// TODO - JUnit5
 	public static final JUnitPluginDescription JUNIT_JUPITER_API_PLUGIN= new JUnitPluginDescription(
-			"org.junit.jupiter.api", new VersionRange("[1.0.0,2.0.0)"), "org.junit.jupiter.api.jar", "org.junit.jupiter.api.jar", "org.junit.jupiter.api.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
+			"org.junit.jupiter.api", new VersionRange("[5.0.0,6.0.0)"), "org.junit.jupiter.api.jar", "org.junit.jupiter.api.jar", "org.junit.jupiter.api.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
 			JUnitPreferencesConstants.JUNIT_JUPITER_API_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_JUPITER_ENGINE_PLUGIN= new JUnitPluginDescription(
-			"org.junit.jupiter.engine", new VersionRange("[1.0.0,2.0.0)"), "org.junit.jupiter.engine.jar", "org.junit.jupiter.engine.jar", "org.junit.jupiter.engine.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
+			"org.junit.jupiter.engine", new VersionRange("[5.0.0,6.0.0)"), "org.junit.jupiter.engine.jar", "org.junit.jupiter.engine.jar", "org.junit.jupiter.engine.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
 			JUnitPreferencesConstants.JUNIT_JUPITER_ENGINE_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_JUPITER_MIGRATION_SUPPORT_PLUGIN= new JUnitPluginDescription(
-			"org.junit.jupiter.migration.support", new VersionRange("[1.0.0,2.0.0)"), "org.junit.jupiter.migration.support.jar", "org.junit.jupiter.migration.support.jar", "org.junit.jupiter.migration.support.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
+			"org.junit.jupiter.migration.support", new VersionRange("[5.0.0,6.0.0)"), "org.junit.jupiter.migration.support.jar", "org.junit.jupiter.migration.support.jar", "org.junit.jupiter.migration.support.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
 			JUnitPreferencesConstants.JUNIT_JUPITER_MIGRATION_SUPPORT_JAVADOC);
 
+	public static final JUnitPluginDescription JUNIT_JUPITER_PARAMS_PLUGIN= new JUnitPluginDescription(
+			"org.junit.jupiter.params", new VersionRange("[5.0.0,6.0.0)"), "org.junit.jupiter.params.jar", "org.junit.jupiter.params.jar", "org.junit.jupiter.params.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
+			JUnitPreferencesConstants.JUNIT_JUPITER_PARAMS_JAVADOC);
+
 	public static final JUnitPluginDescription JUNIT_VINTAGE_ENGINE_PLUGIN= new JUnitPluginDescription(
-			"org.junit.vintage.engine", new VersionRange("[1.0.0,2.0.0)"), "org.junit.vintage.engine.jar", "org.junit.vintage.engine.jar", "org.junit.vintage.engine.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
+			"org.junit.vintage.engine", new VersionRange("[4.12.0,4.13.0)"), "org.junit.vintage.engine.jar", "org.junit.vintage.engine.jar", "org.junit.vintage.engine.source", "source-bundle/", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
 			JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_PLATFORM_PLUGIN= new JUnitPluginDescription(
@@ -312,6 +316,13 @@ public class BuildPathSupport {
 	 */
 	public static IClasspathEntry getJUnitJupiterMigrationSupportLibraryEntry() {
 		return JUNIT_JUPITER_MIGRATION_SUPPORT_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.junit.jupiter.params library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnitJupiterParamsLibraryEntry() {
+		return JUNIT_JUPITER_PARAMS_PLUGIN.getLibraryEntry();
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 IBM Corporation and others.
+ * Copyright (c) 2006, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -121,6 +121,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			entriesList.add(BuildPathSupport.getJUnitJupiterApiLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitJupiterEngineLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitJupiterMigrationSupportLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitJupiterParamsLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitVintageEngineLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnit4LibraryEntry());
 			entriesList.add(BuildPathSupport.getHamcrestCoreLibraryEntry());
@@ -233,6 +234,8 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 					return JUnitPreferencesConstants.JUNIT_JUPITER_ENGINE_JAVADOC;
 				} else if (lastSegment.indexOf("jupiter.migration.support") != -1) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_JUPITER_MIGRATION_SUPPORT_JAVADOC;
+				} else if (lastSegment.indexOf("jupiter.params") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_JUPITER_PARAMS_JAVADOC;
 				} else if (lastSegment.indexOf("vintage.engine") != -1) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC;
 				} else if (lastSegment.indexOf("junit4") != -1) { //$NON-NLS-1$
