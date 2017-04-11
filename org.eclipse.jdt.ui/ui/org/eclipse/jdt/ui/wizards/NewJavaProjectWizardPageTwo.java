@@ -296,7 +296,7 @@ public class NewJavaProjectWizardPageTwo extends JavaCapabilityConfigurationPage
 					cpEntries.add(sourceClasspathEntries[i]);
 				}
 
-				cpEntries.addAll(Arrays.asList(fFirstPage.getDefaultClasspathEntries()));
+				cpEntries.addAll(0, Arrays.asList(fFirstPage.getDefaultClasspathEntries()));
 
 				entries= cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
 
