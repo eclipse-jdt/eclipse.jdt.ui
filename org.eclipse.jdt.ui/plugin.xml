@@ -6230,7 +6230,7 @@
          id="org.eclipse.jdt.ui.matchingBracketsColor"
          isEditable="false"
          label="%Dummy.label"
-         value="192,192,192">
+         value="127,0,85">
       </colorDefinition>
       <colorDefinition
          id="org.eclipse.jdt.ui.java_multi_line_comment"
