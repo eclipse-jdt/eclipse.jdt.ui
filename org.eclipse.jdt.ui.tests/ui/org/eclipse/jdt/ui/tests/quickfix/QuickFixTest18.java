@@ -39,6 +39,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -1488,6 +1489,41 @@ public class QuickFixTest18 extends QuickFixTest {
 		buf.append("      };\n");
 		buf.append("    };\n");
 		buf.append("  }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	// remove redundant @NonNull on field type
+	public void testRemoveRedundantNonNull() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class E {\n");
+		buf.append("    @NonNull Object f=new Object();\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		int offset= buf.indexOf("Object f");
+		AssistContext context= new AssistContext(cu, offset, 0);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, context);
+		assertNumberOfProposals(proposals, 3);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class E {\n");
+		buf.append("    Object f=new Object();\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,8 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
@@ -56,7 +58,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 	}
 
 	@Override
-	protected void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params) throws CoreException {
+	protected void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params, ImportRewriteContext context) throws CoreException {
 		AST ast= rewrite.getAST();
 		ImportRewrite importRewrite= getImportRewrite();
 		ITypeBinding[] bindings= fMethod.getParameterTypes();
@@ -71,7 +73,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 
 			SingleVariableDeclaration newParam= ast.newSingleVariableDeclaration();
 
-			newParam.setType(importRewrite.addImport(curr, ast));
+			newParam.setType(importRewrite.addImport(curr, ast, context, TypeLocation.PARAMETER));
 			newParam.setName(ast.newSimpleName(proposedNames[0]));
 
 			params.add(newParam);
@@ -110,17 +112,17 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 	}
 
 	@Override
-	protected Type getNewMethodType(ASTRewrite rewrite) throws CoreException {
-		return getImportRewrite().addImport(fMethod.getReturnType(), rewrite.getAST());
+	protected Type getNewMethodType(ASTRewrite rewrite, ImportRewriteContext context) throws CoreException {
+		return getImportRewrite().addImport(fMethod.getReturnType(), rewrite.getAST(), context, TypeLocation.RETURN_TYPE);
 	}
 
 	@Override
-	protected void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions) throws CoreException {
+	protected void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions, ImportRewriteContext context) throws CoreException {
 		AST ast= rewrite.getAST();
 		ImportRewrite importRewrite= getImportRewrite();
 		ITypeBinding[] bindings= fMethod.getExceptionTypes();
 		for (int i= 0; i < bindings.length; i++) {
-			Type newType= importRewrite.addImport(bindings[i], ast);
+			Type newType= importRewrite.addImport(bindings[i], ast, context, TypeLocation.EXCEPTION);
 			exceptions.add(newType);
 
 			addLinkedPosition(rewrite.track(newType), false, "exc_type_" + i); //$NON-NLS-1$
@@ -128,7 +130,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCorrectionProposal 
 	}
 
 	@Override
-	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params) throws CoreException {
+	protected void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params, ImportRewriteContext context) throws CoreException {
 
 	}
 

@@ -28,6 +28,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageDataProvider;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
@@ -90,73 +91,50 @@ class BreadcrumbItemDropDown {
 	 * mode. If <code>ltr</code> is true the arrow points to the right, otherwise it
 	 * points to the left.
 	 */
-	private final class AccessibelArrowImage extends CompositeImageDescriptor {
+	private final class AccessibleArrowImage extends CompositeImageDescriptor {
 
 		private final static int ARROW_SIZE= 5;
 
 		private final boolean fLTR;
 
-		public AccessibelArrowImage(boolean ltr) {
+		public AccessibleArrowImage(boolean ltr) {
 			fLTR= ltr;
 		}
 
-		/*
-		 * @see org.eclipse.jface.resource.CompositeImageDescriptor#drawCompositeImage(int, int)
-		 */
 		@Override
 		protected void drawCompositeImage(int width, int height) {
 			Display display= fParentComposite.getDisplay();
-
-			Image image= new Image(display, ARROW_SIZE, ARROW_SIZE * 2);
-
-			GC gc= new GC(image);
-
-			Color triangle= createColor(SWT.COLOR_LIST_FOREGROUND, SWT.COLOR_LIST_BACKGROUND, 20, display);
-			Color aliasing= createColor(SWT.COLOR_LIST_FOREGROUND, SWT.COLOR_LIST_BACKGROUND, 30, display);
-			gc.setBackground(triangle);
-
-			if (fLTR) {
-				gc.fillPolygon(new int[] { mirror(0), 0, mirror(ARROW_SIZE), ARROW_SIZE, mirror(0), ARROW_SIZE * 2 });
-			} else {
-				gc.fillPolygon(new int[] { ARROW_SIZE, 0, 0, ARROW_SIZE, ARROW_SIZE, ARROW_SIZE * 2 });
-			}
-
-			gc.setForeground(aliasing);
-			gc.drawLine(mirror(0), 1, mirror(ARROW_SIZE - 1), ARROW_SIZE);
-			gc.drawLine(mirror(ARROW_SIZE - 1), ARROW_SIZE, mirror(0), ARROW_SIZE * 2 - 1);
-
-			gc.dispose();
-			triangle.dispose();
-			aliasing.dispose();
-
-			ImageData imageData= image.getImageData();
-			for (int y= 1; y < ARROW_SIZE; y++) {
-				for (int x= 0; x < y; x++) {
-					imageData.setAlpha(mirror(x), y, 255);
+			
+			ImageDataProvider imageProvider= zoom -> {
+				Image image= new Image(display, ARROW_SIZE, ARROW_SIZE * 2);
+				
+				GC gc= new GC(image, fLTR ? SWT.LEFT_TO_RIGHT : SWT.RIGHT_TO_LEFT);
+				gc.setAntialias(SWT.ON);
+				
+				Color triangleColor= createColor(SWT.COLOR_LIST_FOREGROUND, SWT.COLOR_LIST_BACKGROUND, 20, display);
+				gc.setBackground(triangleColor);
+				gc.fillPolygon(new int[] { 0, 0, ARROW_SIZE, ARROW_SIZE, 0, ARROW_SIZE * 2 });
+				gc.dispose();
+				triangleColor.dispose();
+				
+				ImageData imageData= image.getImageData(zoom);
+				image.dispose();
+				int zoomedArrowSize= ARROW_SIZE * zoom / 100;
+				for (int y1= 0; y1 < zoomedArrowSize; y1++) {
+					for (int x1= 0; x1 <= y1; x1++) {
+						imageData.setAlpha(fLTR ? x1 : zoomedArrowSize - x1 - 1, y1, 255);
+					}
 				}
-			}
-			for (int y= 0; y < ARROW_SIZE; y++) {
-				for (int x= 0; x <= y; x++) {
-					imageData.setAlpha(mirror(x), ARROW_SIZE * 2 - y - 1, 255);
+				for (int y2= 0; y2 < zoomedArrowSize; y2++) {
+					for (int x2= 0; x2 <= y2; x2++) {
+						imageData.setAlpha(fLTR ? x2 : zoomedArrowSize - x2 - 1, zoomedArrowSize * 2 - y2 - 1, 255);
+					}
 				}
-			}
-
-			int offset= fLTR ? 0 : -1;
-			drawImage(imageData, (width / 2) - (ARROW_SIZE / 2) + offset, (height / 2) - ARROW_SIZE - 1);
-
-			image.dispose();
+				return imageData;
+			};
+			drawImage(imageProvider, (width / 2) - (ARROW_SIZE / 2), (height / 2) - ARROW_SIZE);
 		}
 
-		private int mirror(int x) {
-			if (fLTR)
-				return x;
-
-			return ARROW_SIZE - x - 1;
-		}
-
-		/*
-		 * @see org.eclipse.jface.resource.CompositeImageDescriptor#getSize()
-		 */
 		@Override
 		protected Point getSize() {
 			return new Point(10, 16);
@@ -219,7 +197,7 @@ class BreadcrumbItemDropDown {
 			}
 		};
 
-		showDropDownMenuAction.setImageDescriptor(new AccessibelArrowImage(isLTR()));
+		showDropDownMenuAction.setImageDescriptor(new AccessibleArrowImage(isLTR()));
 		showDropDownMenuAction.setToolTipText(BreadcrumbMessages.BreadcrumbItemDropDown_showDropDownMenu_action_toolTip);
 		manager.add(showDropDownMenuAction);
 

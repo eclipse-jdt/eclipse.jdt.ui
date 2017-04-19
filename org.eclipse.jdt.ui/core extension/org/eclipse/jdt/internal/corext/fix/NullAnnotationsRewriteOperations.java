@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
@@ -371,6 +372,9 @@ public class NullAnnotationsRewriteOperations {
 				if (selectedNode instanceof SingleVariableDeclaration) {
 					SingleVariableDeclaration singleVariableDeclaration= (SingleVariableDeclaration) selectedNode;
 					modifiers= singleVariableDeclaration.modifiers();
+				} else if (selectedNode instanceof FieldDeclaration) {
+					FieldDeclaration fieldDeclaration= (FieldDeclaration) selectedNode;
+					modifiers= fieldDeclaration.modifiers();
 				} else if (selectedNode instanceof MethodDeclaration) {
 					MethodDeclaration methodDeclaration= (MethodDeclaration) selectedNode;
 					modifiers= methodDeclaration.modifiers();
