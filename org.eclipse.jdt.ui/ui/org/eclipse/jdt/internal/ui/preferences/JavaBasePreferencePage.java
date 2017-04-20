@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -24,11 +25,14 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 
@@ -183,12 +187,30 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 				PreferenceConstants.REFACTOR_LIGHTWEIGHT);
 
 		Group group= new Group(result, SWT.NONE);
-		group.setLayout(new GridLayout());
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setText(PreferencesMessages.JavaBasePreferencePage_search);
 
-		addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_search_small_menu, null, PreferenceConstants.SEARCH_USE_REDUCED_MENU);
-		addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_DisableNewJavaIndex, fJavaCorePreferences, "disableNewJavaIndex"); //$NON-NLS-1$
+		GridDataFactory checkBoxData = GridDataFactory.fillDefaults().grab(true, false).align(SWT.FILL, SWT.CENTER);
+		Button smallMenuButton = addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_search_small_menu, null, PreferenceConstants.SEARCH_USE_REDUCED_MENU);
+		checkBoxData.copy().span(2,1).applyTo(smallMenuButton);
+		Button newIndexButton = addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_EnableNewJavaIndex, fJavaCorePreferences, "enableNewJavaIndex"); //$NON-NLS-1$
+		checkBoxData.copy().applyTo(newIndexButton);
+
+		Button clearIndexButton = new Button(group, SWT.PUSH);
+		clearIndexButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Job job = Job.create(PreferencesMessages.JavaBasePreferencePage_rebuildingIndexJobName, monitor -> {
+					JavaCore.rebuildIndex(monitor);
+				});
+				job.setUser(true);
+				job.schedule();
+			}
+		});
+		clearIndexButton.setText(PreferencesMessages.JavaBasePreferencePage_clearIndexButtonName);
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.TOP).applyTo(clearIndexButton);
+
+		GridLayoutFactory.swtDefaults().numColumns(2).generateLayout(group);
 
 		layout= new GridLayout();
 		layout.numColumns= 2;

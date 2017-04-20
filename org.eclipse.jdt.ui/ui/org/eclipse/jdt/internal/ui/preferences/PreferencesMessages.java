@@ -96,6 +96,8 @@ public final class PreferencesMessages extends NLS {
 	public static String ImportOrganizeInputDialog_error_entryExists;
 	public static String ImportOrganizeInputDialog_name_group_label;
 	public static String ImportOrganizeInputDialog_name_group_static_label;
+	public static String JavaBasePreferencePage_rebuildingIndexJobName;
+	public static String JavaBasePreferencePage_clearIndexButtonName;
 	public static String JavaBasePreferencePage_description;
 	public static String JavaBasePreferencePage_doubleclick_action;
 	public static String JavaBasePreferencePage_doubleclick_gointo;
@@ -794,7 +796,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_jrecompliance_info_project;
 	public static String ProblemSeveritiesConfigurationBlock_section_generics;
 	public static String JavaBasePreferencePage_dialogs;
-	public static String JavaBasePreferencePage_DisableNewJavaIndex;
+	public static String JavaBasePreferencePage_EnableNewJavaIndex;
 	public static String JavaBasePreferencePage_do_not_hide_description;
 	public static String JavaBasePreferencePage_do_not_hide_button;
 	public static String JavaBasePreferencePage_do_not_hide_dialog_title;
