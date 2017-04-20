@@ -989,4 +989,204 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+
+	public void testBug513209a() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("   public void SomeMethod(\n");
+		buf.append("      String[] a)\n");
+		buf.append("   {\n");
+		buf.append("\n");
+		buf.append("   }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		buf = new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class B extends A {\n");
+		buf.append("   @Override\n");
+		buf.append("   public void SomeMethod(\n"); 
+		buf.append("      String[] a)\n"); 
+		buf.append("   {\n");
+		buf.append("\n");
+		buf.append("   }\n"); 
+		buf.append("}\n");
+		ICompilationUnit cu=pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Change parameter 'a' to '@Nullable'");
+
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class B extends A {\n");
+		buf.append("   @Override\n");
+		buf.append("   public void SomeMethod(\n"); 
+		buf.append("      String @Nullable [] a)\n"); 
+		buf.append("   {\n");
+		buf.append("\n");
+		buf.append("   }\n"); 
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testBug513209b() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("   public void SomeMethod(\n");
+		buf.append("      int[][] a)\n");
+		buf.append("   {\n");
+		buf.append("\n");
+		buf.append("   }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		buf = new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class B extends A {\n");
+		buf.append("   @Override\n");
+		buf.append("   public void SomeMethod(\n"); 
+		buf.append("      int[][] a)\n"); 
+		buf.append("   {\n");
+		buf.append("\n");
+		buf.append("   }\n"); 
+		buf.append("}\n");
+		ICompilationUnit cu=pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Change parameter 'a' to '@Nullable'");
+
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class B extends A {\n");
+		buf.append("   @Override\n");
+		buf.append("   public void SomeMethod(\n"); 
+		buf.append("      int @Nullable [][] a)\n"); 
+		buf.append("   {\n");
+		buf.append("\n");
+		buf.append("   }\n"); 
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testBug513209c() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("   public void SomeMethod(\n");
+		buf.append("      String[] a)\n");
+		buf.append("   {\n");
+		buf.append("\n");
+		buf.append("   }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		buf = new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class B extends A {\n");
+		buf.append("   @Override\n");
+		buf.append("   public void SomeMethod(\n"); 
+		buf.append("      String @NonNull [] a)\n"); 
+		buf.append("   {\n");
+		buf.append("\n");
+		buf.append("   }\n"); 
+		buf.append("}\n");
+		ICompilationUnit cu=pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Change parameter 'a' to '@Nullable'");
+
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("public class B extends A {\n");
+		buf.append("   @Override\n");
+		buf.append("   public void SomeMethod(\n"); 
+		buf.append("      String @Nullable [] a)\n"); 
+		buf.append("   {\n");
+		buf.append("\n");
+		buf.append("   }\n"); 
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	public void testBug513209d() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class A {\n");
+		buf.append("   public String[][][] SomeMethod()\n");
+		buf.append("   {\n");
+		buf.append("		return null;\n");
+		buf.append("   }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		buf = new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B extends A {\n");
+		buf.append("   @Override\n");
+		buf.append("   public String[][][] SomeMethod()\n");
+		buf.append("   {\n");
+		buf.append("		return new String[0][][];\n");
+		buf.append("   }\n"); 
+		buf.append("}\n");
+		ICompilationUnit cu=pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+
+		assertEqualString(proposal.getDisplayString(), "Change return type of 'SomeMethod(..)' to '@NonNull'");
+
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.NonNull;\n");
+		buf.append("\n");
+		buf.append("public class B extends A {\n");
+		buf.append("   @Override\n");
+		buf.append("   public String @NonNull [][][] SomeMethod()\n");
+		buf.append("   {\n");
+		buf.append("		return new String[0][][];\n");
+		buf.append("   }\n"); 
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
 }
