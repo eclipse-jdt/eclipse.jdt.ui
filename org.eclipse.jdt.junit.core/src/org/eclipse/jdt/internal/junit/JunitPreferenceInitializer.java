@@ -39,10 +39,22 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 		prefs.put(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST, ""); //$NON-NLS-1$
 		prefs.putInt(JUnitPreferencesConstants.MAX_TEST_RUNS, 10);
 
-		// TODO - JUnit5
 		// see https://github.com/junit-team/junit/issues/570
 		prefs.put(JUnitPreferencesConstants.JUNIT3_JAVADOC, "http://junit.sourceforge.net/junit3.8.1/javadoc/"); //$NON-NLS-1$
 		prefs.put(JUnitPreferencesConstants.JUNIT4_JAVADOC, "http://junit-team.github.io/junit/javadoc/latest/"); //$NON-NLS-1$
 		prefs.put(JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC, "http://hamcrest.org/JavaHamcrest/javadoc/1.3/"); //$NON-NLS-1$
+
+		String junit5JavadocLocation= "http://junit.org/junit5/docs/current/api/"; //$NON-NLS-1$
+		prefs.put(JUnitPreferencesConstants.JUNIT_JUPITER_API_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT_JUPITER_ENGINE_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT_JUPITER_MIGRATIONSUPPORT_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT_JUPITER_PARAMS_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT_PLATFORM_COMMONS_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT_PLATFORM_ENGINE_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT_PLATFORM_LAUNCHER_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT_PLATFORM_RUNNER_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_API_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC, junit5JavadocLocation);
+		prefs.put(JUnitPreferencesConstants.JUNIT_OPENTEST4J_JAVADOC, junit5JavadocLocation);
 	}
 }

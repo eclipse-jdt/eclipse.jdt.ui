@@ -115,14 +115,17 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			entry= BuildPathSupport.getJUnit4LibraryEntry();
 			entry2= BuildPathSupport.getHamcrestCoreLibraryEntry();
 		} else if (JUNIT5.equals(version)) {
-			// TODO - JUnit5
-			entriesList.add(BuildPathSupport.getJUnitPlatformLibraryEntry());
-			entriesList.add(BuildPathSupport.getJUnitOpentest4jLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitJupiterApiLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitJupiterEngineLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitJupiterMigrationSupportLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitJupiterParamsLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitPlatformCommonsLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitPlatformEngineLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitPlatformLauncherLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitPlatformRunnerLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitPlatformSuiteApiLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitVintageEngineLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitOpentest4jLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnit4LibraryEntry());
 			entriesList.add(BuildPathSupport.getHamcrestCoreLibraryEntry());
 		}
@@ -223,22 +226,29 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 					return JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC;
 				}
 			} else if (JUNIT5.equals(version)) {
-				// TODO - JUnit5
-				if (lastSegment.indexOf("platform") != -1) { //$NON-NLS-1$
-					return JUnitPreferencesConstants.JUNIT_PLATFORM_JAVADOC;
-				} else if (lastSegment.indexOf("opentest4j") != -1) { //$NON-NLS-1$
-					return JUnitPreferencesConstants.JUNIT_OPENTEST4J_JAVADOC;
-				} else if (lastSegment.indexOf("api") != -1) { //$NON-NLS-1$
+				if (lastSegment.indexOf("jupiter.api") != -1) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_JUPITER_API_JAVADOC;
 				} else if (lastSegment.indexOf("jupiter.engine") != -1) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_JUPITER_ENGINE_JAVADOC;
-				} else if (lastSegment.indexOf("jupiter.migration.support") != -1) { //$NON-NLS-1$
-					return JUnitPreferencesConstants.JUNIT_JUPITER_MIGRATION_SUPPORT_JAVADOC;
+				} else if (lastSegment.indexOf("jupiter.migrationsupport") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_JUPITER_MIGRATIONSUPPORT_JAVADOC;
 				} else if (lastSegment.indexOf("jupiter.params") != -1) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_JUPITER_PARAMS_JAVADOC;
+				} else if (lastSegment.indexOf("platform.commons") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_PLATFORM_COMMONS_JAVADOC;
+				} else if (lastSegment.indexOf("platform.engine") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_PLATFORM_ENGINE_JAVADOC;
+				} else if (lastSegment.indexOf("platform.launcher") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_PLATFORM_LAUNCHER_JAVADOC;
+				} else if (lastSegment.indexOf("platform.runner") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_PLATFORM_RUNNER_JAVADOC;
+				} else if (lastSegment.indexOf("platform.suite.api") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_API_JAVADOC;
 				} else if (lastSegment.indexOf("vintage.engine") != -1) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC;
-				} else if (lastSegment.indexOf("junit4") != -1) { //$NON-NLS-1$
+				} else if (lastSegment.indexOf("opentest4j") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_OPENTEST4J_JAVADOC;
+				} else if (lastSegment.indexOf("junit") != -1) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT4_JAVADOC;
 				} else {
 					return JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC;

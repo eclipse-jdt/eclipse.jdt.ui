@@ -64,7 +64,6 @@ public class SuiteClassesContentProvider implements IStructuredContentProvider {
 	public Set<IType> getTests(IPackageFragment pack) {
 		try {
 			HashSet<IType> result= new HashSet<>();
-			// TODO - JUnit5 - check for JUnit 5 
 			if (isIncludeJunit4Tests()) {
 				new JUnit4TestFinder().findTestsInContainer(pack, result, null);
 			} else {

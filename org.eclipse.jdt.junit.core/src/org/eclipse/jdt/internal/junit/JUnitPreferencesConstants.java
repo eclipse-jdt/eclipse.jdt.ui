@@ -76,7 +76,6 @@ public class JUnitPreferencesConstants {
 	 */
 	public static final String HAMCREST_CORE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit4.hamcrest.core.javadoclocation"; //$NON-NLS-1$
 
-	// TODO - JUnit5
 	/**
 	 * Javadoc location for org.junit.jupiter.api (JUnit 5)
 	 */
@@ -88,9 +87,9 @@ public class JUnitPreferencesConstants {
 	public static final String JUNIT_JUPITER_ENGINE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.jupiter.engine.javadoclocation"; //$NON-NLS-1$
 
 	/**
-	 * Javadoc location for org.junit.jupiter.migration.support (JUnit 5)
+	 * Javadoc location for org.junit.jupiter.migrationsupport (JUnit 5)
 	 */
-	public static final String JUNIT_JUPITER_MIGRATION_SUPPORT_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.jupiter.migration.support.javadoclocation"; //$NON-NLS-1$
+	public static final String JUNIT_JUPITER_MIGRATIONSUPPORT_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.jupiter.migrationsupport.javadoclocation"; //$NON-NLS-1$
 
 	/**
 	 * Javadoc location for org.junit.jupiter.params (JUnit 5)
@@ -98,14 +97,34 @@ public class JUnitPreferencesConstants {
 	public static final String JUNIT_JUPITER_PARAMS_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.jupiter.params.javadoclocation"; //$NON-NLS-1$
 	
 	/**
+	 * Javadoc location for org.junit.platform.commons (JUnit 5)
+	 */
+	public static final String JUNIT_PLATFORM_COMMONS_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.commons.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.platform.engine (JUnit 5)
+	 */
+	public static final String JUNIT_PLATFORM_ENGINE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.engine.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.platform.launcher (JUnit 5)
+	 */
+	public static final String JUNIT_PLATFORM_LAUNCHER_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.launcher.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.platform.runner (JUnit 5)
+	 */
+	public static final String JUNIT_PLATFORM_RUNNER_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.runner.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.platform.suite.api (JUnit 5)
+	 */
+	public static final String JUNIT_PLATFORM_SUITE_API_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.suite.api.javadoclocation"; //$NON-NLS-1$
+
+	/**
 	 * Javadoc location for org.junit.vintage.engine (JUnit 5)
 	 */
 	public static final String JUNIT_VINTAGE_ENGINE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.vintage.engine.javadoclocation"; //$NON-NLS-1$
-
-	/**
-	 * Javadoc location for org.junit.platform (JUnit 5)
-	 */
-	public static final String JUNIT_PLATFORM_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.javadoclocation"; //$NON-NLS-1$
 
 	/**
 	 * Javadoc location for org.opentest4j (JUnit 5)
