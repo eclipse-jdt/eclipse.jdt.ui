@@ -44,6 +44,7 @@ import org.eclipse.jface.internal.text.html.BrowserInformationControl;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.StyledString;
 
@@ -602,8 +603,12 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			String info= getProposalInfo().getInfo(monitor);
 			if (info != null && info.length() > 0) {
 				StringBuffer buffer= new StringBuffer();
-				HTMLPrinter.insertPageProlog(buffer, 0, getCSSStyles());
 
+				ColorRegistry registry = JFaceResources.getColorRegistry();
+				RGB fgRGB = registry.getRGB("org.eclipse.jdt.ui.Javadoc.foregroundColor"); //$NON-NLS-1$ 
+				RGB bgRGB= registry.getRGB("org.eclipse.jdt.ui.Javadoc.backgroundColor"); //$NON-NLS-1$ 
+				HTMLPrinter.insertPageProlog(buffer, 0, fgRGB, bgRGB, getCSSStyles());
+				
 				buffer.append(info);
 
 				IJavaElement element= null;
