@@ -526,6 +526,150 @@ public class AnnotateAssistTest18 extends AbstractAnnotateAssistTests {
 	}
 
 	/**
+	 * Assert two proposals ("@NonNull" and "@Nullable") on an array type in normal syntax.
+	 * A two line entry using this selector & signature exists and will be amended.
+	 * Apply the second proposal and check the effect.
+	 * 
+	 * @throws Exception multiple causes
+	 */
+	public void testAnnotateMethod_Array1() throws Exception {
+		
+		String X_PATH= "pack/age/X";
+		String[] pathAndContents= new String[] {
+					X_PATH+".java",
+					"package pack.age;\n" +
+					"import java.util.List;\n" +
+					"public interface X {\n" +
+					"    public String[] test();\n" +
+					"}\n"
+				};
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
+		
+		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
+		String initialContent=
+				"class pack/age/X\n" +
+				"test\n" +
+				" ()[Ljava/lang/String;\n";
+		ensureExists(annotationFile.getParent());
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+
+		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
+		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+
+		try {
+			int offset= pathAndContents[1].indexOf("[] test");
+
+			List<ICompletionProposal> list= collectAnnotateProposals(javaEditor, offset);
+			
+			assertCorrectLabels(list);
+			assertNumberOfProposals(list, 2);
+			
+			ICompletionProposal proposal= findProposalByName("Annotate as 'String @NonNull []'", list);
+			String expectedInfo=
+					"<dl><dt>test</dt>" +
+					"<dd>()[Ljava/lang/String;</dd>" +
+					"<dd>()[<b>1</b>Ljava/lang/String;</dd>" + // <= 1
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			proposal= findProposalByName("Annotate as 'String @Nullable []'", list);
+			expectedInfo=
+					"<dl><dt>test</dt>" +
+					"<dd>()[Ljava/lang/String;</dd>" +
+					"<dd>()[<b>0</b>Ljava/lang/String;</dd>" + // <= 0
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
+			proposal.apply(document);
+			
+			annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
+			assertTrue("Annotation file should have been created", annotationFile.exists());
+
+			String expectedContent=
+					"class pack/age/X\n" +
+					"test\n" +
+					" ()[Ljava/lang/String;\n" +
+					" ()[0Ljava/lang/String;\n";
+			checkContentOfFile("annotation file content", annotationFile, expectedContent);
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+	}
+
+	/**
+	 * Assert two proposals ("@NonNull" and "@Nullable") on an array type in extra-dims syntax.
+	 * A two line entry using this selector & signature exists and will be amended.
+	 * Apply the second proposal and check the effect.
+	 * 
+	 * @throws Exception multiple causes
+	 */
+	public void testAnnotateMethod_Array2() throws Exception {
+		
+		String X_PATH= "pack/age/X";
+		String[] pathAndContents= new String[] {
+					X_PATH+".java",
+					"package pack.age;\n" +
+					"import java.util.List;\n" +
+					"public interface X {\n" +
+					"    public String test()[];\n" +
+					"}\n"
+				};
+		addLibrary(fJProject1, "lib.jar", "lib.zip", pathAndContents, ANNOTATION_PATH, JavaCore.VERSION_1_8, null);
+		
+		IFile annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
+		String initialContent=
+				"class pack/age/X\n" +
+				"test\n" +
+				" ()[Ljava/lang/String;\n";
+		ensureExists(annotationFile.getParent());
+		annotationFile.create(new ByteArrayInputStream(initialContent.getBytes("UTF-8")), 0, null);
+
+		IType type= fJProject1.findType(X_PATH.replace('/', '.'));
+		JavaEditor javaEditor= (JavaEditor) JavaUI.openInEditor(type);
+
+		try {
+			int offset= pathAndContents[1].indexOf("[];");
+
+			List<ICompletionProposal> list= collectAnnotateProposals(javaEditor, offset);
+			
+			assertCorrectLabels(list);
+			assertNumberOfProposals(list, 2);
+			
+			ICompletionProposal proposal= findProposalByName("Annotate as 'String @NonNull []'", list);
+			String expectedInfo=
+					"<dl><dt>test</dt>" +
+					"<dd>()[Ljava/lang/String;</dd>" +
+					"<dd>()[<b>1</b>Ljava/lang/String;</dd>" + // <= 1
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			proposal= findProposalByName("Annotate as 'String @Nullable []'", list);
+			expectedInfo=
+					"<dl><dt>test</dt>" +
+					"<dd>()[Ljava/lang/String;</dd>" +
+					"<dd>()[<b>0</b>Ljava/lang/String;</dd>" + // <= 0
+					"</dl>";
+			assertEquals("expect detail", expectedInfo, proposal.getAdditionalProposalInfo());
+
+			IDocument document= javaEditor.getDocumentProvider().getDocument(javaEditor.getEditorInput());
+			proposal.apply(document);
+			
+			annotationFile= fJProject1.getProject().getFile(new Path(ANNOTATION_PATH).append(X_PATH+".eea"));
+			assertTrue("Annotation file should have been created", annotationFile.exists());
+
+			String expectedContent=
+					"class pack/age/X\n" +
+					"test\n" +
+					" ()[Ljava/lang/String;\n" +
+					" ()[0Ljava/lang/String;\n";
+			checkContentOfFile("annotation file content", annotationFile, expectedContent);
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+	}
+
+	/**
 	 * Assert two proposals ("@NonNull" and "@Nullable") on the array representing the varargs ellipsis
 	 * Apply the second proposal and check the effect.
 	 * 
