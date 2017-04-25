@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,12 +66,15 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatus;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.InfoFilesUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -84,7 +88,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -590,9 +593,9 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 
 		if (isCreateModuleInfoJava()) {
 			// default package always exists
-			IPackageFragment pack= fCreatedRoot.getPackageFragment(""); //$NON-NLS-1$
-			String fileContent= JavaCore.createModuleFromPackageRoot(null, fCreatedRoot);
-			InfoFilesUtil.createInfoJavaFile(MODULE_INFO_JAVA_FILENAME, fileContent, pack, monitor);
+			IPackageFragment defaultPkg= fCreatedRoot.getPackageFragment(""); //$NON-NLS-1$
+			String fileContent= getModuleInfoFileContent();
+			InfoFilesUtil.createInfoJavaFile(MODULE_INFO_JAVA_FILENAME, fileContent, defaultPkg, monitor);
 		}
 
 		// save dialog settings for create_module_info_java
@@ -604,6 +607,61 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 			}
 			section.put(SETTINGS_CREATE_MODULE_INFO_JAVA, fCreateModuleInfoJavaField.isSelected());
 		}
+	}
+
+	private String getModuleInfoFileContent() throws CoreException {
+		List<String> exportedPackages= new ArrayList<>();
+		IPackageFragmentRoot[] pkgFragmentRoots= fCurrJProject.getPackageFragmentRoots();
+		List<IPackageFragmentRoot> packageFragmentRoots= new ArrayList<>(Arrays.asList(pkgFragmentRoots));
+		for (IPackageFragmentRoot packageFragmentRoot : pkgFragmentRoots) {
+			IResource res= packageFragmentRoot.getCorrespondingResource();
+			if (res == null || res.getType() != IResource.FOLDER || packageFragmentRoot.getKind() != IPackageFragmentRoot.K_SOURCE) {
+				packageFragmentRoots.remove(packageFragmentRoot);
+			}
+		}
+		pkgFragmentRoots= packageFragmentRoots.toArray(new IPackageFragmentRoot[packageFragmentRoots.size()]);
+		for (IPackageFragmentRoot packageFragmentRoot : pkgFragmentRoots) {
+			for (IJavaElement child : packageFragmentRoot.getChildren()) {
+				if (child instanceof IPackageFragment) {
+					IPackageFragment pkgFragment= (IPackageFragment) child;
+					if (!pkgFragment.isDefaultPackage() && pkgFragment.getCompilationUnits().length != 0) {
+						exportedPackages.add(pkgFragment.getElementName());
+					}
+				}
+			}
+		}
+
+		String[] requiredModules= JavaCore.getReferencedModules(fCurrJProject);
+
+		StringBuilder fileContent= new StringBuilder();
+		if (requiredModules.length > 0 || exportedPackages.size() > 0) {
+			String lineDelimiter= StubUtility.getLineDelimiterUsed(fCurrJProject);
+			fileContent.append("module "); //$NON-NLS-1$
+			IModuleDescription moduleDescription= fCurrJProject.getModuleDescription();
+			String moduleName= moduleDescription != null ? moduleDescription.getElementName() : fCurrJProject.getElementName();
+			fileContent.append(moduleName);
+			fileContent.append(" {"); //$NON-NLS-1$
+			fileContent.append(lineDelimiter);
+
+			for (String exportedPkg : exportedPackages) {
+				fileContent.append('\t');
+				fileContent.append("exports "); //$NON-NLS-1$
+				fileContent.append(exportedPkg);
+				fileContent.append(";"); //$NON-NLS-1$
+				fileContent.append(lineDelimiter);
+			}
+
+			for (String requiredModule : requiredModules) {
+				fileContent.append('\t');
+				fileContent.append("requires "); //$NON-NLS-1$
+				fileContent.append(requiredModule);
+				fileContent.append(';');
+				fileContent.append(lineDelimiter);
+			}
+
+			fileContent.append('}');
+		}
+		return fileContent.toString();
 	}
 
 	// ------------- choose dialogs
