@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,11 +23,13 @@ import java.net.URL;
 import org.osgi.framework.Bundle;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Drawable;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.graphics.RGB;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -44,6 +46,8 @@ import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.internal.text.html.HTMLTextPresenter;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.AbstractReusableInformationControlCreator;
@@ -96,7 +100,9 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -113,11 +119,9 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.infoviews.JavadocView;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 
@@ -378,7 +382,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 *
 	 * @since 3.3
 	 */
-	public static final class HoverControlCreator extends AbstractReusableInformationControlCreator {
+	public static final class HoverControlCreator extends AbstractReusableInformationControlCreator implements IPropertyChangeListener {
 		/**
 		 * The information presenter control creator.
 		 * @since 3.4
@@ -407,6 +411,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			fAdditionalInfoAffordance= additionalInfoAffordance;
 		}
 
+		private BrowserInformationControl iControl;
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 		 */
@@ -415,7 +420,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			String tooltipAffordanceString= fAdditionalInfoAffordance ? JavaPlugin.getAdditionalInfoAffordanceString() : EditorsUI.getTooltipAffordanceString();
 			if (BrowserInformationControl.isAvailable(parent)) {
 				String font= PreferenceConstants.APPEARANCE_JAVADOC_FONT;
-				BrowserInformationControl iControl= new BrowserInformationControl(parent, font, tooltipAffordanceString) {
+				iControl= new BrowserInformationControl(parent, font, tooltipAffordanceString) {
 					/*
 					 * @see org.eclipse.jface.text.IInformationControlExtension5#getInformationPresenterControlCreator()
 					 */
@@ -424,6 +429,10 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 						return fInformationPresenterControlCreator;
 					}
 				};
+				
+				JFaceResources.getColorRegistry().addListener(this); // So propertyChange() method is triggered in context of IPropertyChangeListener
+				setHoverColors();
+				
 				addLinkListener(iControl);
 				return iControl;
 			} else {
@@ -439,6 +448,31 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					}
 				};
 			}
+		}
+
+		@Override
+		public void propertyChange(PropertyChangeEvent event) {
+			String property= event.getProperty();
+			if (iControl != null &&
+					(property.equals("org.eclipse.jdt.ui.Javadoc.foregroundColor") //$NON-NLS-1$
+							|| property.equals("org.eclipse.jdt.ui.Javadoc.backgroundColor"))) { //$NON-NLS-1$
+				setHoverColors();
+			}
+		}
+		
+		private void setHoverColors() {
+			ColorRegistry registry = JFaceResources.getColorRegistry();
+			Color fgRGB = registry.get("org.eclipse.jdt.ui.Javadoc.foregroundColor"); //$NON-NLS-1$ 
+			Color bgRGB = registry.get("org.eclipse.jdt.ui.Javadoc.backgroundColor"); //$NON-NLS-1$ 
+			iControl.setForegroundColor(fgRGB);
+			iControl.setBackgroundColor(bgRGB);
+		}
+
+		@Override
+		public void widgetDisposed(DisposeEvent e) {
+			super.widgetDisposed(e);
+			//Called when active editor is closed.
+			JFaceResources.getColorRegistry().removeListener(this);
 		}
 
 		/*
