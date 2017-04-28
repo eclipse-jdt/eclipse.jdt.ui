@@ -97,7 +97,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ImportOrganizeInputDialog_name_group_label;
 	public static String ImportOrganizeInputDialog_name_group_static_label;
 	public static String JavaBasePreferencePage_rebuildingIndexJobName;
-	public static String JavaBasePreferencePage_clearIndexButtonName;
+	public static String JavaBasePreferencePage_rebuildIndexButtonName;
 	public static String JavaBasePreferencePage_description;
 	public static String JavaBasePreferencePage_doubleclick_action;
 	public static String JavaBasePreferencePage_doubleclick_gointo;
