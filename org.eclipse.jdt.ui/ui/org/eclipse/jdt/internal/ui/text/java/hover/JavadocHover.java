@@ -70,12 +70,15 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.core.IAnnotatable;
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMemberValuePair;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -122,6 +125,7 @@ import org.eclipse.jdt.internal.ui.infoviews.JavadocView;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 
@@ -820,12 +824,84 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 			}
 		}
 
-//		if (element.getElementType() == IJavaElement.METHOD) {
-//			IMethod method= (IMethod)element;
-//			//TODO: add default value for annotation type members, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=249016
-//		}
+		if (element.getElementType() == IJavaElement.METHOD) {
+			String defaultValue;
+			try {
+				defaultValue= getAnnotationMemberDefaultValue((IMethod) element, editorInputElement, hoverRegion);
+			} catch (JavaModelException e) {
+				defaultValue= null;
+			}
+			if (defaultValue != null) {
+				defaultValue= HTMLPrinter.convertToHTMLContentWithWhitespace(defaultValue);
+				label.append(CONSTANT_VALUE_SEPARATOR);
+				label.append(defaultValue);
+			}
+		}
 
 		return getImageAndLabel(element, allowImage, label.toString());
+	}
+
+	/**
+	 * Returns the default value of the given annotation type method.
+	 * 
+	 * @param method the method
+	 * @param editorInputElement the editor input element
+	 * @param hoverRegion the hover region in the editor
+	 * @return the default value of the given annotation type method or <code>null</code> if none
+	 * @throws JavaModelException if an exception occurs while accessing its default value
+	 */
+	public static String getAnnotationMemberDefaultValue(IMethod method, ITypeRoot editorInputElement, IRegion hoverRegion) throws JavaModelException {
+		IMemberValuePair memberValuePair= method.getDefaultValue();
+		if (memberValuePair == null) {
+			return null;
+		}
+
+		Object defaultValue= memberValuePair.getValue();
+		boolean isEmptyArray= defaultValue instanceof Object[] && ((Object[]) defaultValue).length == 0;
+		int valueKind= memberValuePair.getValueKind();
+
+		if (valueKind == IMemberValuePair.K_UNKNOWN && !isEmptyArray) {
+			IBinding binding= getHoveredNodeBinding(method, editorInputElement, hoverRegion);
+			if (binding instanceof IMethodBinding) {
+				Object value= ((IMethodBinding) binding).getDefaultValue();
+				StringBuffer buf= new StringBuffer();
+				try {
+					addValue(buf, value, false);
+				} catch (URISyntaxException e) {
+					// should not happen as links are not added
+				}
+				return buf.toString();
+			}
+
+		} else if (defaultValue != null) {
+			IAnnotation parentAnnotation= (IAnnotation) method.getAncestor(IJavaElement.ANNOTATION);
+			StringBuffer buf= new StringBuffer();
+			new JavaElementLabelComposer(buf).appendAnnotationValue(parentAnnotation, defaultValue, valueKind, LABEL_FLAGS);
+			return buf.toString();
+		}
+
+		return null;
+	}
+
+	private static IBinding getHoveredNodeBinding(IJavaElement element, ITypeRoot editorInputElement, IRegion hoverRegion) {
+		if (editorInputElement == null || hoverRegion == null) {
+			return null;
+		}
+		IBinding binding;
+		ASTNode node= getHoveredASTNode(editorInputElement, hoverRegion);
+		if (node == null) {
+			ASTParser p= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+			p.setProject(element.getJavaProject());
+			p.setBindingsRecovery(true);
+			try {
+				binding= p.createBindings(new IJavaElement[] { element }, null)[0];
+			} catch (OperationCanceledException e) {
+				return null;
+			}
+		} else {
+			binding= resolveBinding(node);
+		}
+		return binding;
 	}
 
 	/**
@@ -1108,23 +1184,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				return null;
 		}
 		
-		IBinding binding;
-		ASTNode node= getHoveredASTNode(editorInputElement, hoverRegion);
-		
-		if (node == null) {
-			ASTParser p= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
-			p.setProject(element.getJavaProject());
-			p.setBindingsRecovery(true);
-			try {
-				binding= p.createBindings(new IJavaElement[] { element }, null)[0];
-			} catch (OperationCanceledException e) {
-				return null;
-			}
-			
-		} else {
-			binding= resolveBinding(node);
-		}
-		
+		IBinding binding= getHoveredNodeBinding(element, editorInputElement, hoverRegion);
 		if (binding == null)
 			return null;
 		
@@ -1135,7 +1195,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < annotations.length; i++) {
 			//TODO: skip annotations that don't have an @Documented annotation?
-			addAnnotation(buf, element, annotations[i]);
+			addAnnotation(buf, annotations[i], true);
 			buf.append("<br>"); //$NON-NLS-1$
 		}
 		
@@ -1181,14 +1241,14 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		return null;
 	}
 
-	private static void addAnnotation(StringBuffer buf, IJavaElement element, IAnnotationBinding annotation) throws URISyntaxException {
+	private static void addAnnotation(StringBuffer buf, IAnnotationBinding annotation, boolean addLinks) throws URISyntaxException {
 		IJavaElement javaElement= annotation.getAnnotationType().getJavaElement();
 		buf.append('@');
-		if (javaElement != null) {
+		if (javaElement == null || !addLinks) {
+			buf.append(annotation.getName());
+		} else {
 			String uri= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, javaElement);
 			addLink(buf, uri, annotation.getName());
-		} else {
-			buf.append(annotation.getName());
 		}
 		
 		IMemberValuePairBinding[] mvPairs= annotation.getDeclaredMemberValuePairs();
@@ -1199,21 +1259,25 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 					buf.append(JavaElementLabels.COMMA_STRING);
 				}
 				IMemberValuePairBinding mvPair= mvPairs[j];
-				String memberURI= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, mvPair.getMethodBinding().getJavaElement());
-				addLink(buf, memberURI, mvPair.getName());
+				if (addLinks) {
+					String memberURI= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, mvPair.getMethodBinding().getJavaElement());
+					addLink(buf, memberURI, mvPair.getName());
+				} else {
+					buf.append(mvPair.getName());
+				}
 				buf.append('=');
-				addValue(buf, element, mvPair.getValue());
+				addValue(buf, mvPair.getValue(), addLinks);
 			}
 			buf.append(')');
 		}
 	}
 
-	private static void addValue(StringBuffer buf, IJavaElement element, Object value) throws URISyntaxException {
+	private static void addValue(StringBuffer buf, Object value, boolean addLinks) throws URISyntaxException {
 		// Note: To be bug-compatible with Javadoc from Java 5/6/7, we currently don't escape HTML tags in String-valued annotations.
 		if (value instanceof ITypeBinding) {
 			ITypeBinding typeBinding= (ITypeBinding)value;
 			IJavaElement type= typeBinding.getJavaElement();
-			if (type == null) {
+			if (type == null || !addLinks) {
 				buf.append(typeBinding.getName());
 			} else {
 				String uri= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, type);
@@ -1225,13 +1289,17 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		} else if (value instanceof IVariableBinding) { // only enum constants
 			IVariableBinding variableBinding= (IVariableBinding)value;
 			IJavaElement variable= variableBinding.getJavaElement();
-			String uri= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, variable);
-			String name= variable.getElementName();
-			addLink(buf, uri, name);
+			if (variable == null || !addLinks) {
+				buf.append(variableBinding.getName());
+			} else {
+				String uri= JavaElementLinks.createURI(JavaElementLinks.JAVADOC_SCHEME, variable);
+				String name= variable.getElementName();
+				addLink(buf, uri, name);
+			}
 				
 		} else if (value instanceof IAnnotationBinding) {
 			IAnnotationBinding annotationBinding= (IAnnotationBinding)value;
-			addAnnotation(buf, element, annotationBinding);
+			addAnnotation(buf, annotationBinding, addLinks);
 			
 		} else if (value instanceof String) {
 			buf.append(ASTNodes.getEscapedStringLiteral((String)value));
@@ -1246,7 +1314,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				if (i > 0) {
 					buf.append(JavaElementLabels.COMMA_STRING);
 				}
-				addValue(buf, element, values[i]);
+				addValue(buf, values[i], addLinks);
 			}
 			buf.append('}');
 			
