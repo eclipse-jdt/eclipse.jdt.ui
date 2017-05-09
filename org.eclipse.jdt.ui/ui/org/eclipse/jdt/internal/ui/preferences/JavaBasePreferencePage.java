@@ -72,6 +72,8 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	private ArrayList<Text> fTextControls;
 
 	private IPreferenceStore fJavaCorePreferences;
+	private static final String ENABLE_NEW_JAVA_INDEX= "enableNewJavaIndex"; //JavaIndex.ENABLE_NEW_JAVA_INDEX //$NON-NLS-1$
+
 
 	public JavaBasePreferencePage() {
 		super();
@@ -190,7 +192,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		group.setText(PreferencesMessages.JavaBasePreferencePage_search);
 
 		addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_search_small_menu, null, PreferenceConstants.SEARCH_USE_REDUCED_MENU);
-		addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_EnableNewJavaIndex, fJavaCorePreferences, "disableNewJavaIndex"); //$NON-NLS-1$
+		addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_EnableNewJavaIndex, fJavaCorePreferences, ENABLE_NEW_JAVA_INDEX);
 
 		Button rebuildIndexButton= new Button(group, SWT.PUSH);
 		rebuildIndexButton.setText(PreferencesMessages.JavaBasePreferencePage_rebuildIndexButtonName);
