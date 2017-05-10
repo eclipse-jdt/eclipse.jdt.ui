@@ -293,7 +293,10 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			if (background == null) {
 				background= fParent.getBackground();
 			}
-			setColorAndFont(fParent, foreground, background, JFaceResources.getDialogFont());
+
+			setForegroundColor(foreground); // For main composite.
+			setBackgroundColor(background);
+			setColorAndFont(fParent, foreground, background, JFaceResources.getDialogFont()); // For child elements.
 
 			ICompletionProposal[] proposals= getAnnotationInfo().getCompletionProposals();
 			if (proposals.length > 0)
