@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -24,6 +25,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -70,6 +72,8 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	private ArrayList<Text> fTextControls;
 
 	private IPreferenceStore fJavaCorePreferences;
+	private static final String ENABLE_NEW_JAVA_INDEX= "enableNewJavaIndex"; //JavaIndex.ENABLE_NEW_JAVA_INDEX //$NON-NLS-1$
+
 
 	public JavaBasePreferencePage() {
 		super();
@@ -188,7 +192,22 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		group.setText(PreferencesMessages.JavaBasePreferencePage_search);
 
 		addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_search_small_menu, null, PreferenceConstants.SEARCH_USE_REDUCED_MENU);
-		addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_DisableNewJavaIndex, fJavaCorePreferences, "disableNewJavaIndex"); //$NON-NLS-1$
+		addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_EnableNewJavaIndex, fJavaCorePreferences, ENABLE_NEW_JAVA_INDEX);
+
+		Button rebuildIndexButton= new Button(group, SWT.PUSH);
+		rebuildIndexButton.setText(PreferencesMessages.JavaBasePreferencePage_rebuildIndexButtonName);
+		rebuildIndexButton.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false));
+		rebuildIndexButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Job job= Job.create(PreferencesMessages.JavaBasePreferencePage_rebuildingIndexJobName, monitor -> {
+					JavaCore.rebuildIndex(monitor);
+				});
+				job.setUser(true);
+				job.schedule();
+			}
+		});
+		SWTUtil.setButtonDimensionHint(rebuildIndexButton);
 
 		layout= new GridLayout();
 		layout.numColumns= 2;

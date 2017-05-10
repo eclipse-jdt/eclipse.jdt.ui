@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NecessaryParenthesesChecker;
 import org.eclipse.jdt.internal.corext.dom.ReplaceRewrite;
 import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
+import org.eclipse.jdt.internal.corext.dom.TypeAnnotationRewrite;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
@@ -121,6 +122,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
  * <li>{@link ModifierRewrite}</li>
  * <li>{@link ReplaceRewrite}</li>
  * <li>{@link StatementRewrite}</li>
+ * <li>{@link TypeAnnotationRewrite}</li>
  * <li>{@link VariableDeclarationRewrite}</li>
  * </ul>
  * 

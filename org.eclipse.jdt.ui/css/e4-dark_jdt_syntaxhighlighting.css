@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 Lars Vogel and others.
+ * Copyright (c) 2014, 2017 Lars Vogel and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,7 @@
 
 /* ############################## JDT syntax highlighting ############################## */
 
-IEclipsePreferences#org-eclipse-jdt-ui {
+IEclipsePreferences#org-eclipse-jdt-ui:org-eclipse-jdt-ui { /* pseudo attribute added to allow contributions without replacing this node, see Bug 466075 */
 	preferences:
 		'content_assist_completion_replacement_background=200,200,0'
 		'content_assist_completion_replacement_foreground=200,0,0'
@@ -23,20 +23,20 @@ IEclipsePreferences#org-eclipse-jdt-ui {
 		'java_bracket=249,250,244'
 		'java_comment_task_tag=154,140,124'
 		'java_default=217,232,247'
-		'java_doc_default=98,98,98'
+		'java_doc_default=128,128,128'
 		'java_doc_keyword=154,140,124'
 		'java_doc_link=169,156,140'
 		'java_doc_tag=30,120,155'
-		'java_keyword=221,40,103'
-		'java_keyword_return=221,40,103'
-		'java_multi_line_comment=98,98,98'
+		'java_keyword=204,120,50'
+		'java_keyword_return=204,120,50'
+		'java_multi_line_comment=128,128,128'
 		'java_operator=230,230,250'
-		'java_single_line_comment=98,98,98'
+		'java_single_line_comment=128,128,128'
 		'java_string=23,198,163'
 		'matchingBracketsColor=102,112,125'
 		'pf_coloring_argument=221,40,103'
 		'pf_coloring_assignment=217,232,247'
-		'pf_coloring_comment=98,98,98'
+		'pf_coloring_comment=128,128,128'
 		'pf_coloring_key=217,232,247'
 		'pf_coloring_value=23,198,163'
 		'semanticHighlighting.abstractClass.bold=true'

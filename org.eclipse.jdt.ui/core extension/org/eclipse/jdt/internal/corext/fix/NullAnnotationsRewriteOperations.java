@@ -32,7 +32,11 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Dimension;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
@@ -48,6 +52,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
@@ -116,7 +121,22 @@ public class NullAnnotationsRewriteOperations {
 			return fUnit;
 		}
 
-		boolean checkExisting(List<IExtendedModifier> existingModifiers, ListRewrite listRewrite, TextEditGroup editGroup) {
+		protected ListRewrite getAnnotationListRewrite(Type type, CompilationUnitRewrite cuRewrite, ASTNode declaration, ChildListPropertyDescriptor declAnnotationsProperty) {
+			if (fUseNullTypeAnnotations) {
+				if (type.isArrayType()) {
+					List<Dimension> dimensions= ((ArrayType) type).dimensions();
+					if (!dimensions.isEmpty()) {
+						Dimension outerDim= dimensions.get(0);
+						return cuRewrite.getASTRewrite().getListRewrite(outerDim, Dimension.ANNOTATIONS_PROPERTY);
+					}
+				}
+				// note that in DOM parameter/return annotations are never on the type, always on the declaration
+			}
+			return cuRewrite.getASTRewrite().getListRewrite(declaration, declAnnotationsProperty);
+		}
+
+		boolean checkExisting(ListRewrite listRewrite, TextEditGroup editGroup) {
+			List<IExtendedModifier> existingModifiers= listRewrite.getOriginalList();
 			for (Object mod : existingModifiers) {
 				if (mod instanceof MarkerAnnotation) {
 					MarkerAnnotation annotation= (MarkerAnnotation) mod;
@@ -266,9 +286,10 @@ public class NullAnnotationsRewriteOperations {
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			AST ast= cuRewrite.getRoot().getAST();
-			ListRewrite listRewrite= cuRewrite.getASTRewrite().getListRewrite(fBodyDeclaration, fBodyDeclaration.getModifiersProperty());
+			ListRewrite listRewrite= getAnnotationListRewrite(fBodyDeclaration.getReturnType2(), cuRewrite,
+										fBodyDeclaration, fBodyDeclaration.getModifiersProperty());
 			TextEditGroup group= createTextEditGroup(fMessage, cuRewrite);
-			if (!checkExisting(fBodyDeclaration.modifiers(), listRewrite, group))
+			if (!checkExisting(listRewrite, group))
 				return;
 			if (!fRequireExplicitAnnotation) {
 				if (fUseNullTypeAnnotations
@@ -330,9 +351,9 @@ public class NullAnnotationsRewriteOperations {
 		@Override
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
 			AST ast= cuRewrite.getRoot().getAST();
-			ListRewrite listRewrite= cuRewrite.getASTRewrite().getListRewrite(fArgument, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
+			ListRewrite listRewrite= getAnnotationListRewrite(fArgument.getType(), cuRewrite, fArgument, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
 			TextEditGroup group= createTextEditGroup(fMessage, cuRewrite);
-			if (!checkExisting(fArgument.modifiers(), listRewrite, group))
+			if (!checkExisting(listRewrite, group))
 				return;
 			if (!fRequireExplicitAnnotation) {
 				if (fUseNullTypeAnnotations
@@ -371,6 +392,9 @@ public class NullAnnotationsRewriteOperations {
 				if (selectedNode instanceof SingleVariableDeclaration) {
 					SingleVariableDeclaration singleVariableDeclaration= (SingleVariableDeclaration) selectedNode;
 					modifiers= singleVariableDeclaration.modifiers();
+				} else if (selectedNode instanceof FieldDeclaration) {
+					FieldDeclaration fieldDeclaration= (FieldDeclaration) selectedNode;
+					modifiers= fieldDeclaration.modifiers();
 				} else if (selectedNode instanceof MethodDeclaration) {
 					MethodDeclaration methodDeclaration= (MethodDeclaration) selectedNode;
 					modifiers= methodDeclaration.modifiers();
@@ -590,6 +614,7 @@ public class NullAnnotationsRewriteOperations {
 					case IProblem.RequiredNonNullButProvidedUnknown:
 					case IProblem.ConflictingNullAnnotations:
 					case IProblem.ConflictingInheritedNullAnnotations:
+					case IProblem.RedundantNullCheckAgainstNonNullType:
 						if (fAffectsParameter) {
 							// statement suggests changing parameters:
 							if (selectedNode instanceof SimpleName) {

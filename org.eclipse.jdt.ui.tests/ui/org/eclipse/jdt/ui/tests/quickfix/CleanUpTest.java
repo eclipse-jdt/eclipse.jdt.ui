@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,6 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -38,6 +37,7 @@ import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
@@ -48,7 +48,6 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 import junit.framework.Test;
@@ -5097,11 +5096,10 @@ public class CleanUpTest extends CleanUpTestCase {
 
 		Hashtable<String, String> options= TestOptions.getDefaultOptions();
 
-		Map<String, String> eclipse21Settings= DefaultCodeFormatterConstants.getEclipseDefaultSettings();
-		for (Iterator<String> iterator= eclipse21Settings.keySet().iterator(); iterator.hasNext();) {
-			String key= iterator.next();
-			options.put(key, eclipse21Settings.get(key));
-		}
+		Map<String, String> formatterSettings= DefaultCodeFormatterConstants.getEclipseDefaultSettings();
+		formatterSettings.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_COUNT_LINE_LENGTH_FROM_STARTING_POSITION,
+				DefaultCodeFormatterConstants.FALSE);
+		options.putAll(formatterSettings);
 
 		JavaCore.setOptions(options);
 

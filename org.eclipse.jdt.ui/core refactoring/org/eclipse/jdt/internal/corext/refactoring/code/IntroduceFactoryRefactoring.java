@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,6 +86,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -117,7 +118,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
@@ -514,7 +514,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(p);
 
 		engine.setFiltering(true, true);
-		engine.setScope(RefactoringScopeFactory.create(fCtorBinding.getJavaElement().getJavaProject()));
+		engine.setScope(RefactoringScopeFactory.create(fCtorBinding.getDeclaringClass().getJavaElement().getJavaProject()));
 		engine.setStatus(status);
 		engine.searchPattern(new SubProgressMonitor(pm, 1));
 
@@ -986,7 +986,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		if (unitHandle.equals(fCUHandle)) { // is this the unit containing the selection?
 			if (fCU == null) {
 				fCU= ASTCreator.createAST(unitHandle, null);
-				if (fCU.equals(fFactoryUnitHandle)) // if selection unit and factory unit are the same...
+				if (fCUHandle.equals(fFactoryUnitHandle)) // if selection unit and factory unit are the same...
 					fFactoryCU= fCU; // ...make sure the factory unit gets initialized
 			}
 			return fCU;

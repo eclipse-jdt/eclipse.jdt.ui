@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,6 +76,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor.Field;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
@@ -83,6 +84,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -482,7 +484,8 @@ public class ExtractClassRefactoring extends Refactoring {
 			TypeDeclaration typeDecl= ASTNodeSearchUtil.getTypeDeclarationNode(fDescriptor.getType(), root);
 			ASTRewrite rewrite= fBaseCURewrite.getASTRewrite();
 			ListRewrite listRewrite= rewrite.getListRewrite(typeDecl, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
-			TypeDeclaration paramClass= pof.createClassDeclaration(typeDecl.getName().getFullyQualifiedName(), fBaseCURewrite, fieldUpdate);
+			ContextSensitiveImportRewriteContext context= new ContextSensitiveImportRewriteContext(typeDecl, fBaseCURewrite.getImportRewrite());
+			TypeDeclaration paramClass= pof.createClassDeclaration(typeDecl.getName().getFullyQualifiedName(), fBaseCURewrite, fieldUpdate, context);
 			paramClass.modifiers().add(rewrite.getAST().newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 			if (shouldParamClassBeStatic(typeDecl)) {
 				paramClass.modifiers().add(rewrite.getAST().newModifier(ModifierKeyword.STATIC_KEYWORD));
@@ -860,7 +863,7 @@ public class ExtractClassRefactoring extends Refactoring {
 		ASTResolving.visitAllBindings(node, new TypeBindingVisitor() {
 			@Override
 			public boolean visit(ITypeBinding nodeBinding) {
-				ParameterObjectFactory.importBinding(nodeBinding, cuRewrite);
+				ParameterObjectFactory.importBinding(nodeBinding, cuRewrite, null, TypeLocation.OTHER);
 				return false;
 			}
 		});

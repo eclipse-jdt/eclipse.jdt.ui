@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.launching.JavaRuntime;
@@ -70,7 +71,6 @@ import org.eclipse.jdt.internal.ui.actions.JarImportWizardAction;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.jarimport.JarImportWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -783,7 +783,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			CPListElement elem= cplist.get(i);
 			if (elem.getEntryKind() == IClasspathEntry.CPE_LIBRARY && (elem != existing)) {
 				IResource resource= elem.getResource();
-				if (resource instanceof IContainer && !resource.equals(existing)) {
+				if (resource instanceof IContainer) {
 					res.add(resource.getFullPath());
 				}
 			}

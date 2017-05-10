@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,10 +42,12 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -120,6 +122,8 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 	}
 
 	private MethodDeclaration getStub(ASTRewrite rewrite, ASTNode targetTypeDecl) throws CoreException {
+		ImportRewriteContext context=new ContextSensitiveImportRewriteContext(targetTypeDecl, getImportRewrite());
+
 		AST ast= targetTypeDecl.getAST();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 
@@ -130,7 +134,7 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 		addNewModifiers(rewrite, targetTypeDecl, decl.modifiers());
 
 		ArrayList<String> takenNames= new ArrayList<>();
-		addNewTypeParameters(rewrite, takenNames, decl.typeParameters());
+		addNewTypeParameters(rewrite, takenNames, decl.typeParameters(), context);
 
 		decl.setName(newNameNode);
 
@@ -142,7 +146,7 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 		String bodyStatement= ""; //$NON-NLS-1$
 		boolean isAbstractMethod= Modifier.isAbstract(decl.getModifiers()) || (fSenderBinding.isInterface() && !Modifier.isStatic(decl.getModifiers()) && !Modifier.isDefault(decl.getModifiers()));
 		if (!isConstructor()) {
-			Type returnType= getNewMethodType(rewrite);
+			Type returnType= getNewMethodType(rewrite, context);
 			decl.setReturnType2(returnType);
 
 			boolean isVoid= returnType instanceof PrimitiveType && PrimitiveType.VOID.equals(((PrimitiveType)returnType).getPrimitiveTypeCode());
@@ -153,8 +157,8 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 			}
 		}
 
-		addNewParameters(rewrite, takenNames, decl.parameters());
-		addNewExceptions(rewrite, decl.thrownExceptionTypes());
+		addNewParameters(rewrite, takenNames, decl.parameters(), context);
+		addNewExceptions(rewrite, decl.thrownExceptionTypes(), context);
 
 		Block body= null;
 		if (!isAbstractMethod && !Flags.isAbstract(decl.getModifiers())) {
@@ -207,12 +211,12 @@ public abstract class AbstractMethodCorrectionProposal extends LinkedCorrectionP
 	protected abstract boolean isConstructor();
 
 	protected abstract void addNewModifiers(ASTRewrite rewrite, ASTNode targetTypeDecl, List<IExtendedModifier> modifiers);
-	protected abstract void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params) throws CoreException;
-	protected abstract void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params) throws CoreException;
-	protected abstract void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions) throws CoreException;
+	protected abstract void addNewTypeParameters(ASTRewrite rewrite, List<String> takenNames, List<TypeParameter> params, ImportRewriteContext context) throws CoreException;
+	protected abstract void addNewParameters(ASTRewrite rewrite, List<String> takenNames, List<SingleVariableDeclaration> params, ImportRewriteContext context) throws CoreException;
+	protected abstract void addNewExceptions(ASTRewrite rewrite, List<Type> exceptions, ImportRewriteContext context) throws CoreException;
 
 	protected abstract SimpleName getNewName(ASTRewrite rewrite);
-	protected abstract Type getNewMethodType(ASTRewrite rewrite) throws CoreException;
+	protected abstract Type getNewMethodType(ASTRewrite rewrite, ImportRewriteContext context) throws CoreException;
 
 
 }

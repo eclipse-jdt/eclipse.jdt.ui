@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -107,6 +107,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(TypeParameterMismatchTest.suite());
 		suite.addTest(PropertiesFileQuickAssistTest.suite());
 		suite.addTest(NullAnnotationsQuickFixTest.suite());
+		suite.addTest(NullAnnotationsQuickFixTest18.suite());
 		suite.addTest(NullAnnotationsQuickFixTest18Mix.suite());
 		suite.addTest(AnnotateAssistTest15.suite());
 		suite.addTest(AnnotateAssistTest18.suite());
@@ -169,6 +170,11 @@ public class QuickFixTest extends TestCase {
 		StringAsserts.assertExpectedExistInProposals(getPreviewContents(actualProposals), expecteds);
 	}
 
+	protected static void assertProposalPreviewEquals(String expected, String proposalName, List<IJavaCompletionProposal> proposals) throws CoreException, BadLocationException {
+		final ICompletionProposal proposal= findProposalByName(proposalName, proposals);
+		assertNotNull("proposal \""+proposalName+"\" not found", proposal);
+		assertEquals(expected, getProposalPreviewContent(proposal));
+	}
 
 	public static void assertCommandIdDoesNotExist(List<? extends ICompletionProposal> actualProposals, String commandId) {
 		assertTrue(findProposalByCommandId(commandId, actualProposals) == null);
@@ -418,22 +424,28 @@ public class QuickFixTest extends TestCase {
 	protected static String[] getPreviewContents(List<IJavaCompletionProposal> proposals) throws CoreException, BadLocationException {
 		String[] res= new String[proposals.size()];
 		for (int i= 0; i < proposals.size(); i++) {
-			Object curr= proposals.get(i);
-			if (curr instanceof ReorgCorrectionsSubProcessor.ClasspathFixCorrectionProposal) {
-				// ignore
-			} else if (curr instanceof CUCorrectionProposal) {
-				res[i]= getPreviewContent((CUCorrectionProposal) curr);
-			} else if (curr instanceof NewCUUsingWizardProposal) {
-				res[i]= getWizardPreviewContent((NewCUUsingWizardProposal) curr);
-			} else if (curr instanceof SurroundWithTemplateProposal) {
-				res[i]= getTemplatePreviewContent((SurroundWithTemplateProposal) curr);
-			} else if (curr instanceof SelfEncapsulateFieldProposal) {
-				res[i]= getSEFPreviewContent((SelfEncapsulateFieldProposal) curr);
-			}
+			res[i]=getProposalPreviewContent(proposals.get(i));
 		}
 		return res;
 	}
 
+
+	private static String getProposalPreviewContent(ICompletionProposal curr) throws CoreException, BadLocationException {
+		String previewContent = null;
+		if (curr instanceof ReorgCorrectionsSubProcessor.ClasspathFixCorrectionProposal) {
+			// ignore
+		} else if (curr instanceof CUCorrectionProposal) {
+			previewContent= getPreviewContent((CUCorrectionProposal) curr);
+		} else if (curr instanceof NewCUUsingWizardProposal) {
+			previewContent= getWizardPreviewContent((NewCUUsingWizardProposal) curr);
+		} else if (curr instanceof SurroundWithTemplateProposal) {
+			previewContent= getTemplatePreviewContent((SurroundWithTemplateProposal) curr);
+		} else if (curr instanceof SelfEncapsulateFieldProposal) {
+			previewContent= getSEFPreviewContent((SelfEncapsulateFieldProposal) curr);
+		}
+		return previewContent;
+	}
+	
 	private static String getSEFPreviewContent(SelfEncapsulateFieldProposal sefp) throws CoreException {
 		ICompilationUnit compilationUnit= sefp.getField().getCompilationUnit();
 		TextFileChange change= sefp.getChange((IFile) compilationUnit.getResource());

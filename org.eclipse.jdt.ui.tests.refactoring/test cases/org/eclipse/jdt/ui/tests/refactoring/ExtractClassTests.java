@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,8 +44,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class ExtractClassTests extends RefactoringTest {
 
 	private static final String REFACTORING_PATH= "ExtractClass/";
-	private IPackageFragment fPack;
-	private ExtractClassDescriptor fDescriptor;
+	protected IPackageFragment fPack;
+	protected ExtractClassDescriptor fDescriptor;
 
 	public ExtractClassTests(String name) {
 		super(name);
@@ -59,7 +59,7 @@ public class ExtractClassTests extends RefactoringTest {
 		return new RefactoringTestSetup(someTest);
 	}
 
-	private IType setupType() throws Exception {
+	protected IType setupType() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), getCUName(), true);
 		IType type= cu.getType(getCUName());
 		assertNotNull(type);
@@ -109,7 +109,7 @@ public class ExtractClassTests extends RefactoringTest {
 		return pack;
 	}
 
-	private String getCUName() {
+	protected String getCUName() {
 		StringBuffer sb= new StringBuffer();
 		String name= getName();
 		if (name.startsWith("test"))
@@ -118,14 +118,14 @@ public class ExtractClassTests extends RefactoringTest {
 		return sb.toString();
 	}
 
-	private String getCUFileName() {
+	protected String getCUFileName() {
 		StringBuffer sb= new StringBuffer();
 		sb.append(getCUName());
 		sb.append(".java");
 		return sb.toString();
 	}
 
-	private RefactoringStatus runRefactoring(boolean expectError) throws Exception {
+	protected RefactoringStatus runRefactoring(boolean expectError) throws Exception {
 		RefactoringStatus status= performRefactoring(fDescriptor);
 		if (expectError) {
 			assertNotNull(status + "", status);

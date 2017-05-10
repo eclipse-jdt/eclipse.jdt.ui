@@ -130,6 +130,7 @@ import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -1225,7 +1226,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				typeMethodReference.setName((SimpleName) rewrite.createCopyTarget(methodInvocation.getName()));
 				importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
 				ITypeBinding invocationTypeBinding= ASTNodes.getInvocationType(methodInvocation, methodBinding, invocationQualifier);
-				typeMethodReference.setType(importRewrite.addImport(invocationTypeBinding, ast));
+				invocationTypeBinding=StubUtility2.replaceWildcardsAndCaptures(invocationTypeBinding);
+				ImportRewriteContext importRewriteContext=new ContextSensitiveImportRewriteContext(lambda, importRewrite);
+				typeMethodReference.setType(importRewrite.addImport(invocationTypeBinding, ast, importRewriteContext, TypeLocation.OTHER));
 				typeMethodReference.typeArguments().addAll(getCopiedTypeArguments(rewrite, methodInvocation.typeArguments()));
 
 			} else {
@@ -1384,13 +1387,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
 
 		rewrite.set(lambda, LambdaExpression.PARENTHESES_PROPERTY, Boolean.valueOf(true), null);
-
+		ContextSensitiveImportRewriteContext importRewriteContext= new ContextSensitiveImportRewriteContext(lambda, importRewrite);
 		ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
 		for (int i= 0; i < noOfLambdaParams; i++) {
 			VariableDeclaration param= lambdaParameters.get(i);
 			SingleVariableDeclaration newParam= ast.newSingleVariableDeclaration();
 			newParam.setName(ast.newSimpleName(param.getName().getIdentifier()));
-			newParam.setType(importRewrite.addImport(parameterTypes[i], ast));
+			ITypeBinding type= StubUtility2.replaceWildcardsAndCaptures(parameterTypes[i]);
+			newParam.setType(importRewrite.addImport(type, ast, importRewriteContext, TypeLocation.PARAMETER));
 			rewrite.replace(param, newParam, null);
 		}
 

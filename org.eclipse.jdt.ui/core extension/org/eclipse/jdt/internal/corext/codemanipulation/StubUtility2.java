@@ -372,10 +372,7 @@ public final class StubUtility2 {
 		decl.setConstructor(false);
 		
 		ITypeBinding bindingReturnType= binding.getReturnType();
-		if (bindingReturnType.isWildcardType()) {
-			ITypeBinding bound= bindingReturnType.getBound();
-			bindingReturnType= (bound != null) ? bound : bindingReturnType.getErasure();
-		}
+		bindingReturnType = StubUtility2.replaceWildcardsAndCaptures(bindingReturnType);
 		
 		if (JavaModelUtil.is50OrHigher(javaProject)) {
 			createTypeParameters(imports, context, ast, binding, decl);
@@ -498,10 +495,7 @@ public final class StubUtility2 {
 		for (int i= 0; i < params.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			ITypeBinding type= params[i];
-			if (type.isWildcardType()) {
-				ITypeBinding bound= type.getBound();
-				type= (bound != null) ? bound : type.getErasure();
-			}
+			type=replaceWildcardsAndCaptures(type);
 			if (!is50OrHigher) {
 				type= type.getErasure();
 				var.setType(imports.addImport(type, ast, context, TypeLocation.PARAMETER));
@@ -1007,5 +1001,13 @@ public final class StubUtility2 {
 			}
 		}
 		return null;
+	}
+
+	public static ITypeBinding replaceWildcardsAndCaptures(ITypeBinding type) {
+		while (type.isWildcardType() || type.isCapture() || (type.isArray() && type.getElementType().isCapture())) {
+			ITypeBinding bound= type.getBound();
+			type= (bound != null) ? bound : type.getErasure();
+		}
+		return type;
 	}
 }
