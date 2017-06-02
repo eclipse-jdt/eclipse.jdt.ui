@@ -13,11 +13,9 @@ package org.eclipse.jdt.junit.launcher;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -63,7 +61,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.junit.launcher.AssertionVMArg;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
@@ -350,16 +347,10 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			case IJavaElement.METHOD: {
 				IMethod method= (IMethod)element;
 				testName= method.getElementName(); // Test-names can not be specified when launching a Java method.
+				testName+= JUnitLaunchConfigurationTab.getParameterTypes(method, false);
 				containerHandleId= EMPTY_STRING;
 				IType declaringType= method.getDeclaringType();
 				mainTypeQualifiedName= declaringType.getFullyQualifiedName('.');
-				if (method.getNumberOfParameters() > 0) {
-					// TODO - JUnit5: needs fully qualified type names for the parameter types (check int[] etc.) 
-					// use new API from jdt.core - https://bugs.eclipse.org/bugs/show_bug.cgi?id=502563
-					String[] parameterTypeNames= StubUtility.getParameterTypeNamesForSeeTag(method);
-					String paramTypes= Arrays.stream(parameterTypeNames).collect(Collectors.joining(",", "(", ")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					testName+= paramTypes;
-				}
 				break;
 			}
 			default:
@@ -417,7 +408,9 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 				return element.getElementName();
 			case IJavaElement.METHOD:
 				IMethod method= (IMethod)element;
-				return method.getDeclaringType().getElementName() + '.' + method.getElementName();
+				String methodName= method.getElementName();
+				methodName+= JUnitLaunchConfigurationTab.getParameterTypes(method, true); // use simple names of parameter types
+				return method.getDeclaringType().getElementName() + '.' + methodName;
 			default:
 				throw new IllegalArgumentException("Invalid element type to create a launch configuration: " + element.getClass().getName()); //$NON-NLS-1$
 		}

@@ -412,6 +412,8 @@ public abstract class TestElement implements ITestElement {
 	public String[] getParameterTypeSignatures() {
 		// TODO - JUnit5: Create encoded type signatures so that IType.getMethod(String name, String[] parameterTypeSignatures) can find the method 
 		// use new API from jdt.core - https://bugs.eclipse.org/bugs/show_bug.cgi?id=502563
+		// For two overloaded methods with same simple name of param type (e.g. pkg1.A, pkg2.A), the type sign created by using simple name will be same
+		// hence IType#getMethod will just return the first of the overloaded methods, which is wrong.
 		return fParameterTypes == null ? null : Arrays.stream(fParameterTypes).map(t -> Signature.createTypeSignature(Signature.getSimpleName(t), false)).toArray(String[]::new);
 	}
 }

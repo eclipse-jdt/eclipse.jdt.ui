@@ -71,35 +71,19 @@ public class JUnit5TestFinder implements ITestFinder {
 		}
 
 		public boolean annotatesAtLeastOneMethod(ITypeBinding type) {
-			ITypeBinding curr= type;
-			while (curr != null) {
-				if (annotatesDeclaredMethods(curr)) {
-					return true;
-				}
-				curr= curr.getSuperclass();
+			if (type == null) {
+				return false;
 			}
-
-			curr= type;
-			while (curr != null) {
-				ITypeBinding[] superInterfaces= curr.getInterfaces();
-				for (int i= 0; i < superInterfaces.length; i++) {
-					if (annotatesMethodsInInterface(superInterfaces[i])) {
-						return true;
-					}
-				}
-				curr= curr.getSuperclass();
-			}
-
-			return false;
-		}
-
-		private boolean annotatesMethodsInInterface(ITypeBinding type) {
 			if (annotatesDeclaredMethods(type)) {
 				return true;
 			}
-			ITypeBinding[] superInterfaces= type.getInterfaces();
-			for (int i= 0; i < superInterfaces.length; i++) {
-				if (annotatesMethodsInInterface(superInterfaces[i])) {
+			ITypeBinding superClass= type.getSuperclass();
+			if (annotatesAtLeastOneMethod(superClass)) {
+				return true;
+			}
+			ITypeBinding[] interfaces= type.getInterfaces();
+			for (int i= 0; i < interfaces.length; i++) {
+				if (annotatesAtLeastOneMethod(interfaces[i])) {
 					return true;
 				}
 			}
@@ -117,22 +101,26 @@ public class JUnit5TestFinder implements ITestFinder {
 			return false;
 		}
 
+		// See JUnitLaunchConfigurationTab#isAnnotatedWithTestable also.
 		private boolean annotates(IAnnotationBinding[] annotations) {
 			for (IAnnotationBinding annotation : annotations) {
 				if (annotation == null) {
-					return false;
+					continue;
 				}
-				if (matchesAnnotationName(annotation.getAnnotationType())) {
+				if (matchesName(annotation.getAnnotationType())) {
 					return true;
 				}
-				if (matchesAnnotationNameInHierarchy(annotation)) {
-					return true;
+				if (TESTABLE.getName().equals(fName)) {
+					Set<ITypeBinding> hierarchy= new HashSet<>();
+					if (matchesNameInAnnotationHierarchy(annotation, hierarchy)) {
+						return true;
+					}
 				}
 			}
 			return false;
 		}
 
-		private boolean matchesAnnotationName(ITypeBinding annotationType) {
+		private boolean matchesName(ITypeBinding annotationType) {
 			if (annotationType != null) {
 				String qualifiedName= annotationType.getQualifiedName();
 				if (qualifiedName.equals(fName)) {
@@ -142,36 +130,22 @@ public class JUnit5TestFinder implements ITestFinder {
 			return false;
 		}
 
-		private boolean matchesAnnotationNameInHierarchy(IAnnotationBinding annotation) {
-			if (!TESTABLE.getName().equals(fName)) {
-				return false;
-			}
-
-			Set<ITypeBinding> hierarchy= new HashSet<>();
-			collectAnnotationsInHierarchy(annotation, hierarchy);
-
-			for (ITypeBinding type : hierarchy) {
-				if (matchesAnnotationName(type)) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		private void collectAnnotationsInHierarchy(IAnnotationBinding annotation, Set<ITypeBinding> hierarchy) {
+		private boolean matchesNameInAnnotationHierarchy(IAnnotationBinding annotation, Set<ITypeBinding> hierarchy) {
 			ITypeBinding type= annotation.getAnnotationType();
 			if (type != null) {
 				for (IAnnotationBinding annotationBinding : type.getAnnotations()) {
 					if (annotationBinding != null) {
 						ITypeBinding annotationType= annotationBinding.getAnnotationType();
 						if (annotationType != null && hierarchy.add(annotationType)) {
-							collectAnnotationsInHierarchy(annotationBinding, hierarchy);
+							if (matchesName(annotationType) || matchesNameInAnnotationHierarchy(annotationBinding, hierarchy)) {
+								return true;
+							}
 						}
 					}
 				}
 			}
+			return false;
 		}
-
 	}
 
 	@Override
