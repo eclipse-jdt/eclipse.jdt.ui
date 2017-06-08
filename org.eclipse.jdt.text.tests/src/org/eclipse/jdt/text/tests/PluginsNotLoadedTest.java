@@ -172,7 +172,6 @@ public class PluginsNotLoadedTest extends TestCase {
 			"org.eclipse.rcp.source",
 			"org.eclipse.rcp.source.win32.win32.x86",
 			"org.eclipse.ui.browser",
-			"org.eclipse.ui.presentations.r21",
 			"org.junit.source",
 			"org.mortbay.jetty.source"
 		};
