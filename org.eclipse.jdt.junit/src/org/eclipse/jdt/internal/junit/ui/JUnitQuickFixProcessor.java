@@ -154,6 +154,12 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 				qualifiedName= "org.junit.jupiter.api.TestFactory"; //$NON-NLS-1$
 			} else if (s.equals("Testable")) { //$NON-NLS-1$
 				qualifiedName= "org.junit.platform.commons.annotation.Testable"; //$NON-NLS-1$				
+			} else if (s.equals("TestTemplate")) { //$NON-NLS-1$
+				qualifiedName= "org.junit.jupiter.api.TestTemplate"; //$NON-NLS-1$
+			} else if (s.equals("ParameterizedTest")) { //$NON-NLS-1$
+				qualifiedName= "org.junit.jupiter.params.ParameterizedTest"; //$NON-NLS-1$
+			} else if (s.equals("RepeatedTest")) { //$NON-NLS-1$
+				qualifiedName= "org.junit.jupiter.api.RepeatedTest"; //$NON-NLS-1$
 			}
 			IJavaProject javaProject= unit.getJavaProject();
 			if (!(foundInProjectClasspath(javaProject, qualifiedName) && foundInProjectClasspath(javaProject, qualifiedName1))) {

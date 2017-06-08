@@ -734,8 +734,12 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				if (annotation.exists()) {
 					methodNames.add(methodName + getParameterTypes(method, false));
 				} else if (isJUnit5) {
-					annotation= method.getAnnotation("TestFactory"); //$NON-NLS-1$
-					if (annotation.exists() || isAnnotatedWithTestable(method, type, javaProject)) {
+					boolean hasAnyTestAnnotation= method.getAnnotation("TestFactory").exists() //$NON-NLS-1$
+							|| method.getAnnotation("Testable").exists() //$NON-NLS-1$
+							|| method.getAnnotation("TestTemplate").exists() //$NON-NLS-1$
+							|| method.getAnnotation("ParameterizedTest").exists() //$NON-NLS-1$
+							|| method.getAnnotation("RepeatedTest").exists(); //$NON-NLS-1$
+					if (hasAnyTestAnnotation || isAnnotatedWithTestable(method, type, javaProject)) {
 						methodNames.add(methodName + getParameterTypes(method, false));
 					}
 				}
