@@ -228,9 +228,6 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 * Process the default arguments.
 	 * @param args arguments
 	 */
-	/**
-	 * @param args
-	 */
 	protected final void defaultInit(String[] args) {
 		for(int i= 0; i < args.length; i++) {
 			if(args[i].toLowerCase().equals("-classnames") || args[i].toLowerCase().equals("-classname")){ //$NON-NLS-1$ //$NON-NLS-2$
