@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,8 +77,12 @@ public class InfoFilesUtil {
 			ISourceRange sourceRange= compilationUnit.getSourceRange();
 			String originalContent= buffer.getText(sourceRange.getOffset(), sourceRange.getLength());
 
-			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, originalContent, 0, lineDelimiter, pack.getJavaProject());
-			formattedContent= Strings.trimLeadingTabsAndSpaces(formattedContent);
+			int kind= CodeFormatter.K_COMPILATION_UNIT;
+			if (fileName.equals(JavaModelUtil.MODULE_INFO_JAVA)) {
+				kind= CodeFormatter.K_MODULE_INFO;
+			}
+			String formattedContent= CodeFormatterUtil.format(kind, originalContent, 0, lineDelimiter, pack.getJavaProject());
+			formattedContent= org.eclipse.jdt.internal.core.manipulation.util.Strings.trimLeadingTabsAndSpaces(formattedContent);
 			buffer.replace(sourceRange.getOffset(), sourceRange.getLength(), formattedContent);
 			compilationUnit.commitWorkingCopy(true, new SubProgressMonitor(monitor, 1));
 		} finally {

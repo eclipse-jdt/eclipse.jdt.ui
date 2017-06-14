@@ -1,13 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -16,7 +12,6 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,7 +40,6 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -66,16 +60,12 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatus;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IModuleDescription;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.util.InfoFilesUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -110,10 +100,6 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 
 	private SelectionButtonDialogField fExcludeInOthersFields;
 	private SelectionButtonDialogField fIgnoreOptionalProblemsField;
-	private SelectionButtonDialogField fCreateModuleInfoJavaField;
-
-	private static final String MODULE_INFO_JAVA_FILENAME= JavaModelUtil.MODULE_INFO_JAVA;
-	private static final String SETTINGS_CREATE_MODULE_INFO_JAVA= "create_module_info_java"; //$NON-NLS-1$
 
 	private IWorkspaceRoot fWorkspaceRoot;
 
@@ -158,11 +144,6 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		fIgnoreOptionalProblemsField.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_ignore_optional_problems_label);
 		fIgnoreOptionalProblemsField.setSelection(false);
 
-		fCreateModuleInfoJavaField= new SelectionButtonDialogField(SWT.CHECK);
-		fCreateModuleInfoJavaField.setDialogFieldListener(adapter);
-		fCreateModuleInfoJavaField.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_create_module_info_java);
-		fCreateModuleInfoJavaField.setSelection(false);
-
 		fRootStatus= new StatusInfo();
 		fProjectStatus= new StatusInfo();
 	}
@@ -173,14 +154,6 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		String projPath= getProjectPath(selection);
 		fProjectField.setText(projPath != null ? projPath : ""); //$NON-NLS-1$
 		fRootDialogField.setText(""); //$NON-NLS-1$
-
-		IDialogSettings dialogSettings= getDialogSettings();
-		if (dialogSettings != null) {
-			IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
-			if (section != null) {
-				fCreateModuleInfoJavaField.setSelection(section.getBoolean(SETTINGS_CREATE_MODULE_INFO_JAVA));
-			}
-		}
 	}
 
 	private String getProjectPath(IStructuredSelection selection) {
@@ -225,7 +198,6 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		fRootDialogField.doFillIntoGrid(composite, 3);
 		fExcludeInOthersFields.doFillIntoGrid(composite, 3);
 		fIgnoreOptionalProblemsField.doFillIntoGrid(composite, 3);
-		fCreateModuleInfoJavaField.doFillIntoGrid(composite, 3);
 
 		int maxFieldWidth= convertWidthInCharsToPixels(40);
 		LayoutUtil.setWidthHint(fProjectField.getTextControl(null), maxFieldWidth);
@@ -294,8 +266,6 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		} else if (field == fExcludeInOthersFields) {
 			updateRootStatus();
 		} else if (field == fIgnoreOptionalProblemsField) {
-			updateRootStatus();
-		} else if (field == fCreateModuleInfoJavaField) {
 			updateRootStatus();
 		}
 		updateStatus(new IStatus[] { fProjectStatus, fRootStatus });
@@ -395,10 +365,7 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 					IClasspathEntry curr= fEntries[i];
 					if (curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 						if (path.equals(curr.getPath())) {
-							boolean createModuleInfoJava= isCreateModuleInfoJava() && !moduleInfoJavaAlreadyExists(fCurrJProject.getPackageFragmentRoot(res));
-							if (!createModuleInfoJava) {
-								fRootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExisting);
-							}
+							fRootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExisting);
 							return;
 						}
 						if (projPath.equals(curr.getPath())) {
@@ -464,27 +431,6 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		}
 	}
 
-	/**
-	 * Checks if the module-info.java file already exists in any package in the given package
-	 * fragment root.
-	 * 
-	 * @param root the package fragment root
-	 * @return <code>true</code> if module-info.java exists in any package in the given
-	 *         <code>root</code>, <code>false</code> otherwise
-	 */
-	private boolean moduleInfoJavaAlreadyExists(IPackageFragmentRoot root) {
-		try {
-			for (IJavaElement pkgFragment : root.getChildren()) {
-				if (((IPackageFragment) pkgFragment).getCompilationUnit(MODULE_INFO_JAVA_FILENAME).exists()) {
-					return true;
-				}
-			}
-		} catch (JavaModelException e) {
-			// pretend that the file does not exist
-		}
-		return false;
-	}
-
 	private void insertAtEndOfCategory(IClasspathEntry entry, List<IClasspathEntry> entries) {
 		int length= entries.size();
 		IClasspathEntry[] elements= entries.toArray(new IClasspathEntry[length]);
@@ -542,126 +488,41 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		return fCreatedRoot;
 	}
 
-	/**
-	 * @return <code>true</code> if module-info.java should be created, <code>false</code> otherwise
-	 */
-	private boolean isCreateModuleInfoJava() {
-		return JavaModelUtil.is9OrHigher(fCurrJProject) && fCreateModuleInfoJavaField.isSelected();
-	}
-
 	public IResource getCorrespondingResource() {
-		IFolder folder= fCurrJProject.getProject().getFolder(fRootDialogField.getText());
-		if (isCreateModuleInfoJava()) {
-			return folder.getFile(MODULE_INFO_JAVA_FILENAME);
-		}
-		return folder;
+		return fCurrJProject.getProject().getFolder(fRootDialogField.getText());
 	}
 
 	public void createPackageFragmentRoot(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
-		String relPath= fRootDialogField.getText();
-		IFolder folder= fCurrJProject.getProject().getFolder(relPath);
-		fCreatedRoot= fCurrJProject.getPackageFragmentRoot(folder);
-
-		if (!fCreatedRoot.exists()) {
-			monitor.beginTask(NewWizardMessages.NewSourceFolderWizardPage_operation, 3);
-			try {
-				IPath projPath= fCurrJProject.getProject().getFullPath();
-				if (fOutputLocation.equals(projPath) && !fNewOutputLocation.equals(projPath)) {
-					if (BuildPathsBlock.hasClassfiles(fCurrJProject.getProject())) {
-						if (BuildPathsBlock.getRemoveOldBinariesQuery(getShell()).doQuery(false, projPath)) {
-							BuildPathsBlock.removeOldClassfiles(fCurrJProject.getProject());
-						}
-					}
-				}
-
-				if (!folder.exists()) {
-					CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
-				}
-				if (monitor.isCanceled()) {
-					throw new InterruptedException();
-				}
-
-				fCurrJProject.setRawClasspath(fNewEntries, fNewOutputLocation, new SubProgressMonitor(monitor, 2));
-
-			} finally {
-				monitor.done();
-			}
-		}
-
-		if (isCreateModuleInfoJava()) {
-			// default package always exists
-			IPackageFragment defaultPkg= fCreatedRoot.getPackageFragment(""); //$NON-NLS-1$
-			String fileContent= getModuleInfoFileContent();
-			InfoFilesUtil.createInfoJavaFile(MODULE_INFO_JAVA_FILENAME, fileContent, defaultPkg, monitor);
-		}
-
-		// save dialog settings for create_module_info_java
-		IDialogSettings dialogSettings= getDialogSettings();
-		if (dialogSettings != null) {
-			IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
-			if (section == null) {
-				section= dialogSettings.addNewSection(PAGE_NAME);
-			}
-			section.put(SETTINGS_CREATE_MODULE_INFO_JAVA, fCreateModuleInfoJavaField.isSelected());
-		}
-	}
-
-	private String getModuleInfoFileContent() throws CoreException {
-		List<String> exportedPackages= new ArrayList<>();
-		IPackageFragmentRoot[] pkgFragmentRoots= fCurrJProject.getPackageFragmentRoots();
-		List<IPackageFragmentRoot> packageFragmentRoots= new ArrayList<>(Arrays.asList(pkgFragmentRoots));
-		for (IPackageFragmentRoot packageFragmentRoot : pkgFragmentRoots) {
-			IResource res= packageFragmentRoot.getCorrespondingResource();
-			if (res == null || res.getType() != IResource.FOLDER || packageFragmentRoot.getKind() != IPackageFragmentRoot.K_SOURCE) {
-				packageFragmentRoots.remove(packageFragmentRoot);
-			}
-		}
-		pkgFragmentRoots= packageFragmentRoots.toArray(new IPackageFragmentRoot[packageFragmentRoots.size()]);
-		for (IPackageFragmentRoot packageFragmentRoot : pkgFragmentRoots) {
-			for (IJavaElement child : packageFragmentRoot.getChildren()) {
-				if (child instanceof IPackageFragment) {
-					IPackageFragment pkgFragment= (IPackageFragment) child;
-					if (!pkgFragment.isDefaultPackage() && pkgFragment.getCompilationUnits().length != 0) {
-						exportedPackages.add(pkgFragment.getElementName());
+		monitor.beginTask(NewWizardMessages.NewSourceFolderWizardPage_operation, 3);
+		try {
+			IPath projPath= fCurrJProject.getProject().getFullPath();
+			if (fOutputLocation.equals(projPath) && !fNewOutputLocation.equals(projPath)) {
+				if (BuildPathsBlock.hasClassfiles(fCurrJProject.getProject())) {
+					if (BuildPathsBlock.getRemoveOldBinariesQuery(getShell()).doQuery(false, projPath)) {
+						BuildPathsBlock.removeOldClassfiles(fCurrJProject.getProject());
 					}
 				}
 			}
-		}
 
-		String[] requiredModules= JavaCore.getReferencedModules(fCurrJProject);
+			String relPath= fRootDialogField.getText();
 
-		StringBuilder fileContent= new StringBuilder();
-		if (requiredModules.length > 0 || exportedPackages.size() > 0) {
-			String lineDelimiter= StubUtility.getLineDelimiterUsed(fCurrJProject);
-			fileContent.append("module "); //$NON-NLS-1$
-			IModuleDescription moduleDescription= fCurrJProject.getModuleDescription();
-			String moduleName= moduleDescription != null ? moduleDescription.getElementName() : fCurrJProject.getElementName();
-			fileContent.append(moduleName);
-			fileContent.append(" {"); //$NON-NLS-1$
-			fileContent.append(lineDelimiter);
-
-			for (String exportedPkg : exportedPackages) {
-				fileContent.append('\t');
-				fileContent.append("exports "); //$NON-NLS-1$
-				fileContent.append(exportedPkg);
-				fileContent.append(";"); //$NON-NLS-1$
-				fileContent.append(lineDelimiter);
+			IFolder folder= fCurrJProject.getProject().getFolder(relPath);
+			if (!folder.exists()) {
+				CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
+			}
+			if (monitor.isCanceled()) {
+				throw new InterruptedException();
 			}
 
-			for (String requiredModule : requiredModules) {
-				fileContent.append('\t');
-				fileContent.append("requires "); //$NON-NLS-1$
-				fileContent.append(requiredModule);
-				fileContent.append(';');
-				fileContent.append(lineDelimiter);
-			}
+			fCurrJProject.setRawClasspath(fNewEntries, fNewOutputLocation, new SubProgressMonitor(monitor, 2));
 
-			fileContent.append('}');
+			fCreatedRoot= fCurrJProject.getPackageFragmentRoot(folder);
+		} finally {
+			monitor.done();
 		}
-		return fileContent.toString();
 	}
 
 	// ------------- choose dialogs
