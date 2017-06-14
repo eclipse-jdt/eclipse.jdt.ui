@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import java.util.List;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -4555,4 +4556,625 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		assertProposalDoesNotExist(proposals, CorrectionMessages.QuickAssistProcessor_removeParenthesesInLambda);
 	}
 
+	public void testBug514203_wildCard() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Comparator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("public class Lambda1 {\n");
+		buf.append("	Comparator<List<?>> c = (l1, l2) -> Integer.compare(l1.size(), l2.size());\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Lambda1.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("->"), 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Comparator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("public class Lambda1 {\n");
+		buf.append("	Comparator<List<?>> c = (List<?> l1, List<?> l2) -> Integer.compare(l1.size(), l2.size());\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Add inferred lambda parameter types", proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Comparator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("public class Lambda1 {\n");
+		buf.append("	Comparator<List<?>> c = new Comparator<List<?>>() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public int compare(List<?> l1, List<?> l2) {\n");
+		buf.append("            return Integer.compare(l1.size(), l2.size());\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals);
+		
+	}
+
+	public void testBug514203_capture1() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		StringBuffer buf;
+
+		buf= new StringBuffer();
+		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+		buf.append("package test1;\n");
+		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class Lambda2 {\n");
+		buf.append("	interface Sink<T> {\n");
+		buf.append("		void receive(T t);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	interface Source<U> {\n");
+		buf.append("		void sendTo(Sink<? super U> c);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	void f(Source<? extends Number> source) {\n");
+		buf.append("		source.sendTo(a -> a.doubleValue());\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Lambda2.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("->"), 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class Lambda2 {\n");
+		buf.append("	interface Sink<T> {\n");
+		buf.append("		void receive(T t);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	interface Source<U> {\n");
+		buf.append("		void sendTo(Sink<? super U> c);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	void f(Source<? extends Number> source) {\n");
+		buf.append("		source.sendTo(Number::doubleValue);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Convert to method reference", proposals);
+
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class Lambda2 {\n");
+		buf.append("	interface Sink<T> {\n");
+		buf.append("		void receive(T t);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	interface Source<U> {\n");
+		buf.append("		void sendTo(Sink<? super U> c);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	void f(Source<? extends Number> source) {\n");
+		buf.append("		source.sendTo((Number a) -> a.doubleValue());\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Add inferred lambda parameter types", proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class Lambda2 {\n");
+		buf.append("	interface Sink<T> {\n");
+		buf.append("		void receive(T t);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	interface Source<U> {\n");
+		buf.append("		void sendTo(Sink<? super U> c);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	void f(Source<? extends Number> source) {\n");
+		buf.append("		source.sendTo(new Sink<Number>() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public void receive(Number a) {\n");
+		buf.append("                a.doubleValue();\n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals);
+		
+	}
+
+	public void testBug514203_capture2() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		StringBuffer buf;
+
+		buf= new StringBuffer();
+		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+		buf.append("package test1;\n");
+		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.math.BigDecimal;\n");
+		buf.append("\n");
+		buf.append("public class Lambda3 {\n");
+		buf.append("	interface Sink<T extends Number> {\n");
+		buf.append("		void receive(T t);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	interface Source<U extends BigDecimal> {\n");
+		buf.append("		void sendTo(Sink<? super U> c);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	void f(Source<?> source) {\n");
+		buf.append("		source.sendTo(a -> a.scale());\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Lambda3.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("->"), 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.math.BigDecimal;\n");
+		buf.append("\n");
+		buf.append("public class Lambda3 {\n");
+		buf.append("	interface Sink<T extends Number> {\n");
+		buf.append("		void receive(T t);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	interface Source<U extends BigDecimal> {\n");
+		buf.append("		void sendTo(Sink<? super U> c);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	void f(Source<?> source) {\n");
+		buf.append("		source.sendTo(BigDecimal::scale);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Convert to method reference", proposals);
+
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.math.BigDecimal;\n");
+		buf.append("\n");
+		buf.append("public class Lambda3 {\n");
+		buf.append("	interface Sink<T extends Number> {\n");
+		buf.append("		void receive(T t);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	interface Source<U extends BigDecimal> {\n");
+		buf.append("		void sendTo(Sink<? super U> c);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	void f(Source<?> source) {\n");
+		buf.append("		source.sendTo((BigDecimal a) -> a.scale());\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Add inferred lambda parameter types", proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.math.BigDecimal;\n");
+		buf.append("\n");
+		buf.append("public class Lambda3 {\n");
+		buf.append("	interface Sink<T extends Number> {\n");
+		buf.append("		void receive(T t);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	interface Source<U extends BigDecimal> {\n");
+		buf.append("		void sendTo(Sink<? super U> c);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	void f(Source<?> source) {\n");
+		buf.append("		source.sendTo(new Sink<BigDecimal>() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public void receive(BigDecimal a) {\n");
+		buf.append("                a.scale();\n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals);
+		
+	}
+
+	public void testBug514203_capture3() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		StringBuffer buf;
+
+		buf= new StringBuffer();
+		buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+		buf.append("package test1;\n");
+		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("public class Lambda4 {\n");
+		buf.append("	interface Sink<T extends List<Number>> {\n");
+		buf.append("		void receive(T t);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	interface Source<U extends ArrayList<Number>> {\n");
+		buf.append("		void sendTo(Sink<? super U> c);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	void f(Source<?> source) {\n");
+		buf.append("		source.sendTo(a -> a.size());\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Lambda4.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("->"), 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("public class Lambda4 {\n");
+		buf.append("	interface Sink<T extends List<Number>> {\n");
+		buf.append("		void receive(T t);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	interface Source<U extends ArrayList<Number>> {\n");
+		buf.append("		void sendTo(Sink<? super U> c);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	void f(Source<?> source) {\n");
+		buf.append("		source.sendTo(ArrayList<Number>::size);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Convert to method reference", proposals);
+
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("public class Lambda4 {\n");
+		buf.append("	interface Sink<T extends List<Number>> {\n");
+		buf.append("		void receive(T t);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	interface Source<U extends ArrayList<Number>> {\n");
+		buf.append("		void sendTo(Sink<? super U> c);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	void f(Source<?> source) {\n");
+		buf.append("		source.sendTo((ArrayList<Number> a) -> a.size());\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Add inferred lambda parameter types", proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("public class Lambda4 {\n");
+		buf.append("	interface Sink<T extends List<Number>> {\n");
+		buf.append("		void receive(T t);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	interface Source<U extends ArrayList<Number>> {\n");
+		buf.append("		void sendTo(Sink<? super U> c);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	void f(Source<?> source) {\n");
+		buf.append("		source.sendTo(new Sink<ArrayList<Number>>() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public void receive(ArrayList<Number> a) {\n");
+		buf.append("                a.size();\n");
+		buf.append("            }\n");
+		buf.append("        });\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals);
+		
+	}
+
+	public void testBug514203_lambdaNN() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+		JavaProjectHelper.addLibrary(fJProject1, new Path(Java18ProjectTestSetup.getJdtAnnotations20Path()));
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+
+		StringBuffer buf;
+
+		// --- Set up @NonNullByDefault for the package, including ARRAY_CONTENTS --
+
+		buf= new StringBuffer();
+		buf.append("@NonNullByDefault({ PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT, ARRAY_CONTENTS })\n");
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import static org.eclipse.jdt.annotation.DefaultLocation.*;\n");
+		buf.append("import org.eclipse.jdt.annotation.NonNullByDefault;\n");
+		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+
+		// --- Classes that are only referenced --
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface X {}\n");
+		pack1.createCompilationUnit("X.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface Y {}\n");
+		pack1.createCompilationUnit("Y.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.annotation.ElementType;\n");
+		buf.append("import java.lang.annotation.Target;\n");
+		buf.append("\n");
+		buf.append("@Target(ElementType.TYPE_USE)\n");
+		buf.append("@interface Z {}\n");
+		pack1.createCompilationUnit("Z.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("class Ref<A> {}\n");
+		pack1.createCompilationUnit("Ref.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface SAM<A> {\n");
+		buf.append("	void f(A[] a);\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("SAM.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class Test {\n");
+		buf.append("	static int nn(Object o) {\n");
+		buf.append("		return 0;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		buf.append("");
+		pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		// --- Classes in which the quick assists are checked (without and with NonNullByDefault in effect at the target location) --- 
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("public class LambdaNN1 {\n");
+		buf.append("	void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {\n");
+		buf.append("		@NonNullByDefault({})\n");
+		buf.append("		SAM<? super @NonNull Ref<? extends @NonNull @Y Ref<@X @Nullable String @Y @NonNull [] @Z @NonNull []>>> sam0 = a0 -> Test.nn(a0);\n");
+		buf.append("		sam0.f(data);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("LambdaNN1.java", buf.toString(), false, null);
+
+		AssistContext context1= getCorrectionContext(cu1, buf.toString().indexOf("->"), 0);
+		assertNoErrors(context1);
+		List<IJavaCompletionProposal> proposals1= collectAssists(context1, false);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("public class LambdaNN2 {\n");
+		buf.append("	void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {\n");
+		buf.append("		SAM<? super @NonNull Ref<? extends @NonNull @Y Ref<@X @Nullable String @Y @NonNull [] @Z @NonNull []>>> sam0 = a0 -> Test.nn(a0);\n");
+		buf.append("		sam0.f(data);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("LambdaNN2.java", buf.toString(), false, null);
+
+		AssistContext context2= getCorrectionContext(cu2, buf.toString().indexOf("->"), 0);
+		assertNoErrors(context2);
+
+		List<IJavaCompletionProposal> proposals2= collectAssists(context2, false);
+
+		// --- Convert to method reference without and with NNBD ---
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("public class LambdaNN1 {\n");
+		buf.append("	void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {\n");
+		buf.append("		@NonNullByDefault({})\n");
+		buf.append("		SAM<? super @NonNull Ref<? extends @NonNull @Y Ref<@X @Nullable String @Y @NonNull [] @Z @NonNull []>>> sam0 = Test::nn;\n");
+		buf.append("		sam0.f(data);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Convert to method reference", proposals1);
+
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("public class LambdaNN2 {\n");
+		buf.append("	void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {\n");
+		buf.append("		SAM<? super @NonNull Ref<? extends @NonNull @Y Ref<@X @Nullable String @Y @NonNull [] @Z @NonNull []>>> sam0 = Test::nn;\n");
+		buf.append("		sam0.f(data);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Convert to method reference", proposals2);
+
+		// --- Add inferred lambda parameter types without and with NNBD ---
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("public class LambdaNN1 {\n");
+		buf.append("	void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {\n");
+		buf.append("		@NonNullByDefault({})\n");
+		buf.append("		SAM<? super @NonNull Ref<? extends @NonNull @Y Ref<@X @Nullable String @Y @NonNull [] @Z @NonNull []>>> sam0 = (@NonNull Ref<? extends @NonNull @Y Ref<@X @Nullable String @Y @NonNull [] @Z @NonNull []>> @NonNull [] a0) -> Test.nn(a0);\n");
+		buf.append("		sam0.f(data);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Add inferred lambda parameter types", proposals1);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("public class LambdaNN2 {\n");
+		buf.append("	void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {\n");
+		buf.append("		SAM<? super @NonNull Ref<? extends @NonNull @Y Ref<@X @Nullable String @Y @NonNull [] @Z @NonNull []>>> sam0 = (Ref<? extends @Y Ref<@X @Nullable String @Y [] @Z []>>[] a0) -> Test.nn(a0);\n");
+		buf.append("		sam0.f(data);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Add inferred lambda parameter types", proposals2);
+
+		// --- Convert to anonymous class creation without and with NNBD --
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("public class LambdaNN1 {\n");
+		buf.append("	void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {\n");
+		buf.append("		@NonNullByDefault({})\n");
+		buf.append("		SAM<? super @NonNull Ref<? extends @NonNull @Y Ref<@X @Nullable String @Y @NonNull [] @Z @NonNull []>>> sam0 = new SAM<@NonNull Ref<? extends @NonNull @Y Ref<@X @Nullable String @Y @NonNull [] @Z @NonNull []>>>() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public void f(\n");
+		buf.append("                    @NonNull Ref<? extends @NonNull @Y Ref<@X @Nullable String @Y @NonNull [] @Z @NonNull []>> @NonNull [] a0) {\n");
+		buf.append("                Test.nn(a0);\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("		sam0.f(data);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals1);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.jdt.annotation.*;\n");
+		buf.append("\n");
+		buf.append("public class LambdaNN2 {\n");
+		buf.append("	void g(Ref<? extends Ref<@X @Nullable String @Y [] @Z []>>[] data) {\n");
+		buf.append("		SAM<? super @NonNull Ref<? extends @NonNull @Y Ref<@X @Nullable String @Y @NonNull [] @Z @NonNull []>>> sam0 = new SAM<Ref<? extends @Y Ref<@X @Nullable String @Y [] @Z []>>>() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public void f(\n");
+		buf.append("                    Ref<? extends @Y Ref<@X @Nullable String @Y [] @Z []>>[] a0) {\n");
+		buf.append("                Test.nn(a0);\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("		sam0.f(data);\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals2);
+	}
+	public void testBug514203_annotatedParametrizedType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class Example {\n");
+		buf.append("	@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_USE)\n");
+		buf.append("	public @interface X {}\n");
+		buf.append("\n");
+		buf.append("	interface SAM<T> {\n");
+		buf.append("		T f(T t);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	@X\n");
+		buf.append("	SAM<String> c = a -> a;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Example.java", buf.toString(), false, null);
+
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("->"), 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class Example {\n");
+		buf.append("	@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_USE)\n");
+		buf.append("	public @interface X {}\n");
+		buf.append("\n");
+		buf.append("	interface SAM<T> {\n");
+		buf.append("		T f(T t);\n");
+		buf.append("	}\n");
+		buf.append("\n");
+		buf.append("	@X\n");
+		buf.append("	SAM<String> c = new @X SAM<String>() {\n");
+		buf.append("        @Override\n");
+		buf.append("        public String f(String a) {\n");
+		buf.append("            return a;\n");
+		buf.append("        }\n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals);		
+	}
 }

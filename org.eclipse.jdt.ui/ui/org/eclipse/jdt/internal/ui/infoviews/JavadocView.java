@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -104,6 +104,7 @@ import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -124,6 +125,8 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -144,12 +147,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SimpleSelectionProvider;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavadocHover.FallbackInformationPresenter;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavadocContentAccess2;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLinkedLabelComposer;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
@@ -991,14 +992,14 @@ public class JavadocView extends AbstractInfoView {
 				HTMLPrinter.startBulletList(buffer);
 				IJavaElement curr= result[i];
 				if (curr instanceof IMember || curr instanceof IPackageFragment || curr instanceof IPackageDeclaration || curr.getElementType() == IJavaElement.LOCAL_VARIABLE) {
-					HTMLPrinter.addBullet(buffer, getInfoText(curr, null, false));
+					HTMLPrinter.addBullet(buffer, getInfoText(curr, null, null, false));
 					HTMLPrinter.endBulletList(buffer);
 				}
 			}
 		} else {
 			IJavaElement curr= result[0];
 			if (curr instanceof IPackageDeclaration || curr instanceof IPackageFragment) {
-				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr, null, true));
+				HTMLPrinter.addSmallHeader(buffer, getInfoText(curr, null, null, true));
 				buffer.append("<br>"); //$NON-NLS-1$
 				Reader reader= null;
 				String content= null;
@@ -1048,19 +1049,11 @@ public class JavadocView extends AbstractInfoView {
 			} else if (curr instanceof IMember || curr instanceof ILocalVariable || curr instanceof ITypeParameter) {
 				final IJavaElement element= curr;
 
-				String constantValue= null;
-				if (element instanceof IField) {
-					constantValue= computeFieldConstant(activePart, selection, (IField) element, monitor);
-					if (constantValue != null)
-						constantValue= HTMLPrinter.convertToHTMLContentWithWhitespace(constantValue);
-				}
-
-				HTMLPrinter.addSmallHeader(buffer, getInfoText(element, constantValue, true));
-
+				ITypeRoot typeRoot= null;
+				Region hoverRegion= null;
 				try {
 					ISourceRange nameRange= ((ISourceReference) curr).getNameRange();
 					if (SourceRange.isAvailable(nameRange)) {
-						ITypeRoot typeRoot;
 						if (element instanceof ILocalVariable) {
 							typeRoot= ((ILocalVariable) curr).getTypeRoot();
 						} else if (element instanceof ITypeParameter) {
@@ -1068,12 +1061,36 @@ public class JavadocView extends AbstractInfoView {
 						} else {
 							typeRoot= ((IMember) curr).getTypeRoot();
 						}
-						Region hoverRegion= new Region(nameRange.getOffset(), nameRange.getLength());
-						buffer.append("<br>"); //$NON-NLS-1$
-						JavadocHover.addAnnotations(buffer, curr, typeRoot, hoverRegion);
+						hoverRegion= new Region(nameRange.getOffset(), nameRange.getLength());
 					}
 				} catch (JavaModelException e) {
 					// no annotations this time...
+				}
+
+				String constantValue= null;
+				if (element instanceof IField) {
+					constantValue= computeFieldConstant(activePart, selection, (IField) element, monitor);
+					if (constantValue != null)
+						constantValue= HTMLPrinter.convertToHTMLContentWithWhitespace(constantValue);
+				}
+
+				String defaultValue= null;
+				if (element instanceof IMethod) {
+					try {
+						defaultValue= JavadocHover.getAnnotationMemberDefaultValue((IMethod) element, typeRoot, hoverRegion);
+						if (defaultValue != null) {
+							defaultValue= HTMLPrinter.convertToHTMLContentWithWhitespace(defaultValue);
+						}
+					} catch (JavaModelException e) {
+						// no default value
+					}
+				}
+
+				HTMLPrinter.addSmallHeader(buffer, getInfoText(element, constantValue, defaultValue, true));
+
+				if (typeRoot != null && hoverRegion != null) {
+					buffer.append("<br>"); //$NON-NLS-1$
+					JavadocHover.addAnnotations(buffer, curr, typeRoot, hoverRegion);
 				}
 
 				Reader reader= null;
@@ -1128,10 +1145,11 @@ public class JavadocView extends AbstractInfoView {
 	 * 
 	 * @param member the Java member
 	 * @param constantValue the constant value if any
+	 * @param defaultValue the default value of the annotation type member, if any
 	 * @param allowImage <code>true</code> if the Java element image should be shown
 	 * @return a string containing the member's label
 	 */
-	private String getInfoText(IJavaElement member, String constantValue, boolean allowImage) {
+	private String getInfoText(IJavaElement member, String constantValue, String defaultValue, boolean allowImage) {
 		long flags= JavadocHover.getHeaderFlags(member);
 		IBinding binding= JavadocHover.getHoverBinding(member, null);
 		StringBuffer label;
@@ -1146,6 +1164,9 @@ public class JavadocView extends AbstractInfoView {
 		}
 		if (member.getElementType() == IJavaElement.FIELD && constantValue != null) {
 			label.append(constantValue);
+		} else if (member.getElementType() == IJavaElement.METHOD && defaultValue != null) {
+			label.append(JavadocHover.CONSTANT_VALUE_SEPARATOR);
+			label.append(defaultValue);
 		}
 		return JavadocHover.getImageAndLabel(member, allowImage, label.toString());
 	}
@@ -1272,7 +1293,7 @@ public class JavadocView extends AbstractInfoView {
 	 *
 	 * @param activePart the part that triggered the computation, or <code>null</code>
 	 * @param selection the selection that references the field, or <code>null</code>
-	 * @param resolvedField the filed whose constant value will be computed
+	 * @param resolvedField the field whose constant value will be computed
 	 * @param monitor the progress monitor
 	 *
 	 * @return the textual representation of the constant, or <code>null</code> if the

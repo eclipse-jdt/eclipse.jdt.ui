@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.launching.ExecutionArguments;
@@ -69,7 +70,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 public class JavadocOptionsManager {
@@ -219,7 +219,7 @@ public class JavadocOptionsManager {
 				return null;
 			}
 		}
-		if (res != null && res.isOpen()) {
+		if (res != null && res.getProject().isOpen()) {
 			return res;
 		}
 		return null;
@@ -1089,7 +1089,7 @@ public class JavadocOptionsManager {
 	}
 
 	private boolean isValidProject(IJavaProject project) {
-		if (project != null && project.exists() && project.isOpen()) {
+		if (project != null && project.exists() && project.getProject().isOpen()) {
 			return true;
 		}
 		return false;

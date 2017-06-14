@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -77,6 +78,8 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -97,8 +100,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /* package */ class ExtractMethodAnalyzer extends CodeAnalyzer {
@@ -794,7 +795,26 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 					}
 					if (name.resolveBinding() instanceof IVariableBinding) {
 						StructuralPropertyDescriptor locationInParent= name.getLocationInParent();
-						if (locationInParent == QualifiedName.NAME_PROPERTY || (locationInParent == FieldAccess.NAME_PROPERTY && !(((FieldAccess) name.getParent()).getExpression() instanceof ThisExpression)))  {
+						boolean isPartOfQualifiedName= false;
+						boolean isPartOfQualifier= false;
+						if (locationInParent == QualifiedName.NAME_PROPERTY) {
+							isPartOfQualifiedName= true;
+							QualifiedName qualifiedName= (QualifiedName) name.getParent();
+							QualifiedName currParent= qualifiedName;
+							while (true) {
+								ASTNode parent= currParent.getParent();
+								if (parent instanceof QualifiedName) {
+									currParent= (QualifiedName) parent;
+								} else {
+									break;
+								}
+							}
+							if (!qualifiedName.equals(currParent)) {
+								isPartOfQualifier= true;
+							}
+						}
+						if ((isPartOfQualifiedName && !isPartOfQualifier)
+								|| (locationInParent == FieldAccess.NAME_PROPERTY && !(((FieldAccess) name.getParent()).getExpression() instanceof ThisExpression))) {
 							status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_cannot_extract_part_of_qualified_name);
 							break superCall;
 						}
@@ -827,7 +847,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 	@Override
 	public boolean visit(Assignment node) {
 		boolean result= super.visit(node);
-		if ((getSelection().covers(node.getLeftHandSide()) && !getSelection().covers(node.getRightHandSide())) || getSelection().coveredBy(node.getLeftHandSide())) {
+		Selection selection= getSelection();
+		ASTNode selectedNode= NodeFinder.perform(node, selection.getOffset(), selection.getLength());
+		if ((selectedNode != null && SnippetFinder.isLeftHandSideOfAssignment(selectedNode)) || (selection.covers(node.getLeftHandSide()) && !selection.covers(node.getRightHandSide()))) {
 			invalidSelection(
 				RefactoringCoreMessages.ExtractMethodAnalyzer_leftHandSideOfAssignment,
 				JavaStatusContext.create(fCUnit, node));

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,11 +42,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
+import org.eclipse.jdt.internal.corext.dom.TypeAnnotationRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -65,6 +67,7 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 	private final CompilationUnit fAstRoot;
 	private final ITypeBinding fNewType;
 	private final ITypeBinding[] fTypeProposals;
+	private final TypeLocation fTypeLocation;
 
 	public TypeChangeCorrectionProposal(ICompilationUnit targetCU, IBinding binding, CompilationUnit astRoot, ITypeBinding newType, boolean offerSuperTypeProposals, int relevance) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
@@ -88,14 +91,18 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 			IVariableBinding varBinding= (IVariableBinding) binding;
 			String[] args= { BasicElementLabels.getJavaElementName(varBinding.getName()),  BasicElementLabels.getJavaElementName(typeName)};
 			if (varBinding.isField()) {
+				fTypeLocation= TypeLocation.FIELD;
 				setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_field_name, args));
 			} else if (astRoot.findDeclaringNode(binding) instanceof SingleVariableDeclaration) {
+				fTypeLocation= TypeLocation.PARAMETER;
 				setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_param_name, args));
 			} else {
+				fTypeLocation= TypeLocation.LOCAL_VARIABLE;
 				setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_variable_name, args));
 			}
 		} else {
 			String[] args= { binding.getName(), typeName };
+			fTypeLocation= TypeLocation.RETURN_TYPE;
 			setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_method_name, args));
 		}
 	}
@@ -117,13 +124,14 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 			ImportRewrite imports= createImportRewrite(newRoot);
 
 			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(newRoot, declNode.getStartPosition(), imports);
-			Type type= imports.addImport(fNewType, ast, context);
+			Type type= imports.addImport(fNewType, ast, context, fTypeLocation);
 
 			if (declNode instanceof MethodDeclaration) {
 				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
 				Type origReturnType= methodDecl.getReturnType2();
 				rewrite.set(methodDecl, MethodDeclaration.RETURN_TYPE2_PROPERTY, type, null);
 				DimensionRewrite.removeAllChildren(methodDecl, MethodDeclaration.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
+				TypeAnnotationRewrite.removePureTypeAnnotations(methodDecl, MethodDeclaration.MODIFIERS2_PROPERTY, rewrite, null);
 				// add javadoc tag
 				Javadoc javadoc= methodDecl.getJavadoc();
 				if (javadoc != null && origReturnType != null && origReturnType.isPrimitiveType()
@@ -164,6 +172,7 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 					} else {
 						rewrite.set(fieldDecl, FieldDeclaration.TYPE_PROPERTY, type, null);
 						DimensionRewrite.removeAllChildren(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
+						TypeAnnotationRewrite.removePureTypeAnnotations(fieldDecl, FieldDeclaration.MODIFIERS2_PROPERTY, rewrite, null);
 					}
 				} else if (parent instanceof VariableDeclarationStatement) {
 					VariableDeclarationStatement varDecl= (VariableDeclarationStatement) parent;
@@ -192,6 +201,7 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 				SingleVariableDeclaration variableDeclaration= (SingleVariableDeclaration) declNode;
 				rewrite.set(variableDeclaration, SingleVariableDeclaration.TYPE_PROPERTY, type, null);
 				DimensionRewrite.removeAllChildren(declNode, SingleVariableDeclaration.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
+				TypeAnnotationRewrite.removePureTypeAnnotations(declNode, SingleVariableDeclaration.MODIFIERS2_PROPERTY, rewrite, null);
 			}
 
 			// set up linked mode

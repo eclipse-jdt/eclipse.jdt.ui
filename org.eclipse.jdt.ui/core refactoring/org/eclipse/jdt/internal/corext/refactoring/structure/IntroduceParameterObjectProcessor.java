@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -240,6 +240,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 				final ASTRewrite rewriter= cuRewrite.getASTRewrite();
 				ListRewrite bodyStatements= rewriter.getListRewrite(body, Block.STATEMENTS_PROPERTY);
 				List<ParameterInfo> managedParams= getParameterInfos();
+				ImportRewriteContext context=new ContextSensitiveImportRewriteContext(body, cuRewrite.getImportRewrite());
 				for (Iterator<ParameterInfo> iter= managedParams.iterator(); iter.hasNext();) {
 					final ParameterInfo pi= iter.next();
 					if (isValidField(pi)) {
@@ -255,7 +256,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 							});
 							pi.setInlined(true);
 						} else {
-							ExpressionStatement initializer= fParameterObjectFactory.createInitializer(pi, getParameterName(), cuRewrite);
+							ExpressionStatement initializer= fParameterObjectFactory.createInitializer(pi, getParameterName(), cuRewrite, context);
 							bodyStatements.insertFirst(initializer, null);
 						}
 					}
@@ -713,9 +714,10 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 		} else {
 			ASTRewrite rewriter= cuRewrite.getASTRewrite();
 			TypeDeclaration enclosingType= (TypeDeclaration) methodDeclaration.getParent();
+			ContextSensitiveImportRewriteContext context=new ContextSensitiveImportRewriteContext(enclosingType, cuRewrite.getImportRewrite());
 			ListRewrite bodyRewrite= rewriter.getListRewrite(enclosingType, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 			String fqn= enclosingType.getName().getFullyQualifiedName();
-			TypeDeclaration classDeclaration= fParameterObjectFactory.createClassDeclaration(fqn, cuRewrite, null);
+			TypeDeclaration classDeclaration= fParameterObjectFactory.createClassDeclaration(fqn, cuRewrite, null, context);
 			classDeclaration.modifiers().add(rewriter.getAST().newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 			classDeclaration.modifiers().add(rewriter.getAST().newModifier(ModifierKeyword.STATIC_KEYWORD));
 			bodyRewrite.insertBefore(classDeclaration, methodDeclaration, null);

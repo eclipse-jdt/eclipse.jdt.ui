@@ -360,12 +360,21 @@ public class ExternalNullAnnotationChangeProposals {
 		int extraDims= 0; // total number of extra dimensions
 		int outerExtraDims= 0; // number of outer extra dimension preceding the annotation position
 
-		if (coveringNode instanceof Dimension && coveringNode.getLocationInParent() == SingleVariableDeclaration.EXTRA_DIMENSIONS2_PROPERTY) {
+		boolean coversDimension= coveringNode instanceof Dimension;
+		if (coversDimension && coveringNode.getLocationInParent() == SingleVariableDeclaration.EXTRA_DIMENSIONS2_PROPERTY) {
 			// annotating extra dimensions, remember dimension counts
 			variable= (SingleVariableDeclaration) coveringNode.getParent();
 			outer= variable.getType();
 			inner= variable.getType();
 			List<?> extraDimensions= variable.extraDimensions();
+			extraDims= extraDimensions.size();
+			outerExtraDims= extraDimensions.indexOf(coveringNode);
+		} else if (coversDimension && coveringNode.getLocationInParent() == MethodDeclaration.EXTRA_DIMENSIONS2_PROPERTY) {
+			// annotating extra dimensions, remember dimension counts
+			MethodDeclaration method= (MethodDeclaration) coveringNode.getParent();
+			outer= method.getReturnType2();
+			inner= method.getReturnType2();
+			List<?> extraDimensions= method.extraDimensions();
 			extraDims= extraDimensions.size();
 			outerExtraDims= extraDimensions.indexOf(coveringNode);
 		} else if (coveringNode instanceof SingleVariableDeclaration) {
@@ -423,11 +432,11 @@ public class ExternalNullAnnotationChangeProposals {
 				rendererNullable.addDimension(annotateVarargs);
 				rendererRemove.addDimension(annotateVarargs);
 			}
-			for (int i= 0; i < extraDims; i++) {
-				rendererNonNull.addDimension(i == outerExtraDims);
-				rendererNullable.addDimension(i == outerExtraDims);
-				rendererRemove.addDimension(i == outerExtraDims);
-			}
+		}
+		for (int i= 0; i < extraDims; i++) {
+			rendererNonNull.addDimension(i == outerExtraDims);
+			rendererNullable.addDimension(i == outerExtraDims);
+			rendererRemove.addDimension(i == outerExtraDims);
 		}
 		boolean useJava8= JavaModelUtil.is18OrHigher(javaProject.getOption(JavaCore.COMPILER_SOURCE, true));
 		if (!useJava8 && (outer != inner || outerExtraDims > 0)) { // below 1.8 we can only annotate the top type (not type parameter)

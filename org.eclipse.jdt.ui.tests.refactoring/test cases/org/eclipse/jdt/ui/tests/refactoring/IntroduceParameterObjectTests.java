@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2015 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,7 +57,7 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 	}
 
 	private IPackageFragment fPack;
-	private IntroduceParameterObjectDescriptor fDescriptor;
+	protected IntroduceParameterObjectDescriptor fDescriptor;
 
 	public IntroduceParameterObjectTests(String name) {
 		super(name);
@@ -123,7 +123,7 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		return pack;
 	}
 
-	private void runRefactoring(boolean expectError, boolean useSuggestedMethod) throws Exception {
+	protected void runRefactoring(boolean expectError, boolean useSuggestedMethod) throws Exception {
 		RefactoringStatus status= performRefactoring(fDescriptor);
 		if (expectError) {
 			assertNotNull(status);
@@ -178,7 +178,7 @@ public class IntroduceParameterObjectTests extends RefactoringTest {
 		fPack= getPackageP();
 	}
 
-	private IMethod setupMethod() throws Exception, JavaModelException {
+	protected IMethod setupMethod() throws Exception, JavaModelException {
 		ICompilationUnit cu= createCUfromTestFile(fPack, getCUName(false), true);
 		IType type= cu.getType(getCUName(false));
 		assertNotNull(type);

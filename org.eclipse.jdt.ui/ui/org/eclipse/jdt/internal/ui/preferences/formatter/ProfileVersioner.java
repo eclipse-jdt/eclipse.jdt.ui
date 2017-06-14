@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,8 +40,9 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static final int VERSION_10= 10; // splitting options for annotation types
 	private static final int VERSION_11= 11; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=49412
 	private static final int VERSION_12= 12; // https://bugs.eclipse.org/318010
+	private static final int VERSION_13= 13; // https://bugs.eclipse.org/514019
 
-	private static final int CURRENT_VERSION= VERSION_12;
+	private static final int CURRENT_VERSION= VERSION_13;
 
 	@Override
 	public int getFirstVersion() {
@@ -99,6 +100,9 @@ public class ProfileVersioner implements IProfileVersioner {
 			//$FALL-THROUGH$
 		case VERSION_11 :
 			version11to12(oldSettings);
+			//$FALL-THROUGH$
+		case VERSION_12 :
+			version12to13(oldSettings);
 			//$FALL-THROUGH$
 		default:
 		    for (final Iterator<String> iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
@@ -616,8 +620,13 @@ public class ProfileVersioner implements IProfileVersioner {
 				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_TYPE
 		});
 	}
-	
-	
+
+	private static void version12to13(Map<String, String> oldSettings) {
+		oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_COUNT_LINE_LENGTH_FROM_STARTING_POSITION,
+				DefaultCodeFormatterConstants.FALSE);
+	}
+
+
 	/* old format constant values */
 
     private static final String FORMATTER_METHOD_DECLARATION_ARGUMENTS_ALIGNMENT = JavaCore.PLUGIN_ID + ".formatter.method_declaration_arguments_alignment"; //$NON-NLS-1$

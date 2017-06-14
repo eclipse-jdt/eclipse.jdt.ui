@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -68,6 +68,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -178,10 +179,11 @@ public class ParameterObjectFactory {
 	 * @param declaringType the fully qualified name of the type
 	 * @param cuRewrite the {@link CompilationUnitRewrite} that will be used for creation
 	 * @param listener the creation listener or null
+	 * @param context the import rewrite context or null
 	 * @return the new declaration
 	 * @throws CoreException if creation failed
 	 */
-	public TypeDeclaration createClassDeclaration(String declaringType, CompilationUnitRewrite cuRewrite, CreationListener listener) throws CoreException {
+	public TypeDeclaration createClassDeclaration(String declaringType, CompilationUnitRewrite cuRewrite, CreationListener listener, ImportRewriteContext context) throws CoreException {
 		AST ast= cuRewrite.getAST();
 		if (listener == null)
 			listener= new CreationListener();
@@ -191,7 +193,7 @@ public class ParameterObjectFactory {
 		for (Iterator<ParameterInfo> iter= fVariables.iterator(); iter.hasNext();) {
 			ParameterInfo pi= iter.next();
 			if (isValidField(pi)) {
-				FieldDeclaration declaration= createField(pi, cuRewrite);
+				FieldDeclaration declaration= createField(pi, cuRewrite, context);
 				listener.fieldCreated(cuRewrite, declaration, pi);
 				body.add(declaration);
 				ITypeBinding oldTypeBinding= pi.getOldTypeBinding();
@@ -202,18 +204,18 @@ public class ParameterObjectFactory {
 				}
 			}
 		}
-		MethodDeclaration constructor= createConstructor(declaringType, cuRewrite, listener);
+		MethodDeclaration constructor= createConstructor(declaringType, cuRewrite, listener, context);
 		listener.constructorCreated(cuRewrite, constructor);
 		body.add(constructor);
 		for (Iterator<ParameterInfo> iter= fVariables.iterator(); iter.hasNext();) {
 			ParameterInfo pi= iter.next();
 			if (fCreateGetter && isValidField(pi) && listener.isCreateGetter(pi)) {
-				MethodDeclaration getter= createGetter(pi, declaringType, cuRewrite);
+				MethodDeclaration getter= createGetter(pi, declaringType, cuRewrite, context);
 				listener.getterCreated(cuRewrite, getter, pi);
 				body.add(getter);
 			}
 			if (fCreateSetter && isValidField(pi) && listener.isCreateSetter(pi)) {
-				MethodDeclaration setter= createSetter(pi, declaringType, cuRewrite);
+				MethodDeclaration setter= createSetter(pi, declaringType, cuRewrite, context);
 				listener.setterCreated(cuRewrite, setter, pi);
 				body.add(setter);
 			}
@@ -222,7 +224,7 @@ public class ParameterObjectFactory {
 		return typeDeclaration;
 	}
 
-	private MethodDeclaration createConstructor(String declaringTypeName, CompilationUnitRewrite cuRewrite, CreationListener listener) throws CoreException {
+	private MethodDeclaration createConstructor(String declaringTypeName, CompilationUnitRewrite cuRewrite, CreationListener listener, ImportRewriteContext context) throws CoreException {
 		AST ast= cuRewrite.getAST();
 		ICompilationUnit unit= cuRewrite.getCu();
 		IJavaProject project= unit.getJavaProject();
@@ -269,7 +271,7 @@ public class ParameterObjectFactory {
 			String paramName= getParameterName(pi, project, usedParameter);
 			usedParameter.add(paramName);
 
-			Type fieldType= importBinding(typeBinding, cuRewrite);
+			Type fieldType= importBinding(typeBinding, cuRewrite, context, TypeLocation.PARAMETER);
 			svd.setType(fieldType);
 			svd.setName(ast.newSimpleName(paramName));
 			parameters.add(svd);
@@ -298,18 +300,18 @@ public class ParameterObjectFactory {
 	}
 
 
-	public static Type importBinding(ITypeBinding typeBinding, CompilationUnitRewrite cuRewrite) {
+	public static Type importBinding(ITypeBinding typeBinding, CompilationUnitRewrite cuRewrite, ImportRewriteContext context, TypeLocation typeLocation) {
 		int declaredModifiers= typeBinding.getModifiers();
 		AST ast= cuRewrite.getAST();
 		if (Modifier.isPrivate(declaredModifiers) || Modifier.isProtected(declaredModifiers)) {
 			return ast.newSimpleType(ast.newSimpleName(typeBinding.getName()));
 		}
-		Type type= cuRewrite.getImportRewrite().addImport(typeBinding, cuRewrite.getAST());
+		Type type= cuRewrite.getImportRewrite().addImport(typeBinding, cuRewrite.getAST(), context, typeLocation);
 		cuRewrite.getImportRemover().registerAddedImports(type);
 		return type;
 	}
 
-	private FieldDeclaration createField(ParameterInfo pi, CompilationUnitRewrite cuRewrite) throws CoreException {
+	private FieldDeclaration createField(ParameterInfo pi, CompilationUnitRewrite cuRewrite, ImportRewriteContext context) throws CoreException {
 		AST ast= cuRewrite.getAST();
 		ICompilationUnit unit= cuRewrite.getCu();
 
@@ -332,7 +334,7 @@ public class ParameterObjectFactory {
 			modifiers.add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 		}
 		declaration.modifiers().addAll(modifiers);
-		declaration.setType(importBinding(pi.getNewTypeBinding(), cuRewrite));
+		declaration.setType(importBinding(pi.getNewTypeBinding(), cuRewrite, context, TypeLocation.FIELD));
 		return declaration;
 	}
 
@@ -391,7 +393,7 @@ public class ParameterObjectFactory {
 		return fa;
 	}
 
-	private MethodDeclaration createGetter(ParameterInfo pi, String declaringType, CompilationUnitRewrite cuRewrite) throws CoreException {
+	private MethodDeclaration createGetter(ParameterInfo pi, String declaringType, CompilationUnitRewrite cuRewrite, ImportRewriteContext context) throws CoreException {
 		AST ast= cuRewrite.getAST();
 		ICompilationUnit cu= cuRewrite.getCu();
 		IJavaProject project= cu.getJavaProject();
@@ -407,7 +409,7 @@ public class ParameterObjectFactory {
 				methodDeclaration.setJavadoc((Javadoc) cuRewrite.getASTRewrite().createStringPlaceholder(comment, ASTNode.JAVADOC));
 		}
 		methodDeclaration.setName(ast.newSimpleName(getterName));
-		methodDeclaration.setReturnType2(importBinding(pi.getNewTypeBinding(), cuRewrite));
+		methodDeclaration.setReturnType2(importBinding(pi.getNewTypeBinding(), cuRewrite, context, TypeLocation.RETURN_TYPE));
 		methodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 		Block block= ast.newBlock();
 		methodDeclaration.setBody(block);
@@ -421,7 +423,7 @@ public class ParameterObjectFactory {
 		return methodDeclaration;
 	}
 
-	public ExpressionStatement createInitializer(ParameterInfo pi, String paramName, CompilationUnitRewrite cuRewrite) {
+	public ExpressionStatement createInitializer(ParameterInfo pi, String paramName, CompilationUnitRewrite cuRewrite, ImportRewriteContext context) {
 		AST ast= cuRewrite.getAST();
 
 		VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
@@ -429,14 +431,14 @@ public class ParameterObjectFactory {
 		fragment.setInitializer(createFieldReadAccess(pi, paramName, ast, cuRewrite.getCu().getJavaProject(), false, null));
 		VariableDeclarationExpression declaration= ast.newVariableDeclarationExpression(fragment);
 		IVariableBinding variable= pi.getOldBinding();
-		declaration.setType(importBinding(pi.getNewTypeBinding(), cuRewrite));
+		declaration.setType(importBinding(pi.getNewTypeBinding(), cuRewrite, context, TypeLocation.LOCAL_VARIABLE));
 		int modifiers= variable.getModifiers();
 		List<Modifier> newModifiers= ast.newModifiers(modifiers);
 		declaration.modifiers().addAll(newModifiers);
 		return ast.newExpressionStatement(declaration);
 	}
 
-	private MethodDeclaration createSetter(ParameterInfo pi, String declaringType, CompilationUnitRewrite cuRewrite) throws CoreException {
+	private MethodDeclaration createSetter(ParameterInfo pi, String declaringType, CompilationUnitRewrite cuRewrite, ImportRewriteContext context) throws CoreException {
 		AST ast= cuRewrite.getAST();
 		ICompilationUnit cu= cuRewrite.getCu();
 		IJavaProject project= cu.getJavaProject();
@@ -455,7 +457,7 @@ public class ParameterObjectFactory {
 		methodDeclaration.setName(ast.newSimpleName(setterName));
 		methodDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 		SingleVariableDeclaration variable= ast.newSingleVariableDeclaration();
-		variable.setType(importBinding(pi.getNewTypeBinding(), cuRewrite));
+		variable.setType(importBinding(pi.getNewTypeBinding(), cuRewrite, context, TypeLocation.PARAMETER));
 		variable.setName(ast.newSimpleName(paramName));
 		methodDeclaration.parameters().add(variable);
 		Block block= ast.newBlock();
@@ -646,12 +648,13 @@ public class ParameterObjectFactory {
 			CompilationUnit root= cuRewrite.getRoot();
 			AST ast= cuRewrite.getAST();
 			ImportRewrite importRewrite= cuRewrite.getImportRewrite();
+			ContextSensitiveImportRewriteContext context=new ContextSensitiveImportRewriteContext(root, cuRewrite.getImportRewrite());
 
 			// retrieve&replace dummy type with real class
 			ListRewrite types= rewriter.getListRewrite(root, CompilationUnit.TYPES_PROPERTY);
 			ASTNode dummyType= (ASTNode) types.getOriginalList().get(0);
 			String newTypeName= JavaModelUtil.concatenateName(getPackage(), getClassName());
-			TypeDeclaration classDeclaration= createClassDeclaration(newTypeName, cuRewrite, listener);
+			TypeDeclaration classDeclaration= createClassDeclaration(newTypeName, cuRewrite, listener, context);
 			classDeclaration.modifiers().add(ast.newModifier(ModifierKeyword.PUBLIC_KEYWORD));
 			Javadoc javadoc= (Javadoc) dummyType.getStructuralProperty(TypeDeclaration.JAVADOC_PROPERTY);
 			rewriter.set(classDeclaration, TypeDeclaration.JAVADOC_PROPERTY, javadoc, null);

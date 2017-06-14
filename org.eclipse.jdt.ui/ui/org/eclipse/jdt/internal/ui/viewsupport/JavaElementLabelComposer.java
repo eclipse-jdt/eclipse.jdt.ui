@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -582,7 +582,7 @@ public class JavaElementLabelComposer {
 		fBuffer.append(')');
 	}
 
-	private void appendAnnotationValue(IAnnotation annotation, Object value, int valueKind, long flags) throws JavaModelException {
+	public void appendAnnotationValue(IAnnotation annotation, Object value, int valueKind, long flags) throws JavaModelException {
 		// Note: To be bug-compatible with Javadoc from Java 5/6/7, we currently don't escape HTML tags in String-valued annotations.
 		if (value instanceof Object[]) {
 			fBuffer.append('{');

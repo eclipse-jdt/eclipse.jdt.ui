@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotatableType;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Dimension;
@@ -43,7 +44,9 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 
 /**
@@ -354,36 +357,29 @@ public class ASTNodeFactory {
 		return result;
 	}
 
+	/**
+	 * Create a Type suitable as the creationType in a ClassInstanceCreation expression.
+	 * @param ast The AST to create the nodes for.
+	 * @param typeBinding binding representing the given class type
+	 * @param importRewrite the import rewrite to use
+	 * @param importContext the import context used to determine which (null) annotations to consider
+	 * @return a Type suitable as the creationType in a ClassInstanceCreation expression.
+	 */
 	public static Type newCreationType(AST ast, ITypeBinding typeBinding, ImportRewrite importRewrite, ImportRewriteContext importContext) {
 		if (typeBinding.isParameterizedType()) {
 			Type baseType= newCreationType(ast, typeBinding.getTypeDeclaration(), importRewrite, importContext);
+			IAnnotationBinding[] typeAnnotations= importContext.removeRedundantTypeAnnotations(typeBinding.getTypeAnnotations(), TypeLocation.NEW, typeBinding);
+			for (IAnnotationBinding typeAnnotation : typeAnnotations) {
+				((AnnotatableType)baseType).annotations().add(importRewrite.addAnnotation(typeAnnotation, ast, importContext));
+			}
 			ParameterizedType parameterizedType= ast.newParameterizedType(baseType);
 			for (ITypeBinding typeArgument : typeBinding.getTypeArguments()) {
-				parameterizedType.typeArguments().add(newCreationType(ast, typeArgument, importRewrite, importContext));
+				typeArgument= StubUtility2.replaceWildcardsAndCaptures(typeArgument);
+				parameterizedType.typeArguments().add(importRewrite.addImport(typeArgument, ast, importContext, TypeLocation.TYPE_ARGUMENT));
 			}
 			return parameterizedType;
-			
-		} else if (typeBinding.isParameterizedType()) {
-			Type elementType= newCreationType(ast, typeBinding.getElementType(), importRewrite, importContext);
-			ArrayType arrayType= ast.newArrayType(elementType, 0);
-			while (typeBinding.isArray()) {
-				Dimension dimension= ast.newDimension();
-				IAnnotationBinding[] typeAnnotations= typeBinding.getTypeAnnotations();
-				for (IAnnotationBinding typeAnnotation : typeAnnotations) {
-					dimension.annotations().add(importRewrite.addAnnotation(typeAnnotation, ast, importContext));
-				}
-				arrayType.dimensions().add(dimension);
-				typeBinding= typeBinding.getComponentType();
-			}
-			return arrayType;
-				
-		} else if (typeBinding.isWildcardType()) {
-			ITypeBinding bound= typeBinding.getBound();
-			typeBinding= (bound != null) ? bound : typeBinding.getErasure();
-			return newCreationType(ast, typeBinding, importRewrite, importContext);
-			
 		} else {
-			return importRewrite.addImport(typeBinding, ast, importContext);
+			return importRewrite.addImport(typeBinding, ast, importContext, TypeLocation.NEW);
 		}
 	}
 }
