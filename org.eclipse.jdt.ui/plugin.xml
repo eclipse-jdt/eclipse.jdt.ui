@@ -180,7 +180,11 @@
       <classpathAttributeConfiguration
             attributeName="annotationpath"
             class="org.eclipse.jdt.internal.ui.wizards.buildpaths.ExternalAnnotationsAttributeConfiguration">
-      </classpathAttributeConfiguration>      
+      </classpathAttributeConfiguration>
+      <classpathAttributeConfiguration
+      		attributeName="module"
+            class="org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleAttributeConfiguration">
+      </classpathAttributeConfiguration>
    </extension>
 
 	<!-- Not used to create markers but to allow registering a    -->

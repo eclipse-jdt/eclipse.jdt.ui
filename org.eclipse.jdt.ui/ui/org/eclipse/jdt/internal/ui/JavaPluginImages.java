@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Ferenc Hechler, ferenc_hechler@users.sourceforge.net - 83258 [jar exporter] Deploy java application as executable jar
@@ -301,6 +305,8 @@ public class JavaPluginImages {
     public static final ImageDescriptor DESC_OBJS_OUTPUT_FOLDER_ATTRIB= createUnManaged(T_OBJ, "output_folder_attrib.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_SOURCE_ATTACH_ATTRIB= createUnManaged(T_OBJ, "source_attach_attrib.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_JAVADOC_LOCATION_ATTRIB= createUnManaged(T_OBJ, "javadoc_location_attrib.png"); //$NON-NLS-1$
+
+	public static final ImageDescriptor DESC_OBJS_MODULE_ATTRIB= createUnManaged(T_OBJ, "module_obj.png"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_EXTERNAL_ANNOTATION_LOCATION_ATTRIB= createManagedFromKey(T_OBJ, IMG_OBJS_EXTERNAL_ANNOTATIONS);
 

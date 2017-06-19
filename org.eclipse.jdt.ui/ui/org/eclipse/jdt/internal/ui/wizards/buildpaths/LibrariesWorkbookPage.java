@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contribution for Bug 465293 - External annotation path per container and project
@@ -623,6 +627,14 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	 * @param field  the dilaog field
 	 */
 	private void libaryPageSelectionChanged(DialogField field) {
+		List<Object> selected= fLibrariesList.getSelectedElements();
+		boolean isModuleAttribute= selected.size() == 1
+				&& selected.get(0) instanceof CPListElementAttribute
+				&& CPListElement.MODULE.equals(((CPListElementAttribute) selected.get(0)).getKey());
+		fLibrariesList.getButton(IDX_EDIT).setText(isModuleAttribute
+				? NewWizardMessages.SourceContainerWorkbookPage_folders_toggle_button
+				: NewWizardMessages.LibrariesWorkbookPage_libraries_edit_button);
+
 		updateEnabledState();
 	}
 
@@ -724,7 +736,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					IPath curr= selected[i];
 					IResource resource= root.findMember(curr);
 					if (resource instanceof IContainer) {
-						res.add(newCPLibraryElement(resource));
+						CPListElement newCPLibraryElement= newCPLibraryElement(resource);
+						newCPLibraryElement.setModuleAttributeIf9OrHigher(fCurrJProject);
+						res.add(newCPLibraryElement);
 					}
 				}
 				return res.toArray(new CPListElement[res.size()]);
@@ -747,7 +761,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					IPath curr= selected[i];
 					IResource resource= root.findMember(curr);
 					if (resource instanceof IFile) {
-						res.add(newCPLibraryElement(resource));
+						CPListElement newCPLibraryElement= newCPLibraryElement(resource);
+						newCPLibraryElement.setModuleAttributeIf9OrHigher(fCurrJProject);
+						res.add(newCPLibraryElement);
 					}
 				}
 				return res.toArray(new CPListElement[res.size()]);
@@ -816,7 +832,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (selected != null) {
 				ArrayList<CPListElement> res= new ArrayList<>();
 				for (int i= 0; i < selected.length; i++) {
-					res.add(new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, selected[i], null));
+					CPListElement cpListElement= new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, selected[i], null);
+					cpListElement.setModuleAttributeIf9OrHigher(fCurrJProject);
+					res.add(cpListElement);
 				}
 				return res.toArray(new CPListElement[res.size()]);
 			}
@@ -841,7 +859,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (selected != null) {
 				ArrayList<CPListElement> res= new ArrayList<>();
 				for (int i= 0; i < selected.length; i++) {
-					res.add(new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, selected[i], null));
+					CPListElement cpListElement= new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, selected[i], null);
+					cpListElement.setModuleAttributeIf9OrHigher(fCurrJProject);
+					res.add(cpListElement);
 				}
 				return res.toArray(new CPListElement[res.size()]);
 			}
@@ -873,6 +893,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					IPath path= paths[i];
 					CPListElement elem= createCPVariableElement(path);
 					if (!existingElements.contains(elem)) {
+						elem.setModuleAttributeIf9OrHigher(fCurrJProject);
 						result.add(elem);
 					}
 				}

@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Frits Jalvingh <jal@etc.to> - Contribution for Bug 459831 - [launching] Support attaching external annotations to a JRE container
@@ -59,6 +63,7 @@ public class CPListElement {
 	public static final String SOURCE_ATTACHMENT_ENCODING= IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING;
 	public static final String IGNORE_OPTIONAL_PROBLEMS= IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS;
 	public static final String NATIVE_LIB_PATH= JavaRuntime.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY;
+	public static final String MODULE= IClasspathAttribute.AUTOMATIC_MODULE;
 
 	private IJavaProject fProject;
 
@@ -124,6 +129,7 @@ public class CPListElement {
 				createAttributeElement(SOURCEATTACHMENT, null, true);
 				createAttributeElement(JAVADOC, null, false);
 				createAttributeElement(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH, null, false);
+				createAttributeElement(MODULE, null, false);
 				createAttributeElement(SOURCE_ATTACHMENT_ENCODING, null, false);
 				createAttributeElement(NATIVE_LIB_PATH, null, false);
 				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
@@ -864,4 +870,15 @@ public class CPListElement {
 		}
     }
 
+	void setModuleAttributeIf9OrHigher(IJavaProject project) {
+		if (!JavaModelUtil.is9OrHigher(project)) {
+			return;
+		}
+		CPListElementAttribute moduleAttribute= findAttributeElement(MODULE);
+		if (moduleAttribute == null) {
+			createAttributeElement(MODULE, ModuleAttributeConfiguration.TRUE, false);
+		} else {
+			moduleAttribute.setValue(ModuleAttributeConfiguration.TRUE);
+		}
+	}
 }
