@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.jdt.astview.views;
 
 import java.util.ArrayList;
+import java.util.function.Function;
 
 import org.eclipse.jdt.astview.ASTViewPlugin;
 
@@ -23,6 +24,7 @@ import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IModuleBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -248,6 +250,21 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "IS DEFAULT", memberValuePairBinding.isDefault(), true));
 					res.add(Binding.createValueAttribute(this, "VALUE", memberValuePairBinding.getValue()));
 					break;
+				
+				case IBinding.MODULE:
+					IModuleBinding moduleBinding= (IModuleBinding) fBinding;
+					res.add(new BindingProperty(this, "REQUIRED MODULES", moduleBinding.getRequiredModules(), true));
+					res.add(createPropertiesWithSecondary(moduleBinding.getExportedPackages(), "EXPORTED PACKAGES", "PACKAGE", "TO",
+							moduleBinding::getExportedTo));
+					res.add(createPropertiesWithSecondary(moduleBinding.getOpenedPackages(), "OPENED PACKAGES", "PACKAGE", "TO",
+							moduleBinding::getOpenedTo));
+					res.add(new BindingProperty(this, "USES", moduleBinding.getUses(), true));
+					res.add(createPropertiesWithSecondary(moduleBinding.getServices(), "SERVICES", "PROVIDES", "WITH",
+							moduleBinding::getImplementations));
+					break;
+					
+				default:
+					break;
 			}
 			try {
 				IAnnotationBinding[] annotations= fBinding.getAnnotations();
@@ -268,6 +285,32 @@ public class Binding extends ASTAttribute {
 			return res.toArray();
 		}
 		return EMPTY;
+	}
+
+	private <T extends IBinding> BindingProperty createPropertiesWithSecondary(T[] bindings, String propertiesName, String propertyName, String secondaryName,
+			Function<T, Object[]> secondaryAccessor) {
+		int count= bindings.length;
+		ASTAttribute[] attributes= new ASTAttribute[count * 2];
+		BindingProperty property= new BindingProperty(this, propertiesName, attributes, true) {
+			@Override
+			public String getLabel() {
+				return propertiesName + " (" + count + ")";
+			}
+		};
+		for (int i= 0; i < count; i++) {
+			attributes[i * 2]= new Binding(this, propertyName, bindings[i], true);
+			Object[] secondaryPropertyValues= secondaryAccessor.apply(bindings[i]);
+			if (secondaryPropertyValues instanceof IBinding[]) {
+				attributes[i * 2 + 1]= new BindingProperty(this, secondaryName, (IBinding[]) secondaryPropertyValues, true);
+			} else {
+				GeneralAttribute[] secondaryProperties= new GeneralAttribute[secondaryPropertyValues.length];
+				for (int j= 0; j < secondaryProperties.length; j++) {
+					secondaryProperties[j]= new GeneralAttribute(property, String.valueOf(j), String.valueOf(secondaryPropertyValues[j]));
+				}
+				attributes[i * 2 + 1]= new BindingProperty(this, secondaryName, secondaryProperties, true);
+			}
+		}
+		return property;
 	}
 
 	private final static int ARRAY_TYPE= 1 << 0;
@@ -344,6 +387,8 @@ public class Binding extends ASTAttribute {
 				case IBinding.MEMBER_VALUE_PAIR:
 					buf.append(fBinding.toString());
 					break;
+				case IBinding.MODULE:
+					buf.append(fBinding.getName());
 			}
 			
 		} else {
@@ -443,6 +488,9 @@ public class Binding extends ASTAttribute {
 					break;
 				case IBinding.MEMBER_VALUE_PAIR:
 					label= "> member value pair binding"; //$NON-NLS-1$
+					break;
+				case IBinding.MODULE:
+					label= "> module binding"; //$NON-NLS-1$
 					break;
 				default:
 					label= "> unknown binding"; //$NON-NLS-1$
