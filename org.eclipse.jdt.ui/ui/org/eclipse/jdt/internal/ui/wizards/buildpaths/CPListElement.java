@@ -135,6 +135,7 @@ public class CPListElement {
 				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
 				break;
 			case IClasspathEntry.CPE_PROJECT:
+				createAttributeElement(MODULE, null, false);
 				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
 				createAttributeElement(COMBINE_ACCESSRULES, Boolean.FALSE, true); // not rendered
 				createAttributeElement(NATIVE_LIB_PATH, null, false);

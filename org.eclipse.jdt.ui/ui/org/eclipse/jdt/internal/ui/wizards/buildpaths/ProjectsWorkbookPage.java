@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -379,6 +383,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			if (editCustomAttribute(getShell(), elem)) {
 				fProjectsList.refresh();
 				fClassPathList.dialogFieldChanged(); // validate
+				fProjectsList.postSetSelection(new StructuredSelection(elem));
 			}
 		}
 	}
@@ -420,7 +425,9 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				CPListElement[] cpElements= new CPListElement[result.length];
 				for (int i= 0; i < result.length; i++) {
 					IJavaProject curr= (IJavaProject) result[i];
-					cpElements[i]= new CPListElement(fCurrJProject, IClasspathEntry.CPE_PROJECT, curr.getPath(), curr.getResource());
+					CPListElement cpListElement= new CPListElement(fCurrJProject, IClasspathEntry.CPE_PROJECT, curr.getPath(), curr.getResource());
+					cpListElement.setModuleAttributeIf9OrHigher(fCurrJProject);
+					cpElements[i]= cpListElement;
 				}
 				return cpElements;
 			}
@@ -481,6 +488,14 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	 */
 	private void projectPageSelectionChanged(DialogField field) {
 		List<Object> selElements= fProjectsList.getSelectedElements();
+
+		boolean isModuleAttribute= selElements.size() == 1
+				&& selElements.get(0) instanceof CPListElementAttribute
+				&& CPListElement.MODULE.equals(((CPListElementAttribute) selElements.get(0)).getKey());
+		fProjectsList.getButton(IDX_EDIT).setText(isModuleAttribute
+				? NewWizardMessages.SourceContainerWorkbookPage_folders_toggle_button
+				: NewWizardMessages.ProjectsWorkbookPage_projects_edit_button);
+
 		fProjectsList.enableButton(IDX_EDIT, canEdit(selElements));
 		fProjectsList.enableButton(IDX_REMOVE, canRemove(selElements));
 
