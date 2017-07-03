@@ -338,6 +338,7 @@ public final class NewWizardMessages extends NLS {
 	public static String ProjectsWorkbookPage_projects_label;
 	public static String ProjectsWorkbookPage_projects_add_button;
 	public static String ProjectsWorkbookPage_projects_edit_button;
+	public static String ProjectsWorkbookPage_projects_toggle_button;
 	public static String ProjectsWorkbookPage_projects_remove_button;
 	public static String ProjectsWorkbookPage_chooseProjects_message;
 	public static String ProjectsWorkbookPage_chooseProjects_title;
@@ -354,6 +355,7 @@ public final class NewWizardMessages extends NLS {
 	public static String LibrariesWorkbookPage_configurecontainer_error_title;
 	public static String LibrariesWorkbookPage_configurecontainer_error_message;
 	public static String LibrariesWorkbookPage_libraries_edit_button;
+	public static String LibrariesWorkbookPage_libraries_toggle_button;
 	public static String LibrariesWorkbookPage_NewClassFolderDialog_new_title;
 	public static String LibrariesWorkbookPage_NewClassFolderDialog_edit_title;
 	public static String LibrariesWorkbookPage_NewClassFolderDialog_description;
@@ -696,6 +698,12 @@ public final class NewWizardMessages extends NLS {
 	public static String NewSourceFolderDialog_usefolder_button;
 	public static String NewSourceFolderDialog_sourcefolder_label;
 
+	public static String CPListLabelProvider_test_sources_label;
+	public static String CPListLabelProvider_test_dependency_label;
+	public static String CPListLabelProvider_without_test_code_label;
+	public static String CPListLabelProvider_test_yes;
+	public static String CPListLabelProvider_test_no;
+	
 	public static String HintTextGroup_NoAction;
 
 	public static String NewSourceContainerWorkbookPage_HintTextGroup_title;

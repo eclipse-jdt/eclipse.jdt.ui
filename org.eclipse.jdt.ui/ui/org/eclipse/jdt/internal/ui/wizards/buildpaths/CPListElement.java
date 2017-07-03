@@ -66,6 +66,8 @@ public class CPListElement {
 	public static final String JAVADOC= IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME;
 	public static final String SOURCE_ATTACHMENT_ENCODING= IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING;
 	public static final String IGNORE_OPTIONAL_PROBLEMS= IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS;
+	public static final String TEST= IClasspathAttribute.TEST;
+	public static final String WITHOUT_TEST_CODE= IClasspathAttribute.WITHOUT_TEST_CODE;
 	public static final String NATIVE_LIB_PATH= JavaRuntime.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY;
 	public static final String MODULE= IClasspathAttribute.MODULE;
 
@@ -133,6 +135,7 @@ public class CPListElement {
 				createAttributeElement(EXCLUSION, new Path[0], true);
 				createAttributeElement(NATIVE_LIB_PATH, null, false);
 				createAttributeElement(IGNORE_OPTIONAL_PROBLEMS, null, false);
+				createAttributeElement(TEST, null, false);
 				break;
 			case IClasspathEntry.CPE_LIBRARY:
 			case IClasspathEntry.CPE_VARIABLE:
@@ -143,12 +146,15 @@ public class CPListElement {
 				createAttributeElement(SOURCE_ATTACHMENT_ENCODING, null, false);
 				createAttributeElement(NATIVE_LIB_PATH, null, false);
 				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
+				createAttributeElement(TEST, null, false);
 				break;
 			case IClasspathEntry.CPE_PROJECT:
 				createAttributeElement(MODULE, null, true);
 				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
 				createAttributeElement(COMBINE_ACCESSRULES, Boolean.FALSE, true); // not rendered
 				createAttributeElement(NATIVE_LIB_PATH, null, false);
+				createAttributeElement(TEST, null, false);
+				createAttributeElement(WITHOUT_TEST_CODE, null, false);
 				break;
 			case IClasspathEntry.CPE_CONTAINER:
 				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
@@ -157,6 +163,9 @@ public class CPListElement {
 				try {
 					IClasspathContainer container= JavaCore.getClasspathContainer(fPath, fProject);
 					if (container != null) {
+						if (container.getKind() == IClasspathContainer.K_APPLICATION) {
+							createAttributeElement(TEST, null, false);
+						}
 						IClasspathEntry[] entries= container.getClasspathEntries();
 						if (entries != null) { // catch invalid container implementation
 							if (entries.length == 1) {

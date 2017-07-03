@@ -51,6 +51,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
@@ -1035,6 +1036,21 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 
 	protected void doSelectionChanged(TreeListDialogField<CPUserLibraryElement> field) {
 		List<Object> list= field.getSelectedElements();
+		String text;
+		if (list.size() == 1
+				&& list.get(0) instanceof CPListElementAttribute) {
+			String key= ((CPListElementAttribute) list.get(0)).getKey();
+			if (CPListElement.TEST.equals(key) || CPListElement.WITHOUT_TEST_CODE.equals(key)) {
+				text= PreferencesMessages.UserLibraryPreferencePage_libraries_toggle_button;
+			} else {
+				text= PreferencesMessages.UserLibraryPreferencePage_libraries_edit_button;
+			}
+		} else {
+			text= PreferencesMessages.UserLibraryPreferencePage_libraries_edit_button;
+		}
+		Button editButton= field.getButton(IDX_EDIT);
+		if (editButton != null)
+			editButton.setText(text);
 		field.enableButton(IDX_REMOVE, canRemove(list));
 		field.enableButton(IDX_EDIT, canEdit(list));
 		field.enableButton(IDX_ADD, canAdd(list));

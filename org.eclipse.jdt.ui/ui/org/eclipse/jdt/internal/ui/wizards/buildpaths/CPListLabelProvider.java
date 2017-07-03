@@ -267,6 +267,24 @@ public class CPListLabelProvider extends LabelProvider {
 			} else {
 				return NewWizardMessages.CPListLabelProvider_not_modular_label;
 			}
+		} else if (key.equals(CPListElement.TEST)) {
+			String arg;
+			if ("true".equals(attrib.getValue())) { //$NON-NLS-1$
+				arg= NewWizardMessages.CPListLabelProvider_test_yes;
+			} else {
+				arg= NewWizardMessages.CPListLabelProvider_test_no;
+			}
+			return Messages.format(attrib.getParent().getEntryKind() == IClasspathEntry.CPE_SOURCE
+					? NewWizardMessages.CPListLabelProvider_test_sources_label
+					: NewWizardMessages.CPListLabelProvider_test_dependency_label, arg);
+		} else if (key.equals(CPListElement.WITHOUT_TEST_CODE)) {
+			String arg;
+			if ("true".equals(attrib.getValue())) { //$NON-NLS-1$
+				arg= NewWizardMessages.CPListLabelProvider_test_yes;
+			} else {
+				arg= NewWizardMessages.CPListLabelProvider_test_no;
+			}
+			return Messages.format(NewWizardMessages.CPListLabelProvider_without_test_code_label, arg);
 		} else {
 			ClasspathAttributeConfiguration config= fAttributeDescriptors.get(key);
 			if (config != null) {

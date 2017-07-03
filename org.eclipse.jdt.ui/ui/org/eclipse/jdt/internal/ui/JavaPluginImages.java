@@ -306,6 +306,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_JAVADOC_LOCATION_ATTRIB= createUnManaged(T_OBJ, "javadoc_location_attrib.png"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_MODULE_ATTRIB= createUnManaged(T_OBJ, "module_attrib.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OBJS_TEST_ATTRIB= createUnManaged(T_OBJ, "test_attrib.png"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_EXTERNAL_ANNOTATION_LOCATION_ATTRIB= createManagedFromKey(T_OBJ, IMG_OBJS_EXTERNAL_ANNOTATIONS);
 

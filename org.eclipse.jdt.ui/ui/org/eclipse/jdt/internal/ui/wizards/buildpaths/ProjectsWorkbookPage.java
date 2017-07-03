@@ -724,6 +724,20 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	private void projectPageSelectionChanged(DialogField field) {
 		List<Object> selElements= fProjectsList.getSelectedElements();
 
+		String text;
+		if (selElements.size() == 1
+				&& selElements.get(0) instanceof CPListElementAttribute) {
+			String key= ((CPListElementAttribute) selElements.get(0)).getKey();
+			if (CPListElement.TEST.equals(key) || CPListElement.WITHOUT_TEST_CODE.equals(key)) {
+				text= NewWizardMessages.ProjectsWorkbookPage_projects_toggle_button;
+			} else {
+				text= NewWizardMessages.ProjectsWorkbookPage_projects_edit_button;
+			}
+		} else {
+			text= NewWizardMessages.ProjectsWorkbookPage_projects_edit_button;
+		}
+		fProjectsList.getButton(IDX_EDIT).setText(text);
+
 		fProjectsList.enableButton(IDX_EDIT, canEdit(selElements));
 		fProjectsList.enableButton(IDX_REMOVE, canRemove(selElements));
 

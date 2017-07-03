@@ -173,6 +173,14 @@
             class="org.eclipse.jdt.internal.ui.wizards.buildpaths.NativeLibAttributeConfiguration">
       </classpathAttributeConfiguration>
       <classpathAttributeConfiguration
+            attributeName="test"
+            class="org.eclipse.jdt.internal.ui.wizards.buildpaths.TestAttributeConfiguration">
+      </classpathAttributeConfiguration>
+      <classpathAttributeConfiguration
+            attributeName="without_test_code"
+            class="org.eclipse.jdt.internal.ui.wizards.buildpaths.WithoutTestCodeAttributeConfiguration">
+      </classpathAttributeConfiguration>
+      <classpathAttributeConfiguration
             attributeName="annotationpath"
             class="org.eclipse.jdt.internal.ui.wizards.buildpaths.ExternalAnnotationsAttributeConfiguration">
       </classpathAttributeConfiguration>

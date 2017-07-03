@@ -1000,6 +1000,20 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	 * @param field  the dilaog field
 	 */
 	private void libaryPageSelectionChanged(DialogField field) {
+		List<Object> selected= fLibrariesList.getSelectedElements();
+		String text;
+		if (selected.size() == 1
+				&& selected.get(0) instanceof CPListElementAttribute) {
+			String key= ((CPListElementAttribute) selected.get(0)).getKey();
+			if (CPListElement.TEST.equals(key) || CPListElement.WITHOUT_TEST_CODE.equals(key)) {
+				text= NewWizardMessages.LibrariesWorkbookPage_libraries_toggle_button;
+			} else {
+				text= NewWizardMessages.LibrariesWorkbookPage_libraries_edit_button;
+			}
+		} else {
+			text= NewWizardMessages.LibrariesWorkbookPage_libraries_edit_button;
+		}
+		fLibrariesList.getButton(IDX_EDIT).setText(text);
 		updateEnabledState();
 	}
 

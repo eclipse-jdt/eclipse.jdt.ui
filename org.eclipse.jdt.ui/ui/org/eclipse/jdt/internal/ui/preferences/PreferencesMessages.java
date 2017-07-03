@@ -672,6 +672,7 @@ public final class PreferencesMessages extends NLS {
 	public static String UserLibraryPreferencePage_libraries_label;
 	public static String UserLibraryPreferencePage_libraries_new_button;
 	public static String UserLibraryPreferencePage_libraries_edit_button;
+	public static String UserLibraryPreferencePage_libraries_toggle_button;
 	public static String UserLibraryPreferencePage_libraries_addjar_button;
 	public static String UserLibraryPreferencePage_libraries_addexternaljar_button;
 	public static String UserLibraryPreferencePage_libraries_remove_button;

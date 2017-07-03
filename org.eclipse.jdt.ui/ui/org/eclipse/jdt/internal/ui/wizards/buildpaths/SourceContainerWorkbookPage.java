@@ -436,6 +436,15 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			String newValue= "true".equals(elem.getValue()) ? null : "true"; //$NON-NLS-1$ //$NON-NLS-2$
 			elem.setValue(newValue);
 			fFoldersList.refresh(elem);
+		} else if (key.equals(CPListElement.TEST)) {
+			String newValue= "true".equals(elem.getValue()) ? null : "true"; //$NON-NLS-1$ //$NON-NLS-2$
+			elem.setValue(newValue);
+			fFoldersList.refresh(elem);
+			fClassPathList.dialogFieldChanged(); // validate
+		} else if (key.equals(CPListElement.WITHOUT_TEST_CODE)) {
+			String newValue= "true".equals(elem.getValue()) ? null : "true"; //$NON-NLS-1$ //$NON-NLS-2$
+			elem.setValue(newValue);
+			fFoldersList.refresh(elem);
 		} else {
 			if (editCustomAttribute(getShell(), elem)) {
 				fFoldersList.refresh();
@@ -452,7 +461,13 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		boolean isIgnoreOptionalProblems= selected.size() == 1
 				&& selected.get(0) instanceof CPListElementAttribute
 				&& CPListElement.IGNORE_OPTIONAL_PROBLEMS.equals(((CPListElementAttribute) selected.get(0)).getKey());
-		fFoldersList.getButton(IDX_EDIT).setText(isIgnoreOptionalProblems
+		boolean isTest= selected.size() == 1
+				&& selected.get(0) instanceof CPListElementAttribute
+				&& CPListElement.TEST.equals(((CPListElementAttribute) selected.get(0)).getKey());
+		boolean isWithoutTestCode= selected.size() == 1
+				&& selected.get(0) instanceof CPListElementAttribute
+				&& CPListElement.WITHOUT_TEST_CODE.equals(((CPListElementAttribute) selected.get(0)).getKey());
+		fFoldersList.getButton(IDX_EDIT).setText((isIgnoreOptionalProblems||isTest||isWithoutTestCode)
 				? NewWizardMessages.SourceContainerWorkbookPage_folders_toggle_button
 				: NewWizardMessages.SourceContainerWorkbookPage_folders_edit_button);
 		fFoldersList.enableButton(IDX_EDIT, canEdit(selected));
