@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -24,10 +28,12 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -44,6 +50,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
@@ -51,7 +58,6 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder {
@@ -196,32 +202,45 @@ public class MethodExitsFinder extends ASTVisitor implements IOccurrencesFinder 
 		}
 		node.getBody().accept(this);
 
-		List<VariableDeclarationExpression> resources= node.resources();
-		for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
+		List<Expression> resources= node.resources();
+		for (Iterator<Expression> iterator= resources.iterator(); iterator.hasNext();) {
 			iterator.next().accept(this);
 		}
 
 		//check if the method could exit as a result of resource#close()
 		boolean exitMarked= false;
-		for (VariableDeclarationExpression variable : resources) {
-			Type type= variable.getType();
-			IMethodBinding methodBinding= Bindings.findMethodInHierarchy(type.resolveBinding(), "close", new ITypeBinding[0]); //$NON-NLS-1$
-			if (methodBinding != null) {
-				ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
-				for (int j= 0; j < exceptionTypes.length; j++) {
-					if (isExitPoint(exceptionTypes[j])) { // a close() throws an uncaught exception
-						// mark name of resource
-						for (VariableDeclarationFragment fragment : (List<VariableDeclarationFragment>) variable.fragments()) {
-							SimpleName name= fragment.getName();
-							fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fExitDescription));
-						}
-						if (!exitMarked) {
-							// mark exit position
-							exitMarked= true;
-							Block body= node.getBody();
-							int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
-							fResult.add(new OccurrenceLocation(offset, 1, 0, Messages.format(SearchMessages.MethodExitsFinder_occurrence_exit_impclict_close_description,
-									BasicElementLabels.getJavaElementName(fMethodDeclaration.getName().toString()))));
+		for (Expression variable : resources) {
+			ITypeBinding typeBinding= null;
+			if (variable instanceof VariableDeclarationExpression) {
+				typeBinding= ((VariableDeclarationExpression) variable).getType().resolveBinding();
+			} else if (variable instanceof Name) {
+				typeBinding= ((Name) variable).resolveTypeBinding();
+			}
+			if (typeBinding != null) {
+				IMethodBinding methodBinding= Bindings.findMethodInHierarchy(typeBinding, "close", new ITypeBinding[0]); //$NON-NLS-1$
+				if (methodBinding != null) {
+					ITypeBinding[] exceptionTypes= methodBinding.getExceptionTypes();
+					for (int j= 0; j < exceptionTypes.length; j++) {
+						if (isExitPoint(exceptionTypes[j])) { // a close() throws an uncaught exception
+							// mark name of resource
+							if (variable instanceof VariableDeclarationExpression) {
+								VariableDeclarationExpression varDeclExpr= (VariableDeclarationExpression) variable;
+								for (VariableDeclarationFragment fragment : (List<VariableDeclarationFragment>) varDeclExpr.fragments()) {
+									SimpleName name= fragment.getName();
+									fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fExitDescription));
+								}
+							} else if (variable instanceof Name) {
+								Name name= (Name) variable;
+								fResult.add(new OccurrenceLocation(name.getStartPosition(), name.getLength(), 0, fExitDescription));
+							}
+							if (!exitMarked) {
+								// mark exit position
+								exitMarked= true;
+								Block body= node.getBody();
+								int offset= body.getStartPosition() + body.getLength() - 1; // closing bracket of try block
+								fResult.add(new OccurrenceLocation(offset, 1, 0, Messages.format(SearchMessages.MethodExitsFinder_occurrence_exit_impclict_close_description,
+										BasicElementLabels.getJavaElementName(fMethodDeclaration.getName().toString()))));
+							}
 						}
 					}
 				}

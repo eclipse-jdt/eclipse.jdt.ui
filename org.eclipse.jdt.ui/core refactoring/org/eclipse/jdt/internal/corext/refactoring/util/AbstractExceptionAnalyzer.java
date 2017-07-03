@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -22,6 +26,7 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -99,8 +104,8 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 		// visit try block
 		node.getBody().accept(this);
 
-		List<VariableDeclarationExpression> resources= node.resources();
-		for (Iterator<VariableDeclarationExpression> iterator= resources.iterator(); iterator.hasNext();) {
+		List<Expression> resources= node.resources();
+		for (Iterator<Expression> iterator= resources.iterator(); iterator.hasNext();) {
 			iterator.next().accept(this);
 		}
 
@@ -127,7 +132,7 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 
 	@Override
 	public boolean visit(VariableDeclarationExpression node) {
-		if (node.getLocationInParent() == TryStatement.RESOURCES_PROPERTY) {
+		if (node.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
 			Type type= node.getType();
 			ITypeBinding resourceTypeBinding= type.resolveBinding();
 			if (resourceTypeBinding != null) {

@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -18,7 +22,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.dom.*;
 
 public class ASTFlattener extends GenericVisitor {
-/* 
+/*
  * XXX: Keep in sync with org.eclipse.jdt.internal.core.dom.NaiveASTFlattener:
  * Rename NaiveASTFlattener#buffer to fBuffer, compare with this class, focus on structural changes
  */
@@ -671,7 +675,7 @@ public class ASTFlattener extends GenericVisitor {
 		printReferenceTypeArguments(node.typeArguments());
 		node.getName().accept(this);
 		return false;
-	}	
+	}
 
 	/*
 	 * @see ASTVisitor#visit(ExpressionStatement)
@@ -1045,7 +1049,7 @@ public class ASTFlattener extends GenericVisitor {
 			}
 		}
 		List<? extends ASTNode> thrownExceptions= node.getAST().apiLevel() >= JLS8 ? node.thrownExceptionTypes() : getThrownExceptions(node);
-		if (!thrownExceptions.isEmpty()) {				
+		if (!thrownExceptions.isEmpty()) {
 			this.fBuffer.append(" throws ");//$NON-NLS-1$
 			for (Iterator<? extends ASTNode> it= thrownExceptions.iterator(); it.hasNext();) {
 				ASTNode n = it.next();
@@ -1649,8 +1653,8 @@ public class ASTFlattener extends GenericVisitor {
 		if (node.getAST().apiLevel() >= JLS4) {
 			if (!node.resources().isEmpty()) {
 				this.fBuffer.append("(");//$NON-NLS-1$
-				for (Iterator<VariableDeclarationExpression> it= node.resources().iterator(); it.hasNext();) {
-					VariableDeclarationExpression var= it.next();
+				for (Iterator<Expression> it= node.resources().iterator(); it.hasNext();) {
+					Expression var= it.next();
 					var.accept(this);
 					if (it.hasNext()) {
 						this.fBuffer.append(",");//$NON-NLS-1$
