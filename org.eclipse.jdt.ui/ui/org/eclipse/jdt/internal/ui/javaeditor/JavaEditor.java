@@ -1,15 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Tom Eicher <eclipse@tom.eicher.name> - [formatting] 'Format Element' in JavaDoc does also format method body - https://bugs.eclipse.org/bugs/show_bug.cgi?id=238746
  *     Tom Eicher (Avaloq Evolution AG) - block selection mode
- *     Stefan Xenos (sxenos@gmail.com) - bug 306646, make editor margins follow the java formatter preference 
+ *     Stefan Xenos (sxenos@gmail.com) - bug 306646, make editor margins follow the java formatter preference
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
@@ -185,6 +189,9 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.util.IModifierConstants;
 
+import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder;
+import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
+import org.eclipse.jdt.internal.core.manipulation.search.OccurrencesFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -218,11 +225,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPr
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
-import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder;
-import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.ui.search.ImplementOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
-import org.eclipse.jdt.internal.core.manipulation.search.OccurrencesFinder;
 import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
 import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
@@ -3433,6 +3437,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (fMarkMethodOccurrences && kind == IBinding.METHOD)
 			return true;
 
+		if (fMarkMethodOccurrences && kind == IBinding.MODULE)
+			return true;
+
 		if (kind == IBinding.VARIABLE) {
 			IVariableBinding variableBinding= (IVariableBinding)binding;
 			if (variableBinding.isField()) {
@@ -3494,7 +3501,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			IProgressMonitor monitor = getProgressMonitor();
 			try {
 				SubMonitor subMonitor= SubMonitor.convert(monitor, 2);
-				CompilationUnit ast= SharedASTProvider.getAST(inputElement, SharedASTProvider.WAIT_ACTIVE_ONLY, 
+				CompilationUnit ast= SharedASTProvider.getAST(inputElement, SharedASTProvider.WAIT_ACTIVE_ONLY,
 						subMonitor.newChild(1, SubMonitor.SUPPRESS_NONE));
 				fOverrideIndicatorManager.reconciled(ast, true, subMonitor.newChild(1, SubMonitor.SUPPRESS_NONE));
 			} finally {
