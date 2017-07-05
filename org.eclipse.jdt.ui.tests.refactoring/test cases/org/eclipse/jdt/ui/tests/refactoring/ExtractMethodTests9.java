@@ -1,0 +1,63 @@
+/*******************************************************************************
+ * Copyright (c) 2017 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.ui.tests.refactoring;
+
+import junit.framework.Test;
+
+public class ExtractMethodTests9 extends ExtractMethodTests {
+	private static ExtractMethodTestSetup9 fgTestSetup;
+
+	public ExtractMethodTests9(String name) {
+		super(name);
+	}
+
+	public static Test suite() {
+		fgTestSetup= new ExtractMethodTestSetup9(new NoSuperTestsSuite(ExtractMethodTests9.class));
+		return fgTestSetup;
+	}
+
+	public static Test setUpTest(Test test) {
+		fgTestSetup= new ExtractMethodTestSetup9(test);
+		return fgTestSetup;
+	}
+
+	protected void try9Test() throws Exception {
+		performTest(fgTestSetup.getTry9Package(), "A", COMPARE_WITH_OUTPUT, "try9_out");
+	}
+
+	@Override
+	protected void invalidSelectionTest() throws Exception {
+		performTest(fgTestSetup.getInvalidSelectionPackage(), "A", INVALID_SELECTION, null);
+	}
+
+	//====================================================================================
+	// Testing invalid selections
+	//====================================================================================
+
+	@Override
+	public void test101() throws Exception {
+		invalidSelectionTest();
+	}
+
+	//====================================================================================
+	// Testing try-with-resources
+	//====================================================================================
+
+	@Override
+	public void test201() throws Exception {
+		try9Test();
+	}
+
+}
