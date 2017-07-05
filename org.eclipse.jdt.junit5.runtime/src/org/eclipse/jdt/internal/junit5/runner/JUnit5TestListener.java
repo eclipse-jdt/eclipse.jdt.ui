@@ -152,9 +152,19 @@ public class JUnit5TestListener implements TestExecutionListener {
 
 	@Override
 	public void dynamicTestRegistered(TestIdentifier testIdentifier) {
-		if (testIdentifier.isTest() && fTestPlan != null) {
+		if (fTestPlan != null) {
 			JUnit5Identifier dynamicTestIdentifier= new JUnit5Identifier(testIdentifier);
-			RemoteTestRunner.fgTestRunServer.visitTreeEntry(dynamicTestIdentifier, false, 1, true, JUnit5TestReference.getParentId(testIdentifier, fTestPlan));
+			boolean hasChildren;
+			int testCount;
+			if (testIdentifier.isContainer()) {
+				hasChildren= true;
+				testCount= fTestPlan.getChildren(testIdentifier).size();
+			} else {
+				hasChildren= false;
+				testCount= 1;
+			}
+			String parentId= JUnit5TestReference.getParentId(testIdentifier, fTestPlan);
+			RemoteTestRunner.fgTestRunServer.visitTreeEntry(dynamicTestIdentifier, hasChildren, testCount, true, parentId);
 		}
 	}
 
