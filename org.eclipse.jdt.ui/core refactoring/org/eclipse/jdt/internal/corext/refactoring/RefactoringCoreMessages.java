@@ -9,6 +9,10 @@
  * Community Process (JCP) and is made available for testing and evaluation purposes
  * only. The code is not compatible with any specification of the JCP.
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla <bmuskalla@eclipsesource.com> - [extract method] Extract method and continue https://bugs.eclipse.org/bugs/show_bug.cgi?id=48056
@@ -872,6 +876,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineTempRefactoring_remove_edit_name;
 
 	public static String InlineTempRefactoring_resource_in_try_with_resources;
+
+	public static String InlineTempRefactoring_resource_used_in_try_with_resources;
 
 	public static String InlineTempRefactoring_select_temp;
 

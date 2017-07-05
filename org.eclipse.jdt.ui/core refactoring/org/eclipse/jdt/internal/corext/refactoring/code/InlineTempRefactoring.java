@@ -65,6 +65,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -191,17 +192,15 @@ public class InlineTempRefactoring extends Refactoring {
 		return fVariableDeclaration;
 	}
 
-	/*
-	 * @see IRefactoring#getName()
-	 */
+	private ASTNode getSelectedNode() {
+		return TempDeclarationFinder.getSelectedNode(getASTRoot(), fSelectionStart, fSelectionLength);
+	}
+
 	@Override
 	public String getName() {
 		return RefactoringCoreMessages.InlineTempRefactoring_name;
 	}
 
-	/*
-	 * @see Refactoring#checkActivation(IProgressMonitor)
-	 */
 	@Override
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try {
@@ -211,9 +210,10 @@ public class InlineTempRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;
 
+			ASTNode selected= getSelectedNode();
 			VariableDeclaration declaration= getVariableDeclaration();
 
-			result.merge(checkSelection(declaration));
+			result.merge(checkSelection(selected, declaration));
 			if (result.hasFatalError())
 				return result;
 
@@ -230,7 +230,7 @@ public class InlineTempRefactoring extends Refactoring {
 		return null;
 	}
 
-	private RefactoringStatus checkSelection(VariableDeclaration decl) {
+	private RefactoringStatus checkSelection(ASTNode selectedNode, VariableDeclaration decl) {
 		ASTNode parent= decl.getParent();
 		if (parent instanceof MethodDeclaration) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_method_parameter);
@@ -248,9 +248,20 @@ public class InlineTempRefactoring extends Refactoring {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_resource_in_try_with_resources);
 		}
 
+		if (selectedNode instanceof Name && selectedNode.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_resource_used_in_try_with_resources);
+		}
+
 		if (decl.getInitializer() == null) {
 			String message= Messages.format(RefactoringCoreMessages.InlineTempRefactoring_not_initialized, BasicElementLabels.getJavaElementName(decl.getName().getIdentifier()));
 			return RefactoringStatus.createFatalErrorStatus(message);
+		}
+
+		SimpleName[] references= getReferences();
+		for (SimpleName ref : references) {
+			if (ref.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY) {
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_resource_used_in_try_with_resources);
+			}
 		}
 
 		return checkAssignments(decl);
@@ -270,9 +281,7 @@ public class InlineTempRefactoring extends Refactoring {
 		return RefactoringStatus.createFatalErrorStatus(message, context);
 	}
 
-	/*
-	 * @see Refactoring#checkInput(IProgressMonitor)
-	 */
+
 	@Override
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		try {
