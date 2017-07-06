@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Rabea Gransberger <rgransberger@gmx.de> - [quick fix] Fix several visibility issues - https://bugs.eclipse.org/394692
@@ -58,13 +62,7 @@ public class JdtFlags {
 	public static final int VISIBILITY_CODE_INVALID= 	-1;
 
 	public static boolean isDefaultMethod(IMethodBinding method) {
-		int modifiers= method.getModifiers();
-		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=405517#c7
-		ITypeBinding declaringClass= method.getDeclaringClass();
-		if (declaringClass.isInterface()) {
-			return !Modifier.isAbstract(modifiers) && !Modifier.isStatic(modifiers);
-		}
-		return false;
+		return Modifier.isDefault(method.getModifiers());
 	}
 
 	public static boolean isDefaultMethod(IMethod method) throws JavaModelException {
@@ -74,7 +72,7 @@ public class JdtFlags {
 	public static boolean isAbstract(IMember member) throws JavaModelException{
 		int flags= member.getFlags();
 		if (!member.isBinary() && isInterfaceOrAnnotationMethod(member)) {
-			return !Flags.isStatic(flags) && !Flags.isDefaultMethod(flags);
+			return !Flags.isPrivate(flags) && !Flags.isStatic(flags) && !Flags.isDefaultMethod(flags);
 		}
 		return Flags.isAbstract(flags);
 	}
