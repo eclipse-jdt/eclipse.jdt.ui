@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,12 +86,17 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.actions.ContributionItemFactory;
 import org.eclipse.ui.handlers.IHandlerService;
+import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
+import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 
@@ -120,7 +125,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.SharedASTProvider;
 
 
-public class ASTView extends ViewPart implements IShowInSource {
+public class ASTView extends ViewPart implements IShowInSource, IShowInTargetList {
 	
 	static final int JLS_LATEST= AST.JLS9;
 	
@@ -863,6 +868,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 	}
 
 	protected void fillContextMenu(IMenuManager manager) {
+		ISelection selection= getSite().getSelectionProvider().getSelection();
+		if (!selection.isEmpty() && ((IStructuredSelection) selection).getFirstElement() instanceof IJavaElement) {
+			MenuManager showInSubMenu= new MenuManager(getShowInMenuLabel());
+			IWorkbenchWindow workbenchWindow= getSite().getWorkbenchWindow();
+			showInSubMenu.add(ContributionItemFactory.VIEWS_SHOW_IN.create(workbenchWindow));
+			manager.add(showInSubMenu);
+			manager.add(new Separator());
+		}
 		manager.add(fFocusAction);
 		manager.add(fRefreshAction);
 		manager.add(fClearAction);
@@ -877,6 +890,19 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fDrillDownAdapter.addNavigationActions(manager);
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+	}
+
+	private String getShowInMenuLabel() {
+		String keyBinding= null;
+
+		IBindingService bindingService= PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+		if (bindingService != null)
+			keyBinding= bindingService.getBestActiveBindingFormattedFor(IWorkbenchCommandConstants.NAVIGATE_SHOW_IN_QUICK_MENU);
+
+		if (keyBinding == null)
+			keyBinding= ""; //$NON-NLS-1$
+
+		return "Sho&w In" + '\t' + keyBinding;
 	}
 
 	private void fillLocalToolBar(IToolBarManager manager) {
@@ -1591,6 +1617,11 @@ public class ASTView extends ViewPart implements IShowInSource {
 	@Override
 	public ShowInContext getShowInContext() {
 		return new ShowInContext(null, getSite().getSelectionProvider().getSelection());
+	}
+
+	@Override
+	public String[] getShowInTargetIds() {
+		return new String[] { "org.eclipse.jdt.jeview.views.JavaElementView", JavaUI.ID_PACKAGES };
 	}
 
 	/**
