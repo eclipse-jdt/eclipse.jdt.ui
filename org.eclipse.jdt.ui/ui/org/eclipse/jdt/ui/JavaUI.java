@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -168,6 +168,14 @@ public final class JavaUI {
 	 * @since 3.13 BETA_JAVA9
 	 */
 	public static final String ID_MODULE_INFO_EDITOR= 	"org.eclipse.jdt.ui.ModuleInfoEditor"; //$NON-NLS-1$
+
+	/**
+	 * The editor part id of the module-info.class editor (value
+	 * <code>"org.eclipse.jdt.ui.ModuleInfoClassFileEditor"</code>).
+	 * 
+	 * @since 3.13 BETA_JAVA9
+	 */
+	public static final String ID_MODULE_INFO_CF_EDITOR= "org.eclipse.jdt.ui.ModuleInfoClassFileEditor"; //$NON-NLS-1$
 
 	/**
 	 * The view part id of the Packages view
