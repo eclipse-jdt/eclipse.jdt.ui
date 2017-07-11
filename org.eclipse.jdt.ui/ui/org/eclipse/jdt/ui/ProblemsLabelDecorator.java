@@ -327,13 +327,13 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		}
 		
 		// markers on package itself (e.g. missing @NonNullByDefault)
-		int severity= res.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
+		int severity= findMaxProblemSeverity(res, IMarker.PROBLEM, true, IResource.DEPTH_ZERO);
 		if (severity == IMarker.SEVERITY_ERROR)
 			return ERRORTICK_ERROR;
 		
 		// markers on CUs
 		for (ICompilationUnit cu : pack.getCompilationUnits()) {
-			severity= Math.max(severity, cu.getResource().findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_ZERO));
+			severity= Math.max(severity, findMaxProblemSeverity(cu.getResource(), IMarker.PROBLEM, true, IResource.DEPTH_ZERO));
 			if (severity == IMarker.SEVERITY_ERROR)
 				return ERRORTICK_ERROR;
 		}
@@ -342,7 +342,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		for (Object object : pack.getNonJavaResources()) {
 			if (object instanceof IResource) {
 				IResource resource= (IResource) object;
-				severity= Math.max(severity, resource.findMaxProblemSeverity(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE));
+				severity= Math.max(severity, findMaxProblemSeverity(resource, IMarker.PROBLEM, true, IResource.DEPTH_INFINITE));
 				if (severity == IMarker.SEVERITY_ERROR)
 					return ERRORTICK_ERROR;
 			}
@@ -356,6 +356,18 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 			return ERRORTICK_INFO;
 		}
 		return 0;
+	}
+	
+	private int findMaxProblemSeverity (IResource res, String type, boolean includeSubtypes, int depth) throws CoreException {
+		try {
+			return res.findMaxProblemSeverity(type, includeSubtypes, depth);
+		} catch (CoreException e) {
+			if (e.getStatus().getCode() == IResourceStatus.RESOURCE_NOT_FOUND) {
+				// Ignore failure in the case of concurrent deletion
+				return -1;
+			}
+			throw e;
+		}
 	}
 
 	private boolean isMarkerInRange(IMarker marker, ISourceReference sourceElement) throws CoreException {
