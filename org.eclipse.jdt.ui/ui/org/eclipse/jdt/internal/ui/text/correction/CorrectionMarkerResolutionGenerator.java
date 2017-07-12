@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator2;
+import org.eclipse.ui.IMarkerResolutionRelevance;
 import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
 
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -67,7 +68,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
 
 public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGenerator2 {
 
-	public static class CorrectionMarkerResolution extends WorkbenchMarkerResolution {
+	public static class CorrectionMarkerResolution extends WorkbenchMarkerResolution implements IMarkerResolutionRelevance {
 
 		private static final IMarker[] NO_MARKERS= new IMarker[0];
 
@@ -190,6 +191,13 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		@Override
 		public Image getImage() {
 			return fProposal.getImage();
+		}
+
+		@Override
+		public int getRelevanceForResolution() {
+			if (fProposal != null)
+				return fProposal.getRelevance();
+			return 0;
 		}
 
 		@Override
