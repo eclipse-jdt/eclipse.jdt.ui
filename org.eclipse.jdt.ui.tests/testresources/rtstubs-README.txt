@@ -26,7 +26,7 @@ Building rtstubs*.jar
 - Create a Java project with the JRE for which you need to generate stubs
    (e.g. "JDK9")
 
-- Select the all the modules. This will use the hardcoded default list of
+- Select all the modules. This will use the hardcoded default list of
    packages. In Java 9: from modules java.base, java.compiler, java.desktop, and
    java.sql. Before Java 9: select rt.jar. 
    (in CreateStubsAction, add additionally required packages there).
