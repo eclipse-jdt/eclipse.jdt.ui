@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ public interface IJavaCompletionProposal extends ICompletionProposal {
 	 * The relevance is used to determine if this proposal is more
 	 * relevant than another proposal.</p>
 	 *
-	 * @return the relevance of this completion proposal in the range of [0, 1000]
+	 * @return the relevance of this completion proposal
 	 */
 	int getRelevance();
 
