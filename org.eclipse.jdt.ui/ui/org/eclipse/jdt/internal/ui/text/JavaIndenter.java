@@ -767,8 +767,6 @@ public final class JavaIndenter {
 				int lineOffset= line.getOffset();
 				int prevPos= Math.max(offset - 1, 0);
 				boolean isFirstTokenOnLine= fDocument.get(lineOffset, prevPos + 1 - lineOffset).trim().length() == 0;
-				int prevToken= fScanner.previousToken(prevPos, JavaHeuristicScanner.UNBOUND);
-				boolean bracelessBlockStart= fScanner.isBracelessBlockStart(prevPos, JavaHeuristicScanner.UNBOUND);
 
 				switch (nextToken) {
 					case Symbols.TokenELSE:
@@ -786,6 +784,8 @@ public final class JavaIndenter {
 							matchCase= true;
 						break;
 					case Symbols.TokenLBRACE: // for opening-brace-on-new-line style
+						int prevToken= fScanner.previousToken(prevPos, JavaHeuristicScanner.UNBOUND);
+						boolean bracelessBlockStart= fScanner.isBracelessBlockStart(prevPos, JavaHeuristicScanner.UNBOUND);
 						if (bracelessBlockStart && !fPrefs.prefIndentBracesForBlocks)
 							unindent= true;
 						else if ((prevToken == Symbols.TokenCOLON || prevToken == Symbols.TokenEQUAL) && !fPrefs.prefIndentBracesForArrays)
