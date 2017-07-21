@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -100,7 +100,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
@@ -297,7 +296,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 				@Override
 				public Object[] getChildren(Object parent) {
-					if (parent instanceof IParent && !(parent instanceof IModuleDescription)) {
+					if (parent instanceof IParent) {
 						IParent c= (IParent) parent;
 						try {
 							return filter(c.getChildren());
@@ -339,7 +338,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 				@Override
 				public boolean hasChildren(Object parent) {
-					if (parent instanceof IParent && !(parent instanceof IModuleDescription)) {
+					if (parent instanceof IParent) {
 						IParent c= (IParent) parent;
 						try {
 							IJavaElement[] children= filter(c.getChildren());
