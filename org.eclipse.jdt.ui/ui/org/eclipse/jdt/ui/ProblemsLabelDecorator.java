@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -302,7 +302,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 					if (isMarkerInRange(curr, sourceElement)) {
 						int val= curr.getAttribute(IMarker.SEVERITY, -1);
 						if (val == IMarker.SEVERITY_INFO || val == IMarker.SEVERITY_WARNING || val == IMarker.SEVERITY_ERROR) {
-							severity= val;
+							severity= Math.max(severity, val);
 						}
 					}
 				}
@@ -377,12 +377,13 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 
 	private int getErrorTicksFromAnnotationModel(IAnnotationModel model, ISourceReference sourceElement) throws CoreException {
 		int info= 0;
+		int priority= -1;
 		Iterator<Annotation> iter= model.getAnnotationIterator();
 		while ((info != ERRORTICK_ERROR) && iter.hasNext()) {
 			Annotation annot= iter.next();
 			IMarker marker= isAnnotationInRange(model, annot, sourceElement);
 			if (marker != null) {
-				int priority= marker.getAttribute(IMarker.SEVERITY, -1);
+				priority= Math.max(priority, marker.getAttribute(IMarker.SEVERITY, -1));
 				if (priority == IMarker.SEVERITY_INFO) {
 					info= ERRORTICK_INFO;
 				} else if (priority == IMarker.SEVERITY_WARNING) {
