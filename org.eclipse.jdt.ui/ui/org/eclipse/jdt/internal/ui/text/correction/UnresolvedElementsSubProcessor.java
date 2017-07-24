@@ -1122,7 +1122,7 @@ public class UnresolvedElementsSubProcessor {
 			}
 		}
 		if (binding != null && binding.isFromSource()) {
-			ITypeBinding senderDeclBinding= binding.getTypeDeclaration();
+			ITypeBinding senderDeclBinding= binding.getErasure().getTypeDeclaration();
 
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, senderDeclBinding);
 			if (targetCU != null) {
