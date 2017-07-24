@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -447,6 +447,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_non_externalized_strings_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_dead_code;
 	public static String ProblemSeveritiesConfigurationBlock_pb_deprecation_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_terminal_deprecation_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_deprecation_in_deprecation_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_deprecation_when_overriding_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_empty_statement_label;
