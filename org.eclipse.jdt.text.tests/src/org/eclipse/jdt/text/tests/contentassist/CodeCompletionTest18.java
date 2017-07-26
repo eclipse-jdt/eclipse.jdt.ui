@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014, 2016 GK Software AG, IBM Corporation and others.
+ * Copyright (c) 2014, 2017 GK Software AG, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
 package org.eclipse.jdt.text.tests.contentassist;
 
 import java.util.Hashtable;
+import java.util.Map;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -21,6 +22,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -765,6 +767,126 @@ public class CodeCompletionTest18 extends AbstractCompletionTest {
 		buf.append("    default void dispose() {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
+		assertEquals(buf.toString(), doc.get());
+	}
+	private void prepareNullAnnotations(IPackageFragmentRoot sourceFolder) throws JavaModelException {
+		Map<String, String> options= fJProject1.getOptions(true);
+		options.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
+		options.put(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, "annots.NonNull");
+		options.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "annots.Nullable");
+		options.put(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME, "annots.NonNullByDefault");
+		fJProject1.setOptions(options);
+		
+		IPackageFragment pack0= sourceFolder.createPackageFragment("annots", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("import java.lang.annotation.*;\n");
+		buf.append("\n");
+		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
+		buf.append("@Target({ ElementType.TYPE_USE })\n");
+		buf.append("public @interface NonNull {}\n");
+		pack0.createCompilationUnit("NonNull.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("import java.lang.annotation.*;\n");
+		buf.append("\n");
+		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
+		buf.append("@Target({ ElementType.TYPE_USE })\n");
+		buf.append("public @interface Nullable {}\n");
+		pack0.createCompilationUnit("Nullable.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("public enum DefaultLocation { PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT, ARRAY_CONTENTS, TYPE_PARAMETER }\n");
+		pack0.createCompilationUnit("DefaultLocation.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package annots;\n");
+		buf.append("\n");
+		buf.append("import java.lang.annotation.*;\n");
+		buf.append("import static annots.DefaultLocation.*;\n");
+		buf.append("\n");
+		buf.append("@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n");
+		buf.append("@Target({ ElementType.PACKAGE, ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.FIELD, ElementType.LOCAL_VARIABLE })\n");
+		buf.append("public @interface NonNullByDefault { DefaultLocation[] value() default {PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT}; }\n");
+		pack0.createCompilationUnit("NonNullByDefault.java", buf.toString(), false, null);
+	}
+
+	private static void assertNumberOf(String name, int is, int expected) {
+		assertTrue("Wrong number of " + name + ", is: " + is + ", expected: " + expected, is == expected);
+	}
+
+	public void testBug528871() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		prepareNullAnnotations(sourceFolder);
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import annots.NonNull;\n");
+		buf.append("import annots.NonNullByDefault;\n");
+		buf.append("\n");
+		buf.append("interface A {\n");
+		buf.append("    @NonNull String m();\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class Test {\n");
+		buf.append("    void f() {\n");
+		buf.append("        new A()\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("");
+		String contents= buf.toString();
+
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", contents, false, null);
+
+		String str= "new A(";
+
+		int offset= contents.indexOf(str) + str.length();
+
+		CompletionProposalCollector collector= createCollector(cu, offset);
+		collector.setReplacementLength(0);
+
+		codeComplete(cu, offset, collector);
+
+		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+
+		assertNumberOf("proposals", proposals.length, 1);
+
+		IDocument doc= new Document(contents);
+
+		proposals[0].apply(doc);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import annots.NonNull;\n");
+		buf.append("import annots.NonNullByDefault;\n");
+		buf.append("\n");
+		buf.append("interface A {\n");
+		buf.append("    @NonNull String m();\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("@NonNullByDefault\n");
+		buf.append("public class Test {\n");
+		buf.append("    void f() {\n");
+		buf.append("        new A() {\n");
+		buf.append("            \n");
+		buf.append("            @Override\n");
+		buf.append("            public String m() {\n");
+		buf.append("                //TODO\n");
+		buf.append("                return null;\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("");
 		assertEquals(buf.toString(), doc.get());
 	}
 }

@@ -57,11 +57,13 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -120,7 +122,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		return buffer.toString();
 	}
 
-	private String createNewBody(ImportRewrite importRewrite) throws CoreException {
+	private String createNewBody(ImportRewrite importRewrite, int offset) throws CoreException {
 		if (importRewrite == null)
 			return null;
 
@@ -148,12 +150,18 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 				// add an extra block: helps the AST to recover
 				workingCopyContents.insert(insertPosition, '{' + dummyClassContent + '}');
 				insertPosition++;
+				if(offset > insertPosition) {
+					offset += dummyClassContent.length()+2;
+				}
 			} else {
 				/*
 				 * The two empty lines are added because the trackedDeclaration uses the covered range
 				 * and hence would also included comments that directly follow the dummy class.
 				 */
 				workingCopyContents.insert(insertPosition, dummyClassContent + "\n\n"); //$NON-NLS-1$
+				if(offset > insertPosition) {
+					offset += dummyClassContent.length()+2;
+				}
 			}
 
 			workingCopy.getBuffer().setContents(workingCopyContents.toString());
@@ -164,6 +172,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			parser.setSource(workingCopy);
 
 			CompilationUnit astRoot= (CompilationUnit) parser.createAST(new NullProgressMonitor());
+			ImportRewriteContext context=new ContextSensitiveImportRewriteContext(astRoot, offset, importRewrite);
 			ASTNode newType= NodeFinder.perform(astRoot, insertPosition, dummyClassContent.length());
 			if (!(newType instanceof AbstractTypeDeclaration))
 				return null;
@@ -238,7 +247,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			ListRewrite rewriter= rewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
 			for (int i= 0; i < methodsToOverride.length; i++) {
 				IMethodBinding curr= methodsToOverride[i];
-				MethodDeclaration stub= StubUtility2.createImplementationStub(workingCopy, rewrite, importRewrite, null, curr, dummyTypeBinding, settings, dummyTypeBinding.isInterface(), contextBinding);
+				MethodDeclaration stub= StubUtility2.createImplementationStub(workingCopy, rewrite, importRewrite, context, curr, dummyTypeBinding, settings, dummyTypeBinding.isInterface(), contextBinding);
 				rewriter.insertFirst(stub, null);
 			}
 
@@ -385,7 +394,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	@Override
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportRewrite impRewrite) throws CoreException, BadLocationException {
 		fImportRewrite= impRewrite;
-		String newBody= createNewBody(impRewrite);
+		String newBody= createNewBody(impRewrite, offset);
 		if (newBody == null)
 			return false;
 
