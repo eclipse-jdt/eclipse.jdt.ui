@@ -1189,4 +1189,108 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+	public void testBugXXX() throws Exception {		
+		Hashtable<String, String> options= JavaCore.getOptions();
+		try {
+			Hashtable<String, String> myOptions= new Hashtable<>(options);
+			myOptions.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "my.Nullable");
+			myOptions.put(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, "my.NonNull");
+			myOptions.put(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME, "my.NonNullByDefault");
+			JavaCore.setOptions(myOptions);
+
+			IPackageFragment my= fSourceFolder.createPackageFragment("my", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package my;\n");
+			buf.append("\n");
+			buf.append("import java.lang.annotation.ElementType;\n");
+			buf.append("import java.lang.annotation.Target;\n");
+			buf.append("\n");
+			buf.append("@Target(ElementType.TYPE_USE)\n");
+			buf.append("public @interface Nullable {\n");
+			buf.append("}\n");
+			my.createCompilationUnit("Nullable.java", buf.toString(), false, null);
+
+			buf= new StringBuffer();
+			buf.append("package my;\n");
+			buf.append("\n");
+			buf.append("import java.lang.annotation.ElementType;\n");
+			buf.append("import java.lang.annotation.Target;\n");
+			buf.append("\n");
+			buf.append("@Target(ElementType.TYPE_USE)\n");
+			buf.append("public @interface NonNull {\n");
+			buf.append("}\n");
+			my.createCompilationUnit("NonNull.java", buf.toString(), false, null);
+
+			buf= new StringBuffer();
+			buf.append("package my;\n");
+			buf.append("\n");
+			buf.append("public enum DefaultLocation {\n");
+			buf.append("	PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT\n");
+			buf.append("}\n");
+			buf.append("");
+			my.createCompilationUnit("DefaultLocation.java", buf.toString(), false, null);
+
+			buf= new StringBuffer();
+			buf.append("package my;\n");
+			buf.append("\n");
+			buf.append("import static my.DefaultLocation.*;\n");
+			buf.append("\n");
+			buf.append("public @interface NonNullByDefault {\n");
+			buf.append("	DefaultLocation[] value() default { PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT };\n");
+			buf.append("}\n");
+			buf.append("");
+			my.createCompilationUnit("NonNullByDefault.java", buf.toString(), false, null);
+
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class A {\n");
+			buf.append("   public void SomeMethod(\n");
+			buf.append("      String[] a)\n");
+			buf.append("   {\n");
+			buf.append("\n");
+			buf.append("   }\n");
+			buf.append("}\n");
+			pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import my.*;\n");
+			buf.append("@NonNullByDefault\n");
+			buf.append("public class B extends A {\n");
+			buf.append("   @Override\n");
+			buf.append("   public void SomeMethod(\n");
+			buf.append("      String[] a)\n");
+			buf.append("   {\n");
+			buf.append("\n");
+			buf.append("   }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+			assertNumberOfProposals(proposals, 3);
+			CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+
+			assertEqualString(proposal.getDisplayString(), "Change parameter 'a' to '@Nullable'");
+
+			String preview= getPreviewContent(proposal);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import my.*;\n");
+			buf.append("@NonNullByDefault\n");
+			buf.append("public class B extends A {\n");
+			buf.append("   @Override\n");
+			buf.append("   public void SomeMethod(\n");
+			buf.append("      String @Nullable [] a)\n");
+			buf.append("   {\n");
+			buf.append("\n");
+			buf.append("   }\n");
+			buf.append("}\n");
+			assertEqualString(preview, buf.toString());
+		} finally {
+			JavaCore.setOptions(options);
+		}
+	}
 }
