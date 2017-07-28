@@ -710,7 +710,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			String[][] resolvedTypeNames= type.resolveType(typeName);
 			if (resolvedTypeNames != null && resolvedTypeNames.length > 0) {
 				String[] resolvedTypeName= resolvedTypeNames[0];
-				resolvedType= javaProject.findType(resolvedTypeName[0], resolvedTypeName[1]);
+				resolvedType= javaProject.findType(resolvedTypeName[0], resolvedTypeName[1]); // secondary types not found by this API
 			}
 		}
 		return resolvedType;
