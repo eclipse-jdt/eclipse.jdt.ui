@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -30,6 +34,7 @@ import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -91,6 +96,8 @@ public class CPListLabelProvider extends LabelProvider {
 		} else if (element instanceof IAccessRule) {
 			IAccessRule rule= (IAccessRule) element;
 			return Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_label, new String[] { AccessRulesLabelProvider.getResolutionLabel(rule.getKind()), BasicElementLabels.getPathLabel(rule.getPattern(), false)});
+		} else if (element instanceof ModuleAddExport) {
+			return Messages.format(NewWizardMessages.CPListLabelProvider_add_exports_full_label, new String[] { element.toString() });
 		}
 		return super.getText(element);
 	}
@@ -227,6 +234,17 @@ public class CPListLabelProvider extends LabelProvider {
 				arg= NewWizardMessages.CPListLabelProvider_ignore_optional_problems_no;
 			}
 			return Messages.format(NewWizardMessages.CPListLabelProvider_ignore_optional_problems_label, arg);
+		} else if (key.equals(CPListElement.MODULE)) {
+			Object value= attrib.getValue();
+			if (value instanceof ModuleAddExport[]) {
+				int nExports= ((ModuleAddExport[]) value).length;
+				if (nExports > 0)
+					return NewWizardMessages.CPListLabelProvider_modular_modifiesEncapsulation_label;
+				else
+					return NewWizardMessages.CPListLabelProvider_modular_label;
+			} else {
+				return NewWizardMessages.CPListLabelProvider_not_modular_label;
+			}
 		} else {
 			ClasspathAttributeConfiguration config= fAttributeDescriptors.get(key);
 			if (config != null) {
@@ -247,6 +265,10 @@ public class CPListLabelProvider extends LabelProvider {
 		IPath path= cpentry.getPath();
 		switch (cpentry.getEntryKind()) {
 			case IClasspathEntry.CPE_LIBRARY: {
+				IModuleDescription module= cpentry.getModule();
+				if (module != null) {
+					return module.getElementName();
+				}
 				IResource resource= cpentry.getResource();
 				if (resource instanceof IContainer) {
 					StringBuffer buf= new StringBuffer(BasicElementLabels.getPathLabel(path, false));
@@ -299,7 +321,7 @@ public class CPListLabelProvider extends LabelProvider {
 						return Messages.format(NewWizardMessages.CPListLabelProvider_unbound_library, description);
 					}
 				} catch (JavaModelException e) {
-
+					// fall back to simply showing the path (below)
 				}
 				return BasicElementLabels.getPathLabel(path, false);
 			case IClasspathEntry.CPE_SOURCE: {
@@ -360,6 +382,9 @@ public class CPListLabelProvider extends LabelProvider {
 					return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_PACKFRAG_ROOT);
 				}
 			case IClasspathEntry.CPE_LIBRARY:
+				if (cpentry.getModule() != null) {
+					return JavaPluginImages.DESC_OBJS_MODULE;
+				}
 				IResource res= cpentry.getResource();
 				IPath path= (IPath) cpentry.getAttribute(CPListElement.SOURCEATTACHMENT);
 				if (res == null) {
@@ -449,6 +474,8 @@ public class CPListLabelProvider extends LabelProvider {
 		} else if (element instanceof IAccessRule) {
 			IAccessRule rule= (IAccessRule) element;
 			return AccessRulesLabelProvider.getResolutionImage(rule.getKind());
+		} else if (element instanceof ModuleAddExport) {
+			return fSharedImages.getImage(ISharedImages.IMG_OBJS_ADD_EXPORTS);
 		}
 		return null;
 	}

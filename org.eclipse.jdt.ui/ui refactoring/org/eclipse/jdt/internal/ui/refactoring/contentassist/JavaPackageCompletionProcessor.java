@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -12,6 +16,9 @@ package org.eclipse.jdt.internal.ui.refactoring.contentassist;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Predicate;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -42,15 +49,17 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 
 public class JavaPackageCompletionProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
 
-	private IPackageFragmentRoot fPackageFragmentRoot;
+	private IPackageFragmentRoot[] fPackageFragmentRoots;
 	private CompletionProposalComparator fComparator;
 	private ILabelProvider fLabelProvider;
+	
+	private Predicate<IPackageFragment> fFilter;
 
 	private char[] fProposalAutoActivationSet;
 
 	/**
 	 * Creates a <code>JavaPackageCompletionProcessor</code>.
-	 * The completion context must be set via {@link #setPackageFragmentRoot(IPackageFragmentRoot)}.
+	 * The completion context must be set via {@link #setPackageFragmentRoot(IPackageFragmentRoot...)}.
 	 */
 	public JavaPackageCompletionProcessor() {
 	    this(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS));
@@ -129,7 +138,7 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 	 */
 	@Override
 	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubjectControl contentAssistSubjectControl, int documentOffset) {
-		if (fPackageFragmentRoot == null)
+		if (fPackageFragmentRoots == null || fPackageFragmentRoots.length == 0)
 			return null;
 		String input= contentAssistSubjectControl.getDocument().get();
 		ICompletionProposal[] proposals= createPackagesProposals(documentOffset, input);
@@ -137,26 +146,37 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 		return proposals;
 	}
 
-	public void setPackageFragmentRoot(IPackageFragmentRoot packageFragmentRoot) {
-		fPackageFragmentRoot= packageFragmentRoot;
+	public void setPackageFragmentRoot(IPackageFragmentRoot... packageFragmentRoots) {
+		fPackageFragmentRoots= packageFragmentRoots;
+	}
+
+	public void setFilter(Predicate<IPackageFragment> filter) {
+		fFilter= filter;
 	}
 
 	private ICompletionProposal[] createPackagesProposals(int documentOffset, String input) {
 		ArrayList<JavaCompletionProposal> proposals= new ArrayList<>();
 		String prefix= input.substring(0, documentOffset);
-		try {
-			IJavaElement[] packageFragments= fPackageFragmentRoot.getChildren();
-			for (int i= 0; i < packageFragments.length; i++) {
-				IPackageFragment pack= (IPackageFragment) packageFragments[i];
-				String packName= pack.getElementName();
-				if (packName.length() == 0 || ! packName.startsWith(prefix))
-					continue;
-				Image image= fLabelProvider.getImage(pack);
-				JavaCompletionProposal proposal= new JavaCompletionProposal(packName, 0, input.length(), image, fLabelProvider.getText(pack), 0);
-				proposals.add(proposal);
+		Set<String> names= fPackageFragmentRoots.length > 1 ? new HashSet<>() : null; 
+		for (IPackageFragmentRoot packageFragmentRoot : fPackageFragmentRoots) {				
+			try {
+				IJavaElement[] packageFragments= packageFragmentRoot.getChildren();
+				for (int i= 0; i < packageFragments.length; i++) {
+					IPackageFragment pack= (IPackageFragment) packageFragments[i];
+					String packName= pack.getElementName();
+					if (packName.length() == 0 || ! packName.startsWith(prefix))
+						continue;
+					if (fFilter != null && !fFilter.test(pack))
+						continue; // filtered
+					if (names != null && !names.add(packName))
+						continue; // already proposed
+					Image image= fLabelProvider.getImage(pack);
+					JavaCompletionProposal proposal= new JavaCompletionProposal(packName, 0, input.length(), image, fLabelProvider.getText(pack), 0);
+					proposals.add(proposal);
+				}
+			} catch (JavaModelException e) {
+				//fPackageFragmentRoot is not a proper root -> no proposals
 			}
-		} catch (JavaModelException e) {
-			//fPackageFragmentRoot is not a proper root -> no proposals
 		}
 		return proposals.toArray(new ICompletionProposal[proposals.size()]);
 	}

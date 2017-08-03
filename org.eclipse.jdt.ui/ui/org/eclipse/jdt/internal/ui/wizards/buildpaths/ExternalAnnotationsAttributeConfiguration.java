@@ -37,7 +37,7 @@ public class ExternalAnnotationsAttributeConfiguration extends ClasspathAttribut
 
 	@Override
 	public ImageDescriptor getImageDescriptor(ClasspathAttributeAccess attribute) {
-		return JavaPluginImages.DESC_OBJS_EXTERNAL_ANNOTATION_LOCATION_ATTRIB; // FIXME Need image
+		return JavaPluginImages.DESC_OBJS_EXTERNAL_ANNOTATION_LOCATION_ATTRIB;
 	}
 
 	@Override
@@ -95,6 +95,6 @@ public class ExternalAnnotationsAttributeConfiguration extends ClasspathAttribut
 
 	@Override
 	public IClasspathAttribute performRemove(ClasspathAttributeAccess attribute) {
-		return JavaCore.newClasspathAttribute(IClasspathAttribute.JAVADOC_LOCATION_ATTRIBUTE_NAME, null);
+		return JavaCore.newClasspathAttribute(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH, null);
 	}
 }

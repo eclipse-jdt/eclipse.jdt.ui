@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -299,6 +303,12 @@ public interface ISharedImages {
 	 * @since 3.11
 	 */
 	public static final String IMG_OBJS_EXTERNAL_ANNOTATIONS = JavaPluginImages.IMG_OBJS_EXTERNAL_ANNOTATIONS;
+
+	/**
+	 * Key to access the shared image or image descriptor for an add-exports module directive.
+	 * @since 3.13 BETA_JAVA9
+	 */
+	public static final String IMG_OBJS_ADD_EXPORTS = JavaPluginImages.IMG_OBJS_ADD_EXPORTS;
 
 	/**
 	 * Returns the shared image managed under the given key.

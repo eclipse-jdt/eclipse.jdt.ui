@@ -117,6 +117,12 @@ public final class JavaModelUtil {
 	public static final String MODULE_INFO_CLASS= "module-info.class"; //$NON-NLS-1$
 
 	/**
+	 * Constant for the name of all unnamed modules.
+	 * @since 3.13 BETA_JAVA9
+	 */
+	public static final String ALL_UNNAMED= "ALL-UNNAMED"; //$NON-NLS-1$
+
+	/**
 	 * Finds a type container by container name. The returned element will be of type
 	 * <code>IType</code> or a <code>IPackageFragment</code>. <code>null</code> is returned if the
 	 * type container could not be found.

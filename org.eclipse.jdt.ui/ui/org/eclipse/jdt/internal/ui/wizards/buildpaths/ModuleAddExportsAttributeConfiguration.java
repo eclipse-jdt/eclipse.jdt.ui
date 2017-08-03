@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017 GK Software AG, and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,69 +8,71 @@
  * This is an implementation of an early-draft specification developed under the Java
  * Community Process (JCP) and is made available for testing and evaluation purposes
  * only. The code is not compatible with any specification of the JCP.
- * 
+ *
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jdt.core.IClasspathAttribute;
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
+import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
-public class ModuleAttributeConfiguration extends ClasspathAttributeConfiguration {
+public class ModuleAddExportsAttributeConfiguration extends ClasspathAttributeConfiguration {
 
-	public static final String TRUE= "true"; //$NON-NLS-1$
+	public ModuleAddExportsAttributeConfiguration() {
+	}
 
 	@Override
 	public ImageDescriptor getImageDescriptor(ClasspathAttributeAccess attribute) {
-		return JavaPluginImages.DESC_OBJS_MODULE_ATTRIB;
+		return JavaPluginImages.DESC_OBJS_ADD_EXPORTS_ATTRIB;
 	}
 
 	@Override
 	public String getNameLabel(ClasspathAttributeAccess attribute) {
-		return NewWizardMessages.CPListLabelProvider_module_label;
+		return NewWizardMessages.CPListLabelProvider_add_exports_full_label;
 	}
 
 	@Override
 	public String getValueLabel(ClasspathAttributeAccess access) {
-		String value= access.getClasspathAttribute().getValue();
-		return TRUE.equals(value) ? NewWizardMessages.CPListLabelProvider_module_yes : NewWizardMessages.CPListLabelProvider_module_no;
+		return access.getClasspathAttribute().getValue();
 	}
 
 	@Override
 	public boolean canEdit(ClasspathAttributeAccess attribute) {
-		IJavaProject project= attribute.getJavaProject();
-		return project != null && JavaModelUtil.is9OrHigher(project);
+		return true;
 	}
 
 	@Override
 	public boolean canRemove(ClasspathAttributeAccess attribute) {
-		return false;
+		return attribute.getClasspathAttribute().getValue() != null;
 	}
 
 	@Override
 	public IClasspathAttribute performEdit(Shell shell, ClasspathAttributeAccess attribute) {
-		throw new UnsupportedOperationException("should be handled specifically");
-//
-//		String initialValue= attribute.getClasspathAttribute().getValue();
-//		String newValue= TRUE.equals(initialValue) ? null : TRUE;
-//		return JavaCore.newClasspathAttribute(CPListElement.MODULE, newValue);
+		String initialValue= attribute.getClasspathAttribute().getValue();
+		IPath entryPath= attribute.getParentClasspassEntry().getPath();
+		IJavaElement[] sourceElements= ModuleAddExport.getTargetJavaElements(attribute.getJavaProject(), entryPath);
+		String newValue= BuildPathDialogAccess.configureAddExports(shell, sourceElements, initialValue);
+		if(null == newValue)	// Was the dialog cancelled?
+			return null;
+		return JavaCore.newClasspathAttribute(IClasspathAttribute.ADD_READS, newValue);
 	}
 
 	@Override
 	public IClasspathAttribute performRemove(ClasspathAttributeAccess attribute) {
-		return JavaCore.newClasspathAttribute(CPListElement.MODULE, null);
+		return JavaCore.newClasspathAttribute(IClasspathAttribute.ADD_READS, null);
 	}
 }

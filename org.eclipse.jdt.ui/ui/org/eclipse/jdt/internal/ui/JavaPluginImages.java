@@ -148,6 +148,7 @@ public class JavaPluginImages {
 
 	public static final String IMG_OBJS_JAVADOCTAG= NAME_PREFIX + "jdoc_tag_obj.gif"; 	//$NON-NLS-1$
 	public static final String IMG_OBJS_EXTERNAL_ANNOTATIONS = NAME_PREFIX + "external_annotation_location_attrib.gif"; 	//$NON-NLS-1$
+	public static final String IMG_OBJS_ADD_EXPORTS = NAME_PREFIX + "export_package.png"; 	//$NON-NLS-1$
 	public static final String IMG_OBJS_HTMLTAG= NAME_PREFIX + "html_tag_obj.gif"; 		//$NON-NLS-1$
 
 	public static final String IMG_OBJS_TEMPLATE= NAME_PREFIX + "template_obj.gif"; 		//$NON-NLS-1$
@@ -309,6 +310,8 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_MODULE_ATTRIB= createUnManaged(T_OBJ, "module_obj.png"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_EXTERNAL_ANNOTATION_LOCATION_ATTRIB= createManagedFromKey(T_OBJ, IMG_OBJS_EXTERNAL_ANNOTATIONS);
+
+	public static final ImageDescriptor DESC_OBJS_ADD_EXPORTS_ATTRIB= createManagedFromKey(T_OBJ, IMG_OBJS_ADD_EXPORTS);
 
 	public static final ImageDescriptor DESC_OBJS_ACCESSRULES_ATTRIB= createManagedFromKey(T_OBJ, IMG_OBJS_ACCESSRULES_ATTRIB);
 	public static final ImageDescriptor DESC_OBJS_NATIVE_LIB_PATH_ATTRIB= createUnManaged(T_OBJ, "native_lib_path_attrib.png"); //$NON-NLS-1$

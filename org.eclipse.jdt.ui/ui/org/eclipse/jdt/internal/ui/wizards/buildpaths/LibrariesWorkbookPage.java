@@ -78,8 +78,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
@@ -198,9 +196,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 
 
-	private class LibrariesAdapter implements IDialogFieldListener, ITreeListAdapter<CPListElement> {
-
-		private final Object[] EMPTY_ARR= new Object[0];
+	private class LibrariesAdapter extends CPListAdapter {
 
 		// -------- IListAdapter --------
 		@Override
@@ -225,28 +221,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 		@Override
 		public Object[] getChildren(TreeListDialogField<CPListElement> field, Object element) {
-			if (element instanceof CPListElement) {
-				return ((CPListElement) element).getChildren(false);
-			} else if (element instanceof CPListElementAttribute) {
+			if (element instanceof CPListElementAttribute) {
 				CPListElementAttribute attribute= (CPListElementAttribute) element;
 				if (CPListElement.ACCESSRULES.equals(attribute.getKey())) {
 					return (IAccessRule[]) attribute.getValue();
 				}
 			}
-			return EMPTY_ARR;
-		}
-
-		@Override
-		public Object getParent(TreeListDialogField<CPListElement> field, Object element) {
-			if (element instanceof CPListElementAttribute) {
-				return ((CPListElementAttribute) element).getParent();
-			}
-			return null;
-		}
-
-		@Override
-		public boolean hasChildren(TreeListDialogField<CPListElement> field, Object element) {
-			return getChildren(field, element).length > 0;
+			return super.getChildren(field, element);
 		}
 
 		// ---------- IDialogFieldListener --------
@@ -421,6 +402,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					}
 					changedAttributes.add(key); // collect the changed attributes
 				}
+			} else if (elem instanceof ModuleAddExport) {
+				removeAddExport((ModuleAddExport) elem);
 			}
 		}
 		if (selElements.isEmpty()) {
@@ -470,6 +453,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				if (curr.getParentContainer() != null) {
 					return false;
 				}
+			} else if (elem instanceof ModuleAddExport) {
+				return true;
 			} else { // unknown element
 				return false;
 			}
@@ -531,6 +516,15 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				if (res == AccessRulesDialog.SWITCH_PAGE) { // switch after updates and validation
 					dialog.performPageSwitch(fPageContainer);
 				}
+			}
+		} else if (key.equals(CPListElement.MODULE)) {
+			if (showAddExportDialog(getShell(), elem)) {
+				String[] changedAttributes= { CPListElement.MODULE };
+				attributeUpdated(selElement, changedAttributes);
+
+				fLibrariesList.refresh(elem);
+				fClassPathList.dialogFieldChanged(); // validate
+				updateEnabledState();
 			}
 		} else {
 			if (editCustomAttribute(getShell(), elem)) {
@@ -627,14 +621,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	 * @param field  the dilaog field
 	 */
 	private void libaryPageSelectionChanged(DialogField field) {
-		List<Object> selected= fLibrariesList.getSelectedElements();
-		boolean isModuleAttribute= selected.size() == 1
-				&& selected.get(0) instanceof CPListElementAttribute
-				&& CPListElement.MODULE.equals(((CPListElementAttribute) selected.get(0)).getKey());
-		fLibrariesList.getButton(IDX_EDIT).setText(isModuleAttribute
-				? NewWizardMessages.SourceContainerWorkbookPage_folders_toggle_button
-				: NewWizardMessages.LibrariesWorkbookPage_libraries_edit_button);
-
 		updateEnabledState();
 	}
 
