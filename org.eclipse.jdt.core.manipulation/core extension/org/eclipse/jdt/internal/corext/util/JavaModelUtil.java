@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -39,6 +40,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -106,6 +108,12 @@ public final class JavaModelUtil {
 	 * @since 3.13 BETA_JAVA9
 	 */
 	public static final String MODULE_INFO_JAVA= "module-info.java"; //$NON-NLS-1$
+
+	/**
+	 * The name of the module-info.class file.
+	 * @since 3.13 BETA_JAVA9
+	 */
+	public static final String MODULE_INFO_CLASS= "module-info.class"; //$NON-NLS-1$
 
 	/**
 	 * Finds a type container by container name. The returned element will be of type
@@ -957,6 +965,30 @@ public final class JavaModelUtil {
 	 */
 	public static boolean isModuleInfo(ICompilationUnit cu) {
 		return MODULE_INFO_JAVA.equals(cu.getElementName());
+	}
+
+	/**
+	 * Tells whether the given class file is the module-info.class.
+	 *
+	 * @param cf the class file to test
+	 * @return <code>true</code> if the given class file is the module-info.class
+	 * @since 3.13 BETA_JAVA9
+	 */
+	public static boolean isModuleInfo(IClassFile cf) {
+		return MODULE_INFO_CLASS.equals(cf.getElementName());
+	}
+
+	/**
+	 * Tells whether the given Java element represents a module.
+	 * 
+	 * @param javaElement the Java element to test
+	 * @return <code>true</code> if the given Java element represents a module.
+	 * @since 3.13 BETA_JAVA9
+	 */
+	public static boolean isModule(IJavaElement javaElement) {
+		return javaElement instanceof IModuleDescription
+				|| javaElement instanceof ICompilationUnit && isModuleInfo((ICompilationUnit) javaElement)
+				|| javaElement instanceof IClassFile && isModuleInfo((IClassFile) javaElement);
 	}
 
 	public static boolean isPolymorphicSignature(IMethod method) {

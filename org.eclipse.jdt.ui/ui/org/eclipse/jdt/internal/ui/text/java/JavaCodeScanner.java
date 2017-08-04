@@ -420,7 +420,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 	private List<ISourceVersionDependent> fVersionDependentRules= new ArrayList<>(3);
 
-	private boolean fIsModuleInfoEditor;
+	private boolean fIsModuleInfoCode;
 
 	/**
 	 * Creates a Java code scanner
@@ -435,13 +435,13 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	/**
 	 * Creates a Java code scanner
 	 *
-	 * @param manager	the color manager
-	 * @param store		the preference store
-	 * @param isModuleInfoEditor <code>true</code> if used for module-info.java editor
+	 * @param manager the color manager
+	 * @param store the preference store
+	 * @param isModuleInfoCode <code>true</code> if used for module-info code
 	 */
-	public JavaCodeScanner(IColorManager manager, IPreferenceStore store, boolean isModuleInfoEditor) {
+	public JavaCodeScanner(IColorManager manager, IPreferenceStore store, boolean isModuleInfoCode) {
 		super(manager, store);
-		fIsModuleInfoEditor= isModuleInfoEditor;
+		fIsModuleInfoCode= isModuleInfoCode;
 		initialize();
 	}
 
@@ -465,8 +465,8 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 		String version= getPreferenceStore().getString(SOURCE_VERSION);
 
-		// Create rules for JLS9 module-info.java editor
-		if (fIsModuleInfoEditor) {
+		// Create rules for JLS9 module-info code
+		if (fIsModuleInfoCode) {
 			return create9ModuleInfoRules(defaultToken, version);
 		}
 

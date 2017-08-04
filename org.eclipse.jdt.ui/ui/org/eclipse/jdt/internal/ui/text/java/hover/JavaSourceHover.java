@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -52,11 +56,11 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 
+import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
 import org.eclipse.jdt.ui.SharedASTProvider;
 
@@ -87,13 +91,49 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 	 */
 	private String fBracketHoverStatus;
 
-	/*
-	 * @see JavaElementHover
+	/**
+	 * The hovered Java element to get the source.
+	 * 
+	 * @since 3.13 BETA_JAVA9
 	 */
+	private IJavaElement fJavaElement;
+
+	class JavaSourceInformationInput {
+		private IJavaElement fElement;
+
+		private String fHoverInfo;
+
+		public JavaSourceInformationInput(IJavaElement javaElement, String hoverInfo) {
+			fElement= javaElement;
+			fHoverInfo= hoverInfo;
+		}
+
+		public IJavaElement getJavaElement() {
+			return fElement;
+		}
+
+		public String getHoverInfo() {
+			return fHoverInfo;
+		}
+	}
+
+	@Override
+	public Object getHoverInfo2(ITextViewer textViewer, IRegion hoverRegion) {
+		String hoverInfoString= getHoverInfo(textViewer, hoverRegion);
+		if (hoverInfoString == null) {
+			return null;
+		}
+		if (fJavaElement == null) {
+			return hoverInfoString;
+		}
+		return new JavaSourceInformationInput(fJavaElement, hoverInfoString);
+	}
+
 	@Override
 	@Deprecated
 	public String getHoverInfo(ITextViewer textViewer, IRegion region) {
 		IJavaElement[] result= getJavaElementsAt(textViewer, region);
+		fJavaElement= null;
 
 		fUpwardShiftInLines= 0;
 		fBracketHoverStatus= null;
@@ -105,16 +145,16 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 		if (result.length > 1)
 			return null;
 
-		IJavaElement curr= result[0];
-		if ((curr instanceof IMember || curr instanceof ILocalVariable || curr instanceof ITypeParameter) && curr instanceof ISourceReference) {
+		fJavaElement= result[0];
+		if ((fJavaElement instanceof IMember || fJavaElement instanceof ILocalVariable || fJavaElement instanceof ITypeParameter) && fJavaElement instanceof ISourceReference) {
 			try {
-				String source= ((ISourceReference) curr).getSource();
+				String source= ((ISourceReference) fJavaElement).getSource();
 
-				String[] sourceLines= getTrimmedSource(source, curr);
+				String[] sourceLines= getTrimmedSource(source, fJavaElement);
 				if (sourceLines == null)
 					return null;
 
-				String delim= StubUtility.getLineDelimiterUsed(curr);
+				String delim= StubUtility.getLineDelimiterUsed(fJavaElement);
 				source= Strings.concatenate(sourceLines, delim);
 
 				return source;

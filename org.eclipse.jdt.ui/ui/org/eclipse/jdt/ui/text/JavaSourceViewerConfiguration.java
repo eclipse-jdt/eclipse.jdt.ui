@@ -201,11 +201,47 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * @since 3.0
 	 */
 	public JavaSourceViewerConfiguration(IColorManager colorManager, IPreferenceStore preferenceStore, ITextEditor editor, String partitioning) {
+		this(colorManager, preferenceStore, editor, partitioning, isModuleInfo(editor));
+	}
+
+	/**
+	 * Creates a new Java source viewer configuration for viewers in the given editor using the given
+	 * preference store, the color manager and the specified document partitioning.
+	 * <p>
+	 * Creates a Java source viewer configuration in the new setup without text tools. Clients are
+	 * allowed to call
+	 * {@link JavaSourceViewerConfiguration#handlePropertyChangeEvent(PropertyChangeEvent)} and
+	 * disallowed to call {@link JavaSourceViewerConfiguration#getPreferenceStore()} on the resulting
+	 * Java source viewer configuration.
+	 * </p>
+	 *
+	 * @param colorManager the color manager
+	 * @param preferenceStore the preference store, can be read-only
+	 * @param editor the editor in which the configured viewer(s) will reside, or <code>null</code> if
+	 *            none
+	 * @param partitioning the document partitioning for this configuration, or <code>null</code> for
+	 *            the default partitioning
+	 * @param isModuleInfo <code>true</code> if {@link JavaCodeScanner} should be initialized for
+	 *            module-info code
+	 * @since 3.13 BETA_JAVA9
+	 */
+	public JavaSourceViewerConfiguration(IColorManager colorManager, IPreferenceStore preferenceStore, ITextEditor editor, String partitioning, boolean isModuleInfo) {
 		super(preferenceStore);
 		fColorManager= colorManager;
 		fTextEditor= editor;
 		fDocumentPartitioning= partitioning;
-		initializeScanners();
+		initializeScanners(isModuleInfo);
+	}
+
+	private static boolean isModuleInfo(ITextEditor editor) {
+		boolean isModuleInfo= false;
+		if (editor != null && editor.getEditorSite() != null) {
+			String id= editor.getEditorSite().getId();
+			if (JavaUI.ID_MODULE_INFO_EDITOR.equals(id) || JavaUI.ID_MODULE_INFO_CF_EDITOR.equals(id)) {
+				isModuleInfo= true;
+			}
+		}
+		return isModuleInfo;
 	}
 
 	/**
@@ -342,19 +378,14 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 	/**
 	 * Initializes the scanners.
+	 * 
+	 * @param isModuleInfo <code>true</code> if used for module-info code
 	 *
 	 * @since 3.0
 	 */
-	private void initializeScanners() {
+	private void initializeScanners(boolean isModuleInfo) {
 		Assert.isTrue(isNewSetup());
-		boolean isModuleInfoEditor= false;
-		if (fTextEditor != null && fTextEditor.getEditorSite() != null) {
-			String id= fTextEditor.getEditorSite().getId();
-			if (JavaUI.ID_MODULE_INFO_EDITOR.equals(id) || JavaUI.ID_MODULE_INFO_CF_EDITOR.equals(id)) {
-				isModuleInfoEditor= true;
-			}
-		}
-		fCodeScanner= new JavaCodeScanner(getColorManager(), fPreferenceStore, isModuleInfoEditor);
+		fCodeScanner= new JavaCodeScanner(getColorManager(), fPreferenceStore, isModuleInfo);
 		fMultilineCommentScanner= new JavaCommentScanner(getColorManager(), fPreferenceStore, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT);
 		fSinglelineCommentScanner= new JavaCommentScanner(getColorManager(), fPreferenceStore, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);
 		fStringScanner= new SingleTokenJavaScanner(getColorManager(), fPreferenceStore, IJavaColorConstants.JAVA_STRING);

@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -26,6 +30,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
+import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
 
 /**
  * A simple {@linkplain org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration Java source viewer configuration}.
@@ -41,6 +46,9 @@ public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfigu
 
 	private boolean fConfigureFormatter;
 
+	public static final String STANDARD= "standard"; //$NON-NLS-1$
+	public static final String MODULE= "module"; //$NON-NLS-1$
+
 	/**
 	 * Creates a new Java source viewer configuration for viewers in the given editor
 	 * using the given preference store, the color manager and the specified document partitioning.
@@ -53,6 +61,25 @@ public class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfigu
 	 */
 	public SimpleJavaSourceViewerConfiguration(IColorManager colorManager, IPreferenceStore preferenceStore, ITextEditor editor, String partitioning, boolean configureFormatter) {
 		super(colorManager, preferenceStore, editor, partitioning);
+		fConfigureFormatter= configureFormatter;
+	}
+
+	/**
+	 * Creates a new Java source viewer configuration for viewers in the given editor using the given
+	 * preference store, the color manager and the specified document partitioning.
+	 *
+	 * @param colorManager the color manager
+	 * @param preferenceStore the preference store, can be read-only
+	 * @param editor the editor in which the configured viewer(s) will reside, or <code>null</code> if
+	 *            none
+	 * @param partitioning the document partitioning for this configuration, or <code>null</code> for
+	 *            the default partitioning
+	 * @param configureFormatter <code>true</code> if a content formatter should be configured
+	 * @param isModule <code>true</code> if {@link JavaCodeScanner} should be initialized for
+	 *            module-info code
+	 */
+	public SimpleJavaSourceViewerConfiguration(IColorManager colorManager, IPreferenceStore preferenceStore, ITextEditor editor, String partitioning, boolean configureFormatter, boolean isModule) {
+		super(colorManager, preferenceStore, editor, partitioning, isModule);
 		fConfigureFormatter= configureFormatter;
 	}
 
