@@ -5,12 +5,17 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -33,8 +38,11 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * A base content provider for Java elements. It provides access to the
@@ -251,6 +259,27 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	 */
 	protected Object[] getPackageFragmentRootContent(IPackageFragmentRoot root) throws JavaModelException {
 		IJavaElement[] fragments= root.getChildren();
+		if (JavaModelUtil.is9OrHigher(root.getJavaProject())) {
+			ITypeRoot moduleRoot= getModuleRoot(root);
+			if (moduleRoot != null) {
+				IJavaElement defaultPackage= moduleRoot.getParent();
+				if (!JavaModelUtil.containsOrdinaryCompilationUnit((IPackageFragment) defaultPackage)) {
+					// replace "empty" default package with module-info
+					for (int i= 0; i < fragments.length; i++) {
+						if (fragments[i].equals(defaultPackage)) {
+							fragments= Arrays.copyOf(fragments, fragments.length);
+							fragments[i]= moduleRoot;
+							break;
+						}
+					}
+				} else {
+					// add module-info
+					int length= fragments.length;
+					fragments= Arrays.copyOf(fragments, length+1);
+					fragments[length]= moduleRoot;
+				}
+			}
+		}
 		if (isProjectPackageFragmentRoot(root)) {
 			return fragments;
 		}
@@ -258,6 +287,26 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		if (nonJavaResources == null)
 			return fragments;
 		return concatenate(fragments, nonJavaResources);
+	}
+
+	ITypeRoot getModuleRoot(IPackageFragmentRoot root) throws JavaModelException {
+		IJavaElement module= root.getModuleDescription();
+		if (module == null) {
+			// may still need to show an empty module-info.java, which otherwise would remain invisible
+			IPackageFragment dfltPack= root.getPackageFragment(""); //$NON-NLS-1$
+			if (dfltPack.exists()) {
+				for (IJavaElement child : dfltPack.getChildren()) {
+					if (child instanceof ITypeRoot
+							&& JavaModelUtil.isModuleInfo((ITypeRoot) child)
+							&& ((ITypeRoot) child).getChildren().length == 0) {
+						return (ITypeRoot) child;
+					}
+				}
+			}
+			return null;
+		} else {
+			return (ITypeRoot) module.getParent();
+		}
 	}
 
 	/**
@@ -315,9 +364,25 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	 */
 	protected Object[] getPackageContent(IPackageFragment fragment) throws JavaModelException {
 		if (fragment.getKind() == IPackageFragmentRoot.K_SOURCE) {
-			return concatenate(fragment.getCompilationUnits(), fragment.getNonJavaResources());
+			ITypeRoot[] compilationUnits= filterModuleInfo(fragment, fragment.getCompilationUnits());
+			return concatenate(compilationUnits, fragment.getNonJavaResources());
 		}
-		return concatenate(fragment.getClassFiles(), fragment.getNonJavaResources());
+		ITypeRoot[] classFiles= filterModuleInfo(fragment, fragment.getClassFiles());
+		return concatenate(classFiles, fragment.getNonJavaResources());
+	}
+
+	private ITypeRoot[] filterModuleInfo(IPackageFragment fragment, ITypeRoot[] units) {
+		if (fragment.isDefaultPackage() && JavaModelUtil.is9OrHigher(fragment.getJavaProject())) {
+			int count= 0;
+			ITypeRoot[] newUnits= new ITypeRoot[units.length];
+			for (int i= 0; i < units.length; i++) {
+				if (!JavaModelUtil.isModuleInfo(units[i]))
+					newUnits[count++]= units[i];
+			}
+			if (count < units.length)
+				return Arrays.copyOf(newUnits, count);
+		}
+		return units;
 	}
 
 	/**
@@ -466,6 +531,10 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			// we have to skip the package fragment root as the parent.
 			if (element instanceof IPackageFragment) {
 				return skipProjectPackageFragmentRoot((IPackageFragmentRoot) parent);
+			}
+			if (element instanceof ITypeRoot && JavaModelUtil.isModuleInfo((ITypeRoot) element)
+					&& parent instanceof IPackageFragment && ((IPackageFragment) parent).isDefaultPackage()) {
+				return parent.getParent(); // module-info in default package: skip the default package
 			}
 			return parent;
 		} else if (element instanceof IJarEntryResource) {

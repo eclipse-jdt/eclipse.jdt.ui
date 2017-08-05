@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2015 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -59,6 +63,7 @@ import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -282,6 +287,13 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 							JavaPlugin.log(e);
 							packages.add(object);
 						}
+					} else if (object instanceof ITypeRoot && JavaModelUtil.isModuleInfo((ITypeRoot) object)) {
+						try {
+							packages.add(((ITypeRoot) object).getModule()); // skip the compilation unit
+						} catch (JavaModelException e) {
+							JavaPlugin.log(e);
+							packages.add(object);
+						}
 					} else {
 						packages.add(object);
 					}
@@ -334,6 +346,11 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				IType declaringType= ((IType) element).getDeclaringType();
 				if (declaringType != null)
 					return declaringType;
+			}
+			if (element instanceof IModuleDescription) {
+				IJavaElement parent= ((IModuleDescription) element).getParent();
+				if (parent instanceof ITypeRoot && parent.getParent().exists()) // no containing package if not on the classpath
+					element= parent;
 			}
 
 			Object result= fParent.getParent(element);

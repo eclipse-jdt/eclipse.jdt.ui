@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -979,6 +980,18 @@ public final class JavaModelUtil {
 	}
 
 	/**
+	 * Tells whether the given type root represents a module.
+	 * 
+	 * @param typeRoot the type root to test
+	 * @return <code>true</code> if the given type root is a module-info.java CU or a module-info.class class file.
+	 * @since 3.13 BETA_JAVA9
+	 */
+	public static boolean isModuleInfo(ITypeRoot typeRoot) {
+		return typeRoot instanceof ICompilationUnit && isModuleInfo((ICompilationUnit) typeRoot)
+				|| typeRoot instanceof IClassFile && isModuleInfo((IClassFile) typeRoot);
+	}
+
+	/**
 	 * Tells whether the given Java element represents a module.
 	 * 
 	 * @param javaElement the Java element to test
@@ -987,8 +1000,24 @@ public final class JavaModelUtil {
 	 */
 	public static boolean isModule(IJavaElement javaElement) {
 		return javaElement instanceof IModuleDescription
-				|| javaElement instanceof ICompilationUnit && isModuleInfo((ICompilationUnit) javaElement)
-				|| javaElement instanceof IClassFile && isModuleInfo((IClassFile) javaElement);
+				|| javaElement instanceof ITypeRoot && isModuleInfo((ITypeRoot) javaElement);
+	}
+
+	/**
+	 * Tells whether the given package fragment contains any ordinary compilation unit,
+	 * not counting the modular compilation unit module-info.java nor its class file module-info.class.
+	 * @param fragment a package fragment to test
+	 * @return true iff at least one ordinary compilation unit (or class file) was found. 
+	 * @throws JavaModelException if the package fragment does not exist or if an
+	 *      exception occurs while accessing its corresponding resource
+	 * @since 3.13 BETA_JAVA9
+	 */
+	public static boolean containsOrdinaryCompilationUnit(IPackageFragment fragment) throws JavaModelException {
+		for (IJavaElement child : fragment.getChildren()) {
+			if (child instanceof ITypeRoot && !isModuleInfo((ITypeRoot) child))
+				return true;
+		}
+		return false;
 	}
 
 	public static boolean isPolymorphicSignature(IMethod method) {
