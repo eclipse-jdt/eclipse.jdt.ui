@@ -938,7 +938,16 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		private boolean allowSettersForFinals() {
 			return fAllowSettersForFinals;
 		}
-
+		
+		@Override
+		protected Button createButton(Composite parent, int id, String label, boolean defaultButton) {
+			if(id == IDialogConstants.OK_ID) {
+				return super.createButton(parent, id, ActionMessages.GetterSetterTreeSelectionDialog_generate_button_label, defaultButton);
+			} else {
+				return super.createButton(parent, id, label, defaultButton);
+			}
+		}
+		
 		public void allowSettersForFinals(boolean allowSettersForFinals) {
 			if (fAllowSettersForFinals != allowSettersForFinals) {
 				fAllowSettersForFinals= allowSettersForFinals;

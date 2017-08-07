@@ -179,6 +179,7 @@ public final class ActionMessages extends NLS {
 	public static String GetterSetterTreeSelectionDialog_alpha_pair_sort;
 	public static String GetterSetterTreeSelectionDialog_alpha_method_sort;
 	public static String GetterSetterTreeSelectionDialog_sort_label;
+	public static String GetterSetterTreeSelectionDialog_generate_button_label;
 	public static String SourceActionDialog_enterAt_label;
 	public static String SourceActionDialog_modifier_group;
 	public static String SourceActionDialog_modifier_public;
