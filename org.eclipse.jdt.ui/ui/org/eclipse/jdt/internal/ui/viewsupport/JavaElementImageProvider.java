@@ -31,6 +31,7 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
@@ -234,7 +235,12 @@ public class JavaElementImageProvider {
 
 				case IJavaElement.TYPE: {
 					IType type= (IType) element;
-
+					if (JavaModelUtil.is9OrHigher(type.getJavaProject())) {
+						IJavaElement parent= type.getParent();
+						if (parent instanceof IClassFile && JavaModelUtil.isModuleInfo((IClassFile) parent)) {
+							return JavaPluginImages.DESC_OBJS_MODULE;
+						}
+					}
 					IType declType= type.getDeclaringType();
 					boolean isInner= declType != null;
 					boolean isInInterfaceOrAnnotation= isInner && JavaModelUtil.isInterfaceOrAnnotation(declType);

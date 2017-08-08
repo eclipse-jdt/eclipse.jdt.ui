@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -132,7 +136,7 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 	}
 
 	private void addOverlays(Object element, IDecoration decoration) throws JavaModelException {
-		if (element instanceof ICompilationUnit) {
+		if (element instanceof ICompilationUnit && !JavaModelUtil.isModuleInfo((ICompilationUnit) element)) {
 			ICompilationUnit unit= (ICompilationUnit) element;
 			if (unit.isOpen()) {
 				IType mainType= unit.findPrimaryType();
@@ -144,7 +148,7 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 			String typeName= JavaCore.removeJavaLikeExtension(unit.getElementName());
 			addOverlaysWithSearchEngine(unit, typeName, decoration);
 			
-		} else if (element instanceof IClassFile) {
+		} else if (element instanceof IClassFile && !JavaModelUtil.isModuleInfo((IClassFile) element)) {
 			IClassFile classFile= (IClassFile) element;
 			if (classFile.isOpen()) {
 				addOverlaysFromFlags(classFile.getType().getFlags(), decoration);
