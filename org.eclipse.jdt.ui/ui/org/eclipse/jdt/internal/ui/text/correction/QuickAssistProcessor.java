@@ -2572,7 +2572,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		SimpleName name= (SimpleName) node;
 		IBinding binding= name.resolveBinding();
-		if (binding != null && binding.getKind() == IBinding.PACKAGE) {
+		if (binding != null && (binding.getKind() == IBinding.PACKAGE || binding.getKind() == IBinding.MODULE)) {
 			return false;
 		}
 
