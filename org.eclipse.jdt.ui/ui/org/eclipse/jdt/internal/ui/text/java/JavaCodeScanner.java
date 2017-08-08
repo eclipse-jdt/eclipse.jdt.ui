@@ -44,6 +44,7 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.CombinedWordRule;
+import org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher;
 import org.eclipse.jdt.internal.ui.text.ISourceVersionDependent;
 import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 import org.eclipse.jdt.internal.ui.text.JavaWordDetector;
@@ -467,7 +468,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 		// Create rules for JLS9 module-info code
 		if (fIsModuleInfoCode) {
-			return create9ModuleInfoRules(defaultToken, version);
+			return create9ModuleInfoRules(defaultToken);
 		}
 
 		// Add rule for character constants.
@@ -537,17 +538,14 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		return rules;
 	}
 
-	private List<IRule> create9ModuleInfoRules(Token defaultToken, String version) {
+	private List<IRule> create9ModuleInfoRules(Token defaultToken) {
 		// Add word rule for new keywords
-		VersionedWordMatcher j9ModuleInfoMatcher= new VersionedWordMatcher(defaultToken, JavaCore.VERSION_9, version);
+		WordMatcher j9ModuleInfoMatcher= new WordMatcher();
 		Token token= getToken(IJavaColorConstants.JAVA_KEYWORD);
 		for (int i= 0; i < fgJava9ModuleInfoKeywords.length; i++)
 			j9ModuleInfoMatcher.addWord(fgJava9ModuleInfoKeywords[i], token);
 
-		CombinedWordRule combinedWordRule= new CombinedWordRule(new JavaWordDetector(), defaultToken);
-		combinedWordRule.addWordMatcher(j9ModuleInfoMatcher);
-
-		fVersionDependentRules.add(j9ModuleInfoMatcher);
+		CombinedWordRule combinedWordRule= new CombinedWordRule(new JavaWordDetector(), j9ModuleInfoMatcher, defaultToken);
 
 		setDefaultReturnToken(defaultToken);
 		return new ArrayList<>(Arrays.asList(combinedWordRule));
