@@ -237,7 +237,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		boolean isModuleInfo= false;
 		if (editor != null && editor.getEditorSite() != null) {
 			String id= editor.getEditorSite().getId();
-			if (JavaUI.ID_MODULE_INFO_EDITOR.equals(id) || JavaUI.ID_MODULE_INFO_CF_EDITOR.equals(id)) {
+			if (JavaUI.ID_MODULE_INFO_EDITOR.equals(id) || JavaUI.ID_MODULE_INFO_CF_EDITOR.equals(id) || JavaUI.ID_CF_EDITOR_NO_SOURCE.equals(id)) {
 				isModuleInfo= true;
 			}
 		}
