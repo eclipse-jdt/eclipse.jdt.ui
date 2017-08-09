@@ -426,6 +426,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_NEWJPRJ= createUnManaged(T_WIZBAN, "newjprj_wiz.png"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWSRCFOLDR= createUnManaged(T_WIZBAN, "newsrcfldr_wiz.png"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWPACK= createUnManaged(T_WIZBAN, "newpack_wiz.png"); 			//$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_NEWMODULE= createUnManaged(T_WIZBAN, "newmodule_wiz.png"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWSCRAPPAGE= createUnManaged(T_WIZBAN, "newsbook_wiz.png");		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_JAVA_LAUNCH= createUnManaged(T_WIZBAN, "java_app_wiz.png"); 		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_JAVA_ATTACH= createUnManaged(T_WIZBAN, "java_attach_wiz.png"); 	//$NON-NLS-1$

@@ -769,6 +769,14 @@ public final class NewWizardMessages extends NLS {
 	public static String EditVariableEntryDialog_filename_empty;
 
 	public static String CPListLabelProvider_external_annotations_location_label;
+	
+	public static String NewModuleInfoWizard_title;
+	public static String NewModuleInfoWizardPage_title;
+	public static String NewModuleInfoWizardPage_description;
+	public static String NewModuleInfoWizardPage_module_label;
+	public static String NewModuleInfoWizardPage_error_InvalidModuleName;
+	public static String NewModuleInfoWizardPage_warning_DiscouragedModuleName;
+	public static String NewModuleInfoWizardPage_error_EnterName;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, NewWizardMessages.class);

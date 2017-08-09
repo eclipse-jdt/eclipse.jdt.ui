@@ -21,10 +21,7 @@ import java.util.List;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
@@ -32,33 +29,28 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IObjectActionDelegate;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.ide.IDE;
-import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
+import org.eclipse.ui.IWorkbenchWizard;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IModuleDescription;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.util.InfoFilesUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.wizards.NewModuleInfoWizard;
 
 public class CreateModuleInfoAction implements IObjectActionDelegate {
 
 	private static final String MODULE_INFO_JAVA_FILENAME= JavaModelUtil.MODULE_INFO_JAVA;
 
 	private ISelection fSelection;
-
+	
 	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		fSelection= selection;
@@ -119,91 +111,13 @@ public class CreateModuleInfoAction implements IObjectActionDelegate {
 					}
 				}
 
-				if (targetPkgFragmentRoot == null) {
-					targetPkgFragmentRoot= packageFragmentRoots[0];
-				}
-
-				createAndOpenFile(targetPkgFragmentRoot, packageFragmentRoots);
-
+				IWorkbenchWizard moduleInfoWizard= new NewModuleInfoWizard(javaProject, packageFragmentRoots, targetPkgFragmentRoot);
+				WizardDialog dialog= new WizardDialog(getDisplay().getActiveShell(), moduleInfoWizard);
+				dialog.setHelpAvailable(false);
+				dialog.create();				
+				dialog.open();
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
-			}
-		}
-	}
-
-	private void createAndOpenFile(IPackageFragmentRoot targetPkgFragmentRoot, IPackageFragmentRoot[] packageFragmentRoots) throws CoreException {
-		createModuleInfoJava(targetPkgFragmentRoot, packageFragmentRoots);
-
-		IFile file= ((IFolder) targetPkgFragmentRoot.getCorrespondingResource()).getFile(MODULE_INFO_JAVA_FILENAME);
-		if (file.exists()) {
-			BasicNewResourceWizard.selectAndReveal(file, JavaPlugin.getActiveWorkbenchWindow());
-			openFile(file);
-		}
-	}
-
-	private void createModuleInfoJava(IPackageFragmentRoot targetPkgFragmentRoot, IPackageFragmentRoot[] packageFragmentRoots) throws CoreException {
-		String fileContent= getModuleInfoFileContent(packageFragmentRoots);
-		IPackageFragment defaultPkg= targetPkgFragmentRoot.getPackageFragment(""); //$NON-NLS-1$
-		InfoFilesUtil.createInfoJavaFile(MODULE_INFO_JAVA_FILENAME, fileContent.toString(), defaultPkg, new NullProgressMonitor());
-	}
-
-	private String getModuleInfoFileContent(IPackageFragmentRoot[] packageFragmentRoots) throws CoreException {
-		List<String> exportedPackages= new ArrayList<>();
-		for (IPackageFragmentRoot packageFragmentRoot : packageFragmentRoots) {
-			for (IJavaElement child : packageFragmentRoot.getChildren()) {
-				if (child instanceof IPackageFragment) {
-					IPackageFragment pkgFragment= (IPackageFragment) child;
-					if (!pkgFragment.isDefaultPackage() && pkgFragment.getCompilationUnits().length != 0) {
-						exportedPackages.add(pkgFragment.getElementName());
-					}
-				}
-			}
-		}
-
-		IJavaProject javaProject= packageFragmentRoots[0].getJavaProject();
-
-		String[] requiredModules= JavaCore.getReferencedModules(javaProject);
-
-		IModuleDescription moduleDescription= javaProject.getModuleDescription();
-		String moduleName= moduleDescription != null ? moduleDescription.getElementName() : javaProject.getElementName();
-
-		StringBuilder fileContent= new StringBuilder();
-		fileContent.append("module "); //$NON-NLS-1$
-		fileContent.append(moduleName);
-		fileContent.append(" {"); //$NON-NLS-1$
-
-		for (String exportedPkg : exportedPackages) {
-			fileContent.append("exports "); //$NON-NLS-1$
-			fileContent.append(exportedPkg);
-			fileContent.append(";"); //$NON-NLS-1$
-		}
-
-		for (String requiredModule : requiredModules) {
-			fileContent.append("requires "); //$NON-NLS-1$
-			fileContent.append(requiredModule);
-			fileContent.append(';');
-		}
-
-		fileContent.append('}');
-
-		return fileContent.toString();
-	}
-
-	private void openFile(final IFile file) {
-		final IWorkbenchPage activePage= JavaPlugin.getActivePage();
-		if (activePage != null) {
-			final Display display= getDisplay();
-			if (display != null) {
-				display.asyncExec(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							IDE.openEditor(activePage, file, true);
-						} catch (PartInitException e) {
-							JavaPlugin.log(e);
-						}
-					}
-				});
 			}
 		}
 	}
