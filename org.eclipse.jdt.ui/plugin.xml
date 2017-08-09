@@ -1038,12 +1038,22 @@
             symbolicFontName="org.eclipse.jdt.ui.editors.textfont">
       </editor>
       <editor
-            name="%ModuleInfoEditorName"
+            name="%ModuleInfoClassFileViewerName"
             icon="$nl$/icons/full/obj16/classf_obj.png"
             filenames="module-info.class"
             class="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor"
             contributorClass="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorActionContributor"
             id="org.eclipse.jdt.ui.ModuleInfoClassFileEditor"
+            default="true"
+            symbolicFontName="org.eclipse.jdt.ui.editors.textfont">
+      </editor>
+      <editor
+            name="%ModuleInfoClassFileViewerName"
+            icon="$nl$/icons/full/obj16/classf_obj.png"
+            filenames="module-info.class without source"
+            class="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor"
+            contributorClass="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorActionContributor"
+            id="org.eclipse.jdt.ui.ModuleInfoClassFileEditorNoSource"
             default="true"
             symbolicFontName="org.eclipse.jdt.ui.editors.textfont">
       </editor>

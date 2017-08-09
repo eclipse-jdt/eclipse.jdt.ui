@@ -156,14 +156,6 @@ public final class JavaUI {
 	public static final String ID_CF_EDITOR=			"org.eclipse.jdt.ui.ClassFileEditor"; //$NON-NLS-1$
 
 	/**
-	 * The editor part id of the editor that presents Java binary class files with no source (value
-	 * <code>"org.eclipse.jdt.ui.ClassFileEditorNoSource"</code>).
-	 * 
-	 * @since 3.13 BETA_JAVA9
-	 */
-	public static final String ID_CF_EDITOR_NO_SOURCE= "org.eclipse.jdt.ui.ClassFileEditorNoSource"; //$NON-NLS-1$
-
-	/**
 	 * The editor part id of the code snippet editor
 	 * (value <code>"org.eclipse.jdt.ui.SnippetEditor"</code>).
 	 */
@@ -184,6 +176,14 @@ public final class JavaUI {
 	 * @since 3.13 BETA_JAVA9
 	 */
 	public static final String ID_MODULE_INFO_CF_EDITOR= "org.eclipse.jdt.ui.ModuleInfoClassFileEditor"; //$NON-NLS-1$
+
+	/**
+	 * The editor part id of the module-info.class editor with no source (value
+	 * <code>"org.eclipse.jdt.ui.ModuleInfoClassFileEditorNoSource"</code>).
+	 * 
+	 * @since 3.13 BETA_JAVA9
+	 */
+	public static final String ID_MODULE_INFO_CF_EDITOR_NO_SOURCE= "org.eclipse.jdt.ui.ModuleInfoClassFileEditorNoSource"; //$NON-NLS-1$
 
 	/**
 	 * The view part id of the Packages view
