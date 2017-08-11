@@ -179,6 +179,9 @@ public class ProblemNode extends ASTAttribute {
 			case CategorizedProblem.CAT_RESTRICTION:
 				buf.append("Restriction");
 				break;
+			case CategorizedProblem.CAT_MODULE:
+				buf.append("Module");
+				break;
 			default:
 				buf.append("<UNKNOWN CATEGORY>");
 				break;

@@ -389,6 +389,8 @@ public class Java50Fix extends CompilationUnitRewriteOperationsFix {
 					return true;
 				if (categoryID == CategorizedProblem.CAT_INTERNAL)
 					return true;
+				if (categoryID == CategorizedProblem.CAT_MODULE)
+					return true;
 			}
 		}
 
