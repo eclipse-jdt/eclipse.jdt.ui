@@ -560,6 +560,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_PB_DEPRECATION_WHEN_OVERRIDING= getJDTCoreKey(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD);
 	private static final Key PREF_PB_TERMINAL_DEPRECATION= getJDTCoreKey(JavaCore.COMPILER_PB_TERMINAL_DEPRECATION);
 
+	private static final Key PREF_PB_API_LEAKS= getJDTCoreKey(JavaCore.COMPILER_PB_API_LEAKS);
+
 	private static final Key PREF_PB_HIDDEN_CATCH_BLOCK= getJDTCoreKey(JavaCore.COMPILER_PB_HIDDEN_CATCH_BLOCK);
 	private static final Key PREF_PB_UNUSED_LOCAL= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_LOCAL);
 	private static final Key PREF_PB_UNUSED_PARAMETER= getJDTCoreKey(JavaCore.COMPILER_PB_UNUSED_PARAMETER);
@@ -704,6 +706,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		return new Key[] {
 				PREF_PB_OVERRIDING_PACKAGE_DEFAULT_METHOD,
 				PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, PREF_PB_DEPRECATION, PREF_PB_TERMINAL_DEPRECATION, PREF_PB_HIDDEN_CATCH_BLOCK, PREF_PB_UNUSED_LOCAL,
+				PREF_PB_API_LEAKS,
 				PREF_PB_UNUSED_PARAMETER, PREF_PB_UNUSED_EXCEPTION_PARAMETER, PREF_PB_UNUSED_PARAMETER_INCLUDE_DOC_COMMENT_REFERENCE,
 				PREF_PB_SYNTHETIC_ACCESS_EMULATION, PREF_PB_NON_EXTERNALIZED_STRINGS,
 				PREF_PB_UNUSED_IMPORT, PREF_PB_UNUSED_LABEL,
@@ -1012,6 +1015,17 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_discourraged_reference_label;
 		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_DISCOURRAGED_REFERENCE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
+		// --- module
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_module;
+		twistieKey= OptionsConfigurationBlock.getLocalKey("ProblemSeveritiesConfigurationBlock_section_module"); //$NON-NLS-1$
+		section= fFilteredPrefTree.addExpandableComposite(composite, label, nColumns, twistieKey, null, false);
+		excomposite= getExpandableComposite(twistieKey);
+
+		inner= createInnerComposite(excomposite, nColumns, composite.getFont());
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_api_leak_label;
+		node= fFilteredPrefTree.addComboBox(inner, label, PREF_PB_API_LEAKS, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, defaultIndent, section);
 
 		// --- unnecessary_code
 

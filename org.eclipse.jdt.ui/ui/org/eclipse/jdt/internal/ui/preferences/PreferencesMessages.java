@@ -385,6 +385,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_section_unnecessary_code;
 	public static String ProblemSeveritiesConfigurationBlock_section_code_style;
 	public static String ProblemSeveritiesConfigurationBlock_section_deprecations;
+	public static String ProblemSeveritiesConfigurationBlock_section_module;
 	public static String ProblemSeveritiesConfigurationBlock_section_name_shadowing;
 	public static String ProblemSeveritiesConfigurationBlock_section_null_analysis;
 	public static String ProblemSeveritiesConfigurationBlock_section_annotations;
@@ -450,6 +451,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_terminal_deprecation_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_deprecation_in_deprecation_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_deprecation_when_overriding_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_api_leak_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_empty_statement_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unnecessary_type_check_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_incomplete_enum_switch_label;
