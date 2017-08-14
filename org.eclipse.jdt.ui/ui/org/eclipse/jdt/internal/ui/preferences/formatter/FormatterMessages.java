@@ -293,6 +293,8 @@ final class FormatterMessages extends NLS {
 	public static String LineWrappingTabPage_indentation_by_one;
 	public static String LineWrappingTabPage_class_decls;
 	public static String LineWrappingTabPage_method_decls;
+	public static String LineWrappingTabPage_module_descriptions;
+	public static String LineWrappingTabPage_module_statements;
 	public static String LineWrappingTabPage_constructor_decls;
 	public static String LineWrappingTabPage_function_calls;
 	public static String LineWrappingTabPage_expressions;

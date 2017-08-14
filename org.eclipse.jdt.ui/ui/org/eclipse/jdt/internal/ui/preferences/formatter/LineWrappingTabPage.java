@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -67,15 +71,21 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		public final String key;
 		public final String name;
 		public final String previewText;
+		public final boolean isModuleInfo;
 		public final List<Category> children;
 		public final List<Preference> preferences;
 
 		public int index;
 
 		public Category(String _key, String _previewText, String _name) {
+			this(_key, _previewText, _name, false);
+		}
+
+		public Category(String _key, String _previewText, String _name, boolean _isModuleInfo) {
 			this.key= _key;
 			this.name= _name;
 			this.previewText= _previewText != null ? createPreviewHeader(_name) + _previewText : null;
+			this.isModuleInfo = _isModuleInfo;
 			children= new ArrayList<>();
 			preferences= new ArrayList<>();
 		}
@@ -84,7 +94,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		 * @param _name Category name
 		 */
 		public Category(String _name) {
-		    this(null, null, _name);
+		    this(null, null, _name, false);
 		}
 
 		@Override
@@ -606,6 +616,15 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		"}\n", //$NON-NLS-1$
 		FormatterMessages.LineWrappingTabPage_type_parameters
 	);
+	
+	private final Category fModuleStatementsCategory= new Category(
+		DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_MODULE_STATEMENTS,
+		"module example.module0 {\n" +  //$NON-NLS-1$
+		"	provides example.other.module1.SomeService with example.module0.Service1, example.module0.Service2;\n" +  //$NON-NLS-1$
+		"}", //$NON-NLS-1$
+		FormatterMessages.LineWrappingTabPage_module_statements,
+		true
+	);
 
 	/**
 	 * The default preview line width.
@@ -737,6 +756,9 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		parameterizedTypes.children.add(fTypeArguments);
 		parameterizedTypes.children.add(fTypeParameters);
 
+		final Category moduleDescriptions= new Category(null, null, FormatterMessages.LineWrappingTabPage_module_descriptions, true);
+		moduleDescriptions.children.add(fModuleStatementsCategory);
+
 		final List<Category> root= new ArrayList<>();
 		root.add(annotations);
 		root.add(classDeclarations);
@@ -747,6 +769,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 		root.add(expressions);
 		root.add(statements);
 		root.add(parameterizedTypes);
+		root.add(moduleDescriptions);
 
 		return root;
 	}
@@ -925,6 +948,7 @@ public class LineWrappingTabPage extends FormatterTabPage {
 	}
 
 	protected void setPreviewText(String text) {
+		fPreview.setModuleInfoMode(fSelectionState.getElements().get(0).isModuleInfo);
 		final String normalSetting= fWorkingValues.get(LINE_SPLIT);
 		fWorkingValues.put(LINE_SPLIT, fPreviewPreferences.get(LINE_SPLIT));
 		fPreview.setPreviewText(text);
