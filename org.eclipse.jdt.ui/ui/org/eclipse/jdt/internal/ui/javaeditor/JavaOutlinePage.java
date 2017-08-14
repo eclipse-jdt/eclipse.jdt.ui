@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -642,8 +646,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					Map<String, String> formatterSettings= new HashMap<>(compilationUnit.getJavaProject().getOptions(true));
 					String content= compilationUnit.getBuffer().getContents();
 					String lineDelimiter= TextUtilities.getDefaultLineDelimiter(document);
+					int kind = (JavaModelUtil.isModuleInfo(compilationUnit) ? CodeFormatter.K_MODULE_INFO : CodeFormatter.K_COMPILATION_UNIT) | CodeFormatter.F_INCLUDE_COMMENTS;
 
-					TextEdit edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS, content, regions, 0, lineDelimiter, formatterSettings);
+					TextEdit edit= CodeFormatterUtil.reformat(kind, content, regions, 0, lineDelimiter, formatterSettings);
 					edit.apply(javaSourceViewer.getDocument());
 
 				} catch (CoreException e) {
