@@ -358,7 +358,7 @@ public class ExternalAnnotationsAttachmentBlock {
 			currPath= currPath.removeLastSegments(1);
 		}
 
-		FileDialog dialog= new FileDialog(getShell());
+		FileDialog dialog= new FileDialog(getShell(), SWT.SHEET);
 		dialog.setText(NewWizardMessages.AnnotationsAttachmentBlock_extjardialog_text);
 		dialog.setFilterExtensions(ArchiveFileFilter.JAR_ZIP_FILTER_EXTENSIONS);
 		dialog.setFilterPath(currPath.toOSString());
@@ -378,7 +378,7 @@ public class ExternalAnnotationsAttachmentBlock {
 			currPath= currPath.removeLastSegments(1);
 		}
 
-		DirectoryDialog dialog= new DirectoryDialog(getShell());
+		DirectoryDialog dialog= new DirectoryDialog(getShell(), SWT.SHEET);
 		dialog.setMessage(NewWizardMessages.AnnotationsAttachmentBlock_extfolderdialog_message);
 		dialog.setText(NewWizardMessages.AnnotationsAttachmentBlock_extfolderdialog_text);
 		dialog.setFilterPath(currPath.toOSString());

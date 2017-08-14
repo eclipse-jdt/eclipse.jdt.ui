@@ -340,7 +340,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	private List<ImportOrderEntry> loadImportOrder() {
 		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 
-		FileDialog dialog= new FileDialog(getShell(), SWT.OPEN);
+		FileDialog dialog= new FileDialog(getShell(), SWT.OPEN | SWT.SHEET);
 		dialog.setText(PreferencesMessages.ImportOrganizeConfigurationBlock_loadDialog_title);
 		dialog.setFilterExtensions(new String[] {"*.importorder", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		String lastPath= dialogSettings.get(DIALOGSETTING_LASTLOADPATH);
@@ -377,7 +377,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	private void saveImportOrder(List<ImportOrderEntry> elements) {
 		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 
-		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
+		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE | SWT.SHEET);
 		dialog.setText(PreferencesMessages.ImportOrganizeConfigurationBlock_saveDialog_title);
 		dialog.setFilterExtensions(new String[] {"*.importorder", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		dialog.setFileName("example"); //$NON-NLS-1$

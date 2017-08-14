@@ -363,7 +363,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		@Override
 		public void changeControlPressed(DialogField field) {
 			String label= isSave() ? PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_filedialog_save_title : PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_filedialog_load_title;
-			FileDialog dialog= new FileDialog(getShell(), isSave() ? SWT.SAVE : SWT.OPEN);
+			FileDialog dialog= new FileDialog(getShell(), SWT.SHEET | (isSave() ? SWT.SAVE : SWT.OPEN));
 			dialog.setText(label);
 			dialog.setFilterExtensions(new String[] {"*.userlibraries", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 			String lastPath= fLocationField.getText();
@@ -1440,7 +1440,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		}
 		String title= (existing == null) ? PreferencesMessages.UserLibraryPreferencePage_browsejar_new_title : PreferencesMessages.UserLibraryPreferencePage_browsejar_edit_title;
 
-		FileDialog dialog= new FileDialog(getShell(), existing == null ? SWT.MULTI : SWT.SINGLE);
+		FileDialog dialog= new FileDialog(getShell(), SWT.SHEET | (existing == null ? SWT.MULTI : SWT.SINGLE));
 		dialog.setText(title);
 		dialog.setFilterExtensions(ArchiveFileFilter.ALL_ARCHIVES_FILTER_EXTENSIONS);
 		dialog.setFilterPath(lastUsedPath);

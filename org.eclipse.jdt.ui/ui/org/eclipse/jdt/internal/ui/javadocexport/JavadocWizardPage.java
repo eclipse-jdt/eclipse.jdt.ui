@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.io.File;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -94,7 +95,7 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 	}
 
 	protected void handleFileBrowseButtonPressed(Text text, String[] extensions, String title) {
-		FileDialog dialog= new FileDialog(text.getShell());
+		FileDialog dialog= new FileDialog(text.getShell(), SWT.SHEET);
 		dialog.setText(title);
 		dialog.setFilterExtensions(extensions);
 		String dirName= text.getText();
@@ -110,7 +111,7 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 	}
 
 	protected String handleFolderBrowseButtonPressed(String dir, String title, String message) {
-		DirectoryDialog dialog= new DirectoryDialog(getShell());
+		DirectoryDialog dialog= new DirectoryDialog(getShell(), SWT.SHEET);
 		dialog.setFilterPath(dir);
 		dialog.setText(title);
 		dialog.setMessage(message);

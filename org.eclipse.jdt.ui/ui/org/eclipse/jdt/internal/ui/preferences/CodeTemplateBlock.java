@@ -472,7 +472,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	}
 
 	private void import_() {
-		FileDialog dialog= new FileDialog(getShell());
+		FileDialog dialog= new FileDialog(getShell(), SWT.SHEET);
 		dialog.setText(PreferencesMessages.CodeTemplateBlock_import_title);
 		dialog.setFilterExtensions(new String[] {PreferencesMessages.CodeTemplateBlock_import_extension});
 		String path= dialog.open();
@@ -539,7 +539,7 @@ public class CodeTemplateBlock extends OptionsConfigurationBlock {
 	}
 
 	private void export(TemplatePersistenceData[] templates) {
-		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
+		FileDialog dialog= new FileDialog(getShell(), SWT.SAVE | SWT.SHEET);
 		String text= templates.length == 1 ? PreferencesMessages.CodeTemplateBlock_export_title_singular : Messages.format(PreferencesMessages.CodeTemplateBlock_export_title_plural, String
 				.valueOf(templates.length));
 		dialog.setText(text);

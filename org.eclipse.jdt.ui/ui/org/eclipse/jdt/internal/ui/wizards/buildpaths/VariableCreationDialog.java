@@ -262,7 +262,7 @@ public class VariableCreationDialog extends StatusDialog {
 	private IPath chooseExtJarFile() {
 		String initPath= getInitPath();
 
-		FileDialog dialog= new FileDialog(getShell());
+		FileDialog dialog= new FileDialog(getShell(), SWT.SHEET);
 		dialog.setText(NewWizardMessages.VariableCreationDialog_extjardialog_text);
 		dialog.setFilterExtensions(ArchiveFileFilter.ALL_ARCHIVES_FILTER_EXTENSIONS);
 		dialog.setFilterPath(initPath);
@@ -277,7 +277,7 @@ public class VariableCreationDialog extends StatusDialog {
 	private IPath chooseExtDirectory() {
 		String initPath= getInitPath();
 
-		DirectoryDialog dialog= new DirectoryDialog(getShell());
+		DirectoryDialog dialog= new DirectoryDialog(getShell(), SWT.SHEET);
 		dialog.setText(NewWizardMessages.VariableCreationDialog_extdirdialog_text);
 		dialog.setMessage(NewWizardMessages.VariableCreationDialog_extdirdialog_message);
 		dialog.setFilterPath(initPath);

@@ -490,7 +490,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 		@Override
 		public void run() {
-			FileDialog importDialog= new FileDialog(fShell, SWT.OPEN);
+			FileDialog importDialog= new FileDialog(fShell, SWT.OPEN | SWT.SHEET);
 			importDialog.setText(JUnitMessages.TestRunnerViewPart_ImportTestRunSessionAction_title);
 			IDialogSettings dialogSettings= JUnitPlugin.getDefault().getDialogSettings();
 			String lastPath= dialogSettings.get(PREF_LAST_PATH);
@@ -636,7 +636,7 @@ public class TestRunnerViewPart extends ViewPart {
 
 		@Override
 		public void run() {
-			FileDialog exportDialog= new FileDialog(fShell, SWT.SAVE);
+			FileDialog exportDialog= new FileDialog(fShell, SWT.SAVE | SWT.SHEET);
 			exportDialog.setText(JUnitMessages.TestRunnerViewPart_ExportTestRunSessionAction_title);
 			IDialogSettings dialogSettings= JUnitPlugin.getDefault().getDialogSettings();
 			String lastPath= dialogSettings.get(PREF_LAST_PATH);

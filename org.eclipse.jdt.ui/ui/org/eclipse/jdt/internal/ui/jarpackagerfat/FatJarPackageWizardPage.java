@@ -401,7 +401,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 	 *	to import from
 	 */
 	private void handleAntScriptBrowseButtonPressed() {
-		FileDialog dialog= new FileDialog(getContainer().getShell(), SWT.SAVE);
+		FileDialog dialog= new FileDialog(getContainer().getShell(), SWT.SAVE | SWT.SHEET);
 		dialog.setFilterExtensions(new String[] { "*." + ANTSCRIPT_EXTENSION }); //$NON-NLS-1$
 
 		String currentSourceString= getAntScriptValue();

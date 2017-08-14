@@ -321,7 +321,7 @@ public final class JarImportWizardPage extends WizardPage {
 	 * Handles the browse button selected event.
 	 */
 	protected void handleBrowseButtonSelected() {
-		final FileDialog file= new FileDialog(getShell(), SWT.OPEN);
+		final FileDialog file= new FileDialog(getShell(), SWT.OPEN | SWT.SHEET);
 		file.setText(JarImportMessages.JarImportWizardPage_browse_caption);
 		file.setFilterNames(ArchiveFileFilter.ALL_ARCHIVES_FILTER_EXTENSIONS);
 		file.setFilterExtensions(ArchiveFileFilter.ALL_ARCHIVES_FILTER_EXTENSIONS);

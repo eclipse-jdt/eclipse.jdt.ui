@@ -620,7 +620,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	 * Handles selections of the browse button.
 	 */
 	protected void handleBrowseButtonSelected() {
-		final FileDialog dialog= new FileDialog(fDictionaryPath.getShell(), SWT.OPEN);
+		final FileDialog dialog= new FileDialog(fDictionaryPath.getShell(), SWT.OPEN | SWT.SHEET);
 		dialog.setText(PreferencesMessages.SpellingPreferencePage_filedialog_title);
 		dialog.setFilterPath(fDictionaryPath.getText());
 

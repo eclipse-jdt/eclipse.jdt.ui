@@ -120,7 +120,7 @@ public abstract class AbstractJarDestinationWizardPage extends WizardExportResou
 	 *	to import from
 	 */
 	protected void handleDestinationBrowseButtonPressed() {
-		FileDialog dialog= new FileDialog(getContainer().getShell(), SWT.SAVE);
+		FileDialog dialog= new FileDialog(getContainer().getShell(), SWT.SAVE | SWT.SHEET);
 		dialog.setFilterExtensions(ArchiveFileFilter.JAR_ZIP_FILTER_EXTENSIONS);
 
 		String currentSourceString= getDestinationValue();

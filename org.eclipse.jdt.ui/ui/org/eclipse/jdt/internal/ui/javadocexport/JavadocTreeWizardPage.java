@@ -695,7 +695,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	protected void browseForJavadocCommand() {
-		FileDialog dialog= new FileDialog(getShell());
+		FileDialog dialog= new FileDialog(getShell(), SWT.SHEET);
 		dialog.setText(JavadocExportMessages.JavadocTreeWizardPage_javadoccmd_dialog_title);
 		String dirName= fJavadocCommandText.getText();
 		dialog.setFileName(dirName);

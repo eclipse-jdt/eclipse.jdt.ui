@@ -191,7 +191,7 @@ public class NativeLibrariesConfigurationBlock {
 			currPath= currPath.removeLastSegments(1);
 		}
 
-		DirectoryDialog dialog= new DirectoryDialog(fShell);
+		DirectoryDialog dialog= new DirectoryDialog(fShell, SWT.SHEET);
 		dialog.setMessage(NewWizardMessages.NativeLibrariesDialog_external_message);
 		dialog.setText(NewWizardMessages.NativeLibrariesDialog_extfiledialog_text);
 		dialog.setFilterPath(currPath.toOSString());

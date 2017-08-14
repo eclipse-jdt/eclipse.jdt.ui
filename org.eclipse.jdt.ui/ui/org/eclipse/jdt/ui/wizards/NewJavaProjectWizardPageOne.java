@@ -248,7 +248,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 		@Override
 		public void changeControlPressed(DialogField field) {
-			final DirectoryDialog dialog= new DirectoryDialog(getShell());
+			final DirectoryDialog dialog= new DirectoryDialog(getShell(), SWT.SHEET);
 			dialog.setMessage(NewWizardMessages.NewJavaProjectWizardPageOne_directory_message);
 			String directoryName = fLocation.getText().trim();
 			if (directoryName.length() == 0) {

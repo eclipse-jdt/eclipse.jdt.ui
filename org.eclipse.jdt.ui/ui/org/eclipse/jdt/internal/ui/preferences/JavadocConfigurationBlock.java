@@ -598,7 +598,7 @@ public class JavadocConfigurationBlock {
 			currPath= currPath.removeLastSegments(1);
 		}
 
-		FileDialog dialog= new FileDialog(fShell, SWT.OPEN);
+		FileDialog dialog= new FileDialog(fShell, SWT.OPEN | SWT.SHEET);
 		dialog.setFilterExtensions(ArchiveFileFilter.JAR_ZIP_FILTER_EXTENSIONS);
 		dialog.setText(PreferencesMessages.JavadocConfigurationBlock_zipImportSource_title);
 		dialog.setFilterPath(currPath.toOSString());
@@ -651,7 +651,7 @@ public class JavadocConfigurationBlock {
 		if (fURLResult != null && "file".equals(fURLResult.getProtocol())) { //$NON-NLS-1$
 			initPath= JavaDocLocations.toFile(fURLResult).getPath();
 		}
-		DirectoryDialog dialog= new DirectoryDialog(fShell);
+		DirectoryDialog dialog= new DirectoryDialog(fShell, SWT.SHEET);
 		dialog.setText(PreferencesMessages.JavadocConfigurationBlock_javadocFolderDialog_label);
 		dialog.setMessage(PreferencesMessages.JavadocConfigurationBlock_javadocFolderDialog_message);
 		dialog.setFilterPath(initPath);

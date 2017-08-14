@@ -139,7 +139,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 		@Override
 		public void changeControlPressed(DialogField field) {
-			final DirectoryDialog dialog= new DirectoryDialog(getShell());
+			final DirectoryDialog dialog= new DirectoryDialog(getShell(), SWT.SHEET);
 			dialog.setMessage(NewWizardMessages.AddSourceFolderWizardPage_directory_message);
 			String directoryName = fLinkLocation.getText().trim();
 			if (directoryName.length() == 0) {

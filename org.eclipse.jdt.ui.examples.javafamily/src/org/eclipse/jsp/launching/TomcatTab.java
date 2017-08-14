@@ -172,7 +172,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	 * Show a dialog that lets the user select a tomcat install directory
 	 */
 	protected void handleTomcatBrowseButtonSelected() {
-		DirectoryDialog dialog = new DirectoryDialog(getShell());
+		DirectoryDialog dialog = new DirectoryDialog(getShell(), SWT.SHEET);
 		dialog.setMessage(LaunchingMessages.TomcatTab_4);
 		String currentWorkingDir = fTomcatDir.getText();
 		if (!currentWorkingDir.trim().equals("")) { //$NON-NLS-1$

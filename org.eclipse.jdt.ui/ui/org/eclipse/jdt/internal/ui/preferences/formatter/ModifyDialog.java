@@ -289,7 +289,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModifyDialog
 	private void saveButtonPressed() {
 		Profile selected= new CustomProfile(fProfileNameField.getText(), new HashMap<>(fWorkingValues), fProfile.getVersion(), fProfileManager.getProfileVersioner().getProfileKind());
 
-		final FileDialog dialog= new FileDialog(getShell(), SWT.SAVE);
+		final FileDialog dialog= new FileDialog(getShell(), SWT.SAVE | SWT.SHEET);
 		dialog.setText(FormatterMessages.CodingStyleConfigurationBlock_save_profile_dialog_title);
 		dialog.setFilterExtensions(new String [] {"*.xml"}); //$NON-NLS-1$
 
