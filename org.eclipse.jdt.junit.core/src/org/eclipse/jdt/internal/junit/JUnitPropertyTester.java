@@ -17,10 +17,10 @@ import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -106,8 +106,8 @@ public class JUnitPropertyTester extends PropertyTester {
 			IType testType= null;
 			if (element instanceof ICompilationUnit) {
 				testType= (((ICompilationUnit) element)).findPrimaryType();
-			} else if (element instanceof IClassFile) {
-				testType= (((IClassFile) element)).getType();
+			} else if (element instanceof IOrdinaryClassFile) {
+				testType= (((IOrdinaryClassFile) element)).getType();
 			} else if (element instanceof IType) {
 				testType= (IType) element;
 			} else if (element instanceof IMember) {

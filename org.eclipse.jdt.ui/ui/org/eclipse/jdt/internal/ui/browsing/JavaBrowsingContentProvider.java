@@ -29,13 +29,13 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -117,8 +117,8 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 			sourceRefs= fragment.getCompilationUnits();
 		}
 		else {
-			IClassFile[] classFiles= fragment.getClassFiles();
-			List<IClassFile> topLevelClassFile= new ArrayList<>();
+			IOrdinaryClassFile[] classFiles= fragment.getOrdinaryClassFiles();
+			List<IOrdinaryClassFile> topLevelClassFile= new ArrayList<>();
 			for (int i= 0; i < classFiles.length; i++) {
 				IType type= classFiles[i].getType();
 				if (type != null && type.getDeclaringType() == null && !type.isAnonymous() && !type.isLocal())
@@ -243,8 +243,8 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		if (kind == IJavaElementDelta.REMOVED) {
 			Object parent= internalGetParent(element);
 			if (isElementValidForView) {
-				if (element instanceof IClassFile) {
-					postRemove(((IClassFile)element).getType());
+				if (element instanceof IOrdinaryClassFile) {
+					postRemove(((IOrdinaryClassFile)element).getType());
 				} else if (element instanceof ICompilationUnit && !((ICompilationUnit)element).isWorkingCopy()) {
 						postRefresh(null);
 				} else if (element instanceof ICompilationUnit && ((ICompilationUnit)element).isWorkingCopy()) {
@@ -286,8 +286,8 @@ class JavaBrowsingContentProvider extends StandardJavaElementContentProvider imp
 		if (kind == IJavaElementDelta.ADDED) {
 			if (isElementValidForView) {
 				Object parent= internalGetParent(element);
-				if (element instanceof IClassFile) {
-					postAdd(parent, ((IClassFile)element).getType());
+				if (element instanceof IOrdinaryClassFile) {
+					postAdd(parent, ((IOrdinaryClassFile)element).getType());
 				} else if (element instanceof ICompilationUnit && !((ICompilationUnit)element).isWorkingCopy()) {
 						postAdd(parent, ((ICompilationUnit)element).getTypes());
 				} else if (parent instanceof ICompilationUnit && getProvideWorkingCopy() && !((ICompilationUnit)parent).isWorkingCopy()) {

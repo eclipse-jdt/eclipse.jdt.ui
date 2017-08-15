@@ -49,6 +49,8 @@ public class JavaElementTypeComparator implements Comparator<IJavaElement> {
 				return 90;
 			case IJavaElement.CLASS_FILE:
 				return 80;
+			case IJavaElement.JAVA_MODULE:
+				return 75;
 			case IJavaElement.TYPE:
 				return 70;
 			case IJavaElement.FIELD:

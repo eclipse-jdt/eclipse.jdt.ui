@@ -30,7 +30,6 @@ import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -40,6 +39,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModularClassFile;
 import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -969,17 +969,6 @@ public final class JavaModelUtil {
 	}
 
 	/**
-	 * Tells whether the given class file is the module-info.class.
-	 *
-	 * @param cf the class file to test
-	 * @return <code>true</code> if the given class file is the module-info.class
-	 * @since 3.13 BETA_JAVA9
-	 */
-	public static boolean isModuleInfo(IClassFile cf) {
-		return MODULE_INFO_CLASS.equals(cf.getElementName());
-	}
-
-	/**
 	 * Tells whether the given type root represents a module.
 	 * 
 	 * @param typeRoot the type root to test
@@ -987,8 +976,8 @@ public final class JavaModelUtil {
 	 * @since 3.13 BETA_JAVA9
 	 */
 	public static boolean isModuleInfo(ITypeRoot typeRoot) {
-		return typeRoot instanceof ICompilationUnit && isModuleInfo((ICompilationUnit) typeRoot)
-				|| typeRoot instanceof IClassFile && isModuleInfo((IClassFile) typeRoot);
+		return (typeRoot instanceof ICompilationUnit && isModuleInfo((ICompilationUnit) typeRoot))
+				|| typeRoot instanceof IModularClassFile;
 	}
 
 	/**

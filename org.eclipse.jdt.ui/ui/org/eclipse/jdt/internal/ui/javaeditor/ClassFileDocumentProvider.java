@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -359,15 +360,17 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			/*
 			 * Let's try to find the class file - maybe the JAR changed
 			 */
-			IType type= cf.getType();
-			IJavaProject project= cf.getJavaProject();
-			if (project != null) {
-				type= project.findType(type.getFullyQualifiedName());
-				if (type != null) {
-					IEditorInput editorInput= EditorUtility.getEditorInput(type.getParent());
-					if (editorInput instanceof IClassFileEditorInput) {
-						fireInputChanged((IClassFileEditorInput)editorInput);
-						return;
+			if (cf instanceof IOrdinaryClassFile) {
+				IType type= ((IOrdinaryClassFile) cf).getType();
+				IJavaProject project= cf.getJavaProject();
+				if (project != null) {
+					type= project.findType(type.getFullyQualifiedName());
+					if (type != null) {
+						IEditorInput editorInput= EditorUtility.getEditorInput(type.getParent());
+						if (editorInput instanceof IClassFileEditorInput) {
+							fireInputChanged((IClassFileEditorInput)editorInput);
+							return;
+						}
 					}
 				}
 			}

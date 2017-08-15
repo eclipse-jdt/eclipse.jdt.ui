@@ -146,7 +146,7 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 			for (final Iterator<IPackageFragment> iterator= fPackages.iterator(); iterator.hasNext();) {
 				final IPackageFragment fragment= iterator.next();
 				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 100);
-				final IClassFile[] files= fragment.getClassFiles();
+				final IClassFile[] files= fragment.getClassFiles(); // safe, but implies this operation cannot create module-info CU, which it probably should.
 				final int size= files.length;
 				subMonitor.beginTask(getOperationLabel(), size * 50);
 				final String name= fragment.getElementName();

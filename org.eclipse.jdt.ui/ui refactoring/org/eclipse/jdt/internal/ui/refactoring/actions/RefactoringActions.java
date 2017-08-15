@@ -12,9 +12,9 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -55,8 +55,8 @@ public class RefactoringActions {
 			return result;
 		if (element instanceof ICompilationUnit)
 			return ((ICompilationUnit)element).findPrimaryType();
-		if (element instanceof IClassFile)
-			return ((IClassFile)element).getType();
+		if (element instanceof IOrdinaryClassFile)
+			return ((IOrdinaryClassFile)element).getType();
 		return null;
 	}
 

@@ -102,7 +102,6 @@ import org.eclipse.ui.part.ViewPart;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -623,11 +622,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		} else {
 			ASTParser parser= ASTParser.newParser(fCurrentASTLevel);
 			parser.setResolveBindings(fCreateBindings);
-			if (input instanceof ICompilationUnit) {
-				parser.setSource((ICompilationUnit) input);
-			} else {
-				parser.setSource((IClassFile) input);
-			}
+			parser.setSource(input);
 			parser.setStatementsRecovery(fStatementsRecovery);
 			parser.setBindingsRecovery(fBindingsRecovery);
 			parser.setIgnoreMethodBodies(fIgnoreMethodBodies);

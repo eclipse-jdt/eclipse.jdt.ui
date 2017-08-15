@@ -25,9 +25,11 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.texteditor.IUpdate;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
@@ -112,7 +114,10 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 	private IType[] getTypes() throws JavaModelException {
 		IEditorInput input= fEditor.getEditorInput();
 		if (input instanceof IClassFileEditorInput) {
-			return new IType[] { ((IClassFileEditorInput)input).getClassFile().getType() };
+			IClassFile classFile= ((IClassFileEditorInput)input).getClassFile();
+			if (classFile instanceof IOrdinaryClassFile)
+				return new IType[] { ((IOrdinaryClassFile) classFile).getType() };
+			return new IType[0];
 		} else {
 			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input).getAllTypes();
 		}

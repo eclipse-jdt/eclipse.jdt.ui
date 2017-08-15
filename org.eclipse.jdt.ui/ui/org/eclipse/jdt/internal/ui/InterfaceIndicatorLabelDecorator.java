@@ -24,10 +24,10 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IDecoration;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -148,8 +148,8 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 			String typeName= JavaCore.removeJavaLikeExtension(unit.getElementName());
 			addOverlaysWithSearchEngine(unit, typeName, decoration);
 			
-		} else if (element instanceof IClassFile && !JavaModelUtil.isModuleInfo((IClassFile) element)) {
-			IClassFile classFile= (IClassFile) element;
+		} else if (element instanceof IOrdinaryClassFile) {
+			IOrdinaryClassFile classFile= (IOrdinaryClassFile) element;
 			if (classFile.isOpen()) {
 				addOverlaysFromFlags(classFile.getType().getFlags(), decoration);
 			} else {

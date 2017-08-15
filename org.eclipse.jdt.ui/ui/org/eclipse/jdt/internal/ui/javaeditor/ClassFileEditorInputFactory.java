@@ -19,6 +19,7 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -46,12 +47,12 @@ public class ClassFileEditorInputFactory implements IElementFactory {
 
 		IJavaElement element= JavaCore.create(identifier);
 		try {
-			if (!element.exists() && element instanceof IClassFile) {
+			if (!element.exists() && element instanceof IOrdinaryClassFile) {
 				/*
 				 * Let's try to find the class file,
 				 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=83221
 				 */
-				IClassFile cf= (IClassFile)element;
+				IOrdinaryClassFile cf= (IOrdinaryClassFile)element;
 				IType type= cf.getType();
 				IJavaProject project= element.getJavaProject();
 				if (project != null) {

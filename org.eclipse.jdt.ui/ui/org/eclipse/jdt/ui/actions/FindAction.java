@@ -30,11 +30,11 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.progress.IProgressService;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -148,7 +148,9 @@ public abstract class FindAction extends SelectionDispatchAction {
 				else
 					return findType((ICompilationUnit)o, silent);
 			case IJavaElement.CLASS_FILE:
-				return ((IClassFile)o).getType();
+				if (o instanceof IOrdinaryClassFile)
+					return ((IOrdinaryClassFile)o).getType();
+				return o;
 			default:
 				return o;
 		}

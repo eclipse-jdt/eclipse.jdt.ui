@@ -1072,7 +1072,7 @@ public class JavaElementLabelComposer {
 				int lastDollar= tqn.lastIndexOf('$');
 				if (lastDollar != 1) {
 					String declaringTypeCF= tqn.substring(0, lastDollar) + ".class"; //$NON-NLS-1$
-					declaringType= type.getPackageFragment().getClassFile(declaringTypeCF).getType();
+					declaringType= type.getPackageFragment().getOrdinaryClassFile(declaringTypeCF).getType();
 					try {
 						ISourceRange typeSourceRange= type.getSourceRange();
 						if (declaringType.exists() && SourceRange.isAvailable(typeSourceRange)) {

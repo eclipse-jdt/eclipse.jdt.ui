@@ -367,7 +367,7 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 			ITypeRoot[] compilationUnits= filterModuleInfo(fragment, fragment.getCompilationUnits());
 			return concatenate(compilationUnits, fragment.getNonJavaResources());
 		}
-		ITypeRoot[] classFiles= filterModuleInfo(fragment, fragment.getClassFiles());
+		ITypeRoot[] classFiles= fragment.getOrdinaryClassFiles();
 		return concatenate(classFiles, fragment.getNonJavaResources());
 	}
 

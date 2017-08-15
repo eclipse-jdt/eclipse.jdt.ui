@@ -98,7 +98,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 
 	private boolean isEmpty(IPackageFragment fragment) {
 		try {
-			return (fragment.getCompilationUnits().length == 0) && (fragment.getClassFiles().length == 0);
+			return (fragment.getCompilationUnits().length == 0) && (fragment.getOrdinaryClassFiles().length == 0);
 		} catch (JavaModelException e) {
 			// ignore
 		}
