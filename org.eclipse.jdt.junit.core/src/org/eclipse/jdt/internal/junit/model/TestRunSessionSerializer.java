@@ -99,7 +99,7 @@ public class TestRunSessionSerializer implements XMLReader {
 
 			AttributesImpl atts= new AttributesImpl();
 			// Need to store the full #getTestName instead of only the #getSuiteTypeName for test factory methods
-			addCDATA(atts, IXMLTags.ATTR_NAME, testSuiteElement.getTestName());
+			addCDATA(atts, IXMLTags.ATTR_NAME, testSuiteElement.getTestName().replace('$', '.'));
 			if (! Double.isNaN(testSuiteElement.getElapsedTimeInSeconds()))
 				addCDATA(atts, IXMLTags.ATTR_TIME, timeFormat.format(testSuiteElement.getElapsedTimeInSeconds()));
 			if (testElement.getProgressState() != ProgressState.COMPLETED || testElement.getTestResult(false) != Result.UNDEFINED)
