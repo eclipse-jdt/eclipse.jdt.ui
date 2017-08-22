@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
@@ -228,8 +229,8 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 					if (element instanceof IClassFile) {
 						try {
 							IClassFile cf= (IClassFile) element;
-							if (cf.isStructureKnown())
-								classToTest= cf.getType();
+							if (cf instanceof IOrdinaryClassFile && cf.isStructureKnown())
+								classToTest= ((IOrdinaryClassFile) cf).getType();
 						} catch(JavaModelException e) {
 							JUnitPlugin.log(e);
 						}
