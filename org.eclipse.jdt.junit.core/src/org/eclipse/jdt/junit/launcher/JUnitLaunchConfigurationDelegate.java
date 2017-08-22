@@ -300,8 +300,6 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		vmArguments.addAll(Arrays.asList(execArgs.getVMArgumentsArray()));
 		programArguments.addAll(Arrays.asList(execArgs.getProgramArgumentsArray()));
 
-		String testFailureNames= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES, ""); //$NON-NLS-1$
-		
 		/*
 		 * The "-version" "3" arguments don't make sense and should eventually be removed.
 		 * But we keep them for now, since users may want to run with older releases of
@@ -351,9 +349,17 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			programArguments.add("-testNameFile"); //$NON-NLS-1$
 			programArguments.add(fileName);
 		}
+
+		String testFailureNames= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES, ""); //$NON-NLS-1$
 		if (testFailureNames.length() > 0) {
 			programArguments.add("-testfailures"); //$NON-NLS-1$
 			programArguments.add(testFailureNames);
+		}
+
+		String uniqueId= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_UNIQUE_ID, ""); //$NON-NLS-1$
+		if (!uniqueId.trim().isEmpty()) {
+			programArguments.add("-uniqueId"); //$NON-NLS-1$
+			programArguments.add(uniqueId);
 		}
 	}
 

@@ -20,4 +20,6 @@ public interface ITestIdentifier {
 	String getDisplayName();
 
 	String getParameterTypes();
+
+	String getUniqueId();
 }

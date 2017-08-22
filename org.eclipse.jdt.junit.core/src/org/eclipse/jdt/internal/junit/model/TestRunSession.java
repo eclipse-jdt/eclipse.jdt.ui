@@ -487,6 +487,8 @@ public class TestRunSession implements ITestRunSession {
 		StringBuffer displayNameBuffer= new StringBuffer(100);
 		String[] parameterTypes;
 		StringBuffer parameterTypesBuffer= new StringBuffer(200);
+		String uniqueId;
+		StringBuffer uniqueIdBuffer= new StringBuffer(200);
 		int index3= treeEntry.indexOf(',', index2 + 1);
 		if (index3 == -1) {
 			testCount= Integer.parseInt(treeEntry.substring(index2 + 1));
@@ -494,6 +496,7 @@ public class TestRunSession implements ITestRunSession {
 			parentId= null;
 			displayName= null;
 			parameterTypes= null;
+			uniqueId= null;
 		} else {
 			testCount= Integer.parseInt(treeEntry.substring(index2 + 1, index3));
 
@@ -512,12 +515,19 @@ public class TestRunSession implements ITestRunSession {
 				displayName= null;
 			}
 
-			scanTestName(treeEntry, index6 + 1, parameterTypesBuffer);
+			int index7= scanTestName(treeEntry, index6 + 1, parameterTypesBuffer);
 			String parameterTypesString= parameterTypesBuffer.toString().trim();
-			if (parameterTypesString.trim().isEmpty()) {
+			if (parameterTypesString.isEmpty()) {
 				parameterTypes= null;
 			} else {
 				parameterTypes= parameterTypesString.split(","); //$NON-NLS-1$
+				Arrays.parallelSetAll(parameterTypes, i -> parameterTypes[i].trim());
+			}
+
+			scanTestName(treeEntry, index7 + 1, uniqueIdBuffer);
+			uniqueId= uniqueIdBuffer.toString().trim();
+			if (uniqueId.isEmpty()) {
+				uniqueId= null;
 			}
 		}
 
@@ -525,32 +535,32 @@ public class TestRunSession implements ITestRunSession {
 			if (parentId != null) {
 				for (IncompleteTestSuite suite : fFactoryTestSuites) {
 					if (parentId.equals(suite.fTestSuiteElement.getId())) {
-						return createTestElement(suite.fTestSuiteElement, id, testName, isSuite, testCount, isDynamicTest, displayName, parameterTypes);
+						return createTestElement(suite.fTestSuiteElement, id, testName, isSuite, testCount, isDynamicTest, displayName, parameterTypes, uniqueId);
 					}
 				}
 			}
-			return createTestElement(getUnrootedSuite(), id, testName, isSuite, testCount, isDynamicTest, displayName, parameterTypes); // should not reach here
+			return createTestElement(getUnrootedSuite(), id, testName, isSuite, testCount, isDynamicTest, displayName, parameterTypes, uniqueId); // should not reach here
 		} else {
 			if (fIncompleteTestSuites.isEmpty()) {
-				return createTestElement(fTestRoot, id, testName, isSuite, testCount, isDynamicTest, displayName, parameterTypes);
+				return createTestElement(fTestRoot, id, testName, isSuite, testCount, isDynamicTest, displayName, parameterTypes, uniqueId);
 			} else {
 				int suiteIndex= fIncompleteTestSuites.size() - 1;
 				IncompleteTestSuite openSuite= fIncompleteTestSuites.get(suiteIndex);
 				openSuite.fOutstandingChildren--;
 				if (openSuite.fOutstandingChildren <= 0)
 					fIncompleteTestSuites.remove(suiteIndex);
-				return createTestElement(openSuite.fTestSuiteElement, id, testName, isSuite, testCount, isDynamicTest, displayName, parameterTypes);
+				return createTestElement(openSuite.fTestSuiteElement, id, testName, isSuite, testCount, isDynamicTest, displayName, parameterTypes, uniqueId);
 			}
 		}
 	}
 
-	public TestElement createTestElement(TestSuiteElement parent, String id, String testName, boolean isSuite, int testCount, boolean isDynamicTest, String displayName, String[] parameterTypes) {
+	public TestElement createTestElement(TestSuiteElement parent, String id, String testName, boolean isSuite, int testCount, boolean isDynamicTest, String displayName, String[] parameterTypes, String uniqueId) {
 		TestElement testElement;
 		if (parameterTypes != null && parameterTypes.length > 1) {
 			parameterTypes= Arrays.stream(parameterTypes).map(t -> t.trim()).toArray(String[]::new);
 		}
 		if (isSuite) {
-			TestSuiteElement testSuiteElement= new TestSuiteElement(parent, id, testName, testCount, displayName, parameterTypes);
+			TestSuiteElement testSuiteElement= new TestSuiteElement(parent, id, testName, testCount, displayName, parameterTypes, uniqueId);
 			testElement= testSuiteElement;
 			if (testCount > 0) {
 				fIncompleteTestSuites.add(new IncompleteTestSuite(testSuiteElement, testCount));
@@ -558,7 +568,7 @@ public class TestRunSession implements ITestRunSession {
 				fFactoryTestSuites.add(new IncompleteTestSuite(testSuiteElement, testCount));
 			}
 		} else {
-			testElement= new TestCaseElement(parent, id, testName, displayName, isDynamicTest, parameterTypes);
+			testElement= new TestCaseElement(parent, id, testName, displayName, isDynamicTest, parameterTypes, uniqueId);
 		}
 		fIdToTest.put(id, testElement);
 		return testElement;
@@ -594,7 +604,7 @@ public class TestRunSession implements ITestRunSession {
 
 	private TestSuiteElement getUnrootedSuite() {
 		if (fUnrootedSuite == null) {
-			fUnrootedSuite= (TestSuiteElement) createTestElement(fTestRoot, "-2", JUnitMessages.TestRunSession_unrootedTests, true, 0, false, JUnitMessages.TestRunSession_unrootedTests, null); //$NON-NLS-1$
+			fUnrootedSuite= (TestSuiteElement) createTestElement(fTestRoot, "-2", JUnitMessages.TestRunSession_unrootedTests, true, 0, false, JUnitMessages.TestRunSession_unrootedTests, null, null); //$NON-NLS-1$
 		}
 		return fUnrootedSuite;
 	}
@@ -666,7 +676,7 @@ public class TestRunSession implements ITestRunSession {
 
 		private TestElement createUnrootedTestElement(String testId, String testName) {
 			TestSuiteElement unrootedSuite= getUnrootedSuite();
-			TestElement testElement= createTestElement(unrootedSuite, testId, testName, false, 1, false, testName, null);
+			TestElement testElement= createTestElement(unrootedSuite, testId, testName, false, 1, false, testName, null, null);
 
 			for (ITestSessionListener listener : fSessionListeners) {
 				listener.testAdded(testElement);

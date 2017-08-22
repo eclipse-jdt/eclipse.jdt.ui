@@ -62,9 +62,13 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 */
 	private String fTestName;
 	/**
-	 * The name of the packages containing tests
+	 * The names of the packages containing tests to run
 	 */
 	private String[] fPackageNames;
+	/**
+	 * The unique ID of test to run or "" if not available
+	 */
+	private String fUniqueId;
 
 	/**
 	 * The current test result
@@ -299,6 +303,9 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 				String className = args[i + 1];
 				createLoader(className);
 				i++;
+			} else if(args[i].toLowerCase().equals("-uniqueid")) { //$NON-NLS-1$
+				fUniqueId= args[i+1];
+				i++;
 			}
 		}
 
@@ -484,7 +491,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 * @param execution executor
 	 */
 	public void runTests(String[] testClassNames, String testName, TestExecution execution) {
-		ITestReference[] suites= fLoader.loadTests(loadClasses(testClassNames), testName, fFailureNames, fPackageNames, this);
+		ITestReference[] suites= fLoader.loadTests(loadClasses(testClassNames), testName, fFailureNames, fPackageNames, fUniqueId, this);
 
 		// count all testMethods and inform ITestRunListeners
 		int count= countTests(suites);
@@ -532,7 +539,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 */
 	public void rerunTest(RerunRequest r) {
 		final Class[] classes= loadClasses(new String[] { r.fRerunClassName });
-		ITestReference rerunTest1= fLoader.loadTests(classes, r.fRerunTestName, null, null, this)[0];
+		ITestReference rerunTest1= fLoader.loadTests(classes, r.fRerunTestName, null, null, fUniqueId, this)[0];
 		RerunExecutionListener service= rerunExecutionListener();
 
 		TestExecution execution= new TestExecution(service, getClassifier());
@@ -552,7 +559,8 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 
 	public void visitTreeEntry(ITestIdentifier identifier, boolean hasChildren, int testCount, boolean isDynamicTest, String parentId) {
 		String treeEntry= getTestId(identifier) + ',' + escapeText(identifier.getName()) + ',' + hasChildren + ',' + testCount 
-				+ ',' + isDynamicTest + ',' + parentId + ',' + escapeText(identifier.getDisplayName()) + ',' + escapeText(identifier.getParameterTypes());
+				+ ',' + isDynamicTest + ',' + parentId + ',' + escapeText(identifier.getDisplayName()) + ',' + escapeText(identifier.getParameterTypes()) 
+				+ ',' + escapeText(identifier.getUniqueId());
 		notifyTestTreeEntry(treeEntry);
 	}
 

@@ -82,12 +82,10 @@ public interface IXMLTags {
 	 * value: String
 	 */
 	public static final String ATTR_MESSAGE= "message"; //$NON-NLS-1$
-
 	/**
 	 * value: String
 	 */
 	public static final String ATTR_DISPLAY_NAME= "displayname"; //$NON-NLS-1$
-
 	/**
 	 * value: Boolean
 	 */
@@ -96,5 +94,10 @@ public interface IXMLTags {
 	 * value: String
 	 */
 	public static final String ATTR_PARAMETER_TYPES= "parameters"; //$NON-NLS-1$
+	/**
+	 * value: String
+	 */
+	public static final String ATTR_UNIQUE_ID= "uniqueid"; //$NON-NLS-1$
+
 //	public static final String ATTR_TYPE= "type"; //$NON-NLS-1$
 }

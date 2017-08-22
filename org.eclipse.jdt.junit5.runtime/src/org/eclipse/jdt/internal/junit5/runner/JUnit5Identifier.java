@@ -72,4 +72,9 @@ public class JUnit5Identifier implements ITestIdentifier {
 		};
 		return fTestIdentifier.getSource().map(getParameterTypes).orElse(""); //$NON-NLS-1$
 	}
+
+	@Override
+	public String getUniqueId() {
+		return fTestIdentifier.getUniqueId();
+	}
 }

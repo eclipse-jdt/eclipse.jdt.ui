@@ -2157,7 +2157,7 @@ action enablement
 			getDisplay().asyncExec(r);
 	}
 
-	public void rerunTest(String testId, String className, String testName, String launchMode) {
+	public void rerunTest(String testId, String className, String testName, String uniqueId, String launchMode) {
 		if (lastLaunchIsKeptAlive()) {
 			fTestRunSession.rerunTest(testId, className, testName);
 			TestCaseElement testCaseElement= (TestCaseElement) fTestRunSession.getTestElement(testId);
@@ -2184,6 +2184,7 @@ action enablement
 						// reset the container
 						tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
 						tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME, testName);
+						tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_UNIQUE_ID, uniqueId);
 						relaunch(tmp, launchMode);
 						return;
 						} catch (CoreException e) {

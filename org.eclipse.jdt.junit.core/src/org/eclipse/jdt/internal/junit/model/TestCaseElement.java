@@ -22,8 +22,8 @@ public class TestCaseElement extends TestElement implements ITestCaseElement {
 	private boolean fIgnored;
 	private boolean fIsDynamicTest;
 
-	public TestCaseElement(TestSuiteElement parent, String id, String testName, String displayName, boolean isDynamicTest, String[] parameterTypes) {
-		super(parent, id, testName, displayName, parameterTypes);
+	public TestCaseElement(TestSuiteElement parent, String id, String testName, String displayName, boolean isDynamicTest, String[] parameterTypes, String uniqueId) {
+		super(parent, id, testName, displayName, parameterTypes, uniqueId);
 		Assert.isNotNull(parent);
 		fIsDynamicTest= isDynamicTest;
 	}

@@ -26,19 +26,20 @@ public class JUnit5TestLoader implements ITestLoader {
 	private Launcher fLauncher= LauncherFactory.create();
 
 	@Override
-	public ITestReference[] loadTests(Class[] testClasses, String testName, String[] failureNames, String[] packages, RemoteTestRunner listener) {
+	public ITestReference[] loadTests(Class[] testClasses, String testName, String[] failureNames, String[] packages, String uniqueId, RemoteTestRunner listener) {
 		ITestReference[] refs= new ITestReference[0];
-		if (packages == null) {
-			refs= new ITestReference[testClasses.length];
-			for (int i= 0; i < testClasses.length; i++) {
-				Class<?> clazz= testClasses[i];
-				ITestReference ref= createTest(clazz, testName);
-				refs[i]= ref;
-			}
-		} else {
+		if (uniqueId != null && !uniqueId.trim().isEmpty()) {
+			refs= new ITestReference[1];
+			refs[0]= createUniqueIdTest(uniqueId);
+		} else if (packages != null) {
 			refs= new ITestReference[packages.length];
 			for (int i= 0; i < packages.length; i++) {
 				refs[i]= createTest(packages[i]);
+			}
+		} else {
+			refs= new ITestReference[testClasses.length];
+			for (int i= 0; i < testClasses.length; i++) {
+				refs[i]= createTest(testClasses[i], testName);
 			}
 		}
 		return refs;
@@ -65,6 +66,9 @@ public class JUnit5TestLoader implements ITestLoader {
 	}
 
 	private ITestReference createTest(String pkg) {
+		if (pkg == null) {
+			return null;
+		}
 		String pattern;
 		if (pkg.equals("<default>")) { //$NON-NLS-1$
 			pkg= ""; //$NON-NLS-1$
@@ -77,6 +81,11 @@ public class JUnit5TestLoader implements ITestLoader {
 				.filters(ClassNameFilter.includeClassNamePatterns(pattern))
 				.build();
 
+		return new JUnit5TestReference(request, fLauncher);
+	}
+
+	private ITestReference createUniqueIdTest(String uniqueId) {
+		LauncherDiscoveryRequest request= LauncherDiscoveryRequestBuilder.request().selectors(DiscoverySelectors.selectUniqueId(uniqueId)).build();
 		return new JUnit5TestReference(request, fLauncher);
 	}
 }

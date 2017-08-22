@@ -49,4 +49,8 @@ public class JUnit4Identifier implements ITestIdentifier {
 		return ""; //$NON-NLS-1$
 	}
 
+	public String getUniqueId() {
+		return ""; //$NON-NLS-1$
+	}
+
 }

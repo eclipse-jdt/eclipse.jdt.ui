@@ -184,6 +184,12 @@ public abstract class TestElement implements ITestElement {
 	 */
 	private String[] fParameterTypes;
 
+	/**
+	 * The unique ID of the test element which can be <code>null</code> as it is applicable to JUnit 5
+	 * and above.
+	 */
+	private String fUniqueId;
+
 	private Status fStatus;
 	private String fTrace;
 	private String fExpected;
@@ -209,8 +215,10 @@ public abstract class TestElement implements ITestElement {
 	 * @param displayName the test display name, can be <code>null</code>
 	 * @param parameterTypes the array of fully qualified type names of method parameters if
 	 *            applicable, otherwise <code>null</code>
+	 * @param uniqueId the unique ID of the test element, can be <code>null</code> as it is applicable to JUnit 5 and above
+
 	 */
-	public TestElement(TestSuiteElement parent, String id, String testName, String displayName, String[] parameterTypes) {
+	public TestElement(TestSuiteElement parent, String id, String testName, String displayName, String[] parameterTypes, String uniqueId) {
 		Assert.isNotNull(id);
 		Assert.isNotNull(testName);
 		fParent= parent;
@@ -218,6 +226,7 @@ public abstract class TestElement implements ITestElement {
 		fTestName= testName;
 		fDisplayName= displayName;
 		fParameterTypes= parameterTypes;
+		fUniqueId= uniqueId;
 		fStatus= Status.NOT_RUN;
 		if (parent != null)
 			parent.addChild(this);
@@ -400,6 +409,16 @@ public abstract class TestElement implements ITestElement {
 	 */
 	public String[] getParameterTypes() {
 		return fParameterTypes;
+	}
+
+	/**
+	 * Returns the unique ID of the test element. Can be <code>null</code> as it is applicable to JUnit
+	 * 5 and above.
+	 * 
+	 * @return the unique ID of the test, can be <code>null</code>
+	 */
+	public String getUniqueId() {
+		return fUniqueId;
 	}
 
 	/**

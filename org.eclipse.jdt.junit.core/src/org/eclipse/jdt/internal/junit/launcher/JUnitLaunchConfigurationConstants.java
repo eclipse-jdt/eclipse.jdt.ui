@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,6 +59,11 @@ public class JUnitLaunchConfigurationConstants {
 	public static final String ATTR_FAILURES_NAMES= JUnitCorePlugin.PLUGIN_ID+".FAILURENAMES"; //$NON-NLS-1$
 
 	public static final String ATTR_TEST_RUNNER_KIND= JUnitCorePlugin.PLUGIN_ID+".TEST_KIND"; //$NON-NLS-1$
+
+	/**
+	 * The unique ID of test to run or "" if not available (applicable to JUnit 5 and above).
+	 */
+	public static final String ATTR_TEST_UNIQUE_ID= JUnitCorePlugin.PLUGIN_ID + ".TEST_UNIQUE_ID"; //$NON-NLS-1$
 
 	public static ITestKind getTestRunnerKind(ILaunchConfiguration launchConfiguration) {
 		try {

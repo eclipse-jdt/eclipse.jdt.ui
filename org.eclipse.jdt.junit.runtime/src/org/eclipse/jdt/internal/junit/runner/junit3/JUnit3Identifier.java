@@ -45,4 +45,8 @@ class JUnit3Identifier implements ITestIdentifier {
 	public String getParameterTypes() {
 		return ""; //$NON-NLS-1$
 	}
+
+	public String getUniqueId() {
+		return ""; //$NON-NLS-1$
+	}
 }

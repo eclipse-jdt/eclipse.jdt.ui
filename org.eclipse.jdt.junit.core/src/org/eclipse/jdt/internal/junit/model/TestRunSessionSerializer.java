@@ -112,6 +112,9 @@ public class TestRunSessionSerializer implements XMLReader {
 				String paramTypesStr= Arrays.stream(paramTypes).collect(Collectors.joining(",")); //$NON-NLS-1$
 				addCDATA(atts, IXMLTags.ATTR_PARAMETER_TYPES, paramTypesStr);
 			}
+			if (testSuiteElement.getUniqueId() != null) {
+				addCDATA(atts, IXMLTags.ATTR_UNIQUE_ID, testSuiteElement.getUniqueId());
+			}
 			startElement(IXMLTags.NODE_TESTSUITE, atts);
 			addFailure(testSuiteElement);
 
@@ -143,6 +146,9 @@ public class TestRunSessionSerializer implements XMLReader {
 			if (paramTypes != null) {
 				String paramTypesStr= Arrays.stream(paramTypes).collect(Collectors.joining(",")); //$NON-NLS-1$
 				addCDATA(atts, IXMLTags.ATTR_PARAMETER_TYPES, paramTypesStr);
+			}
+			if (testCaseElement.getUniqueId() != null) {
+				addCDATA(atts, IXMLTags.ATTR_UNIQUE_ID, testCaseElement.getUniqueId());
 			}
 			startElement(IXMLTags.NODE_TESTCASE, atts);
 			addFailure(testCaseElement);
