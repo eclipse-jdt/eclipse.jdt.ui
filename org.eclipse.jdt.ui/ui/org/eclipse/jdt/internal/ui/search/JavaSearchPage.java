@@ -63,12 +63,14 @@ import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
 import org.eclipse.search.ui.NewSearchUI;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModularClassFile;
+import org.eclipse.jdt.core.IModuleDescription;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -1013,16 +1015,29 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 				case IJavaElement.TYPE:
 					return new SearchPatternData(TYPE, REFERENCES, 0, true, PatternStrings.getTypeSignature((IType) element), element, includeMask);
 				case IJavaElement.COMPILATION_UNIT: {
-					IType mainType= ((ICompilationUnit) element).findPrimaryType();
+					ICompilationUnit cu= (ICompilationUnit) element;
+					IType mainType= cu.findPrimaryType();
 					if (mainType != null) {
 						return new SearchPatternData(TYPE, REFERENCES, 0, true, PatternStrings.getTypeSignature(mainType), mainType, includeMask);
+					}
+					IModuleDescription module= cu.getModule();
+					if (module != null && module.exists()) {
+						return new SearchPatternData(MODULE, REFERENCES, 0, true, PatternStrings.getSignature(module), module, includeMask);
 					}
 					break;
 				}
 				case IJavaElement.CLASS_FILE: {
-					IType mainType= ((IClassFile) element).getType();
-					if (mainType.exists()) {
-						return new SearchPatternData(TYPE, REFERENCES, 0, true, PatternStrings.getTypeSignature(mainType), mainType, includeMask);
+					if (element instanceof IOrdinaryClassFile) {
+						IType mainType= ((IOrdinaryClassFile) element).getType();
+						if (mainType.exists()) {
+							return new SearchPatternData(TYPE, REFERENCES, 0, true, PatternStrings.getTypeSignature(mainType), mainType, includeMask);
+						}
+					} else if (element instanceof IModularClassFile) {
+						IModuleDescription module= ((IModularClassFile) element).getModule();
+						if (module != null && module.exists()) {
+							return new SearchPatternData(MODULE, REFERENCES, 0, true, PatternStrings.getSignature(module), module, includeMask);
+						}
+
 					}
 					break;
 				}
