@@ -3453,6 +3453,18 @@
       </workingSet>
    </extension>
 <!-- =========================================================================== -->
+<!-- Main and Test Sources Working Sets                                    -->
+<!-- =========================================================================== -->
+   <extension point="org.eclipse.ui.workingSets">
+      <workingSet
+            name="%DynamicSourcesWorkingSetWizardPage.name"
+            description="%DynamicSourcesWorkingSetWizardPage.description"
+            icon="$nl$/icons/full/obj16/jworkingSet_obj.png"
+            updaterClass="org.eclipse.jdt.internal.ui.workingsets.DynamicSourcesWorkingSetUpdater"
+            id="org.eclipse.jdt.internal.ui.DynamicSourcesWorkingSet">
+      </workingSet>
+   </extension>
+<!-- =========================================================================== -->
 <!-- JDT/UI command definitions                                                  -->
 <!-- =========================================================================== -->
 

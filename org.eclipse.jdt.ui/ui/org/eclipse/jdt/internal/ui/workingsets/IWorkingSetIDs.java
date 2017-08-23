@@ -27,4 +27,6 @@ public interface IWorkingSetIDs {
 	/** 'Other Projects' working set ID */
 	String OTHERS= "org.eclipse.jdt.internal.ui.OthersWorkingSet"; //$NON-NLS-1$
 
+	/** Dynamic Java sources working set ID */
+	String DYNAMIC_SOURCES= "org.eclipse.jdt.internal.ui.DynamicSourcesWorkingSet"; //$NON-NLS-1$
 }

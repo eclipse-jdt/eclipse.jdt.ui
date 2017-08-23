@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -29,6 +30,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -59,6 +61,8 @@ import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.FormColors;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -114,6 +118,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ImagesOnFileSystemRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathAttributeConfigurationDescriptors;
+import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
+import org.eclipse.jdt.internal.ui.workingsets.DynamicSourcesWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetMessages;
 
 
 /**
@@ -412,7 +419,28 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 				}
 			};
 			PlatformUI.getWorkbench().getThemeManager().addPropertyChangeListener(fThemeListener);
+
+			createOrUpdateWorkingSet(DynamicSourcesWorkingSetUpdater.MAIN_NAME, WorkingSetMessages.JavaMainSourcesWorkingSet_name, IWorkingSetIDs.DYNAMIC_SOURCES);
+			createOrUpdateWorkingSet(DynamicSourcesWorkingSetUpdater.TEST_NAME, WorkingSetMessages.JavaTestSourcesWorkingSet_name, IWorkingSetIDs.DYNAMIC_SOURCES);
+
 			new InitializeAfterLoadJob().schedule(); // last call in start, see bug 191193
+		}
+	}
+
+	private void createOrUpdateWorkingSet(String name, String label, final String id) {
+		IWorkingSetManager workingSetManager= PlatformUI.getWorkbench().getWorkingSetManager();
+		IWorkingSet workingSet= Arrays.stream(workingSetManager.getAllWorkingSets()) // 
+				.filter(w -> id.equals(w.getId()) && name.equals(w.getName())) //
+				.findAny() //
+				.orElse(null);
+		if (workingSet == null) {
+			workingSet= workingSetManager.createWorkingSet(name, new IAdaptable[0]);
+			workingSet.setLabel(label);
+			workingSet.setId(id);
+			workingSetManager.addWorkingSet(workingSet);
+		} else {
+			if (!label.equals(workingSet.getLabel()))
+				workingSet.setLabel(label);
 		}
 	}
 
