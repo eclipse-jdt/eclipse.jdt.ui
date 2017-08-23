@@ -223,7 +223,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	public void init(IStructuredSelection selection) {
 		IJavaElement element= getInitialJavaElement(selection);
 
-		initContainerPage(element);
+		initContainerPage(element, true);
 		initTypePage(element);
 		// put default class to test
 		if (element != null) {

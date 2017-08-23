@@ -175,7 +175,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	 */
 	public void init(IStructuredSelection selection) {
 		IJavaElement jelem= getInitialJavaElement(selection);
-		initContainerPage(jelem);
+		initContainerPage(jelem, true);
 		initSuitePage(jelem);
 		boolean isJunit4= false;
 		if (jelem != null && jelem.getElementType() != IJavaElement.JAVA_MODEL) {
