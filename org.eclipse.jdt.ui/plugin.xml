@@ -81,6 +81,24 @@
 			</objectClass>
 		</enablement>
 	</decorator>
+	<decorator
+		label="%WithoutTestCodeDecorator.label"
+		lightweight="true"
+		location="BOTTOM_RIGHT"		
+		state="true"
+		class="org.eclipse.jdt.internal.ui.WithoutTestCodeDecorator"
+		id="org.eclipse.jdt.internal.ui.without.test.code.decorator">
+		<description>
+			%WithoutTestCodeDecorator.description
+		</description>
+         <enablement>
+            <or>
+               <objectClass name="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+               <objectClass name="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer"/>
+               <objectClass name="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer$RequiredProjectWrapper"/>
+            </or>
+         </enablement>
+	</decorator>	
 </extension>
 
    <extension point="org.eclipse.core.runtime.adapters">

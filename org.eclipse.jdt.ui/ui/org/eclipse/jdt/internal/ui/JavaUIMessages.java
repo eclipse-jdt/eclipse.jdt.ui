@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -224,6 +224,8 @@ public final class JavaUIMessages extends NLS {
 
 	public static String JavaOutlineControl_statusFieldText_hideInheritedMembers;
 	public static String JavaOutlineControl_statusFieldText_showInheritedMembers;
+	
+	public static String WithoutTestCodeDecorator_suffix_withoutTestCode;
 
 	public static String RenameSupport_not_available;
 	public static String RenameSupport_dialog_title;

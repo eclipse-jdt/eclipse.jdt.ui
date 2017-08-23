@@ -833,7 +833,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (editCustomAttribute(getShell(), elem)) {
 				String[] changedAttributes= { key };
 				attributeUpdated(selElement, changedAttributes);
-				fLibrariesList.refresh(elem);
+				if(key.equals(CPListElement.TEST) || key.equals(CPListElement.WITHOUT_TEST_CODE)) {
+					fLibrariesList.refresh(elem.getParent());
+				} else { 
+					fLibrariesList.refresh(elem);
+				}
 				fClassPathList.dialogFieldChanged(); // validate
 				updateEnabledState();
 				if (key.equals(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH)) {

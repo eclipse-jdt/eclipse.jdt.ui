@@ -58,6 +58,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	private static final String STACK_BROWSING_VIEWS_VERTICALLY= PreferenceConstants.BROWSING_STACK_VERTICALLY;
 	private static final String PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER;
 	private static final String PREF_CATEGORY= PreferenceConstants.APPEARANCE_CATEGORY;
+	private static final String DECORATE_TEST_CODE_CONTAINER_ICONS= PreferenceConstants.DECORATE_TEST_CODE_CONTAINER_ICONS;
 
 	private SelectionButtonDialogField fShowMethodReturnType;
 	private SelectionButtonDialogField fShowCategory;
@@ -65,6 +66,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	private SelectionButtonDialogField fAbbreviatePackageNames;
 	private SelectionButtonDialogField fStackBrowsingViewsVertically;
 	private SelectionButtonDialogField fShowMembersInPackageView;
+	private SelectionButtonDialogField fDecorateTestCodeContainerIcons;
 	private StringDialogField fPackageNamePattern;
 	private StringDialogField fAbbreviatePackageNamePattern;
 	private SelectionButtonDialogField fFoldPackagesInPackageExplorer;
@@ -97,6 +99,10 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fShowMembersInPackageView.setDialogFieldListener(listener);
 		fShowMembersInPackageView.setLabelText(PreferencesMessages.AppearancePreferencePage_showMembersInPackagesView);
 
+		fDecorateTestCodeContainerIcons= new SelectionButtonDialogField(SWT.CHECK);
+		fDecorateTestCodeContainerIcons.setDialogFieldListener(listener);
+		fDecorateTestCodeContainerIcons.setLabelText(PreferencesMessages.AppearancePreferencePage_decorateTestCodeContainerIcons);
+
 		fStackBrowsingViewsVertically= new SelectionButtonDialogField(SWT.CHECK);
 		fStackBrowsingViewsVertically.setDialogFieldListener(listener);
 		fStackBrowsingViewsVertically.setLabelText(PreferencesMessages.AppearancePreferencePage_stackViewsVerticallyInTheJavaBrowsingPerspective);
@@ -127,6 +133,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fShowMethodReturnType.setSelection(prefs.getBoolean(PREF_METHOD_RETURNTYPE));
 		fShowMethodTypeParameters.setSelection(prefs.getBoolean(PREF_METHOD_TYPEPARAMETERS));
 		fShowMembersInPackageView.setSelection(prefs.getBoolean(SHOW_CU_CHILDREN));
+		fDecorateTestCodeContainerIcons.setSelection(prefs.getBoolean(DECORATE_TEST_CODE_CONTAINER_ICONS));
 		fShowCategory.setSelection(prefs.getBoolean(PREF_CATEGORY));
 		fStackBrowsingViewsVertically.setSelection(prefs.getBoolean(STACK_BROWSING_VIEWS_VERTICALLY));
 		fPackageNamePattern.setText(prefs.getString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW));
@@ -170,6 +177,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fShowCategory.doFillIntoGrid(result, nColumns);
 		fShowMembersInPackageView.doFillIntoGrid(result, nColumns);
 		fFoldPackagesInPackageExplorer.doFillIntoGrid(result, nColumns);
+		fDecorateTestCodeContainerIcons.doFillIntoGrid(result, nColumns);
 
 		new Separator().doFillIntoGrid(result, nColumns);
 
@@ -253,6 +261,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		prefs.setValue(PREF_METHOD_TYPEPARAMETERS, fShowMethodTypeParameters.isSelected());
 		prefs.setValue(PREF_CATEGORY, fShowCategory.isSelected());
 		prefs.setValue(SHOW_CU_CHILDREN, fShowMembersInPackageView.isSelected());
+		prefs.setValue(DECORATE_TEST_CODE_CONTAINER_ICONS, fDecorateTestCodeContainerIcons.isSelected());
 		prefs.setValue(STACK_BROWSING_VIEWS_VERTICALLY, fStackBrowsingViewsVertically.isSelected());
 		prefs.setValue(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, fPackageNamePattern.getText());
 		prefs.setValue(PREF_COMPRESS_PACKAGE_NAMES, fCompressPackageNames.isSelected());
@@ -273,6 +282,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fShowMethodTypeParameters.setSelection(prefs.getDefaultBoolean(PREF_METHOD_TYPEPARAMETERS));
 		fShowCategory.setSelection(prefs.getDefaultBoolean(PREF_CATEGORY));
 		fShowMembersInPackageView.setSelection(prefs.getDefaultBoolean(SHOW_CU_CHILDREN));
+		fDecorateTestCodeContainerIcons.setSelection(prefs.getDefaultBoolean(DECORATE_TEST_CODE_CONTAINER_ICONS));
 		fStackBrowsingViewsVertically.setSelection(prefs.getDefaultBoolean(STACK_BROWSING_VIEWS_VERTICALLY));
 		fPackageNamePattern.setText(prefs.getDefaultString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW));
 		fCompressPackageNames.setSelection(prefs.getDefaultBoolean(PREF_COMPRESS_PACKAGE_NAMES));

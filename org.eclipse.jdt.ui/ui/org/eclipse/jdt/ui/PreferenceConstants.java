@@ -3742,6 +3742,21 @@ public class PreferenceConstants {
 	 */
 	public final static String EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT= "sourceHoverBackgroundColor.SystemDefault"; //$NON-NLS-1$
 
+	
+	/**
+	 * A named preference that tells whether to use different icons
+	 * for source folders marked to contain test code and classpath entries
+	 * visible only for test sources.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @see org.eclipse.jface.resource.StringConverter
+	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 3.14
+	 */
+	public final static String DECORATE_TEST_CODE_CONTAINER_ICONS= "decorateTestCodeContainerIcons"; //$NON-NLS-1$
+
 	/**
 	 * Initializes the given preference store with the default values.
 	 *
@@ -3946,6 +3961,8 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER, false);
 
 		store.setDefault(EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT, true);
+
+		store.setDefault(PreferenceConstants.DECORATE_TEST_CODE_CONTAINER_ICONS, true);
 
 		store.setDefault(PreferenceConstants.FORMATTER_PROFILE, FormatterProfileManager.DEFAULT_PROFILE);
 

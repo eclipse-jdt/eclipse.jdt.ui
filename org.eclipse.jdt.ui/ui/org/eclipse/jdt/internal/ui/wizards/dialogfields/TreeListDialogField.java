@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -268,7 +270,11 @@ public class TreeListDialogField<E> extends DialogField {
 				}
 			});
 			fTree.setContentProvider(fTreeViewerAdapter);
-			fTree.setLabelProvider(fLabelProvider);
+			if(fLabelProvider instanceof IStyledLabelProvider) {
+				fTree.setLabelProvider(new DelegatingStyledCellLabelProvider((IStyledLabelProvider) fLabelProvider));				
+			} else {
+				fTree.setLabelProvider(fLabelProvider);
+			}
 			fTree.addSelectionChangedListener(fTreeViewerAdapter);
 			fTree.addDoubleClickListener(fTreeViewerAdapter);
 
@@ -299,7 +305,7 @@ public class TreeListDialogField<E> extends DialogField {
 	 * @return the button control, or <code>null</code> if the UI has not been created yet
 	 */
 	public Button getButton(int idx) {
-		return fButtonControls[idx];
+		return fButtonControls == null ? null : fButtonControls[idx];
 	}
 
 	/*

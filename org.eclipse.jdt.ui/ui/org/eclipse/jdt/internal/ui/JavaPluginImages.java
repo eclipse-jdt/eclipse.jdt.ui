@@ -123,14 +123,26 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_EMPTY_PACK_RESOURCE= NAME_PREFIX + "empty_pack_fldr_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_EMPTY_PACKAGE= NAME_PREFIX + "empty_pack_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_PACKFRAG_ROOT= NAME_PREFIX + "packagefolder_obj.gif"; //$NON-NLS-1$
+	// workspace folder as classpath entry that is marked as only visible for tests
+	public static final String IMG_OBJS_PACKFRAG_ROOT_TEST= NAME_PREFIX + "packagefolder_test_obj.png"; //$NON-NLS-1$
+	// source folder that is marked to contain test sources
+	public static final String IMG_OBJS_PACKFRAG_ROOT_TESTSOURCES= NAME_PREFIX + "packagefolder_testsources_obj.png"; //$NON-NLS-1$
 	public static final String IMG_OBJS_JAR= NAME_PREFIX + "jar_obj.gif"; 				//$NON-NLS-1$
+	public static final String IMG_OBJS_JAR_TEST= NAME_PREFIX + "jar_test_obj.png"; 				//$NON-NLS-1$
 	public static final String IMG_OBJS_EXTJAR= NAME_PREFIX + "jar_l_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_EXTJAR_TEST= NAME_PREFIX + "jar_l_test_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_OBJS_JAR_WSRC= NAME_PREFIX + "jar_src_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_JAR_WSRC_TEST= NAME_PREFIX + "jar_src_test_obj.gif"; 		//$NON-NLS-1$
 	public static final String IMG_OBJS_EXTJAR_WSRC= NAME_PREFIX + "jar_lsrc_obj.gif";	//$NON-NLS-1$
+	public static final String IMG_OBJS_EXTJAR_WSRC_TEST= NAME_PREFIX + "jar_lsrc_test_obj.gif";	//$NON-NLS-1$
 	public static final String IMG_OBJS_CLASSFOLDER= NAME_PREFIX + "cf_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_CLASSFOLDER_TEST= NAME_PREFIX + "cf_test_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_OBJS_CLASSFOLDER_WSRC= NAME_PREFIX + "cf_src_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_CLASSFOLDER_WSRC_TEST= NAME_PREFIX + "cf_src_test_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_PROJECT_TEST= NAME_PREFIX + "project_test_obj.png"; //$NON-NLS-1$
 
 	public static final String IMG_OBJS_ENV_VAR= NAME_PREFIX + "envvar_obj.gif"; 			//$NON-NLS-1$
+	public static final String IMG_OBJS_ENV_VAR_TEST= NAME_PREFIX + "envvar_test_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_OBJS_JAVA_MODEL= NAME_PREFIX + "java_model_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_MODULE= NAME_PREFIX + "module_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_ERROR_ALT= NAME_PREFIX + "error_alt_obj.gif"; //$NON-NLS-1$
@@ -141,6 +153,7 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_PROJECT_SETTINGS= NAME_PREFIX + "settings_obj.gif"; //$NON-NLS-1$
 
 	public static final String IMG_OBJS_LIBRARY= NAME_PREFIX + "library_obj.gif"; 		//$NON-NLS-1$
+	public static final String IMG_OBJS_LIBRARY_TEST= NAME_PREFIX + "library_test_obj.png"; 		//$NON-NLS-1$
 
 	public static final String IMG_OBJS_JAVADOCTAG= NAME_PREFIX + "jdoc_tag_obj.gif"; 	//$NON-NLS-1$
 	public static final String IMG_OBJS_EXTERNAL_ANNOTATIONS = NAME_PREFIX + "external_annotation_location_attrib.gif"; 	//$NON-NLS-1$
@@ -232,7 +245,11 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_EMPTY_PACKAGE_RESOURCES= createManagedFromKey(T_OBJ, IMG_OBJS_EMPTY_PACK_RESOURCE);
 	public static final ImageDescriptor DESC_OBJS_EMPTY_PACKAGE= createManagedFromKey(T_OBJ, IMG_OBJS_EMPTY_PACKAGE);
 	public static final ImageDescriptor DESC_OBJS_PACKFRAG_ROOT= createManagedFromKey(T_OBJ, IMG_OBJS_PACKFRAG_ROOT);
+	public static final ImageDescriptor DESC_OBJS_PACKFRAG_ROOT_TEST= createManagedFromKey(T_OBJ, IMG_OBJS_PACKFRAG_ROOT_TEST);
+	public static final ImageDescriptor DESC_OBJS_PACKFRAG_ROOT_TESTSOURCES= createManagedFromKey(T_OBJ, IMG_OBJS_PACKFRAG_ROOT_TESTSOURCES);
 	public static final ImageDescriptor DESC_OBJS_PROJECT_SETTINGS= createManagedFromKey(T_OBJ, IMG_OBJS_PROJECT_SETTINGS);
+	public static final ImageDescriptor DESC_OBJS_PROJECT_TEST= createManagedFromKey(T_OBJ, IMG_OBJS_PROJECT_TEST);
+
 
 	public static final ImageDescriptor DESC_OBJS_JAVA_MODEL= createManagedFromKey(T_OBJ, IMG_OBJS_JAVA_MODEL);
 	public static final ImageDescriptor DESC_OBJS_MODULE= createManagedFromKey(T_OBJ, IMG_OBJS_MODULE);
@@ -270,16 +287,24 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_ENUM_ALT= createManagedFromKey(T_OBJ, IMG_OBJS_ENUM_ALT);
 
 	public static final ImageDescriptor DESC_OBJS_JAR= createManagedFromKey(T_OBJ, IMG_OBJS_JAR);
+	public static final ImageDescriptor DESC_OBJS_JAR_TEST= createManagedFromKey(T_OBJ, IMG_OBJS_JAR_TEST);
 	public static final ImageDescriptor DESC_OBJS_EXTJAR= createManagedFromKey(T_OBJ, IMG_OBJS_EXTJAR);
+	public static final ImageDescriptor DESC_OBJS_EXTJAR_TEST= createManagedFromKey(T_OBJ, IMG_OBJS_EXTJAR_TEST);
 	public static final ImageDescriptor DESC_OBJS_JAR_WSRC= createManagedFromKey(T_OBJ, IMG_OBJS_JAR_WSRC);
+	public static final ImageDescriptor DESC_OBJS_JAR_WSRC_TEST= createManagedFromKey(T_OBJ, IMG_OBJS_JAR_WSRC_TEST);
 	public static final ImageDescriptor DESC_OBJS_EXTJAR_WSRC= createManagedFromKey(T_OBJ, IMG_OBJS_EXTJAR_WSRC);
+	public static final ImageDescriptor DESC_OBJS_EXTJAR_WSRC_TEST= createManagedFromKey(T_OBJ, IMG_OBJS_EXTJAR_WSRC_TEST);
 
 	public static final ImageDescriptor DESC_OBJS_CLASSFOLDER= createManagedFromKey(T_OBJ, IMG_OBJS_CLASSFOLDER);
+	public static final ImageDescriptor DESC_OBJS_CLASSFOLDER_TEST= createManagedFromKey(T_OBJ, IMG_OBJS_CLASSFOLDER_TEST);
 	public static final ImageDescriptor DESC_OBJS_CLASSFOLDER_WSRC= createManagedFromKey(T_OBJ, IMG_OBJS_CLASSFOLDER_WSRC);
+	public static final ImageDescriptor DESC_OBJS_CLASSFOLDER_WSRC_TEST= createManagedFromKey(T_OBJ, IMG_OBJS_CLASSFOLDER_WSRC_TEST);
 
 	public static final ImageDescriptor DESC_OBJS_ENV_VAR= createManagedFromKey(T_OBJ, IMG_OBJS_ENV_VAR);
+	public static final ImageDescriptor DESC_OBJS_ENV_VAR_TEST= createManagedFromKey(T_OBJ, IMG_OBJS_ENV_VAR_TEST);
 
 	public static final ImageDescriptor DESC_OBJS_LIBRARY= createManagedFromKey(T_OBJ, IMG_OBJS_LIBRARY);
+	public static final ImageDescriptor DESC_OBJS_LIBRARY_TEST= createManagedFromKey(T_OBJ, IMG_OBJS_LIBRARY_TEST);
 
 	public static final ImageDescriptor DESC_OBJS_JAVADOCTAG= createManagedFromKey(T_OBJ, IMG_OBJS_JAVADOCTAG);
 	public static final ImageDescriptor DESC_OBJS_HTMLTAG= createManagedFromKey(T_OBJ, IMG_OBJS_HTMLTAG);

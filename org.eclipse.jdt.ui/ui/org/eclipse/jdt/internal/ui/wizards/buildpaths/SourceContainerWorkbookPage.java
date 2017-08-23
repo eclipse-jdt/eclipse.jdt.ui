@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -439,12 +439,12 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		} else if (key.equals(CPListElement.TEST)) {
 			String newValue= "true".equals(elem.getValue()) ? null : "true"; //$NON-NLS-1$ //$NON-NLS-2$
 			elem.setValue(newValue);
-			fFoldersList.refresh(elem);
+			fFoldersList.refresh(elem.getParent());
 			fClassPathList.dialogFieldChanged(); // validate
 		} else if (key.equals(CPListElement.WITHOUT_TEST_CODE)) {
 			String newValue= "true".equals(elem.getValue()) ? null : "true"; //$NON-NLS-1$ //$NON-NLS-2$
 			elem.setValue(newValue);
-			fFoldersList.refresh(elem);
+			fFoldersList.refresh(elem.getParent());
 		} else {
 			if (editCustomAttribute(getShell(), elem)) {
 				fFoldersList.refresh();

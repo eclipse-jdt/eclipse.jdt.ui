@@ -597,7 +597,11 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 					moveCPElementAcrossNode(fProjectsList, selElement, changeDirection);
 				}
 			}
-			fProjectsList.refresh(elem);
+			if(key.equals(CPListElement.TEST) || key.equals(CPListElement.WITHOUT_TEST_CODE)) {
+				fProjectsList.refresh(elem.getParent());
+			} else { 
+				fProjectsList.refresh(elem);
+			}
 			fClassPathList.dialogFieldChanged(); // validate
 			fProjectsList.postSetSelection(new StructuredSelection(elem));
 			// if module attribute was changed - it will switch nodes and hence parent should be

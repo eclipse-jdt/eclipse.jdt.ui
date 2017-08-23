@@ -20,8 +20,10 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DecorationOverlayIcon;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StyledString;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.ide.IDE;
@@ -34,6 +36,7 @@ import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.ISharedImages;
@@ -45,16 +48,16 @@ import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttri
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.LimitModules;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModulePatch;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddExport;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddReads;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModulePatch;
 
-public class CPListLabelProvider extends LabelProvider {
+public class CPListLabelProvider extends LabelProvider implements IStyledLabelProvider {
 
 	private String fNewLabel, fClassLabel, fMissing;
 
@@ -414,11 +417,19 @@ public class CPListLabelProvider extends LabelProvider {
 	}
 
 	private ImageDescriptor getCPListElementBaseImage(CPListElement cpentry) {
+		IClasspathEntry classpathEntry= cpentry.getClasspathEntry();
+		boolean isTest= classpathEntry != null && classpathEntry.isTest();
+		return getCPListElementBaseImage(cpentry, isTest);
+	}
+
+	private ImageDescriptor getCPListElementBaseImage(CPListElement cpentry, boolean isTest) {
 		switch (cpentry.getEntryKind()) {
 			case IClasspathEntry.CPE_SOURCE:
 				if (cpentry.getPath().segmentCount() == 1) {
 					return fProjectImage;
 				} else {
+					if(isTest)
+						return JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT_TESTSOURCES;
 					return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_PACKFRAG_ROOT);
 				}
 			case IClasspathEntry.CPE_LIBRARY:
@@ -430,35 +441,51 @@ public class CPListLabelProvider extends LabelProvider {
 				if (res == null) {
 					if (ArchiveFileFilter.isArchivePath(cpentry.getPath(), true)) {
 						if (path == null || path.isEmpty()) {
+							if(isTest)
+								return JavaPluginImages.DESC_OBJS_EXTJAR_TEST;
 							return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_EXTERNAL_ARCHIVE);
 						} else {
+							if(isTest)
+								return JavaPluginImages.DESC_OBJS_EXTJAR_WSRC_TEST;
 							return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_EXTERNAL_ARCHIVE_WITH_SOURCE);
 						}
 					} else {
 						if (path == null || path.isEmpty()) {
+							if(isTest)
+								return JavaPluginImages.DESC_OBJS_CLASSFOLDER_TEST;
 							return JavaPluginImages.DESC_OBJS_CLASSFOLDER;
 						} else {
+							if(isTest)
+								return JavaPluginImages.DESC_OBJS_CLASSFOLDER_WSRC_TEST;
 							return JavaPluginImages.DESC_OBJS_CLASSFOLDER_WSRC;
 						}
 					}
 				} else if (res instanceof IFile) {
 					if (path == null || path.isEmpty()) {
+						if(isTest)
+							return JavaPluginImages.DESC_OBJS_JAR_TEST;
 						return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_JAR);
 					} else {
+						if(isTest)
+							return JavaPluginImages.DESC_OBJS_JAR_WSRC_TEST;
 						return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_JAR_WITH_SOURCE);
 					}
 				} else {
+					if(isTest)
+						return JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT_TEST;
 					return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_PACKFRAG_ROOT);
 				}
 			case IClasspathEntry.CPE_PROJECT:
-				return fProjectImage;
+				return isTest ? JavaPluginImages.DESC_OBJS_PROJECT_TEST : fProjectImage;
 			case IClasspathEntry.CPE_VARIABLE:
-				ImageDescriptor variableImage= fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_CLASSPATH_VAR_ENTRY);
+				ImageDescriptor variableImage= isTest ? JavaPluginImages.DESC_OBJS_ENV_VAR_TEST : fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_CLASSPATH_VAR_ENTRY);
 				if (cpentry.isDeprecated()) {
 					return new JavaElementImageDescriptor(variableImage, JavaElementImageDescriptor.DEPRECATED, JavaElementImageProvider.SMALL_SIZE);
 				}
 				return variableImage;
 			case IClasspathEntry.CPE_CONTAINER:
+				if(isTest)
+					return JavaPluginImages.DESC_OBJS_LIBRARY_TEST;
 				return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_LIBRARY);
 			default:
 				return cpentry.isRootNodeForPath() ? JavaPluginImages.DESC_CLASSPATH_ROOT : null;
@@ -490,7 +517,7 @@ public class CPListLabelProvider extends LabelProvider {
 			} else if (key.equals(CPListElement.ACCESSRULES)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_ACCESSRULES_ATTRIB);
 			} else if (key.equals(CPListElement.IGNORE_OPTIONAL_PROBLEMS)) {
-				Image image= fRegistry.get(getCPListElementBaseImage(attribute.getParent()));
+				Image image= fRegistry.get(getCPListElementBaseImage(attribute.getParent(), false));
 				if (image != null) {
 					ImageDescriptor overlay= JavaPluginImages.DESC_OVR_IGNORE_OPTIONAL_PROBLEMS;
 					ImageDescriptor imageDescriptor= new DecorationOverlayIcon(image, overlay, IDecoration.BOTTOM_LEFT);
@@ -524,5 +551,21 @@ public class CPListLabelProvider extends LabelProvider {
 			return fRegistry.get(JavaPluginImages.DESC_OBJS_MODULE_ATTRIB);
 		}
 		return null;
+	}
+
+	@Override
+	public StyledString getStyledText(Object element) {
+		if (element instanceof CPListElement) {
+			CPListElement cpListElement= (CPListElement) element;
+			IClasspathEntry classpathEntry= cpListElement.getClasspathEntry();
+
+			StyledString styledString= new StyledString();
+			styledString.append(getText(element));
+			if (classpathEntry != null && classpathEntry.isWithoutTestCode()) {
+				styledString.append(JavaUIMessages.WithoutTestCodeDecorator_suffix_withoutTestCode, StyledString.DECORATIONS_STYLER);
+			}
+			return styledString;
+		}
+		return new StyledString(getText(element));
 	}
 }

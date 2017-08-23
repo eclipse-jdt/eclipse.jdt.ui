@@ -304,6 +304,7 @@ public final class PreferencesMessages extends NLS {
 	public static String AppearancePreferencePage_pkgNamePatternAbbreviateEnable_label;
 	public static String AppearancePreferencePage_pkgNamePatternAbbreviate_label;
 	public static String AppearancePreferencePage_showMembersInPackagesView;
+	public static String AppearancePreferencePage_decorateTestCodeContainerIcons;	
 	public static String AppearancePreferencePage_stackViewsVerticallyInTheJavaBrowsingPerspective;
 	public static String AppearancePreferencePage_note;
 	public static String AppearancePreferencePage_preferenceOnlyEffectiveForNewPerspectives;

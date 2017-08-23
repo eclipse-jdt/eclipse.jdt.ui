@@ -1028,6 +1028,11 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				IClasspathAttribute result= config.performEdit(getShell(), elem.getClasspathAttributeAccess());
 				if (result != null) {
 					elem.setValue(result.getValue());
+					if(key.equals(CPListElement.TEST) || key.equals(CPListElement.WITHOUT_TEST_CODE)) {
+						fLibraryList.refresh(elem.getParent());
+					} else { 
+						fLibraryList.refresh(elem);
+					}
 					fLibraryList.refresh(parentContainer);
 				}
 			}
