@@ -39,6 +39,12 @@ public final class SearchMessages extends NLS {
 	public static String MatchFilter_StaticFilter_actionLabel;
 	public static String MatchFilter_StaticFilter_description;
 	public static String MatchFilter_StaticFilter_name;
+	public static String MatchFilter_TestCodeFilter_actionLabel;
+	public static String MatchFilter_TestCodeFilter_description;
+	public static String MatchFilter_TestCodeFilter_name;
+	public static String MatchFilter_MainCodeFilter_actionLabel;
+	public static String MatchFilter_MainCodeFilter_description;
+	public static String MatchFilter_MainCodeFilter_name;
 	public static String SearchLabelProvider_exact_singular;
 	public static String SearchLabelProvider_exact_noCount;
 	public static String SearchLabelProvider_exact_and_potential_plural;
