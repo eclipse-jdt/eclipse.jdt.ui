@@ -5413,6 +5413,14 @@
 <!-- Quick Hierarchy -->
       <filter
             targetId="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy"
+            name="%HideTestCode.label"
+            enabled="false"
+            description="%HideTestCode.description"
+            class="org.eclipse.jdt.internal.ui.filters.TestCodeFilter"
+            id="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy.TestCodeFilter">
+      </filter>
+      <filter
+            targetId="org.eclipse.jdt.internal.ui.typehierarchy.QuickHierarchy"
             name="%HideStatics.label"
             enabled="false"
             description="%HideStatics.description"
