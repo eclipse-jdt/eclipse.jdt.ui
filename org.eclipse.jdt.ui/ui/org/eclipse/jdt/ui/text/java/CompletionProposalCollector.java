@@ -19,6 +19,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
@@ -30,6 +31,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.CompletionRequestor;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -127,6 +129,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 */
 	private JavaContentAssistInvocationContext fInvocationContext;
 
+	private boolean fIsTestCodeExcluded;
+
 	/**
 	 * Creates a new instance ready to collect proposals. If the passed
 	 * <code>ICompilationUnit</code> is not contained in an
@@ -164,11 +168,40 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		super(ignoreAll);
 		fJavaProject= project;
 		fCompilationUnit= cu;
+		
+		fIsTestCodeExcluded = !isTestSource(project, cu);
 
 		fUserReplacementLength= -1;
 		if (!ignoreAll) {
 			setRequireExtendedContext(true);
 		}
+	}
+	
+	private boolean isTestSource(IJavaProject project, ICompilationUnit cu) {
+		try {
+			IClasspathEntry[] resolvedClasspath= project.getResolvedClasspath(true);
+			final IPath resourcePath= cu.getResource().getFullPath();
+			for (IClasspathEntry e : resolvedClasspath) {
+				if (e.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+					if (e.isTest()) {
+						if (e.getPath().isPrefixOf(resourcePath)) {
+							return true;
+						}
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			return false;
+		}
+		return false;
+	}
+
+	/**
+	 * @since 3.14
+	 */
+	@Override
+	public boolean isTestCodeExcluded() {
+		return fIsTestCodeExcluded;
 	}
 
 	/**
