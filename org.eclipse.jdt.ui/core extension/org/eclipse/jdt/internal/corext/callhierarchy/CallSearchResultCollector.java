@@ -14,9 +14,12 @@ package org.eclipse.jdt.internal.corext.callhierarchy;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 class CallSearchResultCollector {
     /**
@@ -68,8 +71,29 @@ class CallSearchResultCollector {
         String fullyQualifiedName = getTypeOfElement(enclosingElement)
                                         .getFullyQualifiedName();
 
+		if (CallHierarchy.getDefault().isFilterTestCode()) {
+			IClasspathEntry classpathEntry= determineClassPathEntry(enclosingElement);
+			if (classpathEntry != null && classpathEntry.isTest()) {
+				return true;
+			}
+		}
+
         return CallHierarchy.getDefault().isIgnored(fullyQualifiedName);
     }
+
+	private static IClasspathEntry determineClassPathEntry(Object element) {
+		if (element instanceof IJavaElement) {
+			IPackageFragmentRoot packageFragmentRoot= (IPackageFragmentRoot) ((IJavaElement) element).getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			if (packageFragmentRoot != null) {
+				try {
+					return packageFragmentRoot.getResolvedClasspathEntry();
+				} catch (JavaModelException e) {
+					return null;
+				}
+			}
+		}
+		return null;
+	}
 
     private IType getTypeOfElement(IMember element) {
         if (element.getElementType() == IJavaElement.TYPE) {

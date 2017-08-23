@@ -46,6 +46,7 @@ public class CallHierarchy {
     private static final String PREF_USE_IMPLEMENTORS= "PREF_USE_IMPLEMENTORS"; //$NON-NLS-1$
     private static final String PREF_USE_FILTERS = "PREF_USE_FILTERS"; //$NON-NLS-1$
     private static final String PREF_FILTERS_LIST = "PREF_FILTERS_LIST"; //$NON-NLS-1$
+    private static final String PREF_FILTER_TESTCODE= "PREF_FILTER_TESTCODE"; //$NON-NLS-1$
 
     private static final String DEFAULT_IGNORE_FILTERS = "java.*,javax.*"; //$NON-NLS-1$
     private static CallHierarchy fgInstance;
@@ -71,6 +72,19 @@ public class CallHierarchy {
 
         settings.setValue(PREF_USE_IMPLEMENTORS, enabled);
     }
+    
+    public boolean isFilterTestCode() {
+        IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
+
+        return settings.getBoolean(PREF_FILTER_TESTCODE);
+    }
+
+    public void setFilterTestCode(boolean enabled) {
+        IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
+
+        settings.setValue(PREF_FILTER_TESTCODE, enabled);
+    }
+
 
     public Collection<IJavaElement> getImplementingMethods(IMethod method) {
         if (isSearchUsingImplementorsEnabled()) {

@@ -39,6 +39,7 @@ class FiltersDialog extends StatusDialog {
     private Button fFilterOnNames;
     private Text fNames;
     private Text fMaxCallDepth;
+    private Button fFilterTestCode;
 
 
     protected FiltersDialog(Shell parentShell) {
@@ -61,6 +62,7 @@ class FiltersDialog extends StatusDialog {
 	protected Control createDialogArea(Composite parent) {
     	Composite composite= (Composite) super.createDialogArea(parent);
 
+        createTestCodeArea(composite);
         createNamesArea(composite);
         new Label(composite, SWT.NONE);         // Filler
         createMaxCallDepthArea(composite);
@@ -118,6 +120,12 @@ class FiltersDialog extends StatusDialog {
         fNamesHelpText.setText(CallHierarchyMessages.FiltersDialog_filterOnNamesSubCaption);
     }
 
+    private void createTestCodeArea(Composite parent) {
+        fFilterTestCode = createCheckbox(parent,
+                CallHierarchyMessages.FiltersDialog_filterTestCode, true);
+    }
+
+    
     /**
      * Creates a check box button with the given parent and text.
      *
@@ -166,6 +174,7 @@ class FiltersDialog extends StatusDialog {
         CallHierarchyUI.getDefault().setMaxCallDepth(maxCallDepth);
         CallHierarchy.getDefault().setFilters(fNames.getText());
         CallHierarchy.getDefault().setFilterEnabled(fFilterOnNames.getSelection());
+        CallHierarchy.getDefault().setFilterTestCode(fFilterTestCode.getSelection());
     }
 
     /**
@@ -175,6 +184,7 @@ class FiltersDialog extends StatusDialog {
       fMaxCallDepth.setText(String.valueOf(CallHierarchyUI.getDefault().getMaxCallDepth()));
       fNames.setText(CallHierarchy.getDefault().getFilters());
       fFilterOnNames.setSelection(CallHierarchy.getDefault().isFilterEnabled());
+      fFilterTestCode.setSelection(CallHierarchy.getDefault().isFilterTestCode());
       updateEnabledState();
     }
 

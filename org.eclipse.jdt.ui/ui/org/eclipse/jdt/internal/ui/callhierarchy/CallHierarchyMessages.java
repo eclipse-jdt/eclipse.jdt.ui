@@ -67,6 +67,7 @@ public final class CallHierarchyMessages extends NLS {
 	public static String FiltersDialog_filterOnNamesSubCaption;
 	public static String FiltersDialog_maxCallDepth;
 	public static String FiltersDialog_messageMaxCallDepthInvalid;
+	public static String FiltersDialog_filterTestCode;
 	public static String CallHierarchyContentProvider_searchError_title;
 	public static String CallHierarchyContentProvider_searchError_message;
 	public static String CallHierarchyLabelProvider_constructor_label;
