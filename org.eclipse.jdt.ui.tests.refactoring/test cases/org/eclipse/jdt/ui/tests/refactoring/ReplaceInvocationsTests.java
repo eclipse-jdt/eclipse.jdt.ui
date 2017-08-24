@@ -66,7 +66,7 @@ public class ReplaceInvocationsTests extends AbstractSelectionTestCase {
 		CompilationUnit compilationUnit= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(unit, false);
 		Comment comment= (Comment) compilationUnit.getCommentList().get(0);
 		String commentString= unit.getBuffer().getText(comment.getStartPosition(), comment.getLength());
-		Matcher matcher= Pattern.compile("(?s)/\\*\\s*params:[^\\r\\n&&\\s]*" + "([^\\r\\n]*)" + "(\\r\\n?|\\n)" + "(.+)" + "\\*/").matcher(commentString);
+		Matcher matcher= Pattern.compile("(?s)/\\*\\s*params:[[^\\r\\n]&&\\s]*" + "([^\\r\\n]*)" + "(\\r\\n?|\\n)" + "(.+)" + "\\*/").matcher(commentString);
 		assertTrue(matcher.find());
 		String paramsString= matcher.group(1);
 		String[] params= paramsString.length() == 0 ? new String[0] : paramsString.split("[\\s,]+");
