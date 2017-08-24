@@ -771,6 +771,7 @@ public final class NewWizardMessages extends NLS {
 	public static String CPListLabelProvider_external_annotations_location_label;
 	
 	public static String NewModuleInfoWizard_title;
+	public static String NewModuleInfoWizard_updateProject_job;
 	public static String NewModuleInfoWizardPage_title;
 	public static String NewModuleInfoWizardPage_description;
 	public static String NewModuleInfoWizardPage_module_label;

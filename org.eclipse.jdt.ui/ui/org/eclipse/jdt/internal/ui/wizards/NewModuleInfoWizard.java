@@ -15,13 +15,17 @@
 package org.eclipse.jdt.internal.ui.wizards;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -36,14 +40,18 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.InfoFilesUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.wizards.NewModuleInfoWizardPage;
 
@@ -51,6 +59,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class NewModuleInfoWizard extends Wizard implements INewWizard {
+
+	private static final String TRUE= "true"; //$NON-NLS-1$
 
 	private NewModuleInfoWizardPage fPage;
 
@@ -94,6 +104,17 @@ public class NewModuleInfoWizard extends Wizard implements INewWizard {
 			if (fProject != null && fTargetPkgFragmentRoot != null && fPackageFragmentRoots != null && fPackageFragmentRoots.length > 0) {
 				try {
 					createAndOpenFile(fTargetPkgFragmentRoot, fPackageFragmentRoots);
+					new Job(Messages.format(NewWizardMessages.NewModuleInfoWizard_updateProject_job, this.fProject.getElementName())) {
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+							try {
+								convertClasspathToModulePath(monitor);
+							} catch (CoreException e) {
+								return e.getStatus();
+							}
+							return Status.OK_STATUS;
+						}
+					}.schedule();
 				} catch (CoreException e) {
 					JavaPlugin.log(e);
 				}
@@ -179,6 +200,58 @@ public class NewModuleInfoWizard extends Wizard implements INewWizard {
 		fileContent.append('}');
 
 		return fileContent.toString();
+	}
+
+	private void convertClasspathToModulePath(IProgressMonitor monitor) throws JavaModelException {
+		boolean changed= false;
+		IClasspathEntry[] rawClasspath= this.fProject.getRawClasspath();
+		for (int i= 0; i < rawClasspath.length; i++) {
+			IClasspathEntry entry= rawClasspath[i];
+			switch (entry.getEntryKind()) {
+				case IClasspathEntry.CPE_LIBRARY:
+				case IClasspathEntry.CPE_PROJECT:
+					IClasspathAttribute[] newAttributes= addModuleAttributeIfNeeded(entry.getExtraAttributes());
+					if (newAttributes != null) {
+						rawClasspath[i]= addAttributes(entry, newAttributes);
+						changed= true;
+					}
+					break;
+				default:
+					// other kinds are not handled
+			}
+		}
+		if (changed) {
+			this.fProject.setRawClasspath(rawClasspath, monitor);
+		}
+	}
+
+	private IClasspathAttribute[] addModuleAttributeIfNeeded(IClasspathAttribute[] extraAttributes) {
+		for (int j= 0; j < extraAttributes.length; j++) {
+			IClasspathAttribute classpathAttribute= extraAttributes[j];
+			if (IClasspathAttribute.AUTOMATIC_MODULE.equals(classpathAttribute.getName())) {
+				if (TRUE.equals(classpathAttribute.getValue())) {
+					return null; // no change required
+				}
+				extraAttributes[j]= JavaCore.newClasspathAttribute(IClasspathAttribute.AUTOMATIC_MODULE, TRUE);
+				return extraAttributes;
+			}
+		}
+		extraAttributes= Arrays.copyOf(extraAttributes, extraAttributes.length+1);
+		extraAttributes[extraAttributes.length-1]= JavaCore.newClasspathAttribute(IClasspathAttribute.AUTOMATIC_MODULE, TRUE);
+		return extraAttributes;
+	}
+
+	private IClasspathEntry addAttributes(IClasspathEntry entry, IClasspathAttribute[] extraAttributes) {
+		switch (entry.getEntryKind()) {
+			case IClasspathEntry.CPE_LIBRARY:
+				return JavaCore.newLibraryEntry(entry.getPath(), entry.getSourceAttachmentPath(),
+						entry.getSourceAttachmentRootPath(), entry.getAccessRules(), extraAttributes, entry.isExported());
+			case IClasspathEntry.CPE_PROJECT:
+				return JavaCore.newProjectEntry(entry.getPath(), entry.getAccessRules(), entry.combineAccessRules(),
+						extraAttributes, entry.isExported());
+			default:
+				return entry; // other kinds are not handled
+		}
 	}
 
 	@Override
