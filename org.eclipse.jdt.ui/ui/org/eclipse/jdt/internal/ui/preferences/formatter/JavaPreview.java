@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,6 @@ import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -57,19 +56,6 @@ public abstract class JavaPreview {
 
 	private final class JavaSourcePreviewerUpdater {
 
-	    final IPropertyChangeListener fontListener= new IPropertyChangeListener() {
-	        @Override
-			public void propertyChange(PropertyChangeEvent event) {
-	            if (event.getProperty().equals(PreferenceConstants.EDITOR_TEXT_FONT)) {
-					final Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
-					fSourceViewer.getTextWidget().setFont(font);
-					if (fMarginPainter != null) {
-						fMarginPainter.initialize();
-					}
-				}
-			}
-		};
-
 	    final IPropertyChangeListener propertyListener= new IPropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
@@ -83,13 +69,11 @@ public abstract class JavaPreview {
 
 		public JavaSourcePreviewerUpdater() {
 
-		    JFaceResources.getFontRegistry().addListener(fontListener);
 		    fPreferenceStore.addPropertyChangeListener(propertyListener);
 
 			fSourceViewer.getTextWidget().addDisposeListener(new DisposeListener() {
 				@Override
 				public void widgetDisposed(DisposeEvent e) {
-					JFaceResources.getFontRegistry().removeListener(fontListener);
 					fPreferenceStore.removePropertyChangeListener(propertyListener);
 				}
 			});
