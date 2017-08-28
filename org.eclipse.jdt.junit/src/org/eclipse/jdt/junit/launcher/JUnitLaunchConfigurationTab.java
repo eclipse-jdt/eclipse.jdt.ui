@@ -773,7 +773,12 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 					StringBuffer buf= new StringBuffer();
 
 					String typeSign= Signature.getTypeErasure(paramTypeSign);
-					String fullName= JavaModelUtil.getResolvedTypeName(typeSign, method.getDeclaringType(), '$');
+					String fullName;
+					if (useSimpleNames) {
+						fullName= JavaModelUtil.getResolvedTypeName(typeSign, method.getDeclaringType(), '.');
+					} else {
+						fullName= JavaModelUtil.getResolvedTypeName(typeSign, method.getDeclaringType(), '$');
+					}
 					if (fullName == null) { // e.g. a type parameter "QE;"
 						if (fullNames == null) {
 							fullNames= JUnitStubUtility.getParameterTypeNamesForSeeTag(method);
