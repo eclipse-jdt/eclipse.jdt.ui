@@ -304,10 +304,10 @@ public class TestViewer {
 			testMethodName= testMethodName + "(" + paramTypesStr + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
-			manager.add(new RerunAction(JUnitMessages.RerunAction_label_rerun, fTestRunnerPart, testCaseElement.getId(), className, testMethodName, testCaseElement.getUniqueId(), ILaunchManager.RUN_MODE));
+			manager.add(new RerunAction(JUnitMessages.RerunAction_label_rerun, fTestRunnerPart, testCaseElement.getId(), className, testMethodName, testCaseElement.getDisplayName(), testCaseElement.getUniqueId(), ILaunchManager.RUN_MODE));
 		} else {
-			manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testCaseElement.getId(), className, testMethodName, testCaseElement.getUniqueId(), ILaunchManager.RUN_MODE));
-			manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testCaseElement.getId(), className, testMethodName, testCaseElement.getUniqueId(), ILaunchManager.DEBUG_MODE));
+			manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testCaseElement.getId(), className, testMethodName, testCaseElement.getDisplayName(), testCaseElement.getUniqueId(), ILaunchManager.RUN_MODE));
+			manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testCaseElement.getId(), className, testMethodName, testCaseElement.getDisplayName(), testCaseElement.getUniqueId(), ILaunchManager.DEBUG_MODE));
 		}
 	}
 
@@ -345,8 +345,8 @@ public class TestViewer {
 			}
 		}
 		if (qualifiedName != null) {
-			manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testSuiteElement.getId(), qualifiedName, testMethodName, testSuiteElement.getUniqueId(), ILaunchManager.RUN_MODE));
-			manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testSuiteElement.getId(), qualifiedName, testMethodName, testSuiteElement.getUniqueId(), ILaunchManager.DEBUG_MODE));
+			manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testSuiteElement.getId(), qualifiedName, testMethodName, testSuiteElement.getDisplayName(), testSuiteElement.getUniqueId(), ILaunchManager.RUN_MODE));
+			manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testSuiteElement.getId(), qualifiedName, testMethodName, testSuiteElement.getDisplayName(), testSuiteElement.getUniqueId(), ILaunchManager.DEBUG_MODE));
 		}
 	}
 

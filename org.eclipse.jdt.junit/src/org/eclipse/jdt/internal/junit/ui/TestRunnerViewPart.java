@@ -2157,7 +2157,7 @@ action enablement
 			getDisplay().asyncExec(r);
 	}
 
-	public void rerunTest(String testId, String className, String testName, String uniqueId, String launchMode) {
+	public void rerunTest(String testId, String className, String testName, String testDisplayName, String uniqueId, String launchMode) {
 		if (lastLaunchIsKeptAlive()) {
 			fTestRunSession.rerunTest(testId, className, testName);
 			TestCaseElement testCaseElement= (TestCaseElement) fTestRunSession.getTestElement(testId);
@@ -2174,9 +2174,14 @@ action enablement
 				ILaunchConfiguration launchConfiguration= launch.getLaunchConfiguration();
 				if (launchConfiguration != null) {
 					try {
-						String name= className;
-						if (testName != null)
-							name+= "."+testName; //$NON-NLS-1$
+						String name;
+						if (testDisplayName != null) {
+							name= testDisplayName;
+						} else {
+							name= className;
+							if (testName != null)
+								name+= "."+testName; //$NON-NLS-1$
+						}
 						String configName= Messages.format(JUnitMessages.TestRunnerViewPart_configName, name);
 						ILaunchConfigurationWorkingCopy tmp = launchConfiguration.copy(configName);
 						// fix for bug: 64838  junit view run single test does not use correct class [JUnit]
