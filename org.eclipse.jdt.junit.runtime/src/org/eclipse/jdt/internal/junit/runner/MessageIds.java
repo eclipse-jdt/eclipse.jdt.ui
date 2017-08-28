@@ -113,7 +113,7 @@ public class MessageIds {
 	 * isDynamicTest = "true" or "false" <br>
 	 * parentId = the unique id of its parent if it is a dynamic test, otherwise can be "-1" <br>
 	 * displayName = the display name of the test <br>
-	 * parameterTypes = comma-separated list of fully qualified type names of method parameters if applicable, otherwise an empty string <br>
+	 * parameterTypes = comma-separated list of method parameter types if applicable, otherwise an empty string <br>
 	 * See: ITestRunListener2#testTreeEntry
 	 * 
 	 */

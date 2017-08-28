@@ -82,7 +82,7 @@ public interface ITestRunListener2 {
 	 *  isDynamicTest: true or false
 	 *  parentId: the unique testId of its parent if it is a dynamic test, otherwise can be "-1"
 	 *  displayName: the display name of the test
-	 *  parameterTypes: comma-separated list of fully qualified type names of method parameters if applicable, otherwise an empty string
+	 *  parameterTypes: comma-separated list of method parameter types if applicable, otherwise an empty string
 	 *  uniqueId: the unique ID of the test provided by JUnit launcher, otherwise an empty string
 	 *  
 	 *  Example: 324968,testPass(junit.tests.MyTest),false,1,false,-1,A simple test case,&quot;&quot;,&quot;&quot;

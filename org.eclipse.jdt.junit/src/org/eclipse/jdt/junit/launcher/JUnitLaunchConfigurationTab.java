@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -90,7 +88,6 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.Messages;
@@ -731,7 +728,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			if (!isJUnit3 && !Modifier.isPrivate(flags) && !Modifier.isStatic(flags)) {
 				IAnnotation annotation= method.getAnnotation("Test"); //$NON-NLS-1$
 				if (annotation.exists()) {
-					methodNames.add(methodName + getParameterTypes(method, false));
+					methodNames.add(methodName + JUnitStubUtility.getParameterTypes(method, false));
 				} else if (isJUnit5) {
 					boolean hasAnyTestAnnotation= method.getAnnotation("TestFactory").exists() //$NON-NLS-1$
 							|| method.getAnnotation("Testable").exists() //$NON-NLS-1$
@@ -739,76 +736,11 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 							|| method.getAnnotation("ParameterizedTest").exists() //$NON-NLS-1$
 							|| method.getAnnotation("RepeatedTest").exists(); //$NON-NLS-1$
 					if (hasAnyTestAnnotation || isAnnotatedWithTestable(method, type, javaProject)) {
-						methodNames.add(methodName + getParameterTypes(method, false));
+						methodNames.add(methodName + JUnitStubUtility.getParameterTypes(method, false));
 					}
 				}
 			}
 		}
-	}
-
-	/**
-	 * Returns a comma-separated list of method parameter type names in parentheses or "" if the method
-	 * has no parameters. If fully qualified type names are required, <code>$</code> is used as the
-	 * enclosing type separator in the qualified type name. Type erasure is performed on a parameterized
-	 * type, arrays use the square brackets and a type parameter is resolved while creating the return
-	 * value.
-	 * 
-	 * @param method the method whose parameter types are required
-	 * @param useSimpleNames <code>true</code> if the last segment of the type name should be used
-	 *            instead of the fully qualified type name
-	 * @return a comma-separated list of method parameter type names in parentheses
-	 */
-	static String getParameterTypes(final IMethod method, final boolean useSimpleNames) {
-		String paramTypes= ""; //$NON-NLS-1$
-
-		int numOfParams= method.getNumberOfParameters();
-		if (numOfParams > 0) {
-			String[] parameterTypeSignatures= method.getParameterTypes();
-			ArrayList<String> parameterTypeNames= new ArrayList<>(numOfParams);
-
-			try {
-				String[] fullNames= null;
-				for (int i= 0; i < parameterTypeSignatures.length; i++) {
-					String paramTypeSign= parameterTypeSignatures[i];
-					StringBuffer buf= new StringBuffer();
-
-					String typeSign= Signature.getTypeErasure(paramTypeSign);
-					String fullName;
-					if (useSimpleNames) {
-						fullName= JavaModelUtil.getResolvedTypeName(typeSign, method.getDeclaringType(), '.');
-					} else {
-						fullName= JavaModelUtil.getResolvedTypeName(typeSign, method.getDeclaringType(), '$');
-					}
-					if (fullName == null) { // e.g. a type parameter "QE;"
-						if (fullNames == null) {
-							fullNames= JUnitStubUtility.getParameterTypeNamesForSeeTag(method);
-						}
-						fullName= fullNames[i];
-					}
-
-					if (fullName != null) {
-						buf.append(fullName);
-						int dim= Signature.getArrayCount(typeSign);
-						while (dim > 0) {
-							buf.append("[]"); //$NON-NLS-1$
-							dim--;
-						}
-					}
-
-					parameterTypeNames.add(buf.toString());
-				}
-			} catch (JavaModelException e) {
-				// ignore
-			}
-
-			Stream<String> stream= parameterTypeNames.stream();
-			if (useSimpleNames) {
-				stream= stream.map(paramTypeName -> paramTypeName.substring(paramTypeName.lastIndexOf('.') + 1));
-			}
-			paramTypes= stream.collect(Collectors.joining(", ", "(", ")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$	
-		}
-
-		return paramTypes;
 	}
 
 	// See JUnit5TestFinder.Annotation#annotates also.

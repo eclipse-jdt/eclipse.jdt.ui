@@ -179,8 +179,9 @@ public abstract class TestElement implements ITestElement {
 	private String fDisplayName;
 
 	/**
-	 * The array of fully qualified type names of method parameters if applicable, otherwise
-	 * <code>null</code>.
+	 * The array of method parameter types (as given by
+	 * org.junit.platform.engine.support.descriptor.MethodSource.getMethodParameterTypes()) if
+	 * applicable, otherwise <code>null</code>.
 	 */
 	private String[] fParameterTypes;
 
@@ -213,10 +214,11 @@ public abstract class TestElement implements ITestElement {
 	 * @param id the test id
 	 * @param testName the test name
 	 * @param displayName the test display name, can be <code>null</code>
-	 * @param parameterTypes the array of fully qualified type names of method parameters if
-	 *            applicable, otherwise <code>null</code>
-	 * @param uniqueId the unique ID of the test element, can be <code>null</code> as it is applicable to JUnit 5 and above
-
+	 * @param parameterTypes the array of method parameter types (as given by
+	 *            org.junit.platform.engine.support.descriptor.MethodSource.getMethodParameterTypes())
+	 *            if applicable, otherwise <code>null</code>
+	 * @param uniqueId the unique ID of the test element, can be <code>null</code> as it is applicable
+	 *            to JUnit 5 and above
 	 */
 	public TestElement(TestSuiteElement parent, String id, String testName, String displayName, String[] parameterTypes, String uniqueId) {
 		Assert.isNotNull(id);
@@ -404,8 +406,9 @@ public abstract class TestElement implements ITestElement {
 	}
 
 	/**
-	 * @return the array of fully qualified type names of method parameters if applicable, otherwise
-	 *         <code>null</code>
+	 * @return the array of method parameter types (as given by
+	 *         org.junit.platform.engine.support.descriptor.MethodSource.getMethodParameterTypes()) if
+	 *         applicable, otherwise <code>null</code>
 	 */
 	public String[] getParameterTypes() {
 		return fParameterTypes;
@@ -422,11 +425,10 @@ public abstract class TestElement implements ITestElement {
 	}
 
 	/**
-	 * Creates encoded type signatures from fully qualified type names provided by
-	 * {@link #getParameterTypes()}.
+	 * Creates encoded type signatures from type names provided by {@link #getParameterTypes()}.
 	 * 
-	 * @return the array of parameter type signatures obtained by converting the fully qualified
-	 *         type names from {@link #getParameterTypes()}, can be <code>null</code>
+	 * @return the array of parameter type signatures obtained by converting the type names from
+	 *         {@link #getParameterTypes()}, can be <code>null</code>
 	 */
 	public String[] getParameterTypeSignatures() {
 		// TODO - JUnit5: Create encoded type signatures so that IType.getMethod(String name, String[] parameterTypeSignatures) can find the method 

@@ -69,6 +69,7 @@ import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
+import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
@@ -347,7 +348,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			case IJavaElement.METHOD: {
 				IMethod method= (IMethod)element;
 				testName= method.getElementName(); // Test-names can not be specified when launching a Java method.
-				testName+= JUnitLaunchConfigurationTab.getParameterTypes(method, false);
+				testName+= JUnitStubUtility.getParameterTypes(method, false);
 				containerHandleId= EMPTY_STRING;
 				IType declaringType= method.getDeclaringType();
 				mainTypeQualifiedName= declaringType.getFullyQualifiedName('.');
@@ -409,7 +410,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 			case IJavaElement.METHOD:
 				IMethod method= (IMethod)element;
 				String methodName= method.getElementName();
-				methodName+= JUnitLaunchConfigurationTab.getParameterTypes(method, true); // use simple names of parameter types
+				methodName+= JUnitStubUtility.getParameterTypes(method, true); // use simple names of parameter types
 				return method.getDeclaringType().getElementName() + '.' + methodName;
 			default:
 				throw new IllegalArgumentException("Invalid element type to create a launch configuration: " + element.getClass().getName()); //$NON-NLS-1$
