@@ -198,13 +198,13 @@ public class ModuleAddExportsBlock {
 		return sourceModule+'/'+pack+'='+targetModules;
 	}
 
-	public ModuleAddExport getExport() {
+	public ModuleAddExport getExport(CPListElementAttribute parentAttribute) {
 		String sourceModule= getSourceModuleText();
 		String pack= getPackageText();
 		String targetModules= getTargetModulesText();
 		if (sourceModule.isEmpty() || pack.isEmpty() || targetModules.isEmpty())
 			return null;
-		return new ModuleAddExport(sourceModule, pack, targetModules, null);
+		return new ModuleAddExport(sourceModule, pack, targetModules, parentAttribute);
 	}
 
 	/**

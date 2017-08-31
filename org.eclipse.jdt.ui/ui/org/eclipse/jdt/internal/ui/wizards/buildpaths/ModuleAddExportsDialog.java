@@ -122,10 +122,11 @@ public class ModuleAddExportsDialog extends StatusDialog {
 
 	/**
 	 * Returns the configured export value.
+	 * @param parentAttribute the "module" attribute to which this export is associated
 	 *
 	 * @return the configured export value, or {@code null} if no export was configured.
 	 */
-	public ModuleAddExport getExport() {
-		return fAddExportsBlock.getExport();
+	public ModuleAddExport getExport(CPListElementAttribute parentAttribute) {
+		return fAddExportsBlock.getExport(parentAttribute);
 	}
 }

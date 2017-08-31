@@ -282,7 +282,7 @@ public class ModuleDialog extends StatusDialog {
 		ModuleAddExport export= selElements.get(0);
 		ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(getShell(), fJavaElements, export);
 		if (dialog.open() == Window.OK) {
-			ModuleAddExport newExport= dialog.getExport();
+			ModuleAddExport newExport= dialog.getExport(fCurrCPElement.findAttributeElement(CPListElement.MODULE));
 			if (newExport != null) {
 				field.replaceElement(export, newExport);
 			} else {
@@ -295,7 +295,7 @@ public class ModuleDialog extends StatusDialog {
 		ModuleAddExport initialValue= new ModuleAddExport(getSourceModuleName(), NO_NAME, getCurrentModuleName(), null);
 		ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(getShell(), fJavaElements, initialValue);
 		if (dialog.open() == Window.OK) {
-			ModuleAddExport export= dialog.getExport();
+			ModuleAddExport export= dialog.getExport(fCurrCPElement.findAttributeElement(CPListElement.MODULE));
 			if (export != null)
 				field.addElement(export);
 		}
