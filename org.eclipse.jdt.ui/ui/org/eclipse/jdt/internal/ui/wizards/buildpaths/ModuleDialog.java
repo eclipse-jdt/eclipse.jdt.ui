@@ -366,7 +366,6 @@ public class ModuleDialog extends StatusDialog {
 		public void dialogFieldChanged(DialogField field) {
 			if (field == fIsModuleCheckbox) {
 				if (!fIsModuleCheckbox.isSelected()) {
-					fAddExportsList.removeAllElements();
 					fAddExportsList.enableButton(IDX_ADD, false);
 					fAddExportsList.enableButton(IDX_EDIT, false);
 					fAddExportsList.enableButton(IDX_REMOVE, false);
@@ -381,9 +380,9 @@ public class ModuleDialog extends StatusDialog {
 	}
 
 	public ModuleAddExport[] getAddExports() {
-		List<ModuleAddExport> elements= fAddExportsList.getElements();
-		if (elements.isEmpty() && !fIsModuleCheckbox.isSelected())
+		if (!fIsModuleCheckbox.isSelected())
 			return null;
+		List<ModuleAddExport> elements= fAddExportsList.getElements();
 		return elements.toArray(new ModuleAddExport[elements.size()]);
 	}
 
