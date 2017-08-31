@@ -143,6 +143,18 @@ public class ModuleAddExportsBlock {
 		return moduleNames;
 	}
 
+	private String getSourceModuleText() {
+		return fSourceModule.getText().trim();
+	}
+
+	private String getPackageText() {
+		return fPackage.getText().trim();
+	}
+
+	private String getTargetModulesText() {
+		return fTargetModules.getText().trim();
+	}
+
 	/* Answer all roots whose (@Nullable) module matches the given predicat. */
 	private IPackageFragmentRoot[] findRoots(Predicate<IModuleDescription> match) {
 		List<IPackageFragmentRoot> result= new ArrayList<>();
@@ -178,18 +190,18 @@ public class ModuleAddExportsBlock {
 	 * @return the add-export value, or an empty string if any of the fields was left empty. 
 	 */
 	public String getValue() {
-		String sourceModule= fSourceModule.getText();
-		String pack= fPackage.getText();
-		String targetModules= fTargetModules.getText();
+		String sourceModule= getSourceModuleText();
+		String pack= getPackageText();
+		String targetModules= getTargetModulesText();
 		if (sourceModule.isEmpty() || pack.isEmpty() || targetModules.isEmpty())
 			return ""; //$NON-NLS-1$
 		return sourceModule+'/'+pack+'='+targetModules;
 	}
 
 	public ModuleAddExport getExport() {
-		String sourceModule= fSourceModule.getText();
-		String pack= fPackage.getText();
-		String targetModules= fTargetModules.getText();
+		String sourceModule= getSourceModuleText();
+		String pack= getPackageText();
+		String targetModules= getTargetModulesText();
 		if (sourceModule.isEmpty() || pack.isEmpty() || targetModules.isEmpty())
 			return null;
 		return new ModuleAddExport(sourceModule, pack, targetModules, null);
@@ -280,7 +292,7 @@ public class ModuleAddExportsBlock {
 				if (!fragment.containsJavaResources()) {
 					return false; // don't propose "empty" packages
 				}
-				String sourceModule= fSourceModule.getText();
+				String sourceModule= getSourceModuleText();
 				if (!sourceModule.isEmpty()) {
 					IModuleDescription module= ((IPackageFragmentRoot) fragment.getParent()).getModuleDescription();
 					if (module != null) {
@@ -337,11 +349,11 @@ public class ModuleAddExportsBlock {
 	}
 
 	private void updateModuleStatus() {
-		fSourceModuleStatus= computeSourceModuleStatus(fSourceModule.getText());
+		fSourceModuleStatus= computeSourceModuleStatus(getSourceModuleText());
 	}
 
 	private void updatePackageStatus() {
-		fPackageStatus= computePackageStatus(fPackage.getText());
+		fPackageStatus= computePackageStatus(getPackageText());
 	}
 
 	private IStatus computeSourceModuleStatus(String value) {
@@ -351,7 +363,7 @@ public class ModuleAddExportsBlock {
 			return status;
 		}
 		if (moduleNames().contains(value)) {
-			if (!fPackage.getText().isEmpty()) {
+			if (!getPackageText().isEmpty()) {
 				updatePackageStatus();
 			}
 			return status;
@@ -367,7 +379,7 @@ public class ModuleAddExportsBlock {
 			return status;
 		}
 		boolean needToSetSource= false;
-		String moduleName= fSourceModule.getText();
+		String moduleName= getSourceModuleText();
 		IPackageFragmentRoot[] roots;
 		if (!moduleName.isEmpty()) {
 			roots= findRoots(mod -> (mod != null && mod.getElementName().equals(moduleName)));
@@ -393,7 +405,7 @@ public class ModuleAddExportsBlock {
 				}
 			}
 		}
-		status.setError(Messages.format(NewWizardMessages.ModuleAddExportsBlock_wrongPackage_error, new Object[] {value, fSourceModule.getText()}));
+		status.setError(Messages.format(NewWizardMessages.ModuleAddExportsBlock_wrongPackage_error, new Object[] {value, getSourceModuleText()}));
 		return status;
 	}
 
@@ -408,7 +420,7 @@ public class ModuleAddExportsBlock {
 			}
 		}
 		if (status == null) {
-			if (fPackage.getText().isEmpty()) { // not yet validated but empty?
+			if (getPackageText().isEmpty()) { // not yet validated but empty?
 				status= ModuleAddExportsDialog.newSilentError();
 			} else {
 				status= Status.OK_STATUS;
