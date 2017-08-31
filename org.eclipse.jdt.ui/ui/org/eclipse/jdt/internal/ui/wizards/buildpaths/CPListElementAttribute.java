@@ -19,6 +19,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess;
 
 
@@ -69,7 +71,18 @@ public class CPListElementAttribute {
 	 * @return Returns <code>true</code> if the attribute a on a container child and is read-only
 	 */
 	public boolean isNonModifiable() {
-		return fStatus != null && !fStatus.isOK();
+		if (fStatus != null && !fStatus.isOK()) {
+			return true;
+		}
+		if (fBuiltIn) {
+			if (this.fKey.equals(IClasspathAttribute.AUTOMATIC_MODULE)) {
+				IJavaProject javaProject= fParent.getJavaProject();
+				if (!JavaModelUtil.is9OrHigher(javaProject)) {
+					return true; // cannot set "module=true" in 1.8- project
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
