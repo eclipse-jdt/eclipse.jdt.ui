@@ -942,7 +942,7 @@ public class CPListElement {
 			CPListElementAttribute curr= attributes[i];
 			CPListElementAttribute elem= findAttributeElement(curr.getKey());
 			if (elem == null) {
-				createAttributeElement(curr.getKey(), curr.getValue(), false);
+				createAttributeElement(curr.getKey(), curr.getValue(), curr.isBuiltIn());
 			} else {
 				elem.setValue(curr.getValue());
 			}
