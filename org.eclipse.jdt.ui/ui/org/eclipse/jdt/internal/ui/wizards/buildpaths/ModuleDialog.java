@@ -119,6 +119,7 @@ public class ModuleDialog extends StatusDialog {
 		}
 
 		fAddExportsList= createListContents(entryToEdit);
+		doSelectionChanged(fAddExportsList);
 
 		fJavaElements= selectedElements;
 	}
@@ -251,9 +252,11 @@ public class ModuleDialog extends StatusDialog {
 	}
 
 	protected void doSelectionChanged(ListDialogField<ModuleAddExport> field) {
+		boolean isModular= fIsModuleCheckbox.isSelected();
 		List<ModuleAddExport> selected= field.getSelectedElements();
-		field.enableButton(IDX_EDIT, canEdit(selected));
-		field.enableButton(IDX_REMOVE, selected.size() > 0);
+		field.enableButton(IDX_ADD, isModular);
+		field.enableButton(IDX_EDIT, isModular && canEdit(selected));
+		field.enableButton(IDX_REMOVE, isModular && selected.size() > 0);
 		validate();
 	}
 
@@ -365,16 +368,7 @@ public class ModuleDialog extends StatusDialog {
 		@Override
 		public void dialogFieldChanged(DialogField field) {
 			if (field == fIsModuleCheckbox) {
-				if (!fIsModuleCheckbox.isSelected()) {
-					fAddExportsList.enableButton(IDX_ADD, false);
-					fAddExportsList.enableButton(IDX_EDIT, false);
-					fAddExportsList.enableButton(IDX_REMOVE, false);
-				} else {
-					List<ModuleAddExport> elements= fAddExportsList.getSelectedElements();
-					fAddExportsList.enableButton(IDX_ADD, true);
-					fAddExportsList.enableButton(IDX_EDIT, canEdit(elements));
-					fAddExportsList.enableButton(IDX_REMOVE, elements.size() > 0);
-				}
+				doSelectionChanged(fAddExportsList);
 			}
 		}
 	}
