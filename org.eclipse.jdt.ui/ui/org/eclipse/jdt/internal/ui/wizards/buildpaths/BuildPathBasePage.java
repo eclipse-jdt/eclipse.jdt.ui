@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -85,7 +86,8 @@ public abstract class BuildPathBasePage {
 					NewWizardMessages.BuildPathBasePage_addNow_button,
 					NewWizardMessages.BuildPathBasePage_proceedWithoutAdding_button,
 					NewWizardMessages.BuildPathBasePage_cancel_button);
-			switch (dialog.open()) {
+			int answer= dialog.open();
+			switch (answer) {
 				case 0: // Add now ...
 					try {
 						selectedJavaElements= persistEntry(selElement);
@@ -98,10 +100,11 @@ public abstract class BuildPathBasePage {
 					break;
 				case 1: // Process without adding ...
 					break;
+				case SWT.DEFAULT:
 				case 2: // Cancel
 					return false;
 				default:
-					throw new IllegalStateException(NewWizardMessages.BuildPathBasePage_unexpectedAnswer_error);
+					throw new IllegalStateException(Messages.format(NewWizardMessages.BuildPathBasePage_unexpectedAnswer_error, String.valueOf(answer)));
 			}			
 		}
 		ModuleDialog dialog= new ModuleDialog(shell, selElement, selectedJavaElements);
