@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,7 +75,7 @@ public class CPListElementAttribute {
 			return true;
 		}
 		if (fBuiltIn) {
-			if (this.fKey.equals(IClasspathAttribute.AUTOMATIC_MODULE)) {
+			if (this.fKey.equals(IClasspathAttribute.MODULE)) {
 				IJavaProject javaProject= fParent.getJavaProject();
 				if (!JavaModelUtil.is9OrHigher(javaProject)) {
 					return true; // cannot set "module=true" in 1.8- project

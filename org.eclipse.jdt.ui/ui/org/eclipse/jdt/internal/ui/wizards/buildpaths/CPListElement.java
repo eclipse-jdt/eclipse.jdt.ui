@@ -64,7 +64,7 @@ public class CPListElement {
 	public static final String SOURCE_ATTACHMENT_ENCODING= IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING;
 	public static final String IGNORE_OPTIONAL_PROBLEMS= IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS;
 	public static final String NATIVE_LIB_PATH= JavaRuntime.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY;
-	public static final String MODULE= IClasspathAttribute.AUTOMATIC_MODULE;
+	public static final String MODULE= IClasspathAttribute.MODULE;
 
 	private IJavaProject fProject;
 
@@ -225,7 +225,7 @@ public class CPListElement {
 						res.add(elem.getClasspathAttribute());
 					}
 				} else if (elem.getValue() instanceof ModuleAddExport[]) {
-					res.add(JavaCore.newClasspathAttribute(IClasspathAttribute.AUTOMATIC_MODULE, "true")); //$NON-NLS-1$
+					res.add(JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true")); //$NON-NLS-1$
 					String encodedExports= ModuleAddExport.encode((ModuleAddExport[]) elem.getValue());
 					if (!encodedExports.isEmpty()) {
 						res.add(JavaCore.newClasspathAttribute(IClasspathAttribute.ADD_EXPORTS, encodedExports));
@@ -711,7 +711,7 @@ public class CPListElement {
 			IClasspathAttribute attrib= extraAttributes[i];
 			CPListElementAttribute attribElem= elem.findAttributeElement(attrib.getName());
 			if (attribElem == null) {
-				if (!IClasspathAttribute.ADD_EXPORTS.equals(attrib.getName()) && !IClasspathAttribute.AUTOMATIC_MODULE.equals(attrib.getName())) {
+				if (!IClasspathAttribute.ADD_EXPORTS.equals(attrib.getName()) && !IClasspathAttribute.MODULE.equals(attrib.getName())) {
 					elem.createAttributeElement(attrib.getName(), attrib.getValue(), false);
 				}
 			} else {

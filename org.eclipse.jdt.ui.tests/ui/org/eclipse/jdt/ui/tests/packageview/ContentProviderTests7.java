@@ -201,7 +201,7 @@ public class ContentProviderTests7 extends TestCase {
 		assertNotNull("project null", fJProject);//$NON-NLS-1$
 		IPath[] rtJarPath= JavaProjectHelper.findRtJar(JavaProjectHelper.RT_STUBS_9);
 		JavaProjectHelper.set9CompilerOptions(fJProject);
-		IClasspathAttribute[] attributes= { new ClasspathAttribute(IClasspathAttribute.AUTOMATIC_MODULE, "true") };
+		IClasspathAttribute[] attributes= { new ClasspathAttribute(IClasspathAttribute.MODULE, "true") };
 		IClasspathEntry cpe= JavaCore.newLibraryEntry(rtJarPath[0], rtJarPath[1], rtJarPath[2], null, attributes, false);
 		JavaProjectHelper.addToClasspath(fJProject, cpe);
 

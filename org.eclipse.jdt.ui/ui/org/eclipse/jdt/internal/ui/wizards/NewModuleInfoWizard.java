@@ -228,16 +228,16 @@ public class NewModuleInfoWizard extends Wizard implements INewWizard {
 	private IClasspathAttribute[] addModuleAttributeIfNeeded(IClasspathAttribute[] extraAttributes) {
 		for (int j= 0; j < extraAttributes.length; j++) {
 			IClasspathAttribute classpathAttribute= extraAttributes[j];
-			if (IClasspathAttribute.AUTOMATIC_MODULE.equals(classpathAttribute.getName())) {
+			if (IClasspathAttribute.MODULE.equals(classpathAttribute.getName())) {
 				if (TRUE.equals(classpathAttribute.getValue())) {
 					return null; // no change required
 				}
-				extraAttributes[j]= JavaCore.newClasspathAttribute(IClasspathAttribute.AUTOMATIC_MODULE, TRUE);
+				extraAttributes[j]= JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, TRUE);
 				return extraAttributes;
 			}
 		}
 		extraAttributes= Arrays.copyOf(extraAttributes, extraAttributes.length+1);
-		extraAttributes[extraAttributes.length-1]= JavaCore.newClasspathAttribute(IClasspathAttribute.AUTOMATIC_MODULE, TRUE);
+		extraAttributes[extraAttributes.length-1]= JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, TRUE);
 		return extraAttributes;
 	}
 
