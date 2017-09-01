@@ -423,7 +423,7 @@ public class TestViewer {
 	}
 
 	private OpenTestAction getOpenTestAction(TestCaseElement testCase) {
-		return new OpenTestAction(fTestRunnerPart, testCase, testCase.getParameterTypeSignatures());
+		return new OpenTestAction(fTestRunnerPart, testCase, testCase.getParameterTypes());
 	}
 
 	private OpenTestAction getOpenTestAction(TestSuiteElement testSuite) {
@@ -441,10 +441,10 @@ public class TestViewer {
 			if (children.length > 0 && children[0] instanceof TestCaseElement) {
 				// has dynamic test case as child
 				TestCaseElement testCase= (TestCaseElement) children[0];
-				return new OpenTestAction(fTestRunnerPart, testCase, testCase.getParameterTypeSignatures());
+				return new OpenTestAction(fTestRunnerPart, testCase, testCase.getParameterTypes());
 			} else {
 				// has no child
-				return new OpenTestAction(fTestRunnerPart, testSuite.getSuiteTypeName(), testName.substring(0, index), testSuite.getParameterTypeSignatures(), true);
+				return new OpenTestAction(fTestRunnerPart, testSuite.getSuiteTypeName(), testName.substring(0, index), testSuite.getParameterTypes(), true);
 			}
 		}
 

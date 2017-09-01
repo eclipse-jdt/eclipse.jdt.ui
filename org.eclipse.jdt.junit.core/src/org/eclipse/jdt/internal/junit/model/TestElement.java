@@ -14,15 +14,11 @@
 
 package org.eclipse.jdt.internal.junit.model;
 
-import java.util.Arrays;
-
 import org.eclipse.jdt.junit.model.ITestElement;
 import org.eclipse.jdt.junit.model.ITestElementContainer;
 import org.eclipse.jdt.junit.model.ITestRunSession;
 
 import org.eclipse.core.runtime.Assert;
-
-import org.eclipse.jdt.core.Signature;
 
 public abstract class TestElement implements ITestElement {
 	public final static class Status {
@@ -424,17 +420,4 @@ public abstract class TestElement implements ITestElement {
 		return fUniqueId;
 	}
 
-	/**
-	 * Creates encoded type signatures from type names provided by {@link #getParameterTypes()}.
-	 * 
-	 * @return the array of parameter type signatures obtained by converting the type names from
-	 *         {@link #getParameterTypes()}, can be <code>null</code>
-	 */
-	public String[] getParameterTypeSignatures() {
-		// TODO - JUnit5: Create encoded type signatures so that IType.getMethod(String name, String[] parameterTypeSignatures) can find the method 
-		// use new API from jdt.core - https://bugs.eclipse.org/bugs/show_bug.cgi?id=502563
-		// For two overloaded methods with same simple name of param type (e.g. pkg1.A, pkg2.A), the type sign created by using simple name will be same
-		// hence IType#getMethod will just return the first of the overloaded methods, which is wrong.
-		return fParameterTypes == null ? null : Arrays.stream(fParameterTypes).map(t -> Signature.createTypeSignature(Signature.getSimpleName(t.trim()), false)).toArray(String[]::new);
-	}
 }
