@@ -15,6 +15,7 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,11 +38,13 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -113,7 +116,7 @@ public class ModuleDialog extends StatusDialog {
 		fIsModuleCheckbox.setDialogFieldListener(new AddExportsAdapter());
 
 		if (fCurrCPElement.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-			IPackageFragmentRoot[] roots= fCurrCPElement.getJavaProject().findPackageFragmentRoots(fCurrCPElement.getClasspathEntry());
+			IPackageFragmentRoot[] roots= findRoots(fCurrCPElement);
 			if (roots.length > 1 && roots[0].getModuleDescription() != null)
 				fIsModuleCheckbox.setEnabled(false); // assume multi-module container is Java 9 JRE
 		}
@@ -122,6 +125,32 @@ public class ModuleDialog extends StatusDialog {
 		doSelectionChanged(fAddExportsList);
 
 		fJavaElements= selectedElements;
+	}
+
+	private IPackageFragmentRoot[] findRoots(CPListElement element) {
+		IClasspathEntry entry= element.getClasspathEntry();
+		IPackageFragmentRoot[] roots= element.getJavaProject().findPackageFragmentRoots(entry);
+		if (roots.length == 0) {
+			// 2nd attempt in case "module=true" is not explicit on the real cp entry:
+			entry = copyCPEntryWithoutModuleAttribute(entry);
+			if (entry != null)
+				roots= element.getJavaProject().findPackageFragmentRoots(entry);
+		}
+		return roots;
+	}
+
+	private IClasspathEntry copyCPEntryWithoutModuleAttribute(IClasspathEntry entry) {
+		IClasspathAttribute[] oldAttributes= entry.getExtraAttributes();
+		IClasspathAttribute[] newAttributes= new IClasspathAttribute[oldAttributes.length];
+		int count= 0;
+		for (int i= 0; i < oldAttributes.length; i++) {
+			if (!oldAttributes[i].getName().equals(IClasspathAttribute.MODULE))
+				newAttributes[count++]= oldAttributes[i];
+		}
+		if (count == oldAttributes.length)
+			return null;
+		newAttributes= count == 0 ? new IClasspathAttribute[0] : Arrays.copyOf(newAttributes, count);
+		return JavaCore.newContainerEntry(entry.getPath(), entry.getAccessRules(), newAttributes, entry.isExported());
 	}
 
 	/*
