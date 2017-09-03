@@ -182,7 +182,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		for (int i= 0; i < nElements; i++) {
 			CPListElement cpe= cpelements.get(i);
 			if (isEntryKind(cpe.getEntryKind())) {
-				boolean isModular = false;
 				Object mod = cpe.getAttribute(CPListElement.MODULE);
 				if(mod==null) {
 					rootClasspath.addCPListElement(cpe);
@@ -366,8 +365,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 						for (CPListElement cpListElement : elementsToAdd) {
 							Object attribute= cpListElement.getAttribute(IClasspathAttribute.MODULE);
 							if(attribute == null) {
-								cpListElement.setAttribute(IClasspathAttribute.MODULE, new ModuleAddExport[0]);
-								
+								cpListElement.setAttribute(IClasspathAttribute.MODULE, new ModuleEncapsulationDetail[0]);
 							}
 						}
 					}
@@ -500,8 +498,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					}
 					changedAttributes.add(key); // collect the changed attributes
 				}
-			} else if (elem instanceof ModuleAddExport) {
-				removeAddExport((ModuleAddExport) elem);
+			} else if (elem instanceof ModuleEncapsulationDetail) {
+				removeEncapsulationDetail((ModuleEncapsulationDetail) elem);
 			}
 		}
 		if (selElements.isEmpty()) {
@@ -571,7 +569,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				if (curr.getParentContainer() != null) {
 					return false;
 				}
-			} else if (elem instanceof ModuleAddExport) {
+			} else if (elem instanceof ModuleEncapsulationDetail) {
 				return true;
 			} else { // unknown element
 				return false;
@@ -643,7 +641,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				}
 			}
 		} else if (key.equals(CPListElement.MODULE)) {
-			if (showAddExportDialog(getShell(), elem)) {
+			if (showModuleDialog(getShell(), elem)) {
 				String[] changedAttributes= { CPListElement.MODULE };
 				attributeUpdated(selElement, changedAttributes);
 
@@ -835,13 +833,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	private void updateClasspathList() {
 		 List<CPListElement> projelements= fLibrariesList.getElements();
-		 List<CPListElement> flattenedProjElements = new ArrayList<CPListElement>();
+		 List<CPListElement> flattenedProjElements = new ArrayList<>();
 		 for ( int i =0; i < projelements.size(); i++ ) {
 		 	CPListElement ele = projelements.get(i);
 		 	// if root node, collect the CPList elements
 		 	if(ele.isRootNodeForPath()) {
 		 		ArrayList<Object> children= ele.getChildren();
-		 		for (Iterator iterator= children.iterator(); iterator.hasNext();) {
+		 		for (Iterator<?> iterator= children.iterator(); iterator.hasNext();) {
 		 			Object object=  iterator.next();
 		 			if(object instanceof CPListElement) {
 		 				flattenedProjElements.add((CPListElement) object);

@@ -451,27 +451,58 @@ public final class NewWizardMessages extends NLS {
 	public static String ModuleDialog_container_description;
 	public static String ModuleDialog_project_description;
 	public static String ModuleDialog_defines_modules_label;
-	public static String ModuleDialog_duplicatePackage_error;
+	public static String ModuleDialog_errorOnContentsTab_error;
+	public static String ModuleDialog_errorOnDetailsTab_error;
+
+	public static String ModuleDialog_contents_tab;
+	public static String ModuleDialog_availableModules_list;
+	public static String ModuleDialog_availableModules_tooltip;
+	public static String ModuleDialog_explicitlyIncludedModules_list;
+	public static String ModuleDialog_explicitlyIncludedModules_tooltip;
+	public static String ModuleDialog_implicitelyIncludedModules_list;
+	public static String ModuleDialog_implicitlyIncludedModule_tooltip;
+	public static String ModuleDialog_addToIncluded_tooltip;
+	public static String ModuleDialog_removeFromIncluded_tooltip;
+	public static String ModuleDialog_addToExplicitlyIncluded_tooltip;
+	public static String ModuleDialog_cannotLimitSingle_error;
+
+	public static String ModuleDialog_details_tab;
+	public static String ModuleDialog_patches_module_label;
+	public static String ModuleDialog_patched_module_label;
+	public static String ModuleDialog_patchedModuleExcluded_error;
 	public static String ModuleDialog_source_module_header;
 	public static String ModuleDialog_package_header;
-	public static String ModuleDialog_target_modules_header;
+	public static String ModuleDialog_target_module_header;
 	public static String ModuleDialog_exports_label;
-	public static String ModuleDialog_exports_add;
-	public static String ModuleDialog_exports_edit;
-	public static String ModuleDialog_exports_remove;
+	public static String ModuleDialog_exportSourceModuleExcluded_error;
+	public static String ModuleDialog_reads_label;
+	public static String ModuleDialog_readsSourceModuleExcluded_error;
+	public static String ModuleDialog_detail_add;
+	public static String ModuleDialog_detail_edit;
+	public static String ModuleDialog_detail_remove;
+	public static String ModuleDialog_duplicatePackage_error;
+	public static String ModuleDialog_duplicateReads_error;
+	public static String ModuleDialog_missingPatch_error;
+	public static String ModuleDialog_wrongPatch_error;
+	public static String ModuleDialog_mustIncludeModule_error;
 
 	public static String ModuleAddExportsBlock_packageEmpty_error;
 	public static String ModuleAddExportsBlock_sourceModuleEmpty_error;
 	public static String ModuleAddExportsBlock_wrongPackage_error;
 	public static String ModuleAddExportsBlock_wrongSourceModule_error;
 
-	public static String AddExportsDialog_notPersisted_warning;
+	public static String AddModuleDetailsDialog_notPersisted_warning;
 	public static String AddExportsDialog_title;
 
 	public static String AddExportsBlock_message;
 	public static String AddExportsBlock_sourceModule_label;
 	public static String AddExportsBlock_package_label;
 	public static String AddExportsBlock_targetModules_label;
+
+	public static String AddReadsDialog_title;
+	public static String AddReadsBlock_message;
+	public static String AddReadsBlock_sourceModule_label;
+	public static String AddReadsBlock_targetModule_label;
 	//
 	
 	public static String EditVariableEntryDialog_title;
@@ -649,10 +680,15 @@ public final class NewWizardMessages extends NLS {
 	public static String CPListLabelProvider_module_no;
 	public static String CPListLabelProvider_modular_modifiesEncapsulation_label;
 	public static String CPListLabelProvider_modular_label;
+	public static String CPListLabelProvider_modular_limitsAndModifies_label;
+	public static String CPListLabelProvider_modular_limitsModules_label;
 	public static String CPListLabelProvider_not_modular_label;
 
 	public static String CPListLabelProvider_add_exports_name_label;
+	public static String CPListLabelProvider_patch_module_full_label;
 	public static String CPListLabelProvider_add_exports_full_label;
+	public static String CPListLabelProvider_add_reads_full_label;
+	public static String CPListLabelProvider_limitModules_full_label;
 
 	public static String NewSourceFolderDialog_useproject_button;
 	public static String NewSourceFolderDialog_usefolder_button;

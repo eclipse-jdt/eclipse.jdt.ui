@@ -185,10 +185,6 @@
       		attributeName="module"
             class="org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleAttributeConfiguration">
       </classpathAttributeConfiguration>
-      <classpathAttributeConfiguration
-            attributeName="add-exports"
-            class="org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleAddExportsAttributeConfiguration">
-      </classpathAttributeConfiguration>
    </extension>
 
 	<!-- Not used to create markers but to allow registering a    -->

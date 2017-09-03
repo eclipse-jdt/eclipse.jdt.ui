@@ -43,7 +43,6 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.views.navigator.ResourceComparator;
 
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
@@ -63,8 +62,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathContainerWizard;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.EditVariableEntryDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ExternalAnnotationsAttachmentDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.JavadocLocationDialog;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleAddExport;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleAddExportsDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.MultipleFolderSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.NewVariableEntryDialog;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentDialog;
@@ -160,25 +157,6 @@ public final class BuildPathDialogAccess {
 	 */
 	public static IPath configureExternalAnnotationsAttachment(Shell shell, IPath initialEntry) {
 		ExternalAnnotationsAttachmentDialog dialog= new ExternalAnnotationsAttachmentDialog(shell, initialEntry);
-		if (dialog.open() == Window.OK) {
-			return dialog.getResult();
-		}
-		return null;
-	}
-
-	/**
-	 * Shows the UI for configuring an add-exports classpath attribute. <code>null</code> is
-	 * returned when the user cancels the dialog. The dialog does not apply any changes.
-	 *
-	 * @param shell The parent shell for the dialog
-	 * @param sourceElements the Java elements representing the source modules from which more packages should be exported
-	 * @param initialValue The export value to edit; format: {@code <source-module>/<package>=<target-module>(,<target-module>)*}.
-	 * @return Returns the entered value, possibly different from the initialValue,
-	 * or <code>null</code> if the dialog has been cancelled.
-	 * @since 3.13 BETA_JAVA9
-	 */
-	public static String configureAddExports(Shell shell, IJavaElement[] sourceElements, String initialValue) {
-		ModuleAddExportsDialog dialog= new ModuleAddExportsDialog(shell, sourceElements, ModuleAddExport.fromString(null, initialValue));
 		if (dialog.open() == Window.OK) {
 			return dialog.getResult();
 		}

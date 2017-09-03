@@ -126,7 +126,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementSorter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListLabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPUserLibraryElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathAttributeConfigurationDescriptors;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleAddExport;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -1519,7 +1519,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 					return (IAccessRule[]) attribute.getValue();
 				}
 				if (CPListElement.MODULE.equals(attribute.getKey())) {
-					return (ModuleAddExport[]) attribute.getValue();
+					return (ModuleEncapsulationDetail[]) attribute.getValue();
 				}
 			}
 			return EMPTY;

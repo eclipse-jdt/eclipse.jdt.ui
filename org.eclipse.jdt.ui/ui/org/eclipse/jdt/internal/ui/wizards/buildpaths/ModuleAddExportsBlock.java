@@ -24,7 +24,6 @@ import java.util.function.Predicate;
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -52,13 +51,12 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPackageCompletionProcessor;
-import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPrecomputedNamesAssistProcessor;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddExport;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -242,7 +240,9 @@ public class ModuleAddExportsBlock {
 		LayoutUtil.setWidthHint(sourceModuleField, widthHint);
 		LayoutUtil.setHorizontalGrabbing(sourceModuleField);
 		BidiUtils.applyBidiProcessing(sourceModuleField, StructuredTextTypeHandlerFactory.JAVA);
-		configureModuleContentAssist(fSourceModule.getTextControl(composite));
+		if (fSourceJavaElements != null) {
+			ModuleDialog.configureModuleContentAssist(fSourceModule.getTextControl(composite), moduleNames());
+		}
 
 		DialogField.createEmptySpace(composite, 2);
 
@@ -268,18 +268,6 @@ public class ModuleAddExportsBlock {
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.EXTERNAL_ANNOTATIONS_ATTACHMENT_DIALOG); // FIXME
 		return composite;
-	}
-
-	private void configureModuleContentAssist(Text textControl) {
-		if (fSourceJavaElements == null || fSourceJavaElements.length <= 1) {
-			return;
-		}
-		Set<String> moduleNames= moduleNames();
-		if (!moduleNames.isEmpty()) {
-			Image image= JavaPlugin.getImageDescriptorRegistry().get(JavaPluginImages.DESC_OBJS_MODULE);
-			JavaPrecomputedNamesAssistProcessor processor= new JavaPrecomputedNamesAssistProcessor(moduleNames, image);
-			ControlContentAssistHelper.createTextContentAssistant(textControl, processor);
-		}
 	}
 
 	private void configurePackageContentAssist(Text textControl) {
@@ -421,7 +409,7 @@ public class ModuleAddExportsBlock {
 		}
 		if (status == null) {
 			if (getPackageText().isEmpty()) { // not yet validated but empty?
-				status= ModuleAddExportsDialog.newSilentError();
+				status= ModuleDialog.newSilentError();
 			} else {
 				status= Status.OK_STATUS;
 			}

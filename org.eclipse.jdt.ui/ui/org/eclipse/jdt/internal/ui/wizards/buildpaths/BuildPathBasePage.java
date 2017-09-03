@@ -75,10 +75,10 @@ public abstract class BuildPathBasePage {
 		return false;
 	}
 
-	protected boolean showAddExportDialog(Shell shell, CPListElementAttribute elem) {
+	protected boolean showModuleDialog(Shell shell, CPListElementAttribute elem) {
 		CPListElement selElement= elem.getParent();
 		// the element targeted by the CP entry will be the source module from which packages are exported:
-		IJavaElement[] selectedJavaElements= ModuleAddExport.getTargetJavaElements(selElement.getJavaProject(), selElement.getPath());
+		IJavaElement[] selectedJavaElements= ModuleEncapsulationDetail.getTargetJavaElements(selElement.getJavaProject(), selElement.getPath());
 		if (selectedJavaElements == null) {
 			MessageDialog dialog= new MessageDialog(shell, NewWizardMessages.BuildPathBasePage_notAddedQuestion_title, null,
 					Messages.format(NewWizardMessages.BuildPathBasePage_notAddedQuestion_description, selElement.getPath().toString()),
@@ -110,8 +110,8 @@ public abstract class BuildPathBasePage {
 		ModuleDialog dialog= new ModuleDialog(shell, selElement, selectedJavaElements);
 		int res= dialog.open();
 		if (res == Window.OK) {
-			ModuleAddExport[] newExports= dialog.getAddExports();
-			elem.setValue(newExports);
+			ModuleEncapsulationDetail[] newDetails= dialog.getAllDetails();
+			elem.setValue(newDetails);
 			return true;
 		}
 		return false;
@@ -133,7 +133,7 @@ public abstract class BuildPathBasePage {
 			}
 		};
 		PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(runnable));
-		selectedJavaElements= ModuleAddExport.getTargetJavaElements(element.getJavaProject(), element.getPath());
+		selectedJavaElements= ModuleEncapsulationDetail.getTargetJavaElements(element.getJavaProject(), element.getPath());
 		return selectedJavaElements;
 	}
 
@@ -149,22 +149,22 @@ public abstract class BuildPathBasePage {
 		return false;
 	}
 
-	protected void removeAddExport(ModuleAddExport export) {
-		CPListElementAttribute parent= export.getParent();
+	protected void removeEncapsulationDetail(ModuleEncapsulationDetail detail) {
+		CPListElementAttribute parent= detail.getParent();
 		if (parent != null) {
 			Object value= parent.getValue();
-			if (value instanceof ModuleAddExport[]) {
-				ModuleAddExport[] existingExports= (ModuleAddExport[]) value;
+			if (value instanceof ModuleEncapsulationDetail[]) {
+				ModuleEncapsulationDetail[] existingDetails= (ModuleEncapsulationDetail[]) value;
 				int count= 0;
-				for (int j= 0; j < existingExports.length; j++) {
-					ModuleAddExport anExport= existingExports[j];
-					if (anExport != export)
-						existingExports[count++]= anExport;
+				for (int j= 0; j < existingDetails.length; j++) {
+					ModuleEncapsulationDetail aDetail= existingDetails[j];
+					if (aDetail != detail)
+						existingDetails[count++]= aDetail;
 				}
-				if (count < existingExports.length) {
-					ModuleAddExport[] newExports= new ModuleAddExport[count];
-					System.arraycopy(existingExports, 0, newExports, 0, count);
-					parent.setValue(newExports);
+				if (count < existingDetails.length) {
+					ModuleEncapsulationDetail[] newDetails= new ModuleEncapsulationDetail[count];
+					System.arraycopy(existingDetails, 0, newDetails, 0, count);
+					parent.setValue(newDetails);
 					parent.getParent().attributeChanged(CPListElement.MODULE);
 				}
 			}
@@ -292,7 +292,7 @@ public abstract class BuildPathBasePage {
 			} else if (element instanceof CPListElementAttribute) {
 				CPListElementAttribute attribute= (CPListElementAttribute) element;
 				if (CPListElement.MODULE.equals(attribute.getKey())) {
-					return (ModuleAddExport[]) attribute.getValue();
+					return (ModuleEncapsulationDetail[]) attribute.getValue();
 				}
 			}
 			return EMPTY_ARR;

@@ -32,25 +32,25 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddExport;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddReads;
 
 /**
- * A dialog to configure add-exports of a library.
+ * A dialog to configure add-reads of a library.
  *
  */
-public class ModuleAddExportsDialog extends StatusDialog {
+public class ModuleAddReadsDialog extends StatusDialog {
 
-	private ModuleAddExportsBlock fAddExportsBlock;
+	private ModuleAddReadsBlock fAddReadsBlock;
 
 	/**
 	 * Creates an instance. After <code>open</code>, the edited export can be accessed using {@code #getResult()}
-	 * or {@code #getExport()}.
+	 * or {@code #getReads()}.
 	 *
 	 * @param parent Parent shell for the dialog
-	 * @param sourceJavaElements java elements representing the source modules from where packages should be exported
+	 * @param sourceJavaElements java elements representing the source modules for which more reads should be added
 	 * @param value The value to edit.
 	 */
-	public ModuleAddExportsDialog(Shell parent, IJavaElement[] sourceJavaElements, ModuleAddExport value) {
+	public ModuleAddReadsDialog(Shell parent, IJavaElement[] sourceJavaElements, ModuleAddReads value) {
 		super(parent);
 
 		IStatusChangeListener listener= new IStatusChangeListener() {
@@ -59,9 +59,9 @@ public class ModuleAddExportsDialog extends StatusDialog {
 				updateStatus(status);
 			}
 		};
-		fAddExportsBlock= new ModuleAddExportsBlock(listener, sourceJavaElements, value);
+		fAddReadsBlock= new ModuleAddReadsBlock(listener, sourceJavaElements, value);
 
-		setTitle(NewWizardMessages.AddExportsDialog_title);
+		setTitle(NewWizardMessages.AddReadsDialog_title);
 		if (sourceJavaElements == null)
 			updateStatus(new Status(IStatus.WARNING, JavaPlugin.getPluginId(),
 					NewWizardMessages.AddModuleDetailsDialog_notPersisted_warning));
@@ -91,7 +91,7 @@ public class ModuleAddExportsDialog extends StatusDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite) super.createDialogArea(parent);
 
-		Control inner= createAddExportsControls(composite);
+		Control inner= createAddReadsControls(composite);
 		inner.setLayoutData(new GridData(GridData.FILL_BOTH));
 		applyDialogFont(composite);
 		return composite;
@@ -103,8 +103,8 @@ public class ModuleAddExportsDialog extends StatusDialog {
 	 * @param composite the parent composite
 	 * @return the control
 	 */
-	protected Control createAddExportsControls(Composite composite) {
-		return fAddExportsBlock.createControl(composite);
+	protected Control createAddReadsControls(Composite composite) {
+		return fAddReadsBlock.createControl(composite);
 	}
 
 	/**
@@ -113,7 +113,7 @@ public class ModuleAddExportsDialog extends StatusDialog {
 	 * @return the configured export value, or an empty string if no export was configured.
 	 */
 	public String getResult() {
-		return fAddExportsBlock.getValue();
+		return fAddReadsBlock.getValue();
 	}
 
 	/**
@@ -122,7 +122,7 @@ public class ModuleAddExportsDialog extends StatusDialog {
 	 *
 	 * @return the configured export value, or {@code null} if no export was configured.
 	 */
-	public ModuleAddExport getExport(CPListElementAttribute parentAttribute) {
-		return fAddExportsBlock.getExport(parentAttribute);
+	public ModuleAddReads getReads(CPListElementAttribute parentAttribute) {
+		return fAddReadsBlock.getReads(parentAttribute);
 	}
 }

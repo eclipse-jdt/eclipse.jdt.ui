@@ -53,6 +53,10 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.LimitModules;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModulePatch;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddExport;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddReads;
 
 public class CPListLabelProvider extends LabelProvider {
 
@@ -100,8 +104,14 @@ public class CPListLabelProvider extends LabelProvider {
 		} else if (element instanceof IAccessRule) {
 			IAccessRule rule= (IAccessRule) element;
 			return Messages.format(NewWizardMessages.CPListLabelProvider_access_rules_label, new String[] { AccessRulesLabelProvider.getResolutionLabel(rule.getKind()), BasicElementLabels.getPathLabel(rule.getPattern(), false)});
+		} else if (element instanceof ModulePatch) {
+			return Messages.format(NewWizardMessages.CPListLabelProvider_patch_module_full_label, new String[] { element.toString() });
 		} else if (element instanceof ModuleAddExport) {
 			return Messages.format(NewWizardMessages.CPListLabelProvider_add_exports_full_label, new String[] { element.toString() });
+		} else if (element instanceof ModuleAddReads) {
+			return Messages.format(NewWizardMessages.CPListLabelProvider_add_reads_full_label, new String[] { element.toString() });
+		} else if (element instanceof LimitModules) {
+			return Messages.format(NewWizardMessages.CPListLabelProvider_limitModules_full_label, new String[] { element.toString() });
 		}
 		return super.getText(element);
 	}
@@ -240,12 +250,24 @@ public class CPListLabelProvider extends LabelProvider {
 			return Messages.format(NewWizardMessages.CPListLabelProvider_ignore_optional_problems_label, arg);
 		} else if (key.equals(CPListElement.MODULE)) {
 			Object value= attrib.getValue();
-			if (value instanceof ModuleAddExport[]) {
-				int nExports= ((ModuleAddExport[]) value).length;
-				if (nExports > 0)
+			if (value instanceof ModuleEncapsulationDetail[]) {
+				boolean limitModules= false;
+				boolean modifiesEncaps= false;
+				for (ModuleEncapsulationDetail detail : (ModuleEncapsulationDetail[]) value) {
+					if (detail instanceof LimitModules) {
+						limitModules= true;
+					} else {
+						modifiesEncaps= true;
+					}
+				}
+				if (modifiesEncaps) {
+					if (limitModules)
+						return NewWizardMessages.CPListLabelProvider_modular_limitsAndModifies_label;
 					return NewWizardMessages.CPListLabelProvider_modular_modifiesEncapsulation_label;
-				else
-					return NewWizardMessages.CPListLabelProvider_modular_label;
+				} else if (limitModules) {
+					return NewWizardMessages.CPListLabelProvider_modular_limitsModules_label;
+				}
+				return NewWizardMessages.CPListLabelProvider_modular_label;
 			} else {
 				return NewWizardMessages.CPListLabelProvider_not_modular_label;
 			}
@@ -478,8 +500,14 @@ public class CPListLabelProvider extends LabelProvider {
 		} else if (element instanceof IAccessRule) {
 			IAccessRule rule= (IAccessRule) element;
 			return AccessRulesLabelProvider.getResolutionImage(rule.getKind());
+		} else if (element instanceof ModulePatch) {
+			return fRegistry.get(JavaPluginImages.DESC_OBJS_MODULE_ATTRIB);
 		} else if (element instanceof ModuleAddExport) {
-			return fSharedImages.getImage(ISharedImages.IMG_OBJS_ADD_EXPORTS);
+			return fRegistry.get(JavaPluginImages.DESC_OBJS_MODULE_ATTRIB);
+		} else if (element instanceof ModuleAddReads) {
+			return fRegistry.get(JavaPluginImages.DESC_OBJS_MODULE_ATTRIB);
+		} else if (element instanceof LimitModules) {
+			return fRegistry.get(JavaPluginImages.DESC_OBJS_MODULE_ATTRIB);
 		}
 		return null;
 	}
