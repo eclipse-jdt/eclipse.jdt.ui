@@ -129,7 +129,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 
 	private boolean fConsoleMode = false;
 
-	public static RemoteTestRunner fgTestRunServer;
+	public static final RemoteTestRunner fgTestRunServer= new RemoteTestRunner();
 
 	/**
 	 * Reader thread that processes messages from the client.
@@ -199,7 +199,6 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
      */
 	public static void main(String[] args) {
 		try {
-			fgTestRunServer= new RemoteTestRunner();
 			fgTestRunServer.init(args);
 			fgTestRunServer.run();
 		} catch (Throwable e) {
