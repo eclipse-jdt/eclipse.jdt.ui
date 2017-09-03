@@ -93,7 +93,18 @@
          <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime"/>     	
       </kind>
    </extension>
-   
+      <extension
+         point="org.eclipse.jdt.junit.internal_testKinds">
+      <kind
+            id="org.eclipse.jdt.junit.loader.junit5"
+            displayName="%testKind.junit5"
+            finderClass="org.eclipse.jdt.internal.junit.launcher.JUnit5TestFinder"
+            loaderPluginId="org.eclipse.jdt.junit5.runtime"
+            loaderClass="org.eclipse.jdt.internal.junit5.runner.JUnit5TestLoader">
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit5.runtime" />
+         <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime" />
+      </kind>
+   </extension>
    <extension
          point="org.eclipse.core.contenttype.contentTypes">
       <content-type

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,12 +73,12 @@ public class MessageIds {
 	 */
 	public static final String TEST_START=  "%TESTS  ";		 //$NON-NLS-1$
 	/**
-	 * Notification that a test has started.
+	 * Notification that a test has ended.
 	 * TEST_END + testID + "," + testName
 	 */
 	public static final String TEST_END=    "%TESTE  ";		 //$NON-NLS-1$
 	/**
-	 * Notification that a test had a error.
+	 * Notification that a test had an error.
 	 * TEST_ERROR + testID + "," + testName.
 	 * After the notification follows the stack trace.
 	 */
@@ -104,12 +104,20 @@ public class MessageIds {
 	 * Status = "OK" or "FAILURE".
 	 */
 	public static final String TEST_RERAN=  "%TSTRERN"; //$NON-NLS-1$
+
 	/**
-	 * Notification about a test inside the test suite.
-	 * TEST_TREE + testId + "," + testName + "," + isSuite + "," + testcount
-	 * isSuite = "true" or "false"
+	 * Notification about a test inside the test suite. <br>
+	 * TEST_TREE + testId + "," + testName + "," + isSuite + "," + testcount + "," +
+	 * isDynamicTest + "," + parentId + "," + displayName + "," + parameterTypes<br>
+	 * isSuite = "true" or "false" <br>
+	 * isDynamicTest = "true" or "false" <br>
+	 * parentId = the unique id of its parent if it is a dynamic test, otherwise can be "-1" <br>
+	 * displayName = the display name of the test <br>
+	 * parameterTypes = comma-separated list of method parameter types if applicable, otherwise an empty string <br>
+	 * See: ITestRunListener2#testTreeEntry
+	 * 
 	 */
-	public static final String TEST_TREE="%TSTTREE"; //$NON-NLS-1$
+	public static final String TEST_TREE= "%TSTTREE"; //$NON-NLS-1$
 	/**
 	 * Request to stop the current test run.
 	 */

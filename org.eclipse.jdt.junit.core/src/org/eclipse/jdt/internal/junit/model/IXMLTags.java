@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,5 +82,22 @@ public interface IXMLTags {
 	 * value: String
 	 */
 	public static final String ATTR_MESSAGE= "message"; //$NON-NLS-1$
+	/**
+	 * value: String
+	 */
+	public static final String ATTR_DISPLAY_NAME= "displayname"; //$NON-NLS-1$
+	/**
+	 * value: Boolean
+	 */
+	public static final String ATTR_DYNAMIC_TEST= "dynamicTest"; //$NON-NLS-1$
+	/**
+	 * value: String
+	 */
+	public static final String ATTR_PARAMETER_TYPES= "parameters"; //$NON-NLS-1$
+	/**
+	 * value: String
+	 */
+	public static final String ATTR_UNIQUE_ID= "uniqueid"; //$NON-NLS-1$
+
 //	public static final String ATTR_TYPE= "type"; //$NON-NLS-1$
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,6 +62,15 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 */
 	private String fTestName;
 	/**
+	 * The names of the packages containing tests to run
+	 */
+	private String[] fPackageNames;
+	/**
+	 * The unique ID of test to run or "" if not available
+	 */
+	private String fUniqueId;
+
+	/**
 	 * The current test result
 	 */
 	private TestExecution fExecution;
@@ -119,6 +128,8 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	private MessageSender fSender;
 
 	private boolean fConsoleMode = false;
+
+	public static RemoteTestRunner fgTestRunServer;
 
 	/**
 	 * Reader thread that processes messages from the client.
@@ -180,6 +191,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 * <pre>-classnames: the name of the test suite class
 	 * -testfilename: the name of a file containing classnames of test suites
 	 * -test: the test method name (format classname testname)
+	 * -packagenamefile: the name of a file containing package names of tests
 	 * -host: the host to connect to default local host
 	 * -port: the port to connect to, mandatory argument
 	 * -keepalive: keep the process alive after a test run
@@ -187,9 +199,9 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
      */
 	public static void main(String[] args) {
 		try {
-			RemoteTestRunner testRunServer= new RemoteTestRunner();
-			testRunServer.init(args);
-			testRunServer.run();
+			fgTestRunServer= new RemoteTestRunner();
+			fgTestRunServer.init(args);
+			fgTestRunServer.run();
 		} catch (Throwable e) {
 			e.printStackTrace(); // don't allow System.exit(0) to swallow exceptions
 		} finally {
@@ -249,7 +261,16 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 				}
 				i++;
 
-			} else if(args[i].toLowerCase().equals("-testfailures")) { //$NON-NLS-1$
+			} else if (args[i].toLowerCase().equals("-packagenamefile")) { //$NON-NLS-1$
+				String pkgNameFile= args[i+1];
+				try {
+					readPackageNames(pkgNameFile);
+				} catch (IOException e) {
+					throw new IllegalArgumentException("Cannot read packagename file.");		 //$NON-NLS-1$
+				}
+				i++;
+
+			} else if (args[i].toLowerCase().equals("-testfailures")) { //$NON-NLS-1$
 				String testFailuresFile= args[i+1];
 				try {
 					readFailureNames(testFailuresFile);
@@ -282,14 +303,22 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 				String className = args[i + 1];
 				createLoader(className);
 				i++;
+			} else if(args[i].toLowerCase().equals("-uniqueid")) { //$NON-NLS-1$
+				fUniqueId= args[i+1];
+				i++;
 			}
 		}
 
 		if (getTestLoader() == null)
 			initDefaultLoader();
 
-		if(fTestClassNames == null || fTestClassNames.length == 0)
-			throw new IllegalArgumentException(JUnitMessages.getString("RemoteTestRunner.error.classnamemissing")); //$NON-NLS-1$
+		if(fTestClassNames == null || fTestClassNames.length == 0) {
+			if (fPackageNames == null || fPackageNames.length == 0) {
+				throw new IllegalArgumentException(JUnitMessages.getString("RemoteTestRunner.error.classnamemissing")); //$NON-NLS-1$
+			} else {
+				fTestClassNames= new String[0];
+			}
+		}
 
 		if (fPort == -1)
 			throw new IllegalArgumentException(JUnitMessages.getString("RemoteTestRunner.error.portmissing")); //$NON-NLS-1$
@@ -324,6 +353,27 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		fLoader = newInstance;
 	}
 
+	private void readPackageNames(String pkgNameFile) throws IOException {
+		BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(pkgNameFile)), "UTF-8")); //$NON-NLS-1$
+		try {
+			String line;
+			Vector list= new Vector();
+			while ((line= br.readLine()) != null) {
+				list.add(line);
+			}
+			fPackageNames= (String[]) list.toArray(new String[list.size()]);
+		}
+		finally {
+			br.close();
+		}
+		if (fDebugMode) {
+			System.out.println("Packages:"); //$NON-NLS-1$
+			for (int i= 0; i < fPackageNames.length; i++) {
+				System.out.println("    "+fPackageNames[i]); //$NON-NLS-1$
+			}
+		}
+	}
+	
 	private void readTestNames(String testNameFile) throws IOException {
 		BufferedReader br= new BufferedReader(new InputStreamReader(new FileInputStream(new File(testNameFile)), "UTF-8")); //$NON-NLS-1$
 		try {
@@ -441,17 +491,18 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 * @param execution executor
 	 */
 	public void runTests(String[] testClassNames, String testName, TestExecution execution) {
-		ITestReference[] suites= fLoader.loadTests(loadClasses(testClassNames), testName, fFailureNames, this);
+		ITestReference[] suites= fLoader.loadTests(loadClasses(testClassNames), testName, fFailureNames, fPackageNames, fUniqueId, this);
 
 		// count all testMethods and inform ITestRunListeners
 		int count= countTests(suites);
 
 		notifyTestRunStarted(count);
 
-		if (count == 0) {
+		// test count is 0 if only dynamic tests will be run (i.e. only @TestFactory methods are present), hence test run should continue.
+		/*if (count == 0) {
 			notifyTestRunEnded(0);
 			return;
-		}
+		}*/
 
 		sendTrees(suites);
 
@@ -488,7 +539,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 */
 	public void rerunTest(RerunRequest r) {
 		final Class[] classes= loadClasses(new String[] { r.fRerunClassName });
-		ITestReference rerunTest1= fLoader.loadTests(classes, r.fRerunTestName, null, this)[0];
+		ITestReference rerunTest1= fLoader.loadTests(classes, r.fRerunTestName, null, null, fUniqueId, this)[0];
 		RerunExecutionListener service= rerunExecutionListener();
 
 		TestExecution execution= new TestExecution(service, getClassifier());
@@ -506,11 +557,14 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 		return new DefaultClassifier();
 	}
 
-	public void visitTreeEntry(ITestIdentifier id, boolean b, int i) {
-		notifyTestTreeEntry(getTestId(id) + ',' + escapeTestName(id.getName()) + ',' + b + ',' + i);
+	public void visitTreeEntry(ITestIdentifier identifier, boolean hasChildren, int testCount, boolean isDynamicTest, String parentId) {
+		String treeEntry= getTestId(identifier) + ',' + escapeText(identifier.getName()) + ',' + hasChildren + ',' + testCount 
+				+ ',' + isDynamicTest + ',' + parentId + ',' + escapeText(identifier.getDisplayName()) + ',' + escapeText(identifier.getParameterTypes()) 
+				+ ',' + escapeText(identifier.getUniqueId());
+		notifyTestTreeEntry(treeEntry);
 	}
 
-	public static String escapeTestName(String s) {
+	public static String escapeText(String s) {
 		if ((s.indexOf(',') < 0) && (s.indexOf('\\') < 0) && (s.indexOf('\r') < 0) && (s.indexOf('\n') < 0))
 			return s;
 		StringBuffer sb= new StringBuffer(s.length()+10);
@@ -535,7 +589,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	}
 
 	// WANT: work in bug fixes since RC2?
-	private String getTestId(ITestIdentifier id) {
+	public String getTestId(ITestIdentifier id) {
 		return fIds.getTestId(id);
 	}
 
@@ -676,7 +730,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 
 	public void runTests(TestExecution execution) {
 		runTests(fTestClassNames, fTestName, execution);
-		}
+	}
 
 	public ITestLoader getTestLoader() {
 		return fLoader;

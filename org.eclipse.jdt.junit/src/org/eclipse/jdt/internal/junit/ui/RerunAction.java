@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,9 @@ public class RerunAction extends Action {
 	private String fTestId;
 	private String fClassName;
 	private String fTestName;
+	private String fTestDisplayName;
 	private TestRunnerViewPart fTestRunner;
+	private String fUniqueId;
 	private String fLaunchMode;
 
 	/**
@@ -31,24 +33,25 @@ public class RerunAction extends Action {
 	 * @param testId the test id
 	 * @param className the class name containing the test
 	 * @param testName the method to run or <code>null</code>
+	 * @param testDisplayName the display name of the test to re-run or <code>null</code>
+	 * @param uniqueId the unique ID of the test to re-run or <code>null</code>
 	 * @param launchMode the launch mode
 	 */
 	public RerunAction(String actionName, TestRunnerViewPart runner, String testId, String className, String testName,
-			String launchMode) {
+			String testDisplayName, String uniqueId, String launchMode) {
 		super(actionName);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.RERUN_ACTION);
 		fTestRunner= runner;
 		fTestId= testId;
 		fClassName= className;
 		fTestName= testName;
+		fTestDisplayName= testDisplayName;
+		fUniqueId= uniqueId;
 		fLaunchMode= launchMode;
 	}
 
-	/*
-	 * @see IAction#run()
-	 */
 	@Override
 	public void run() {
-		fTestRunner.rerunTest(fTestId, fClassName, fTestName, fLaunchMode);
+		fTestRunner.rerunTest(fTestId, fClassName, fTestName, fTestDisplayName, fUniqueId, fLaunchMode);
 	}
 }

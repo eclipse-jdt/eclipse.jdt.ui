@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,9 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -96,12 +98,23 @@ public class TestRunSessionSerializer implements XMLReader {
 			TestSuiteElement testSuiteElement= (TestSuiteElement) testElement;
 
 			AttributesImpl atts= new AttributesImpl();
-			addCDATA(atts, IXMLTags.ATTR_NAME, testSuiteElement.getSuiteTypeName());
+			// Need to store the full #getTestName instead of only the #getSuiteTypeName for test factory methods
+			addCDATA(atts, IXMLTags.ATTR_NAME, testSuiteElement.getTestName());
 			if (! Double.isNaN(testSuiteElement.getElapsedTimeInSeconds()))
 				addCDATA(atts, IXMLTags.ATTR_TIME, timeFormat.format(testSuiteElement.getElapsedTimeInSeconds()));
 			if (testElement.getProgressState() != ProgressState.COMPLETED || testElement.getTestResult(false) != Result.UNDEFINED)
 				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
-
+			if (testSuiteElement.getDisplayName() != null) {
+				addCDATA(atts, IXMLTags.ATTR_DISPLAY_NAME, testSuiteElement.getDisplayName());
+			}
+			String[] paramTypes= testSuiteElement.getParameterTypes();
+			if (paramTypes != null) {
+				String paramTypesStr= Arrays.stream(paramTypes).collect(Collectors.joining(",")); //$NON-NLS-1$
+				addCDATA(atts, IXMLTags.ATTR_PARAMETER_TYPES, paramTypesStr);
+			}
+			if (testSuiteElement.getUniqueId() != null) {
+				addCDATA(atts, IXMLTags.ATTR_UNIQUE_ID, testSuiteElement.getUniqueId());
+			}
 			startElement(IXMLTags.NODE_TESTSUITE, atts);
 			addFailure(testSuiteElement);
 
@@ -123,7 +136,20 @@ public class TestRunSessionSerializer implements XMLReader {
 				addCDATA(atts, IXMLTags.ATTR_INCOMPLETE, Boolean.TRUE.toString());
 			if (testCaseElement.isIgnored())
 				addCDATA(atts, IXMLTags.ATTR_IGNORED, Boolean.TRUE.toString());
-
+			if (testCaseElement.isDynamicTest()) {
+				addCDATA(atts, IXMLTags.ATTR_DYNAMIC_TEST, Boolean.TRUE.toString());
+			}
+			if (testCaseElement.getDisplayName() != null) {
+				addCDATA(atts, IXMLTags.ATTR_DISPLAY_NAME, testCaseElement.getDisplayName());
+			}
+			String[] paramTypes= testCaseElement.getParameterTypes();
+			if (paramTypes != null) {
+				String paramTypesStr= Arrays.stream(paramTypes).collect(Collectors.joining(",")); //$NON-NLS-1$
+				addCDATA(atts, IXMLTags.ATTR_PARAMETER_TYPES, paramTypesStr);
+			}
+			if (testCaseElement.getUniqueId() != null) {
+				addCDATA(atts, IXMLTags.ATTR_UNIQUE_ID, testCaseElement.getUniqueId());
+			}
 			startElement(IXMLTags.NODE_TESTCASE, atts);
 			addFailure(testCaseElement);
 

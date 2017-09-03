@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -141,6 +141,7 @@ import org.eclipse.jdt.internal.junit.JUnitPreferencesConstants;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
+import org.eclipse.jdt.internal.junit.launcher.TestKindRegistry;
 import org.eclipse.jdt.internal.junit.model.ITestRunSessionListener;
 import org.eclipse.jdt.internal.junit.model.ITestSessionListener;
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
@@ -758,6 +759,7 @@ public class TestRunnerViewPart extends ViewPart {
 				}
 			});
 			stopUpdateJobs();
+			showMessageIfNoTests();
 		}
 
 		@Override
@@ -1456,6 +1458,19 @@ public class TestRunnerViewPart extends ViewPart {
 			}
 		});
 		stopUpdateJobs();
+		showMessageIfNoTests();
+	}
+
+	private void showMessageIfNoTests() {
+		if (fTestRunSession != null && TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(fTestRunSession.getTestRunnerKind().getId()) && fTestRunSession.getTotalCount() == 0) {
+			Display.getDefault().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					String msg= Messages.format(JUnitMessages.TestRunnerViewPart_error_notests_kind, fTestRunSession.getTestRunnerKind().getDisplayName());
+					MessageDialog.openInformation(JUnitPlugin.getActiveWorkbenchShell(), JUnitMessages.TestRunnerViewPart__error_cannotrun, msg);
+				}
+			});
+		}
 	}
 
 	private void resetViewIcon() {
@@ -1583,9 +1598,16 @@ action enablement
 	}
 
 	private void updateRerunFailedFirstAction() {
-		boolean state= hasErrorsOrFailures() && fTestRunSession.getLaunch() != null;
-	    fRerunFailedFirstAction.setEnabled(state);
-    }
+		boolean state= !isJUnit5() && hasErrorsOrFailures() && fTestRunSession.getLaunch() != null;
+		fRerunFailedFirstAction.setEnabled(state);
+	}
+
+	private boolean isJUnit5() {
+		if (fTestRunSession == null) {
+			return false;
+		}
+		return TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(fTestRunSession.getTestRunnerKind().getId());
+	}
 
     /**
      * @return the display name of the current test run sessions kind, or <code>null</code>
@@ -2135,7 +2157,7 @@ action enablement
 			getDisplay().asyncExec(r);
 	}
 
-	public void rerunTest(String testId, String className, String testName, String launchMode) {
+	public void rerunTest(String testId, String className, String testName, String testDisplayName, String uniqueId, String launchMode) {
 		if (lastLaunchIsKeptAlive()) {
 			fTestRunSession.rerunTest(testId, className, testName);
 			TestCaseElement testCaseElement= (TestCaseElement) fTestRunSession.getTestElement(testId);
@@ -2152,18 +2174,22 @@ action enablement
 				ILaunchConfiguration launchConfiguration= launch.getLaunchConfiguration();
 				if (launchConfiguration != null) {
 					try {
-						String name= className;
-						if (testName != null)
-							name+= "."+testName; //$NON-NLS-1$
+						String name;
+						if (testDisplayName != null) {
+							name= testDisplayName;
+						} else {
+							name= className;
+							if (testName != null)
+								name+= "."+testName; //$NON-NLS-1$
+						}
 						String configName= Messages.format(JUnitMessages.TestRunnerViewPart_configName, name);
 						ILaunchConfigurationWorkingCopy tmp = launchConfiguration.copy(configName);
 						// fix for bug: 64838  junit view run single test does not use correct class [JUnit]
 						tmp.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, className);
 						// reset the container
 						tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_CONTAINER, ""); //$NON-NLS-1$
-						if (testName != null) {
-							tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME, testName);
-						}
+						tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME, testName);
+						tmp.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_UNIQUE_ID, uniqueId);
 						relaunch(tmp, launchMode);
 						return;
 						} catch (CoreException e) {

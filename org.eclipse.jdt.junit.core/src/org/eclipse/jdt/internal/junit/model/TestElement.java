@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,7 +19,6 @@ import org.eclipse.jdt.junit.model.ITestElementContainer;
 import org.eclipse.jdt.junit.model.ITestRunSession;
 
 import org.eclipse.core.runtime.Assert;
-
 
 public abstract class TestElement implements ITestElement {
 	public final static class Status {
@@ -169,6 +168,25 @@ public abstract class TestElement implements ITestElement {
 	private final String fId;
 	private String fTestName;
 
+	/**
+	 * The display name of the test element, can be <code>null</code>. In that case, use
+	 * {@link TestElement#fTestName fTestName}.
+	 */
+	private String fDisplayName;
+
+	/**
+	 * The array of method parameter types (as given by
+	 * org.junit.platform.engine.support.descriptor.MethodSource.getMethodParameterTypes()) if
+	 * applicable, otherwise <code>null</code>.
+	 */
+	private String[] fParameterTypes;
+
+	/**
+	 * The unique ID of the test element which can be <code>null</code> as it is applicable to JUnit 5
+	 * and above.
+	 */
+	private String fUniqueId;
+
 	private Status fStatus;
 	private String fTrace;
 	private String fExpected;
@@ -191,13 +209,22 @@ public abstract class TestElement implements ITestElement {
 	 * @param parent the parent, can be <code>null</code>
 	 * @param id the test id
 	 * @param testName the test name
+	 * @param displayName the test display name, can be <code>null</code>
+	 * @param parameterTypes the array of method parameter types (as given by
+	 *            org.junit.platform.engine.support.descriptor.MethodSource.getMethodParameterTypes())
+	 *            if applicable, otherwise <code>null</code>
+	 * @param uniqueId the unique ID of the test element, can be <code>null</code> as it is applicable
+	 *            to JUnit 5 and above
 	 */
-	public TestElement(TestSuiteElement parent, String id, String testName) {
+	public TestElement(TestSuiteElement parent, String id, String testName, String displayName, String[] parameterTypes, String uniqueId) {
 		Assert.isNotNull(id);
 		Assert.isNotNull(testName);
 		fParent= parent;
 		fId= id;
 		fTestName= testName;
+		fDisplayName= displayName;
+		fParameterTypes= parameterTypes;
+		fUniqueId= uniqueId;
 		fStatus= Status.NOT_RUN;
 		if (parent != null)
 			parent.addChild(this);
@@ -363,4 +390,34 @@ public abstract class TestElement implements ITestElement {
 	public String toString() {
 		return getProgressState() + " - " + getTestResult(true); //$NON-NLS-1$
 	}
+
+	/**
+	 * Returns the display name of the test. Can be <code>null</code>. In that case, use
+	 * {@link TestElement#getTestName() getTestName()}.
+	 * 
+	 * @return the test display name, can be <code>null</code>
+	 */
+	public String getDisplayName() {
+		return fDisplayName;
+	}
+
+	/**
+	 * @return the array of method parameter types (as given by
+	 *         org.junit.platform.engine.support.descriptor.MethodSource.getMethodParameterTypes()) if
+	 *         applicable, otherwise <code>null</code>
+	 */
+	public String[] getParameterTypes() {
+		return fParameterTypes;
+	}
+
+	/**
+	 * Returns the unique ID of the test element. Can be <code>null</code> as it is applicable to JUnit
+	 * 5 and above.
+	 * 
+	 * @return the unique ID of the test, can be <code>null</code>
+	 */
+	public String getUniqueId() {
+		return fUniqueId;
+	}
+
 }

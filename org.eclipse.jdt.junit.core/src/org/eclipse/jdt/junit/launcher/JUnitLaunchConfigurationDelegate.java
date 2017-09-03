@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.osgi.framework.Bundle;
 
@@ -49,8 +50,11 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.JUnitMessages;
@@ -82,7 +86,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 
 	private boolean fKeepAlive= false;
 	private int fPort;
-	private IMember[] fTestElements;
+	private IJavaElement[] fTestElements;
 
 	@Override
 	public synchronized void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
@@ -122,7 +126,17 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			fPort= evaluatePort();
 			launch.setAttribute(JUnitLaunchConfigurationConstants.ATTR_PORT, String.valueOf(fPort));
 
-			fTestElements= evaluateTests(configuration, new SubProgressMonitor(monitor, 1));
+			ITestKind testKind= getTestRunnerKind(configuration);
+			if (TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKind.getId()) || TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId())) {
+				fTestElements= evaluateTests(configuration, new SubProgressMonitor(monitor, 1));
+			} else {
+				IJavaElement testTarget= getTestTarget(configuration, getJavaProject(configuration));
+				if (testTarget instanceof IPackageFragment || testTarget instanceof IPackageFragmentRoot || testTarget instanceof IJavaProject) {
+					fTestElements= new IJavaElement[] { testTarget };
+				} else {
+					fTestElements= evaluateTests(configuration, new SubProgressMonitor(monitor, 1));
+				}
+			}
 
 			String mainTypeName= verifyMainTypeName(configuration);
 			IVMRunner runner= getVMRunner(configuration, mode);
@@ -206,14 +220,18 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			if ((javaProject == null) || !javaProject.exists()) {
 				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_invalidproject, null, IJavaLaunchConfigurationConstants.ERR_NOT_A_JAVA_PROJECT);
 			}
-			if (!CoreTestSearchEngine.hasTestCaseType(javaProject)) {
-				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
-			}
-
 			ITestKind testKind= getTestRunnerKind(configuration);
 			boolean isJUnit4Configuration= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId());
-			if (isJUnit4Configuration && ! CoreTestSearchEngine.hasTestAnnotation(javaProject)) {
+			boolean isJUnit5Configuration= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKind.getId());
+			if (!isJUnit5Configuration && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
+				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junitnotonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
+			}
+			if (isJUnit4Configuration && !CoreTestSearchEngine.hasJUnit4TestAnnotation(javaProject)) {
 				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junit4notonpath, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
+			}
+			if (isJUnit5Configuration && !CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
+				String msg= Messages.format(JUnitMessages.JUnitLaunchConfigurationDelegate_error_junit5notonpath, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME);
+				abort(msg, null, IJUnitStatusConstants.ERR_JUNIT_NOT_ON_PATH);
 			}
 		} finally {
 			monitor.done();
@@ -250,6 +268,8 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		String testMethodName= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_NAME, ""); //$NON-NLS-1$
 		if (testMethodName.length() > 0) {
 			if (testTarget instanceof IType) {
+				// If parameters exist, testMethodName is followed by a comma-separated list of fully qualified parameter type names in parentheses.
+				// The testMethodName is required in this format by #collectExecutionArguments, hence it will be used as it is with the handle-only method IType#getMethod here.
 				return new IMember[] { ((IType) testTarget).getMethod(testMethodName, new String[0]) };
 			}
 		}
@@ -280,8 +300,6 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		vmArguments.addAll(Arrays.asList(execArgs.getVMArgumentsArray()));
 		programArguments.addAll(Arrays.asList(execArgs.getProgramArgumentsArray()));
 
-		String testFailureNames= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES, ""); //$NON-NLS-1$
-		
 		/*
 		 * The "-version" "3" arguments don't make sense and should eventually be removed.
 		 * But we keep them for now, since users may want to run with older releases of
@@ -307,18 +325,22 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		programArguments.add("-loaderpluginname"); //$NON-NLS-1$
 		programArguments.add(testRunnerKind.getLoaderPluginId());
 
-		IMember[] testElements = fTestElements;
+		IJavaElement[] testElements= fTestElements;
 
-		// a test name was specified just run the single test
-		if (testElements.length == 1) {
-			if (testElements[0] instanceof IMethod) {
-				IMethod method= (IMethod) testElements[0];
+		if (testElements.length == 1) { // a test name was specified just run the single test, or a test container was specified
+			IJavaElement testElement= testElements[0];
+			if (testElement instanceof IMethod) {
+				IMethod method= (IMethod) testElement;
 				programArguments.add("-test"); //$NON-NLS-1$
-				programArguments.add(method.getDeclaringType().getFullyQualifiedName()+':'+method.getElementName());
-			} else if (testElements[0] instanceof IType) {
-				IType type= (IType) testElements[0];
+				programArguments.add(method.getDeclaringType().getFullyQualifiedName() + ':' + method.getElementName());
+			} else if (testElement instanceof IType) {
+				IType type= (IType) testElement;
 				programArguments.add("-classNames"); //$NON-NLS-1$
 				programArguments.add(type.getFullyQualifiedName());
+			} else if (testElement instanceof IPackageFragment || testElement instanceof IPackageFragmentRoot || testElement instanceof IJavaProject) {
+				String fileName= createPackageNamesFile(testElement, testRunnerKind);
+				programArguments.add("-packageNameFile"); //$NON-NLS-1$
+				programArguments.add(fileName);
 			} else {
 				abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_wrong_input, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
 			}
@@ -327,13 +349,72 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			programArguments.add("-testNameFile"); //$NON-NLS-1$
 			programArguments.add(fileName);
 		}
+
+		String testFailureNames= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_FAILURES_NAMES, ""); //$NON-NLS-1$
 		if (testFailureNames.length() > 0) {
 			programArguments.add("-testfailures"); //$NON-NLS-1$
 			programArguments.add(testFailureNames);
 		}
+
+		String uniqueId= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_UNIQUE_ID, ""); //$NON-NLS-1$
+		if (!uniqueId.trim().isEmpty()) {
+			programArguments.add("-uniqueId"); //$NON-NLS-1$
+			programArguments.add(uniqueId);
+		}
 	}
 
-	private String createTestNamesFile(IMember[] testElements) throws CoreException {
+	private String createPackageNamesFile(IJavaElement testContainer, ITestKind testRunnerKind) throws CoreException {
+		try {
+			File file= File.createTempFile("packageNames", ".txt"); //$NON-NLS-1$ //$NON-NLS-2$
+			file.deleteOnExit();
+			try (BufferedWriter bw= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"))) { //$NON-NLS-1$) 
+				Set<String> pkgNames= new HashSet<>();
+				if (testContainer instanceof IPackageFragment) {
+					pkgNames.add(getPackageName(testContainer.getElementName()));
+				} else if (testContainer instanceof IPackageFragmentRoot) {
+					addAllPackageFragments((IPackageFragmentRoot) testContainer, pkgNames);
+				} else if (testContainer instanceof IJavaProject) {
+					for (IPackageFragmentRoot pkgFragmentRoot : ((IJavaProject) testContainer).getPackageFragmentRoots()) {
+						if (!pkgFragmentRoot.isExternal() && !pkgFragmentRoot.isArchive()) {
+							addAllPackageFragments(pkgFragmentRoot, pkgNames);
+						}
+					}
+				} else {
+					abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_wrong_input, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
+				}
+				if (pkgNames.size() == 0) {
+					String msg= Messages.format(JUnitMessages.JUnitLaunchConfigurationDelegate_error_notests_kind, testRunnerKind.getDisplayName());
+					abort(msg, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
+				} else {
+					for (String pkgName : pkgNames) {
+						bw.write(pkgName);
+						bw.newLine();
+					}
+				}
+			}
+			return file.getAbsolutePath();
+		} catch (IOException | JavaModelException e) {
+			throw new CoreException(new Status(IStatus.ERROR, JUnitCorePlugin.CORE_PLUGIN_ID, IStatus.ERROR, "", e)); //$NON-NLS-1$
+		}
+	}
+
+	private Set<String> addAllPackageFragments(IPackageFragmentRoot pkgFragmentRoot, Set<String> pkgNames) throws JavaModelException {
+		for (IJavaElement child : pkgFragmentRoot.getChildren()) {
+			if (child instanceof IPackageFragment && ((IPackageFragment) child).hasChildren()) {
+				pkgNames.add(getPackageName(child.getElementName()));
+			}
+		}
+		return pkgNames;
+	}
+
+	private String getPackageName(String elementName) {
+		if (elementName.isEmpty()) {
+			return "<default>"; //$NON-NLS-1$
+		}
+		return elementName;
+	}
+
+	private String createTestNamesFile(IJavaElement[] testElements) throws CoreException {
 		try {
 			File file= File.createTempFile("testNames", ".txt"); //$NON-NLS-1$ //$NON-NLS-2$
 			file.deleteOnExit();

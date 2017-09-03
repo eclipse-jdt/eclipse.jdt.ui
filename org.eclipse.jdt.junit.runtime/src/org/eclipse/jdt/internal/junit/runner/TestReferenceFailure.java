@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 IBM Corporation and others.
+ * Copyright (c) 2006, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,7 +38,7 @@ public class TestReferenceFailure {
 		fComparison = comparison;
 	}
 
-	public TestReferenceFailure(ITestReference reference, String status, String trace) {
+	public TestReferenceFailure(ITestReference reference, String status, String trace) { // not used
 		this(reference.getIdentifier(), status, trace);
 	}
 
@@ -55,7 +55,8 @@ public class TestReferenceFailure {
 	}
 
 	public String toString() {
-		return fStatus + " " + RemoteTestRunner.escapeTestName(fTest.getName()); //$NON-NLS-1$
+		return fStatus + " " + RemoteTestRunner.escapeText(fTest.getName())  //$NON-NLS-1$
+			+ " " + RemoteTestRunner.escapeText(fTest.getParameterTypes()); //$NON-NLS-1$ 
 	}
 
 	public void setComparison(FailedComparison comparison) {

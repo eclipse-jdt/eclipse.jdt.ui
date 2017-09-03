@@ -65,5 +65,6 @@
     <module>org.eclipse.jdt.junit.core</module>
     <module>org.eclipse.jdt.junit.runtime</module>
     <module>org.eclipse.jdt.junit4.runtime</module>
+    <module>org.eclipse.jdt.junit5.runtime</module>
   </modules>
 </project>
