@@ -907,56 +907,54 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				return;
 			}
 			validateJavaProject(fContainerElement.getJavaProject());
-			return;
-		}
 
-		String projectName= fProjText.getText().trim();
-		if (projectName.length() == 0) {
-			setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_projectnotdefined);
-			return;
-		}
-
-		IStatus status= ResourcesPlugin.getWorkspace().validatePath(IPath.SEPARATOR + projectName, IResource.PROJECT);
-		if (!status.isOK() || !Path.ROOT.isValidSegment(projectName)) {
-			setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_invalidProjectName, BasicElementLabels.getResourceName(projectName)));
-			return;
-		}
-
-		IProject project= getWorkspaceRoot().getProject(projectName);
-		if (!project.exists()) {
-			setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_projectnotexists);
-			return;
-		}
-		IJavaProject javaProject= JavaCore.create(project);
-		validateJavaProject(javaProject);
-
-		try {
-			if (!project.hasNature(JavaCore.NATURE_ID)) {
-				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_notJavaProject);
+		} else {
+			String projectName= fProjText.getText().trim();
+			if (projectName.length() == 0) {
+				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_projectnotdefined);
 				return;
 			}
-			String className= fTestText.getText().trim();
-			if (className.length() == 0) {
-				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testnotdefined);
+
+			IStatus status= ResourcesPlugin.getWorkspace().validatePath(IPath.SEPARATOR + projectName, IResource.PROJECT);
+			if (!status.isOK() || !Path.ROOT.isValidSegment(projectName)) {
+				setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_invalidProjectName, BasicElementLabels.getResourceName(projectName)));
 				return;
 			}
-			IType type= javaProject.findType(className);
-			if (type == null) {
-				setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_test_class_not_found, new String[] { className, projectName }));
+
+			IProject project= getWorkspaceRoot().getProject(projectName);
+			if (!project.exists()) {
+				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_projectnotexists);
 				return;
 			}
-			String methodName = fTestMethodText.getText();
-			if (methodName.length() > 0) {
-				Set<String> methodsForType= getMethodsForType(javaProject, type, getSelectedTestKind());
-				if (!methodsForType.contains(methodName)) {
-					super.setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_test_method_not_found, new String[] { className, methodName, projectName }));
+			IJavaProject javaProject= JavaCore.create(project);
+			validateJavaProject(javaProject);
+
+			try {
+				if (!project.hasNature(JavaCore.NATURE_ID)) {
+					setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_notJavaProject);
 					return;
 				}
+				String className= fTestText.getText().trim();
+				if (className.length() == 0) {
+					setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testnotdefined);
+					return;
+				}
+				IType type= javaProject.findType(className);
+				if (type == null) {
+					setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_test_class_not_found, new String[] { className, projectName }));
+					return;
+				}
+				String methodName= fTestMethodText.getText();
+				if (methodName.length() > 0) {
+					Set<String> methodsForType= getMethodsForType(javaProject, type, getSelectedTestKind());
+					if (!methodsForType.contains(methodName)) {
+						super.setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_test_method_not_found, new String[] { className, methodName, projectName }));
+						return;
+					}
+				}
+			} catch (CoreException e) {
+				JUnitPlugin.log(e);
 			}
-
-
-		} catch (CoreException e) {
-			JUnitPlugin.log(e);
 		}
 
 		validateTestLoaderJVM();
@@ -996,8 +994,13 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				IVMInstall vm = JavaRuntime.getVMInstall(Path.fromPortableString(path));
 				if (vm instanceof AbstractVMInstall) {
 					String compliance= ((AbstractVMInstall)vm).getJavaVersion();
-					if (compliance != null && !JUnitStubUtility.is50OrHigher(compliance)) {
-						setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_JDK15_required);
+					if (compliance != null) {
+						String testKindId= testKind.getId();
+						if (TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKindId) && !JUnitStubUtility.is50OrHigher(compliance)) {
+							setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_JDK15_required);
+						} else if (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId) && !JUnitStubUtility.is18OrHigher(compliance)) {
+							setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_JDK18_required);
+						}
 					}
 				}
 			}
