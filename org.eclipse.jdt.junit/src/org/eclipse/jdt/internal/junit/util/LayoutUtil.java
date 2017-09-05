@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.layout.LayoutConstants;
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.resource.JFaceResources;
 
@@ -88,4 +89,70 @@ public class LayoutUtil {
 		}
 	}
 
+	/**
+	 * Sets the horizontal indent of a dependent control. Assumes that GridData is used.
+	 */
+	public static void setHorizontalIndent(Control control) {
+		Object ld= control.getLayoutData();
+		if (ld instanceof GridData) {
+			((GridData) ld).horizontalIndent= LayoutUtil.getIndent();
+		}
+	}
+	
+	/**
+	 * Returns the indent of dependent controls, in pixels.
+	 * <p>
+	 * <strong>Note:</strong> Use this method instead of {@link LayoutConstants#getIndent()} for
+	 * compatibility reasons.
+	 * </p>
+	 * 
+	 * @return the indent of dependent controls, in pixels.
+	 * @since 3.9
+	 */
+	public static final int getIndent() {
+		return LayoutConstants.getIndent();
+	}
+	
+	/**
+	 * Sets the horizontal grabbing of a control to true. Assumes that GridData is used.
+	 */
+	public static void setHorizontalGrabbing(Control control) {
+		Object ld= control.getLayoutData();
+		if (ld instanceof GridData) {
+			((GridData)ld).grabExcessHorizontalSpace= true;
+		}
+	}
+	
+	/**
+	 * Sets the vertical grabbing of a control to true. Assumes that GridData is used.
+	 * @since 3.6
+	 */
+	public static void setVerticalGrabbing(Control control) {
+		Object ld= control.getLayoutData();
+		if (ld instanceof GridData) {
+			GridData gd= ((GridData)ld);
+			gd.grabExcessVerticalSpace= true;
+			gd.verticalAlignment= SWT.FILL;
+		}
+	}
+	
+	/**
+	 * Sets the width hint of a control. Assumes that GridData is used.
+	 */
+	public static void setWidthHint(Control control, int widthHint) {
+		Object ld= control.getLayoutData();
+		if (ld instanceof GridData) {
+			((GridData)ld).widthHint= widthHint;
+		}
+	}
+
+	/**
+	 * Sets the heightHint hint of a control. Assumes that GridData is used.
+	 */
+	public static void setHeightHint(Control control, int heightHint) {
+		Object ld= control.getLayoutData();
+		if (ld instanceof GridData) {
+			((GridData)ld).heightHint= heightHint;
+		}
+	}
 }
