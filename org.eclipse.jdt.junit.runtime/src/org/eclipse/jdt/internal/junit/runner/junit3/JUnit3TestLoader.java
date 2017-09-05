@@ -36,7 +36,7 @@ public class JUnit3TestLoader implements ITestLoader {
 
 	// WANT: give test loaders a schema
 
-	public ITestReference[] loadTests(Class[] testClasses, String testName, String[] failureNames, String[] packages, String uniqueId, RemoteTestRunner listener) {
+	public ITestReference[] loadTests(Class[] testClasses, String testName, String[] failureNames, String[] packages, String[][] includeExcludeTags, String uniqueId, RemoteTestRunner listener) {
 		// instantiate all tests
 		ITestReference[] suites= new ITestReference[testClasses.length];
 		ITestPrioritizer prioritizer;

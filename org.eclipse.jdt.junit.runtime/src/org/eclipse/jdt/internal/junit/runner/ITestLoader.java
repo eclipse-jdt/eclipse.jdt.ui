@@ -19,10 +19,11 @@ public interface ITestLoader {
 	 * @param testName individual method to be run
 	 * @param failureNames may want to run these first, since they failed
 	 * @param packages packages containing tests to run
+	 * @param includeExcludeTags tags to be included and excluded in the test run
 	 * @param uniqueId unique ID of the test to run
 	 * @param listener to be notified if tests could not be loaded
 	 * @return the loaded test references
 	 */
-	public abstract ITestReference[] loadTests(Class[] testClasses, String testName, String[] failureNames, String[] packages, String uniqueId, RemoteTestRunner listener);
+	public abstract ITestReference[] loadTests(Class[] testClasses, String testName, String[] failureNames, String[] packages, String[][] includeExcludeTags, String uniqueId, RemoteTestRunner listener);
 }
 

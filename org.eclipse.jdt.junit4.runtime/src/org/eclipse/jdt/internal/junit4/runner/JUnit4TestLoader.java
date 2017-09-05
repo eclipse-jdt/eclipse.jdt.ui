@@ -36,6 +36,7 @@ public class JUnit4TestLoader implements ITestLoader {
 			String testName,
 			String[] failureNames,
 			String[] packages,
+			String[][] includeExcludeTags,
 			String uniqueId,
 			RemoteTestRunner listener) {
 
