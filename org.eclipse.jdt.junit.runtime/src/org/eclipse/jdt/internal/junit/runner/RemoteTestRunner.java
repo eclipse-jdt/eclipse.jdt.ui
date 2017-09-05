@@ -69,6 +69,10 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 * The unique ID of test to run or "" if not available
 	 */
 	private String fUniqueId;
+	/**
+	 * Tags to be included and excluded in the test run
+	 */
+	private String[][] fIncludeExcludeTags= new String[2][];
 
 	/**
 	 * The current test result
@@ -305,6 +309,32 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 			} else if(args[i].toLowerCase().equals("-uniqueid")) { //$NON-NLS-1$
 				fUniqueId= args[i+1];
 				i++;
+			} else if (args[i].toLowerCase().equals("--include-tag")) { //$NON-NLS-1$
+				String[] includeTags= fIncludeExcludeTags[0];
+				if (includeTags == null) {
+					includeTags= new String[1];
+					includeTags[0]= args[i + 1];
+				} else {
+					String[] tags= new String[includeTags.length + 1];
+					System.arraycopy(includeTags, 0, tags, 0, includeTags.length);
+					tags[includeTags.length]= args[i + 1];
+					includeTags= tags;
+				}
+				fIncludeExcludeTags[0]= includeTags;
+				i++;
+			} else if (args[i].toLowerCase().equals("--exclude-tag")) { //$NON-NLS-1$
+				String[] excludeTags= fIncludeExcludeTags[1];
+				if (excludeTags == null) {
+					excludeTags= new String[1];
+					excludeTags[0]= args[i + 1];
+				} else {
+					String[] tags= new String[excludeTags.length + 1];
+					System.arraycopy(excludeTags, 0, tags, 0, excludeTags.length);
+					tags[excludeTags.length]= args[i + 1];
+					excludeTags= tags;
+				}
+				fIncludeExcludeTags[1]= excludeTags;
+				i++;
 			}
 		}
 
@@ -490,7 +520,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 * @param execution executor
 	 */
 	public void runTests(String[] testClassNames, String testName, TestExecution execution) {
-		ITestReference[] suites= fLoader.loadTests(loadClasses(testClassNames), testName, fFailureNames, fPackageNames, fUniqueId, this);
+		ITestReference[] suites= fLoader.loadTests(loadClasses(testClassNames), testName, fFailureNames, fPackageNames, fIncludeExcludeTags, fUniqueId, this);
 
 		// count all testMethods and inform ITestRunListeners
 		int count= countTests(suites);
@@ -538,7 +568,7 @@ public class RemoteTestRunner implements MessageSender, IVisitsTestTrees {
 	 */
 	public void rerunTest(RerunRequest r) {
 		final Class[] classes= loadClasses(new String[] { r.fRerunClassName });
-		ITestReference rerunTest1= fLoader.loadTests(classes, r.fRerunTestName, null, null, fUniqueId, this)[0];
+		ITestReference rerunTest1= fLoader.loadTests(classes, r.fRerunTestName, null, null, fIncludeExcludeTags, fUniqueId, this)[0];
 		RerunExecutionListener service= rerunExecutionListener();
 
 		TestExecution execution= new TestExecution(service, getClassifier());
