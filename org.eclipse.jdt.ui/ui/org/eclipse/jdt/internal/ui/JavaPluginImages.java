@@ -307,7 +307,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_SOURCE_ATTACH_ATTRIB= createUnManaged(T_OBJ, "source_attach_attrib.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_JAVADOC_LOCATION_ATTRIB= createUnManaged(T_OBJ, "javadoc_location_attrib.png"); //$NON-NLS-1$
 
-	public static final ImageDescriptor DESC_OBJS_MODULE_ATTRIB= createUnManaged(T_OBJ, "module_obj.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OBJS_MODULE_ATTRIB= createUnManaged(T_OBJ, "module_attrib.png"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_EXTERNAL_ANNOTATION_LOCATION_ATTRIB= createManagedFromKey(T_OBJ, IMG_OBJS_EXTERNAL_ANNOTATIONS);
 
@@ -417,6 +417,8 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_CLASS= createUnManagedCached(T_OVR, "class_tsk.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_ABSTRACT_CLASS= createUnManagedCached(T_OVR, "class_abs_tsk.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_LIBRARY= createUnManagedCached(T_OVR, "library_ovr.png"); //$NON-NLS-1$
+	
+	public static final ImageDescriptor DESC_OVR_MODULAR_PROPERTIES= createUnManagedCached(T_OVR, "modular_properties.png"); //$NON-NLS-1$
 
     // Call Hierarchy
     public static final ImageDescriptor DESC_OVR_RECURSIVE= createUnManaged(T_OVR, "recursive_co.png");              //$NON-NLS-1$
