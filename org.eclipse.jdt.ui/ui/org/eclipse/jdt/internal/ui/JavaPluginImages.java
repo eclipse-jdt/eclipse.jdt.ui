@@ -418,8 +418,6 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_ABSTRACT_CLASS= createUnManagedCached(T_OVR, "class_abs_tsk.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_LIBRARY= createUnManagedCached(T_OVR, "library_ovr.png"); //$NON-NLS-1$
 	
-	public static final ImageDescriptor DESC_OVR_MODULAR_PROPERTIES= createUnManagedCached(T_OVR, "modular_properties.png"); //$NON-NLS-1$
-
     // Call Hierarchy
     public static final ImageDescriptor DESC_OVR_RECURSIVE= createUnManaged(T_OVR, "recursive_co.png");              //$NON-NLS-1$
     public static final ImageDescriptor DESC_OVR_MAX_LEVEL= createUnManaged(T_OVR, "maxlevel_co.png");                    //$NON-NLS-1$
