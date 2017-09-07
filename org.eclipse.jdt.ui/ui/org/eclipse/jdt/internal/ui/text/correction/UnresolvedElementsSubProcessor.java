@@ -104,6 +104,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
@@ -815,7 +816,7 @@ public class UnresolvedElementsSubProcessor {
 				if (binding.isParameterizedType()
 						&& (node.getParent() instanceof SimpleType || node.getParent() instanceof NameQualifiedType)
 						&& !(node.getParent().getParent() instanceof Type)) {
-					proposals.add(createTypeRefChangeFullProposal(cu, binding, node, relevance + 5));
+					proposals.add(createTypeRefChangeFullProposal(cu, binding, node, relevance + 5, TypeLocation.UNKNOWN));
 				}
 			}
 		} else {
@@ -823,7 +824,7 @@ public class UnresolvedElementsSubProcessor {
 			if (!(normalizedNode.getParent() instanceof Type) && node.getParent() != normalizedNode) {
 				ITypeBinding normBinding= ASTResolving.guessBindingForTypeReference(normalizedNode);
 				if (normBinding != null && !normBinding.isRecovered()) {
-					proposals.add(createTypeRefChangeFullProposal(cu, normBinding, normalizedNode, relevance + 5));
+					proposals.add(createTypeRefChangeFullProposal(cu, normBinding, normalizedNode, relevance + 5, TypeLocation.UNKNOWN));
 				}
 			}
 		}
@@ -941,7 +942,7 @@ public class UnresolvedElementsSubProcessor {
 		return proposal;
 	}
 
-	static CUCorrectionProposal createTypeRefChangeFullProposal(ICompilationUnit cu, ITypeBinding binding, ASTNode node, int relevance) {
+	static CUCorrectionProposal createTypeRefChangeFullProposal(ICompilationUnit cu, ITypeBinding binding, ASTNode node, int relevance, TypeLocation typeLocation) {
 		ASTRewrite rewrite= ASTRewrite.create(node.getAST());
 		String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_change_full_type_description, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_DEFAULT));
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -949,7 +950,8 @@ public class UnresolvedElementsSubProcessor {
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, relevance, image);
 
 		ImportRewrite imports= proposal.createImportRewrite((CompilationUnit) node.getRoot());
-		Type type= imports.addImport(binding, node.getAST());
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(node, imports);
+		Type type= imports.addImport(binding, node.getAST(), context, typeLocation);
 
 		rewrite.replace(node, type, null);
 		return proposal;

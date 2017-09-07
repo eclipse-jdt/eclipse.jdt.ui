@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.NullTestUtils;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -1350,5 +1351,45 @@ public class LocalCorrectionsQuickFixTest18 extends QuickFixTest {
 		String expected1= buf.toString();
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
-
+	public void testBug528875() throws Exception {
+		try {
+			Hashtable<String, String> options= JavaCore.getOptions();
+			options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+			JavaCore.setOptions(options);
+			NullTestUtils.prepareNullTypeAnnotations(fSourceFolder);
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package pack;\n");
+			buf.append("import java.util.*;\n");
+			buf.append("import annots.*;\n");
+			buf.append("@NonNullByDefault\n");
+			buf.append("public class E {\n");
+			buf.append("    private void foo() {\n");
+			buf.append("        ArrayList x=new ArrayList<String>();\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1);
+			
+			assertCorrectLabels(proposals);
+			assertNumberOfProposals(proposals, 6);
+			
+			buf= new StringBuffer();
+			buf.append("package pack;\n");
+			buf.append("import java.util.*;\n");
+			buf.append("import annots.*;\n");
+			buf.append("@NonNullByDefault\n");
+			buf.append("public class E {\n");
+			buf.append("    private void foo() {\n");
+			buf.append("        ArrayList<String> x=new ArrayList<String>();\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			
+			assertProposalPreviewEquals(buf.toString(), "Change type to 'ArrayList<String>'", proposals);
+		} finally {
+			NullTestUtils.disableAnnotationBasedNullAnalysis(fSourceFolder);
+		}
+	}
 }
