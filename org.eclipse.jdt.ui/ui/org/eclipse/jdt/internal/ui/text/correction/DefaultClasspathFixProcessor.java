@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import org.eclipse.swt.graphics.Image;
@@ -19,13 +20,18 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -46,6 +52,8 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.AddModuleRequiresCorrectionProposal;
+
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
@@ -120,6 +128,70 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 		if (res.isEmpty()) {
 			return;
 		}
+		IModuleDescription currentModuleDescription= null;
+		if (JavaModelUtil.is9OrHigher(project)) {
+			currentModuleDescription= project.getModuleDescription();
+			if (currentModuleDescription != null && !currentModuleDescription.exists()) {
+				currentModuleDescription= null;
+			}
+		}
+
+		HashMap<IClasspathEntry, TypeNameMatch> classPathEntryToTypeNameMatch= new HashMap<>();
+		HashMap<TypeNameMatch, String> typeNameMatchToModuleName= new HashMap<>();
+		HashSet<IClasspathEntry> classpaths= new HashSet<>();
+		HashSet<TypeNameMatch> typesWithModule= new HashSet<>();
+		if (currentModuleDescription != null) {
+			for (int i= 0; i < res.size(); i++) {
+				TypeNameMatch curr= res.get(i);
+				IType type= curr.getType();
+				if (type != null) {
+					IPackageFragmentRoot root= (IPackageFragmentRoot) type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					try {
+						IClasspathEntry entry= root.getRawClasspathEntry();
+						if (entry == null) {
+							continue;
+						}
+
+						IModuleDescription projectModule= null;
+						String moduleName= null;
+						projectModule= root.getModuleDescription();
+						if (projectModule != null && projectModule.exists()) {
+							moduleName= projectModule.getElementName();
+						}
+
+						if (classpaths.add(entry)) {
+							classPathEntryToTypeNameMatch.put(entry, curr);
+							typesWithModule.add(curr);
+							if (moduleName != null) {
+								typeNameMatchToModuleName.put(curr, moduleName);
+							}
+						} else {
+							Object typeNameMatch= classPathEntryToTypeNameMatch.get(entry);
+							if (typeNameMatch != null) {
+								if (moduleName != null) {
+									Object modName= typeNameMatchToModuleName.get(typeNameMatch);
+									if (!moduleName.equals(modName)) {
+										// remove classpath module if there are multiple type matches 
+										// which belong to the same class path but different modules 
+										typesWithModule.remove(typeNameMatch);
+										classPathEntryToTypeNameMatch.remove(entry);
+									}
+								} else {
+									// remove classpath module if there are multiple type matches 
+									// which belong to the same class path but one has module and the other does not 
+									typesWithModule.remove(typeNameMatch);
+									classPathEntryToTypeNameMatch.remove(entry);
+								}
+							}
+						}
+					} catch (JavaModelException e) {
+						// ignore
+					}
+				}
+			}
+		}
+
+
 		HashSet<Object> addedClaspaths= new HashSet<>();
 		for (int i= 0; i < res.size(); i++) {
 			TypeNameMatch curr= res.get(i);
@@ -131,15 +203,47 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 					if (entry == null) {
 						continue;
 					}
+					Change cuChange= null;
+					String moduleName= null;
+					if (typesWithModule.contains(curr)) {
+						moduleName= typeNameMatchToModuleName.get(curr);
+						if (moduleName != null && currentModuleDescription != null) {
+							ICompilationUnit currentCU= currentModuleDescription.getCompilationUnit();
+							String[] args= { moduleName };
+							final String changeName= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_info, args);
+							final String changeDescription= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_description, args);
+							AddModuleRequiresCorrectionProposal moduleRequiresProposal= new AddModuleRequiresCorrectionProposal(moduleName, changeName, changeDescription, currentCU, 0);
+							cuChange= moduleRequiresProposal.getChange();
+							if (cuChange != null) {
+								cuChange.initializeValidationData(new NullProgressMonitor());
+							}
+						}
+					}
 					IJavaProject other= root.getJavaProject();
 					int entryKind= entry.getEntryKind();
 					if ((entry.isExported() || entryKind == IClasspathEntry.CPE_SOURCE) && addedClaspaths.add(other)) {
-						IClasspathEntry newEntry= JavaCore.newProjectEntry(other.getPath());
+						IClasspathEntry newEntry= null;
+						if (cuChange != null) {
+							IClasspathAttribute[] extraAttributes= new IClasspathAttribute[] {
+									JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true") //$NON-NLS-1$
+							};
+							newEntry= JavaCore.newProjectEntry(other.getPath(), null, true, extraAttributes, false);
+						} else {
+							newEntry= JavaCore.newProjectEntry(other.getPath());
+						}
 						Change change= ClasspathFixProposal.newAddClasspathChange(project, newEntry);
 						if (change != null) {
 							String[] args= { BasicElementLabels.getResourceName(other.getElementName()), BasicElementLabels.getResourceName(project.getElementName()) };
 							String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_addcp_project_description, args);
 							String desc= label;
+							if (cuChange != null) {
+								String additionalLabel= cuChange.getName();
+								additionalLabel= additionalLabel.substring(0, 1).toLowerCase() + additionalLabel.substring(1);
+								change= new CompositeChange(change.getName(), new Change[] { change, cuChange });
+								String[] arguments= { label, additionalLabel };
+								label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_combine_two_proposals_info, arguments);
+								desc= label;
+							}							
 							DefaultClasspathFixProposal proposal= new DefaultClasspathFixProposal(label, change, desc, IProposalRelevance.ADD_PROJECT_TO_BUILDPATH);
 							proposals.add(proposal);
 						}
@@ -147,14 +251,14 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 					if (entryKind == IClasspathEntry.CPE_CONTAINER) {
 						IPath entryPath= entry.getPath();
 						if (isNonProjectSpecificContainer(entryPath)) {
-							addLibraryProposal(project, root, entry, addedClaspaths, proposals);
+							addLibraryProposal(project, root, entry, addedClaspaths, proposals, cuChange);
 						} else {
 							try {
 								IClasspathContainer classpathContainer= JavaCore.getClasspathContainer(entryPath, root.getJavaProject());
 								if (classpathContainer != null) {
 									IClasspathEntry entryInContainer= JavaModelUtil.findEntryInContainer(classpathContainer, root.getPath());
 									if (entryInContainer != null) {
-										addLibraryProposal(project, root, entryInContainer, addedClaspaths, proposals);
+										addLibraryProposal(project, root, entryInContainer, addedClaspaths, proposals, cuChange);
 									}
 								}
 							} catch (CoreException e) {
@@ -162,7 +266,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 							}
 						}
 					} else if ((entryKind == IClasspathEntry.CPE_LIBRARY || entryKind == IClasspathEntry.CPE_VARIABLE)) {
-						addLibraryProposal(project, root, entry, addedClaspaths, proposals);
+						addLibraryProposal(project, root, entry, addedClaspaths, proposals, cuChange);
 					}
 				} catch (JavaModelException e) {
 					// ignore
@@ -171,12 +275,20 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 		}
 	}
 
-	private void addLibraryProposal(IJavaProject project, IPackageFragmentRoot root, IClasspathEntry entry, Collection<Object> addedClaspaths, Collection<DefaultClasspathFixProposal> proposals) throws JavaModelException {
+	private void addLibraryProposal(IJavaProject project, IPackageFragmentRoot root, IClasspathEntry entry, Collection<Object> addedClaspaths, Collection<DefaultClasspathFixProposal> proposals,
+			Change additionalChange) throws JavaModelException {
 		if (addedClaspaths.add(entry)) {
 			String label= getAddClasspathLabel(entry, root, project);
 			if (label != null) {
-				Change change= ClasspathFixProposal.newAddClasspathChange(project, entry);
+				Change change= ClasspathFixProposal.newAddClasspathChange(project, entry);				
 				if (change != null) {
+					if (additionalChange != null) {
+						String additionalLabel = additionalChange.getName();
+						additionalLabel= additionalLabel.substring(0, 1).toLowerCase() + additionalLabel.substring(1);
+						String[] arguments = {label, additionalLabel};
+						label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_combine_two_proposals_info, arguments);
+						change= new CompositeChange(change.getName(), new Change[] { change, additionalChange });
+					}
 					DefaultClasspathFixProposal proposal= new DefaultClasspathFixProposal(label, change, label, IProposalRelevance.ADD_TO_BUILDPATH);
 					proposals.add(proposal);
 				}

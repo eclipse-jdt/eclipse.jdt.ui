@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -311,9 +311,12 @@ public class ReorgCorrectionsSubProcessor {
 				name= ((QualifiedName) name).getQualifier();
 			}
 			int kind= JavaModelUtil.is50OrHigher(cu.getJavaProject()) ? SimilarElementsRequestor.REF_TYPES : SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
+			UnresolvedElementsSubProcessor.addRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, false);
 			UnresolvedElementsSubProcessor.addNewTypeProposals(cu, name, kind, IProposalRelevance.IMPORT_NOT_FOUND_NEW_TYPE, proposals);
+		} else {
+			Name name= importDeclaration.getName();
+			UnresolvedElementsSubProcessor.addRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, true);
 		}
-
 		String name= ASTNodes.asString(importDeclaration.getName());
 		if (importDeclaration.isOnDemand()) {
 			name= JavaModelUtil.concatenateName(name, "*"); //$NON-NLS-1$

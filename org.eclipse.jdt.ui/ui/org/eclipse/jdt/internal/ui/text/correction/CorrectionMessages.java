@@ -384,6 +384,8 @@ public final class CorrectionMessages extends NLS {
 	public static String UnresolvedElementsSubProcessor_change_full_type_description;
 	public static String UnresolvedElementsSubProcessor_copy_annotation_jar_description;
 	public static String UnresolvedElementsSubProcessor_copy_annotation_jar_info;
+	public static String UnresolvedElementsSubProcessor_add_requires_module_info;
+	public static String UnresolvedElementsSubProcessor_combine_two_proposals_info;
 	public static String LocalCorrectionsSubProcessor_remove_allocated_description;
 	public static String LocalCorrectionsSubProcessor_remove_redundant_superinterface;
 	public static String LocalCorrectionsSubProcessor_return_allocated_description;
@@ -391,6 +393,7 @@ public final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_qualify_right_hand_side_description;
 	public static String UnresolvedElementsSubProcessor_UnresolvedElementsSubProcessor_changetoattribute_description;
 	public static String UnresolvedElementsSubProcessor_UnresolvedElementsSubProcessor_createattribute_description;
+	public static String UnresolvedElementsSubProcessor_add_requires_module_description;
 	public static String MissingAnnotationAttributesProposal_add_missing_attributes_label;
 	public static String FixCorrectionProposal_ErrorAdditionalProposalInfo;
 	public static String FixCorrectionProposal_MultiFixChange_label;

@@ -171,6 +171,7 @@ public interface IProposalRelevance {
 	public static final int CAST_ARGUMENT_2= 5;
 	public static final int CHANGE_TYPE_OF_NODE_TO_CAST= 5;
 	public static final int IMPORT_NOT_FOUND_NEW_TYPE= 5;
+	public static final int IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE= 5;
 	public static final int REMOVE_INVALID_MODIFIERS= 5;
 	public static final int CHANGE_VISIBILITY_TO_NON_PRIVATE= 5;
 	public static final int CHANGE_MODIFIER_TO_STATIC= 5;
