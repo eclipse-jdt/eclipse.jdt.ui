@@ -83,6 +83,10 @@ public class CPListLabelProvider extends LabelProvider {
 	@Override
 	public String getText(Object element) {
 		if (element instanceof CPListElement) {
+			CPListElement cp = (CPListElement) element;
+			if( cp.isRootNodeForPath()) {
+				return cp.getPathRootNodeName();
+			}
 			return getCPListElementText((CPListElement) element);
 		} else if (element instanceof CPListElementAttribute) {
 			CPListElementAttribute attribute= (CPListElementAttribute) element;
@@ -421,7 +425,7 @@ public class CPListLabelProvider extends LabelProvider {
 			case IClasspathEntry.CPE_CONTAINER:
 				return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_LIBRARY);
 			default:
-				return null;
+				return cpentry.isRootNodeForPath() ? JavaPluginImages.DESC_CLASSPATH_ROOT : null;
 		}
 	}
 

@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -34,10 +35,13 @@ import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.IAccessRule;
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
 
@@ -107,6 +111,39 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	}
 
 	private void updateProjectsList() {
+			if(JavaModelUtil.is9OrHigher(fCurrJProject)) {
+				updateProjectsListWithRootNode();
+				return;
+			}	
+			// add the projects-cpentries that are already on the class path
+			List<CPListElement> cpelements= fClassPathList.getElements();
+
+			final List<CPListElement> checkedProjects= new ArrayList<>(cpelements.size());
+
+			for (int i= cpelements.size() - 1 ; i >= 0; i--) {
+				CPListElement cpelem= cpelements.get(i);
+				if (isEntryKind(cpelem.getEntryKind())) {
+					checkedProjects.add(cpelem);
+				}
+			}
+			fProjectsList.setElements(checkedProjects);
+	}
+	
+	boolean hasRootNodes(){
+		if (fProjectsList == null)
+			return false;
+		if(fProjectsList.getSize()==0)
+			return false;
+		if(fProjectsList.getElement(0).isRootNodeForPath())
+			return true;
+		return false;
+	}
+	private void updateProjectsListWithRootNode() {
+		CPListElement rootClasspath = new CPListElement(fCurrJProject, -1);
+		rootClasspath.setPathRootNodeName(NewWizardMessages.PathRootWorkbookPage_classpath,false);
+		CPListElement rootModulepath = new CPListElement(fCurrJProject, -1);
+		rootModulepath.setPathRootNodeName(NewWizardMessages.PathRootWorkbookPage_modulepath,true);
+
 		// add the projects-cpentries that are already on the class path
 		List<CPListElement> cpelements= fClassPathList.getElements();
 
@@ -115,10 +152,19 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		for (int i= cpelements.size() - 1 ; i >= 0; i--) {
 			CPListElement cpelem= cpelements.get(i);
 			if (isEntryKind(cpelem.getEntryKind())) {
-				checkedProjects.add(cpelem);
+				Object mod= cpelem.getAttribute(CPListElement.MODULE);
+				if(mod == null) {
+					rootClasspath.addCPListElement(cpelem);
+				} else {
+					rootModulepath.addCPListElement(cpelem);
+				}
 			}
 		}
+		checkedProjects.add(rootModulepath);
+		checkedProjects.add(rootClasspath);
+		
 		fProjectsList.setElements(checkedProjects);
+		fProjectsList.enableButton(IDX_ADDPROJECT, false);
 	}
 
 	// -------- UI creation ---------
@@ -142,6 +188,24 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 
 	private void updateClasspathList() {
 		List<CPListElement> projelements= fProjectsList.getElements();
+		
+		 List<CPListElement> flattenedProjElements = new ArrayList<CPListElement>();
+		 for ( int i =0; i < projelements.size(); i++ ) {
+		 	CPListElement ele = projelements.get(i);
+		 	// if root node, collect the CPList elements
+		 	if(ele.isRootNodeForPath()) {
+		 		ArrayList<Object> children= ele.getChildren();
+		 		for (Iterator iterator= children.iterator(); iterator.hasNext();) {
+		 			Object object=  iterator.next();
+		 			if(object instanceof CPListElement) {
+		 				flattenedProjElements.add((CPListElement) object);
+		 			}
+		 		}
+		 	}
+		 	else {
+		 		flattenedProjElements.add(ele);
+		 	}
+		 }
 
 		boolean remove= false;
 		List<CPListElement> cpelements= fClassPathList.getElements();
@@ -149,16 +213,16 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		for (int i= cpelements.size() -1; i >= 0 ; i--) {
 			CPListElement cpe= cpelements.get(i);
 			if (isEntryKind(cpe.getEntryKind())) {
-				if (!projelements.remove(cpe)) {
+				if (!flattenedProjElements.remove(cpe)) {
 					cpelements.remove(i);
 					remove= true;
 				}
 			}
 		}
-		for (int i= 0; i < projelements.size(); i++) {
-			cpelements.add(projelements.get(i));
+		for (int i= 0; i < flattenedProjElements.size(); i++) {
+			cpelements.add(flattenedProjElements.get(i));
 		}
-		if (remove || (projelements.size() > 0)) {
+		if (remove || (flattenedProjElements.size() > 0)) {
 			fClassPathList.setElements(cpelements);
 		}
 	}
@@ -251,8 +315,40 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				}
 			}
 
+			if(!hasRootNodes()) {
 			fProjectsList.addElements(elementsToAdd);
-			if (index == IDX_ADDPROJECT) {
+			}
+			else {
+				// on the new nodes, only additions allowed, rest disabled
+				List<Object> selectedElements= fProjectsList.getSelectedElements();
+				List<CPListElement> elements= fProjectsList.getElements();
+				// if nothing selected, do nothing
+				if(selectedElements.size()==0)
+					return;
+				fProjectsList.removeAllElements();
+				for (int i= 0; i < selectedElements.size(); i++) {
+					if( ((CPListElement)selectedElements.get(i)).isClassPathRootNode()) {
+						for (CPListElement cpListElement : elementsToAdd) {
+							cpListElement.setAttribute(IClasspathAttribute.MODULE, null);
+						}
+					}
+					if( ((CPListElement)selectedElements.get(i)).isModulePathRootNode()) {
+						for (CPListElement cpListElement : elementsToAdd) {
+							Object attribute= cpListElement.getAttribute(IClasspathAttribute.MODULE);
+							if(attribute == null) {
+								cpListElement.setAttribute(IClasspathAttribute.MODULE, new ModuleAddExport[0]);
+								
+							}
+						}
+					}
+					((CPListElement)selectedElements.get(i)).addCPListElement(elementsToAdd);					
+				}
+				fProjectsList.setElements(elements);
+				fProjectsList.refresh();
+				fProjectsList.getTreeViewer().expandToLevel(2);	
+			}
+			
+			if (index == IDX_ADDPROJECT && !hasRootNodes()) {
 				fProjectsList.refresh();
 			}
 			fProjectsList.postSetSelection(new StructuredSelection(entries));
@@ -284,7 +380,19 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			fProjectsList.refresh();
 			fClassPathList.dialogFieldChanged(); // validate
 		} else {
-			fProjectsList.removeElements(selElements);
+			if(hasRootNodes()) {
+				List<CPListElement> elements= fProjectsList.getElements();
+				for (CPListElement cpListElement : elements) {
+					cpListElement.getChildren().removeAll(selElements);
+				}
+				fProjectsList.getTreeViewer().remove(selElements.toArray());
+				fProjectsList.dialogFieldChanged();
+				
+			}
+			else {
+				fProjectsList.removeElements(selElements);
+			}
+		
 		}
 	}
 
@@ -297,6 +405,9 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
+				if (IClasspathAttribute.MODULE.equals(attrib.getKey())) {
+					return false;
+				}
 				if (attrib.isNonModifiable()) {
 					return false;
 				}
@@ -315,6 +426,10 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				}
 			} else if (elem instanceof ModuleAddExport) {
 				return true;
+			} else if (elem instanceof CPListElement) {
+				if (((CPListElement)elem).isRootNodeForPath()) {
+					return false;
+				}
 			}
 		}
 		return true;
@@ -335,6 +450,18 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			}
 			if (!attrib.isBuiltIn()) {
 				return canEditCustomAttribute(attrib);
+			}
+			CPListElement parent = attrib.getParent();
+			if(hasRootNodes() && attrib.getKey().equals(IClasspathAttribute.MODULE)) {
+				// if the parent in in library list disable edit
+				CPListElement root = fProjectsList.getElement(0).isClassPathRootNode() ? fProjectsList.getElement(0) :
+					fProjectsList.getElement(1);
+				ArrayList<Object> children= root.getChildren();
+				for (Object object : children) {
+					if(object == parent) {
+						return false;
+					}
+				}
 			}
 			return true;
 		}
@@ -429,6 +556,18 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		List<CPListElement> elements= fProjectsList.getElements();
 		for (int i= 0; i < elements.size(); i++) {
 			CPListElement curr= elements.get(i);
+			if (curr.isRootNodeForPath()) {
+				ArrayList<Object> children= curr.getChildren();
+				for (Iterator iterator= children.iterator(); iterator.hasNext();) {
+					Object object=  iterator.next();
+					if(object instanceof CPListElement) {
+						CPListElement cpe = (CPListElement)object;
+						IJavaProject proj= (IJavaProject) JavaCore.create(cpe.getResource());
+						selectable.remove(proj);
+					}
+					
+				}
+			}
 			IJavaProject proj= (IJavaProject) JavaCore.create(curr.getResource());
 			selectable.remove(proj);
 		}
@@ -483,9 +622,26 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			enabled= false;
 		}
 		fProjectsList.enableButton(IDX_ADDPROJECT, enabled);
+		if(hasRootNodes()) {
+			fProjectsList.enableButton(IDX_ADDPROJECT, enabled && canAdd(selElements));
+		}
 	}
 
-    @Override
+    private boolean canAdd(List<Object> selElements) {
+		if (selElements.size() != 1) {
+			return false;
+		}
+		Object elem= selElements.get(0);
+		if (elem instanceof CPListElement) {
+			return ((CPListElement)elem).isRootNodeForPath();
+		}
+		if(elem instanceof CPListElementAttribute) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
 	public void setFocus() {
     	fProjectsList.setFocus();
     }

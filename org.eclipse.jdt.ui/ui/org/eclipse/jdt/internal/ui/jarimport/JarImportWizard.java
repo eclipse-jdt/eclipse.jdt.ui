@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -168,6 +168,10 @@ public final class JarImportWizard extends BinaryRefactoringHistoryWizard implem
 	 *         <code>false</code> otherwise
 	 */
 	public static boolean isValidClassPathEntry(final IClasspathEntry entry) {
+		// for root classpath or module path 
+		if(entry == null){
+			return false;
+		}
 		Assert.isNotNull(entry);
 		final int kind= entry.getEntryKind();
 		if (kind == IClasspathEntry.CPE_LIBRARY)

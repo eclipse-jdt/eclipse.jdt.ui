@@ -728,6 +728,8 @@ public final class NewWizardMessages extends NLS {
 	public static String PackageExplorerActionGroup_FormText_Default_Reset;
 	public static String PackageExplorerActionGroup_FormText_Default_ResetAll;
 	public static String PackageExplorerActionGroup_FormText_createNewSourceFolder;
+	public static String PathRootWorkbookPage_classpath;
+	public static String PathRootWorkbookPage_modulepath;
 
 	public static String DialogPackageExplorer_LabelProvider_Excluded;
 	public static String DialogPackageExplorer_LabelProvider_SingleExcluded;

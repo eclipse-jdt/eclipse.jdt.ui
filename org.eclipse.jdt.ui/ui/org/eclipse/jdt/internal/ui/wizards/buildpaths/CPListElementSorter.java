@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,6 +81,19 @@ public class CPListElementSorter extends ViewerComparator {
                 ILabelProvider lprov = (ILabelProvider) prov;
                 String name1 = lprov.getText(e1);
                 String name2 = lprov.getText(e2);
+                if( e1 instanceof CPListElement && e2 instanceof CPListElement) {
+                	CPListElement cp1 = (CPListElement)e1;
+                	CPListElement cp2 =(CPListElement)e2;
+                	if(cp1.isRootNodeForPath() && cp2.isRootNodeForPath()) {
+                		if(cp1.isClassPathRootNode() && cp2.isModulePathRootNode()) {
+                			return 1;
+                		}
+                		if(cp1.isModulePathRootNode() && cp2.isClassPathRootNode()) {
+                			return -1;
+                		}
+                	}
+                	
+                }
                 return getComparator().compare(name1, name2);
             }
 		}

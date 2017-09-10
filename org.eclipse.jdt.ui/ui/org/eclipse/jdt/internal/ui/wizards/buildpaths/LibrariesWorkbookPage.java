@@ -63,10 +63,10 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.launching.JavaRuntime;
-
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -154,6 +154,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 
 	private void updateLibrariesList() {
+		if(JavaModelUtil.is9OrHigher(fCurrJProject)) {
+			updateLibrariesListWithRootNode();
+			return;
+		}
 		List<CPListElement> cpelements= fClassPathList.getElements();
 		List<CPListElement> libelements= new ArrayList<>(cpelements.size());
 
@@ -165,6 +169,49 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			}
 		}
 		fLibrariesList.setElements(libelements);
+	}
+	private void updateLibrariesListWithRootNode() {
+		CPListElement rootClasspath = new CPListElement(fCurrJProject, -1);
+		rootClasspath.setPathRootNodeName(NewWizardMessages.PathRootWorkbookPage_classpath,false);
+		CPListElement rootModulepath = new CPListElement(fCurrJProject, -1);
+		rootModulepath.setPathRootNodeName(NewWizardMessages.PathRootWorkbookPage_modulepath,true);
+		List<CPListElement> cpelements= fClassPathList.getElements();
+		List<CPListElement> libelements= new ArrayList<>(cpelements.size());
+
+		int nElements= cpelements.size();
+		for (int i= 0; i < nElements; i++) {
+			CPListElement cpe= cpelements.get(i);
+			if (isEntryKind(cpe.getEntryKind())) {
+				boolean isModular = false;
+				Object mod = cpe.getAttribute(CPListElement.MODULE);
+				if(mod==null) {
+					rootClasspath.addCPListElement(cpe);
+				} else {
+					rootModulepath.addCPListElement(cpe);
+				}
+					
+			}
+		}
+		libelements.add(rootModulepath);
+		libelements.add(rootClasspath);
+		fLibrariesList.setElements(libelements);
+		
+		fLibrariesList.enableButton(IDX_ADDEXT, false);
+		fLibrariesList.enableButton(IDX_ADDFOL, false);
+		fLibrariesList.enableButton(IDX_ADDEXTFOL, false);
+		fLibrariesList.enableButton(IDX_ADDJAR, false);
+		fLibrariesList.enableButton(IDX_ADDLIB, false);
+		fLibrariesList.enableButton(IDX_ADDVAR, false);
+	}
+	
+	boolean hasRootNodes(){
+		if (fLibrariesList == null)
+			return false;
+		if(fLibrariesList.getSize()==0)
+			return false;
+		if(fLibrariesList.getElement(0).isRootNodeForPath())
+			return true;
+		return false;
 	}
 
 	// -------- UI creation
@@ -278,12 +325,16 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		if (libentries != null) {
 			int nElementsChosen= libentries.length;
 			// remove duplicates
-			List<?> cplist= fLibrariesList.getElements();
+			List<CPListElement> cplist= fLibrariesList.getElements();
 			List<CPListElement> elementsToAdd= new ArrayList<>(nElementsChosen);
 
 			for (int i= 0; i < nElementsChosen; i++) {
 				CPListElement curr= libentries[i];
-				if (!cplist.contains(curr) && !elementsToAdd.contains(curr)) {
+				boolean contains = cplist.contains(curr);
+				if(hasRootNodes()) {
+					contains = hasCurrentElement(cplist,curr);
+				}
+				if (!contains && !elementsToAdd.contains(curr)) {
 					elementsToAdd.add(curr);
 					curr.setAttribute(CPListElement.SOURCEATTACHMENT, BuildPathSupport.guessSourceAttachment(curr));
 					curr.setAttribute(CPListElement.JAVADOC, BuildPathSupport.guessJavadocLocation(curr));
@@ -292,13 +343,60 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (!elementsToAdd.isEmpty() && (index == IDX_ADDFOL)) {
 				askForAddingExclusionPatternsDialog(elementsToAdd);
 			}
-
-			fLibrariesList.addElements(elementsToAdd);
+			
+			if(!hasRootNodes()) {
+				fLibrariesList.addElements(elementsToAdd);
+			}
+			else {
+				// on the new nodes, only additions allowed, rest disabled
+				List<Object> selectedElements= fLibrariesList.getSelectedElements();
+				List<CPListElement> elements= fLibrariesList.getElements();
+				// if nothing selected, do nothing
+				if(selectedElements.size()==0) {
+					return;
+				}
+				fLibrariesList.removeAllElements();
+				for (int i= 0; i < selectedElements.size(); i++) {
+					if( ((CPListElement)selectedElements.get(i)).isClassPathRootNode()) {
+						for (CPListElement cpListElement : elementsToAdd) {
+							cpListElement.setAttribute(IClasspathAttribute.MODULE, null);
+						}
+					}
+					if( ((CPListElement)selectedElements.get(i)).isModulePathRootNode()) {
+						for (CPListElement cpListElement : elementsToAdd) {
+							Object attribute= cpListElement.getAttribute(IClasspathAttribute.MODULE);
+							if(attribute == null) {
+								cpListElement.setAttribute(IClasspathAttribute.MODULE, new ModuleAddExport[0]);
+								
+							}
+						}
+					}
+					((CPListElement)selectedElements.get(i)).addCPListElement(elementsToAdd);					
+				}
+				
+				fLibrariesList.setElements(elements);
+				fLibrariesList.refresh();
+				fLibrariesList.getTreeViewer().expandToLevel(2);		
+			}	
+			
 			if (index == IDX_ADDLIB || index == IDX_ADDVAR) {
 				fLibrariesList.refresh();
 			}
 			fLibrariesList.postSetSelection(new StructuredSelection(libentries));
 		}
+	}
+
+	private boolean hasCurrentElement(List<CPListElement> cplist, CPListElement curr) {
+		//note that the same cpelement with different attribute can be added
+		for (CPListElement cpListElement : cplist) {
+			if(cpListElement.isRootNodeForPath()) {
+				boolean cont = cpListElement.getChildren().contains(curr);
+				if(cont == true) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -410,7 +508,19 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			fLibrariesList.refresh();
 			fClassPathList.dialogFieldChanged(); // validate
 		} else {
-			fLibrariesList.removeElements(selElements);
+			if(hasRootNodes()) {
+				List<CPListElement> elements= fLibrariesList.getElements();
+				for (CPListElement cpListElement : elements) {
+					cpListElement.getChildren().removeAll(selElements);
+				}
+				fLibrariesList.getTreeViewer().remove(selElements.toArray());
+				fLibrariesList.dialogFieldChanged();
+				
+			}
+			else {
+				fLibrariesList.removeElements(selElements);
+			}
+		
 		}
 		for (Iterator<Map.Entry<CPListElement, HashSet<String>>> iter= containerEntriesToUpdate.entrySet().iterator(); iter.hasNext();) {
 			Map.Entry<CPListElement, HashSet<String>> entry= iter.next();
@@ -430,6 +540,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
 				CPListElementAttribute attrib= (CPListElementAttribute) elem;
+				
+				if (IClasspathAttribute.MODULE.equals(attrib.getKey())) {
+					return false;
+				}
+						
 				if (attrib.isNonModifiable()) {
 					return false;
 				}
@@ -450,6 +565,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				}
 			} else if (elem instanceof CPListElement) {
 				CPListElement curr= (CPListElement) elem;
+				if(curr.isRootNodeForPath()) {
+					return false;
+				}
 				if (curr.getParentContainer() != null) {
 					return false;
 				}
@@ -471,7 +589,14 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			return;
 		}
 		Object elem= selElements.get(0);
-		if (fLibrariesList.getIndexOfElement(elem) != -1) {
+		
+		boolean canEdit = false;
+		if(hasRootNodes()) {
+			canEdit = fLibrariesList.getElement(0).getChildren().indexOf(elem) != -1 || 
+					fLibrariesList.getElement(1).getChildren().indexOf(elem) != -1 ;
+			
+		}
+		if (canEdit || fLibrariesList.getIndexOfElement(elem) != -1 ) {
 			editElementEntry((CPListElement) elem);
 		} else if (elem instanceof CPListElementAttribute) {
 			editAttributeEntry((CPListElementAttribute) elem);
@@ -630,13 +755,34 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		fLibrariesList.enableButton(IDX_REMOVE, canRemove(selElements));
 		fLibrariesList.enableButton(IDX_REPLACE, getSelectedPackageFragmentRoot() != null);
 
-		boolean noAttributes= containsOnlyTopLevelEntries(selElements);
-		fLibrariesList.enableButton(IDX_ADDEXT, noAttributes);
-		fLibrariesList.enableButton(IDX_ADDFOL, noAttributes);
-		fLibrariesList.enableButton(IDX_ADDEXTFOL, noAttributes);
-		fLibrariesList.enableButton(IDX_ADDJAR, noAttributes);
-		fLibrariesList.enableButton(IDX_ADDLIB, noAttributes);
-		fLibrariesList.enableButton(IDX_ADDVAR, noAttributes);
+		boolean addEnabled= containsOnlyTopLevelEntries(selElements);
+	
+		fLibrariesList.enableButton(IDX_ADDEXT, addEnabled);
+		fLibrariesList.enableButton(IDX_ADDFOL, addEnabled);
+		fLibrariesList.enableButton(IDX_ADDEXTFOL, addEnabled);
+		fLibrariesList.enableButton(IDX_ADDJAR, addEnabled);
+		fLibrariesList.enableButton(IDX_ADDLIB, addEnabled);
+		fLibrariesList.enableButton(IDX_ADDVAR, addEnabled);
+	}
+	@Override
+	protected boolean containsOnlyTopLevelEntries(List<?> selElements) {
+		if(hasRootNodes()==false) {
+			return super.containsOnlyTopLevelEntries(selElements);
+		}
+		if (selElements.size() == 0 || selElements.size() > 1) {
+			return false;
+		}
+		for (int i= 0; i < selElements.size(); i++) {
+			Object elem= selElements.get(i);
+			if (elem instanceof CPListElement) {
+				if (!((CPListElement) elem).isRootNodeForPath()) {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private boolean canEdit(List<?> selElements) {
@@ -646,6 +792,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		Object elem= selElements.get(0);
 		if (elem instanceof CPListElement) {
 			CPListElement curr= (CPListElement) elem;
+			if(((CPListElement) elem).isRootNodeForPath()) {
+				return false;
+			}
 			return !(curr.getResource() instanceof IFolder) && curr.getParentContainer() == null;
 		}
 		if (elem instanceof CPListElementAttribute) {
@@ -656,6 +805,19 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (!attrib.isBuiltIn()) {
 				return canEditCustomAttribute(attrib);
 			}
+			CPListElement parent = attrib.getParent();
+			if(hasRootNodes() && attrib.getKey().equals(IClasspathAttribute.MODULE)) {
+				// if the parent in in classpath list disable edit
+				CPListElement root = fLibrariesList.getElement(0).isClassPathRootNode() ? fLibrariesList.getElement(0) :
+						fLibrariesList.getElement(1);
+				ArrayList<Object> children= root.getChildren();
+				for (Object object : children) {
+					if(object == parent) {
+						return false;
+					}
+				}
+			}
+			
 			return true;
 		}
 		return false;
@@ -672,7 +834,24 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 
 	private void updateClasspathList() {
-		List<CPListElement> projelements= fLibrariesList.getElements();
+		 List<CPListElement> projelements= fLibrariesList.getElements();
+		 List<CPListElement> flattenedProjElements = new ArrayList<CPListElement>();
+		 for ( int i =0; i < projelements.size(); i++ ) {
+		 	CPListElement ele = projelements.get(i);
+		 	// if root node, collect the CPList elements
+		 	if(ele.isRootNodeForPath()) {
+		 		ArrayList<Object> children= ele.getChildren();
+		 		for (Iterator iterator= children.iterator(); iterator.hasNext();) {
+		 			Object object=  iterator.next();
+		 			if(object instanceof CPListElement) {
+		 				flattenedProjElements.add((CPListElement) object);
+		 			}
+		 		}
+		 	}
+		 	else {
+		 		flattenedProjElements.add(ele);
+		 	}
+		 }
 
 		List<CPListElement> cpelements= fClassPathList.getElements();
 		int nEntries= cpelements.size();
@@ -682,16 +861,16 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			CPListElement cpe= cpelements.get(i);
 			int kind= cpe.getEntryKind();
 			if (isEntryKind(kind)) {
-				if (!projelements.remove(cpe)) {
+				if (!flattenedProjElements.remove(cpe)) {
 					cpelements.remove(i);
 					lastRemovePos= i;
 				}
 			}
 		}
 
-		cpelements.addAll(lastRemovePos, projelements);
+		cpelements.addAll(lastRemovePos, flattenedProjElements);
 
-		if (lastRemovePos != nEntries || !projelements.isEmpty()) {
+		if (lastRemovePos != nEntries || !flattenedProjElements.isEmpty()) {
 			fClassPathList.setElements(cpelements);
 		}
 	}

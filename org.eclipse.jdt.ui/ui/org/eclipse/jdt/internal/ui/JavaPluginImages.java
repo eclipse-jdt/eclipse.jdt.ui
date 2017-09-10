@@ -213,6 +213,7 @@ public class JavaPluginImages {
 
 	public static final ImageDescriptor DESC_MENU_SHIFT_RIGHT= createUnManaged(T_ETOOL, "shift_r_edit.png"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_MENU_SHIFT_LEFT= createUnManaged(T_ETOOL, "shift_l_edit.png"); 	//$NON-NLS-1$
+	public static final ImageDescriptor DESC_CLASSPATH_ROOT= createUnManaged(T_ETOOL, "classpath_obj.png"); 	//$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_GHOST= createManagedFromKey(T_OBJ, IMG_OBJS_GHOST);
 	public static final ImageDescriptor DESC_OBJS_PACKDECL= createManagedFromKey(T_OBJ, IMG_OBJS_PACKDECL);
