@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -246,8 +246,8 @@ public class JavadocConfigurationBlock {
 			LayoutUtil.setHorizontalIndent(fArchiveField.getLabelControl(null));
 			LayoutUtil.setHorizontalIndent(fArchivePathField.getLabelControl(null));
 			LayoutUtil.setHorizontalIndent(fURLField.getLabelControl(null));
-
 			fURLRadioButton.attachDialogFields(new DialogField[] {fURLField,  fBrowseFolder, fValidateURLButton });
+			fValidateURLButton.setEnabled(!(fURLField.getText() == null || fURLField.getText().isEmpty()));
 			fArchiveRadioButton.attachDialogFields(new DialogField[] {fArchiveField,  fBrowseArchive, fExternalRadio, fWorkspaceRadio, fArchivePathField, fBrowseArchivePath, fValidateArchiveButton });
 		}
 
@@ -454,6 +454,9 @@ public class JavadocConfigurationBlock {
 		if (field == fURLField) {
 			fURLStatus= updateURLStatus();
 			statusChanged();
+			if (fValidateURLButton != null) {
+				fValidateURLButton.setEnabled(!(fURLField.getText() == null || fURLField.getText().isEmpty()));
+			}
 		} else if (field == fArchiveField) {
 			fArchiveStatus= updateArchiveStatus();
 			statusChanged();
