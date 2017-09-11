@@ -249,6 +249,10 @@ public class BuildPathSupport {
 			"org.opentest4j", new VersionRange("[1.0.0,2.0.0)"), "org.opentest4j.jar", "", "org.opentest4j.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
 			JUnitPreferencesConstants.JUNIT_OPENTEST4J_JAVADOC);
 
+	public static final JUnitPluginDescription JUNIT_APIGUARDIAN_PLUGIN= new JUnitPluginDescription(
+			"org.apiguardian", new VersionRange("[1.0.0,2.0.0)"), "org.apiguardian.jar", "", "org.apiguardian.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
+			JUnitPreferencesConstants.JUNIT_APIGUARDIAN_JAVADOC);
+
 	public static final JUnitPluginDescription JUNIT4_AS_3_PLUGIN= new JUnitPluginDescription(
 			JUNIT4_PLUGIN.bundleId, JUNIT4_PLUGIN.versionRange, JUNIT4_PLUGIN.bundleRoot, JUNIT4_PLUGIN.binaryImportedRoot,
 			JUNIT4_PLUGIN.sourceBundleId, JUNIT4_PLUGIN.repositorySource, JUNIT3_PLUGIN.javadocPreferenceKey) {
@@ -386,5 +390,12 @@ public class BuildPathSupport {
 	 */
 	public static IClasspathEntry getJUnitOpentest4jLibraryEntry() {
 		return JUNIT_OPENTEST4J_PLUGIN.getLibraryEntry();
+	}
+
+	/**
+	 * @return the org.apiguardian library, or <code>null</code> if not available
+	 */
+	public static IClasspathEntry getJUnitApiGuardianLibraryEntry() {
+		return JUNIT_APIGUARDIAN_PLUGIN.getLibraryEntry();
 	}
 }
