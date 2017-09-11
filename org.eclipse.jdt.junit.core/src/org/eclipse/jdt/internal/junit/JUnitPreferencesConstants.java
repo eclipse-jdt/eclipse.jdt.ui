@@ -131,6 +131,11 @@ public class JUnitPreferencesConstants {
 	 */
 	public static final String JUNIT_OPENTEST4J_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.opentest4j.javadoclocation"; //$NON-NLS-1$
 
+	/**
+	 * Javadoc location for org.apiguardian (JUnit 5)
+	 */
+	public static final String JUNIT_APIGUARDIAN_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.apiguardian.javadoclocation"; //$NON-NLS-1$
+
 	private static final String[] fgDefaultFilterPatterns= new String[] {
 		"org.eclipse.jdt.internal.junit.runner.*", //$NON-NLS-1$
 		"org.eclipse.jdt.internal.junit4.runner.*", //$NON-NLS-1$

@@ -126,6 +126,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 			entriesList.add(BuildPathSupport.getJUnitPlatformSuiteApiLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitVintageEngineLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnitOpentest4jLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitApiGuardianLibraryEntry());
 			entriesList.add(BuildPathSupport.getJUnit4LibraryEntry());
 			entriesList.add(BuildPathSupport.getHamcrestCoreLibraryEntry());
 		}
@@ -248,6 +249,8 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 					return JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC;
 				} else if (lastSegment.indexOf("opentest4j") != -1) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT_OPENTEST4J_JAVADOC;
+				} else if (lastSegment.indexOf("apiguardian") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_APIGUARDIAN_JAVADOC;
 				} else if (lastSegment.indexOf("junit") != -1) { //$NON-NLS-1$
 					return JUnitPreferencesConstants.JUNIT4_JAVADOC;
 				} else {
