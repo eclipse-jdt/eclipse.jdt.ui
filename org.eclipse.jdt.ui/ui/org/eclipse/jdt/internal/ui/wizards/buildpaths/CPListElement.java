@@ -554,6 +554,9 @@ public class CPListElement {
 			if(elem.isRootNodeForPath()) {
 				return (this == other);
 			}
+			if(getClasspathEntry() == null) {
+				return false;
+			}
 			return getClasspathEntry().equals(elem.getClasspathEntry());
 		}
 		return false;
