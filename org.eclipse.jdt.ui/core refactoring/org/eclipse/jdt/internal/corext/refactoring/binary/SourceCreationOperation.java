@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2011 IBM Corporation and others.
+ * Copyright (c) 2006, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IModularClassFile;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
@@ -71,11 +73,15 @@ public class SourceCreationOperation extends AbstractCodeCreationOperation {
 	protected void run(final IClassFile file, final IFileStore parent, final IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(getOperationLabel(), 2);
-			final IType type= file.getType();
-			if (type.isAnonymous() || type.isLocal() || type.isMember())
-				return;
 			final String source= file.getSource();
-			createCompilationUnit(parent, type.getElementName() + JavaModelUtil.DEFAULT_CU_SUFFIX, source != null ? source : "", monitor); //$NON-NLS-1$
+			if (file instanceof IModularClassFile) {
+				createCompilationUnit(parent, JavaModelUtil.MODULE_INFO_JAVA, source != null ? source : "", monitor); //$NON-NLS-1$
+			} else {
+				final IType type= ((IOrdinaryClassFile) file).getType();
+				if (type.isAnonymous() || type.isLocal() || type.isMember())
+					return;
+				createCompilationUnit(parent, type.getElementName() + JavaModelUtil.DEFAULT_CU_SUFFIX, source != null ? source : "", monitor); //$NON-NLS-1$
+			}
 		} finally {
 			monitor.done();
 		}

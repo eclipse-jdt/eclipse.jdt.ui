@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,12 +47,12 @@ import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -951,8 +951,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements
 				IJavaElement child= children[c];
 				if (child instanceof ICompilationUnit) {
 					typesCollector.addAll(Arrays.asList(((ICompilationUnit) child).getTypes()));
-				} else if (child instanceof IClassFile) {
-					typesCollector.add(((IClassFile) child).getType());
+				} else if (child instanceof IOrdinaryClassFile) {
+					typesCollector.add(((IOrdinaryClassFile) child).getType());
 				}
 			}
 		}

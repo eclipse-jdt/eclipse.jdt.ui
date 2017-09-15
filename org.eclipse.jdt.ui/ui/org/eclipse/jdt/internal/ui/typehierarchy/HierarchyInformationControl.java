@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,12 +29,12 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -231,7 +231,11 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 					input= ((ICompilationUnit) elem).findPrimaryType();
 					break;
 				case IJavaElement.CLASS_FILE :
-					input= ((IClassFile) elem).getType();
+					if (elem instanceof IOrdinaryClassFile) {
+						input= ((IOrdinaryClassFile) elem).getType();
+					} else {
+						JavaPlugin.logErrorMessage("Element unsupported by the hierarchy: " + elem.getClass()); //$NON-NLS-1$
+					}
 					break;
 				case IJavaElement.METHOD :
 					IMethod method= (IMethod) elem;

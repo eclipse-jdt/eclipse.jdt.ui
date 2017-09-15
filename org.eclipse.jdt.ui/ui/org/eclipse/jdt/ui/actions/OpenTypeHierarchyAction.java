@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,10 +28,10 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -307,8 +307,10 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 						}
 						break;
 					case IJavaElement.CLASS_FILE:
-						onlyContainers= false;
-						result.add(((IClassFile)elem).getType());
+						if (elem instanceof IOrdinaryClassFile) {
+							onlyContainers= false;
+							result.add(((IOrdinaryClassFile) elem).getType());
+						}
 						break;
 					case IJavaElement.COMPILATION_UNIT:
 						ICompilationUnit cu= (ICompilationUnit)elem;
