@@ -42,7 +42,6 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 
 	private final String fTypeName;
-
 	private final String fQualifierName;
 
 	protected AddModuleRequiresCorrectionProposal fAdditionalProposal= null;
@@ -121,7 +120,7 @@ public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 				String[] args= { moduleName };
 				final String changeName= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_info, args);
 				final String changeDescription= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_description, args);
-				additionalChangeCorrectionProposal= new AddModuleRequiresCorrectionProposal(moduleName, changeName, changeDescription, currentModuleCompilationUnit, getRelevance());				
+				additionalChangeCorrectionProposal= new AddModuleRequiresCorrectionProposal(moduleName, changeName, changeDescription, currentModuleCompilationUnit, getRelevance());
 			}
 		}
 		return additionalChangeCorrectionProposal;

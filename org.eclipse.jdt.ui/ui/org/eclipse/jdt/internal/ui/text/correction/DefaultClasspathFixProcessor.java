@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
@@ -53,8 +54,6 @@ import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddModuleRequiresCorrectionProposal;
-
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  * Default contribution to org.eclipse.jdt.ui.classpathFixProcessors
@@ -171,14 +170,14 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 								if (moduleName != null) {
 									Object modName= typeNameMatchToModuleName.get(typeNameMatch);
 									if (!moduleName.equals(modName)) {
-										// remove classpath module if there are multiple type matches 
-										// which belong to the same class path but different modules 
+										// remove classpath module if there are multiple type matches
+										// which belong to the same class path but different modules
 										typesWithModule.remove(typeNameMatch);
 										classPathEntryToTypeNameMatch.remove(entry);
 									}
 								} else {
-									// remove classpath module if there are multiple type matches 
-									// which belong to the same class path but one has module and the other does not 
+									// remove classpath module if there are multiple type matches
+									// which belong to the same class path but one has module and the other does not
 									typesWithModule.remove(typeNameMatch);
 									classPathEntryToTypeNameMatch.remove(entry);
 								}
@@ -243,7 +242,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 								String[] arguments= { label, additionalLabel };
 								label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_combine_two_proposals_info, arguments);
 								desc= label;
-							}							
+							}
 							DefaultClasspathFixProposal proposal= new DefaultClasspathFixProposal(label, change, desc, IProposalRelevance.ADD_PROJECT_TO_BUILDPATH);
 							proposals.add(proposal);
 						}
@@ -280,12 +279,12 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 		if (addedClaspaths.add(entry)) {
 			String label= getAddClasspathLabel(entry, root, project);
 			if (label != null) {
-				Change change= ClasspathFixProposal.newAddClasspathChange(project, entry);				
+				Change change= ClasspathFixProposal.newAddClasspathChange(project, entry);
 				if (change != null) {
 					if (additionalChange != null) {
-						String additionalLabel = additionalChange.getName();
+						String additionalLabel= additionalChange.getName();
 						additionalLabel= additionalLabel.substring(0, 1).toLowerCase() + additionalLabel.substring(1);
-						String[] arguments = {label, additionalLabel};
+						String[] arguments= { label, additionalLabel };
 						label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_combine_two_proposals_info, arguments);
 						change= new CompositeChange(change.getName(), new Change[] { change, additionalChange });
 					}
