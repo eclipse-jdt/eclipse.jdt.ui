@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 IBM Corporation and others.
+ * Copyright (c) 2006, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,11 +40,11 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeRoot;
@@ -262,7 +262,7 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 			methodDeclarationAstRoot= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL).parse(source.get(), methodCu, true, true, null);
 
 		} else {
-			IClassFile classFile= method.getClassFile();
+			IOrdinaryClassFile classFile= (IOrdinaryClassFile) method.getClassFile();
 			//TODO: use source if available?
 			StubCreator stubCreator= new StubCreator(true) {
 				@Override

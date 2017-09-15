@@ -71,7 +71,6 @@ import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.IAnnotation;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -79,6 +78,7 @@ import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -1160,7 +1160,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 						addAnnotations(buf, packDecls[0], null, null);
 					}
 				} else {
-					IClassFile classFile= pack.getClassFile(JavaModelUtil.PACKAGE_INFO_CLASS);
+					IOrdinaryClassFile classFile= pack.getOrdinaryClassFile(JavaModelUtil.PACKAGE_INFO_CLASS);
 					if (classFile.exists()) {
 						addAnnotations(buf, classFile.getType(), null, null);
 					}

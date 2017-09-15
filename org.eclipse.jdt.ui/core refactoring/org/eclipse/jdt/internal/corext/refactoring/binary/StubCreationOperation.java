@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
@@ -87,11 +88,15 @@ public class StubCreationOperation extends AbstractCodeCreationOperation {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, 2);
 			SubProgressMonitor subProgressMonitor= new SubProgressMonitor(monitor, 1);
-			final IType type= file.getType();
-			if (type.isAnonymous() || type.isLocal() || type.isMember())
+			if (file instanceof IOrdinaryClassFile) {
+				final IType type= ((IOrdinaryClassFile) file).getType();
+				if (type.isAnonymous() || type.isLocal() || type.isMember())
+					return;
+				String source= new StubCreator(fStubInvisible).createStub(type, subProgressMonitor);
+				createCompilationUnit(parent, type.getElementName() + JavaModelUtil.DEFAULT_CU_SUFFIX, source, monitor);
+			} else {
 				return;
-			String source= new StubCreator(fStubInvisible).createStub(type, subProgressMonitor);
-			createCompilationUnit(parent, type.getElementName() + JavaModelUtil.DEFAULT_CU_SUFFIX, source, monitor);
+			}
 		} finally {
 			monitor.done();
 		}

@@ -53,11 +53,11 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeRoot;
@@ -161,10 +161,10 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 					} else {
 						do {
 							je= je.getAncestor(IJavaElement.CLASS_FILE);
-							if (fInput.equals(je) || je == null) {
+							if (fInput.equals(je) || je == null || !(je instanceof IOrdinaryClassFile)) {
 								return null;
 							}
-							je= ((IClassFile) je).getType().getDeclaringType();
+							je= ((IOrdinaryClassFile) je).getType().getDeclaringType();
 						} while (je != null);
 					}
 				}
