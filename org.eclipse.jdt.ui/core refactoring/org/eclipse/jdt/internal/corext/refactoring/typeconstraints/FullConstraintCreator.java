@@ -363,7 +363,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 			List<ITypeConstraint> all= new ArrayList<>();
 			all.addAll(Arrays.asList(defines));
 			all.addAll(Arrays.asList(constraints));
-			return (ITypeConstraint[])all.toArray();
+			return all.toArray(new ITypeConstraint[all.size()]);
 		}
 	}
 
