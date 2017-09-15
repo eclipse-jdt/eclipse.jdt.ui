@@ -732,7 +732,27 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			CPListElement curr= res[0];
 			curr.setExported(elem.isExported());
 			curr.setAttributesFromExisting(elem);
-			fLibrariesList.replaceElement(elem, curr);
+			if (hasRootNodes()) {
+				for (int i= 0; i < fLibrariesList.getElements().size(); i++) {
+					CPListElement cpe= fLibrariesList.getElement(i);
+					if (cpe.isRootNodeForPath()) {
+						if (cpe.getChildren().contains(elem)) {
+							for (int j= 0; j < cpe.getChildren().size(); j++) {
+								// find index
+								Object obj= cpe.getChildren().get(j);
+								if (obj.equals(elem)) {
+									cpe.getChildren().set(j, curr);
+									fLibrariesList.dialogFieldChanged();
+									fLibrariesList.refresh();
+									break;
+								}
+							}
+						}
+					}
+				}
+			} else {
+				fLibrariesList.replaceElement(elem, curr);
+			}
 			if (elem.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
 				fLibrariesList.refresh();
 			}
@@ -1092,7 +1112,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			IClasspathEntry existingEntry= existing.getClasspathEntry();
 			IClasspathEntry created= BuildPathDialogAccess.configureContainerEntry(getShell(), existingEntry, fCurrJProject, getRawClasspath());
 			if (created != null) {
-				CPListElement elem= new CPListElement(null, fCurrJProject, IClasspathEntry.CPE_CONTAINER, created.getPath(), ! created.equals(existingEntry), null, null);
+				CPListElement elem= new CPListElement(null, fCurrJProject, created, IClasspathEntry.CPE_CONTAINER, created.getPath(), null, ! created.equals(existingEntry), null, null);
 				return new CPListElement[] { elem };
 			}
 		}
