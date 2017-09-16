@@ -589,10 +589,12 @@ public class ModuleDialog extends StatusDialog {
 
 	private IStatus computeContentsStatus() {
 		StatusInfo info= new StatusInfo();
-		if (fModuleLists[IDX_INCLUDED].fNames.isEmpty()) {
-			info.setError(NewWizardMessages.ModuleDialog_mustIncludeModule_error);
-		} else if (fModuleLists[IDX_INCLUDED].fNames.size() + fModuleLists[IDX_AVAILABLE].fNames.size() == 1) {
-			info.setInfo(NewWizardMessages.ModuleDialog_cannotLimitSingle_error);
+		if (fIsModuleCheckbox.isSelected()) {
+			if (fModuleLists[IDX_INCLUDED].fNames.isEmpty()) {
+				info.setError(NewWizardMessages.ModuleDialog_mustIncludeModule_error);
+			} else if (fModuleLists[IDX_INCLUDED].fNames.size() + fModuleLists[IDX_AVAILABLE].fNames.size() == 1) {
+				info.setInfo(NewWizardMessages.ModuleDialog_cannotLimitSingle_error);
+			}
 		}
 		return info;
 	}
