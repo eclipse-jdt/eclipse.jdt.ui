@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -89,6 +89,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.junit.BasicElementLabels;
+import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.launcher.ITestKind;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants;
@@ -664,7 +665,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		if (javaProject == null || type == null || testKind == null)
 			return Collections.emptySet();
 
-		String methodsCacheKey= javaProject.getElementName() + '\n' + type.getFullyQualifiedName() + '\n' + testKind.getId();
+		String testKindId= testKind.getId();
+		String methodsCacheKey= javaProject.getElementName() + '\n' + type.getFullyQualifiedName() + '\n' + testKindId;
 		if (methodsCacheKey.equals(fMethodsCacheKey))
 			return fMethodsCache;
 
@@ -672,42 +674,108 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fMethodsCache= methodNames;
 		fMethodsCacheKey= methodsCacheKey;
 
-		boolean isJUnit4= TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId());
+		collectMethodNames(type, javaProject, testKindId, methodNames);
 
-		while (type != null) {
-			IMethod[] methods= type.getMethods();
-			for (IMethod method : methods) {
-				int flags= method.getFlags();
-				// Only include public, non-static, no-arg methods that return void and start with "test":
-				if (Modifier.isPublic(flags) && !Modifier.isStatic(flags) &&
-						method.getNumberOfParameters() == 0 && Signature.SIG_VOID.equals(method.getReturnType()) &&
-						method.getElementName().startsWith("test")) { //$NON-NLS-1$
-					methodNames.add(method.getElementName());
-				}
-				if (isJUnit4) {
-					IAnnotation annotation= method.getAnnotation("Test"); //$NON-NLS-1$
-					if (annotation.exists()) {
-						methodNames.add(method.getElementName());
+		return methodNames;
+	}
+
+	private void collectMethodNames(IType type, IJavaProject javaProject, String testKindId, Set<String> methodNames) throws JavaModelException {
+		if (type == null) {
+			return;
+		}
+		collectDeclaredMethodNames(type, javaProject, testKindId, methodNames);
+
+		String superclassName= type.getSuperclassName();
+		IType superType= getResolvedType(superclassName, type, javaProject);
+		collectMethodNames(superType, javaProject, testKindId, methodNames);
+
+		String[] superInterfaceNames= type.getSuperInterfaceNames();
+		for (String interfaceName : superInterfaceNames) {
+			superType= getResolvedType(interfaceName, type, javaProject);
+			collectMethodNames(superType, javaProject, testKindId, methodNames);
+		}
+	}
+
+	private IType getResolvedType(String typeName, IType type, IJavaProject javaProject) throws JavaModelException {
+		IType resolvedType= null;
+		if (typeName != null) {
+			int pos= typeName.indexOf('<');
+			if (pos != -1) {
+				typeName= typeName.substring(0, pos);
+			}
+			String[][] resolvedTypeNames= type.resolveType(typeName);
+			if (resolvedTypeNames != null && resolvedTypeNames.length > 0) {
+				String[] resolvedTypeName= resolvedTypeNames[0];
+				resolvedType= javaProject.findType(resolvedTypeName[0], resolvedTypeName[1]); // secondary types not found by this API
+			}
+		}
+		return resolvedType;
+	}
+
+	private void collectDeclaredMethodNames(IType type, IJavaProject javaProject, String testKindId, Set<String> methodNames) throws JavaModelException {
+		IMethod[] methods= type.getMethods();
+		for (IMethod method : methods) {
+			String methodName= method.getElementName();
+			int flags= method.getFlags();
+			// Only include public, non-static, no-arg methods that return void and start with "test":
+			if (Modifier.isPublic(flags) && !Modifier.isStatic(flags) &&
+					method.getNumberOfParameters() == 0 && Signature.SIG_VOID.equals(method.getReturnType()) &&
+					methodName.startsWith("test")) { //$NON-NLS-1$
+				methodNames.add(methodName);
+			}
+			boolean isJUnit3= TestKindRegistry.JUNIT3_TEST_KIND_ID.equals(testKindId);
+			boolean isJUnit5= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId);
+			if (!isJUnit3 && !Modifier.isPrivate(flags) && !Modifier.isStatic(flags)) {
+				IAnnotation annotation= method.getAnnotation("Test"); //$NON-NLS-1$
+				if (annotation.exists()) {
+					methodNames.add(methodName + JUnitStubUtility.getParameterTypes(method, false));
+				} else if (isJUnit5) {
+					boolean hasAnyTestAnnotation= method.getAnnotation("TestFactory").exists() //$NON-NLS-1$
+							|| method.getAnnotation("Testable").exists() //$NON-NLS-1$
+							|| method.getAnnotation("TestTemplate").exists() //$NON-NLS-1$
+							|| method.getAnnotation("ParameterizedTest").exists() //$NON-NLS-1$
+							|| method.getAnnotation("RepeatedTest").exists(); //$NON-NLS-1$
+					if (hasAnyTestAnnotation || isAnnotatedWithTestable(method, type, javaProject)) {
+						methodNames.add(methodName + JUnitStubUtility.getParameterTypes(method, false));
 					}
 				}
 			}
-			String superclassName= type.getSuperclassName();
-			if (superclassName != null) {
-				int pos= superclassName.indexOf('<');
-				if (pos != -1)
-					superclassName= superclassName.substring(0, pos);
-				String[][] resolvedSupertype= type.resolveType(superclassName);
-				if (resolvedSupertype != null && resolvedSupertype.length > 0) {
-					String[] superclass= resolvedSupertype[0];
-					type= javaProject.findType(superclass[0], superclass[1]);
-				} else {
-					type= null;
+		}
+	}
+
+	// See JUnit5TestFinder.Annotation#annotates also.
+	private boolean isAnnotatedWithTestable(IMethod method, IType declaringType, IJavaProject javaProject) throws JavaModelException {
+		for (IAnnotation annotation : method.getAnnotations()) {
+			IType annotationType= getResolvedType(annotation.getElementName(), declaringType, javaProject);
+			if (annotationType != null) {
+				if (matchesTestable(annotationType)) {
+					return true;
 				}
-			} else {
-				type= null;
+				Set<IType> hierarchy= new HashSet<>();
+				if (matchesTestableInAnnotationHierarchy(annotationType, javaProject, hierarchy)) {
+					return true;
+				}
 			}
 		}
-		return methodNames;
+		return false;
+	}
+
+	private boolean matchesTestable(IType annotationType) {
+		return annotationType != null && JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME.equals(annotationType.getFullyQualifiedName());
+	}
+
+	private boolean matchesTestableInAnnotationHierarchy(IType annotationType, IJavaProject javaProject, Set<IType> hierarchy) throws JavaModelException {
+		if (annotationType != null) {
+			for (IAnnotation annotation : annotationType.getAnnotations()) {
+				IType annType= getResolvedType(annotation.getElementName(), annotationType, javaProject);
+				if (annType != null && hierarchy.add(annType)) {
+					if (matchesTestable(annType) || matchesTestableInAnnotationHierarchy(annType, javaProject, hierarchy)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	private String chooseMethodName(Set<String> methodNames) {
@@ -839,70 +907,74 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				return;
 			}
 			validateJavaProject(fContainerElement.getJavaProject());
-			return;
-		}
 
-		String projectName= fProjText.getText().trim();
-		if (projectName.length() == 0) {
-			setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_projectnotdefined);
-			return;
-		}
-
-		IStatus status= ResourcesPlugin.getWorkspace().validatePath(IPath.SEPARATOR + projectName, IResource.PROJECT);
-		if (!status.isOK() || !Path.ROOT.isValidSegment(projectName)) {
-			setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_invalidProjectName, BasicElementLabels.getResourceName(projectName)));
-			return;
-		}
-
-		IProject project= getWorkspaceRoot().getProject(projectName);
-		if (!project.exists()) {
-			setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_projectnotexists);
-			return;
-		}
-		IJavaProject javaProject= JavaCore.create(project);
-		validateJavaProject(javaProject);
-
-		try {
-			if (!project.hasNature(JavaCore.NATURE_ID)) {
-				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_notJavaProject);
+		} else {
+			String projectName= fProjText.getText().trim();
+			if (projectName.length() == 0) {
+				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_projectnotdefined);
 				return;
 			}
-			String className= fTestText.getText().trim();
-			if (className.length() == 0) {
-				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testnotdefined);
+
+			IStatus status= ResourcesPlugin.getWorkspace().validatePath(IPath.SEPARATOR + projectName, IResource.PROJECT);
+			if (!status.isOK() || !Path.ROOT.isValidSegment(projectName)) {
+				setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_invalidProjectName, BasicElementLabels.getResourceName(projectName)));
 				return;
 			}
-			IType type= javaProject.findType(className);
-			if (type == null) {
-				setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_test_class_not_found, new String[] { className, projectName }));
+
+			IProject project= getWorkspaceRoot().getProject(projectName);
+			if (!project.exists()) {
+				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_projectnotexists);
 				return;
 			}
-			String methodName = fTestMethodText.getText();
-			if (methodName.length() > 0) {
-				Set<String> methodsForType= getMethodsForType(javaProject, type, getSelectedTestKind());
-				if (!methodsForType.contains(methodName)) {
-					super.setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_test_method_not_found, new String[] { className, methodName, projectName }));
+			IJavaProject javaProject= JavaCore.create(project);
+			validateJavaProject(javaProject);
+
+			try {
+				if (!project.hasNature(JavaCore.NATURE_ID)) {
+					setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_notJavaProject);
 					return;
 				}
+				String className= fTestText.getText().trim();
+				if (className.length() == 0) {
+					setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testnotdefined);
+					return;
+				}
+				IType type= javaProject.findType(className);
+				if (type == null) {
+					setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_test_class_not_found, new String[] { className, projectName }));
+					return;
+				}
+				String methodName= fTestMethodText.getText();
+				if (methodName.length() > 0) {
+					Set<String> methodsForType= getMethodsForType(javaProject, type, getSelectedTestKind());
+					if (!methodsForType.contains(methodName)) {
+						super.setErrorMessage(Messages.format(JUnitMessages.JUnitLaunchConfigurationTab_error_test_method_not_found, new String[] { className, methodName, projectName }));
+						return;
+					}
+				}
+			} catch (CoreException e) {
+				JUnitPlugin.log(e);
 			}
-
-
-		} catch (CoreException e) {
-			JUnitPlugin.log(e);
 		}
 
 		validateTestLoaderJVM();
 	}
 
 	private void validateJavaProject(IJavaProject javaProject) {
-		if (! CoreTestSearchEngine.hasTestCaseType(javaProject)) {
-			setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testcasenotonpath);
-			return;
-		}
 		TestKind testKind = getSelectedTestKind();
-		if (testKind != null && TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId())) {
-			if (! CoreTestSearchEngine.hasTestAnnotation(javaProject)) {
-				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testannotationnotonpath);
+		if (testKind != null) {
+			if (!TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKind.getId()) && !CoreTestSearchEngine.hasTestCaseType(javaProject)) {
+				setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_testcasenotonpath);
+				return;
+			}
+
+			String msg= JUnitMessages.JUnitLaunchConfigurationTab_error_testannotationnotonpath;
+			if (TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKind.getId()) && !CoreTestSearchEngine.hasJUnit4TestAnnotation(javaProject)) {
+				setErrorMessage(Messages.format(msg, JUnitCorePlugin.JUNIT4_ANNOTATION_NAME));
+				return;
+			}
+			if (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKind.getId()) && !CoreTestSearchEngine.hasJUnit5TestAnnotation(javaProject)) {
+				setErrorMessage(Messages.format(msg, JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME));
 				return;
 			}
 		}
@@ -922,8 +994,13 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				IVMInstall vm = JavaRuntime.getVMInstall(Path.fromPortableString(path));
 				if (vm instanceof AbstractVMInstall) {
 					String compliance= ((AbstractVMInstall)vm).getJavaVersion();
-					if (compliance != null && !JUnitStubUtility.is50OrHigher(compliance)) {
-						setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_JDK15_required);
+					if (compliance != null) {
+						String testKindId= testKind.getId();
+						if (TestKindRegistry.JUNIT4_TEST_KIND_ID.equals(testKindId) && !JUnitStubUtility.is50OrHigher(compliance)) {
+							setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_JDK15_required);
+						} else if (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(testKindId) && !JUnitStubUtility.is18OrHigher(compliance)) {
+							setErrorMessage(JUnitMessages.JUnitLaunchConfigurationTab_error_JDK18_required);
+						}
 					}
 				}
 			}

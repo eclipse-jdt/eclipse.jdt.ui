@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,12 +57,14 @@ public final class JUnitMessages extends NLS {
 	public static String GotoReferencedTestAction_selectdialog_title;
 
 	public static String JUnitAddLibraryProposa_junit4_label;
+	public static String JUnitAddLibraryProposa_junit5_label;
 
 	public static String JUnitAddLibraryProposal_info;
 	public static String JUnitAddLibraryProposal_title;
 	public static String JUnitAddLibraryProposal_cannotAdd;
 
 	public static String JUnitAddLibraryProposal_junit4_info;
+	public static String JUnitAddLibraryProposal_junit5_info;
 	public static String JUnitAddLibraryProposal_label;
 
 	public static String JUnitContainerWizardPage_combo_label;
@@ -79,6 +81,8 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitContainerWizardPage_option_junit4;
 
+	public static String JUnitContainerWizardPage_option_junit5;
+
 	public static String JUnitClasspathFixProcessor_progress_desc;
 
 	public static String JUnitContainerWizardPage_resolved_label;
@@ -89,6 +93,8 @@ public final class JUnitMessages extends NLS {
 
 	public static String JUnitContainerWizardPage_warning_java5_required;
 
+	public static String JUnitContainerWizardPage_warning_java8_required;
+
 	public static String JUnitContainerWizardPage_wizard_description;
 
 	public static String JUnitContainerWizardPage_wizard_title;
@@ -98,6 +104,8 @@ public final class JUnitMessages extends NLS {
 	public static String JUnitLaunchConfigurationTab_error_invalidProjectName;
 
 	public static String JUnitLaunchConfigurationTab_error_JDK15_required;
+
+	public static String JUnitLaunchConfigurationTab_error_JDK18_required;
 
 	public static String JUnitLaunchConfigurationTab_error_noContainer;
 
@@ -250,7 +258,11 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_cannotrerun_title;
 	public static String TestRunnerViewPart_cannotrerurn_message;
 	public static String TestRunnerViewPart_configName;
+
+	public static String TestRunnerViewPart__error_cannotrun;
 	public static String TestRunnerViewPart_error_cannotrerun;
+
+	public static String TestRunnerViewPart_error_notests_kind;
 
 	public static String TestRunnerViewPart_ExportTestRunSessionAction_error_title;
 

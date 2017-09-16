@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,10 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.util;
+
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -264,6 +268,71 @@ public class JUnitStubUtility {
 		return null;
 	}
 
+	/**
+	 * Returns a comma-separated list of method parameter type names in parentheses or "" if the method
+	 * has no parameters. If fully qualified type names are required, <code>$</code> is used as the
+	 * enclosing type separator in the qualified type name. Type erasure is performed on a parameterized
+	 * type, arrays use the square brackets and a type parameter is resolved while creating the return
+	 * value.
+	 * 
+	 * @param method the method whose parameter types are required
+	 * @param useSimpleNames <code>true</code> if the last segment of the type name should be used
+	 *            instead of the fully qualified type name
+	 * @return a comma-separated list of method parameter type names in parentheses
+	 */
+	public static String getParameterTypes(final IMethod method, final boolean useSimpleNames) {
+		String paramTypes= ""; //$NON-NLS-1$
+
+		int numOfParams= method.getNumberOfParameters();
+		if (numOfParams > 0) {
+			String[] parameterTypeSignatures= method.getParameterTypes();
+			ArrayList<String> parameterTypeNames= new ArrayList<>(numOfParams);
+
+			try {
+				String[] fullNames= null;
+				for (int i= 0; i < parameterTypeSignatures.length; i++) {
+					String paramTypeSign= parameterTypeSignatures[i];
+					StringBuffer buf= new StringBuffer();
+
+					String typeSign= Signature.getTypeErasure(paramTypeSign);
+					String fullName;
+					if (useSimpleNames) {
+						fullName= JavaModelUtil.getResolvedTypeName(typeSign, method.getDeclaringType(), '.');
+					} else {
+						fullName= JavaModelUtil.getResolvedTypeName(typeSign, method.getDeclaringType(), '$');
+					}
+					if (fullName == null) { // e.g. a type parameter "QE;"
+						if (fullNames == null) {
+							fullNames= JUnitStubUtility.getParameterTypeNamesForSeeTag(method);
+						}
+						fullName= fullNames[i];
+					}
+
+					if (fullName != null) {
+						buf.append(fullName);
+						int dim= Signature.getArrayCount(typeSign);
+						while (dim > 0) {
+							buf.append("[]"); //$NON-NLS-1$
+							dim--;
+						}
+					}
+
+					parameterTypeNames.add(buf.toString());
+				}
+			} catch (JavaModelException e) {
+				// ignore
+			}
+
+			Stream<String> stream= parameterTypeNames.stream();
+			if (useSimpleNames) {
+				stream= stream.map(paramTypeName -> paramTypeName.substring(paramTypeName.lastIndexOf('.') + 1));
+			}
+			paramTypes= stream.collect(Collectors.joining(", ", "(", ")")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$	
+		}
+
+		return paramTypes;
+	}
+
 	/*
 	 * Evaluates if a member (possible from another package) is visible from
 	 * elements in a package.
@@ -293,6 +362,14 @@ public class JUnitStubUtility {
 
 	public static boolean is50OrHigher(String compliance) {
 		return CoreTestSearchEngine.is50OrHigher(compliance);
+	}
+
+	public static boolean is18OrHigher(IJavaProject project) {
+		return CoreTestSearchEngine.is18OrHigher(project);
+	}
+
+	public static boolean is18OrHigher(String compliance) {
+		return CoreTestSearchEngine.is18OrHigher(compliance);
 	}
 
 	public static String[] getParameterTypeNamesForSeeTag(IMethod overridden) {

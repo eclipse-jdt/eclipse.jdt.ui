@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.junit.model.ITestElement;
 import org.eclipse.jdt.junit.model.ITestElement.Result;
@@ -266,32 +267,18 @@ public class TestViewer {
 		if (! selection.isEmpty()) {
 			TestElement testElement= (TestElement) selection.getFirstElement();
 
-			String testLabel= testElement.getTestName();
-			String className= testElement.getClassName();
 			if (testElement instanceof TestSuiteElement) {
-				manager.add(new OpenTestAction(fTestRunnerPart, testLabel));
+				TestSuiteElement testSuiteElement= (TestSuiteElement) testElement;
+				manager.add(getOpenTestAction(testSuiteElement));
 				manager.add(new Separator());
 				if (!fTestRunnerPart.lastLaunchIsKeptAlive()) {
-					IType testType= findTestClass(testElement);
-					if (testType != null) {
-						String qualifiedName= testType.getFullyQualifiedName();
-						String testName= qualifiedName.equals(className) ? null : testElement.getTestName();
-						manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testElement.getId(), qualifiedName, testName, ILaunchManager.RUN_MODE));
-						manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testElement.getId(), qualifiedName, testName, ILaunchManager.DEBUG_MODE));
-					}
+					addRerunActions(manager, testSuiteElement);
 				}
 			} else {
 				TestCaseElement testCaseElement= (TestCaseElement) testElement;
-				String testMethodName= testCaseElement.getTestMethodName();
-				manager.add(new OpenTestAction(fTestRunnerPart, testCaseElement));
+				manager.add(getOpenTestAction(testCaseElement));
 				manager.add(new Separator());
-				if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
-					manager.add(new RerunAction(JUnitMessages.RerunAction_label_rerun, fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.RUN_MODE));
-
-				} else {
-					manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.RUN_MODE));
-					manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.DEBUG_MODE));
-				}
+				addRerunActions(manager, testCaseElement);
 			}
 			if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
 				manager.add(new Separator());
@@ -308,10 +295,65 @@ public class TestViewer {
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end")); //$NON-NLS-1$
 	}
 
+	private void addRerunActions(IMenuManager manager, TestCaseElement testCaseElement) {
+		String className= testCaseElement.getClassName();
+		String testMethodName= testCaseElement.getTestMethodName();
+		String[] parameterTypes= testCaseElement.getParameterTypes();
+		if (parameterTypes != null) {
+			String paramTypesStr= Arrays.stream(parameterTypes).collect(Collectors.joining(",")); //$NON-NLS-1$
+			testMethodName= testMethodName + "(" + paramTypesStr + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
+			manager.add(new RerunAction(JUnitMessages.RerunAction_label_rerun, fTestRunnerPart, testCaseElement.getId(), className, testMethodName, testCaseElement.getDisplayName(), testCaseElement.getUniqueId(), ILaunchManager.RUN_MODE));
+		} else {
+			manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testCaseElement.getId(), className, testMethodName, testCaseElement.getDisplayName(), testCaseElement.getUniqueId(), ILaunchManager.RUN_MODE));
+			manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testCaseElement.getId(), className, testMethodName, testCaseElement.getDisplayName(), testCaseElement.getUniqueId(), ILaunchManager.DEBUG_MODE));
+		}
+	}
+
+	private void addRerunActions(IMenuManager manager, TestSuiteElement testSuiteElement) {
+		String qualifiedName= null;
+		String testMethodName= null; // test method name is null when re-running a regular test class
+
+		String testName= testSuiteElement.getTestName();
+
+		IType testType= findTestClass(testSuiteElement, true);
+		if (testType != null) {
+			qualifiedName= testType.getFullyQualifiedName();
+
+			if (!qualifiedName.equals(testName)) {
+				int index= testName.indexOf('(');
+				if (index > 0) { // test factory method
+					testMethodName= testName.substring(0, index);
+				}
+			}
+			String[] parameterTypes= testSuiteElement.getParameterTypes();
+			if (testMethodName != null && parameterTypes != null) {
+				String paramTypesStr= Arrays.stream(parameterTypes).collect(Collectors.joining(",")); //$NON-NLS-1$
+				testMethodName= testMethodName + "(" + paramTypesStr + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		} else {
+			// see bug 443498
+			testType= findTestClass(testSuiteElement.getParent(), false);
+			if (testType != null) {
+				qualifiedName= testType.getFullyQualifiedName();
+
+				String className= testSuiteElement.getSuiteTypeName();
+				if (!qualifiedName.equals(className)) {
+					testMethodName= testName;
+				}
+			}
+		}
+		if (qualifiedName != null) {
+			manager.add(new RerunAction(JUnitMessages.RerunAction_label_run, fTestRunnerPart, testSuiteElement.getId(), qualifiedName, testMethodName, testSuiteElement.getDisplayName(), testSuiteElement.getUniqueId(), ILaunchManager.RUN_MODE));
+			manager.add(new RerunAction(JUnitMessages.RerunAction_label_debug, fTestRunnerPart, testSuiteElement.getId(), qualifiedName, testMethodName, testSuiteElement.getDisplayName(), testSuiteElement.getUniqueId(), ILaunchManager.DEBUG_MODE));
+		}
+	}
+
 	/*
 	 * Returns the element's test class or the next container's test class, which exists, and for which ITestFinder.isTest() is true.
 	 */
-	private IType findTestClass(ITestElement element) {
+	private IType findTestClass(ITestElement element, boolean checkOnlyCurrentElement) {
 		ITestFinder finder= ((TestRunSession)element.getTestRunSession()).getTestRunnerKind().getFinder();
 		if (ITestFinder.NULL.equals(finder)) {
 			return null;
@@ -334,8 +376,11 @@ public class TestViewer {
 				}
 				if (className != null) {
 					IType type= project.findType(className);
-					if (type != null && finder.isTest(type))
+					if (type != null && finder.isTest(type)) {
 						return type;
+					} else if (checkOnlyCurrentElement) {
+						return null;
+					}
 				}
 			} catch (JavaModelException e) {
 				// fall through
@@ -366,24 +411,45 @@ public class TestViewer {
 
 		OpenTestAction action;
 		if (testElement instanceof TestSuiteElement) {
-			String testName= testElement.getTestName();
-			ITestElement[] children= ((TestSuiteElement) testElement).getChildren();
-			if (testName.startsWith("[") && testName.endsWith("]") //$NON-NLS-1$ //$NON-NLS-2$
-					&& children.length > 0 && children[0] instanceof TestCaseElement) {
-				// a group of parameterized tests
-				action= new OpenTestAction(fTestRunnerPart, (TestCaseElement) children[0]);
-			} else {
-				action= new OpenTestAction(fTestRunnerPart, testName);
-			}
+			action= getOpenTestAction((TestSuiteElement) testElement);
 		} else if (testElement instanceof TestCaseElement) {
-			TestCaseElement testCase= (TestCaseElement)testElement;
-			action= new OpenTestAction(fTestRunnerPart, testCase);
+			action= getOpenTestAction((TestCaseElement) testElement);
 		} else {
 			throw new IllegalStateException(String.valueOf(testElement));
 		}
 
 		if (action.isEnabled())
 			action.run();
+	}
+
+	private OpenTestAction getOpenTestAction(TestCaseElement testCase) {
+		return new OpenTestAction(fTestRunnerPart, testCase, testCase.getParameterTypes());
+	}
+
+	private OpenTestAction getOpenTestAction(TestSuiteElement testSuite) {
+		String testName= testSuite.getTestName();
+		ITestElement[] children= testSuite.getChildren();
+
+		if (testName.startsWith("[") && testName.endsWith("]") && children.length > 0 && children[0] instanceof TestCaseElement) { //$NON-NLS-1$ //$NON-NLS-2$
+			// a group of parameterized tests
+			return new OpenTestAction(fTestRunnerPart, (TestCaseElement) children[0], null);
+		}
+
+		int index= testName.indexOf('(');
+		// test factory method
+		if (index > 0) {
+			if (children.length > 0 && children[0] instanceof TestCaseElement) {
+				// has dynamic test case as child
+				TestCaseElement testCase= (TestCaseElement) children[0];
+				return new OpenTestAction(fTestRunnerPart, testCase, testCase.getParameterTypes());
+			} else {
+				// has no child
+				return new OpenTestAction(fTestRunnerPart, testSuite.getSuiteTypeName(), testName.substring(0, index), testSuite.getParameterTypes(), true);
+			}
+		}
+
+		// regular test class
+		return new OpenTestAction(fTestRunnerPart, testName);
 	}
 
 	private void handleSelected() {
@@ -675,7 +741,7 @@ public class TestViewer {
 	}
 
 	public void selectFirstFailure() {
-		TestCaseElement firstFailure= getNextChildFailure(fTestRunSession.getTestRoot(), true);
+		TestElement firstFailure= getNextChildFailure(fTestRunSession.getTestRoot(), true);
 		if (firstFailure != null)
 			getActiveViewer().setSelection(new StructuredSelection(firstFailure), true);
 	}
@@ -704,7 +770,7 @@ public class TestViewer {
 		return getNextFailureSibling(selected, showNext);
 	}
 
-	private TestCaseElement getNextFailureSibling(TestElement current, boolean showNext) {
+	private TestElement getNextFailureSibling(TestElement current, boolean showNext) {
 		TestSuiteElement parent= current.getParent();
 		if (parent == null)
 			return null;
@@ -718,16 +784,20 @@ public class TestViewer {
 			TestElement sibling= (TestElement) siblings.get(i);
 			if (sibling.getStatus().isErrorOrFailure()) {
 				if (sibling instanceof TestCaseElement) {
-					return (TestCaseElement) sibling;
+					return sibling;
 				} else {
-					return getNextChildFailure((TestSuiteElement) sibling, showNext);
+					TestSuiteElement testSuiteElement= (TestSuiteElement) sibling;
+					if (testSuiteElement.getChildren().length == 0) {
+						return testSuiteElement;
+					}
+					return getNextChildFailure(testSuiteElement, showNext);
 				}
 			}
 		}
 		return getNextFailureSibling(parent, showNext);
 	}
 
-	private TestCaseElement getNextChildFailure(TestSuiteElement root, boolean showNext) {
+	private TestElement getNextChildFailure(TestSuiteElement root, boolean showNext) {
 		List<ITestElement> children= Arrays.asList(root.getChildren());
 		if (! showNext)
 			children= new ReverseList<>(children);
@@ -735,9 +805,13 @@ public class TestViewer {
 			TestElement child= (TestElement) children.get(i);
 			if (child.getStatus().isErrorOrFailure()) {
 				if (child instanceof TestCaseElement) {
-					return (TestCaseElement) child;
+					return child;
 				} else {
-					return getNextChildFailure((TestSuiteElement) child, showNext);
+					TestSuiteElement testSuiteElement= (TestSuiteElement) child;
+					if (testSuiteElement.getChildren().length == 0) {
+						return testSuiteElement;
+					}
+					return getNextChildFailure(testSuiteElement, showNext);
 				}
 			}
 		}

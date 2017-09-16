@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2015 IBM Corporation and others.
+ * Copyright (c) 2006, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,6 +33,7 @@ public class TestKindRegistry {
 
 	public static final String JUNIT3_TEST_KIND_ID= "org.eclipse.jdt.junit.loader.junit3"; //$NON-NLS-1$
 	public static final String JUNIT4_TEST_KIND_ID= "org.eclipse.jdt.junit.loader.junit4"; //$NON-NLS-1$
+	public static final String JUNIT5_TEST_KIND_ID= "org.eclipse.jdt.junit.loader.junit5"; //$NON-NLS-1$
 
 	public static TestKindRegistry getDefault() {
 		if (fgRegistry != null)
@@ -107,8 +108,13 @@ public class TestKindRegistry {
 	public static String getContainerTestKindId(IJavaElement element) {
 		if (element != null) {
 			IJavaProject project= element.getJavaProject();
-			if (CoreTestSearchEngine.is50OrHigher(project) && CoreTestSearchEngine.hasTestAnnotation(project)) {
-				return JUNIT4_TEST_KIND_ID;
+			if (CoreTestSearchEngine.is50OrHigher(project)) {
+				if (CoreTestSearchEngine.is18OrHigher(project) && CoreTestSearchEngine.hasJUnit5TestAnnotation(project)) {
+					return JUNIT5_TEST_KIND_ID;
+				}
+				if (CoreTestSearchEngine.hasJUnit4TestAnnotation(project)) {
+					return JUNIT4_TEST_KIND_ID;
+				}
 			}
 		}
 		return JUNIT3_TEST_KIND_ID;

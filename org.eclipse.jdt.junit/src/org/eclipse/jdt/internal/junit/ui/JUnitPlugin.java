@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,7 +16,11 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -45,6 +49,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
  * The plug-in runtime class for the JUnit plug-in.
@@ -187,18 +193,56 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		return null;
 	}
 
-	/**
-	 * @see AbstractUIPlugin#start(BundleContext)
-	 */
 	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		fBundleContext= context;
+		setCodeassistFavoriteStaticMembers();
 	}
 
 	/**
-	 * @see AbstractUIPlugin#stop(BundleContext)
+	 * Add the new default static import favorites in old workspaces that already have non-default
+	 * favorites. Only do this once, so that users have a way to opt-out if they don't want the new
+	 * favorites.
 	 */
+	private void setCodeassistFavoriteStaticMembers() {
+		Set<String> favoritesToAdd= new LinkedHashSet<>();
+		favoritesToAdd.add("org.junit.Assert.*"); //$NON-NLS-1$
+		favoritesToAdd.add("org.junit.Assume.*"); //$NON-NLS-1$
+		favoritesToAdd.add("org.junit.jupiter.api.Assertions.*"); //$NON-NLS-1$
+		favoritesToAdd.add("org.junit.jupiter.api.Assumptions.*"); //$NON-NLS-1$
+		favoritesToAdd.add("org.junit.jupiter.api.DynamicContainer.*"); //$NON-NLS-1$
+		favoritesToAdd.add("org.junit.jupiter.api.DynamicTest.*"); //$NON-NLS-1$
+
+		// default value
+		Set<String> defaultFavorites= new LinkedHashSet<>();
+		String defaultPreferenceValue= PreferenceConstants.getPreferenceStore().getDefaultString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+		if (defaultPreferenceValue != null && defaultPreferenceValue.length() > 0) {
+			defaultFavorites.addAll(Arrays.asList(defaultPreferenceValue.split(";"))); //$NON-NLS-1$
+		}
+		defaultFavorites.addAll(favoritesToAdd);
+		String newDefaultPreferenceValue= defaultFavorites.stream().collect(Collectors.joining(";")); //$NON-NLS-1$
+		PreferenceConstants.getPreferenceStore().setDefault(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, newDefaultPreferenceValue);
+
+		// current value
+		if (JUnitUIPreferencesConstants.isCodeassistFavoriteStaticMembersMigrated()) {
+			return;
+		}
+		Set<String> currentFavorites= new LinkedHashSet<>();
+		String currentPreferenceValue= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS);
+		if (currentPreferenceValue != null && currentPreferenceValue.length() > 0) {
+			currentFavorites.addAll(Arrays.asList(currentPreferenceValue.split(";"))); //$NON-NLS-1$
+		}
+		favoritesToAdd.removeAll(currentFavorites);
+		if (!favoritesToAdd.isEmpty()) {
+			String newPreferenceValue= currentPreferenceValue + ";" + favoritesToAdd.stream().collect(Collectors.joining(";")); //$NON-NLS-1$ //$NON-NLS-2$
+			PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.CODEASSIST_FAVORITE_STATIC_MEMBERS, newPreferenceValue);
+		}
+
+		// set as migrated
+		JUnitUIPreferencesConstants.setCodeassistFavoriteStaticMembersMigrated(true);
+	}
+
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		fIsStopped= true;

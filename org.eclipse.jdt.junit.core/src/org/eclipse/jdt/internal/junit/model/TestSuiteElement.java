@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,8 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 	private List<TestElement> fChildren;
 	private Status fChildrenStatus;
 
-	public TestSuiteElement(TestSuiteElement parent, String id, String testName, int childrenCount) {
-		super(parent, id, testName);
+	public TestSuiteElement(TestSuiteElement parent, String id, String testName, int childrenCount, String displayName, String[] parameterTypes, String uniqueId) {
+		super(parent, id, testName, displayName, parameterTypes, uniqueId);
 		fChildren= new ArrayList<>(childrenCount);
 	}
 
@@ -49,6 +49,10 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 
 	public void addChild(TestElement child) {
 		fChildren.add(child);
+	}
+
+	public void removeChild(TestElement child) {
+		fChildren.remove(child);
 	}
 
 	@Override
@@ -144,7 +148,7 @@ public class TestSuiteElement extends TestElement implements ITestSuiteElement {
 
 	@Override
 	public String toString() {
-		return "TestSuite: " + getSuiteTypeName() + " : " + super.toString() + " (" + fChildren.size() + ")";   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		return "TestSuite: " + getTestName() + " : " + super.toString() + " (" + fChildren.size() + ")";   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 }

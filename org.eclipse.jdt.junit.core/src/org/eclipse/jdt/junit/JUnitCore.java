@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,6 +61,7 @@ public class JUnitCore {
 	 * 
 	 * @see #JUNIT3_CONTAINER_PATH
 	 * @see #JUNIT4_CONTAINER_PATH
+	 * @see #JUNIT5_CONTAINER_PATH
 	 * @since 3.6
 	 */
 	public static final String JUNIT_CONTAINER_ID= "org.eclipse.jdt.junit.JUNIT_CONTAINER"; //$NON-NLS-1$
@@ -78,6 +79,13 @@ public class JUnitCore {
 	 * @since 3.6
 	 */
 	public final static IPath JUNIT4_CONTAINER_PATH= new Path(JUNIT_CONTAINER_ID).append("4"); //$NON-NLS-1$
+
+	/**
+	 * Path of the JUnit 5 {@linkplain IClasspathContainer classpath container}.
+	 * 
+	 * @since 3.9
+	 */
+	public final static IPath JUNIT5_CONTAINER_PATH= new Path(JUNIT_CONTAINER_ID).append("5"); //$NON-NLS-1$
 
 	/**
 	 * Adds a listener for test runs.

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,11 +75,71 @@ public class JUnitPreferencesConstants {
 	 * Javadoc location for org.hamcrest.core (JUnit 4)
 	 */
 	public static final String HAMCREST_CORE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit4.hamcrest.core.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.jupiter.api (JUnit 5)
+	 */
+	public static final String JUNIT_JUPITER_API_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.jupiter.api.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.jupiter.engine (JUnit 5)
+	 */
+	public static final String JUNIT_JUPITER_ENGINE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.jupiter.engine.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.jupiter.migrationsupport (JUnit 5)
+	 */
+	public static final String JUNIT_JUPITER_MIGRATIONSUPPORT_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.jupiter.migrationsupport.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.jupiter.params (JUnit 5)
+	 */
+	public static final String JUNIT_JUPITER_PARAMS_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.jupiter.params.javadoclocation"; //$NON-NLS-1$
 	
+	/**
+	 * Javadoc location for org.junit.platform.commons (JUnit 5)
+	 */
+	public static final String JUNIT_PLATFORM_COMMONS_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.commons.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.platform.engine (JUnit 5)
+	 */
+	public static final String JUNIT_PLATFORM_ENGINE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.engine.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.platform.launcher (JUnit 5)
+	 */
+	public static final String JUNIT_PLATFORM_LAUNCHER_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.launcher.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.platform.runner (JUnit 5)
+	 */
+	public static final String JUNIT_PLATFORM_RUNNER_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.runner.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.platform.suite.api (JUnit 5)
+	 */
+	public static final String JUNIT_PLATFORM_SUITE_API_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.platform.suite.api.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.junit.vintage.engine (JUnit 5)
+	 */
+	public static final String JUNIT_VINTAGE_ENGINE_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.vintage.engine.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.opentest4j (JUnit 5)
+	 */
+	public static final String JUNIT_OPENTEST4J_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.opentest4j.javadoclocation"; //$NON-NLS-1$
+
+	/**
+	 * Javadoc location for org.apiguardian (JUnit 5)
+	 */
+	public static final String JUNIT_APIGUARDIAN_JAVADOC= JUnitCorePlugin.PLUGIN_ID + ".junit5.apiguardian.javadoclocation"; //$NON-NLS-1$
 
 	private static final String[] fgDefaultFilterPatterns= new String[] {
 		"org.eclipse.jdt.internal.junit.runner.*", //$NON-NLS-1$
 		"org.eclipse.jdt.internal.junit4.runner.*", //$NON-NLS-1$
+		"org.eclipse.jdt.internal.junit5.runner.*", //$NON-NLS-1$
 		"org.eclipse.jdt.internal.junit.ui.*", //$NON-NLS-1$
 		"junit.framework.TestCase", //$NON-NLS-1$
 		"junit.framework.TestResult", //$NON-NLS-1$

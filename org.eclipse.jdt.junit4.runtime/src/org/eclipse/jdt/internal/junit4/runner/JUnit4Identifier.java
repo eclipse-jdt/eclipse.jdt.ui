@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2008 IBM Corporation and others.
+ * Copyright (c) 2006, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,18 @@ public class JUnit4Identifier implements ITestIdentifier {
 
 		JUnit4Identifier id= (JUnit4Identifier) obj;
 		return fPlan.equals(id.fPlan);
+	}
+
+	public String getDisplayName() {
+		return getName();
+	}
+
+	public String getParameterTypes() {
+		return ""; //$NON-NLS-1$
+	}
+
+	public String getUniqueId() {
+		return ""; //$NON-NLS-1$
 	}
 
 }

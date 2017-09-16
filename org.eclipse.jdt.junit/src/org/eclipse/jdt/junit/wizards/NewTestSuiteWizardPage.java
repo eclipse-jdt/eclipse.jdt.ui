@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -180,7 +180,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		boolean isJunit4= false;
 		if (jelem != null && jelem.getElementType() != IJavaElement.JAVA_MODEL) {
 			IJavaProject project= jelem.getJavaProject();
-			isJunit4= CoreTestSearchEngine.hasTestAnnotation(project);
+			isJunit4= CoreTestSearchEngine.hasJUnit4TestAnnotation(project);
 			if (!isJunit4 && !CoreTestSearchEngine.hasTestCaseType(project) && JUnitStubUtility.is50OrHigher(project)) {
 				isJunit4= true;
 			}

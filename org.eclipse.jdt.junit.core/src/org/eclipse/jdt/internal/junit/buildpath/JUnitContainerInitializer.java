@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 IBM Corporation and others.
+ * Copyright (c) 2006, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.junit.buildpath;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jdt.junit.JUnitCore;
 
@@ -47,6 +48,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	private final static String JUNIT3_8_1= "3.8.1"; //$NON-NLS-1$
 	private final static String JUNIT3= "3"; //$NON-NLS-1$
 	private final static String JUNIT4= "4"; //$NON-NLS-1$
+	private final static String JUNIT5= "5"; //$NON-NLS-1$
 
 	private static class JUnitContainer implements IClasspathContainer {
 
@@ -65,6 +67,9 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 
 		@Override
 		public String getDescription() {
+			if (JUnitCore.JUNIT5_CONTAINER_PATH.equals(fPath)) {
+				return JUnitMessages.JUnitContainerInitializer_description_junit5;
+			}
 			if (JUnitCore.JUNIT4_CONTAINER_PATH.equals(fPath)) {
 				return JUnitMessages.JUnitContainerInitializer_description_junit4;
 			}
@@ -97,6 +102,7 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	}
 
 	private static JUnitContainer getNewContainer(IPath containerPath) {
+		List<IClasspathEntry> entriesList= new ArrayList<>();
 		IClasspathEntry entry= null;
 		IClasspathEntry entry2= null;
 		String version= containerPath.segment(1);
@@ -108,9 +114,26 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 		} else if (JUNIT4.equals(version)) {
 			entry= BuildPathSupport.getJUnit4LibraryEntry();
 			entry2= BuildPathSupport.getHamcrestCoreLibraryEntry();
+		} else if (JUNIT5.equals(version)) {
+			entriesList.add(BuildPathSupport.getJUnitJupiterApiLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitJupiterEngineLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitJupiterMigrationSupportLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitJupiterParamsLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitPlatformCommonsLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitPlatformEngineLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitPlatformLauncherLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitPlatformRunnerLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitPlatformSuiteApiLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitVintageEngineLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitOpentest4jLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnitApiGuardianLibraryEntry());
+			entriesList.add(BuildPathSupport.getJUnit4LibraryEntry());
+			entriesList.add(BuildPathSupport.getHamcrestCoreLibraryEntry());
 		}
 		IClasspathEntry[] entries;
-		if (entry == null) {
+		if (!entriesList.isEmpty() ) {
+			entries= entriesList.toArray(new IClasspathEntry[entriesList.size()]);
+		} else if (entry == null) {
 			entries= new IClasspathEntry[] { };
 		} else if (entry2 == null) {
 			entries= new IClasspathEntry[] { entry };
@@ -195,11 +218,44 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 	private String getPreferenceKey(IClasspathEntry entry, String version) {
 		if (JUNIT3.equals(version)) {
 			return JUnitPreferencesConstants.JUNIT3_JAVADOC;
-		} else if (JUNIT4.equals(version)) {
-			if (entry.getPath().lastSegment().indexOf("junit") != -1) { //$NON-NLS-1$
-				return JUnitPreferencesConstants.JUNIT4_JAVADOC;
-			} else {
-				return JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC;
+		} else {
+			String lastSegment= entry.getPath().lastSegment();
+			if (JUNIT4.equals(version)) {
+				if (lastSegment.indexOf("junit") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT4_JAVADOC;
+				} else {
+					return JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC;
+				}
+			} else if (JUNIT5.equals(version)) {
+				if (lastSegment.indexOf("jupiter.api") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_JUPITER_API_JAVADOC;
+				} else if (lastSegment.indexOf("jupiter.engine") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_JUPITER_ENGINE_JAVADOC;
+				} else if (lastSegment.indexOf("jupiter.migrationsupport") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_JUPITER_MIGRATIONSUPPORT_JAVADOC;
+				} else if (lastSegment.indexOf("jupiter.params") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_JUPITER_PARAMS_JAVADOC;
+				} else if (lastSegment.indexOf("platform.commons") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_PLATFORM_COMMONS_JAVADOC;
+				} else if (lastSegment.indexOf("platform.engine") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_PLATFORM_ENGINE_JAVADOC;
+				} else if (lastSegment.indexOf("platform.launcher") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_PLATFORM_LAUNCHER_JAVADOC;
+				} else if (lastSegment.indexOf("platform.runner") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_PLATFORM_RUNNER_JAVADOC;
+				} else if (lastSegment.indexOf("platform.suite.api") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_API_JAVADOC;
+				} else if (lastSegment.indexOf("vintage.engine") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC;
+				} else if (lastSegment.indexOf("opentest4j") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_OPENTEST4J_JAVADOC;
+				} else if (lastSegment.indexOf("apiguardian") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT_APIGUARDIAN_JAVADOC;
+				} else if (lastSegment.indexOf("junit") != -1) { //$NON-NLS-1$
+					return JUnitPreferencesConstants.JUNIT4_JAVADOC;
+				} else {
+					return JUnitPreferencesConstants.HAMCREST_CORE_JAVADOC;
+				}
 			}
 		}
 		return null;
@@ -240,6 +296,8 @@ public class JUnitContainerInitializer extends ClasspathContainerInitializer {
 				return JUnitMessages.JUnitContainerInitializer_description_initializer_junit3;
 			} else if (JUNIT4.equals(version)) {
 				return JUnitMessages.JUnitContainerInitializer_description_initializer_junit4;
+			} else if (JUNIT5.equals(version)) {
+				return JUnitMessages.JUnitContainerInitializer_description_initializer_junit5;
 			}
 		}
 		return JUnitMessages.JUnitContainerInitializer_description_initializer_unresolved;

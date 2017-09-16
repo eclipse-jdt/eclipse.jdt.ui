@@ -474,6 +474,19 @@ public final class JavaModelUtil {
 	 * @throws JavaModelException thrown when the type can not be accessed
 	 */
 	public static String getResolvedTypeName(String refTypeSig, IType declaringType) throws JavaModelException {
+		return getResolvedTypeName(refTypeSig, declaringType, '.');
+	}
+
+	/**
+	 * Resolves a type name in the context of the declaring type.
+	 *
+	 * @param refTypeSig the type name in signature notation (for example 'QVector') this can also be an array type, but dimensions will be ignored.
+	 * @param declaringType the context for resolving (type where the reference was made in)
+	 * @param enclosingTypeSeparator the enclosing type separator used in the qualified type name 
+	 * @return returns the fully qualified type name or build-in-type name. if a unresolved type couldn't be resolved null is returned
+	 * @throws JavaModelException thrown when the type can not be accessed
+	 */
+	public static String getResolvedTypeName(String refTypeSig, IType declaringType, char enclosingTypeSeparator) throws JavaModelException {
 		int arrayCount= Signature.getArrayCount(refTypeSig);
 		char type= refTypeSig.charAt(arrayCount);
 		if (type == Signature.C_UNRESOLVED) {
@@ -490,7 +503,7 @@ public final class JavaModelUtil {
 			}
 			String[][] resolvedNames= declaringType.resolveType(name);
 			if (resolvedNames != null && resolvedNames.length > 0) {
-				return JavaModelUtil.concatenateName(resolvedNames[0][0], resolvedNames[0][1]);
+				return JavaModelUtil.concatenateName(resolvedNames[0][0], resolvedNames[0][1].replace('.', enclosingTypeSeparator));
 			}
 			return null;
 		} else {
