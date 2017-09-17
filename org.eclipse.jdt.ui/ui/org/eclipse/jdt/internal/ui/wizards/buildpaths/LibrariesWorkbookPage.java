@@ -171,10 +171,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		fLibrariesList.setElements(libelements);
 	}
 	private void updateLibrariesListWithRootNode() {
-		CPListElement rootClasspath = new CPListElement(fCurrJProject, -1);
-		rootClasspath.setPathRootNodeName(NewWizardMessages.PathRootWorkbookPage_classpath,false);
-		CPListElement rootModulepath = new CPListElement(fCurrJProject, -1);
-		rootModulepath.setPathRootNodeName(NewWizardMessages.PathRootWorkbookPage_modulepath,true);
+		CPListElement rootClasspath = new RootCPListElement(fCurrJProject, NewWizardMessages.PathRootWorkbookPage_classpath,false);
+		CPListElement rootModulepath = new RootCPListElement(fCurrJProject,NewWizardMessages.PathRootWorkbookPage_modulepath,true);
+
 		List<CPListElement> cpelements= fClassPathList.getElements();
 		List<CPListElement> libelements= new ArrayList<>(cpelements.size());
 
@@ -184,9 +183,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (isEntryKind(cpe.getEntryKind())) {
 				Object mod = cpe.getAttribute(CPListElement.MODULE);
 				if(mod==null) {
-					rootClasspath.addCPListElement(cpe);
+					((RootCPListElement)rootClasspath).addCPListElement(cpe);
 				} else {
-					rootModulepath.addCPListElement(cpe);
+					((RootCPListElement)rootModulepath).addCPListElement(cpe);
 				}
 					
 			}
@@ -369,7 +368,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 							}
 						}
 					}
-					((CPListElement)selectedElements.get(i)).addCPListElement(elementsToAdd);					
+					((RootCPListElement)selectedElements.get(i)).addCPListElement(elementsToAdd);					
 				}
 				
 				fLibrariesList.setElements(elements);
@@ -388,7 +387,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		//note that the same cpelement with different attribute can be added
 		for (CPListElement cpListElement : cplist) {
 			if(cpListElement.isRootNodeForPath()) {
-				boolean cont = cpListElement.getChildren().contains(curr);
+				boolean cont =( (RootCPListElement)cpListElement).getChildren().contains(curr);
 				if(cont == true) {
 					return true;
 				}
@@ -509,7 +508,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if(hasRootNodes()) {
 				List<CPListElement> elements= fLibrariesList.getElements();
 				for (CPListElement cpListElement : elements) {
-					cpListElement.getChildren().removeAll(selElements);
+					((RootCPListElement)cpListElement).getChildren().removeAll(selElements);
 				}
 				fLibrariesList.getTreeViewer().remove(selElements.toArray());
 				fLibrariesList.dialogFieldChanged();
@@ -590,8 +589,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		
 		boolean canEdit = false;
 		if(hasRootNodes()) {
-			canEdit = fLibrariesList.getElement(0).getChildren().indexOf(elem) != -1 || 
-					fLibrariesList.getElement(1).getChildren().indexOf(elem) != -1 ;
+			canEdit = ((RootCPListElement)fLibrariesList.getElement(0)).getChildren().indexOf(elem) != -1 || 
+					((RootCPListElement)fLibrariesList.getElement(1)).getChildren().indexOf(elem) != -1 ;
 			
 		}
 		if (canEdit || fLibrariesList.getIndexOfElement(elem) != -1 ) {
@@ -736,12 +735,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				for (int i= 0; i < fLibrariesList.getElements().size(); i++) {
 					CPListElement cpe= fLibrariesList.getElement(i);
 					if (cpe.isRootNodeForPath()) {
-						if (cpe.getChildren().contains(elem)) {
-							for (int j= 0; j < cpe.getChildren().size(); j++) {
+						if ((((RootCPListElement)cpe).getChildren().contains(elem))) {
+							for (int j= 0; j < ((RootCPListElement)cpe).getChildren().size(); j++) {
 								// find index
-								Object obj= cpe.getChildren().get(j);
+								Object obj= ((RootCPListElement) cpe).getChildren().get(j);
 								if (obj.equals(elem)) {
-									cpe.getChildren().set(j, curr);
+									((RootCPListElement)cpe).getChildren().set(j, curr);
 									fLibrariesList.dialogFieldChanged();
 									fLibrariesList.refresh();
 									break;
@@ -828,7 +827,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				// if the parent in in classpath list disable edit
 				CPListElement root = fLibrariesList.getElement(0).isClassPathRootNode() ? fLibrariesList.getElement(0) :
 						fLibrariesList.getElement(1);
-				ArrayList<Object> children= root.getChildren();
+				ArrayList<Object> children= ((RootCPListElement)root).getChildren();
 				for (Object object : children) {
 					if(object == parent) {
 						return false;
@@ -858,7 +857,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		 	CPListElement ele = projelements.get(i);
 		 	// if root node, collect the CPList elements
 		 	if(ele.isRootNodeForPath()) {
-		 		ArrayList<Object> children= ele.getChildren();
+		 		ArrayList<Object> children= ((RootCPListElement)ele).getChildren();
 		 		for (Iterator<?> iterator= children.iterator(); iterator.hasNext();) {
 		 			Object object=  iterator.next();
 		 			if(object instanceof CPListElement) {

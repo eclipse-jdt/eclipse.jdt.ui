@@ -89,7 +89,7 @@ public class CPListLabelProvider extends LabelProvider {
 		if (element instanceof CPListElement) {
 			CPListElement cp = (CPListElement) element;
 			if( cp.isRootNodeForPath()) {
-				return cp.getPathRootNodeName();
+				return ((RootCPListElement)cp).getPathRootNodeName();
 			}
 			return getCPListElementText((CPListElement) element);
 		} else if (element instanceof CPListElementAttribute) {

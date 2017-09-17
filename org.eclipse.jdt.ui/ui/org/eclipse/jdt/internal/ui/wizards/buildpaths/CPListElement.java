@@ -87,11 +87,9 @@ public class CPListElement {
 	/**
 	 * List of {@link CPListElement} and {@link CPListElementAttribute}.
 	 */
-	private ArrayList<Object> fChildren;
+	protected ArrayList<Object> fChildren;
 	private IPath fLinkTarget, fOrginalLinkTarget;
 	private IModuleDescription fModule;
-	private String fPathRootNodeName= null;
-	private boolean fIsModuleRootNode;
 
 	private CPListElement() {}
 
@@ -593,13 +591,6 @@ public class CPListElement {
 	public boolean equals(Object other) {
 		if (other != null && other.getClass().equals(getClass())) {
 			CPListElement elem= (CPListElement) other;
-			// for root node, it should be exactly same object
-			if(elem.isRootNodeForPath()) {
-				return (this == other);
-			}
-			if(getClasspathEntry() == null) {
-				return false;
-			}
 			return getClasspathEntry().equals(elem.getClasspathEntry());
 		}
 		return false;
@@ -1035,55 +1026,15 @@ public class CPListElement {
 		}
 	}
 
-	// all root node related functions have package access
-	// can add CPListElement only to root  path
-	void addCPListElement(CPListElement cpe) {
-		if(isRootNodeForPath()) {
-			fChildren.add(cpe);
-		}
-	}	
-	
-	// can add list of CPListElement only to root  path
-	void addCPListElement(List<CPListElement> elementsToAdd) {
-		if(isRootNodeForPath()) {
-			fChildren.addAll(elementsToAdd);
-		}
-	}
-	
-	// return children of root  path or null
-	ArrayList<Object> getChildren() {
-		if(isRootNodeForPath()) {
-			return fChildren;
-		}
-		else { 
-			return null;
-		}
-	}
-
-	String getPathRootNodeName() {
-		return fPathRootNodeName;
-	}
-
-	void setPathRootNodeName(String rootNodeName, boolean modulePath) {
-		fPathRootNodeName = rootNodeName;
-		fIsModuleRootNode = modulePath;
-	}
-	
 	boolean isRootNodeForPath() {
-		return (fPathRootNodeName != null);
+		return false;
 	}
-	
+
 	boolean isModulePathRootNode() {
-		if(isRootNodeForPath()==false) {
-			 Assert.isLegal(false);
-		}
-		return fIsModuleRootNode;
+		return false;
 	}
 	
 	boolean isClassPathRootNode() {
-		if(isRootNodeForPath()==false) {
-			 Assert.isLegal(false);
-		}
-		return !fIsModuleRootNode; 
+		return false; 
 	}
 }
