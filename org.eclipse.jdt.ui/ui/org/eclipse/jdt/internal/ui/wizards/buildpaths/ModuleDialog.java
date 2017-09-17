@@ -18,6 +18,7 @@ import static org.eclipse.swt.events.SelectionListener.widgetSelectedAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -668,6 +669,7 @@ public class ModuleDialog extends StatusDialog {
 	private void initializeValues() {
 		fModule2RequiredModules= new HashMap<>();
 
+		boolean isJava9JRE= isJava9JRE();
 		List<String> availableNames= new ArrayList<>(moduleNames());
 		List<String> includedNames= new ArrayList<>();
 		List<LimitModules> limits= fCurrCPElement.getModuleEncapsulationDetails(LimitModules.class);
@@ -676,6 +678,9 @@ public class ModuleDialog extends StatusDialog {
 				includedNames.addAll(limitModules.fExplicitlyIncludedModules);
 				availableNames.removeAll(limitModules.fExplicitlyIncludedModules);
 			}
+		} else if (isJava9JRE) {
+			includedNames= defaultIncludedModuleNames();
+			availableNames.removeAll(includedNames);
 		} else {
 			includedNames= availableNames;
 			availableNames= new ArrayList<>();
@@ -687,10 +692,8 @@ public class ModuleDialog extends StatusDialog {
 
 		// access to widgets may trigger validation, which needs all values to be initialized (non-null):
 
-		if (fCurrCPElement.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-			IPackageFragmentRoot[] roots= findRoots(fCurrCPElement);
-			if (roots.length > 1 && roots[0].getModuleDescription() != null)
-				fIsModuleCheckbox.setEnabled(false); // assume multi-module container is Java 9 JRE
+		if (isJava9JRE) {
+			fIsModuleCheckbox.setEnabled(false);
 		}
 
 		List<ModulePatch> patchedModules= fCurrCPElement.getModuleEncapsulationDetails(ModulePatch.class);
@@ -700,6 +703,14 @@ public class ModuleDialog extends StatusDialog {
 			fPatchedModule.setText(patchedModules.iterator().next().fModule);
 	}
 
+	private boolean isJava9JRE() {
+		if (fCurrCPElement.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+			IPackageFragmentRoot[] roots= findRoots(fCurrCPElement);
+			if (roots.length > 1 && roots[0].getModuleDescription() != null)
+				return true; // assume multi-module container is Java 9 JRE
+		}
+		return false;
+	}
 	private IPackageFragmentRoot[] findRoots(CPListElement element) {
 		IClasspathEntry entry= element.getClasspathEntry();
 		IPackageFragmentRoot[] roots= element.getJavaProject().findPackageFragmentRoots(entry);
@@ -750,6 +761,19 @@ public class ModuleDialog extends StatusDialog {
 			}
 		}
 		return fModuleNames= moduleNames;
+	}
+
+	private List<String> defaultIncludedModuleNames() {
+		if (fJavaElements != null) {
+			List<IPackageFragmentRoot> roots= new ArrayList<>();
+			for (int i= 0; i < fJavaElements.length; i++) {
+				if (fJavaElements[i] instanceof IPackageFragmentRoot) {
+					roots.add((IPackageFragmentRoot) fJavaElements[i]);
+				}
+			}
+			return JavaModelAccess.defaultRootModules(roots);
+		}
+		return Collections.emptyList();
 	}
 
 	private void recordModule(IModuleDescription module, Set<String> moduleNames) {
