@@ -1134,7 +1134,7 @@ public class ASTFlattener extends GenericVisitor {
 
 	/*
 	 * @see ASTVisitor#visit(ModuleModifier)
-	 * @since 3.13 BETA_JAVA9
+	 * @since 3.14
 	 */
 	@Override
 	public boolean visit(ModuleModifier node) {

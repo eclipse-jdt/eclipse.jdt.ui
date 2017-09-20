@@ -165,7 +165,7 @@ public final class JavaUI {
 	 * The editor part id of the module-info.java editor (value
 	 * <code>"org.eclipse.jdt.ui.ModuleInfoEditor"</code>).
 	 * 
-	 * @since 3.13 BETA_JAVA9
+	 * @since 3.14
 	 */
 	public static final String ID_MODULE_INFO_EDITOR= 	"org.eclipse.jdt.ui.ModuleInfoEditor"; //$NON-NLS-1$
 
@@ -173,7 +173,7 @@ public final class JavaUI {
 	 * The editor part id of the module-info.class editor (value
 	 * <code>"org.eclipse.jdt.ui.ModuleInfoClassFileEditor"</code>).
 	 * 
-	 * @since 3.13 BETA_JAVA9
+	 * @since 3.14
 	 */
 	public static final String ID_MODULE_INFO_CF_EDITOR= "org.eclipse.jdt.ui.ModuleInfoClassFileEditor"; //$NON-NLS-1$
 
@@ -181,7 +181,7 @@ public final class JavaUI {
 	 * The editor part id of the module-info.class editor with no source (value
 	 * <code>"org.eclipse.jdt.ui.ModuleInfoClassFileEditorNoSource"</code>).
 	 * 
-	 * @since 3.13 BETA_JAVA9
+	 * @since 3.14
 	 */
 	public static final String ID_MODULE_INFO_CF_EDITOR_NO_SOURCE= "org.eclipse.jdt.ui.ModuleInfoClassFileEditorNoSource"; //$NON-NLS-1$
 

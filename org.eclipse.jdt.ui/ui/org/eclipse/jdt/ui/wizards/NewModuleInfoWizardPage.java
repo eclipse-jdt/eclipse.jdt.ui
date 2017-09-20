@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  * Note: This class is not intended to be subclassed, but clients can instantiate.
  * </p>
  *
- * @since 3.13 BETA_JAVA9
+ * @since 3.14
  *
  * @noextend This class is not intended to be subclassed by clients.
  */

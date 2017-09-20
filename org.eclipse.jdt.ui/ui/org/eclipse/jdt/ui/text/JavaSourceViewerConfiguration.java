@@ -223,7 +223,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 *            the default partitioning
 	 * @param isModuleInfo <code>true</code> if {@link JavaCodeScanner} should be initialized for
 	 *            module-info code
-	 * @since 3.13 BETA_JAVA9
+	 * @since 3.14
 	 */
 	public JavaSourceViewerConfiguration(IColorManager colorManager, IPreferenceStore preferenceStore, ITextEditor editor, String partitioning, boolean isModuleInfo) {
 		super(preferenceStore);

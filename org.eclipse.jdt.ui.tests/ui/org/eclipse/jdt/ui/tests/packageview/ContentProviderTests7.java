@@ -44,7 +44,7 @@ import junit.framework.TestSuite;
  * <li>Bug 501507: [1.9] Consider displaying the module-info.java file in the source folder root
  * </ul>
  * 
- * @since 3.13 BETA_JAVA9
+ * @since 3.14
  */
 public class ContentProviderTests7 extends TestCase {
 

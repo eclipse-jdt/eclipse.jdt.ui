@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.ui" version="2">
     <resource path="META-INF/MANIFEST.MF">
+        <filter id="924844039">
+            <message_arguments>
+                <message_argument value="3.13.1"/>
+                <message_argument value="3.13.0"/>
+            </message_arguments>
+        </filter>
         <filter comment="keep the same version as in 4.7.1 for now" id="924844039">
             <message_arguments>
                 <message_argument value="3.13.1"/>
@@ -160,11 +166,52 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="ui/org/eclipse/jdt/ui/JavaUI.java" type="org.eclipse.jdt.ui.JavaUI">
+        <filter id="1141899266">
+            <message_arguments>
+                <message_argument value="3.14"/>
+                <message_argument value="3.13"/>
+                <message_argument value="ID_MODULE_INFO_CF_EDITOR"/>
+            </message_arguments>
+        </filter>
+        <filter id="1141899266">
+            <message_arguments>
+                <message_argument value="3.14"/>
+                <message_argument value="3.13"/>
+                <message_argument value="ID_MODULE_INFO_CF_EDITOR_NO_SOURCE"/>
+            </message_arguments>
+        </filter>
+        <filter id="1141899266">
+            <message_arguments>
+                <message_argument value="3.14"/>
+                <message_argument value="3.13"/>
+                <message_argument value="ID_MODULE_INFO_EDITOR"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="ui/org/eclipse/jdt/ui/actions/IJavaEditorActionDefinitionIds.java" type="org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds">
         <filter id="571473929">
             <message_arguments>
                 <message_argument value="ITextEditorActionDefinitionIds"/>
                 <message_argument value="IJavaEditorActionDefinitionIds"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/ui/text/JavaSourceViewerConfiguration.java" type="org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration">
+        <filter id="1141899266">
+            <message_arguments>
+                <message_argument value="3.14"/>
+                <message_argument value="3.13"/>
+                <message_argument value="JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String, boolean)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="ui/org/eclipse/jdt/ui/wizards/NewModuleInfoWizardPage.java" type="org.eclipse.jdt.ui.wizards.NewModuleInfoWizardPage">
+        <filter id="1108344834">
+            <message_arguments>
+                <message_argument value="3.14"/>
+                <message_argument value="3.13"/>
+                <message_argument value="org.eclipse.jdt.ui.wizards.NewModuleInfoWizardPage"/>
             </message_arguments>
         </filter>
     </resource>

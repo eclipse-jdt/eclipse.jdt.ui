@@ -204,7 +204,7 @@ public class JavaProjectHelper {
 	 * Sets the compiler options to 9 for the given project.
 	 * 
 	 * @param project the java project
-	 * @since 3.13 BETA_JAVA9
+	 * @since 3.14
 	 */
 	public static void set9CompilerOptions(IJavaProject project) {
 		Map<String, String> options= project.getOptions(false);
@@ -269,7 +269,7 @@ public class JavaProjectHelper {
 	 * Sets the compiler options to 9.
 	 * 
 	 * @param options the compiler options to configure
-	 * @since 3.13 BETA_JAVA9
+	 * @since 3.14
 	 */
 	public static void set9CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_9, options);

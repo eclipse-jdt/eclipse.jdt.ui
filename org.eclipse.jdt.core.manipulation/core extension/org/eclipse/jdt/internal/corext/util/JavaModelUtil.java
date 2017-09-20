@@ -106,19 +106,19 @@ public final class JavaModelUtil {
 
 	/**
 	 * The name of the module-info.java file.
-	 * @since 3.13 BETA_JAVA9
+	 * @since 3.14
 	 */
 	public static final String MODULE_INFO_JAVA= "module-info.java"; //$NON-NLS-1$
 
 	/**
 	 * The name of the module-info.class file.
-	 * @since 3.13 BETA_JAVA9
+	 * @since 3.14
 	 */
 	public static final String MODULE_INFO_CLASS= "module-info.class"; //$NON-NLS-1$
 
 	/**
 	 * Constant for the name of all unnamed modules.
-	 * @since 3.13 BETA_JAVA9
+	 * @since 3.14
 	 */
 	public static final String ALL_UNNAMED= "ALL-UNNAMED"; //$NON-NLS-1$
 
@@ -981,7 +981,7 @@ public final class JavaModelUtil {
 	 *
 	 * @param cu the compilation unit to test
 	 * @return <code>true</code> if the given CU is the module-info.java
-	 * @since 3.13 BETA_JAVA9
+	 * @since 3.14
 	 */
 	public static boolean isModuleInfo(ICompilationUnit cu) {
 		return MODULE_INFO_JAVA.equals(cu.getElementName());
@@ -992,7 +992,7 @@ public final class JavaModelUtil {
 	 * 
 	 * @param typeRoot the type root to test
 	 * @return <code>true</code> if the given type root is a module-info.java CU or a module-info.class class file.
-	 * @since 3.13 BETA_JAVA9
+	 * @since 3.14
 	 */
 	public static boolean isModuleInfo(ITypeRoot typeRoot) {
 		return (typeRoot instanceof ICompilationUnit && isModuleInfo((ICompilationUnit) typeRoot))
@@ -1004,7 +1004,7 @@ public final class JavaModelUtil {
 	 * 
 	 * @param javaElement the Java element to test
 	 * @return <code>true</code> if the given Java element represents a module.
-	 * @since 3.13 BETA_JAVA9
+	 * @since 3.14
 	 */
 	public static boolean isModule(IJavaElement javaElement) {
 		return javaElement instanceof IModuleDescription
@@ -1018,7 +1018,7 @@ public final class JavaModelUtil {
 	 * @return true iff at least one ordinary compilation unit (or class file) was found. 
 	 * @throws JavaModelException if the package fragment does not exist or if an
 	 *      exception occurs while accessing its corresponding resource
-	 * @since 3.13 BETA_JAVA9
+	 * @since 3.14
 	 */
 	public static boolean containsOrdinaryCompilationUnit(IPackageFragment fragment) throws JavaModelException {
 		for (IJavaElement child : fragment.getChildren()) {
