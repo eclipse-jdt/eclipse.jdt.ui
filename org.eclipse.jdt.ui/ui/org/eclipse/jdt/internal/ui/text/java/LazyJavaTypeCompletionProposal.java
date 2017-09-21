@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -100,8 +100,8 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 
 		String qualifiedTypeName= getQualifiedTypeName();
 
-		// Type in package info and module info must be fully qualified.
-		if (fCompilationUnit != null && (JavaModelUtil.isPackageInfo(fCompilationUnit) || JavaModelUtil.isModuleInfo(fCompilationUnit)))
+		// Type in package info must be fully qualified.
+		if (fCompilationUnit != null && JavaModelUtil.isPackageInfo(fCompilationUnit))
 			return qualifiedTypeName;
 
 		if (qualifiedTypeName.indexOf('.') == -1 && replacement.length() > 0)
@@ -163,7 +163,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	}
 
 	private ImportRewrite createImportRewrite() {
-		if (fCompilationUnit != null && allowAddingImports() && !JavaModelUtil.isPackageInfo(fCompilationUnit) && !JavaModelUtil.isModuleInfo(fCompilationUnit)) {
+		if (fCompilationUnit != null && allowAddingImports() && !JavaModelUtil.isPackageInfo(fCompilationUnit)) {
 			try {
 				CompilationUnit cu= getASTRoot(fCompilationUnit);
 				if (cu == null) {
