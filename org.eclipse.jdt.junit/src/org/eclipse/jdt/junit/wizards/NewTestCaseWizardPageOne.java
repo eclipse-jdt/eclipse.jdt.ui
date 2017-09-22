@@ -1391,6 +1391,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		return fJUnitVersion != JUnitVersion.VERSION_3 ? "java.lang.Object" : getJUnit3TestSuperclassName(); //$NON-NLS-1$
 	}
 
+	/**
+	 * @since 3.11
+	 */
 	@Override
 	public int getModifiers() {
 		int modifiers= super.getModifiers();

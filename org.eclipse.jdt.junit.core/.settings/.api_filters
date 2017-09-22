@@ -3,12 +3,6 @@
     <resource path="META-INF/MANIFEST.MF">
         <filter comment="keep the same version as in 4.7.1 for now" id="924844039">
             <message_arguments>
-                <message_argument value="3.9.0"/>
-                <message_argument value="3.9.0"/>
-            </message_arguments>
-        </filter>
-        <filter id="924844039">
-            <message_arguments>
                 <message_argument value="3.9.50"/>
                 <message_argument value="3.9.0"/>
             </message_arguments>
