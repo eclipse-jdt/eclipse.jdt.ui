@@ -7019,6 +7019,11 @@
 	        <objectState
 	        	name="open"
 	        	value="true"/>
+            <not>
+            <objectState 
+	            name="projectNature" 
+	            value="org.eclipse.pde.PluginNature"/>
+            </not>
             </and>
        	 </visibility>
          <action
