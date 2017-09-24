@@ -33,8 +33,11 @@ import org.eclipse.jface.util.BidiUtils;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -60,11 +63,12 @@ public class ModuleAddReadsBlock {
 	private StringDialogField fTargetModule;
 
 	private IStatus fSourceModuleStatus;
+	private IStatus fTargetModuleStatus;
 
 	private Control fSWTWidget;
 
 	private final ModuleAddReads fInitialValue;
-	
+
 	private IJavaElement[] fSourceJavaElements;
 
 	/**
@@ -79,7 +83,7 @@ public class ModuleAddReadsBlock {
 
 		fSourceModuleStatus= new StatusInfo();
 
-		IDialogFieldListener adapter= field -> addExportsDialogFieldChanged(field);
+		IDialogFieldListener adapter= field -> addReadsDialogFieldChanged(field);
 
 		// create the dialog fields (no widgets yet)
 		fSourceModule= new StringDialogField();
@@ -205,17 +209,28 @@ public class ModuleAddReadsBlock {
 
 	// ---------- IDialogFieldListener --------
 
-	private void addExportsDialogFieldChanged(DialogField field) {
+	private void addReadsDialogFieldChanged(DialogField field) {
 		if (fSWTWidget != null) {
 			if (field == fSourceModule && fSourceModule.isEnabled()) {
-				updateModuleStatus();
+				updateSourceModuleStatus();
+			} else if (field == fTargetModule && fTargetModule.isEnabled()) {
+				updateTargetModuleStatus();
 			}
 			doStatusLineUpdate();
 		}
 	}
 
-	private void updateModuleStatus() {
+	private void updateSourceModuleStatus() {
 		fSourceModuleStatus= computeSourceModuleStatus(getSourceModuleText());
+		if (fSourceModuleStatus.isOK()) {
+			if (getTargetModulesText().isEmpty() && fTargetModuleStatus == null) {
+				fTargetModuleStatus= ModuleDialog.newSilentError();
+			}
+		}
+	}
+
+	private void updateTargetModuleStatus() {
+		fTargetModuleStatus= computeTargetModuleStatus(getTargetModulesText());
 	}
 
 	private IStatus computeSourceModuleStatus(String value) {
@@ -231,12 +246,32 @@ public class ModuleAddReadsBlock {
 		return status;
 	}
 
+	private IStatus computeTargetModuleStatus(String value) {
+		StatusInfo status= new StatusInfo();
+		if (value.isEmpty()) {
+			status.setError(NewWizardMessages.ModuleAddExportsBlock_targetModuleEmpty_error);
+			return status;
+		}
+		String source= "9", compliance= "9"; //$NON-NLS-1$ //$NON-NLS-2$
+		if (fSourceJavaElements != null && fSourceJavaElements.length > 0) {
+			IJavaProject project= fSourceJavaElements[0].getJavaProject();
+			source= project.getOption(JavaCore.COMPILER_SOURCE, true);
+			compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		}
+		if (JavaConventions.validateModuleName(value, source, compliance).getSeverity() == IStatus.ERROR) {
+			status.setError(Messages.format(NewWizardMessages.ModuleAddExportsBlock_illegalTargetModule_error, value));
+		}
+		return status;
+		
+	}
+
 	private void doStatusLineUpdate() {
 		IStatus status= null;
 		if (!fSourceModuleStatus.isOK()) {
 			status= fSourceModuleStatus; 	// priority
+		} else {
+			status= fTargetModuleStatus;
 		}
-		// target module is not (yet) validated
 		if (status == null) {
 			status= Status.OK_STATUS;
 		}

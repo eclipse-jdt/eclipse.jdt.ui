@@ -486,6 +486,8 @@ public final class NewWizardMessages extends NLS {
 	public static String ModuleAddExportsBlock_sourceModuleEmpty_error;
 	public static String ModuleAddExportsBlock_wrongPackage_error;
 	public static String ModuleAddExportsBlock_wrongSourceModule_error;
+	public static String ModuleAddExportsBlock_targetModuleEmpty_error;
+	public static String ModuleAddExportsBlock_illegalTargetModule_error;
 
 	public static String AddModuleDetailsDialog_notPersisted_warning;
 	public static String AddExportsDialog_title;
