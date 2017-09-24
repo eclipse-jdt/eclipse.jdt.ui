@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Karsten Thoms (itemis) - Bug#223318
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
@@ -51,7 +52,7 @@ import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 
 /**
  * Viewer comparator for Java elements. Ordered by element category, then by element name.
- * Package fragment roots are sorted as ordered on the classpath.
+ * Package fragment roots are either sorted as ordered on the classpath, or by their name.
  *
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -84,16 +85,30 @@ public class JavaElementComparator extends ViewerComparator {
 	private static final int JAVAELEMENTS= 50;
 	private static final int OTHERS= 51;
 
-	private MembersOrderPreferenceCache fMemberOrderCache;
+	private final MembersOrderPreferenceCache fMemberOrderCache;
+	private final boolean fSortPFRByName;
 
 	/**
 	 * Constructor.
 	 */
 	public JavaElementComparator() {
+		this(false);
+	}
+	
+	/**
+	 * Constructor.
+	 * 
+	 * @param sortPFRByName When <code>true</code> {@link IPackageFragmentRoot}s are sorted by name and not by their classpath order
+	 * 
+	 * @since 3.14
+	 */
+	public JavaElementComparator(boolean sortPFRByName) {
 		super(null); // delay initialization of collator
 		fMemberOrderCache= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
+		fSortPFRByName = sortPFRByName;
 	}
 
+		
 	@Override
 	public int category(Object element) {
 		if (element instanceof IJavaElement) {
@@ -184,7 +199,7 @@ public class JavaElementComparator extends ViewerComparator {
 		int cat1= category(e1);
 		int cat2= category(e2);
 
-		if (needsClasspathComparision(e1, cat1, e2, cat2)) {
+		if (needsClasspathComparison(e1, cat1, e2, cat2)) {
 			IPackageFragmentRoot root1= getPackageFragmentRoot(e1);
 			IPackageFragmentRoot root2= getPackageFragmentRoot(e2);
 			if (root1 == null) {
@@ -323,7 +338,7 @@ public class JavaElementComparator extends ViewerComparator {
 		return Integer.MAX_VALUE;
 	}
 
-	private boolean needsClasspathComparision(Object e1, int cat1, Object e2, int cat2) {
+	private boolean needsClasspathComparison(Object e1, int cat1, Object e2, int cat2) {
 		if ((cat1 == PACKAGEFRAGMENTROOTS && cat2 == PACKAGEFRAGMENTROOTS) ||
 			(cat1 == PACKAGEFRAGMENT &&
 				((IPackageFragment)e1).getParent().getResource() instanceof IProject &&
@@ -331,6 +346,11 @@ public class JavaElementComparator extends ViewerComparator {
 			(cat1 == PACKAGEFRAGMENTROOTS &&
 				cat2 == PACKAGEFRAGMENT &&
 				((IPackageFragment)e2).getParent().getResource() instanceof IProject)) {
+			// when PFRs should be sorted by name, they do not need classpath comparison
+			if (fSortPFRByName && cat1 == PACKAGEFRAGMENTROOTS && cat2 == PACKAGEFRAGMENTROOTS) {
+				// categories might be PACKAGEFRAGMENTROOTS, but not necessarily compared objects are PFR instances
+				return (e1 instanceof IPackageFragmentRoot && e2 instanceof IPackageFragmentRoot) ? false : true;
+			}
 			IJavaProject p1= getJavaProject(e1);
 			return p1 != null && p1.equals(getJavaProject(e2));
 		}

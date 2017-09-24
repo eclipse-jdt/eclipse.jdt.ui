@@ -170,6 +170,16 @@ public class PreferenceConstants {
 	public static final String APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= "org.eclipse.jdt.ui.flatPackagesInPackageExplorer";//$NON-NLS-1$
 
 	/**
+	 * A named preference that controls if entries of library containers are sorted alphabetically.
+	 * <p>
+	 * Value is of type <code>Boolean</code>: if <code>true</code> entries are sorted alphabetically, otherwise
+	 * by their occurance order.
+	 * </p>
+	 * @since 3.14
+	 */
+	public static final String APPEARANCE_SORT_LIBRARY_ENTRIES_BY_NAME= "org.eclipse.jdt.ui.sortLibraryEntriesByName";//$NON-NLS-1$
+
+	/**
 	 * A named preference that defines how member elements are ordered by the
 	 * Java views using the <code>JavaElementSorter</code>.
 	 * <p>
