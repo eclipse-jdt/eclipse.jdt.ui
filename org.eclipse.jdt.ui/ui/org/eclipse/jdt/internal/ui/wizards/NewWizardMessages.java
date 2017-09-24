@@ -676,8 +676,8 @@ public final class NewWizardMessages extends NLS {
 	public static String CPListLabelProvider_module_no;
 	public static String CPListLabelProvider_modular_modifiesEncapsulation_label;
 	public static String CPListLabelProvider_modular_label;
-	public static String CPListLabelProvider_modular_limitsAndModifies_label;
-	public static String CPListLabelProvider_modular_limitsModules_label;
+	public static String CPListLabelProvider_modular_modifiesContentsAndEncapsulation_label;
+	public static String CPListLabelProvider_modular_modifiesContents_label;
 	public static String CPListLabelProvider_not_modular_label;
 
 	public static String CPListLabelProvider_add_exports_name_label;

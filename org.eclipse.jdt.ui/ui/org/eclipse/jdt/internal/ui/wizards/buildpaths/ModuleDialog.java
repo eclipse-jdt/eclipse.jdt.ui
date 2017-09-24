@@ -960,10 +960,22 @@ public class ModuleDialog extends StatusDialog {
 			if (!patchedModule.isEmpty())
 				allElements.add(ModulePatch.fromString(attribute, patchedModule));
 		}
-		if (!fModuleLists[IDX_AVAILABLE].fNames.isEmpty() || !fModuleLists[IDX_IMPLICITLY_INCLUDED].fNames.isEmpty()) {
+		if (modifiesContents()) {
 			allElements.add(new ModuleEncapsulationDetail.LimitModules(fModuleLists[IDX_INCLUDED].fNames, attribute));
 		}
 		return allElements.toArray(new ModuleEncapsulationDetail[allElements.size()]);
+	}
+
+	private boolean modifiesContents() {
+		if (fModuleLists[IDX_AVAILABLE].fNames.isEmpty() && fModuleLists[IDX_IMPLICITLY_INCLUDED].fNames.isEmpty()) {
+			return false; // all modules are "included" - this includes the single-module case.
+		}
+		Set<String> initialNames = new HashSet<>(defaultIncludedModuleNames());
+		for (String name : fModuleLists[IDX_INCLUDED].fNames) {
+			if (!initialNames.remove(name))
+				return true;
+		}
+		return !initialNames.isEmpty();
 	}
 
 	/*

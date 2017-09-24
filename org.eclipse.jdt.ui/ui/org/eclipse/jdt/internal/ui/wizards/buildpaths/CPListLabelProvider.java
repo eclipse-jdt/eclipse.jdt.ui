@@ -258,10 +258,10 @@ public class CPListLabelProvider extends LabelProvider {
 				}
 				if (modifiesEncaps) {
 					if (limitModules)
-						return NewWizardMessages.CPListLabelProvider_modular_limitsAndModifies_label;
+						return NewWizardMessages.CPListLabelProvider_modular_modifiesContentsAndEncapsulation_label;
 					return NewWizardMessages.CPListLabelProvider_modular_modifiesEncapsulation_label;
 				} else if (limitModules) {
-					return NewWizardMessages.CPListLabelProvider_modular_limitsModules_label;
+					return NewWizardMessages.CPListLabelProvider_modular_modifiesContents_label;
 				}
 				return NewWizardMessages.CPListLabelProvider_modular_label;
 			} else {
