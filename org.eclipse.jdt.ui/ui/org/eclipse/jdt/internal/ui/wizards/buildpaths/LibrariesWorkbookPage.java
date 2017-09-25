@@ -62,7 +62,10 @@ import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.launching.AbstractVMInstall;
+import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -639,7 +642,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (showModuleDialog(getShell(), elem)) {
 				String[] changedAttributes= { CPListElement.MODULE };
 				attributeUpdated(selElement, changedAttributes);
-
+				if (hasRootNodes()) {
+					Object mod= selElement.getAttribute(CPListElement.MODULE);
+					boolean remove= mod == null;
+					moveCPElementAcrossNode(selElement, remove);
+				}
 				fLibrariesList.refresh(elem);
 				fClassPathList.dialogFieldChanged(); // validate
 				updateEnabledState();
@@ -736,7 +743,11 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 								// find index
 								Object obj= ((RootCPListElement) cpe).getChildren().get(j);
 								if (obj.equals(elem)) {
-									((RootCPListElement)cpe).getChildren().set(j, curr);
+									((RootCPListElement) cpe).getChildren().set(j, curr);
+									int changeNodeLocation= doesElementNeedNodeChange(elem, curr);
+									if (changeNodeLocation != 0) {
+										moveCPElementAcrossNode(curr, changeNodeLocation == -1);
+									}
 									fLibrariesList.dialogFieldChanged();
 									fLibrariesList.refresh();
 									break;
@@ -753,6 +764,86 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			}
 		}
 
+	}
+
+	/**
+	 * @param curr is classpath element
+	 * @param remove if true element needs to be removed from modulepath ( if present) and put in
+	 *            classpath and if false element need to be moved from classpath (if present) to
+	 *            modulepath
+	 */
+	private void moveCPElementAcrossNode(CPListElement curr, boolean remove) {
+		List<CPListElement> elements= fLibrariesList.getElements();
+		CPListElement selElement= curr;
+		//remove from module node or classnode
+		for (CPListElement cpListElement : elements) {
+			if (cpListElement.isRootNodeForPath()) {
+				if ((remove ? cpListElement.isModulePathRootNode() : cpListElement.isClassPathRootNode()) && ((RootCPListElement) cpListElement).getChildren().contains(selElement)) {
+					((RootCPListElement) cpListElement).removeCPListElement(selElement);
+					fLibrariesList.getTreeViewer().remove(selElement);
+					fLibrariesList.dialogFieldChanged();
+				}
+			}
+		}
+		// add to classpath node or module and select the cpe
+		for (CPListElement cpListElement : elements) {
+			if (cpListElement.isRootNodeForPath()) {
+				if (remove ? cpListElement.isClassPathRootNode() : cpListElement.isModulePathRootNode()) {
+					RootCPListElement rootCPListElement= (RootCPListElement) cpListElement;
+					if (rootCPListElement.getChildren().contains(selElement))
+						break;
+					rootCPListElement.addCPListElement(selElement);
+					List<CPListElement> all= fLibrariesList.getElements();
+					fLibrariesList.removeAllElements();
+					fLibrariesList.setElements(all);
+					fLibrariesList.refresh();
+					fLibrariesList.getTreeViewer().expandToLevel(2);
+					fLibrariesList.postSetSelection(new StructuredSelection(selElement));
+					break;
+				}
+			}
+		}
+
+	}
+
+	/**
+	 * @param elem is former cpelement
+	 * @param curr is new cpelement
+	 * @return 0 is no change is required, -1 if modular element is removed, +1 if non-modular element
+	 *         is removed.
+	 */
+	private int doesElementNeedNodeChange(CPListElement elem, CPListElement curr) {
+		if (elem.getClasspathEntry().getEntryKind() != IClasspathEntry.CPE_CONTAINER)
+			return 0;
+		if (curr.getClasspathEntry().getEntryKind() != IClasspathEntry.CPE_CONTAINER)
+			return 0;
+		String v1= null;
+		String v2= null;
+		IVMInstall vm1= JavaRuntime.getVMInstall(elem.getPath());
+		if (vm1 instanceof AbstractVMInstall) {
+			v1= ((AbstractVMInstall) vm1).getJavaVersion();
+		}
+		IVMInstall vm2= JavaRuntime.getVMInstall(curr.getPath());
+		if (vm2 instanceof AbstractVMInstall) {
+			v2= ((AbstractVMInstall) vm2).getJavaVersion();
+		}
+		if (v1 != null && v2 != null) {
+			boolean mod1= JavaModelUtil.is9OrHigher(v1);
+			boolean mod2= JavaModelUtil.is9OrHigher(v2);
+			if (mod1 == true && mod2 == true)
+				return 0;
+			if (mod1 == false && mod2 == false)
+				return 0;
+			if (mod1 == true && mod2 == false) {
+				// removed module
+				return -1;
+			}
+			if (mod1 == false && mod2 == true) {
+				//added module
+				return 1;
+			}
+		}
+		return 0;
 	}
 
 	/**
@@ -818,17 +909,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (!attrib.isBuiltIn()) {
 				return canEditCustomAttribute(attrib);
 			}
-			CPListElement parent = attrib.getParent();
-			if(hasRootNodes() && attrib.getKey().equals(IClasspathAttribute.MODULE)) {
-				// if the parent in in classpath list disable edit
-				CPListElement root = fLibrariesList.getElement(0).isClassPathRootNode() ? fLibrariesList.getElement(0) :
-						fLibrariesList.getElement(1);
-				ArrayList<Object> children= ((RootCPListElement)root).getChildren();
-				for (Object object : children) {
-					if(object == parent) {
-						return false;
-					}
-				}
+			if (hasRootNodes() && attrib.getKey().equals(IClasspathAttribute.MODULE)) {
+				//module attribute should always be enabled
+				return true;
 			}
 			
 			return true;

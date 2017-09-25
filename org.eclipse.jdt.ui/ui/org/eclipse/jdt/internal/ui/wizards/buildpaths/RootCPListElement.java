@@ -85,4 +85,10 @@ public class RootCPListElement extends CPListElement {
 	boolean isClassPathRootNode() {
 		return !fIsModuleRootNode;
 	}
+
+	void removeCPListElement(CPListElement element) {
+		if (isRootNodeForPath()) {
+			fChildren.remove(element);
+		}
+	}
 }
