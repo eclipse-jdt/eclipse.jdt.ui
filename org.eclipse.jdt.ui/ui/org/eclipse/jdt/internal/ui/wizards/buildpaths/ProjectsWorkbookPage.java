@@ -445,17 +445,9 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			if (!attrib.isBuiltIn()) {
 				return canEditCustomAttribute(attrib);
 			}
-			CPListElement parent = attrib.getParent();
-			if(hasRootNodes() && attrib.getKey().equals(IClasspathAttribute.MODULE)) {
-				// if the parent in in library list disable edit
-				CPListElement root = fProjectsList.getElement(0).isClassPathRootNode() ? fProjectsList.getElement(0) :
-					fProjectsList.getElement(1);
-				ArrayList<Object> children= ((RootCPListElement)root).getChildren();
-				for (Object object : children) {
-					if(object == parent) {
-						return false;
-					}
-				}
+			if (hasRootNodes() && attrib.getKey().equals(IClasspathAttribute.MODULE)) {
+				// module info should always be enabled.
+				return true;
 			}
 			return true;
 		}
@@ -487,9 +479,54 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			needRefresh= editCustomAttribute(getShell(), elem);
 		}
 		if (needRefresh) {
+			if (key.equals(CPListElement.MODULE) && hasRootNodes()) {
+				// if module attribute is changed, the element 
+				// may change nodes
+				CPListElement selElement= elem.getParent();
+				Object mod= selElement.getAttribute(CPListElement.MODULE);
+				boolean remove= mod == null;
+				List<CPListElement> elements= fProjectsList.getElements();
+				//remove from module node or classnode
+				for (CPListElement cpListElement : elements) {
+					if (cpListElement.isRootNodeForPath()) {
+						if ((remove ? cpListElement.isModulePathRootNode() : cpListElement.isClassPathRootNode()) && ((RootCPListElement) cpListElement).getChildren().contains(selElement)) {
+							((RootCPListElement) cpListElement).removeCPListElement(selElement);
+							fProjectsList.getTreeViewer().remove(selElement);
+							fProjectsList.dialogFieldChanged();
+						}
+					}
+				}
+				// add to classpath node or module and select the cpe
+				for (CPListElement cpListElement : elements) {
+					if (cpListElement.isRootNodeForPath()) {
+						if (remove ? cpListElement.isClassPathRootNode() : cpListElement.isModulePathRootNode()) {
+							RootCPListElement rootCPListElement= (RootCPListElement) cpListElement;
+							if (rootCPListElement.getChildren().contains(cpListElement))
+								break;
+							rootCPListElement.addCPListElement(selElement);
+							List<CPListElement> all= fProjectsList.getElements();
+							fProjectsList.removeAllElements();
+							fProjectsList.setElements(all);
+							fProjectsList.refresh();
+							fProjectsList.getTreeViewer().expandToLevel(2);
+							fProjectsList.getTreeViewer().setSelection(new StructuredSelection(selElement));
+							break;
+						}
+					}
+				}
+
+			}
 			fProjectsList.refresh(elem);
 			fClassPathList.dialogFieldChanged(); // validate
 			fProjectsList.postSetSelection(new StructuredSelection(elem));
+			// if module attribute was changed - it will switch nodes and hence parent should be
+			// selected
+			if (key.equals(CPListElement.MODULE) && hasRootNodes()) {
+				fProjectsList.postSetSelection(new StructuredSelection(elem.getParent()));
+			} else {
+				fProjectsList.postSetSelection(new StructuredSelection(elem));
+			}
+
 		}
 	}
 
