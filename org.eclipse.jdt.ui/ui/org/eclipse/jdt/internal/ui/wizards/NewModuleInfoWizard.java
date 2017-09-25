@@ -10,9 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
 
 import org.eclipse.swt.widgets.Display;
 
@@ -162,7 +161,7 @@ public class NewModuleInfoWizard extends Wizard implements INewWizard {
 	}
 
 	private String getModuleInfoFileContent(IPackageFragmentRoot[] packageFragmentRoots) throws CoreException {
-		List<String> exportedPackages= new ArrayList<>();
+		HashSet<String> exportedPackages= new HashSet<>();
 		for (IPackageFragmentRoot packageFragmentRoot : packageFragmentRoots) {
 			for (IJavaElement child : packageFragmentRoot.getChildren()) {
 				if (child instanceof IPackageFragment) {
