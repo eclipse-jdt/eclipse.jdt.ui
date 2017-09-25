@@ -755,6 +755,11 @@ public class CPListElement {
 				if (!isModuleAttribute(attrib.getName())) {
 					elem.createAttributeElement(attrib.getName(), attrib.getValue(), false);
 				}
+				if (isModuleAttribute(attrib.getName())) {
+					if (elem.getClasspathEntry().getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+						elem.createAttributeElement(MODULE, new ModuleEncapsulationDetail[0], true);
+					}
+				}
 			} else {
 				Object value= attrib.getValue();
 				if (attrib.getName().equals(MODULE)) {
@@ -1021,6 +1026,13 @@ public class CPListElement {
 			moduleAttribute.setValue(new ModuleEncapsulationDetail[0]);
 		}
 	}
+	
+	public void updateExtraAttributeOfClasspathEntry() {
+		this.createAttributeElement(MODULE, new ModuleEncapsulationDetail[0], true);
+		//refresh the cached classpath entry
+		fCachedEntry= null;
+		fCachedEntry= this.getClasspathEntry();
+	}
 
 	boolean isRootNodeForPath() {
 		return false;
@@ -1033,4 +1045,6 @@ public class CPListElement {
 	boolean isClassPathRootNode() {
 		return false; 
 	}
+
+
 }
