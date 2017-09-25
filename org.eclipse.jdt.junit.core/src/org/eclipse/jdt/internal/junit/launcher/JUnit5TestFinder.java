@@ -50,6 +50,8 @@ public class JUnit5TestFinder implements ITestFinder {
 
 		private static final Annotation TESTABLE= new Annotation(JUnitCorePlugin.JUNIT5_TESTABLE_ANNOTATION_NAME);
 
+		private static final Annotation NESTED= new Annotation(JUnitCorePlugin.JUNIT5_JUPITER_NESTED_ANNOTATION_NAME);
+
 		private final String fName;
 
 		private Annotation(String name) {
@@ -58,6 +60,47 @@ public class JUnit5TestFinder implements ITestFinder {
 
 		public String getName() {
 			return fName;
+		}
+
+		public boolean annotatesAtLeastOneInnerClass(ITypeBinding type) {
+			if (type == null) {
+				return false;
+			}
+			if (annotatesDeclaredTypes(type)) {
+				return true;
+			}
+			ITypeBinding superClass= type.getSuperclass();
+			if (annotatesAtLeastOneInnerClass(superClass)) {
+				return true;
+			}
+			ITypeBinding[] interfaces= type.getInterfaces();
+			for (int i= 0; i < interfaces.length; i++) {
+				if (annotatesAtLeastOneInnerClass(interfaces[i])) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private boolean annotatesDeclaredTypes(ITypeBinding type) {
+			ITypeBinding[] declaredTypes= type.getDeclaredTypes();
+			for (int i= 0; i < declaredTypes.length; i++) {
+				if (isNestedClass(declaredTypes[i])) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private boolean isNestedClass(ITypeBinding type) {
+			int modifiers= type.getModifiers();
+			if (type.isInterface() || Modifier.isPrivate(modifiers) || Modifier.isStatic(modifiers)) {
+				return false;
+			}
+			if (annotates(type.getAnnotations())) {
+				return true;
+			}
+			return false;
 		}
 
 		public boolean annotatesTypeOrSuperTypes(ITypeBinding type) {
@@ -110,7 +153,7 @@ public class JUnit5TestFinder implements ITestFinder {
 				if (matchesName(annotation.getAnnotationType())) {
 					return true;
 				}
-				if (TESTABLE.getName().equals(fName)) {
+				if (TESTABLE.getName().equals(fName) || NESTED.getName().equals(fName)) {
 					Set<ITypeBinding> hierarchy= new HashSet<>();
 					if (matchesNameInAnnotationHierarchy(annotation, hierarchy)) {
 						return true;
@@ -252,7 +295,8 @@ public class JUnit5TestFinder implements ITestFinder {
 		if (Annotation.RUN_WITH.annotatesTypeOrSuperTypes(binding)
 				|| Annotation.TEST_4.annotatesAtLeastOneMethod(binding)
 				|| Annotation.TESTABLE.annotatesAtLeastOneMethod(binding)
-				|| Annotation.TESTABLE.annotatesTypeOrSuperTypes(binding)) {
+				|| Annotation.TESTABLE.annotatesTypeOrSuperTypes(binding)
+				|| Annotation.NESTED.annotatesAtLeastOneInnerClass(binding)) {
 			return true;
 		}
 		return CoreTestSearchEngine.isTestImplementor(binding);
