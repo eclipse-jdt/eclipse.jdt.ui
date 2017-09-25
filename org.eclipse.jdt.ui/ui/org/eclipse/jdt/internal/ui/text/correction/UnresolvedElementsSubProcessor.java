@@ -627,7 +627,17 @@ public class UnresolvedElementsSubProcessor {
 		while (node.getParent() instanceof QualifiedName) {
 			node= (Name) node.getParent();
 		}
-
+		
+		IModuleDescription moduleDescription= cu.getModule();
+		IJavaProject currentJavaProject= cu.getJavaProject();
+		if (moduleDescription != null && moduleDescription.exists()
+				&& currentJavaProject == null || JavaModelUtil.is9OrHigher(currentJavaProject)) {
+					ICompilationUnit moduleCompilationUnit = moduleDescription.getCompilationUnit();
+					if (cu.equals(moduleCompilationUnit)) {
+						addRequiresModuleProposals(cu, node,kind, proposals, false);
+					}
+		}
+		
 		if (selectedNode != node) {
 			kind= evauateTypeKind(node, cu.getJavaProject());
 		}
