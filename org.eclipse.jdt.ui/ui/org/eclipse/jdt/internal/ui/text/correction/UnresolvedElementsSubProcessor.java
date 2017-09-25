@@ -591,7 +591,8 @@ public class UnresolvedElementsSubProcessor {
 			return;
 		}
 
-		int kind= evauateTypeKind(selectedNode, cu.getJavaProject());
+		IJavaProject javaProject= cu.getJavaProject();
+		int kind= evauateTypeKind(selectedNode, javaProject);
 		
 		if (kind == SimilarElementsRequestor.REF_TYPES) {
 			addEnhancedForWithoutTypeProposals(cu, selectedNode, proposals);
@@ -627,19 +628,18 @@ public class UnresolvedElementsSubProcessor {
 		while (node.getParent() instanceof QualifiedName) {
 			node= (Name) node.getParent();
 		}
-		
+
 		IModuleDescription moduleDescription= cu.getModule();
-		IJavaProject currentJavaProject= cu.getJavaProject();
 		if (moduleDescription != null && moduleDescription.exists()
-				&& currentJavaProject == null || JavaModelUtil.is9OrHigher(currentJavaProject)) {
-					ICompilationUnit moduleCompilationUnit = moduleDescription.getCompilationUnit();
-					if (cu.equals(moduleCompilationUnit)) {
-						addRequiresModuleProposals(cu, node,kind, proposals, false);
-					}
+				&& javaProject != null && JavaModelUtil.is9OrHigher(javaProject)) {
+			ICompilationUnit moduleCompilationUnit= moduleDescription.getCompilationUnit();
+			if (cu.equals(moduleCompilationUnit)) {
+				addRequiresModuleProposals(cu, node, kind, proposals, false);
+			}
 		}
-		
+
 		if (selectedNode != node) {
-			kind= evauateTypeKind(node, cu.getJavaProject());
+			kind= evauateTypeKind(node, javaProject);
 		}
 		if ((kind & (SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES)) != 0) {
 			kind &= ~SimilarElementsRequestor.ANNOTATIONS; // only propose annotations when there are no other suggestions
