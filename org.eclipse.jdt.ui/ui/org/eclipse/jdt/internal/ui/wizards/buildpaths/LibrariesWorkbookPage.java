@@ -1094,12 +1094,22 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 
 	private CPListElement[] openContainerSelectionDialog(CPListElement existing) {
+		boolean shouldAddModule= false;
+		if (this.getSelection().size() == 1) {
+			Object obj= this.getSelection().get(0);
+			if (obj instanceof RootCPListElement) {
+				shouldAddModule= ((RootCPListElement) obj).isModulePathRootNode();
+			}
+		}
 		if (existing == null) {
 			IClasspathEntry[] created= BuildPathDialogAccess.chooseContainerEntries(getShell(), fCurrJProject, getRawClasspath());
 			if (created != null) {
 				CPListElement[] res= new CPListElement[created.length];
 				for (int i= 0; i < res.length; i++) {
 					res[i]= CPListElement.create(created[i], true, fCurrJProject);
+					if(shouldAddModule && res[i].getClasspathEntry().getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+						res[i].updateExtraAttributeOfClasspathEntry();
+					}
 				}
 				return res;
 			}
