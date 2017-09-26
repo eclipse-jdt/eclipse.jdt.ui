@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -259,7 +260,9 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 			case IJavaElement.COMPILATION_UNIT:
 				return getTypeForCU((ICompilationUnit)je);
 			case IJavaElement.CLASS_FILE:
-				return findInputForJavaElement(((IClassFile)je).getType());
+				if (je instanceof IOrdinaryClassFile)
+					return findInputForJavaElement(((IOrdinaryClassFile)je).getType());
+				return null;
 			case IJavaElement.IMPORT_DECLARATION:
 				return findInputForJavaElement(je.getParent());
 			case IJavaElement.PACKAGE_DECLARATION:

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -565,6 +565,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodAnalyzer_resource_in_try_with_resources;
 
+	public static String ExtractMethodAnalyzer_resource_used_in_try_with_resources;
+
 	public static String ExtractMethodAnalyzer_single_expression_or_set;
 
 	public static String ExtractMethodAnalyzer_super_or_this;
@@ -866,6 +868,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineTempRefactoring_remove_edit_name;
 
 	public static String InlineTempRefactoring_resource_in_try_with_resources;
+
+	public static String InlineTempRefactoring_resource_used_in_try_with_resources;
 
 	public static String InlineTempRefactoring_select_temp;
 

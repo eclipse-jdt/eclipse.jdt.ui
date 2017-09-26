@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -381,6 +381,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_section_unnecessary_code;
 	public static String ProblemSeveritiesConfigurationBlock_section_code_style;
 	public static String ProblemSeveritiesConfigurationBlock_section_deprecations;
+	public static String ProblemSeveritiesConfigurationBlock_section_module;
 	public static String ProblemSeveritiesConfigurationBlock_section_name_shadowing;
 	public static String ProblemSeveritiesConfigurationBlock_section_null_analysis;
 	public static String ProblemSeveritiesConfigurationBlock_section_annotations;
@@ -443,8 +444,10 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_non_externalized_strings_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_dead_code;
 	public static String ProblemSeveritiesConfigurationBlock_pb_deprecation_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_terminal_deprecation_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_deprecation_in_deprecation_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_deprecation_when_overriding_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_api_leak_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_empty_statement_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unnecessary_type_check_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_incomplete_enum_switch_label;
@@ -806,6 +809,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_version16;
 	public static String ComplianceConfigurationBlock_version17;
 	public static String ComplianceConfigurationBlock_version18;
+	public static String ComplianceConfigurationBlock_version9;
 	public static String ComplianceConfigurationBlock_versionCLDC11;
 	public static String ComplianceConfigurationBlock_src_greater_compliance;
 	public static String ComplianceConfigurationBlock_classfile_greater_compliance;

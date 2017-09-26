@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,14 +44,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.SourceRange;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.CorextMessages;
 import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Resources;
-
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 /**
@@ -268,9 +267,10 @@ public class JavaElementUtil {
 	}
 
 	/**
-	 * Applies an text edit to a compilation unit. Filed bug 117694 against jdt.core.
-	 * 	@param cu the compilation unit to apply the edit to
-	 * 	@param edit the edit to apply
+	 * Applies a text edit to a compilation unit.
+	 * 
+	 * @param cu the compilation unit to apply the edit to
+	 * @param edit the edit to apply
 	 * @param save is set, save the CU after the edit has been applied
 	 * @param monitor the progress monitor to use
 	 * @throws CoreException Thrown when the access to the CU failed

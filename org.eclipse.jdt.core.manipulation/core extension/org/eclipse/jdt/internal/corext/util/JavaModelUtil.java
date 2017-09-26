@@ -35,10 +35,13 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModularClassFile;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -61,7 +64,7 @@ public final class JavaModelUtil {
 	 */
 	public static final String VERSION_LATEST;
 	static {
-		VERSION_LATEST= JavaCore.VERSION_1_8; // make sure it is not inlined
+		VERSION_LATEST= JavaCore.VERSION_9; // make sure it is not inlined
 	}
 	
 	/**
@@ -96,6 +99,24 @@ public final class JavaModelUtil {
 	 * @since 3.9
 	 */
 	public static final String PACKAGE_HTML= "package.html"; //$NON-NLS-1$
+
+	/**
+	 * The name of the module-info.java file.
+	 * @since 3.14
+	 */
+	public static final String MODULE_INFO_JAVA= "module-info.java"; //$NON-NLS-1$
+
+	/**
+	 * The name of the module-info.class file.
+	 * @since 3.14
+	 */
+	public static final String MODULE_INFO_CLASS= "module-info.class"; //$NON-NLS-1$
+
+	/**
+	 * Constant for the name of all unnamed modules.
+	 * @since 3.14
+	 */
+	public static final String ALL_UNNAMED= "ALL-UNNAMED"; //$NON-NLS-1$
 
 	/**
 	 * Finds a type container by container name. The returned element will be of type
@@ -219,7 +240,7 @@ public final class JavaModelUtil {
 	 * Returns whether the two names match. They match if they
 	 * are equal, or if they are the same name but one is missing a dot-separated qualifier.
 	 * 
-	 * @param nameA a potentially qualified name 
+	 * @param nameA a potentially qualified name
 	 * @param nameB a potentially qualified name
 	 * @return <code>true</code> iff the given names match
 	 * @since 3.8
@@ -774,6 +795,10 @@ public final class JavaModelUtil {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_8);
 	}
 
+	public static boolean is9OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_9);
+	}
+	
 	/**
 	 * Checks if the given project or workspace has source compliance 1.5 or greater.
 	 *
@@ -803,6 +828,17 @@ public final class JavaModelUtil {
 	 */
 	public static boolean is18OrHigher(IJavaProject project) {
 		return is18OrHigher(getSourceCompliance(project));
+	}
+
+	/**
+	 * Checks if the given project or workspace has source compliance 9 or greater.
+	 * 
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 9 or
+	 *         greater.
+	 */
+	public static boolean is9OrHigher(IJavaProject project) {
+		return is9OrHigher(getSourceCompliance(project));
 	}
 
 	private static String getSourceCompliance(IJavaProject project) {
@@ -838,6 +874,8 @@ public final class JavaModelUtil {
 		String version= vMInstall.getJavaVersion();
 		if (version == null) {
 			return defaultCompliance;
+		} else if (version.startsWith(JavaCore.VERSION_9)) {
+			return JavaCore.VERSION_9;
 		} else if (version.startsWith(JavaCore.VERSION_1_8)) {
 			return JavaCore.VERSION_1_8;
 		} else if (version.startsWith(JavaCore.VERSION_1_7)) {
@@ -868,7 +906,9 @@ public final class JavaModelUtil {
 		
 		// fallback:
 		String desc= executionEnvironment.getId();
-		if (desc.indexOf(JavaCore.VERSION_1_8) != -1) {
+		if (desc.indexOf(JavaCore.VERSION_9) != -1) {
+			return JavaCore.VERSION_9;
+		} else if (desc.indexOf(JavaCore.VERSION_1_8) != -1) {
 			return JavaCore.VERSION_1_8;
 		} else if (desc.indexOf(JavaCore.VERSION_1_7) != -1) {
 			return JavaCore.VERSION_1_7;
@@ -930,6 +970,58 @@ public final class JavaModelUtil {
 	 */
 	public static boolean isPackageInfo(ICompilationUnit cu) {
 		return PACKAGE_INFO_JAVA.equals(cu.getElementName());
+	}
+
+	/**
+	 * Tells whether the given CU is the module-info.java.
+	 *
+	 * @param cu the compilation unit to test
+	 * @return <code>true</code> if the given CU is the module-info.java
+	 * @since 3.14
+	 */
+	public static boolean isModuleInfo(ICompilationUnit cu) {
+		return MODULE_INFO_JAVA.equals(cu.getElementName());
+	}
+
+	/**
+	 * Tells whether the given type root represents a module.
+	 * 
+	 * @param typeRoot the type root to test
+	 * @return <code>true</code> if the given type root is a module-info.java CU or a module-info.class class file.
+	 * @since 3.14
+	 */
+	public static boolean isModuleInfo(ITypeRoot typeRoot) {
+		return (typeRoot instanceof ICompilationUnit && isModuleInfo((ICompilationUnit) typeRoot))
+				|| typeRoot instanceof IModularClassFile;
+	}
+
+	/**
+	 * Tells whether the given Java element represents a module.
+	 * 
+	 * @param javaElement the Java element to test
+	 * @return <code>true</code> if the given Java element represents a module.
+	 * @since 3.14
+	 */
+	public static boolean isModule(IJavaElement javaElement) {
+		return javaElement instanceof IModuleDescription
+				|| javaElement instanceof ITypeRoot && isModuleInfo((ITypeRoot) javaElement);
+	}
+
+	/**
+	 * Tells whether the given package fragment contains any ordinary compilation unit,
+	 * not counting the modular compilation unit module-info.java nor its class file module-info.class.
+	 * @param fragment a package fragment to test
+	 * @return true iff at least one ordinary compilation unit (or class file) was found. 
+	 * @throws JavaModelException if the package fragment does not exist or if an
+	 *      exception occurs while accessing its corresponding resource
+	 * @since 3.14
+	 */
+	public static boolean containsOrdinaryCompilationUnit(IPackageFragment fragment) throws JavaModelException {
+		for (IJavaElement child : fragment.getChildren()) {
+			if (child instanceof ITypeRoot && !isModuleInfo((ITypeRoot) child))
+				return true;
+		}
+		return false;
 	}
 
 	public static boolean isPolymorphicSignature(IMethod method) {

@@ -25,10 +25,10 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.IShowInTargetList;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
@@ -135,7 +135,9 @@ public class TypesView extends JavaBrowsingPart {
 			case IJavaElement.COMPILATION_UNIT:
 				return getTypeForCU((ICompilationUnit)je);
 			case IJavaElement.CLASS_FILE:
-				return findElementToSelect(((IClassFile)je).getType());
+				if (je instanceof IOrdinaryClassFile)
+					return findElementToSelect(((IOrdinaryClassFile)je).getType());
+				return null;
 			case IJavaElement.IMPORT_CONTAINER:
 			case IJavaElement.IMPORT_DECLARATION:
 			case IJavaElement.PACKAGE_DECLARATION:

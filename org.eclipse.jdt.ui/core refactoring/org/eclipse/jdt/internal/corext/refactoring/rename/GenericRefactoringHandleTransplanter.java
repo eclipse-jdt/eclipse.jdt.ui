@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -121,7 +122,9 @@ public class GenericRefactoringHandleTransplanter {
 			case IJavaElement.COMPILATION_UNIT:
 				return ((ICompilationUnit) parent).getType(element.getElementName());
 			case IJavaElement.CLASS_FILE:
-				return ((IClassFile) parent).getType();
+				if (parent instanceof IOrdinaryClassFile)
+					return ((IOrdinaryClassFile) parent).getType();
+				throw new IllegalStateException(element.toString());
 			case IJavaElement.METHOD:
 				return ((IMethod) parent).getType(element.getElementName(), element.getOccurrenceCount());
 			case IJavaElement.FIELD:

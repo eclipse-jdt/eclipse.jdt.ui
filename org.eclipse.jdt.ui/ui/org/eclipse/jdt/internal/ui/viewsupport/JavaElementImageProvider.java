@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Matt Chapman, mpchapman@gmail.com - 89977 Make JDT .java agnostic
@@ -230,7 +230,6 @@ public class JavaElementImageProvider {
 
 				case IJavaElement.TYPE: {
 					IType type= (IType) element;
-
 					IType declType= type.getDeclaringType();
 					boolean isInner= declType != null;
 					boolean isInInterfaceOrAnnotation= isInner && JavaModelUtil.isInterfaceOrAnnotation(declType);
@@ -308,6 +307,9 @@ public class JavaElementImageProvider {
 
 				case IJavaElement.ANNOTATION:
 					return JavaPluginImages.DESC_OBJS_ANNOTATION;
+					
+				case IJavaElement.JAVA_MODULE:
+					return JavaPluginImages.DESC_OBJS_MODULE;
 
 				default:
 					// ignore. Must be a new, yet unknown Java element
@@ -433,12 +435,14 @@ public class JavaElementImageProvider {
 	}
 
 	public static ImageDescriptor getMethodImageDescriptor(boolean isInInterfaceOrAnnotation, int flags) {
-		if (Flags.isPublic(flags) || isInInterfaceOrAnnotation)
+		if (Flags.isPublic(flags))
 			return JavaPluginImages.DESC_MISC_PUBLIC;
 		if (Flags.isProtected(flags))
 			return JavaPluginImages.DESC_MISC_PROTECTED;
 		if (Flags.isPrivate(flags))
 			return JavaPluginImages.DESC_MISC_PRIVATE;
+		if (isInInterfaceOrAnnotation)
+			return JavaPluginImages.DESC_MISC_PUBLIC;
 
 		return JavaPluginImages.DESC_MISC_DEFAULT;
 	}

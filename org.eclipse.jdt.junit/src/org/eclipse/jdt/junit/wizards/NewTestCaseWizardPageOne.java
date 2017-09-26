@@ -56,6 +56,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
@@ -241,8 +242,8 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 					if (element instanceof IClassFile) {
 						try {
 							IClassFile cf= (IClassFile) element;
-							if (cf.isStructureKnown())
-								classToTest= cf.getType();
+							if (cf instanceof IOrdinaryClassFile && cf.isStructureKnown())
+								classToTest= ((IOrdinaryClassFile) cf).getType();
 						} catch(JavaModelException e) {
 							JUnitPlugin.log(e);
 						}
@@ -1390,6 +1391,9 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		return fJUnitVersion != JUnitVersion.VERSION_3 ? "java.lang.Object" : getJUnit3TestSuperclassName(); //$NON-NLS-1$
 	}
 
+	/**
+	 * @since 3.11
+	 */
 	@Override
 	public int getModifiers() {
 		int modifiers= super.getModifiers();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -314,7 +314,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 	public boolean visit(TryStatement node) {
 		if (traverseNode(node)) {
 			fFlowContext.pushExcptions(node);
-			for (Iterator<VariableDeclarationExpression> iterator= node.resources().iterator(); iterator.hasNext();) {
+			for (Iterator<Expression> iterator= node.resources().iterator(); iterator.hasNext();) {
 				iterator.next().accept(this);
 			}
 			node.getBody().accept(this);
@@ -945,7 +945,7 @@ abstract class FlowAnalyzer extends GenericVisitor {
 			return;
 		TryFlowInfo info= createTry();
 		setFlowInfo(node, info);
-		for (Iterator<VariableDeclarationExpression> iterator= node.resources().iterator(); iterator.hasNext();) {
+		for (Iterator<Expression> iterator= node.resources().iterator(); iterator.hasNext();) {
 			info.mergeResources(getFlowInfo(iterator.next()), fFlowContext);
 		}
 		info.mergeTry(getFlowInfo(node.getBody()), fFlowContext);

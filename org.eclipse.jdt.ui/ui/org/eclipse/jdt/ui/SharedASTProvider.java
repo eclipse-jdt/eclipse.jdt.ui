@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * <p>Clients can make the following assumptions about the AST:
  * <dl>
  *    <li>the AST has a {@link ITypeRoot} as source: {@link CompilationUnit#getTypeRoot()} is not null.</li>
- *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS8 API level 8} or higher</li>
+ *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS9 API level 9} or higher</li>
  *    <li>the AST has bindings resolved ({@link AST#hasResolvedBindings()})</li>
  *    <li>{@link AST#hasStatementsRecovery() statement} and {@link AST#hasBindingsRecovery() bindings}
  *           recovery are enabled

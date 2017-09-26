@@ -101,6 +101,7 @@ import org.eclipse.jdt.core.IJarEntryResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -1115,8 +1116,8 @@ public class PackageExplorerPart extends ViewPart
 				if (types.length > 0)
 					type= types[0];
 			}
-			else if (element instanceof IClassFile) {
-				IClassFile cf= (IClassFile)element;
+			else if (element instanceof IOrdinaryClassFile) {
+				IOrdinaryClassFile cf= (IOrdinaryClassFile)element;
 				type= cf.getType();
 			}
 			if (type != null) {

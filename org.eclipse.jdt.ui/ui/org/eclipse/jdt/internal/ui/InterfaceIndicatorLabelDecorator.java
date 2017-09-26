@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -20,10 +20,10 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IDecoration;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -132,7 +132,7 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 	}
 
 	private void addOverlays(Object element, IDecoration decoration) throws JavaModelException {
-		if (element instanceof ICompilationUnit) {
+		if (element instanceof ICompilationUnit && !JavaModelUtil.isModuleInfo((ICompilationUnit) element)) {
 			ICompilationUnit unit= (ICompilationUnit) element;
 			if (unit.isOpen()) {
 				IType mainType= unit.findPrimaryType();
@@ -144,8 +144,8 @@ public class InterfaceIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 			String typeName= JavaCore.removeJavaLikeExtension(unit.getElementName());
 			addOverlaysWithSearchEngine(unit, typeName, decoration);
 			
-		} else if (element instanceof IClassFile) {
-			IClassFile classFile= (IClassFile) element;
+		} else if (element instanceof IOrdinaryClassFile) {
+			IOrdinaryClassFile classFile= (IOrdinaryClassFile) element;
 			if (classFile.isOpen()) {
 				addOverlaysFromFlags(classFile.getType().getFlags(), decoration);
 			} else {

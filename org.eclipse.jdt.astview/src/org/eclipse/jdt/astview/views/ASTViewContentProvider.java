@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
 import org.eclipse.jdt.core.dom.MethodReference;
+import org.eclipse.jdt.core.dom.ModuleDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -200,6 +201,9 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 			res.add(createBinding(node, binding));
 		} else if (node instanceof MemberValuePair) {
 			IBinding binding= ((MemberValuePair) node).resolveMemberValuePairBinding();
+			res.add(createBinding(node, binding));
+		} else if (node instanceof ModuleDeclaration) {
+			IBinding binding= ((ModuleDeclaration) node).resolveBinding();
 			res.add(createBinding(node, binding));
 		}
  		

@@ -27,6 +27,8 @@ import org.eclipse.ui.IPersistableElement;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IModularClassFile;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -96,7 +98,16 @@ public class InternalClassFileEditorInput implements IClassFileEditorInput, IPer
 	 */
 	@Override
 	public String getToolTipText() {
-		return fClassFile.getType().getFullyQualifiedName();
+		if (fClassFile instanceof IOrdinaryClassFile) {
+			return ((IOrdinaryClassFile) fClassFile).getType().getFullyQualifiedName();
+		} else if (fClassFile instanceof IModularClassFile) {
+			try {
+				return ((IModularClassFile) fClassFile).getModule().getElementName();
+			} catch (JavaModelException e) {
+				return e.getMessage();
+			}
+		}
+		throw new IllegalStateException("input must be either IClassFile or IModularClassFile");  //$NON-NLS-1$
 	}
 
 	/*

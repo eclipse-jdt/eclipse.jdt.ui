@@ -97,7 +97,6 @@ import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJarEntryResource;
@@ -105,6 +104,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModularClassFile;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -874,10 +875,17 @@ public class JavadocView extends AbstractInfoView {
 				}
 				break;
 			case IJavaElement.CLASS_FILE:
-				if (JavaModelUtil.PACKAGE_INFO_CLASS.equals(input.getElementName()))
+				if (JavaModelUtil.PACKAGE_INFO_CLASS.equals(input.getElementName())) {
 					javadocHtml= getJavadocHtml(new IJavaElement[] { input.getParent() }, part, selection, monitor);
-				else
-					javadocHtml= getJavadocHtml(new IJavaElement[] { ((IClassFile) input).getType() }, part, selection, monitor);
+				} else if (input instanceof IModularClassFile) {
+					try {
+						javadocHtml= getJavadocHtml(new IJavaElement[] { ((IModularClassFile) input).getModule() }, part, selection, monitor);
+					} catch (JavaModelException e) {
+						return null;
+					}
+				} else {
+					javadocHtml= getJavadocHtml(new IJavaElement[] { ((IOrdinaryClassFile) input).getType() }, part, selection, monitor);
+				}
 				break;
 			default:
 				javadocHtml= getJavadocHtml(new IJavaElement[] { input }, part, selection, monitor);

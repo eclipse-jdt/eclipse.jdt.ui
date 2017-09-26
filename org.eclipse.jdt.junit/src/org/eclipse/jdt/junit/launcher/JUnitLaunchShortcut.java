@@ -48,12 +48,12 @@ import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.ILaunchShortcut2;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
@@ -175,7 +175,8 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 							elementToLaunch= element;
 							break;
 						case IJavaElement.CLASS_FILE:
-							elementToLaunch= ((IClassFile) element).getType();
+							if (element instanceof IOrdinaryClassFile)
+								elementToLaunch= ((IOrdinaryClassFile) element).getType();
 							break;
 						case IJavaElement.COMPILATION_UNIT:
 							elementToLaunch= findTypeToLaunch((ICompilationUnit) element, mode);
@@ -554,7 +555,8 @@ public class JUnitLaunchShortcut implements ILaunchShortcut2 {
 						elementToLaunch= element;
 						break;
 					case IJavaElement.CLASS_FILE:
-						elementToLaunch= ((IClassFile) element).getType();
+						if (element instanceof IOrdinaryClassFile)
+							elementToLaunch= ((IOrdinaryClassFile) element).getType();
 						break;
 					case IJavaElement.COMPILATION_UNIT:
 						elementToLaunch= ((ICompilationUnit) element).findPrimaryType();

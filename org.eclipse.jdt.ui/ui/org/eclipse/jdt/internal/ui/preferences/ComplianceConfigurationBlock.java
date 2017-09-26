@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -121,6 +121,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String VERSION_1_6= JavaCore.VERSION_1_6;
 	private static final String VERSION_1_7= JavaCore.VERSION_1_7;
 	private static final String VERSION_1_8= JavaCore.VERSION_1_8;
+	private static final String VERSION_9= JavaCore.VERSION_9;
 	private static final String VERSION_JSR14= "jsr14"; //$NON-NLS-1$
 
 	private static final String ERROR= JavaCore.ERROR;
@@ -259,16 +260,49 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 	private Composite createComplianceTabContent(Composite folder) {
 
-		String[] values3456= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8 };
-		String[] values3456Labels= new String[] {
+		final String[] complianceVersions= new String[] { VERSION_1_3, VERSION_1_4,
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9 };
+		final String[] complianceLabels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_version13,
 			PreferencesMessages.ComplianceConfigurationBlock_version14,
 			PreferencesMessages.ComplianceConfigurationBlock_version15,
 			PreferencesMessages.ComplianceConfigurationBlock_version16,
 			PreferencesMessages.ComplianceConfigurationBlock_version17,
 			PreferencesMessages.ComplianceConfigurationBlock_version18,
+			PreferencesMessages.ComplianceConfigurationBlock_version9,
 		};
-
+		
+		String[] targetVersions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4,
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9 };
+		String[] targetLabels= new String[] {
+				PreferencesMessages.ComplianceConfigurationBlock_versionCLDC11,
+				PreferencesMessages.ComplianceConfigurationBlock_version11,
+				PreferencesMessages.ComplianceConfigurationBlock_version12,
+				PreferencesMessages.ComplianceConfigurationBlock_version13,
+				PreferencesMessages.ComplianceConfigurationBlock_version14,
+				PreferencesMessages.ComplianceConfigurationBlock_version15,
+				PreferencesMessages.ComplianceConfigurationBlock_version16,
+				PreferencesMessages.ComplianceConfigurationBlock_version17,
+				PreferencesMessages.ComplianceConfigurationBlock_version18,
+				PreferencesMessages.ComplianceConfigurationBlock_version9,
+		};
+		if (ComplianceConfigurationBlock.VERSION_JSR14.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM))) {
+			targetVersions= append(targetVersions, ComplianceConfigurationBlock.VERSION_JSR14);
+			targetLabels= append(targetLabels, ComplianceConfigurationBlock.VERSION_JSR14);
+		}
+		
+		String[] sourceVersions= new String[] { VERSION_1_3, VERSION_1_4,
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9 };
+		String[] sourceLabels= new String[] {
+				PreferencesMessages.ComplianceConfigurationBlock_version13,
+				PreferencesMessages.ComplianceConfigurationBlock_version14,
+				PreferencesMessages.ComplianceConfigurationBlock_version15,
+				PreferencesMessages.ComplianceConfigurationBlock_version16,
+				PreferencesMessages.ComplianceConfigurationBlock_version17,
+				PreferencesMessages.ComplianceConfigurationBlock_version18,
+				PreferencesMessages.ComplianceConfigurationBlock_version9,
+		};
+		
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
 		Composite composite= sc1.getBody();
 		GridLayout layout= new GridLayout();
@@ -318,7 +352,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		
 		
 		String label= PreferencesMessages.ComplianceConfigurationBlock_compiler_compliance_label;
-		addComboBox(group, label, PREF_COMPLIANCE, values3456, values3456Labels, 0);
+		addComboBox(group, label, PREF_COMPLIANCE, complianceVersions, complianceLabels, 0);
 
 		label= PreferencesMessages.ComplianceConfigurationBlock_default_settings_label;
 		addCheckBox(group, label, INTR_DEFAULT_COMPLIANCE, defaultUserValues, 0);
@@ -331,30 +365,11 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		
 		int indent= LayoutUtil.getIndent();
 
-		String[] versions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8 };
-		String[] versionsLabels= new String[] {
-				PreferencesMessages.ComplianceConfigurationBlock_versionCLDC11,
-				PreferencesMessages.ComplianceConfigurationBlock_version11,
-				PreferencesMessages.ComplianceConfigurationBlock_version12,
-				PreferencesMessages.ComplianceConfigurationBlock_version13,
-				PreferencesMessages.ComplianceConfigurationBlock_version14,
-				PreferencesMessages.ComplianceConfigurationBlock_version15,
-				PreferencesMessages.ComplianceConfigurationBlock_version16,
-				PreferencesMessages.ComplianceConfigurationBlock_version17,
-				PreferencesMessages.ComplianceConfigurationBlock_version18
-		};
-
-		boolean showJsr14= ComplianceConfigurationBlock.VERSION_JSR14.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM));
-		if (showJsr14) {
-			versions= append(versions, ComplianceConfigurationBlock.VERSION_JSR14);
-			versionsLabels= append(versionsLabels, ComplianceConfigurationBlock.VERSION_JSR14);
-		}
-
 		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_targetplatform_label;
-		addComboBox(group, label, PREF_CODEGEN_TARGET_PLATFORM, versions, versionsLabels, indent);
+		addComboBox(group, label, PREF_CODEGEN_TARGET_PLATFORM, targetVersions, targetLabels, indent);
 
 		label= PreferencesMessages.ComplianceConfigurationBlock_source_compatibility_label;
-		addComboBox(group, label, PREF_SOURCE_COMPATIBILITY, values3456, values3456Labels, indent);
+		addComboBox(group, label, PREF_SOURCE_COMPATIBILITY, sourceVersions, sourceLabels, indent);
 
 		String[] errorWarningInfoIgnore= new String[] { ERROR, WARNING, INFO, IGNORE };
 
@@ -607,12 +622,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				}
 			}
 			
-//			String source= getValue(PREF_SOURCE_COMPATIBILITY);
-//			if (VERSION_1_8.equals(source)) {
-//				fJRE50InfoText.setText("This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
-//				isVisible= true;
-//			}
-			
 			fJRE50InfoText.setVisible(isVisible);
 			fJRE50InfoImage.setImage(isVisible ? JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_WARNING) : null);
 			fJRE50InfoImage.getParent().layout();
@@ -846,32 +855,13 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				}
 				
 			} else {
-				//TODO: use JavaModelUtil.setComplianceOptions(new HashMap(), complianceLevel);
-				if (VERSION_1_4.equals(complianceLevel)) {
-					assertAsId= WARNING;
-					enumAsId= WARNING;
-					source= VERSION_1_3;
-					target= VERSION_1_2;
-				} else if (VERSION_1_5.equals(complianceLevel)) {
-					assertAsId= ERROR;
-					enumAsId= ERROR;
-					source= VERSION_1_5;
-					target= VERSION_1_5;
-				} else if (VERSION_1_6.equals(complianceLevel)) {
-					assertAsId= ERROR;
-					enumAsId= ERROR;
-					source= VERSION_1_6;
-					target= VERSION_1_6;
-				} else if (VERSION_1_7.equals(complianceLevel)) {
-					assertAsId= ERROR;
-					enumAsId= ERROR;
-					source= VERSION_1_7;
-					target= VERSION_1_7;
-				} else if (VERSION_1_8.equals(complianceLevel)) {
-					assertAsId= ERROR;
-					enumAsId= ERROR;
-					source= VERSION_1_8;
-					target= VERSION_1_8;
+				HashMap<String, String> options= new HashMap<String, String>();
+				JavaModelUtil.setComplianceOptions(options, complianceLevel);
+				if (complianceLevel.equals(options.get(JavaCore.COMPILER_COMPLIANCE))) {
+					source= options.get(JavaCore.COMPILER_SOURCE);
+					target= options.get(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM);
+					assertAsId= options.get(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER);
+					enumAsId= options.get(JavaCore.COMPILER_PB_ENUM_IDENTIFIER);
 				} else {
 					assertAsId= IGNORE;
 					enumAsId= IGNORE;
@@ -908,38 +898,16 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	 * @return {@link #DEFAULT_CONF} or {@link #USER_CONF}
 	 */
 	private String getCurrentCompliance() {
-		Object complianceLevel= getValue(PREF_COMPLIANCE);
-		//TODO: use JavaModelUtil.setComplianceOptions(new HashMap(), complianceLevel);
-		if ((VERSION_1_3.equals(complianceLevel)
-				&& IGNORE.equals(getValue(PREF_PB_ASSERT_AS_IDENTIFIER))
-				&& IGNORE.equals(getValue(PREF_PB_ENUM_AS_IDENTIFIER))
-				&& VERSION_1_3.equals(getValue(PREF_SOURCE_COMPATIBILITY))
-				&& VERSION_1_1.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))
-			|| (VERSION_1_4.equals(complianceLevel)
-				&& WARNING.equals(getValue(PREF_PB_ASSERT_AS_IDENTIFIER))
-				&& WARNING.equals(getValue(PREF_PB_ENUM_AS_IDENTIFIER))
-				&& VERSION_1_3.equals(getValue(PREF_SOURCE_COMPATIBILITY))
-				&& VERSION_1_2.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))
-			|| (VERSION_1_5.equals(complianceLevel)
-				&& ERROR.equals(getValue(PREF_PB_ASSERT_AS_IDENTIFIER))
-				&& ERROR.equals(getValue(PREF_PB_ENUM_AS_IDENTIFIER))
-				&& VERSION_1_5.equals(getValue(PREF_SOURCE_COMPATIBILITY))
-				&& VERSION_1_5.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))
-			|| (VERSION_1_6.equals(complianceLevel)
-				&& ERROR.equals(getValue(PREF_PB_ASSERT_AS_IDENTIFIER))
-				&& ERROR.equals(getValue(PREF_PB_ENUM_AS_IDENTIFIER))
-				&& VERSION_1_6.equals(getValue(PREF_SOURCE_COMPATIBILITY))
-				&& VERSION_1_6.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))
-			|| (VERSION_1_7.equals(complianceLevel)
-				&& ERROR.equals(getValue(PREF_PB_ASSERT_AS_IDENTIFIER))
-				&& ERROR.equals(getValue(PREF_PB_ENUM_AS_IDENTIFIER))
-				&& VERSION_1_7.equals(getValue(PREF_SOURCE_COMPATIBILITY))
-				&& VERSION_1_7.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))
-			|| (VERSION_1_8.equals(complianceLevel)
-					&& ERROR.equals(getValue(PREF_PB_ASSERT_AS_IDENTIFIER))
-					&& ERROR.equals(getValue(PREF_PB_ENUM_AS_IDENTIFIER))
-					&& VERSION_1_8.equals(getValue(PREF_SOURCE_COMPATIBILITY))
-					&& VERSION_1_8.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))) {
+		String complianceLevel= getValue(PREF_COMPLIANCE);
+		
+		HashMap<String, String> defaultOptions= new HashMap<String, String>();
+		JavaModelUtil.setComplianceOptions(defaultOptions, complianceLevel);
+		
+		if (complianceLevel.equals(defaultOptions.get(JavaCore.COMPILER_COMPLIANCE))
+				&& getValue(PREF_SOURCE_COMPATIBILITY).equals(defaultOptions.get(JavaCore.COMPILER_SOURCE))
+				&& getValue(PREF_CODEGEN_TARGET_PLATFORM).equals(defaultOptions.get(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM))
+				&& getValue(PREF_PB_ASSERT_AS_IDENTIFIER).equals(defaultOptions.get(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER))
+				&& getValue(PREF_PB_ENUM_AS_IDENTIFIER).equals(defaultOptions.get(JavaCore.COMPILER_PB_ENUM_IDENTIFIER))) {
 			return DEFAULT_CONF;
 		}
 		return USER_CONF;

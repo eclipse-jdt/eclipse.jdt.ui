@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2016 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -76,6 +76,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 			requestor.setIgnored(CompletionProposal.LABEL_REF, true);
 			requestor.setIgnored(CompletionProposal.METHOD_DECLARATION, true);
 			requestor.setIgnored(CompletionProposal.PACKAGE_REF, true);
+			requestor.setIgnored(CompletionProposal.MODULE_REF, true);
 			requestor.setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
 			requestor.setIgnored(CompletionProposal.METHOD_REF, true);
 			requestor.setIgnored(CompletionProposal.CONSTRUCTOR_INVOCATION, true);
@@ -220,7 +221,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 		
 		if (packName.length() > 0) {
 			dummyCU.append("package ").append(packName).append(';'); //$NON-NLS-1$
-		}		
+		}
 		dummyCU.append("public class ").append(type.getElementName()).append("{\n static {\n").append(elementName); // static initializer  //$NON-NLS-1$//$NON-NLS-2$
 		int offset= dummyCU.length();
 		dummyCU.append("\n}\n }"); //$NON-NLS-1$
@@ -262,8 +263,8 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 		} finally {
 			if (newCU != null) {
 				newCU.discardWorkingCopy();
-			}	
-		}	
+			}
+		}
 	}
 
 	

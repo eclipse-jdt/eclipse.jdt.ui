@@ -47,8 +47,10 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -411,6 +413,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		IJavaElement[] children= parent.getChildren();
 		String prefix= fragment != null ? fragment.getElementName() + '.' : ""; //$NON-NLS-1$
 		int prefixLen= prefix.length();
+		boolean is9OrHigher= JavaModelUtil.is9OrHigher(parent.getJavaProject());
 		for (int i= 0; i < children.length; i++) {
 			IPackageFragment curr= (IPackageFragment) children[i];
 			String name= curr.getElementName();
@@ -420,9 +423,40 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				}
 				result.add(curr);
 			} else if (fragment == null && curr.isDefaultPackage()) {
-				result.add(curr);
+				if (isRelevantPackage(curr, is9OrHigher))
+					result.add(curr);
+				IJavaElement emptyModuleInfo= emptyModuleInfo(curr, is9OrHigher);
+				if (emptyModuleInfo != null)
+					result.add(emptyModuleInfo);
 			}
 		}
+		if (fragment == null) {
+			if (is9OrHigher) {
+				IModuleDescription module= parent.getModuleDescription();
+				if (module != null) {
+					result.add(module.getParent());
+				}
+			}
+		}
+	}
+
+	boolean isRelevantPackage(IPackageFragment fragment, boolean is9OrHigher) throws JavaModelException {
+		if (is9OrHigher && !JavaModelUtil.containsOrdinaryCompilationUnit(fragment)) {
+			// at 9, a default package containing only module-info should be hidden:
+			return false;
+		}
+		return true;
+	}
+
+	IJavaElement emptyModuleInfo(IPackageFragment fragment, boolean is9OrHigher) throws JavaModelException {
+		if (is9OrHigher) {
+			// at 9, empty module-info.java should be added
+			for (IJavaElement child : fragment.getChildren()) {
+				if (child instanceof ITypeRoot && ((ITypeRoot) child).getChildren().length == 0)
+					return child;
+			}
+		}
+		return null;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.corext.refactoring.util.TextEditUtil;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
@@ -63,15 +64,16 @@ public class CodeFormatFix implements ICleanUpFix {
 			String content= cu.getBuffer().getContents();
 			Document document= new Document(content);
 			String lineDelemiter= TextUtilities.getDefaultLineDelimiter(document);
+			int kind = (JavaModelUtil.isModuleInfo(cu) ? CodeFormatter.K_MODULE_INFO : CodeFormatter.K_COMPILATION_UNIT) | CodeFormatter.F_INCLUDE_COMMENTS;
 
 			TextEdit edit;
 			if (regions == null) {
-				edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS, content, 0, lineDelemiter, formatterSettings);
+				edit= CodeFormatterUtil.reformat(kind, content, 0, lineDelemiter, formatterSettings);
 			} else {
 				if (regions.length == 0)
 					return null;
 
-				edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS, content, regions, 0, lineDelemiter, formatterSettings);
+				edit= CodeFormatterUtil.reformat(kind, content, regions, 0, lineDelemiter, formatterSettings);
 			}
 			if (edit != null && (!(edit instanceof MultiTextEdit) || edit.hasChildren())) {
 				formatEdit.addChild(edit);

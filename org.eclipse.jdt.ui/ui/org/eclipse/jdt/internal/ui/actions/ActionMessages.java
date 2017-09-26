@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -431,6 +431,11 @@ public final class ActionMessages extends NLS {
 	public static String CollapsAllAction_label;
 	public static String CollapsAllAction_tooltip;
 	public static String CollapsAllAction_description;
+
+	public static String CreateModuleInfoAction_error_message_compliance;
+	public static String CreateModuleInfoAction_error_message_no_source_folder;
+	public static String CreateModuleInfoAction_error_title;
+	public static String CreateModuleInfoAction_question_message_overwrite_module_info;
 
 	public static String GenerateToStringAction_label;
 	public static String GenerateToStringAction_description;

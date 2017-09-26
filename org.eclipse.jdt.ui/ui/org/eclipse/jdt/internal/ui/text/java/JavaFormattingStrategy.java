@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,7 @@ import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -42,6 +43,8 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 	private final LinkedList<IDocument> fDocuments= new LinkedList<>();
 	/** Partitions to be formatted by this strategy */
 	private final LinkedList<TypedPosition> fPartitions= new LinkedList<>();
+	/** Paths of compilation units to be formatted (not obligatory, used to recognize module-infos) */
+	private final LinkedList<String> fPaths= new LinkedList<>();
 
 	/**
 	 * Creates a new java formatting strategy.
@@ -59,12 +62,14 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 
 		final IDocument document= fDocuments.removeFirst();
 		final TypedPosition partition= fPartitions.removeFirst();
+		final String path= fPaths.removeFirst();
 
 		if (document != null && partition != null) {
 			Map<String, IDocumentPartitioner> partitioners= null;
 			try {
-
-				final TextEdit edit= CodeFormatterUtil.reformat(CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS, document.get(), partition.getOffset(), partition.getLength(), 0, TextUtilities.getDefaultLineDelimiter(document), getPreferences());
+				final boolean isModuleInfo= path != null && path.endsWith(JavaModelUtil.MODULE_INFO_JAVA);
+				final int kind= (isModuleInfo ? CodeFormatter.K_MODULE_INFO : CodeFormatter.K_COMPILATION_UNIT) | CodeFormatter.F_INCLUDE_COMMENTS;
+				final TextEdit edit= CodeFormatterUtil.reformat(kind, document.get(), partition.getOffset(), partition.getLength(), 0, TextUtilities.getDefaultLineDelimiter(document), getPreferences());
 				if (edit != null) {
 					if (edit.getChildrenSize() > 20)
 						partitioners= TextUtilities.removeDocumentPartitioners(document);
@@ -93,6 +98,7 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 
 		fPartitions.addLast((TypedPosition) context.getProperty(FormattingContextProperties.CONTEXT_PARTITION));
 		fDocuments.addLast((IDocument) context.getProperty(FormattingContextProperties.CONTEXT_MEDIUM));
+		fPaths.addLast((String) context.getProperty(JavaFormattingContext.KEY_SOURCE_PATH));
 	}
 
 	/*

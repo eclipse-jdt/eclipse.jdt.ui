@@ -51,7 +51,6 @@ import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
 
 import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IField;
@@ -61,6 +60,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -2026,7 +2026,7 @@ public class JavadocContentAccess2 {
 				if (packageJavadocNode != null) {
 					IJavaElement element;
 					if (isBinary) {
-						element= ((IClassFile) packageInfo).getType();
+						element= ((IOrdinaryClassFile) packageInfo).getType();
 					} else {
 						element= packageInfo.getParent(); // parent is the IPackageFragment
 					}

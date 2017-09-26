@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2015 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,6 @@ import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -59,6 +58,9 @@ import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IModularClassFile;
+import org.eclipse.jdt.core.IModuleDescription;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -282,6 +284,13 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 							JavaPlugin.log(e);
 							packages.add(object);
 						}
+					} else if (object instanceof ITypeRoot && JavaModelUtil.isModuleInfo((ITypeRoot) object)) {
+						try {
+							packages.add(((ITypeRoot) object).getModule()); // skip the compilation unit
+						} catch (JavaModelException e) {
+							JavaPlugin.log(e);
+							packages.add(object);
+						}
 					} else {
 						packages.add(object);
 					}
@@ -335,6 +344,11 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 				if (declaringType != null)
 					return declaringType;
 			}
+			if (element instanceof IModuleDescription) {
+				IJavaElement parent= ((IModuleDescription) element).getParent();
+				if (parent instanceof ITypeRoot && parent.getParent().exists()) // no containing package if not on the classpath
+					element= parent;
+			}
 
 			Object result= fParent.getParent(element);
 
@@ -386,7 +400,7 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 					}
 				}
 
-				IClassFile[] classFiles= pack.getClassFiles();
+				IOrdinaryClassFile[] classFiles= pack.getOrdinaryClassFiles();
 				for (int i= 0; i < classFiles.length; i++) {
 					if (isValidType(classFiles[i].getType()))
 						result.add(classFiles[i].getType());
@@ -857,8 +871,11 @@ public class JavaEditorBreadcrumb extends EditorBreadcrumb {
 					element= types[0];
 			}
 
-			if (element instanceof IClassFile)
-				element= ((IClassFile) element).getType();
+			if (element instanceof IOrdinaryClassFile)
+				element= ((IOrdinaryClassFile) element).getType();
+			
+			if (element instanceof IModularClassFile)
+				element= ((IModularClassFile) element).getModule();
 
 			return element;
 		} catch (JavaModelException e) {

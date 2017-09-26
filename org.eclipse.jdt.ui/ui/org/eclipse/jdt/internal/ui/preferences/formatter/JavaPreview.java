@@ -80,13 +80,16 @@ public abstract class JavaPreview {
 		}
 	}
 
-	protected final SimpleJavaSourceViewerConfiguration fViewerConfiguration;
+	protected final SimpleJavaSourceViewerConfiguration fViewerConfigurationStandard;
+	protected final SimpleJavaSourceViewerConfiguration fViewerConfigurationModule;
 	protected final Document fPreviewDocument;
 	protected final SourceViewer fSourceViewer;
 	protected final IPreferenceStore fPreferenceStore;
 
 	protected final MarginPainter fMarginPainter;
 
+	protected boolean fModuleInfoMode= false;
+	protected SimpleJavaSourceViewerConfiguration fViewerConfiguration;
 	protected Map<String, String> fWorkingValues;
 
 	private int fTabSize= 0;
@@ -116,7 +119,9 @@ public abstract class JavaPreview {
 		// Don't set caret to 'null' as this causes https://bugs.eclipse.org/293263
 //		fSourceViewer.getTextWidget().setCaret(null);
 
-		fViewerConfiguration= new SimpleJavaSourceViewerConfiguration(tools.getColorManager(), fPreferenceStore, null, IJavaPartitions.JAVA_PARTITIONING, true);
+		fViewerConfigurationStandard= new SimpleJavaSourceViewerConfiguration(tools.getColorManager(), fPreferenceStore, null, IJavaPartitions.JAVA_PARTITIONING, true, false);
+		fViewerConfigurationModule= new SimpleJavaSourceViewerConfiguration(tools.getColorManager(), fPreferenceStore, null, IJavaPartitions.JAVA_PARTITIONING, true, true);
+		fViewerConfiguration= fViewerConfigurationStandard;
 		fSourceViewer.configure(fViewerConfiguration);
 		fSourceViewer.getTextWidget().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 
@@ -211,6 +216,14 @@ public abstract class JavaPreview {
 		} else {
 			fSourceViewer.removePainter(fWhitespaceCharacterPainter);
 			fWhitespaceCharacterPainter= null;
+		}
+	}
+
+	public void setModuleInfoMode(boolean moduleInfoMode) {
+		if (fModuleInfoMode != moduleInfoMode) {
+			fModuleInfoMode= moduleInfoMode;
+			fViewerConfiguration= moduleInfoMode ? fViewerConfigurationModule : fViewerConfigurationStandard;
+			fSourceViewer.configure(fViewerConfiguration);
 		}
 	}
 }

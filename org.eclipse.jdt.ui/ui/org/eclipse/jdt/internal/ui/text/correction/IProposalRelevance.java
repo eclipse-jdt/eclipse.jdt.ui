@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 IBM Corporation and others.
+ * Copyright (c) 2012, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -171,6 +171,7 @@ public interface IProposalRelevance {
 	public static final int CAST_ARGUMENT_2= 5;
 	public static final int CHANGE_TYPE_OF_NODE_TO_CAST= 5;
 	public static final int IMPORT_NOT_FOUND_NEW_TYPE= 5;
+	public static final int IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE= 5;
 	public static final int REMOVE_INVALID_MODIFIERS= 5;
 	public static final int CHANGE_VISIBILITY_TO_NON_PRIVATE= 5;
 	public static final int CHANGE_MODIFIER_TO_STATIC= 5;

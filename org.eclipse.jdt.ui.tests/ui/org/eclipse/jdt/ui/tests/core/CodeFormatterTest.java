@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2015 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,9 +50,9 @@ public class CodeFormatterTest extends CoreTests {
 
 	private static final Class<CodeFormatterTest> THIS= CodeFormatterTest.class;
 
-	private IJavaProject fJProject1;
+	protected IJavaProject fJProject1;
 
-	private IPackageFragmentRoot fSourceFolder;
+	protected IPackageFragmentRoot fSourceFolder;
 
 	public CodeFormatterTest(String name) {
 		super(name);
@@ -85,11 +85,11 @@ public class CodeFormatterTest extends CoreTests {
 		JavaProjectHelper.delete(fJProject1);
 	}
 
-	private static String format(ICompilationUnit cu, int offset, int length) throws PartInitException, JavaModelException {
+	protected static String format(ICompilationUnit cu, int offset, int length) throws PartInitException, JavaModelException {
 		return format(cu, offset, length, "Format");
 	}
 
-	private static String formatElement(ICompilationUnit cu, int offset, int length) throws PartInitException, JavaModelException {
+	protected static String formatElement(ICompilationUnit cu, int offset, int length) throws PartInitException, JavaModelException {
 		return format(cu, offset, length, "QuickFormat"); // see JavaEditor for the action ids
 	}
 

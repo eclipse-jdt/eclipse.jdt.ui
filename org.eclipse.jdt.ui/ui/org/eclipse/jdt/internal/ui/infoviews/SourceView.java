@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.infoviews;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -19,6 +21,8 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -43,6 +47,7 @@ import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
@@ -54,8 +59,9 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
@@ -158,6 +164,8 @@ public class SourceView extends AbstractInfoView {
 	private SourceViewer fViewer;
 	/** The viewers configuration */
 	private JavaSourceViewerConfiguration fViewerConfiguration;
+	/** Map of configuration kind to source viewer configuration */
+	private Map<String, JavaSourceViewerConfiguration> fKindToViewerConfiguration= new HashMap<>();
 	/** The viewer's font properties change listener. */
 	private IPropertyChangeListener fFontPropertyChangeListener= new FontPropertyChangeListener();
 	/**
@@ -183,6 +191,7 @@ public class SourceView extends AbstractInfoView {
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		fViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL, store);
 		fViewerConfiguration= new SimpleJavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, IJavaPartitions.JAVA_PARTITIONING, false);
+		fKindToViewerConfiguration.put(SimpleJavaSourceViewerConfiguration.STANDARD, fViewerConfiguration);
 		fViewer.configure(fViewerConfiguration);
 		fViewer.setEditable(false);
 
@@ -380,6 +389,7 @@ public class SourceView extends AbstractInfoView {
 	protected void internalDispose() {
 		fViewer= null;
 		fViewerConfiguration= null;
+		fKindToViewerConfiguration= null;
 		JFaceResources.getFontRegistry().removeListener(fFontPropertyChangeListener);
 		JavaPlugin.getDefault().getCombinedPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
 	}
@@ -427,6 +437,24 @@ public class SourceView extends AbstractInfoView {
 		if (sourceLines == null || sourceLines.length == 0)
 			return ""; //$NON-NLS-1$
 
+		if (input instanceof IJavaElement) {
+			IWorkbenchPartSite site= getSite();
+			if (site != null) {
+				Shell shell= site.getShell();
+				if (!shell.isDisposed()) {
+					Display display= shell.getDisplay();
+					if (!display.isDisposed()) {
+						display.asyncExec(new Runnable() {
+							@Override
+							public void run() {
+								updateViewerConfiguration((IJavaElement) input);
+							}
+						});
+					}
+				}
+			}
+		}
+
 		String firstLine= sourceLines[0];
 		boolean firstCharNotWhitespace= firstLine != null && firstLine.length() > 0 && !Character.isWhitespace(firstLine.charAt(0));
 		if (firstCharNotWhitespace)
@@ -442,6 +470,25 @@ public class SourceView extends AbstractInfoView {
 			sourceLines[0]= firstLine;
 
 		return Strings.concatenate(sourceLines, delim);
+	}
+
+	private void updateViewerConfiguration(IJavaElement input) {
+		if (fKindToViewerConfiguration != null) {
+			JavaSourceViewerConfiguration oldViewerConfiguration= fViewerConfiguration;
+			if (JavaModelUtil.isModule(input)) {
+				fViewerConfiguration= fKindToViewerConfiguration.get(SimpleJavaSourceViewerConfiguration.MODULE);
+				if (fViewerConfiguration == null) {
+					IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+					fViewerConfiguration= new SimpleJavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, IJavaPartitions.JAVA_PARTITIONING, false, true);
+					fKindToViewerConfiguration.put(SimpleJavaSourceViewerConfiguration.MODULE, fViewerConfiguration);
+				}
+			} else {
+				fViewerConfiguration= fKindToViewerConfiguration.get(SimpleJavaSourceViewerConfiguration.STANDARD);
+			}
+			if (fViewerConfiguration != null && !fViewerConfiguration.equals(oldViewerConfiguration)) {
+				fViewer.configure(fViewerConfiguration);
+			}
+		}
 	}
 
 	/*

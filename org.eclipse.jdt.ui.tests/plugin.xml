@@ -2,6 +2,40 @@
 <?eclipse version="3.0"?>
 <plugin>
     
+<!-- **************** See testresources/rtstubs-README.txt ******************* -->
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.IJavaElement"
+            id="org.eclipse.jdt.ui.tests.contribution">
+         <visibility>
+            <or>
+               <objectClass
+                     name="org.eclipse.jdt.core.IPackageFragment">
+               </objectClass>
+               <objectClass
+                     name="org.eclipse.jdt.core.IPackageFragmentRoot">
+               </objectClass>
+            </or>
+         </visibility>
+         <menu
+               label="&amp;jdt.ui test tools"
+               path="additions"
+               id="org.eclipse.jdt.ui.tests.menu">
+            <separator
+                  name="group">
+            </separator>
+         </menu>
+         <action
+               label="Create stubs in pro&amp;ject..."
+               class="org.eclipse.jdt.testplugin.util.CreateStubsAction"
+               menubarPath="org.eclipse.jdt.ui.tests.menu/group"
+               enablesFor="+"
+               id="org.eclipse.jdt.ui.examples.CreateStubsAction">
+         </action>
+      </objectContribution>
+   </extension>
+
 <!-- **************** TEST DECORATOR ******************* -->
    <extension
          point="org.eclipse.ui.decorators">

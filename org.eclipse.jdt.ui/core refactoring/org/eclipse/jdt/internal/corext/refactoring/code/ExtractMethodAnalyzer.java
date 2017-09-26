@@ -987,13 +987,27 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		}
 		super.endVisit(node);
 	}
-	
+
+	@Override
+	public void endVisit(QualifiedName node) {
+		if (isResourceInTry(node)) {
+			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_resource_used_in_try_with_resources, JavaStatusContext.create(fCUnit, getSelection()));
+		}
+		super.endVisit(node);
+	}
+
+	@Override
+	public void endVisit(SimpleName node) {
+		if (isResourceInTry(node)) {
+			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_resource_used_in_try_with_resources, JavaStatusContext.create(fCUnit, getSelection()));
+		}
+		super.endVisit(node);
+	}
+
 	@Override
 	public void endVisit(VariableDeclarationExpression node) {
-		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED && getFirstSelectedNode() == node) {
-			if (node.getLocationInParent() == TryStatement.RESOURCES_PROPERTY) {
-				invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_resource_in_try_with_resources, JavaStatusContext.create(fCUnit, getSelection()));
-			}
+		if (isResourceInTry(node)) {
+			invalidSelection(RefactoringCoreMessages.ExtractMethodAnalyzer_resource_in_try_with_resources, JavaStatusContext.create(fCUnit, getSelection()));
 		}
 		checkTypeInDeclaration(node.getType());
 		super.endVisit(node);
@@ -1022,6 +1036,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		if (first instanceof Expression && getSelectedNodes().length != 1)
 			return false;
 		return true;
+	}
+
+	private boolean isResourceInTry(Expression node) {
+		return getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED && getFirstSelectedNode() == node && node.getLocationInParent() == TryStatement.RESOURCES2_PROPERTY;
 	}
 }
 

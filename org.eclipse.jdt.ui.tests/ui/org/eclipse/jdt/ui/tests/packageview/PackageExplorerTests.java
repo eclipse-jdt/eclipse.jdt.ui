@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -25,6 +25,7 @@ public class PackageExplorerTests {
 		suite.addTest(ContentProviderTests4.suite());
 		suite.addTest(ContentProviderTests5.suite());
 		suite.addTest(ContentProviderTests6.suite());
+		suite.addTest(ContentProviderTests7.suite());
 		suite.addTest(PackageExplorerShowInTests.suite());
 		suite.addTestSuite(WorkingSetDropAdapterTest.class);
 		suite.addTest(HierarchicalContentProviderTests.suite());

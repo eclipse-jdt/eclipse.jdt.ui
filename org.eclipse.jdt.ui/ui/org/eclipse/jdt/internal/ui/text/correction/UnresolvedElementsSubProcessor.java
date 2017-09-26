@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
@@ -46,7 +47,9 @@ import org.eclipse.ltk.core.refactoring.resource.ResourceChange;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -101,7 +104,10 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -128,6 +134,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddArgumentCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddImportCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.AddModuleRequiresCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddTypeParameterProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CastCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal;
@@ -143,9 +150,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrection
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameNodeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ReplaceCorrectionProposal;
-
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
@@ -587,7 +591,8 @@ public class UnresolvedElementsSubProcessor {
 			return;
 		}
 
-		int kind= evauateTypeKind(selectedNode, cu.getJavaProject());
+		IJavaProject javaProject= cu.getJavaProject();
+		int kind= evauateTypeKind(selectedNode, javaProject);
 		
 		if (kind == SimilarElementsRequestor.REF_TYPES) {
 			addEnhancedForWithoutTypeProposals(cu, selectedNode, proposals);
@@ -624,8 +629,17 @@ public class UnresolvedElementsSubProcessor {
 			node= (Name) node.getParent();
 		}
 
+		IModuleDescription moduleDescription= cu.getModule();
+		if (moduleDescription != null && moduleDescription.exists()
+				&& javaProject != null && JavaModelUtil.is9OrHigher(javaProject)) {
+			ICompilationUnit moduleCompilationUnit= moduleDescription.getCompilationUnit();
+			if (cu.equals(moduleCompilationUnit)) {
+				addRequiresModuleProposals(cu, node, kind, proposals, false);
+			}
+		}
+
 		if (selectedNode != node) {
-			kind= evauateTypeKind(node, cu.getJavaProject());
+			kind= evauateTypeKind(node, javaProject);
 		}
 		if ((kind & (SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES)) != 0) {
 			kind &= ~SimilarElementsRequestor.ANNOTATIONS; // only propose annotations when there are no other suggestions
@@ -770,9 +784,19 @@ public class UnresolvedElementsSubProcessor {
 			if (!simpleBinding.isRecovered()) {
 				resolvedTypeName= simpleBinding.getQualifiedName();
 				CUCorrectionProposal proposal= createTypeRefChangeProposal(cu, resolvedTypeName, node, relevance + 2, elements.length);
-				proposals.add(proposal);
-				if (proposal instanceof AddImportCorrectionProposal)
-					proposal.setRelevance(relevance + elements.length + 2);
+				ChangeCorrectionProposal compositeProposal= getCompositeChangeProposal(proposal);
+				if (compositeProposal != null) {
+					proposals.add(compositeProposal);
+				} else {
+					proposals.add(proposal);
+				}
+				if (proposal instanceof AddImportCorrectionProposal) {
+					int rel= relevance + elements.length + 2;
+					proposal.setRelevance(rel);
+					if (compositeProposal != null) {
+						compositeProposal.setRelevance(rel);
+					}
+				}
 
 				if (binding.isParameterizedType()
 						&& (node.getParent() instanceof SimpleType || node.getParent() instanceof NameQualifiedType)
@@ -796,10 +820,46 @@ public class UnresolvedElementsSubProcessor {
 			if ((elem.getKind() & SimilarElementsRequestor.ALL_TYPES) != 0) {
 				String fullName= elem.getName();
 				if (!fullName.equals(resolvedTypeName)) {
-					proposals.add(createTypeRefChangeProposal(cu, fullName, node, relevance, elements.length));
+					CUCorrectionProposal cuProposal= createTypeRefChangeProposal(cu, fullName, node, relevance, elements.length);
+					ChangeCorrectionProposal compositeProposal= getCompositeChangeProposal(cuProposal);
+					if (compositeProposal != null) {
+						proposals.add(compositeProposal);
+					} else {
+						proposals.add(cuProposal);
+					}
 				}
 			}
 		}
+	}
+
+	private static ChangeCorrectionProposal getCompositeChangeProposal(ChangeCorrectionProposal proposal) throws CoreException {
+		ChangeCorrectionProposal compositeProposal= null;
+		if (proposal instanceof AddImportCorrectionProposal) {
+			AddModuleRequiresCorrectionProposal cp= ((AddImportCorrectionProposal) proposal).getAdditionalProposal();
+			if (cp != null) {
+				Change importChange= proposal.getChange();
+				Change change= cp.getChange();
+				if (change != null) {
+					change.initializeValidationData(new NullProgressMonitor());
+					String importChangeName= importChange.getName();
+					String moduleRequiresChangeName= change.getName();
+					moduleRequiresChangeName= moduleRequiresChangeName.substring(0, 1).toLowerCase() + moduleRequiresChangeName.substring(1);
+					String changeName= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_combine_two_proposals_info, new String[] { importChangeName, moduleRequiresChangeName });
+					compositeProposal= new ChangeCorrectionProposal(changeName, null, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE) {
+						@Override
+						protected Change createChange() throws CoreException {
+							return new CompositeChange(changeName, new Change[] { importChange, change });
+						}
+
+						@Override
+						public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+							return changeName;
+						}
+					};
+				}
+			}
+		}
+		return compositeProposal;
 	}
 
 	private static CUCorrectionProposal createTypeRefChangeProposal(ICompilationUnit cu, String fullName, Name node, int relevance, int maxProposals) {
@@ -981,6 +1041,75 @@ public class UnresolvedElementsSubProcessor {
 					declaration= ASTResolving.findParentBodyDeclaration(declaration.getParent());
 				} else {
 					declaration= null;
+				}
+			}
+		}
+	}
+
+	public static void addRequiresModuleProposals(ICompilationUnit cu, Name node, int relevance, Collection<ICommandAccess> proposals, boolean isOnDemand) throws CoreException {
+		if (cu == null) {
+			return;
+		}
+		IJavaProject currentJavaProject= cu.getJavaProject();
+		if (currentJavaProject == null || !JavaModelUtil.is9OrHigher(currentJavaProject)) {
+			return;
+		}
+		IModuleDescription currentModuleDescription= currentJavaProject.getModuleDescription();
+		if (currentModuleDescription == null) {
+			return;
+		}
+		ICompilationUnit currentModuleCompilationUnit= currentModuleDescription.getCompilationUnit();
+		if (currentModuleCompilationUnit == null || !currentModuleCompilationUnit.exists()) {
+			return;
+		}
+		int typeRule= IJavaSearchConstants.TYPE;
+		if (isOnDemand) {
+			typeRule= IJavaSearchConstants.PACKAGE;
+		}
+
+		List<IPackageFragment> matchingPackageFragments= new ArrayList<>();
+		if (node.isSimpleName()) {
+			matchingPackageFragments.add((IPackageFragment) cu.getParent());
+		} else {
+			String qualifiedName= node.getFullyQualifiedName();
+			List<IPackageFragment> packageFragments= AddModuleRequiresCorrectionProposal.getPackageFragmentsOfMatchingTypes(qualifiedName, typeRule, currentJavaProject);
+			if (packageFragments.size() > 0) {
+				matchingPackageFragments.addAll(packageFragments);
+			} else if (isOnDemand) {
+				packageFragments= AddModuleRequiresCorrectionProposal.getPackageFragmentsOfMatchingTypes(qualifiedName, IJavaSearchConstants.TYPE, currentJavaProject);
+				if (packageFragments.size() > 0) {
+					matchingPackageFragments.addAll(packageFragments);
+				}
+			}
+		}
+		IModuleDescription projectModule= null;
+		if (matchingPackageFragments.size() > 0) {
+			HashSet<String> modules= new HashSet<>();
+			for (IPackageFragment enclosingPackage : matchingPackageFragments) {
+				if (enclosingPackage.isReadOnly()) { // This is to handle the case where the enclosingPackage belongs to a jar file
+					IPackageFragmentRoot root= (IPackageFragmentRoot) enclosingPackage.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					if (root != null) {
+						projectModule= root.getModuleDescription();
+					}
+				} else {
+					IJavaProject project= enclosingPackage.getJavaProject();
+					if (project != null && JavaModelUtil.is9OrHigher(project)) {
+						projectModule= project.getModuleDescription();
+					}
+				}
+				if (projectModule != null && projectModule.exists() && !projectModule.equals(currentModuleDescription)) {
+					String moduleName= projectModule.getElementName();
+					if (!modules.contains(moduleName)) {
+						String[] args= { moduleName };
+						final String changeName= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_info, args);
+						final String changeDescription= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_description, args);
+						ChangeCorrectionProposal proposal= new AddModuleRequiresCorrectionProposal(moduleName, changeName, changeDescription, currentModuleCompilationUnit, relevance);
+						Change change= proposal.getChange();
+						if (change != null) {
+							proposals.add(proposal);
+							modules.add(moduleName);
+						}
+					}
 				}
 			}
 		}

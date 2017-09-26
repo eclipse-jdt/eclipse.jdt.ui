@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java.hover;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -43,6 +46,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IInformationControlExtension;
+import org.eclipse.jface.text.IInformationControlExtension2;
 import org.eclipse.jface.text.IInformationControlExtension3;
 import org.eclipse.jface.text.IInformationControlExtension5;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -50,14 +54,20 @@ import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
+import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaSourceHover.JavaSourceInformationInput;
 
 /**
  * Source viewer based implementation of <code>IInformationControl</code>.
@@ -65,7 +75,8 @@ import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
  *
  * @since 3.0
  */
-public class SourceViewerInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension3, IInformationControlExtension5, DisposeListener {
+public class SourceViewerInformationControl
+		implements IInformationControl, IInformationControlExtension, IInformationControlExtension2, IInformationControlExtension3, IInformationControlExtension5, DisposeListener {
 
 	/** The control's shell */
 	private Shell fShell;
@@ -118,6 +129,8 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	private Color fBackgroundColor;
 	private boolean fIsSystemBackgroundColor= true;
 
+	private JavaSourceViewerConfiguration fViewerConfiguration;
+	private Map<String, JavaSourceViewerConfiguration> fKindToViewerConfiguration= new HashMap<>();
 
 	/**
 	 * Creates a source viewer information control with the given shell as parent. The given
@@ -169,7 +182,9 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		// Source viewer
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		fViewer= new JavaSourceViewer(composite, null, null, false, textStyle, store);
-		fViewer.configure(new SimpleJavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, IJavaPartitions.JAVA_PARTITIONING, false));
+		fViewerConfiguration= new SimpleJavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, IJavaPartitions.JAVA_PARTITIONING, false);
+		fKindToViewerConfiguration.put(SimpleJavaSourceViewerConfiguration.STANDARD, fViewerConfiguration);
+		fViewer.configure(fViewerConfiguration);
 		fViewer.setEditable(false);
 
 		fText= fViewer.getTextWidget();
@@ -300,19 +315,33 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		styledText.setFont(fTextFont);
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.IInformationControlExtension2#setInput(java.lang.Object)
-	 */
+	@Override
 	public void setInput(Object input) {
-		if (input instanceof String)
-			setInformation((String)input);
-		else
-			setInformation(null);
+		String content= null;
+		if (input instanceof String) {
+			content= (String) input;
+		} else if (input instanceof JavaSourceInformationInput) {
+			content= ((JavaSourceInformationInput) input).getHoverInfo();
+		}
+		setInformation(content);
+
+		if (fShell != null && !fShell.isDisposed()) {
+			Display display= fShell.getDisplay();
+			if (!display.isDisposed()) {
+				display.asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						IJavaElement javaElement= null;
+						if (input instanceof JavaSourceInformationInput) {
+							javaElement= ((JavaSourceInformationInput) input).getJavaElement();
+						}
+						updateViewerConfiguration(javaElement);
+					}
+				});
+			}
+		}
 	}
 
-	/*
-	 * @see IInformationControl#setInformation(String)
-	 */
 	@Override
 	public void setInformation(String content) {
 		if (content == null) {
@@ -323,6 +352,25 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 		IDocument doc= new Document(content);
 		JavaPlugin.getDefault().getJavaTextTools().setupJavaDocumentPartitioner(doc, IJavaPartitions.JAVA_PARTITIONING);
 		fViewer.setInput(doc);
+	}
+
+	private void updateViewerConfiguration(IJavaElement input) {
+		if (fKindToViewerConfiguration != null) {
+			JavaSourceViewerConfiguration oldViewerConfiguration= fViewerConfiguration;
+			if (JavaModelUtil.isModule(input)) {
+				fViewerConfiguration= fKindToViewerConfiguration.get(SimpleJavaSourceViewerConfiguration.MODULE);
+				if (fViewerConfiguration == null) {
+					IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
+					fViewerConfiguration= new SimpleJavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools().getColorManager(), store, null, IJavaPartitions.JAVA_PARTITIONING, false, true);
+					fKindToViewerConfiguration.put(SimpleJavaSourceViewerConfiguration.MODULE, fViewerConfiguration);
+				}
+			} else {
+				fViewerConfiguration= fKindToViewerConfiguration.get(SimpleJavaSourceViewerConfiguration.STANDARD);
+			}
+			if (fViewerConfiguration != null && !fViewerConfiguration.equals(oldViewerConfiguration)) {
+				fViewer.configure(fViewerConfiguration);
+			}
+		}
 	}
 
 	/*
@@ -360,6 +408,7 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 			fShell.dispose();
 		else
 			widgetDisposed(null);
+		fKindToViewerConfiguration= null;
 	}
 
 	/*

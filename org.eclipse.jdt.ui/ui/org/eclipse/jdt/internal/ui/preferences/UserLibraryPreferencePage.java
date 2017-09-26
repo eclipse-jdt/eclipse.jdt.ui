@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -122,6 +122,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementSorter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListLabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPUserLibraryElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathAttributeConfigurationDescriptors;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -1513,6 +1514,9 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				if (CPListElement.ACCESSRULES.equals(attribute.getKey())) {
 					return (IAccessRule[]) attribute.getValue();
 				}
+				if (CPListElement.MODULE.equals(attribute.getKey())) {
+					return (ModuleEncapsulationDetail[]) attribute.getValue();
+				}
 			}
 			return EMPTY;
 		}
@@ -1529,7 +1533,8 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 
 		@Override
 		public boolean hasChildren(TreeListDialogField<CPUserLibraryElement> field, Object element) {
-			return getChildren(field, element).length > 0;
+			Object[] children= getChildren(field, element);
+			return children == null ? false : children.length > 0;
 		}
 
 	}

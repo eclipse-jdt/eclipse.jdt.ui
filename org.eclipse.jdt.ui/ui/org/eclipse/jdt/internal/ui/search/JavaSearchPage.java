@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,12 +59,14 @@ import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
 import org.eclipse.search.ui.NewSearchUI;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModularClassFile;
+import org.eclipse.jdt.core.IModuleDescription;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -240,6 +242,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	private final static int METHOD= IJavaSearchConstants.METHOD;
 	private final static int PACKAGE= IJavaSearchConstants.PACKAGE;
 	private final static int CONSTRUCTOR= IJavaSearchConstants.CONSTRUCTOR;
+	private final static int MODULE= IJavaSearchConstants.MODULE;
 	private final static int FIELD= IJavaSearchConstants.FIELD;
 
 	// limit to
@@ -716,13 +719,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			createButton(result, SWT.RADIO, SearchMessages.SearchPage_searchFor_method, METHOD, false),
 			createButton(result, SWT.RADIO, SearchMessages.SearchPage_searchFor_package, PACKAGE, false),
 			createButton(result, SWT.RADIO, SearchMessages.SearchPage_searchFor_constructor, CONSTRUCTOR, false),
+			createButton(result, SWT.RADIO, SearchMessages.SearchPage_searchFor_module, MODULE, false),
 			createButton(result, SWT.RADIO, SearchMessages.SearchPage_searchFor_field, FIELD, false)
 		};
-
-		// Fill with dummy radio buttons
-		Label filler= new Label(result, SWT.NONE);
-		filler.setVisible(false);
-		filler.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 
 		return result;
 	}
@@ -983,6 +982,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			case IJavaElement.TYPE:
 			case IJavaElement.FIELD:
 			case IJavaElement.METHOD:
+			case IJavaElement.JAVA_MODULE:
 				return true;
 		}
 		return false;
@@ -995,6 +995,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			int includeMask= getLastIncludeMask();
 
 			switch (element.getElementType()) {
+				case IJavaElement.JAVA_MODULE:
+					return new SearchPatternData(MODULE, REFERENCES, 0, true, element.getElementName(), element, includeMask);
 				case IJavaElement.PACKAGE_FRAGMENT:
 				case IJavaElement.PACKAGE_DECLARATION:
 					return new SearchPatternData(PACKAGE, REFERENCES, 0, true, element.getElementName(), element, includeMask);
@@ -1009,16 +1011,29 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 				case IJavaElement.TYPE:
 					return new SearchPatternData(TYPE, REFERENCES, 0, true, PatternStrings.getTypeSignature((IType) element), element, includeMask);
 				case IJavaElement.COMPILATION_UNIT: {
-					IType mainType= ((ICompilationUnit) element).findPrimaryType();
+					ICompilationUnit cu= (ICompilationUnit) element;
+					IType mainType= cu.findPrimaryType();
 					if (mainType != null) {
 						return new SearchPatternData(TYPE, REFERENCES, 0, true, PatternStrings.getTypeSignature(mainType), mainType, includeMask);
+					}
+					IModuleDescription module= cu.getModule();
+					if (module != null && module.exists()) {
+						return new SearchPatternData(MODULE, REFERENCES, 0, true, PatternStrings.getSignature(module), module, includeMask);
 					}
 					break;
 				}
 				case IJavaElement.CLASS_FILE: {
-					IType mainType= ((IClassFile) element).getType();
-					if (mainType.exists()) {
-						return new SearchPatternData(TYPE, REFERENCES, 0, true, PatternStrings.getTypeSignature(mainType), mainType, includeMask);
+					if (element instanceof IOrdinaryClassFile) {
+						IType mainType= ((IOrdinaryClassFile) element).getType();
+						if (mainType.exists()) {
+							return new SearchPatternData(TYPE, REFERENCES, 0, true, PatternStrings.getTypeSignature(mainType), mainType, includeMask);
+						}
+					} else if (element instanceof IModularClassFile) {
+						IModuleDescription module= ((IModularClassFile) element).getModule();
+						if (module != null && module.exists()) {
+							return new SearchPatternData(MODULE, REFERENCES, 0, true, PatternStrings.getSignature(module), module, includeMask);
+						}
+
 					}
 					break;
 				}

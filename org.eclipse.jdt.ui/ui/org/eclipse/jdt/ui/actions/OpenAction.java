@@ -38,6 +38,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
@@ -160,8 +161,7 @@ public class OpenAction extends SelectionDispatchAction {
 
 			IJavaElement element= elements[0];
 			if (elements.length > 1) {
-				// If there are multiple IPackageFragments that could be selected, use the first one on the build path.
-				if (!(element instanceof IPackageFragment)) {
+				if (needsUserSelection(elements, input)) {
 					element= SelectionConverter.selectJavaElement(elements, getShell(), getDialogTitle(), ActionMessages.OpenAction_select_element);
 					if (element == null)
 						return;
@@ -174,6 +174,29 @@ public class OpenAction extends SelectionDispatchAction {
 		} catch (InterruptedException e) {
 			// ignore
 		}
+	}
+
+	private boolean needsUserSelection(IJavaElement[] elements, ITypeRoot input) {
+		if (elements[0] instanceof IPackageFragment) {
+			IJavaProject javaProject= input.getJavaProject();
+			if (JavaModelUtil.is9OrHigher(javaProject)) {
+				try {
+					if (javaProject.getModuleDescription() != null) {
+						for (IJavaElement element : elements) {
+							IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+							if (root.getModuleDescription() != null)
+								return true;
+						}
+					}
+				} catch (JavaModelException e) {
+					// silent
+				}
+			}
+			// below 9 or with no modules in the picture:
+			// if there are multiple IPackageFragments that could be selected, use the first one on the build path.
+			return false;
+		}
+		return true;
 	}
 
 	/**

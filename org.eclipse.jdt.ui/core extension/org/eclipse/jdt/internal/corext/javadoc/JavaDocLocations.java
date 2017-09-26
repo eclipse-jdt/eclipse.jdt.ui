@@ -32,7 +32,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -44,7 +43,10 @@ import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModularClassFile;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -248,7 +250,15 @@ public class JavaDocLocations {
 				appendTypePath(mainType, pathBuffer);
 				break;
 			case IJavaElement.CLASS_FILE :
-				appendTypePath(((IClassFile) element).getType(), pathBuffer);
+				if (element instanceof IModularClassFile) {
+					try {
+						appendModuleSummaryPath(((IModularClassFile) element).getModule(), pathBuffer);
+					} catch (JavaModelException e) {
+						return null;
+					}
+				} else {
+					appendTypePath(((IOrdinaryClassFile) element).getType(), pathBuffer);
+				}
 				break;
 			case IJavaElement.TYPE :
 				appendTypePath((IType) element, pathBuffer);
@@ -293,6 +303,10 @@ public class JavaDocLocations {
 					return null;
 				}
 				break;
+			case IJavaElement.JAVA_MODULE:
+				IModuleDescription module= (IModuleDescription) element;
+				appendModuleSummaryPath(module, pathBuffer);
+				break;	
 			default :
 				return null;
 		}
@@ -317,6 +331,12 @@ public class JavaDocLocations {
 		String packPath= pack.getElementName().replace('.', '/');
 		buf.append(packPath);
 		buf.append("/package-summary.html"); //$NON-NLS-1$
+	}
+
+	private static void appendModuleSummaryPath(IModuleDescription module, StringBuffer buf) {
+		String moduleName= module.getElementName();
+		buf.append(moduleName);
+		buf.append("-summary.html"); //$NON-NLS-1$
 	}
 
 	private static void appendIndexPath(StringBuffer buf) {

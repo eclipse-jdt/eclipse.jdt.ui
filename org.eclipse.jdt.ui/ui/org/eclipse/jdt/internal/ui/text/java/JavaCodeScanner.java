@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -39,6 +40,7 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
 import org.eclipse.jdt.internal.ui.text.CombinedWordRule;
+import org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher;
 import org.eclipse.jdt.internal.ui.text.ISourceVersionDependent;
 import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
 import org.eclipse.jdt.internal.ui.text.JavaWordDetector;
@@ -394,6 +396,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	private static final String RETURN= "return"; //$NON-NLS-1$
 	private static String[] fgJava14Keywords= { "assert" }; //$NON-NLS-1$
 	private static String[] fgJava15Keywords= { "enum" }; //$NON-NLS-1$
+	private static String[] fgJava9ModuleInfoKeywords= { "module", "requires", "exports", "to", "provides", "with", "uses", "open", "opens", "transitive", "import" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$
 
 	private static String[] fgTypes= { "void", "boolean", "char", "byte", "short", "strictfp", "int", "long", "float", "double" }; //$NON-NLS-1$ //$NON-NLS-5$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-8$ //$NON-NLS-9$  //$NON-NLS-10$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-2$
 
@@ -414,6 +417,8 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 	private List<ISourceVersionDependent> fVersionDependentRules= new ArrayList<>(3);
 
+	private boolean fIsModuleInfoCode;
+
 	/**
 	 * Creates a Java code scanner
 	 *
@@ -421,7 +426,19 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	 * @param store		the preference store
 	 */
 	public JavaCodeScanner(IColorManager manager, IPreferenceStore store) {
+		this(manager, store, false);
+	}
+
+	/**
+	 * Creates a Java code scanner
+	 *
+	 * @param manager the color manager
+	 * @param store the preference store
+	 * @param isModuleInfoCode <code>true</code> if used for module-info code
+	 */
+	public JavaCodeScanner(IColorManager manager, IPreferenceStore store, boolean isModuleInfoCode) {
 		super(manager, store);
+		fIsModuleInfoCode= isModuleInfoCode;
 		initialize();
 	}
 
@@ -441,17 +458,21 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 		List<IRule> rules= new ArrayList<>();
 
+		Token defaultToken= getToken(IJavaColorConstants.JAVA_DEFAULT);
+
+		String version= getPreferenceStore().getString(SOURCE_VERSION);
+
+		// Create rules for JLS9 module-info code
+		if (fIsModuleInfoCode) {
+			return create9ModuleInfoRules(defaultToken);
+		}
+
 		// Add rule for character constants.
 		Token token= getToken(IJavaColorConstants.JAVA_STRING);
 		rules.add(new SingleLineRule("'", "'", token, '\\')); //$NON-NLS-2$ //$NON-NLS-1$
 
-
-		Token defaultToken= getToken(IJavaColorConstants.JAVA_DEFAULT);
-		
 		// Add generic whitespace rule.
 		rules.add(new WhitespaceRule(new JavaWhitespaceDetector(), defaultToken));
-
-		String version= getPreferenceStore().getString(SOURCE_VERSION);
 
 		// Add JLS3 rule for /@\s*interface/ and /@\s*\w+/
 		token= getToken(ANNOTATION_COLOR_KEY);
@@ -511,6 +532,19 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 		setDefaultReturnToken(defaultToken);
 		return rules;
+	}
+
+	private List<IRule> create9ModuleInfoRules(Token defaultToken) {
+		// Add word rule for new keywords
+		WordMatcher j9ModuleInfoMatcher= new WordMatcher();
+		Token token= getToken(IJavaColorConstants.JAVA_KEYWORD);
+		for (int i= 0; i < fgJava9ModuleInfoKeywords.length; i++)
+			j9ModuleInfoMatcher.addWord(fgJava9ModuleInfoKeywords[i], token);
+
+		CombinedWordRule combinedWordRule= new CombinedWordRule(new JavaWordDetector(), j9ModuleInfoMatcher, defaultToken);
+
+		setDefaultReturnToken(defaultToken);
+		return new ArrayList<>(Arrays.asList(combinedWordRule));
 	}
 
 	/*

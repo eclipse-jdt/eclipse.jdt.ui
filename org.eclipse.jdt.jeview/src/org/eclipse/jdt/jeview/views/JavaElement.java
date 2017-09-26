@@ -21,7 +21,6 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.IAnnotation;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJarEntryResource;
@@ -32,6 +31,8 @@ import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModularClassFile;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
@@ -157,8 +158,10 @@ public class JavaElement extends JEAttribute {
 		
 		if (fJavaElement instanceof ITypeRoot)
 			addTypeRootChildren(result, (ITypeRoot) fJavaElement);
-		if (fJavaElement instanceof IClassFile)
-			addClassFileChildren(result, (IClassFile) fJavaElement);
+		if (fJavaElement instanceof IOrdinaryClassFile)
+			addClassFileChildren(result, (IOrdinaryClassFile) fJavaElement);
+		if (fJavaElement instanceof IModularClassFile)
+			addModularClassFileChildren(result, (IModularClassFile) fJavaElement);
 		if (fJavaElement instanceof ICompilationUnit)
 			addCompilationUnitChildren(result, (ICompilationUnit) fJavaElement);
 		
@@ -322,7 +325,7 @@ public class JavaElement extends JEAttribute {
 		result.add(new JavaElementChildrenProperty(this, "CLASS FILES") {
 			@Override
 			protected JEAttribute[] computeChildren() throws JavaModelException {
-				return createJavaElements(this, packageFragment.getClassFiles());
+				return createJavaElements(this, packageFragment.getAllClassFiles());
 			}
 		});
 		result.add(new JavaElementChildrenProperty(this, "NON JAVA RESOURCES") {
@@ -342,11 +345,20 @@ public class JavaElement extends JEAttribute {
 		}));
 	}
 	
-	private void addClassFileChildren(ArrayList<JEAttribute> result, final IClassFile classFile) {
+	private void addClassFileChildren(ArrayList<JEAttribute> result, final IOrdinaryClassFile classFile) {
 		result.add(JavaElement.compute(this, "TYPE", new Callable<IJavaElement>() {
 			@Override
 			public IJavaElement call() throws JavaModelException {
 				return classFile.getType();
+			}
+		}));
+	}
+	
+	private void addModularClassFileChildren(ArrayList<JEAttribute> result, final IModularClassFile classFile) {
+		result.add(JavaElement.compute(this, "MODULE", new Callable<IJavaElement>() {
+			@Override
+			public IJavaElement call() throws JavaModelException {
+				return classFile.getModule();
 			}
 		}));
 	}

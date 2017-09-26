@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,8 +14,10 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IPath;
@@ -33,11 +35,17 @@ import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.LimitModules;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddExport;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModuleAddReads;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail.ModulePatch;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
@@ -59,6 +67,7 @@ public class CPListElement {
 	public static final String SOURCE_ATTACHMENT_ENCODING= IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING;
 	public static final String IGNORE_OPTIONAL_PROBLEMS= IClasspathAttribute.IGNORE_OPTIONAL_PROBLEMS;
 	public static final String NATIVE_LIB_PATH= JavaRuntime.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY;
+	public static final String MODULE= IClasspathAttribute.MODULE;
 
 	private IJavaProject fProject;
 
@@ -74,8 +83,9 @@ public class CPListElement {
 	/**
 	 * List of {@link CPListElement} and {@link CPListElementAttribute}.
 	 */
-	private ArrayList<Object> fChildren;
+	protected ArrayList<Object> fChildren;
 	private IPath fLinkTarget, fOrginalLinkTarget;
+	private IModuleDescription fModule;
 
 	private CPListElement() {}
 
@@ -96,6 +106,10 @@ public class CPListElement {
 	}
 	
 	public CPListElement(Object parent, IJavaProject project, int entryKind, IPath path, boolean newElement, IResource res, IPath linkTarget) {
+		this(parent, project, null, entryKind, path, null, newElement, res, linkTarget);
+	}
+	
+	public CPListElement(Object parent, IJavaProject project, IClasspathEntry entry, int entryKind, IPath path, IModuleDescription module, boolean newElement, IResource res, IPath linkTarget) {
 		fProject= project;
 
 		fEntryKind= entryKind;
@@ -106,6 +120,7 @@ public class CPListElement {
 		fChildren= new ArrayList<>();
 		fResource= res;
 		fIsExported= false;
+		fModule= module;
 
 		fIsMissing= false;
 		fCachedEntry= null;
@@ -124,11 +139,13 @@ public class CPListElement {
 				createAttributeElement(SOURCEATTACHMENT, null, true);
 				createAttributeElement(JAVADOC, null, false);
 				createAttributeElement(IClasspathAttribute.EXTERNAL_ANNOTATION_PATH, null, false);
+				createAttributeElement(MODULE, (module != null ? new ModuleEncapsulationDetail[0] : null), true);
 				createAttributeElement(SOURCE_ATTACHMENT_ENCODING, null, false);
 				createAttributeElement(NATIVE_LIB_PATH, null, false);
 				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
 				break;
 			case IClasspathEntry.CPE_PROJECT:
+				createAttributeElement(MODULE, null, true);
 				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
 				createAttributeElement(COMBINE_ACCESSRULES, Boolean.FALSE, true); // not rendered
 				createAttributeElement(NATIVE_LIB_PATH, null, false);
@@ -142,10 +159,19 @@ public class CPListElement {
 					if (container != null) {
 						IClasspathEntry[] entries= container.getClasspathEntries();
 						if (entries != null) { // catch invalid container implementation
+							if (entries.length == 1) {
+								// redirect the Java 9 JRT pseudo entry to the list of contained modules:
+								int beforeModules= fChildren.size();
+								boolean modulesAdded= addModuleNodes(entry, entries[0]);
+								if (modulesAdded) {
+									fChildren.add(beforeModules, new CPListElementAttribute(this, MODULE, new ModuleEncapsulationDetail[0], true));
+									return;
+								}
+							}
 							for (int i= 0; i < entries.length; i++) {
-								IClasspathEntry entry= entries[i];
-								if (entry != null) {
-									CPListElement curr= createFromExisting(this, entry, fProject);
+								IClasspathEntry currEntry= entries[i];
+								if (currEntry != null) {
+									CPListElement curr= createFromExisting(this, currEntry, fProject);
 									fChildren.add(curr);
 								} else {
 									JavaPlugin.logErrorMessage("Null entry in container '" + fPath + "'");  //$NON-NLS-1$//$NON-NLS-2$
@@ -156,10 +182,39 @@ public class CPListElement {
 						}
 					}
 				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
 				}
 				break;
 			default:
 		}
+	}
+
+	private boolean addModuleNodes(IClasspathEntry containerEntry, IClasspathEntry pseudoEntry) {
+		boolean modulesAdded= false;
+		if (containerEntry != null) {
+			IPackageFragmentRoot[] fragmentRoots= fProject.findPackageFragmentRoots(containerEntry);
+			if (fragmentRoots != null && fragmentRoots.length > 1) {
+				for (IPackageFragmentRoot fragmentRoot : fragmentRoots) {
+					IModuleDescription currModule= fragmentRoot.getModuleDescription();
+					if (currModule != null) {
+						CPListElement curr= create(this, pseudoEntry, currModule, true, fProject);
+						fChildren.add(curr);
+						modulesAdded= true;
+					}
+				}
+			}
+		} else {
+			JavaPlugin.logErrorMessage("Null entry for container '" + fPath + "'");  //$NON-NLS-1$//$NON-NLS-2$
+		}
+		return modulesAdded;
+	}
+
+	private boolean hasLimitModules(IClasspathEntry entry) {
+		for (IClasspathAttribute attribute : entry.getExtraAttributes()) {
+			if (IClasspathAttribute.LIMIT_MODULES.equals(attribute.getName()))
+				return true;
+		}
+		return false;
 	}
 
 	public IClasspathEntry getClasspathEntry() {
@@ -176,14 +231,35 @@ public class CPListElement {
 			Object curr= fChildren.get(i);
 			if (curr instanceof CPListElementAttribute) {
 				CPListElementAttribute elem= (CPListElementAttribute) curr;
-				if (!elem.isBuiltIn() && elem.getValue() != null) {
-					res.add(elem.getClasspathAttribute());
+				if (!elem.isBuiltIn()) {
+					if (elem.getValue() != null) {
+						res.add(elem.getClasspathAttribute());
+					}
+				} else if (elem.getValue() instanceof ModuleEncapsulationDetail[]) {
+					res.add(JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true")); //$NON-NLS-1$
+
+					ModuleEncapsulationDetail[] detailValue= (ModuleEncapsulationDetail[]) elem.getValue();
+					String encodedPatch= ModuleEncapsulationDetail.encodeFiltered(detailValue, ModulePatch.class);
+					if (!encodedPatch.isEmpty()) {
+						res.add(JavaCore.newClasspathAttribute(IClasspathAttribute.PATCH_MODULE, encodedPatch));
+					}
+					String encodedExports= ModuleEncapsulationDetail.encodeFiltered(detailValue, ModuleAddExport.class);
+					if (!encodedExports.isEmpty()) {
+						res.add(JavaCore.newClasspathAttribute(IClasspathAttribute.ADD_EXPORTS, encodedExports));
+					}
+					String encodedReads= ModuleEncapsulationDetail.encodeFiltered(detailValue, ModuleAddReads.class);
+					if (!encodedReads.isEmpty()) {
+						res.add(JavaCore.newClasspathAttribute(IClasspathAttribute.ADD_READS, encodedReads));
+					}
+					String encodedLimits= ModuleEncapsulationDetail.encodeFiltered(detailValue, LimitModules.class);
+					if (!encodedLimits.isEmpty()) {
+						res.add(JavaCore.newClasspathAttribute(IClasspathAttribute.LIMIT_MODULES, encodedLimits));
+					}
 				}
 			}
 		}
 		return res.toArray(new IClasspathAttribute[res.size()]);
 	}
-
 
 	private IClasspathEntry newClasspathEntry() {
 
@@ -243,6 +319,14 @@ public class CPListElement {
 	 */
 	public IResource getResource() {
 		return fResource;
+	}
+
+	/**
+	 * Entries inside a JRT container represent one module each.
+	 * @return the module represented by this element.
+	 */
+	public IModuleDescription getModule() {
+		return fModule;
 	}
 
 	public CPListElementAttribute setAttribute(String key, Object value) {
@@ -350,6 +434,20 @@ public class CPListElement {
 		return res.toArray(new CPListElementAttribute[res.size()]);
 	}
 
+	public <T extends ModuleEncapsulationDetail> List<T> getModuleEncapsulationDetails(Class<T> clazz) {
+		Object moduleDetails= getAttribute(CPListElement.MODULE);
+		if (moduleDetails instanceof ModuleEncapsulationDetail[]) {
+			ModuleEncapsulationDetail[] details= (ModuleEncapsulationDetail[]) moduleDetails;
+			List<T> elements= new ArrayList<>(details.length);
+			for (int i= 0; i < details.length; i++) {
+				if (clazz.isInstance(details[i]))
+					elements.add(clazz.cast(details[i]));
+			}
+			return elements;
+		} else {
+			return Collections.emptyList();
+		}
+	}
 
 	private void createAttributeElement(String key, Object value, boolean builtIn) {
 		fChildren.add(new CPListElementAttribute(this, key, value, builtIn));
@@ -499,6 +597,8 @@ public class CPListElement {
 	 */
 	@Override
 	public int hashCode() {
+		if(fPath==null)
+			return super.hashCode();
 		return fPath.hashCode() + fEntryKind;
 	}
 
@@ -572,14 +672,14 @@ public class CPListElement {
 
 	public static CPListElement createFromExisting(Object parent, IClasspathEntry curr, IJavaProject project) {
 		//Note: Some old clients of this method could actually mean create(parent, curr, true, project)
-		return create(parent, curr, false, project);
+		return create(parent, curr, null, false, project);
 	}
 	
 	public static CPListElement create(IClasspathEntry curr, boolean newElement, IJavaProject project) {
-		return create(null, curr, newElement, project);
+		return create(null, curr, null, newElement, project);
 	}
-	
-	public static CPListElement create(Object parent, IClasspathEntry curr, boolean newElement, IJavaProject project) {
+
+	public static CPListElement create(Object parent, IClasspathEntry curr, IModuleDescription module, boolean newElement, IJavaProject project) {
 		IPath path= curr.getPath();
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 
@@ -638,7 +738,7 @@ public class CPListElement {
 				isMissing= (res == null);
 				break;
 		}
-		CPListElement elem= new CPListElement(parent, project, curr.getEntryKind(), path, newElement, res, linkTarget);
+		CPListElement elem= new CPListElement(parent, project, curr, curr.getEntryKind(), path, module, newElement, res, linkTarget);
 		elem.setExported(curr.isExported());
 		elem.setAttribute(SOURCEATTACHMENT, curr.getSourceAttachmentPath());
 		elem.setAttribute(OUTPUT, curr.getOutputLocation());
@@ -652,14 +752,43 @@ public class CPListElement {
 			IClasspathAttribute attrib= extraAttributes[i];
 			CPListElementAttribute attribElem= elem.findAttributeElement(attrib.getName());
 			if (attribElem == null) {
-				elem.createAttributeElement(attrib.getName(), attrib.getValue(), false);
+				if (!isModuleAttribute(attrib.getName())) {
+					elem.createAttributeElement(attrib.getName(), attrib.getValue(), false);
+				}
 			} else {
-				attribElem.setValue(attrib.getValue());
+				Object value= attrib.getValue();
+				if (attrib.getName().equals(MODULE)) {
+					if (ModuleAttributeConfiguration.TRUE.equals(attrib.getValue())) {
+						List<ModuleEncapsulationDetail> details= new ArrayList<>();
+						for (int j= 0; j < extraAttributes.length; j++) {
+							IClasspathAttribute otherAttrib= extraAttributes[j];
+							if (IClasspathAttribute.PATCH_MODULE.equals(otherAttrib.getName())) {
+								details.add(ModulePatch.fromString(attribElem, otherAttrib.getValue()));
+							} else if (IClasspathAttribute.ADD_EXPORTS.equals(otherAttrib.getName())) {
+								details.addAll(ModuleAddExport.fromMultiString(attribElem, otherAttrib.getValue()));
+							} else if (IClasspathAttribute.ADD_READS.equals(otherAttrib.getName())) {
+								details.addAll(ModuleAddReads.fromMultiString(attribElem, otherAttrib.getValue()));
+							} else if (IClasspathAttribute.LIMIT_MODULES.equals(otherAttrib.getName())) {
+								details.add(LimitModules.fromString(attribElem, otherAttrib.getValue()));
+							}
+						}
+						value= details.toArray(new ModuleEncapsulationDetail[details.size()]);
+					} else {
+						value= null;
+					}
+				}
+				attribElem.setValue(value);
 			}
 		}
 
 		elem.setIsMissing(isMissing);
 		return elem;
+	}
+
+	private static boolean isModuleAttribute(String attributeName) {
+		return Stream.of(IClasspathAttribute.MODULE, IClasspathAttribute.LIMIT_MODULES,
+					IClasspathAttribute.PATCH_MODULE, IClasspathAttribute.ADD_EXPORTS, IClasspathAttribute.ADD_READS)
+				.anyMatch(attributeName::equals);
 	}
 
 	public static StringBuffer appendEncodePath(IPath path, StringBuffer buf) {
@@ -730,6 +859,23 @@ public class CPListElement {
 						appendEncodedAccessRules((IAccessRule[]) elem.getValue(), buf).append(';');
 					} else if (COMBINE_ACCESSRULES.equals(key)) {
 						buf.append(((Boolean) elem.getValue()).booleanValue()).append(';');
+					} else if (MODULE.equals(key)) {
+						Object value= elem.getValue();
+						if (value instanceof ModuleEncapsulationDetail[]) {
+							buf.append(MODULE+"=true;"); //$NON-NLS-1$
+							for (ModuleEncapsulationDetail detail : ((ModuleEncapsulationDetail[]) value)) {
+								if (detail instanceof ModulePatch)
+									buf.append(IClasspathAttribute.PATCH_MODULE+':'+detail.toString()).append(';');
+								if (detail instanceof ModuleAddExport)
+									buf.append(IClasspathAttribute.ADD_EXPORTS+':'+detail.toString()).append(';');
+								if (detail instanceof ModuleAddReads)
+									buf.append(IClasspathAttribute.ADD_READS+':'+detail.toString()).append(';');
+								if (detail instanceof LimitModules)
+									buf.append(IClasspathAttribute.LIMIT_MODULES+':'+detail.toString()).append(';');
+							}
+						} else {
+							buf.append(MODULE+"=false;"); //$NON-NLS-1$
+						}
 					}
 				} else {
 					appendEncodedString((String) elem.getValue(), buf);
@@ -857,11 +1003,34 @@ public class CPListElement {
 			CPListElementAttribute curr= attributes[i];
 			CPListElementAttribute elem= findAttributeElement(curr.getKey());
 			if (elem == null) {
-				createAttributeElement(curr.getKey(), curr.getValue(), false);
+				createAttributeElement(curr.getKey(), curr.getValue(), curr.isBuiltIn());
 			} else {
 				elem.setValue(curr.getValue());
 			}
 		}
     }
 
+	void setModuleAttributeIf9OrHigher(IJavaProject project) {
+		if (!JavaModelUtil.is9OrHigher(project)) {
+			return;
+		}
+		CPListElementAttribute moduleAttribute= findAttributeElement(MODULE);
+		if (moduleAttribute == null) {
+			createAttributeElement(MODULE, new ModuleEncapsulationDetail[0], true);
+		} else {
+			moduleAttribute.setValue(new ModuleEncapsulationDetail[0]);
+		}
+	}
+
+	boolean isRootNodeForPath() {
+		return false;
+	}
+
+	boolean isModulePathRootNode() {
+		return false;
+	}
+	
+	boolean isClassPathRootNode() {
+		return false; 
+	}
 }

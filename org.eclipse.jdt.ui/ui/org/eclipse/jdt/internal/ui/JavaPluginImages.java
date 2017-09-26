@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -132,6 +132,7 @@ public class JavaPluginImages {
 
 	public static final String IMG_OBJS_ENV_VAR= NAME_PREFIX + "envvar_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_OBJS_JAVA_MODEL= NAME_PREFIX + "java_model_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_MODULE= NAME_PREFIX + "module_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_ERROR_ALT= NAME_PREFIX + "error_alt_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_WARNING_ALT= NAME_PREFIX + "warning_alt_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_INFO_ALT= NAME_PREFIX + "info_alt_obj.gif"; //$NON-NLS-1$
@@ -207,6 +208,9 @@ public class JavaPluginImages {
 
 	public static final ImageDescriptor DESC_MENU_SHIFT_RIGHT= createUnManaged(T_ETOOL, "shift_r_edit.png"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_MENU_SHIFT_LEFT= createUnManaged(T_ETOOL, "shift_l_edit.png"); 	//$NON-NLS-1$
+	public static final ImageDescriptor DESC_CLASSPATH_ROOT= createUnManaged(T_ETOOL, "classpath_obj.png"); 	//$NON-NLS-1$
+
+	public static final ImageDescriptor DESC_BUTTON_MOVE_UP= createUnManaged(T_ETOOL, "move_up.png"); 	//$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_GHOST= createManagedFromKey(T_OBJ, IMG_OBJS_GHOST);
 	public static final ImageDescriptor DESC_OBJS_PACKDECL= createManagedFromKey(T_OBJ, IMG_OBJS_PACKDECL);
@@ -231,6 +235,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_PROJECT_SETTINGS= createManagedFromKey(T_OBJ, IMG_OBJS_PROJECT_SETTINGS);
 
 	public static final ImageDescriptor DESC_OBJS_JAVA_MODEL= createManagedFromKey(T_OBJ, IMG_OBJS_JAVA_MODEL);
+	public static final ImageDescriptor DESC_OBJS_MODULE= createManagedFromKey(T_OBJ, IMG_OBJS_MODULE);
 
 	public static final ImageDescriptor DESC_OBJS_CLASS= createManagedFromKey(T_OBJ, IMG_OBJS_CLASS);
 	public static final ImageDescriptor DESC_OBJS_CLASS_DEFAULT= createManagedFromKey(T_OBJ, IMG_OBJS_CLASS_DEFAULT);
@@ -299,6 +304,8 @@ public class JavaPluginImages {
     public static final ImageDescriptor DESC_OBJS_OUTPUT_FOLDER_ATTRIB= createUnManaged(T_OBJ, "output_folder_attrib.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_SOURCE_ATTACH_ATTRIB= createUnManaged(T_OBJ, "source_attach_attrib.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_JAVADOC_LOCATION_ATTRIB= createUnManaged(T_OBJ, "javadoc_location_attrib.png"); //$NON-NLS-1$
+
+	public static final ImageDescriptor DESC_OBJS_MODULE_ATTRIB= createUnManaged(T_OBJ, "module_attrib.png"); //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_OBJS_EXTERNAL_ANNOTATION_LOCATION_ATTRIB= createManagedFromKey(T_OBJ, IMG_OBJS_EXTERNAL_ANNOTATIONS);
 
@@ -406,7 +413,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_CLASS= createUnManagedCached(T_OVR, "class_tsk.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_ABSTRACT_CLASS= createUnManagedCached(T_OVR, "class_abs_tsk.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_LIBRARY= createUnManagedCached(T_OVR, "library_ovr.png"); //$NON-NLS-1$
-
+	
     // Call Hierarchy
     public static final ImageDescriptor DESC_OVR_RECURSIVE= createUnManaged(T_OVR, "recursive_co.png");              //$NON-NLS-1$
     public static final ImageDescriptor DESC_OVR_MAX_LEVEL= createUnManaged(T_OVR, "maxlevel_co.png");                    //$NON-NLS-1$
@@ -418,6 +425,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_NEWJPRJ= createUnManaged(T_WIZBAN, "newjprj_wiz.png"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWSRCFOLDR= createUnManaged(T_WIZBAN, "newsrcfldr_wiz.png"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWPACK= createUnManaged(T_WIZBAN, "newpack_wiz.png"); 			//$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_NEWMODULE= createUnManaged(T_WIZBAN, "newmodule_wiz.png"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_NEWSCRAPPAGE= createUnManaged(T_WIZBAN, "newsbook_wiz.png");		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_JAVA_LAUNCH= createUnManaged(T_WIZBAN, "java_app_wiz.png"); 		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_JAVA_ATTACH= createUnManaged(T_WIZBAN, "java_attach_wiz.png"); 	//$NON-NLS-1$

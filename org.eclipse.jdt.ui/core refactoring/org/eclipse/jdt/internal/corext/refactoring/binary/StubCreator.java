@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2014 IBM Corporation and others.
+ * Copyright (c) 2006, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -135,11 +135,11 @@ public class StubCreator {
 
 	private void appendAnnotation(IAnnotation annotation) throws JavaModelException {
 		String name= annotation.getElementName();
-		if (!fStubInvisible && name.startsWith("sun.")) //$NON-NLS-1$
+		if (!fStubInvisible && name.startsWith("sun.") || name.startsWith("jdk.internal.")) //$NON-NLS-1$ //$NON-NLS-2$
 			return; // skip Sun-internal annotations 
 		
 		fBuffer.append('@');
-		fBuffer.append(name);
+		fBuffer.append(name.replace('$', '.'));
 		fBuffer.append('(');
 		
 		IMemberValuePair[] memberValuePairs= annotation.getMemberValuePairs();
@@ -194,7 +194,8 @@ public class StubCreator {
 				final boolean isDefault= !Flags.isPublic(flags) && !Flags.isProtected(flags) && !isPrivate;
 				final boolean stub= fStubInvisible || (!isPrivate && !isDefault);
 				if (child instanceof IType) {
-					if (stub)
+					if (stub || "java.lang.invoke.MethodHandle".equals(type.getFullyQualifiedName()) //$NON-NLS-1$
+							|| "java.util.concurrent.ConcurrentHashMap$CollectionView".equals(((IType) child).getFullyQualifiedName())) //$NON-NLS-1$
 						appendTypeDeclaration((IType) child, new SubProgressMonitor(monitor, 1));
 				} else if (child instanceof IField) {
 					if (stub && !Flags.isEnum(flags) && !Flags.isSynthetic(flags))
@@ -349,6 +350,11 @@ public class StubCreator {
 			if (index > 0)
 				fBuffer.append(","); //$NON-NLS-1$
 			fBuffer.append(Signature.toString(exceptionTypes[index]));
+		}
+		if (Flags.isAnnnotationDefault(flags) ) {
+			fBuffer.append(" default "); //$NON-NLS-1$
+			IMemberValuePair pair= method.getDefaultValue();
+			appendAnnotationValue(pair.getValue(), pair.getValueKind());
 		}
 		if (Flags.isAbstract(flags) || Flags.isNative(flags))
 			fBuffer.append(";"); //$NON-NLS-1$

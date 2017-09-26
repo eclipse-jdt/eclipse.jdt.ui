@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,8 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodReference;
+import org.eclipse.jdt.core.dom.ModuleDirective;
+import org.eclipse.jdt.core.dom.ModulePackageAccess;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
@@ -73,6 +75,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			registerCall(ASTNode.class);
 			return false;
 		}
+		@SuppressWarnings("unused") // called reflectively
 		public void superVisit(ASTNode node) {
 			super.visit(node);
 		}
@@ -80,87 +83,8 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void endVisit(ASTNode node) {
 			registerCall(ASTNode.class);
 		}
+		@SuppressWarnings("unused") // called reflectively
 		public void superEndVisit(ASTNode node) {
-			super.visit(node);
-		}
-
-		@Override
-		public boolean visit(Expression node) {
-			registerCall(Expression.class);
-			return false;
-		}
-		public void superVisit(Expression node) {
-			super.visit(node);
-		}
-		@Override
-		public void endVisit(Expression node) {
-			registerCall(Expression.class);
-		}
-		public void superEndVisit(Expression node) {
-			super.visit(node);
-		}
-
-		@Override
-		public boolean visit(AnnotatableType node) {
-			registerCall(AnnotatableType.class);
-			return false;
-		}
-		public void superVisit(AnnotatableType node) {
-			super.visit(node);
-		}
-		@Override
-		public void endVisit(AnnotatableType node) {
-			registerCall(AnnotatableType.class);
-		}
-		public void superEndVisit(AnnotatableType node) {
-			super.visit(node);
-		}
-
-		@Override
-		public boolean visit(Annotation node) {
-			registerCall(Annotation.class);
-			return false;
-		}
-		public void superVisit(Annotation node) {
-			super.visit(node);
-		}
-		@Override
-		public void endVisit(Annotation node) {
-			registerCall(Annotation.class);
-		}
-		public void superEndVisit(Annotation node) {
-			super.visit(node);
-		}
-
-		@Override
-		public boolean visit(MethodReference node) {
-			registerCall(MethodReference.class);
-			return false;
-		}
-		public void superVisit(MethodReference node) {
-			super.visit(node);
-		}
-		@Override
-		public void endVisit(MethodReference node) {
-			registerCall(MethodReference.class);
-		}
-		public void superEndVisit(MethodReference node) {
-			super.visit(node);
-		}
-
-		@Override
-		public boolean visit(Name node) {
-			registerCall(Name.class);
-			return false;
-		}
-		public void superVisit(Name node) {
-			super.visit(node);
-		}
-		@Override
-		public void endVisit(Name node) {
-			registerCall(Name.class);
-		}
-		public void superEndVisit(Name node) {
 			super.visit(node);
 		}
 
@@ -169,6 +93,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			registerCall(BodyDeclaration.class);
 			return false;
 		}
+		@SuppressWarnings("unused") // called reflectively
 		public void superVisit(BodyDeclaration node) {
 			super.visit(node);
 		}
@@ -176,6 +101,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void endVisit(BodyDeclaration node) {
 			registerCall(BodyDeclaration.class);
 		}
+		@SuppressWarnings("unused") // called reflectively
 		public void superEndVisit(BodyDeclaration node) {
 			super.visit(node);
 		}
@@ -185,6 +111,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			registerCall(AbstractTypeDeclaration.class);
 			return false;
 		}
+		@SuppressWarnings("unused") // called reflectively
 		public void superVisit(AbstractTypeDeclaration node) {
 			super.visit(node);
 		}
@@ -192,6 +119,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void endVisit(AbstractTypeDeclaration node) {
 			registerCall(AbstractTypeDeclaration.class);
 		}
+		@SuppressWarnings("unused") // called reflectively
 		public void superEndVisit(AbstractTypeDeclaration node) {
 			super.visit(node);
 		}
@@ -201,6 +129,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			registerCall(Comment.class);
 			return false;
 		}
+		@SuppressWarnings("unused") // called reflectively
 		public void superVisit(Comment node) {
 			super.visit(node);
 		}
@@ -208,7 +137,135 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void endVisit(Comment node) {
 			registerCall(Comment.class);
 		}
+		@SuppressWarnings("unused") // called reflectively
 		public void superEndVisit(Comment node) {
+			super.visit(node);
+		}
+
+		@Override
+		public boolean visit(Expression node) {
+			registerCall(Expression.class);
+			return false;
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superVisit(Expression node) {
+			super.visit(node);
+		}
+		@Override
+		public void endVisit(Expression node) {
+			registerCall(Expression.class);
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superEndVisit(Expression node) {
+			super.visit(node);
+		}
+
+		@Override
+		public boolean visit(Annotation node) {
+			registerCall(Annotation.class);
+			return false;
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superVisit(Annotation node) {
+			super.visit(node);
+		}
+		@Override
+		public void endVisit(Annotation node) {
+			registerCall(Annotation.class);
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superEndVisit(Annotation node) {
+			super.visit(node);
+		}
+
+		@Override
+		public boolean visit(MethodReference node) {
+			registerCall(MethodReference.class);
+			return false;
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superVisit(MethodReference node) {
+			super.visit(node);
+		}
+		@Override
+		public void endVisit(MethodReference node) {
+			registerCall(MethodReference.class);
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superEndVisit(MethodReference node) {
+			super.visit(node);
+		}
+
+		@Override
+		public boolean visit(Name node) {
+			registerCall(Name.class);
+			return false;
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superVisit(Name node) {
+			super.visit(node);
+		}
+		@Override
+		public void endVisit(Name node) {
+			registerCall(Name.class);
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superEndVisit(Name node) {
+			super.visit(node);
+		}
+
+		@Override
+		public boolean visit(ModuleDirective node) {
+			registerCall(ModuleDirective.class);
+			return false;
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superVisit(ModuleDirective node) {
+			super.visit(node);
+		}
+		@Override
+		public void endVisit(ModuleDirective node) {
+			registerCall(ModuleDirective.class);
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superEndVisit(ModuleDirective node) {
+			super.visit(node);
+		}
+
+		@Override
+		public boolean visit(ModulePackageAccess node) {
+			registerCall(ModulePackageAccess.class);
+			return false;
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superVisit(ModulePackageAccess node) {
+			super.visit(node);
+		}
+		@Override
+		public void endVisit(ModulePackageAccess node) {
+			registerCall(ModulePackageAccess.class);
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superEndVisit(ModulePackageAccess node) {
+			super.visit(node);
+		}
+
+
+		@Override
+		public boolean visit(Statement node) {
+			registerCall(Statement.class);
+			return false;
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superVisit(Statement node) {
+			super.visit(node);
+		}
+		@Override
+		public void endVisit(Statement node) {
+			registerCall(Statement.class);
+		}
+		@SuppressWarnings("unused") // called reflectively
+		public void superEndVisit(Statement node) {
 			super.visit(node);
 		}
 
@@ -217,6 +274,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			registerCall(Type.class);
 			return false;
 		}
+		@SuppressWarnings("unused") // called reflectively
 		public void superVisit(Type node) {
 			super.visit(node);
 		}
@@ -224,23 +282,26 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void endVisit(Type node) {
 			registerCall(Type.class);
 		}
+		@SuppressWarnings("unused") // called reflectively
 		public void superEndVisit(Type node) {
 			super.visit(node);
 		}
 
 		@Override
-		public boolean visit(Statement node) {
-			registerCall(Statement.class);
+		public boolean visit(AnnotatableType node) {
+			registerCall(AnnotatableType.class);
 			return false;
 		}
-		public void superVisit(Statement node) {
+		@SuppressWarnings("unused") // called reflectively
+		public void superVisit(AnnotatableType node) {
 			super.visit(node);
 		}
 		@Override
-		public void endVisit(Statement node) {
-			registerCall(Statement.class);
+		public void endVisit(AnnotatableType node) {
+			registerCall(AnnotatableType.class);
 		}
-		public void superEndVisit(Statement node) {
+		@SuppressWarnings("unused") // called reflectively
+		public void superEndVisit(AnnotatableType node) {
 			super.visit(node);
 		}
 
@@ -249,6 +310,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 			registerCall(VariableDeclaration.class);
 			return false;
 		}
+		@SuppressWarnings("unused") // called reflectively
 		public void superVisit(VariableDeclaration node) {
 			super.visit(node);
 		}
@@ -256,6 +318,7 @@ public class HierarchicalASTVisitorTest extends TestCase {
 		public void endVisit(VariableDeclaration node) {
 			registerCall(VariableDeclaration.class);
 		}
+		@SuppressWarnings("unused") // called reflectively
 		public void superEndVisit(VariableDeclaration node) {
 			super.visit(node);
 		}
@@ -360,44 +423,6 @@ public class HierarchicalASTVisitorTest extends TestCase {
 					"where YY is the superclass of XX.", fNodeClassForCalledMethod);
 			fNodeClassForCalledMethod= nodeClassForMethod;
 		}
-		
-		public TestHierarchicalASTVisitor() {
-			if (Boolean.FALSE.booleanValue())
-				callSuperVisitToAvoidUnusedMethodsWarning();
-		}
-		/**
-		 * A useless method that calls all superVisit() and superEndVisit() methods.
-		 * This test calls these methods reflectively, but the compiler doesn't know that
-		 * and wrongly reports them as unused.
-		 * The explicit references here are to satisfy the compiler.
-		 */
-		private void callSuperVisitToAvoidUnusedMethodsWarning() {
-			superVisit((ASTNode) null);
-			superEndVisit((ASTNode) null);
-			superVisit((Expression) null);
-			superEndVisit((Expression) null);
-			superVisit((Annotation) null);
-			superEndVisit((Annotation) null);
-			superVisit((AnnotatableType) null);
-			superEndVisit((AnnotatableType) null);
-			superVisit((MethodReference) null);
-			superEndVisit((MethodReference) null);
-			superVisit((Name) null);
-			superEndVisit((Name) null);
-			superVisit((BodyDeclaration) null);
-			superEndVisit((BodyDeclaration) null);
-			superVisit((AbstractTypeDeclaration) null);
-			superEndVisit((AbstractTypeDeclaration) null);
-			superVisit((Comment) null);
-			superEndVisit((Comment) null);
-			superVisit((Type) null);
-			superEndVisit((Type) null);
-			superVisit((Statement) null);
-			superEndVisit((Statement) null);
-			superVisit((VariableDeclaration) null);
-			superEndVisit((VariableDeclaration) null);
-		}
-		
 	}
 
 	private static final Class<HierarchicalASTVisitorTest> THIS_CLASS= HierarchicalASTVisitorTest.class;

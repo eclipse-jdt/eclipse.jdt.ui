@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
 
+
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.Flags;
@@ -508,6 +509,11 @@ public class CompletionProposalLabelProvider {
 		return Strings.markJavaElementLabelLTR(buf);
 	}
 
+	StyledString createModuleProposalLabel(CompletionProposal proposal) {
+		Assert.isTrue(proposal.getKind() == CompletionProposal.MODULE_REF);
+		return Strings.markJavaElementLabelLTR(new StyledString(String.valueOf(proposal.getDeclarationSignature())));
+	}
+
 	StyledString createPackageProposalLabel(CompletionProposal proposal) {
 		Assert.isTrue(proposal.getKind() == CompletionProposal.PACKAGE_REF);
 		return Strings.markJavaElementLabelLTR(new StyledString(String.valueOf(proposal.getDeclarationSignature())));
@@ -587,6 +593,8 @@ public class CompletionProposalLabelProvider {
 				return createJavadocMethodProposalLabel(proposal);
 			case CompletionProposal.PACKAGE_REF:
 				return createPackageProposalLabel(proposal);
+			case CompletionProposal.MODULE_REF:
+				return createModuleProposalLabel(proposal);
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
 			case CompletionProposal.FIELD_REF:
 			case CompletionProposal.FIELD_REF_WITH_CASTED_RECEIVER:
@@ -647,6 +655,9 @@ public class CompletionProposalLabelProvider {
 				break;
 			case CompletionProposal.PACKAGE_REF:
 				descriptor= JavaPluginImages.DESC_OBJS_PACKAGE;
+				break;
+			case CompletionProposal.MODULE_REF:
+				descriptor= JavaPluginImages.DESC_OBJS_MODULE;
 				break;
 			case CompletionProposal.KEYWORD:
 			case CompletionProposal.LABEL_REF:

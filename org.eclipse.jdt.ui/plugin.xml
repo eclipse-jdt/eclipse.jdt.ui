@@ -175,7 +175,11 @@
       <classpathAttributeConfiguration
             attributeName="annotationpath"
             class="org.eclipse.jdt.internal.ui.wizards.buildpaths.ExternalAnnotationsAttributeConfiguration">
-      </classpathAttributeConfiguration>      
+      </classpathAttributeConfiguration>
+      <classpathAttributeConfiguration
+      		attributeName="module"
+            class="org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleAttributeConfiguration">
+      </classpathAttributeConfiguration>
    </extension>
 
 	<!-- Not used to create markers but to allow registering a    -->
@@ -1017,6 +1021,36 @@
             id="org.eclipse.jdt.ui.JARDescEditor"
             launcher="org.eclipse.jdt.internal.ui.jarpackager.OpenJarExportWizardEditorLauncher"
             name="%jarDescEditorName">
+      </editor>
+      <editor
+            name="%ModuleInfoEditorName"
+            icon="$nl$/icons/full/obj16/jcu_obj.png"
+            filenames="module-info.java"
+            class="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor"
+            contributorClass="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditorActionContributor"
+            id="org.eclipse.jdt.ui.ModuleInfoEditor"
+            default="true"
+            symbolicFontName="org.eclipse.jdt.ui.editors.textfont">
+      </editor>
+      <editor
+            name="%ModuleInfoClassFileViewerName"
+            icon="$nl$/icons/full/obj16/classf_obj.png"
+            filenames="module-info.class"
+            class="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor"
+            contributorClass="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorActionContributor"
+            id="org.eclipse.jdt.ui.ModuleInfoClassFileEditor"
+            default="true"
+            symbolicFontName="org.eclipse.jdt.ui.editors.textfont">
+      </editor>
+      <editor
+            name="%ModuleInfoClassFileViewerName"
+            icon="$nl$/icons/full/obj16/classf_obj.png"
+            filenames="module-info.class without source"
+            class="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor"
+            contributorClass="org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorActionContributor"
+            id="org.eclipse.jdt.ui.ModuleInfoClassFileEditorNoSource"
+            default="true"
+            symbolicFontName="org.eclipse.jdt.ui.editors.textfont">
       </editor>
    </extension>
    
@@ -6970,5 +7004,35 @@
            </hasFileRecursively>
         </activeWhen>
      </projectConfigurator>
+  </extension>
+  <extension
+        point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.core.resources.IProject"
+            adaptable="true"
+            id="org.eclipse.jdt.ui.create.module.info">
+       	 <visibility>
+        	<and>
+            <objectState 
+	            name="projectNature" 
+	            value="org.eclipse.jdt.core.javanature"/>
+	        <objectState
+	        	name="open"
+	        	value="true"/>
+            <not>
+            <objectState 
+	            name="projectNature" 
+	            value="org.eclipse.pde.PluginNature"/>
+            </not>
+            </and>
+       	 </visibility>
+         <action
+            label="%create.module.info.label"
+            class="org.eclipse.jdt.internal.ui.actions.CreateModuleInfoAction"
+            menubarPath="org.eclipse.ui.projectConfigure/additions"
+            enablesFor="1"
+            id="org.eclipse.jdt.ui.create.module.info.action">
+      	</action>
+      </objectContribution>
   </extension>
 </plugin>
