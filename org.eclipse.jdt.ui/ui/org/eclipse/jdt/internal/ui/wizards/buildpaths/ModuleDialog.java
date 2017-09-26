@@ -545,7 +545,7 @@ public class ModuleDialog extends StatusDialog {
 	protected void doSelectionChanged(ListDialogField<? extends ModuleEncapsulationDetail> field) {
 		boolean isModular= fIsModuleCheckbox.isSelected();
 		List<? extends ModuleEncapsulationDetail> selected= field.getSelectedElements();
-		field.enableButton(IDX_ADD, isModular);
+		field.enableButton(IDX_ADD, isModular && fJavaElements != null);
 		field.enableButton(IDX_EDIT, isModular && canEdit(selected));
 		field.enableButton(IDX_REMOVE, isModular && selected.size() > 0);
 		validateDetails(field);
@@ -587,10 +587,14 @@ public class ModuleDialog extends StatusDialog {
 	private IStatus computeContentsStatus() {
 		StatusInfo info= new StatusInfo();
 		if (fIsModuleCheckbox.isSelected()) {
-			if (fModuleLists[IDX_INCLUDED].fNames.isEmpty()) {
-				info.setError(NewWizardMessages.ModuleDialog_mustIncludeModule_error);
-			} else if (fModuleLists[IDX_INCLUDED].fNames.size() + fModuleLists[IDX_AVAILABLE].fNames.size() == 1) {
-				info.setInfo(NewWizardMessages.ModuleDialog_cannotLimitSingle_error);
+			if (fJavaElements != null) {
+				if (fModuleLists[IDX_INCLUDED].fNames.isEmpty()) {
+					info.setError(NewWizardMessages.ModuleDialog_mustIncludeModule_error);
+				} else if (fModuleLists[IDX_INCLUDED].fNames.size() + fModuleLists[IDX_AVAILABLE].fNames.size() == 1) {
+					info.setInfo(NewWizardMessages.ModuleDialog_cannotLimitSingle_error);
+				}
+			} else {
+				info.setInfo(NewWizardMessages.ModuleDialog_unknownModules_info);
 			}
 		}
 		return info;
@@ -652,6 +656,9 @@ public class ModuleDialog extends StatusDialog {
 							reads.fSourceModule));
 				}
 			}
+		}
+		if (status.isOK() && fJavaElements == null) {
+			status.setInfo(NewWizardMessages.ModuleDialog_cannotEditDetails_info);
 		}
 		return status;
 	}
