@@ -743,12 +743,20 @@ public class ModuleDialog extends StatusDialog {
 					IModuleDescription module= ((IPackageFragmentRoot) fJavaElements[i]).getModuleDescription();
 					if (module != null) {
 						recordModule(module, moduleNames);
+					} else {
+						try {
+							recordModule(JavaModelAccess.getAutomaticModuleDescription(fJavaElements[i]), moduleNames);
+						} catch (JavaModelException e) {
+							JavaPlugin.log(e);
+						}
 					}
 				} else if (fJavaElements[i] instanceof IJavaProject) {
 					try {
 						IModuleDescription module= ((IJavaProject) fJavaElements[i]).getModuleDescription();
 						if (module != null) {
 							recordModule(module, moduleNames);
+						} else {
+							recordModule(JavaModelAccess.getAutomaticModuleDescription(fJavaElements[i]), moduleNames);
 						}
 					} catch (JavaModelException e) {
 						JavaPlugin.log(e);
