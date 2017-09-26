@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2016 IBM Corporation and others.
+ * Copyright (c) 2013, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,13 +23,13 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -44,10 +44,9 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -257,7 +256,7 @@ public class JDTFlagsTest18 extends TestCase {
 		Assert.assertTrue(jarRoot.isArchive());
 		IPackageFragment pf= jarRoot.getPackageFragment("pack1");//$NON-NLS-1$
 		Assert.assertTrue(pf.exists());
-		IClassFile classFile2= pf.getClassFile("Snippet.class");
+		IOrdinaryClassFile classFile2= (IOrdinaryClassFile) pf.getClassFile("Snippet.class");
 		IMethod[] clsFile= classFile2.getType().getMethods();
 		IMethod method= clsFile[0];
 		Assert.assertTrue(JdtFlags.isStatic(method));
@@ -303,7 +302,7 @@ public class JDTFlagsTest18 extends TestCase {
 		Assert.assertTrue(jarRoot.isArchive());
 		IPackageFragment pf= jarRoot.getPackageFragment("pack1");//$NON-NLS-1$
 		Assert.assertTrue(pf.exists());
-		IClassFile classFile2= pf.getClassFile("Snippet.class");
+		IOrdinaryClassFile classFile2= (IOrdinaryClassFile) pf.getClassFile("Snippet.class");
 		IMethod method= classFile2.getType().getMethod("defaultMethod", null);
 		Assert.assertTrue(JdtFlags.isDefaultMethod(method));
 		Assert.assertFalse(JdtFlags.isStatic(method));
@@ -425,7 +424,7 @@ public class JDTFlagsTest18 extends TestCase {
 		Assert.assertTrue(jarRoot.isArchive());
 		IPackageFragment pf= jarRoot.getPackageFragment("pack1");//$NON-NLS-1$
 		Assert.assertTrue(pf.exists());
-		IClassFile classFile2= pf.getClassFile("Snippet.class");
+		IOrdinaryClassFile classFile2= (IOrdinaryClassFile) pf.getClassFile("Snippet.class");
 		IMethod method= classFile2.getType().getMethod("explicitAbstractMethod", null);
 		Assert.assertFalse(JdtFlags.isStatic(method));
 		Assert.assertFalse(JdtFlags.isDefaultMethod(method));
@@ -442,7 +441,7 @@ public class JDTFlagsTest18 extends TestCase {
 		Assert.assertTrue(jarRoot.isArchive());
 		IPackageFragment pf= jarRoot.getPackageFragment("pack1");//$NON-NLS-1$
 		Assert.assertTrue(pf.exists());
-		IClassFile classFile2= pf.getClassFile("Snippet.class");
+		IOrdinaryClassFile classFile2= (IOrdinaryClassFile) pf.getClassFile("Snippet.class");
 		IMethod method= classFile2.getType().getMethod("implicitAbstractMethod", null);
 		Assert.assertFalse(JdtFlags.isStatic(method));
 		Assert.assertFalse(JdtFlags.isDefaultMethod(method));
