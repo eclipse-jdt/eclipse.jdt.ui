@@ -209,14 +209,6 @@ public class CPListElement {
 		return modulesAdded;
 	}
 
-	private boolean hasLimitModules(IClasspathEntry entry) {
-		for (IClasspathAttribute attribute : entry.getExtraAttributes()) {
-			if (IClasspathAttribute.LIMIT_MODULES.equals(attribute.getName()))
-				return true;
-		}
-		return false;
-	}
-
 	public IClasspathEntry getClasspathEntry() {
 		if (fCachedEntry == null) {
 			fCachedEntry= newClasspathEntry();
@@ -754,33 +746,15 @@ public class CPListElement {
 			if (attribElem == null) {
 				if (!isModuleAttribute(attrib.getName())) {
 					elem.createAttributeElement(attrib.getName(), attrib.getValue(), false);
-				}
-				if (isModuleAttribute(attrib.getName())) {
-					if (elem.getClasspathEntry().getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-						elem.createAttributeElement(MODULE, new ModuleEncapsulationDetail[0], true);
-					}
+				} else if (attrib.getName().equals(MODULE)) {
+					attribElem = new CPListElementAttribute(elem, MODULE, null, true);
+					attribElem.setValue(getModuleAttributeValue(attribElem, attrib, extraAttributes));
+					elem.fChildren.add(attribElem);
 				}
 			} else {
 				Object value= attrib.getValue();
 				if (attrib.getName().equals(MODULE)) {
-					if (ModuleAttributeConfiguration.TRUE.equals(attrib.getValue())) {
-						List<ModuleEncapsulationDetail> details= new ArrayList<>();
-						for (int j= 0; j < extraAttributes.length; j++) {
-							IClasspathAttribute otherAttrib= extraAttributes[j];
-							if (IClasspathAttribute.PATCH_MODULE.equals(otherAttrib.getName())) {
-								details.add(ModulePatch.fromString(attribElem, otherAttrib.getValue()));
-							} else if (IClasspathAttribute.ADD_EXPORTS.equals(otherAttrib.getName())) {
-								details.addAll(ModuleAddExport.fromMultiString(attribElem, otherAttrib.getValue()));
-							} else if (IClasspathAttribute.ADD_READS.equals(otherAttrib.getName())) {
-								details.addAll(ModuleAddReads.fromMultiString(attribElem, otherAttrib.getValue()));
-							} else if (IClasspathAttribute.LIMIT_MODULES.equals(otherAttrib.getName())) {
-								details.add(LimitModules.fromString(attribElem, otherAttrib.getValue()));
-							}
-						}
-						value= details.toArray(new ModuleEncapsulationDetail[details.size()]);
-					} else {
-						value= null;
-					}
+					value= getModuleAttributeValue(attribElem, attrib, extraAttributes);
 				}
 				attribElem.setValue(value);
 			}
@@ -788,6 +762,27 @@ public class CPListElement {
 
 		elem.setIsMissing(isMissing);
 		return elem;
+	}
+
+	private static Object getModuleAttributeValue(CPListElementAttribute attribElem, IClasspathAttribute attrib, IClasspathAttribute[] extraAttributes) {
+		if (ModuleAttributeConfiguration.TRUE.equals(attrib.getValue())) {
+			List<ModuleEncapsulationDetail> details= new ArrayList<>();
+			for (int j= 0; j < extraAttributes.length; j++) {
+				IClasspathAttribute otherAttrib= extraAttributes[j];
+				if (IClasspathAttribute.PATCH_MODULE.equals(otherAttrib.getName())) {
+					details.add(ModulePatch.fromString(attribElem, otherAttrib.getValue()));
+				} else if (IClasspathAttribute.ADD_EXPORTS.equals(otherAttrib.getName())) {
+					details.addAll(ModuleAddExport.fromMultiString(attribElem, otherAttrib.getValue()));
+				} else if (IClasspathAttribute.ADD_READS.equals(otherAttrib.getName())) {
+					details.addAll(ModuleAddReads.fromMultiString(attribElem, otherAttrib.getValue()));
+				} else if (IClasspathAttribute.LIMIT_MODULES.equals(otherAttrib.getName())) {
+					details.add(LimitModules.fromString(attribElem, otherAttrib.getValue()));
+				}
+			}
+			return details.toArray(new ModuleEncapsulationDetail[details.size()]);
+		} else {
+			return null;
+		}
 	}
 
 	private static boolean isModuleAttribute(String attributeName) {
