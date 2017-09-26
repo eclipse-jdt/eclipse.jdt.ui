@@ -94,8 +94,6 @@ public class StubCreationOperation extends AbstractCodeCreationOperation {
 					return;
 				String source= new StubCreator(fStubInvisible).createStub(type, subProgressMonitor);
 				createCompilationUnit(parent, type.getElementName() + JavaModelUtil.DEFAULT_CU_SUFFIX, source, monitor);
-			} else {
-				return;
 			}
 		} finally {
 			monitor.done();
