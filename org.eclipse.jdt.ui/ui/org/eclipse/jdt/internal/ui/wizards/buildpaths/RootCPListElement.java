@@ -24,6 +24,20 @@ import org.eclipse.jdt.core.IJavaProject;
  */
 public class RootCPListElement extends CPListElement {
 
+	enum RootNodeChange {
+		ToModulepath, ToClasspath, NoChange;
+
+		static RootNodeChange fromOldAndNew(boolean wasModular, boolean isModular) {
+			if (wasModular == isModular) {
+				return NoChange;
+			} else if (isModular) {
+				return ToModulepath;
+			} else {
+				return ToClasspath;
+			}
+		}
+	}
+
 	private String fPathRootNodeName= null;
 
 	private boolean fIsModuleRootNode;
@@ -48,23 +62,15 @@ public class RootCPListElement extends CPListElement {
 	}
 
 	void addCPListElement(CPListElement cpe) {
-		if (isRootNodeForPath()) {
-			fChildren.add(cpe);
-		}
+		fChildren.add(cpe);
 	}
 
 	void addCPListElement(List<CPListElement> elementsToAdd) {
-		if (isRootNodeForPath()) {
-			fChildren.addAll(elementsToAdd);
-		}
+		fChildren.addAll(elementsToAdd);
 	}
 
 	ArrayList<Object> getChildren() {
-		if (isRootNodeForPath()) {
-			return fChildren;
-		} else {
-			return null;
-		}
+		return fChildren;
 	}
 
 	String getPathRootNodeName() {
@@ -86,9 +92,15 @@ public class RootCPListElement extends CPListElement {
 		return !fIsModuleRootNode;
 	}
 
+	public boolean isSourceRootNode(RootNodeChange changeNodeDirection) {
+		return RootNodeChange.fromOldAndNew(fIsModuleRootNode, !fIsModuleRootNode) == changeNodeDirection;
+	}
+
+	public boolean isTargetRootNode(RootNodeChange changeNodeDirection) {
+		return RootNodeChange.fromOldAndNew(!fIsModuleRootNode, fIsModuleRootNode) == changeNodeDirection;
+	}
+
 	void removeCPListElement(CPListElement element) {
-		if (isRootNodeForPath()) {
-			fChildren.remove(element);
-		}
+		fChildren.remove(element);
 	}
 }

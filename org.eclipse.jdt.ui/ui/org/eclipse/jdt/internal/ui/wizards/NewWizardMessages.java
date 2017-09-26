@@ -461,6 +461,7 @@ public final class NewWizardMessages extends NLS {
 	public static String ModuleDialog_removeFromIncluded_tooltip;
 	public static String ModuleDialog_addToExplicitlyIncluded_tooltip;
 	public static String ModuleDialog_cannotLimitSingle_error;
+	public static String ModuleDialog_unknownModules_info;
 
 	public static String ModuleDialog_details_tab;
 	public static String ModuleDialog_patches_module_label;
@@ -480,6 +481,7 @@ public final class NewWizardMessages extends NLS {
 	public static String ModuleDialog_duplicateReads_error;
 	public static String ModuleDialog_missingPatch_error;
 	public static String ModuleDialog_wrongPatch_error;
+	public static String ModuleDialog_cannotEditDetails_info;
 	public static String ModuleDialog_mustIncludeModule_error;
 
 	public static String ModuleAddExportsBlock_packageEmpty_error;

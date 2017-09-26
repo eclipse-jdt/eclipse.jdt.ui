@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
@@ -47,6 +48,7 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.RootCPListElement.RootNodeChange;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
@@ -276,6 +278,46 @@ public abstract class BuildPathBasePage {
 
 	public abstract void setFocus();
 	
+
+
+	/**
+	 * @param listField the UI element holding the list of elements to be manipulated
+	 * @param selElement is classpath element
+	 * @param changeNodeDirection indicate in which direction the element should be moved
+	 */
+	protected void moveCPElementAcrossNode(TreeListDialogField<CPListElement> listField, CPListElement selElement, RootNodeChange changeNodeDirection) {
+		List<CPListElement> elements= listField.getElements();
+		//remove from module node or classnode
+		for (CPListElement cpListElement : elements) {
+			if (cpListElement.isRootNodeForPath()) {
+				RootCPListElement rootElement= (RootCPListElement) cpListElement;
+				if (rootElement.isSourceRootNode(changeNodeDirection) && rootElement.getChildren().contains(selElement)) {
+					rootElement.removeCPListElement(selElement);
+					listField.getTreeViewer().remove(selElement);
+					listField.dialogFieldChanged();
+				}
+			}
+		}
+		// add to classpath node or module and select the cpe
+		for (CPListElement cpListElement : elements) {
+			if (cpListElement.isRootNodeForPath()) {
+				RootCPListElement rootCPListElement= (RootCPListElement) cpListElement;
+				if (rootCPListElement.isTargetRootNode(changeNodeDirection)) {
+					if (rootCPListElement.getChildren().contains(selElement))
+						break;
+					rootCPListElement.addCPListElement(selElement);
+					List<CPListElement> all= listField.getElements();
+					listField.removeAllElements();
+					listField.setElements(all);
+					listField.refresh();
+					listField.getTreeViewer().expandToLevel(2);
+					listField.postSetSelection(new StructuredSelection(selElement));
+					break;
+				}
+			}
+		}
+	}
+
 
 
 	protected abstract class CPListAdapter implements IDialogFieldListener, ITreeListAdapter<CPListElement> {

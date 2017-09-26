@@ -44,6 +44,7 @@ import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.RootCPListElement.RootNodeChange;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
@@ -135,8 +136,8 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		return false;
 	}
 	private void updateProjectsListWithRootNode() {
-		CPListElement rootClasspath = new RootCPListElement(fCurrJProject, NewWizardMessages.PathRootWorkbookPage_classpath,false);
-		CPListElement rootModulepath =  new RootCPListElement(fCurrJProject,NewWizardMessages.PathRootWorkbookPage_modulepath,true);
+		RootCPListElement rootClasspath = new RootCPListElement(fCurrJProject, NewWizardMessages.PathRootWorkbookPage_classpath,false);
+		RootCPListElement rootModulepath =  new RootCPListElement(fCurrJProject,NewWizardMessages.PathRootWorkbookPage_modulepath,true);
 
 		// add the projects-cpentries that are already on the class path
 		List<CPListElement> cpelements= fClassPathList.getElements();
@@ -148,9 +149,9 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			if (isEntryKind(cpelem.getEntryKind())) {
 				Object mod= cpelem.getAttribute(CPListElement.MODULE);
 				if(mod == null) {
-					((RootCPListElement)rootClasspath).addCPListElement(cpelem);
+					rootClasspath.addCPListElement(cpelem);
 				} else {
-					((RootCPListElement)rootModulepath).addCPListElement(cpelem);
+					rootModulepath.addCPListElement(cpelem);
 				}
 			}
 		}
@@ -471,50 +472,24 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	private void editAttributeEntry(CPListElementAttribute elem) {
 		String key= elem.getKey();
 		boolean needRefresh= false;
+		boolean wasModular= false;
 		if (key.equals(CPListElement.ACCESSRULES)) {
 			showAccessRestrictionDialog(elem.getParent());
 		} else if (key.equals(CPListElement.MODULE)) {
+			wasModular= elem.getValue() != null;
 			needRefresh= showModuleDialog(getShell(), elem);
 		} else {
 			needRefresh= editCustomAttribute(getShell(), elem);
 		}
 		if (needRefresh) {
 			if (key.equals(CPListElement.MODULE) && hasRootNodes()) {
-				// if module attribute is changed, the element 
-				// may change nodes
+				// if module attribute is changed, the element may change nodes
 				CPListElement selElement= elem.getParent();
-				Object mod= selElement.getAttribute(CPListElement.MODULE);
-				boolean remove= mod == null;
-				List<CPListElement> elements= fProjectsList.getElements();
-				//remove from module node or classnode
-				for (CPListElement cpListElement : elements) {
-					if (cpListElement.isRootNodeForPath()) {
-						if ((remove ? cpListElement.isModulePathRootNode() : cpListElement.isClassPathRootNode()) && ((RootCPListElement) cpListElement).getChildren().contains(selElement)) {
-							((RootCPListElement) cpListElement).removeCPListElement(selElement);
-							fProjectsList.getTreeViewer().remove(selElement);
-							fProjectsList.dialogFieldChanged();
-						}
-					}
+				boolean isModular= selElement.getAttribute(CPListElement.MODULE) != null;
+				RootNodeChange changeDirection= RootNodeChange.fromOldAndNew(wasModular, isModular);
+				if (changeDirection != RootNodeChange.NoChange) {
+					moveCPElementAcrossNode(fProjectsList, selElement, changeDirection);
 				}
-				// add to classpath node or module and select the cpe
-				for (CPListElement cpListElement : elements) {
-					if (cpListElement.isRootNodeForPath()) {
-						if (remove ? cpListElement.isClassPathRootNode() : cpListElement.isModulePathRootNode()) {
-							RootCPListElement rootCPListElement= (RootCPListElement) cpListElement;
-							if (rootCPListElement.getChildren().contains(cpListElement))
-								break;
-							rootCPListElement.addCPListElement(selElement);
-							List<CPListElement> all= fProjectsList.getElements();
-							fProjectsList.removeAllElements();
-							fProjectsList.setElements(all);
-							fProjectsList.refresh();
-							fProjectsList.getTreeViewer().expandToLevel(2);
-							fProjectsList.getTreeViewer().setSelection(new StructuredSelection(selElement));
-							break;
-						}
-					}
-				}
-
 			}
 			fProjectsList.refresh(elem);
 			fClassPathList.dialogFieldChanged(); // validate
