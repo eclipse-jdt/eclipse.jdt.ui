@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2013 IBM Corporation and others.
+ * Copyright (c) 2006, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -61,7 +61,9 @@ public class JUnit4TestListener extends RunListener {
 
 	@Override
 	public void testStarted(Description plan) throws Exception {
-		fNotified.notifyTestStarted(getIdentifier(plan, false, false));
+		if (plan.isTest()) {
+			fNotified.notifyTestStarted(getIdentifier(plan, false, false));
+		}
 	}
 
 	@Override
@@ -71,7 +73,9 @@ public class JUnit4TestListener extends RunListener {
 
 	@Override
 	public void testAssumptionFailure(Failure failure) {
-		testFailure(failure, true);
+		if (failure.getDescription().isTest()) {
+			testFailure(failure, true);
+		}
 	}
 
 	private void testFailure(Failure failure, boolean assumptionFailed) {
@@ -99,15 +103,19 @@ public class JUnit4TestListener extends RunListener {
 
 	@Override
 	public void testIgnored(Description plan) throws Exception {
-		// Send message to listeners which would be stale otherwise
-		ITestIdentifier identifier= getIdentifier(plan, true, false);
-		fNotified.notifyTestStarted(identifier);
-		fNotified.notifyTestEnded(identifier);
+		if (plan.isTest()) {
+			// Send message to listeners which would be stale otherwise
+			ITestIdentifier identifier= getIdentifier(plan, true, false);
+			fNotified.notifyTestStarted(identifier);
+			fNotified.notifyTestEnded(identifier);
+		}
 	}
 
 	@Override
 	public void testFinished(Description plan) throws Exception {
-		fNotified.notifyTestEnded(getIdentifier(plan, false, false));
+		if (plan.isTest()) {
+			fNotified.notifyTestEnded(getIdentifier(plan, false, false));
+		}
 	}
 
 	private ITestIdentifier getIdentifier(Description plan, boolean ignored, boolean assumptionFailed) {
