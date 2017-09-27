@@ -82,8 +82,14 @@ public class TestRunSessionSerializer implements XMLReader {
 		addCDATA(atts, IXMLTags.ATTR_FAILURES, fTestRunSession.getFailureCount());
 		addCDATA(atts, IXMLTags.ATTR_ERRORS, fTestRunSession.getErrorCount());
 		addCDATA(atts, IXMLTags.ATTR_IGNORED, fTestRunSession.getIgnoredCount());
-		addCDATA(atts, IXMLTags.ATTR_INCLUDE_TAGS, fTestRunSession.getIncludeTags());
-		addCDATA(atts, IXMLTags.ATTR_EXCLUDE_TAGS, fTestRunSession.getExcludeTags());
+		String includeTags= fTestRunSession.getIncludeTags();
+		if (includeTags != null && !includeTags.trim().isEmpty()) {
+			addCDATA(atts, IXMLTags.ATTR_INCLUDE_TAGS, includeTags);
+		}
+		String excludeTags= fTestRunSession.getExcludeTags();
+		if (excludeTags != null && !excludeTags.trim().isEmpty()) { 
+			addCDATA(atts, IXMLTags.ATTR_EXCLUDE_TAGS, excludeTags);
+		}
 		startElement(IXMLTags.NODE_TESTRUN, atts);
 
 		TestRoot testRoot= fTestRunSession.getTestRoot();
