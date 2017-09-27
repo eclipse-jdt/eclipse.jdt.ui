@@ -61,6 +61,7 @@ public class JUnitLaunchIncludeExcludeTagsDialog extends StatusDialog {
 		createIncludeTagGroup();
 		createExcludeTagGroup();
 		setHelpAvailable(false);
+		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 
 	@Override
