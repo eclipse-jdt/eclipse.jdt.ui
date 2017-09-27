@@ -97,7 +97,19 @@ public class TestRunSession implements ITestRunSession {
 	 */
 	private TestSuiteElement fUnrootedSuite;
 
- 	/**
+	private static final String EMPTY_STRING= ""; //$NON-NLS-1$
+
+	/**
+	 * Tags included in this test run.
+	 */
+	private String fIncludeTags;
+
+	/**
+	 * Tags excluded from this test run.
+	 */
+	private String fExcludeTags;
+
+	/**
  	 * Number of tests started during this test run.
  	 */
 	volatile int fStartedCount;
@@ -863,6 +875,45 @@ public class TestRunSession implements ITestRunSession {
 			return Double.NaN;
 
 		return fTestRoot.getElapsedTimeInSeconds();
+	}
+
+	public String getIncludeTags() {
+		if (fLaunch != null) {
+			try {
+				boolean hasIncludeTags= fLaunch.getLaunchConfiguration().getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_HAS_INCLUDE_TAGS, false);
+				if (hasIncludeTags) {
+					return fLaunch.getLaunchConfiguration().getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_INCLUDE_TAGS, EMPTY_STRING);
+				}
+			} catch (CoreException e) {
+				//ignore
+			}
+			return EMPTY_STRING;
+		}
+		return fIncludeTags;
+	}
+
+	public String getExcludeTags() {
+		if (fLaunch != null) {
+			try {
+				boolean hasExcludeTags= fLaunch.getLaunchConfiguration().getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_HAS_EXCLUDE_TAGS, false);
+				if (hasExcludeTags) {
+					return fLaunch.getLaunchConfiguration().getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_EXCLUDE_TAGS, EMPTY_STRING);
+				}
+			} catch (CoreException e) {
+				//ignore
+			}
+			return EMPTY_STRING;
+		}
+		return fExcludeTags;
+	}
+
+	public void setIncludeTags(String includeTags) {
+		fIncludeTags= includeTags;
+	}
+
+
+	public void setExcludeTags(String excludeTags) {
+		fExcludeTags= excludeTags;
 	}
 
 	@Override

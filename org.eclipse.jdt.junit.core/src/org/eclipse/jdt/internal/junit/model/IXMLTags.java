@@ -99,5 +99,14 @@ public interface IXMLTags {
 	 */
 	public static final String ATTR_UNIQUE_ID= "uniqueid"; //$NON-NLS-1$
 
+	/**
+	 * value: String
+	 */
+	public static final String ATTR_INCLUDE_TAGS= "include_tags"; //$NON-NLS-1$
+	/**
+	 * value: String
+	 */
+	public static final String ATTR_EXCLUDE_TAGS= "exclude_tags"; //$NON-NLS-1$
+
 //	public static final String ATTR_TYPE= "type"; //$NON-NLS-1$
 }
