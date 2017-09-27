@@ -60,6 +60,7 @@ public class JUnitLaunchIncludeExcludeTagsDialog extends StatusDialog {
 		setTitle(JUnitMessages.JUnitLaunchConfigurationTab_addincludeexcludetagdialog_title);
 		createIncludeTagGroup();
 		createExcludeTagGroup();
+		setHelpAvailable(false);
 	}
 
 	@Override
