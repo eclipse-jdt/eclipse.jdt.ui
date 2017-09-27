@@ -59,14 +59,14 @@ public class JUnitLaunchConfigurationConstants {
 	public static final String ATTR_FAILURES_NAMES= JUnitCorePlugin.PLUGIN_ID+".FAILURENAMES"; //$NON-NLS-1$
 
 	public static final String ATTR_TEST_RUNNER_KIND= JUnitCorePlugin.PLUGIN_ID+".TEST_KIND"; //$NON-NLS-1$
-	
-	public static final String ATTR_TEST_IS_INCLUDE_TAG= JUnitCorePlugin.PLUGIN_ID+".IS_INCLUDE_TAG"; //$NON-NLS-1$
-	
-	public static final String ATTR_TEST_IS_EXCLUDE_TAG= JUnitCorePlugin.PLUGIN_ID+".IS_EXCLUDE_TAG"; //$NON-NLS-1$
-	
-	public static final String ATTR_TEST_INCLUDE_TAGS= JUnitCorePlugin.PLUGIN_ID+".INCLUDE_TAGS"; //$NON-NLS-1$
-	
-	public static final String ATTR_TEST_EXCLUDE_TAGS= JUnitCorePlugin.PLUGIN_ID+".EXCLUDE_TAGS"; //$NON-NLS-1$
+
+	public static final String ATTR_TEST_HAS_INCLUDE_TAGS= JUnitCorePlugin.PLUGIN_ID + ".HAS_INCLUDE_TAGS"; //$NON-NLS-1$
+
+	public static final String ATTR_TEST_HAS_EXCLUDE_TAGS= JUnitCorePlugin.PLUGIN_ID + ".HAS_EXCLUDE_TAGS"; //$NON-NLS-1$
+
+	public static final String ATTR_TEST_INCLUDE_TAGS= JUnitCorePlugin.PLUGIN_ID + ".INCLUDE_TAGS"; //$NON-NLS-1$
+
+	public static final String ATTR_TEST_EXCLUDE_TAGS= JUnitCorePlugin.PLUGIN_ID + ".EXCLUDE_TAGS"; //$NON-NLS-1$
 
 	/**
 	 * The unique ID of test to run or "" if not available (applicable to JUnit 5 and above).
