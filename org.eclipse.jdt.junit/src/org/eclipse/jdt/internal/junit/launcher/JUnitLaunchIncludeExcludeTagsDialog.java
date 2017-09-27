@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,9 +35,9 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.TextBoxDialogField;
 
 public class JUnitLaunchIncludeExcludeTagsDialog extends StatusDialog {
-	private SelectionButtonDialogField fIsIncludeTags;
+	private SelectionButtonDialogField fHasIncludeTags;
 
-	private SelectionButtonDialogField fIsExcludeTags;
+	private SelectionButtonDialogField fHasExcludeTags;
 
 	private TextBoxDialogField fIncludeTags;
 
@@ -76,7 +76,7 @@ public class JUnitLaunchIncludeExcludeTagsDialog extends StatusDialog {
 		inner.setLayout(layout);
 		inner.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		fIsIncludeTags.doFillIntoGrid(inner, 1);
+		fHasIncludeTags.doFillIntoGrid(inner, 1);
 		fIncludeTags.doFillIntoGrid(inner, 2);
 		LayoutUtil.setHorizontalIndent(fIncludeTags.getLabelControl(null));
 		Text includeTagControl= fIncludeTags.getTextControl(null);
@@ -86,7 +86,7 @@ public class JUnitLaunchIncludeExcludeTagsDialog extends StatusDialog {
 		LayoutUtil.setVerticalGrabbing(includeTagControl);
 		LayoutUtil.setHeightHint(includeTagControl, convertHeightInCharsToPixels(3));
 
-		fIsExcludeTags.doFillIntoGrid(inner, 1);
+		fHasExcludeTags.doFillIntoGrid(inner, 1);
 		fExcludeTags.doFillIntoGrid(inner, 2);
 		LayoutUtil.setHorizontalIndent(fExcludeTags.getLabelControl(null));
 		Text excludeTagsControl= fExcludeTags.getTextControl(null);
@@ -126,99 +126,85 @@ public class JUnitLaunchIncludeExcludeTagsDialog extends StatusDialog {
 		return buf.toString();
 	}
 
-	/*
-	 * Gets the Included tags
-	 */
 	public String getIncludeTags() {
 		return getCommaSeperatedText(fIncludeTags.getText());
 	}
 
-	/*
-	 * Gets the Excluded tags
-	 */
 	public String getExcludeTags() {
 		return getCommaSeperatedText(fExcludeTags.getText());
 	}
 
-	/*
-	 * If Included tags are present
-	 */
-	public boolean isIncludeTags() {
-		return fIsIncludeTags.isSelected();
+	public boolean hasIncludeTags() {
+		return fHasIncludeTags.isSelected();
 	}
 
-	/*
-	 * If Excluded tags are present
-	 */
-	public boolean isExcludeTags() {
-		return fIsExcludeTags.isSelected();
+	public boolean hasExcludeTags() {
+		return fHasExcludeTags.isSelected();
 	}
-
 
 	private void createIncludeTagGroup() {
-
-		fIsIncludeTags= new SelectionButtonDialogField(SWT.CHECK);
-		fIsIncludeTags.setDialogFieldListener(fListener);
-		fIsIncludeTags.setLabelText(JUnitMessages.JUnitLaunchConfigurationTab_includetag_checkbox_label);
+		fHasIncludeTags= new SelectionButtonDialogField(SWT.CHECK);
+		fHasIncludeTags.setDialogFieldListener(fListener);
+		fHasIncludeTags.setLabelText(JUnitMessages.JUnitLaunchConfigurationTab_includetag_checkbox_label);
 
 		fIncludeTags= new TextBoxDialogField();
 		fIncludeTags.setDialogFieldListener(fListener);
 		fIncludeTags.setLabelText(JUnitMessages.JUnitLaunchConfigurationTab_includetags_description);
 
 		try {
-			fIsIncludeTags.setSelection(fLaunchConfiguration.getAttribute(org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants.ATTR_TEST_IS_INCLUDE_TAG, false));
+			fHasIncludeTags.setSelection(fLaunchConfiguration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_HAS_INCLUDE_TAGS, false));
 		} catch (CoreException e) {
+			// ignore
 		}
-		fIncludeTags.setEnabled(fIsIncludeTags.isSelected());
+		fIncludeTags.setEnabled(fHasIncludeTags.isSelected());
 		try {
 			fIncludeTags
-					.setText(getLineSeperatedText(fLaunchConfiguration.getAttribute(org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfigurationConstants.ATTR_TEST_INCLUDE_TAGS, EMPTY_STRING)));
+					.setText(getLineSeperatedText(fLaunchConfiguration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_INCLUDE_TAGS, EMPTY_STRING)));
 		} catch (CoreException e) {
+			// ignore
 		}
-
-
 	}
 
 	private void createExcludeTagGroup() {
-		fIsExcludeTags= new SelectionButtonDialogField(SWT.CHECK);
-		fIsExcludeTags.setDialogFieldListener(fListener);
-		fIsExcludeTags.setLabelText(JUnitMessages.JUnitLaunchConfigurationTab_excludetag_checkbox_label);
+		fHasExcludeTags= new SelectionButtonDialogField(SWT.CHECK);
+		fHasExcludeTags.setDialogFieldListener(fListener);
+		fHasExcludeTags.setLabelText(JUnitMessages.JUnitLaunchConfigurationTab_excludetag_checkbox_label);
 
 		fExcludeTags= new TextBoxDialogField();
 		fExcludeTags.setDialogFieldListener(fListener);
 		fExcludeTags.setLabelText(JUnitMessages.JUnitLaunchConfigurationTab_excludetags_description);
 
 		try {
-			fIsExcludeTags.setSelection(fLaunchConfiguration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_IS_EXCLUDE_TAG, false));
+			fHasExcludeTags.setSelection(fLaunchConfiguration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_HAS_EXCLUDE_TAGS, false));
 		} catch (CoreException e) {
+			// ignore
 		}
-		fExcludeTags.setEnabled(fIsExcludeTags.isSelected());
+		fExcludeTags.setEnabled(fHasExcludeTags.isSelected());
 		try {
 			fExcludeTags
 					.setText(getLineSeperatedText(fLaunchConfiguration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_EXCLUDE_TAGS, EMPTY_STRING)));
 		} catch (CoreException e) {
+			// ignore
 		}
 	}
 
-
 	private IStatus getValidationStatus() {
-		if (fIsIncludeTags != null && fIsIncludeTags.isSelected()
-				&& fIncludeTags.getText().equals("")) { //$NON-NLS-1$
+		if (fHasIncludeTags != null && fHasIncludeTags.isSelected() && fIncludeTags.getText().trim().equals(EMPTY_STRING)) {
 			return new StatusInfo(IStatus.ERROR, JUnitMessages.JUnitLaunchConfigurationTab_includetag_empty_error);
 		}
 
-		if (fIsExcludeTags != null && fIsExcludeTags.isSelected() && fExcludeTags.getText().equals(EMPTY_STRING))
+		if (fHasExcludeTags != null && fHasExcludeTags.isSelected() && fExcludeTags.getText().trim().equals(EMPTY_STRING))
 			return new StatusInfo(IStatus.ERROR, JUnitMessages.JUnitLaunchConfigurationTab_excludetag_empty_error);
 
 		return new StatusInfo();
 	}
 
 	private void doDialogFieldChanged(DialogField field) {
-		if (field == fIsIncludeTags) {
-			fIncludeTags.setEnabled(fIsIncludeTags.isSelected());
+		if (field == fHasIncludeTags) {
+			fIncludeTags.setEnabled(fHasIncludeTags.isSelected());
 		}
-		if (field == fIsExcludeTags) {
-			fExcludeTags.setEnabled(fIsExcludeTags.isSelected());
+		if (field == fHasExcludeTags) {
+			fExcludeTags.setEnabled(fHasExcludeTags.isSelected());
 		}
 		updateStatus(getValidationStatus());
 	}

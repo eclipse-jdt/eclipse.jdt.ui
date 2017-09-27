@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -91,6 +91,8 @@ public class LayoutUtil {
 
 	/**
 	 * Sets the horizontal indent of a dependent control. Assumes that GridData is used.
+	 * 
+	 * @param control the control
 	 */
 	public static void setHorizontalIndent(Control control) {
 		Object ld= control.getLayoutData();
@@ -98,7 +100,7 @@ public class LayoutUtil {
 			((GridData) ld).horizontalIndent= LayoutUtil.getIndent();
 		}
 	}
-	
+
 	/**
 	 * Returns the indent of dependent controls, in pixels.
 	 * <p>
@@ -107,52 +109,61 @@ public class LayoutUtil {
 	 * </p>
 	 * 
 	 * @return the indent of dependent controls, in pixels.
-	 * @since 3.9
 	 */
 	public static final int getIndent() {
 		return LayoutConstants.getIndent();
 	}
-	
+
 	/**
 	 * Sets the horizontal grabbing of a control to true. Assumes that GridData is used.
+	 * 
+	 * @param control the control
 	 */
 	public static void setHorizontalGrabbing(Control control) {
 		Object ld= control.getLayoutData();
 		if (ld instanceof GridData) {
-			((GridData)ld).grabExcessHorizontalSpace= true;
+			((GridData) ld).grabExcessHorizontalSpace= true;
 		}
 	}
-	
+
 	/**
 	 * Sets the vertical grabbing of a control to true. Assumes that GridData is used.
-	 * @since 3.6
+	 * 
+	 * @param control the control
+	 * 
 	 */
 	public static void setVerticalGrabbing(Control control) {
 		Object ld= control.getLayoutData();
 		if (ld instanceof GridData) {
-			GridData gd= ((GridData)ld);
+			GridData gd= ((GridData) ld);
 			gd.grabExcessVerticalSpace= true;
 			gd.verticalAlignment= SWT.FILL;
 		}
 	}
-	
+
 	/**
 	 * Sets the width hint of a control. Assumes that GridData is used.
+	 * 
+	 * @param control the control
+	 * @param widthHint the preferred width in pixels
 	 */
 	public static void setWidthHint(Control control, int widthHint) {
 		Object ld= control.getLayoutData();
 		if (ld instanceof GridData) {
-			((GridData)ld).widthHint= widthHint;
+			((GridData) ld).widthHint= widthHint;
 		}
 	}
 
 	/**
 	 * Sets the heightHint hint of a control. Assumes that GridData is used.
+	 * 
+	 * @param control the control
+	 * @param heightHint the preferred height in pixels
 	 */
 	public static void setHeightHint(Control control, int heightHint) {
 		Object ld= control.getLayoutData();
 		if (ld instanceof GridData) {
-			((GridData)ld).heightHint= heightHint;
+			((GridData) ld).heightHint= heightHint;
 		}
 	}
 }

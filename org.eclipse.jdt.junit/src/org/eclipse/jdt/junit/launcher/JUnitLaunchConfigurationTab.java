@@ -158,8 +158,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	private Button fTestRadioButton;
 	private Label fTestLabel;
 
-	private Label fIncludeExcludeTagLabel;
-	private Button fIncludeExcludeTagButton;
+	private Label fIncludeExcludeTagsLabel;
+	private Button fIncludeExcludeTagsButton;
 
 	private ComboViewer fTestLoaderViewer;
 
@@ -203,18 +203,18 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJUnitHelpContextIds.LAUNCH_CONFIGURATION_DIALOG_JUNIT_MAIN_TAB);
 		validatePage();
 	}
-	
+
 	private void createTagsGroup(Composite comp) {
 		GridData gd;
 
-		fIncludeExcludeTagLabel= new Label(comp, SWT.NONE);
-		fIncludeExcludeTagLabel.setText(JUnitMessages.JUnitLaunchConfigurationTab_addtag_text);
+		fIncludeExcludeTagsLabel= new Label(comp, SWT.NONE);
+		fIncludeExcludeTagsLabel.setText(JUnitMessages.JUnitLaunchConfigurationTab_addtag_text);
 		gd= new GridData();
 		gd.horizontalSpan= 1;
-		fIncludeExcludeTagLabel.setLayoutData(gd);
-		fIncludeExcludeTagButton= new Button(comp, SWT.PUSH);
-		fIncludeExcludeTagButton.setText(JUnitMessages.JUnitLaunchConfigurationTab_addtag_label);
-		fIncludeExcludeTagButton.addSelectionListener(new SelectionListener() {
+		fIncludeExcludeTagsLabel.setLayoutData(gd);
+		fIncludeExcludeTagsButton= new Button(comp, SWT.PUSH);
+		fIncludeExcludeTagsButton.setText(JUnitMessages.JUnitLaunchConfigurationTab_addtag_label);
+		fIncludeExcludeTagsButton.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				addIncludeExcludeTags();
@@ -227,8 +227,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		});
 		gd= new GridData();
 		gd.horizontalSpan= 1;
-		fIncludeExcludeTagButton.setLayoutData(gd);
-
+		fIncludeExcludeTagsButton.setLayoutData(gd);
 	}
 
 	private void createTestLoaderGroup(Composite comp) {
@@ -255,13 +254,23 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 			public void selectionChanged(SelectionChangedEvent event) {
 				validatePage();
 				updateLaunchConfigurationDialog();
-				setTagGroupEnable();
+				setEnableTagsGroup(event);
 			}
 		});
 	}
 	
-	private void setTagGroupEnable() {
-		// To do Enable only for Junit 5
+	private void setEnableTagsGroup(SelectionChangedEvent event) {
+		ISelection selection= event.getSelection();
+		if (selection instanceof IStructuredSelection) {
+			IStructuredSelection ss= (IStructuredSelection) selection;
+			if (ss.size() == 1) {
+				Object first= ss.getFirstElement();
+				if (first instanceof ITestKind) {
+					boolean isJUnit5= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(((ITestKind) first).getId());
+					fIncludeExcludeTagsButton.setEnabled(isJUnit5);
+				}
+			}
+		}
 	}
 
 	private void createSpacer(Composite comp) {
@@ -1254,15 +1263,15 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 	public String getId() {
 		return "org.eclipse.jdt.junit.JUnitLaunchConfigurationTab"; //$NON-NLS-1$
 	}
-	
+
 	private void addIncludeExcludeTags() {
 		JUnitLaunchIncludeExcludeTagsDialog dialog= new JUnitLaunchIncludeExcludeTagsDialog(getShell(), fLaunchConfiguration);
 
 		if (dialog.open() == Window.OK) {
 			try {
 				ILaunchConfigurationWorkingCopy workingCopy= fLaunchConfiguration.getWorkingCopy();
-				workingCopy.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_IS_INCLUDE_TAG, dialog.isIncludeTags());
-				workingCopy.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_IS_EXCLUDE_TAG, dialog.isExcludeTags());
+				workingCopy.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_HAS_INCLUDE_TAGS, dialog.hasIncludeTags());
+				workingCopy.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_HAS_EXCLUDE_TAGS, dialog.hasExcludeTags());
 				workingCopy.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_INCLUDE_TAGS, dialog.getIncludeTags());
 				workingCopy.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_EXCLUDE_TAGS, dialog.getExcludeTags());
 				workingCopy.doSave();
