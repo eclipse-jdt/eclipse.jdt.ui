@@ -192,8 +192,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		createTestContainerSelectionGroup(comp);
 		createSpacer(comp);
 
-		/*createTagsGroup(comp);
-		createSpacer(comp);*/
+		createTagsGroup(comp);
+		createSpacer(comp);
 
 		createTestLoaderGroup(comp);
 		createSpacer(comp);

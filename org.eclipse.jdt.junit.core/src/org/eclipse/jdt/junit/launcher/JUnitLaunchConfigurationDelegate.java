@@ -361,6 +361,30 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			programArguments.add("-uniqueId"); //$NON-NLS-1$
 			programArguments.add(uniqueId);
 		}
+
+		boolean hasIncludeTags= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_HAS_INCLUDE_TAGS, false);
+		if (hasIncludeTags) {
+			String includeTags= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_INCLUDE_TAGS, ""); //$NON-NLS-1$
+			if (includeTags != null && !includeTags.trim().isEmpty()) {
+				String[] tags= includeTags.split(","); //$NON-NLS-1$
+				for (String tag : tags) {
+					programArguments.add("--include-tag"); //$NON-NLS-1$
+					programArguments.add(tag.trim());
+				}
+			}
+		}
+
+		boolean hasExcludeTags= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_HAS_EXCLUDE_TAGS, false);
+		if (hasExcludeTags) {
+			String excludeTags= configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_EXCLUDE_TAGS, ""); //$NON-NLS-1$
+			if (excludeTags != null && !excludeTags.trim().isEmpty()) {
+				String[] tags= excludeTags.split(","); //$NON-NLS-1$
+				for (String tag : tags) {
+					programArguments.add("--exclude-tag"); //$NON-NLS-1$
+					programArguments.add(tag.trim());
+				}
+			}
+		}
 	}
 
 	private String createPackageNamesFile(IJavaElement testContainer, ITestKind testRunnerKind) throws CoreException {
