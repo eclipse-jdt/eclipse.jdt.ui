@@ -13,6 +13,18 @@
                 <message_argument value="3.13.1"/>
             </message_arguments>
         </filter>
+        <filter comment="Backported Java 9 work" id="924844039">
+            <message_arguments>
+                <message_argument value="3.13.50"/>
+                <message_argument value="3.13.0"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Backported Java 9 work" id="924844039">
+            <message_arguments>
+                <message_argument value="3.13.50"/>
+                <message_argument value="3.13.1"/>
+            </message_arguments>
+        </filter>
     </resource>
     <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/ReplaceInvocationsRefactoring.java" type="org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring">
         <filter id="571519004">
