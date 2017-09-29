@@ -268,6 +268,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				if (ASTNodes.getParent(ref, ASTNode.PACKAGE_DECLARATION) != null) {
 					return true; // reference in package-info.java
 				}
+				if (ASTNodes.getParent(ref, ASTNode.MODULE_DECLARATION) != null) {
+					return true; // reference in module-info.java
+				}
 				return false; // not in a type
 			}
 			if (!Modifier.isPublic(modifiers)) {
