@@ -9913,4 +9913,122 @@ public class AssistQuickFixTest extends QuickFixTest {
 			fJProject1.setOptions(saveOptions);
 		}
 	}
+	public void testGenerateForQualified() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Collection;\n");
+		buf.append("public class E {\n");
+		buf.append("    Collection<String> collection;\n");
+		buf.append("    void foo(E e) {\n");
+		buf.append("        e.collection\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
+		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
+		try {
+			fJProject1.setOptions(newOptions);
+			String selection= "collection";
+			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+			assertNumberOfProposals(proposals, 5);
+			assertCorrectLabels(proposals);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Collection;\n");
+			buf.append("public class E {\n");
+			buf.append("    Collection<String> collection;\n");
+			buf.append("    void foo(E e) {\n");
+			buf.append("        for (String string : e.collection) {\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertProposalPreviewEquals(buf.toString(), "Create enhanced 'for' loop", proposals);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Collection;\n");
+			buf.append("import java.util.Iterator;\n");
+			buf.append("public class E {\n");
+			buf.append("    Collection<String> collection;\n");
+			buf.append("    void foo(E e) {\n");
+			buf.append("        for (Iterator<String> iterator = e.collection.iterator(); iterator\n");
+			buf.append("                .hasNext();) {\n");
+			buf.append("            String string = iterator.next();\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+
+			
+			assertProposalPreviewEquals(buf.toString(), "Create 'for' loop using Iterator", proposals);
+		} finally {
+			fJProject1.setOptions(saveOptions);
+		}
+	}
+	public void testGenerateForThis() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Collection;\n");
+		buf.append("public class E {\n");
+		buf.append("    Collection<String> collection;\n");
+		buf.append("    void foo() {\n");
+		buf.append("        this.collection\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		Map<String, String> saveOptions= fJProject1.getOptions(false);
+		Map<String, String> newOptions= new HashMap<>(saveOptions);
+		newOptions.put(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, "true");
+		try {
+			fJProject1.setOptions(newOptions);
+			String selection= "collection";
+			AssistContext context= getCorrectionContext(cu, buf.toString().lastIndexOf(selection) + selection.length(), 0);
+			List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+			assertNumberOfProposals(proposals, 2);
+			assertCorrectLabels(proposals);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Collection;\n");
+			buf.append("public class E {\n");
+			buf.append("    Collection<String> collection;\n");
+			buf.append("    void foo() {\n");
+			buf.append("        for (String string : this.collection) {\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertProposalPreviewEquals(buf.toString(), "Create enhanced 'for' loop", proposals);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Collection;\n");
+			buf.append("import java.util.Iterator;\n");
+			buf.append("public class E {\n");
+			buf.append("    Collection<String> collection;\n");
+			buf.append("    void foo() {\n");
+			buf.append("        for (Iterator<String> iterator = this.collection.iterator(); iterator\n");
+			buf.append("                .hasNext();) {\n");
+			buf.append("            String string = iterator.next();\n");
+			buf.append("            \n");
+			buf.append("        }\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+
+			
+			assertProposalPreviewEquals(buf.toString(), "Create 'for' loop using Iterator", proposals);
+		} finally {
+			fJProject1.setOptions(saveOptions);
+		}
+	}
 }

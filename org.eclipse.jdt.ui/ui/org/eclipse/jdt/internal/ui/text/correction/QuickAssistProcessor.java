@@ -96,6 +96,7 @@ import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression.Operator;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -3488,10 +3489,19 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		ExpressionStatement expressionStatement= (ExpressionStatement) statement;
 		Expression expression= expressionStatement.getExpression();
+		if (expression instanceof Assignment) {
+			Assignment assignment= (Assignment) expression;
+			Expression leftHandSide= assignment.getLeftHandSide();
+			if (leftHandSide instanceof FieldAccess && leftHandSide.getStartPosition() == assignment.getStartPosition() && leftHandSide.getLength() == assignment.getLength()) {
+				// "this.fieldname" recovered as "this.fieldname = $missing$"
+				expression= leftHandSide;
+			}
+		}
 		ITypeBinding expressionType= null;
 		if (expression instanceof MethodInvocation
 				|| expression instanceof SimpleName
-				|| expression instanceof FieldAccess) {
+				|| expression instanceof FieldAccess
+				|| expression instanceof QualifiedName) {
 			expressionType= expression.resolveTypeBinding();
 		} else {
 			return false;
