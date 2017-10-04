@@ -217,7 +217,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fIncludeExcludeTagsButton.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				addIncludeExcludeTags();
+				configureIncludeExcludeTags();
 			}
 
 			@Override
@@ -252,9 +252,9 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		fTestLoaderViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				setEnableTagsGroup(event);
 				validatePage();
 				updateLaunchConfigurationDialog();
-				setEnableTagsGroup(event);
 			}
 		});
 	}
@@ -1264,7 +1264,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		return "org.eclipse.jdt.junit.JUnitLaunchConfigurationTab"; //$NON-NLS-1$
 	}
 
-	private void addIncludeExcludeTags() {
+	private void configureIncludeExcludeTags() {
 		JUnitLaunchIncludeExcludeTagsDialog dialog= new JUnitLaunchIncludeExcludeTagsDialog(getShell(), fLaunchConfiguration);
 
 		if (dialog.open() == Window.OK) {
@@ -1275,6 +1275,8 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 				workingCopy.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_INCLUDE_TAGS, dialog.getIncludeTags());
 				workingCopy.setAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_EXCLUDE_TAGS, dialog.getExcludeTags());
 				workingCopy.doSave();
+				validatePage();
+				updateLaunchConfigurationDialog();
 			} catch (CoreException e) {
 			}
 		}
