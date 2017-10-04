@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2016 GK Software AG and others.
+ * Copyright (c) 2012, 2017 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,10 +21,18 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+
 import org.eclipse.jface.preference.IPreferenceStore;
+
+import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -35,14 +43,23 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring.MultiFixTarget;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMarkerResolutionGenerator;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMarkerResolutionGenerator.CorrectionMarkerResolution;
+import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CreatePackageInfoWithDefaultNullnessProposal;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -1994,5 +2011,357 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
+	}
+	public void testBug525428a() throws Exception {
+		fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.ERROR);
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuilder buf= new StringBuilder();
+			buf.append("package test1;\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
+	
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+			assertNumberOfProposals(proposals, 2);
+			CUCorrectionProposal proposal= (CUCorrectionProposal)proposals.get(0);
+	
+			assertEqualString(proposal.getDisplayString(), "Add '@NonNullByDefault' to the package declaration");
+	
+			String preview= getPreviewContent(proposal);
+	
+			buf= new StringBuilder();
+			buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+			buf.append("package test1;\n");
+			assertEqualString(preview, buf.toString());
+		} finally {
+			fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.IGNORE);
+		}
+	}
+	public void testBug525428b() throws Exception {
+		fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.ERROR);
+		String typecomment= StubUtility.getCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, null).getPattern();
+		String filecomment= StubUtility.getCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, null).getPattern();
+
+		try {
+			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, "/**\n * Type\n */", null);
+			StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, "/**\n * File\n */", null);
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuilder buf= new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("public class E {\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+			cu.getJavaProject().getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			IMarker[] markers= pack1.getResource().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			assertEquals(1, markers.length);
+			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
+			IInvocationContext context= new AssistContext(cu,  0, 0);
+			IEditorInput input= EditorUtility.getEditorInput(cu);
+			IProblemLocation location= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[0]);
+			IStatus status= JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
+			assertStatusOk(status);
+
+			assertNumberOfProposals(proposals, 2);
+			IJavaCompletionProposal proposal= proposals.get(0);
+	
+			assertEqualString(proposal.getDisplayString(), "Add package-info.java with '@NonNullByDefault'");
+			proposal.apply(null);
+
+			cu.getJavaProject().getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+
+			assertEquals(0, pack1.getResource().findMarkers(null, true, IResource.DEPTH_INFINITE).length);
+			
+			ICompilationUnit packageInfoCU= pack1.getCompilationUnit("package-info.java");
+			StringBuilder expected=new StringBuilder();
+			expected.append("/**\n");
+			expected.append(" * File\n");
+			expected.append(" */\n");
+			expected.append("/**\n");
+			expected.append(" * Type\n");
+			expected.append(" */\n");
+			expected.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+			expected.append("package test1;\n");
+			assertEquals(expected.toString(), packageInfoCU.getSource());
+		} finally {
+			fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.IGNORE);
+			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, typecomment, null);
+			StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, filecomment, null);
+		}
+	}
+	// marker for same project in two source folders in same project: package-info.java must be created in first one (when comparing paths)
+	public void testBug525428c() throws Exception {
+		fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.ERROR);
+		String typecomment= StubUtility.getCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, null).getPattern();
+		String filecomment= StubUtility.getCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, null).getPattern();
+
+		try {
+			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, "/**\n * Type\n */", null);
+			StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, "/**\n * File\n */", null);
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuilder buf= new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("public class E {\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+			IPackageFragmentRoot testSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src-tests");
+			IPackageFragment pack2= testSourceFolder.createPackageFragment("test1", false, null);
+
+			cu.getJavaProject().getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+
+			buf=new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("public class ETest {\n");
+			buf.append("}\n");
+			ICompilationUnit cu2= pack2.createCompilationUnit("ETest.java", buf.toString(), false, null);
+
+			// after the incremental, there is also a problem marker on the package in the src-tests directory
+			cu2.getJavaProject().getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
+
+			IMarker[] markers= pack1.getResource().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			assertEquals(1, markers.length);
+
+			IMarker[] markers2= pack2.getResource().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			assertEquals(1, markers2.length);
+
+
+			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
+			IInvocationContext context= new AssistContext(cu, 0, 0);
+			IEditorInput input= EditorUtility.getEditorInput(cu);
+			IProblemLocation location= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[0]);
+			IStatus status= JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
+			assertStatusOk(status);
+
+			IInvocationContext context2= new AssistContext(cu, 0, 0);
+			IEditorInput input2= EditorUtility.getEditorInput(cu);
+			IProblemLocation location2= CorrectionMarkerResolutionGenerator.findProblemLocation(input2, markers2[0]);
+			status= JavaCorrectionProcessor.collectCorrections(context2, new IProblemLocation[] { location2 }, proposals);
+			assertStatusOk(status);
+
+			assertNumberOfProposals(proposals, 4);
+			IJavaCompletionProposal proposal= proposals.get(0);
+			IJavaCompletionProposal proposal2= proposals.get(2);
+
+			assertEqualString(proposal.getDisplayString(), "Add package-info.java with '@NonNullByDefault'");
+			assertEqualString(proposal2.getDisplayString(), "Add package-info.java with '@NonNullByDefault'");
+
+			MultiFixTarget[] problems= CorrectionMarkerResolution.getCleanUpTargets(new IMarker[] { markers[0], markers2[0] });
+
+			((CreatePackageInfoWithDefaultNullnessProposal) proposal).resolve(problems, new NullProgressMonitor());
+
+			cu.getJavaProject().getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
+			assertEquals(0, cu.getJavaProject().getProject().findMarkers(null, true, IResource.DEPTH_INFINITE).length);
+
+			ICompilationUnit packageInfoCU= pack1.getCompilationUnit("package-info.java");
+			ICompilationUnit packageInfoCU2= pack2.getCompilationUnit("package-info.java");
+			assertTrue("a package-info.java should have been created in src", packageInfoCU.exists());
+			assertTrue("no package-info.java should have been created in src-tests", !packageInfoCU2.exists());
+
+			StringBuilder expected= new StringBuilder();
+			expected.append("/**\n");
+			expected.append(" * File\n");
+			expected.append(" */\n");
+			expected.append("/**\n");
+			expected.append(" * Type\n");
+			expected.append(" */\n");
+			expected.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+			expected.append("package test1;\n");
+			assertEquals(expected.toString(), packageInfoCU.getSource());
+		} finally {
+			fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.IGNORE);
+			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, typecomment, null);
+			StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, filecomment, null);
+		}
+	}
+	// marker for same project in two dependent projects: package-info.java must be created in the one that cannot see the other
+	public void testBug525428d() throws Exception {
+		fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.ERROR);
+		String typecomment= StubUtility.getCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, null).getPattern();
+		String filecomment= StubUtility.getCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, null).getPattern();
+		IJavaProject proj2=null;
+
+		try {
+			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, "/**\n * Type\n */", null);
+			StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, "/**\n * File\n */", null);
+
+			proj2= JavaProjectHelper.createJavaProject("OtherProject", "bin");
+			proj2.setRawClasspath(ProjectTestSetup.getDefaultClasspath(), null);
+			TestOptions.initializeProjectOptions(proj2);
+			JavaProjectHelper.addLibrary(proj2, new Path(ANNOTATION_JAR_PATH));
+			JavaProjectHelper.addRequiredProject(proj2, fJProject1);
+			IPackageFragmentRoot sourceFolder2= JavaProjectHelper.addSourceContainer(proj2, "src");
+			proj2.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.ERROR);
+
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuilder buf= new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("}\n");
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+			IPackageFragment pack2= sourceFolder2.createPackageFragment("test1", false, null);
+
+			buf=new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("public class E2 {\n");
+			buf.append("}\n");
+			ICompilationUnit cu2= pack2.createCompilationUnit("E2.java", buf.toString(), false, null);
+
+			cu2.getJavaProject().getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+
+			IMarker[] markers= pack1.getResource().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			assertEquals(1, markers.length);
+
+			IMarker[] markers2= pack2.getResource().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			assertEquals(1, markers2.length);
+
+
+			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
+			IInvocationContext context= new AssistContext(cu1, 0, 0);
+			IEditorInput input= EditorUtility.getEditorInput(cu1);
+			IProblemLocation location= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[0]);
+			IStatus status= JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
+			assertStatusOk(status);
+
+			IInvocationContext context2= new AssistContext(cu2, 0, 0);
+			IEditorInput input2= EditorUtility.getEditorInput(cu2);
+			IProblemLocation location2= CorrectionMarkerResolutionGenerator.findProblemLocation(input2, markers2[0]);
+			status= JavaCorrectionProcessor.collectCorrections(context2, new IProblemLocation[] { location2 }, proposals);
+			assertStatusOk(status);
+
+			assertNumberOfProposals(proposals, 4);
+			IJavaCompletionProposal proposal= proposals.get(0);
+			IJavaCompletionProposal proposal2= proposals.get(2);
+
+			assertEqualString(proposal.getDisplayString(), "Add package-info.java with '@NonNullByDefault'");
+			assertEqualString(proposal2.getDisplayString(), "Add package-info.java with '@NonNullByDefault'");
+
+			MultiFixTarget[] problems= CorrectionMarkerResolution.getCleanUpTargets(new IMarker[] { markers[0], markers2[0] });
+
+			((CreatePackageInfoWithDefaultNullnessProposal) proposal).resolve(problems, new NullProgressMonitor());
+
+			cu1.getJavaProject().getProject().getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
+			
+			assertEquals(0, cu1.getJavaProject().getProject().findMarkers(null, true, IResource.DEPTH_INFINITE).length);
+			assertEquals(0, cu2.getJavaProject().getProject().findMarkers(null, true, IResource.DEPTH_INFINITE).length);
+
+			ICompilationUnit packageInfoCU= pack1.getCompilationUnit("package-info.java");
+			ICompilationUnit packageInfoCU2= pack2.getCompilationUnit("package-info.java");
+			assertTrue("a package-info.java should have been created in fJProject1", packageInfoCU.exists());
+			assertTrue("no package-info.java should have been created in proj2", !packageInfoCU2.exists());
+
+			StringBuilder expected= new StringBuilder();
+			expected.append("/**\n");
+			expected.append(" * File\n");
+			expected.append(" */\n");
+			expected.append("/**\n");
+			expected.append(" * Type\n");
+			expected.append(" */\n");
+			expected.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+			expected.append("package test1;\n");
+			assertEquals(expected.toString(), packageInfoCU.getSource());
+		} finally {
+			fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.IGNORE);
+			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, typecomment, null);
+			StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, filecomment, null);
+			if (proj2 != null) {
+				JavaProjectHelper.delete(proj2);
+			}
+		}
+	}
+	// marker for same project in two independent projects: package-info.java must be created in both
+	public void testBug525428e() throws Exception {
+		fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.ERROR);
+		String typecomment= StubUtility.getCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, null).getPattern();
+		String filecomment= StubUtility.getCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, null).getPattern();
+		IJavaProject proj2=null;
+
+		try {
+			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, "/**\n * Type\n */", null);
+			StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, "/**\n * File\n */", null);
+
+			proj2= JavaProjectHelper.createJavaProject("OtherProject", "bin");
+			proj2.setRawClasspath(ProjectTestSetup.getDefaultClasspath(), null);
+			TestOptions.initializeProjectOptions(proj2);
+			JavaProjectHelper.addLibrary(proj2, new Path(ANNOTATION_JAR_PATH));
+			IPackageFragmentRoot sourceFolder2= JavaProjectHelper.addSourceContainer(proj2, "src");
+			proj2.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.ERROR);
+
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuilder buf= new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("public class E1 {\n");
+			buf.append("}\n");
+			ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+			IPackageFragment pack2= sourceFolder2.createPackageFragment("test1", false, null);
+
+			buf=new StringBuilder();
+			buf.append("package test1;\n");
+			buf.append("public class E2 {\n");
+			buf.append("}\n");
+			ICompilationUnit cu2= pack2.createCompilationUnit("E2.java", buf.toString(), false, null);
+
+			cu2.getJavaProject().getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+
+			IMarker[] markers= pack1.getResource().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			assertEquals(1, markers.length);
+
+			IMarker[] markers2= pack2.getResource().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			assertEquals(1, markers2.length);
+
+
+			ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
+			IInvocationContext context= new AssistContext(cu1, 0, 0);
+			IEditorInput input= EditorUtility.getEditorInput(cu1);
+			IProblemLocation location= CorrectionMarkerResolutionGenerator.findProblemLocation(input, markers[0]);
+			IStatus status= JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
+			assertStatusOk(status);
+
+			IInvocationContext context2= new AssistContext(cu2, 0, 0);
+			IEditorInput input2= EditorUtility.getEditorInput(cu2);
+			IProblemLocation location2= CorrectionMarkerResolutionGenerator.findProblemLocation(input2, markers2[0]);
+			status= JavaCorrectionProcessor.collectCorrections(context2, new IProblemLocation[] { location2 }, proposals);
+			assertStatusOk(status);
+
+			assertNumberOfProposals(proposals, 4);
+			IJavaCompletionProposal proposal= proposals.get(0);
+			IJavaCompletionProposal proposal2= proposals.get(2);
+
+			assertEqualString(proposal.getDisplayString(), "Add package-info.java with '@NonNullByDefault'");
+			assertEqualString(proposal2.getDisplayString(), "Add package-info.java with '@NonNullByDefault'");
+
+			MultiFixTarget[] problems= CorrectionMarkerResolution.getCleanUpTargets(new IMarker[] { markers[0], markers2[0] });
+
+			((CreatePackageInfoWithDefaultNullnessProposal) proposal).resolve(problems, new NullProgressMonitor());
+
+			cu1.getJavaProject().getProject().getWorkspace().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
+			
+			assertEquals(0, cu1.getJavaProject().getProject().findMarkers(null, true, IResource.DEPTH_INFINITE).length);
+			assertEquals(0, cu2.getJavaProject().getProject().findMarkers(null, true, IResource.DEPTH_INFINITE).length);
+
+			ICompilationUnit packageInfoCU= pack1.getCompilationUnit("package-info.java");
+			ICompilationUnit packageInfoCU2= pack2.getCompilationUnit("package-info.java");
+			assertTrue("a package-info.java should have been created in fJProject1", packageInfoCU.exists());
+			assertTrue("a package-info.java should have been created in proj2", packageInfoCU2.exists());
+
+			StringBuilder expected= new StringBuilder();
+			expected.append("/**\n");
+			expected.append(" * File\n");
+			expected.append(" */\n");
+			expected.append("/**\n");
+			expected.append(" * Type\n");
+			expected.append(" */\n");
+			expected.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
+			expected.append("package test1;\n");
+			assertEquals(expected.toString(), packageInfoCU.getSource());
+		} finally {
+			fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.IGNORE);
+			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, typecomment, null);
+			StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, filecomment, null);
+			if (proj2 != null) {
+				JavaProjectHelper.delete(proj2);
+			}
+		}
 	}
 }

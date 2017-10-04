@@ -49,6 +49,7 @@ import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -421,6 +422,40 @@ public class NullAnnotationsRewriteOperations {
 				String name= annotationBinding.getName();
 				if (name.equals(NullAnnotationsFix.getNonNullByDefaultAnnotationName(fCompilationUnit.getJavaElement(), true))) {
 					astRewrite.remove(annotation, group);
+				}
+			}
+		}
+	}
+
+	static class AddMissingDefaultNullnessRewriteOperation extends CompilationUnitRewriteOperation {
+
+		private IProblemLocation fProblem;
+		private CompilationUnit fCompilationUnit;
+
+		public AddMissingDefaultNullnessRewriteOperation(CompilationUnit compilationUnit, IProblemLocation problem) {
+			fCompilationUnit= compilationUnit;
+			fProblem= problem;
+		}
+
+		@Override
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
+
+			if (fProblem.getProblemId() == IProblem.MissingNonNullByDefaultAnnotationOnPackage) {
+				ASTNode selectedNode= fCompilationUnit.getPackage();
+				if (selectedNode instanceof PackageDeclaration) {
+					String nonNullByDefaultAnnotationname= NullAnnotationsFix.getNonNullByDefaultAnnotationName(fCompilationUnit.getJavaElement(), true);
+					String label= Messages.format(FixMessages.NullAnnotationsRewriteOperations_add_missing_default_nullness_annotation, new String[] { nonNullByDefaultAnnotationname });
+					TextEditGroup group= createTextEditGroup(label, cuRewrite);
+					ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+					PackageDeclaration packageDeclaration= (PackageDeclaration) selectedNode;
+					AST ast= cuRewrite.getRoot().getAST();
+					ListRewrite listRewrite= astRewrite.getListRewrite(packageDeclaration, PackageDeclaration.ANNOTATIONS_PROPERTY);
+					Annotation newAnnotation= ast.newMarkerAnnotation();
+					// NOTE: to be consistent with completion proposals, don't use import in package-info.java
+					String annotationToAdd= NullAnnotationsFix.getNonNullByDefaultAnnotationName(fCompilationUnit.getJavaElement(), false);
+					newAnnotation.setTypeName(ast.newName(annotationToAdd));
+					listRewrite.insertLast(newAnnotation, group);
+					return;
 				}
 			}
 		}

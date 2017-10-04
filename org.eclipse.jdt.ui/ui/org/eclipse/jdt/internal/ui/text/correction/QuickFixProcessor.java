@@ -284,6 +284,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.TypeAnnotationAtQualifiedName:
 			case IProblem.NullAnnotationAtQualifyingType:
 			case IProblem.IllegalAnnotationForBaseType:
+			case IProblem.MissingNonNullByDefaultAnnotationOnPackage:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -797,6 +798,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NullAnnotationAtQualifyingType:
 			case IProblem.IllegalAnnotationForBaseType:
 				TypeAnnotationSubProcessor.addMoveTypeAnnotationToTypeProposal(context, problem, proposals);
+				break;
+			case IProblem.MissingNonNullByDefaultAnnotationOnPackage:
+				NullAnnotationsCorrectionProcessor.addAddMissingDefaultNullnessProposal(context, problem, proposals);
 				break;
 			default:
 		}

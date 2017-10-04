@@ -414,4 +414,5 @@ public final class CorrectionMessages extends NLS {
 	public static String VarargsWarningsSubProcessor_add_safevarargs_to_method_label;
 	public static String VarargsWarningsSubProcessor_remove_safevarargs_label;
 	public static String NullAnnotationsCorrectionProcessor_change_local_variable_to_nonNull;
+	public static String NullAnnotationsCorrectionProcessor_create_packageInfo_with_defaultnullness;
 }

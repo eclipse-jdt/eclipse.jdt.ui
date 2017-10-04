@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2013 GK Software AG and others.
+ * Copyright (c) 2011, 2017 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,7 +17,10 @@ import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -35,6 +38,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsFix;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.ChangeKind;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -42,6 +47,7 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.NullAnnotationsCleanUp;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CreatePackageInfoWithDefaultNullnessProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ExtractToNullCheckedLocalProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MakeLocalVariableNonNullProposal;
@@ -121,6 +127,23 @@ public class NullAnnotationsCorrectionProcessor {
 		Map<String, String> options= new Hashtable<>();
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, problem.getProblemId()), IProposalRelevance.REMOVE_REDUNDANT_NULLNESS_ANNOTATION, image, context);
 		proposals.add(proposal);
+	}
+
+	public static void addAddMissingDefaultNullnessProposal(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
+		final CompilationUnit astRoot= context.getASTRoot();
+		if (astRoot.getJavaElement().getElementName().equals(JavaModelUtil.PACKAGE_INFO_JAVA)) {
+			NullAnnotationsFix fix= NullAnnotationsFix.createAddMissingDefaultNullnessAnnotationsFix(astRoot, problem);
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			Map<String, String> options= new Hashtable<>();
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, problem.getProblemId()), IProposalRelevance.ADD_MISSING_NULLNESS_ANNOTATION, image,
+					context);
+			proposals.add(proposal);
+		} else {
+			final IPackageFragment pack= (IPackageFragment) astRoot.getJavaElement().getParent();
+			String nonNullByDefaultAnnotationname= NullAnnotationsFix.getNonNullByDefaultAnnotationName(pack, true);
+			String label= Messages.format(CorrectionMessages.NullAnnotationsCorrectionProcessor_create_packageInfo_with_defaultnullness, new String[] { nonNullByDefaultAnnotationname });
+			proposals.add(CreatePackageInfoWithDefaultNullnessProposal.createFor(problem.getProblemId(), label, pack));
+		}
 	}
 
 	/**

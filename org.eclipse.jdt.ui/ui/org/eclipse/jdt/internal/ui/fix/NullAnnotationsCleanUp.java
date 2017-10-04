@@ -110,6 +110,9 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 			case IProblem.RedundantNullDefaultAnnotationField:
 				result.add(MultiFixMessages.NullAnnotationsCleanUp_remove_redundant_nullness_annotation);
 				break;
+			case IProblem.MissingNonNullByDefaultAnnotationOnPackage:
+				result.add(MultiFixMessages.NullAnnotationsCleanUp_add_nonnullbydefault_annotation);
+				break;
 		}
 		return result.toArray(new String[result.size()]);
 	}

@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 
@@ -47,10 +48,14 @@ import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring.MultiFixTarget;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.cleanup.ICleanUp;
@@ -63,6 +68,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.IMultiFix;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CreatePackageInfoWithDefaultNullnessProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 
 
@@ -127,7 +133,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				return;
 			}
 
-			if (!(fProposal instanceof FixCorrectionProposal))
+			if (!(fProposal instanceof FixCorrectionProposal) && !(fProposal instanceof CreatePackageInfoWithDefaultNullnessProposal))
 				return;
 
 			if (monitor == null)
@@ -135,6 +141,11 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 
 			try {
 				MultiFixTarget[] problems= getCleanUpTargets(markers);
+
+				if (fProposal instanceof CreatePackageInfoWithDefaultNullnessProposal) {					
+					((CreatePackageInfoWithDefaultNullnessProposal) fProposal).resolve(problems, monitor);
+					return;
+				}
 
 				((FixCorrectionProposal)fProposal).resolve(problems, monitor);
 
@@ -150,7 +161,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			}
 		}
 
-		private MultiFixTarget[] getCleanUpTargets(IMarker[] markers) {
+		public static MultiFixTarget[] getCleanUpTargets(IMarker[] markers) {
 			Hashtable<ICompilationUnit, List<IProblemLocation>> problemLocations= new Hashtable<>();
 			for (int i= 0; i < markers.length; i++) {
 				IMarker marker= markers[i];
@@ -202,6 +213,23 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 
 		@Override
 		public IMarker[] findOtherMarkers(IMarker[] markers) {
+			if (fProposal instanceof CreatePackageInfoWithDefaultNullnessProposal) {
+				CreatePackageInfoWithDefaultNullnessProposal createPackageInfoWithDefaultNullnessProposal= (CreatePackageInfoWithDefaultNullnessProposal) fProposal;
+				final List<IMarker> result= new ArrayList<>();
+				for (IMarker marker : markers) {
+					int id= marker.getAttribute(IJavaModelMarker.ID, -1);
+					if(marker.getResource().getName().equals(JavaModelUtil.PACKAGE_INFO_JAVA)) {
+						// if marker is on package-info.java, no need to create it (another quickfix offers just to add @NonNullByDefault)
+						continue;
+					}
+					if (createPackageInfoWithDefaultNullnessProposal.fProblemId == id)
+						result.add(marker);
+				}
+				if (result.size() == 0)
+					return NO_MARKERS;
+
+				return result.toArray(new IMarker[result.size()]);
+			}
 			if (!(fProposal instanceof FixCorrectionProposal))
 				return NO_MARKERS;
 
@@ -325,7 +353,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				if (location != null) {
 
 					IInvocationContext context= new AssistContext(cu,  location.getOffset(), location.getLength());
-					if (!hasProblem (context.getASTRoot().getProblems(), location))
+					if (!hasProblem(context.getASTRoot().getProblems(), location) && !(marker.getResource() instanceof IFolder))
 						return NO_RESOLUTIONS;
 
 					ArrayList<IJavaCompletionProposal> proposals= new ArrayList<>();
@@ -360,10 +388,43 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			if (element instanceof ICompilationUnit)
 				return (ICompilationUnit) element;
 		}
+		if (res instanceof IFolder && res.isAccessible()) {
+			IJavaElement element= JavaCore.create((IFolder) res);
+			if (element instanceof IPackageFragment) {
+				IPackageFragment packageFragment= (IPackageFragment) element;
+				IJavaProject javaProject= packageFragment.getJavaProject();
+				try {
+					IPackageFragment[] packageFragments= javaProject.getPackageFragments();
+					for (IPackageFragment p : packageFragments) {
+						if (p.getElementName().equals(packageFragment.getElementName())) {
+							ICompilationUnit compilationUnit= p.getCompilationUnit(org.eclipse.jdt.internal.corext.util.JavaModelUtil.PACKAGE_INFO_JAVA);
+							if (compilationUnit.exists()) {
+								return compilationUnit;
+							}
+						}
+					}
+					// no existing package-info.java found, return any writeable compilation unit in packageFragment as placeholder
+					// (there must be one, or the error wouldn't exist.)
+					ICompilationUnit[] compilationUnits= packageFragment.getCompilationUnits();
+					for (int i= 0; i < compilationUnits.length; i++) {
+						ICompilationUnit compilationUnit= compilationUnits[i];
+						if (compilationUnit.exists()) {
+							return compilationUnit;
+						}
+					}
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e);
+				}
+			}
+		}
 		return null;
 	}
 
-	private static IProblemLocation findProblemLocation(IEditorInput input, IMarker marker) {
+	public static IProblemLocation findProblemLocation(IEditorInput input, IMarker marker) {
+		if (marker.getResource() instanceof IFolder) {
+			ICompilationUnit cu= getCompilationUnit(marker);
+			return createFromMarker(marker, cu);
+		}
 		IAnnotationModel model= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getAnnotationModel(input);
 		if (model != null) { // open in editor
 			Iterator<Annotation> iter= model.getAnnotationIterator();
