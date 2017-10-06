@@ -15,20 +15,22 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Optional;
 
-import org.eclipse.jdt.internal.junit.runner.FailedComparison;
-import org.eclipse.jdt.internal.junit.runner.IListensToTestExecutions;
-import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
-import org.eclipse.jdt.internal.junit.runner.MessageIds;
-import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
-import org.eclipse.jdt.internal.junit.runner.TestReferenceFailure;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.TestExecutionResult.Status;
+import org.junit.platform.engine.reporting.ReportEntry;
 import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 import org.opentest4j.AssertionFailedError;
 import org.opentest4j.MultipleFailuresError;
 import org.opentest4j.ValueWrapper;
+
+import org.eclipse.jdt.internal.junit.runner.FailedComparison;
+import org.eclipse.jdt.internal.junit.runner.IListensToTestExecutions;
+import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
+import org.eclipse.jdt.internal.junit.runner.MessageIds;
+import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
+import org.eclipse.jdt.internal.junit.runner.TestReferenceFailure;
 
 public class JUnit5TestListener implements TestExecutionListener {
 
@@ -204,5 +206,11 @@ public class JUnit5TestListener implements TestExecutionListener {
 				return MessageIds.ASSUMPTION_FAILED_TEST_PREFIX + name;
 			return null;
 		}
+	}
+
+	@Override
+	public void reportingEntryPublished(TestIdentifier testIdentifier, ReportEntry entry) {
+		System.out.println(TestIdentifier.class.getSimpleName() + " [" + testIdentifier.getDisplayName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+		System.out.println(entry);
 	}
 }
