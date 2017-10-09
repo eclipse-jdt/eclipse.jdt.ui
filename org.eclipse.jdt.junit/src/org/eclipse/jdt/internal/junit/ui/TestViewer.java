@@ -369,7 +369,9 @@ public class TestViewer {
 					ILaunch launch= ((TestRunSession) element.getTestRunSession()).getLaunch();
 					if (launch != null) {
 						ILaunchConfiguration configuration= launch.getLaunchConfiguration();
-						className= configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String) null);
+						if (configuration != null) {
+							className= configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, (String) null);
+						}
 					}
 				} else if (current instanceof TestElement) {
 					className= ((TestElement)current).getClassName();

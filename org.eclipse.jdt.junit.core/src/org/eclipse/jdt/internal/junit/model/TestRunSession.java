@@ -880,9 +880,12 @@ public class TestRunSession implements ITestRunSession {
 	public String getIncludeTags() {
 		if (fLaunch != null) {
 			try {
-				boolean hasIncludeTags= fLaunch.getLaunchConfiguration().getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_HAS_INCLUDE_TAGS, false);
-				if (hasIncludeTags) {
-					return fLaunch.getLaunchConfiguration().getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_INCLUDE_TAGS, EMPTY_STRING);
+				ILaunchConfiguration launchConfig= fLaunch.getLaunchConfiguration();
+				if (launchConfig != null) {
+					boolean hasIncludeTags= launchConfig.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_HAS_INCLUDE_TAGS, false);
+					if (hasIncludeTags) {
+						return launchConfig.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_INCLUDE_TAGS, EMPTY_STRING);
+					}
 				}
 			} catch (CoreException e) {
 				//ignore
@@ -895,9 +898,12 @@ public class TestRunSession implements ITestRunSession {
 	public String getExcludeTags() {
 		if (fLaunch != null) {
 			try {
-				boolean hasExcludeTags= fLaunch.getLaunchConfiguration().getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_HAS_EXCLUDE_TAGS, false);
-				if (hasExcludeTags) {
-					return fLaunch.getLaunchConfiguration().getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_EXCLUDE_TAGS, EMPTY_STRING);
+				ILaunchConfiguration launchConfig= fLaunch.getLaunchConfiguration();
+				if (launchConfig != null) {
+					boolean hasExcludeTags= launchConfig.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_HAS_EXCLUDE_TAGS, false);
+					if (hasExcludeTags) {
+						return launchConfig.getAttribute(JUnitLaunchConfigurationConstants.ATTR_TEST_EXCLUDE_TAGS, EMPTY_STRING);
+					}
 				}
 			} catch (CoreException e) {
 				//ignore
