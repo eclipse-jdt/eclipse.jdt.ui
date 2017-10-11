@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -95,10 +95,15 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 	private IJavaElement fTypeContainer; // IType or IPackageFragment
 	private String fTypeNameWithParameters;
 	private IType fCreatedType;
+	private ITypeBinding fSuperTypeBinding;
 
 	private boolean fShowDialog;
 
 	public NewCUUsingWizardProposal(ICompilationUnit cu, Name node, int typeKind, IJavaElement typeContainer, int severity) {
+		this(cu, node, typeKind, typeContainer, severity, null);
+	}
+	
+	public NewCUUsingWizardProposal(ICompilationUnit cu, Name node, int typeKind, IJavaElement typeContainer, int severity, ITypeBinding superTypeBinding) {
 		super("", null, severity, null); //$NON-NLS-1$
 
 		fCompilationUnit= cu;
@@ -106,7 +111,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 		fTypeKind= typeKind;
 		fTypeContainer= typeContainer;
 		fTypeNameWithParameters= getTypeName(typeKind, node);
-
+		fSuperTypeBinding= superTypeBinding;
 		fCreatedType= null;
 
 		String containerName= ASTNodes.getQualifier(node);
@@ -330,17 +335,23 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 		ITypeBinding type= getPossibleSuperTypeBinding(fNode);
 		type= Bindings.normalizeTypeBinding(type);
 		if (type != null) {
-			if (type.isArray()) {
-				type= type.getElementType();
-			}
-			if (type.isTopLevel() || type.isMember()) {
-				if (type.isClass() && (fTypeKind == K_CLASS)) {
-					page.setSuperClass(type.getQualifiedName(), true);
-				} else if (type.isInterface()) {
-					List<String> superInterfaces= new ArrayList<>();
-					superInterfaces.add(type.getQualifiedName());
-					page.setSuperInterfaces(superInterfaces, true);
-				}
+			setSuperType(page, type);
+		} else if (fSuperTypeBinding != null) {
+			setSuperType(page, fSuperTypeBinding);
+		}
+	}
+
+	private void setSuperType(NewTypeWizardPage page, ITypeBinding type) {
+		if (type.isArray()) {
+			type= type.getElementType();
+		}
+		if (type.isTopLevel() || type.isMember()) {
+			if (type.isClass() && (fTypeKind == K_CLASS)) {
+				page.setSuperClass(type.getQualifiedName(), true);
+			} else if (type.isInterface()) {
+				List<String> superInterfaces= new ArrayList<>();
+				superInterfaces.add(type.getQualifiedName());
+				page.setSuperInterfaces(superInterfaces, true);
 			}
 		}
 	}

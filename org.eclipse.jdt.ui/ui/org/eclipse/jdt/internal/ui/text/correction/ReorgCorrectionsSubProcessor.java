@@ -312,7 +312,7 @@ public class ReorgCorrectionsSubProcessor {
 			}
 			int kind= JavaModelUtil.is50OrHigher(cu.getJavaProject()) ? SimilarElementsRequestor.REF_TYPES : SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
 			UnresolvedElementsSubProcessor.addRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, false);
-			UnresolvedElementsSubProcessor.addNewTypeProposals(cu, name, kind, IProposalRelevance.IMPORT_NOT_FOUND_NEW_TYPE, proposals);
+			UnresolvedElementsSubProcessor.addNewTypeProposals(cu, name, kind, IProposalRelevance.IMPORT_NOT_FOUND_NEW_TYPE, proposals, null);
 		} else {
 			Name name= importDeclaration.getName();
 			UnresolvedElementsSubProcessor.addRequiresModuleProposals(cu, name, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, true);
