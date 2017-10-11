@@ -84,6 +84,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.ProvidesDirective;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -280,7 +281,7 @@ public class UnresolvedElementsSubProcessor {
 			addSimilarTypeProposals(typeKind, cu, node, relevance + 1, proposals);
 
 			typeKind &= ~SimilarElementsRequestor.ANNOTATIONS;
-			addNewTypeProposals(cu, node, typeKind, relevance, proposals);
+			addNewTypeProposals(cu, node, typeKind, relevance, proposals, null);
 
 			ReorgCorrectionsSubProcessor.addProjectSetupFixProposal(context, problem, node.getFullyQualifiedName(), proposals);
 		}
@@ -629,12 +630,23 @@ public class UnresolvedElementsSubProcessor {
 			node= (Name) node.getParent();
 		}
 
+		ITypeBinding superTypeBinding= null;
+
 		IModuleDescription moduleDescription= cu.getModule();
 		if (moduleDescription != null && moduleDescription.exists()
 				&& javaProject != null && JavaModelUtil.is9OrHigher(javaProject)) {
 			ICompilationUnit moduleCompilationUnit= moduleDescription.getCompilationUnit();
 			if (cu.equals(moduleCompilationUnit)) {
 				addRequiresModuleProposals(cu, node, kind, proposals, false);
+				ASTNode parentNode= node.getParent();
+				if (parentNode instanceof ProvidesDirective) {
+					ProvidesDirective providesDirective= (ProvidesDirective) parentNode;
+					Name name= providesDirective.getName();
+					IBinding binding= name.resolveBinding();
+					if (binding instanceof ITypeBinding) {
+						superTypeBinding= (ITypeBinding) binding;
+					}
+				}
 			}
 		}
 
@@ -644,7 +656,7 @@ public class UnresolvedElementsSubProcessor {
 		if ((kind & (SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES)) != 0) {
 			kind &= ~SimilarElementsRequestor.ANNOTATIONS; // only propose annotations when there are no other suggestions
 		}
-		addNewTypeProposals(cu, node, kind, IProposalRelevance.NEW_TYPE, proposals);
+		addNewTypeProposals(cu, node, kind, IProposalRelevance.NEW_TYPE, proposals, superTypeBinding);
 		
 		ReorgCorrectionsSubProcessor.addProjectSetupFixProposal(context, problem, node.getFullyQualifiedName(), proposals);
 	}
@@ -974,7 +986,7 @@ public class UnresolvedElementsSubProcessor {
 		return false;
 	}
 
-	public static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, Collection<ICommandAccess> proposals) throws CoreException {
+	public static void addNewTypeProposals(ICompilationUnit cu, Name refNode, int kind, int relevance, Collection<ICommandAccess> proposals, ITypeBinding superTypeBinding) throws CoreException {
 		Name node= refNode;
 		do {
 			String typeName= ASTNodes.getSimpleNameIdentifier(node);
@@ -1018,17 +1030,23 @@ public class UnresolvedElementsSubProcessor {
 					IJavaElement enclosing= enclosingPackage != null ? (IJavaElement) enclosingPackage : enclosingType;
 
 					if ((kind & SimilarElementsRequestor.CLASSES) != 0) {
-						proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_CLASS, enclosing, rel+3));
+						proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_CLASS, enclosing, rel+3, superTypeBinding));						
 					}
 					if ((kind & SimilarElementsRequestor.INTERFACES) != 0) {
-						proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_INTERFACE, enclosing, rel+2));
+						if (superTypeBinding == null || superTypeBinding.isInterface()) {
+							proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_INTERFACE, enclosing, rel + 2, superTypeBinding));
+						}
 					}
 					if ((kind & SimilarElementsRequestor.ENUMS) != 0) {
-						proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_ENUM, enclosing, rel));
+						if (superTypeBinding == null) {
+							proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_ENUM, enclosing, rel, superTypeBinding));
+						}
 					}
 					if ((kind & SimilarElementsRequestor.ANNOTATIONS) != 0) {
-						proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_ANNOTATION, enclosing, rel + 1));
-						addNullityAnnotationTypesProposals(cu, node, proposals);
+						if (superTypeBinding == null) {
+							proposals.add(new NewCUUsingWizardProposal(cu, node, NewCUUsingWizardProposal.K_ANNOTATION, enclosing, rel + 1, superTypeBinding));
+							addNullityAnnotationTypesProposals(cu, node, proposals);
+						}
 					}
 				}
 			}
