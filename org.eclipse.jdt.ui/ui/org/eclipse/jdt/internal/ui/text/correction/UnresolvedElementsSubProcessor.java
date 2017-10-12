@@ -869,7 +869,7 @@ public class UnresolvedElementsSubProcessor {
 						compositeProposal= new ChangeCorrectionProposal(changeName, null, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE) {
 							@Override
 							protected Change createChange() throws CoreException {
-								return new CompositeChange(changeName, new Change[] { importChange, change });
+								return new CompositeChange(changeName, new Change[] { change, importChange });
 							}
 
 							@Override
