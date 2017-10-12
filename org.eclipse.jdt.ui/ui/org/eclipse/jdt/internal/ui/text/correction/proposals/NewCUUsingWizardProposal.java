@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,12 +37,16 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.ProvidesDirective;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -63,9 +67,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.UnresolvedElementsSubProcessor;
-
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewAnnotationCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
@@ -371,6 +372,15 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 				return null; // no guessing for LHS types, cannot be a supertype of a known type
 			case ASTNode.PARAMETERIZED_TYPE:
 				return null; // Inheritance doesn't help: A<X> z= new A<String>(); ->
+			case ASTNode.PROVIDES_DIRECTIVE:
+				if (node.getLocationInParent() == ProvidesDirective.IMPLEMENTATIONS_PROPERTY) {
+					Name serviceName= ((ProvidesDirective) parent).getName();
+					IBinding binding= serviceName.resolveBinding();
+					if (binding instanceof ITypeBinding) {
+						return (ITypeBinding) binding;
+					}
+				}
+				break;
 		}
 		ITypeBinding binding= ASTResolving.guessBindingForTypeReference(node);
 		if (binding != null && !binding.isRecovered()) {

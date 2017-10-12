@@ -84,6 +84,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.ProvidesDirective;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -635,6 +636,19 @@ public class UnresolvedElementsSubProcessor {
 			ICompilationUnit moduleCompilationUnit= moduleDescription.getCompilationUnit();
 			if (cu.equals(moduleCompilationUnit)) {
 				addRequiresModuleProposals(cu, node, kind, proposals, false);
+				ASTNode parentNode= node.getParent();
+				if (parentNode instanceof ProvidesDirective) {
+					Name serviceName= ((ProvidesDirective) parentNode).getName();
+					IBinding binding= serviceName.resolveBinding();
+					if (binding instanceof ITypeBinding) {
+						ITypeBinding typeBinding= (ITypeBinding) binding;
+						if (typeBinding.isClass()) {
+							kind= SimilarElementsRequestor.CLASSES;
+						} else if (typeBinding.isInterface()) {
+							kind= SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
+						}
+					}
+				}
 			}
 		}
 
