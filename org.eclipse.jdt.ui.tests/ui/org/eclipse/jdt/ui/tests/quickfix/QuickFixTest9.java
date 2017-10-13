@@ -11,7 +11,9 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -29,7 +31,6 @@ import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 
 public class QuickFixTest9 extends QuickFixTest {
 
@@ -55,27 +56,22 @@ public class QuickFixTest9 extends QuickFixTest {
 	}
 
 	@Override
-	protected void setUp() throws Exception {
+	protected void setUp() throws CoreException {
 		fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
 		JavaProjectHelper.set9CompilerOptions(fJProject2);
 		JavaProjectHelper.addRequiredProject(fJProject2, Java9ProjectTestSetup.getProject());
-		try {
-			IPackageFragmentRoot java9Src= JavaProjectHelper.addSourceContainer(fJProject2, "src");
-			IPackageFragment def= java9Src.createPackageFragment("", false, null);
-			IPackageFragment pkgFrag= java9Src.createPackageFragment("java.defaultProject", false, null);
-			StringBuffer buf= new StringBuffer();
-			buf.append("module java.defaultProject {\n");
-			buf.append("     exports java.defaultProject; \n");
-			buf.append("}\n");
-			def.createCompilationUnit("module-info.java", buf.toString(), false, null);
-			StringBuffer buf2= new StringBuffer();
-			buf2.append("package java.defaultProject; \n\n public class One { \n\n");
-			buf2.append("}\n");
-			pkgFrag.createCompilationUnit("One.java", buf2.toString(), false, null);
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		IPackageFragmentRoot java9Src= JavaProjectHelper.addSourceContainer(fJProject2, "src");
+		IPackageFragment def= java9Src.createPackageFragment("", false, null);
+		IPackageFragment pkgFrag= java9Src.createPackageFragment("java.defaultProject", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("module java.defaultProject {\n");
+		buf.append("     exports java.defaultProject; \n");
+		buf.append("}\n");
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		StringBuffer buf2= new StringBuffer();
+		buf2.append("package java.defaultProject; \n\n public class One { \n\n");
+		buf2.append("}\n");
+		pkgFrag.createCompilationUnit("One.java", buf2.toString(), false, null);
 
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.set9CompilerOptions(fJProject1);
@@ -87,8 +83,13 @@ public class QuickFixTest9 extends QuickFixTest {
 
 	@Override
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJProject1);
-		JavaProjectHelper.delete(fJProject2);
+		if (fJProject1 != null) {
+			JavaProjectHelper.clear(fJProject1, Java9ProjectTestSetup.getDefaultClasspath());
+		}
+		if (fJProject2 != null) {
+			JavaProjectHelper.clear(fJProject2, Java9ProjectTestSetup.getDefaultClasspath());
+		}
+		super.tearDown();
 	}
 
 	public void testAddModuleRequiresAndImportProposal() throws Exception {

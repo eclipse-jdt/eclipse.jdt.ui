@@ -74,6 +74,7 @@ public class QuickFixTest extends TestCase {
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite(QuickFixTest.class.getName());
+		suite.addTest(QuickFixTest9.suite());
 		suite.addTest(QuickFixTest18.suite());
 		suite.addTest(SerialVersionQuickFixTest.suite());
 		suite.addTest(UtilitiesTest.suite());
