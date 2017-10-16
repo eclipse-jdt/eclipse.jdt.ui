@@ -147,7 +147,10 @@ public class BuildPathsBlock {
 	private long fFileTimeStamp;
 
     private IRunnableContext fRunnableContext;
-    private boolean fUseNewPage;
+
+	private boolean fUseNewPage;
+
+	private boolean fIs9OrHigher;
 
 	private final IWorkbenchPreferenceContainer fPageContainer; // null when invoked from a non-property page context
 
@@ -269,6 +272,7 @@ public class BuildPathsBlock {
 			fSourceContainerPage.init(fCurrJProject);
 			fLibrariesPage.init(fCurrJProject);
 			fProjectsPage.init(fCurrJProject);
+			fIs9OrHigher= JavaModelUtil.is9OrHigher(fCurrJProject);
 		}
 
 		folder.setSelection(fPageIndex);
@@ -350,6 +354,7 @@ public class BuildPathsBlock {
 			fSourceContainerPage.init(fCurrJProject);
 			fProjectsPage.init(fCurrJProject);
 			fLibrariesPage.init(fCurrJProject);
+			fIs9OrHigher= JavaModelUtil.is9OrHigher(fCurrJProject);
 		}
 
 		initializeTimeStamps();
@@ -379,7 +384,13 @@ public class BuildPathsBlock {
 	protected void doUpdateUI() {
 		fBuildPathDialogField.refresh();
 		fClassPathList.refresh();
-
+		boolean is9OrHigherAfter= JavaModelUtil.is9OrHigher(fCurrJProject);
+		if (is9OrHigherAfter != fIs9OrHigher) {
+			// update the library and project page if fis9OrHigher changed
+			fLibrariesPage.init(fCurrJProject);
+			fProjectsPage.init(fCurrJProject);
+			fIs9OrHigher= is9OrHigherAfter;
+		}
 		doStatusLineUpdate();
 	}
 
