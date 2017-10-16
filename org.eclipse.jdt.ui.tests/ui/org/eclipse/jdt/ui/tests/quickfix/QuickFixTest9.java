@@ -84,10 +84,10 @@ public class QuickFixTest9 extends QuickFixTest {
 	@Override
 	protected void tearDown() throws Exception {
 		if (fJProject1 != null) {
-			JavaProjectHelper.clear(fJProject1, Java9ProjectTestSetup.getDefaultClasspath());
+			JavaProjectHelper.delete(fJProject1);
 		}
 		if (fJProject2 != null) {
-			JavaProjectHelper.clear(fJProject2, Java9ProjectTestSetup.getDefaultClasspath());
+			JavaProjectHelper.delete(fJProject2);
 		}
 		super.tearDown();
 	}
