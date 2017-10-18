@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.junit" version="2">
-    <resource path="META-INF/MANIFEST.MF">
-        <filter comment="keep the same version as in 4.7.1 for now" id="924844039">
-            <message_arguments>
-                <message_argument value="3.10.50"/>
-                <message_argument value="3.10.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="src/org/eclipse/jdt/junit/wizards/NewTestCaseWizardPageOne.java" type="org.eclipse.jdt.junit.wizards.NewTestCaseWizardPageOne">
         <filter comment="keep the same version as in 4.7.1 for now" id="1141899266">
             <message_arguments>

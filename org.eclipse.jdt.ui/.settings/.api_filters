@@ -1,31 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.ui" version="2">
-    <resource path="META-INF/MANIFEST.MF">
-        <filter id="924844039">
-            <message_arguments>
-                <message_argument value="3.13.1"/>
-                <message_argument value="3.13.0"/>
-            </message_arguments>
-        </filter>
-        <filter comment="keep the same version as in 4.7.1 for now" id="924844039">
-            <message_arguments>
-                <message_argument value="3.13.1"/>
-                <message_argument value="3.13.1"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Backported Java 9 work" id="924844039">
-            <message_arguments>
-                <message_argument value="3.13.50"/>
-                <message_argument value="3.13.0"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Backported Java 9 work" id="924844039">
-            <message_arguments>
-                <message_argument value="3.13.50"/>
-                <message_argument value="3.13.1"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="core refactoring/org/eclipse/jdt/internal/corext/refactoring/code/ReplaceInvocationsRefactoring.java" type="org.eclipse.jdt.internal.corext.refactoring.code.ReplaceInvocationsRefactoring">
         <filter id="571519004">
             <message_arguments>
