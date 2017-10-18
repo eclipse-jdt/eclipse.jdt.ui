@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1498,11 +1498,9 @@ public class ASTNodes {
 		List<String> variableNames= new ArrayList<>();
 		CompilationUnit root= (CompilationUnit) node.getRoot();
 		IBinding[] bindings= new ScopeAnalyzer(root).
-				getDeclarationsInScope(node.getStartPosition(), ScopeAnalyzer.VARIABLES | ScopeAnalyzer.CHECK_VISIBILITY);
+				getDeclarationsInScope(node.getStartPosition(), ScopeAnalyzer.VARIABLES | ScopeAnalyzer.NO_FIELDS | ScopeAnalyzer.CHECK_VISIBILITY);
 		for (IBinding binding : bindings) {
-			if (binding instanceof IVariableBinding && !((IVariableBinding) binding).isField()) {
-				variableNames.add(binding.getName());
-			}
+			variableNames.add(binding.getName());
 		}
 		return variableNames;
 	}

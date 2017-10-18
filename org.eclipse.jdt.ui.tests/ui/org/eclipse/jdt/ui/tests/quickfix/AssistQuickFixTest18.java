@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.core.runtime.Path;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -1433,6 +1435,66 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
 		assertNumberOfProposals(proposals, 0);
+	}
+
+	public void testConvertToLambda27() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface FI {\n");
+		buf.append("    int e= 0;\n");
+		buf.append("    void run(int x);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class Test {\n");
+		buf.append("    {\n");
+		buf.append("        FI fi = new FI() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public void run(int e) {\n");
+		buf.append("                FI fi = new FI() {\n");
+		buf.append("                    @Override\n");
+		buf.append("                    public void run(int e) { // [1]\n");
+		buf.append("                        return;\n");
+		buf.append("                    }\n");
+		buf.append("                };\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("run(int e) { // [1]");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("interface FI {\n");
+		buf.append("    int e= 0;\n");
+		buf.append("    void run(int x);\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class Test {\n");
+		buf.append("    {\n");
+		buf.append("        FI fi = new FI() {\n");
+		buf.append("            @Override\n");
+		buf.append("            public void run(int e) {\n");
+		buf.append("                FI fi = e1 -> { // [1]\n");
+		buf.append("                    return;\n");
+		buf.append("                };\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
 
 	public void testConvertToLambdaAmbiguousOverridden() throws Exception {
