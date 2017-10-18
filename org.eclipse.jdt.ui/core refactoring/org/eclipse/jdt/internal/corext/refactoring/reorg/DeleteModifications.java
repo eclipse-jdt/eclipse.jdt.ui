@@ -13,7 +13,9 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -53,11 +55,11 @@ public class DeleteModifications extends RefactoringModifications {
 	 * <code>handlePackageFragmentDelete</code>. This is part of the
 	 * algorithm to check if a parent folder can be deleted.
 	 */
-	private List<IPackageFragment> fPackagesToDelete;
+	private Set<IPackageFragment> fPackagesToDelete;
 
 	public DeleteModifications() {
 		fDelete= new ArrayList<>();
-		fPackagesToDelete= new ArrayList<>();
+		fPackagesToDelete= new LinkedHashSet<>();
 	}
 
 	public void delete(IResource resource) {
