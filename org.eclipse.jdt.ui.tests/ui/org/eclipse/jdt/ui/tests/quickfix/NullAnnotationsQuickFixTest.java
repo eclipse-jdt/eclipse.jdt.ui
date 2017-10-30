@@ -2032,7 +2032,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			buf= new StringBuilder();
 			buf.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 			buf.append("package test1;\n");
-			assertEqualString(preview, buf.toString());
+			assertEqualStringIgnoreDelim(preview, buf.toString());
 		} finally {
 			fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.IGNORE);
 		}
@@ -2081,7 +2081,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			expected.append(" */\n");
 			expected.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 			expected.append("package test1;\n");
-			assertEquals(expected.toString(), packageInfoCU.getSource());
+			assertEqualStringIgnoreDelim(packageInfoCU.getSource(), expected.toString());
 		} finally {
 			fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.IGNORE);
 			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, typecomment, null);
@@ -2166,7 +2166,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			expected.append(" */\n");
 			expected.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 			expected.append("package test1;\n");
-			assertEquals(expected.toString(), packageInfoCU.getSource());
+			assertEqualStringIgnoreDelim(packageInfoCU.getSource(), expected.toString());
 		} finally {
 			fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.IGNORE);
 			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, typecomment, null);
@@ -2259,7 +2259,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			expected.append(" */\n");
 			expected.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 			expected.append("package test1;\n");
-			assertEquals(expected.toString(), packageInfoCU.getSource());
+			assertEqualStringIgnoreDelim(packageInfoCU.getSource(), expected.toString());
 		} finally {
 			fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.IGNORE);
 			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, typecomment, null);
@@ -2354,7 +2354,7 @@ public class NullAnnotationsQuickFixTest extends QuickFixTest {
 			expected.append(" */\n");
 			expected.append("@org.eclipse.jdt.annotation.NonNullByDefault\n");
 			expected.append("package test1;\n");
-			assertEquals(expected.toString(), packageInfoCU.getSource());
+			assertEqualStringIgnoreDelim(packageInfoCU.getSource(), expected.toString());
 		} finally {
 			fJProject1.setOption(JavaCore.COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, JavaCore.IGNORE);
 			StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, typecomment, null);
