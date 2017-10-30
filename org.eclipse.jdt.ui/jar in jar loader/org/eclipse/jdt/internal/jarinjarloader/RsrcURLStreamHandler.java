@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2009 IBM Corporation and others.
+ * Copyright (c) 2008, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,8 @@ public class RsrcURLStreamHandler extends java.net.URLStreamHandler {
     		file = spec;
     	else if (url.getFile().endsWith(JIJConstants.PATH_SEPARATOR)) 
     		file = url.getFile() + spec;
+		else if (JIJConstants.RUNTIME.equals(spec))
+    		file = url.getFile();
     	else 
     		file = spec;
     	setURL(url, JIJConstants.INTERNAL_URL_PROTOCOL, "", -1, null, null, file, null, null);	 //$NON-NLS-1$ 
