@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -73,6 +73,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
@@ -89,7 +90,6 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 /**
@@ -754,9 +754,12 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 		IRuntimeClasspathEntry[] entries= JavaRuntime.computeUnresolvedRuntimeClasspath(configuration);
 		entries= JavaRuntime.resolveRuntimeClasspath(entries, configuration);
 
+		boolean isModularConfig= JavaRuntime.isModularConfiguration(configuration);
 		ArrayList<IPath> userEntries= new ArrayList<>(entries.length);
 		for (int i= 0; i < entries.length; i++) {
-			if (entries[i].getClasspathProperty() == IRuntimeClasspathEntry.USER_CLASSES) {
+			int classPathProperty= entries[i].getClasspathProperty();
+			if ((!isModularConfig && classPathProperty == IRuntimeClasspathEntry.USER_CLASSES)
+					|| (isModularConfig && (classPathProperty == IRuntimeClasspathEntry.CLASS_PATH || classPathProperty == IRuntimeClasspathEntry.MODULE_PATH))) {
 
 				String location= entries[i].getLocation();
 				if (location != null) {
