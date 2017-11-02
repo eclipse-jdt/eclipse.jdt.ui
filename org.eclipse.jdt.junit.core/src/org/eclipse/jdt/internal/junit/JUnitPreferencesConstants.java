@@ -149,6 +149,7 @@ public class JUnitPreferencesConstants {
 		"org.junit.*", //$NON-NLS-1$ //TODO: filter all these?
 		"java.lang.reflect.Method.invoke", //$NON-NLS-1$
 		"sun.reflect.*", //$NON-NLS-1$
+		"jdk.internal.reflect.*", //$NON-NLS-1$
 	};
 
 	private JUnitPreferencesConstants() {
