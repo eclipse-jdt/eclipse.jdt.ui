@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2013 IBM Corporation and others.
+ * Copyright (c) 2007, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
-
-import junit.framework.TestCase;
 
 import org.eclipse.jdt.junit.JUnitCore;
 import org.eclipse.jdt.junit.TestRunListener;
@@ -53,6 +51,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.junit.model.JUnitModel;
 import org.eclipse.jdt.internal.junit.model.TestRunSession;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
+
+import junit.framework.TestCase;
 
 public class AbstractTestRunSessionSerializationTests extends TestCase {
 
@@ -125,7 +125,7 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		/*
 		 * Avoid comparing stack traces (which are VM-dependent)
 		 */
-		String regex= "(?m)^\\s*at\\s+[\\w\\.\\:\\;\\$\\(\\)\\[ \\t]+$\r?\n?";
+		String regex= "(?m)^\\s*at\\s+[/\\w\\.\\:\\;\\$\\(\\)\\[ \\t]+$\r?\n?";
 		/*
 		 * Strips lines like " ... 18 more"
 		 */
