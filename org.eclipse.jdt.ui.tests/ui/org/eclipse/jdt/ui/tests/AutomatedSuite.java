@@ -28,6 +28,7 @@ import org.eclipse.jdt.ui.tests.model.ContentProviderTests;
 import org.eclipse.jdt.ui.tests.packageHover.PackageJavadocTests;
 import org.eclipse.jdt.ui.tests.packageview.PackageExplorerTests;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTests;
 import org.eclipse.jdt.ui.tests.search.SearchTest;
 import org.eclipse.jdt.ui.tests.wizardapi.ImporterTest;
 import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
@@ -68,6 +69,8 @@ public class AutomatedSuite extends TestSuite {
 		addTest(ContentProviderTests.suite());
 
 		addTest(CallHierarchyContentProviderTest.suite());
+
+		addTest(RefactoringTests.suite());
 
 		addTest(SearchTest.suite());
 		addTest(JUnitJUnitTests.suite());

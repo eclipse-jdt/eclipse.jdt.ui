@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -39,8 +42,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 /**
@@ -120,13 +123,29 @@ public class DeleteModifications extends RefactoringModifications {
 
 	/**
 	 * @return a List of IResources that are removed by package deletes
-	 * @throws CoreException
+	 * @throws CoreException if accessing package structure of packages to delete fails
 	 */
 	public List<IResource> postProcess() throws CoreException {
+		return postProcess(new NullProgressMonitor());
+	}
+
+	/**
+	 * @param monitor may be null
+	 * @return a List of IResources that are removed by package deletes
+	 * @throws CoreException if accessing package structure of packages to delete fails
+	 */
+	public List<IResource> postProcess(IProgressMonitor monitor) throws CoreException {
+		String taskName= RefactoringCoreMessages.DeleteRefactoring_progress_collecting_resources;
+		SubMonitor subMonitor= SubMonitor.convert(monitor, taskName, fPackagesToDelete.size());
+
+		IsCompletelySelected isCompletelySelected = new IsCompletelySelected(fPackagesToDelete, subMonitor);
+
 		ArrayList<IResource> resourcesCollector= new ArrayList<>();
-		for (Iterator<IPackageFragment> iter= fPackagesToDelete.iterator(); iter.hasNext();) {
+		for (Iterator<IPackageFragment> iter= fPackagesToDelete.iterator(); iter.hasNext(); ) {
+			subMonitor.checkCanceled();
 			IPackageFragment pack= iter.next();
-			handlePackageFragmentDelete(pack, resourcesCollector);
+			handlePackageFragmentDelete(pack, resourcesCollector, isCompletelySelected);
+			subMonitor.worked(1);
 		}
 		return resourcesCollector;
 	}
@@ -160,11 +179,12 @@ public class DeleteModifications extends RefactoringModifications {
 	 *
 	 * All deleted resources are added to <code>resourcesCollector</code>
 	 * @param pack the package
+	 * @param isCompletelySelected predicate which states whether all sub-packages of a package are to be deleted
 	 *
 	 * @param resourcesCollector a collector for IResources to be deleted
-	 * @throws CoreException
+	 * @throws CoreException if accessing package structure of {@code pack} fails
 	 */
-	private void handlePackageFragmentDelete(IPackageFragment pack, ArrayList<IResource> resourcesCollector) throws CoreException {
+	private void handlePackageFragmentDelete(IPackageFragment pack, ArrayList<IResource> resourcesCollector, IsCompletelySelected isCompletelySelected) throws CoreException {
 		final IContainer container= (IContainer)pack.getResource();
 		if (container == null)
 			return;
@@ -175,7 +195,7 @@ public class DeleteModifications extends RefactoringModifications {
 		 * Check whether this package is removed completely or only cleared.
 		 * The default package can never be removed completely.
 		 */
-		if (!pack.isDefaultPackage() && canRemoveCompletely(pack)) {
+		if (!pack.isDefaultPackage() && isCompletelySelected.test(pack)) {
 			// This package is removed completely, which means its folder will be
 			// deleted as well. We only notify participants of the folder deletion
 			// if the parent folder of this folder will not be deleted as well:
@@ -192,7 +212,7 @@ public class DeleteModifications extends RefactoringModifications {
 
 			if (parentIsMarked) {
 				// Parent is marked, but is it really deleted or only cleared?
-				if (canRemoveCompletely(parent)) {
+				if (isCompletelySelected.test(parent)) {
 					// Parent can be removed completely, so we do not add
 					// this folder to the list.
 				} else {
@@ -233,21 +253,5 @@ public class DeleteModifications extends RefactoringModifications {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Returns true if this initially selected package is really deletable
-	 * (if it has non-selected sub packages, it may only be cleared).
-	 * @param pack the package
-	 * @return  true if this initially selected package is really deletable
-	 * @throws JavaModelException
-	 */
-	private boolean canRemoveCompletely(IPackageFragment pack) throws JavaModelException {
-		final IPackageFragment[] subPackages= JavaElementUtil.getPackageAndSubpackages(pack);
-		for (int i= 0; i < subPackages.length; i++) {
-			if (!(subPackages[i].equals(pack)) && !(fPackagesToDelete.contains(subPackages[i])))
-				return false;
-		}
-		return true;
 	}
 }

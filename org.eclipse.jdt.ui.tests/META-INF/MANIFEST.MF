@@ -35,6 +35,7 @@ Export-Package:
  org.eclipse.jdt.ui.tests.performance.views;x-internal:=true,
  org.eclipse.jdt.ui.tests.preferences;x-internal:=true,
  org.eclipse.jdt.ui.tests.quickfix;x-internal:=true,
+ org.eclipse.jdt.ui.tests.refactoring;x-internal:=true,
  org.eclipse.jdt.ui.tests.search;x-internal:=true,
  org.eclipse.jdt.ui.tests.ui.internal.compatibility;x-internal:=true,
  org.eclipse.jdt.ui.tests.wizardapi;x-internal:=true

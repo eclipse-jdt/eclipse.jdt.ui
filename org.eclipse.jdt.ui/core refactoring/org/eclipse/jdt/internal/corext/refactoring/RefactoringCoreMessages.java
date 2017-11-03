@@ -353,6 +353,10 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String DeleteRefactoring_9;
 
+	public static String DeleteRefactoring_progress_collecting_resources;
+
+	public static String DeleteRefactoring_progress_collecting_sub_packages;
+
 	public static String DeleteRefactoring_delete_package_fragment_root;
 
 	public static String DeleteSourceManipulationChange_0;
