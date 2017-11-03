@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,9 +66,11 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.dialogs.WorkingSetConfigurationBlock;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -88,7 +90,6 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ComboDialogField;
@@ -1251,19 +1252,68 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 	}
 
 	/**
-	 * Returns the default class path entries to be added on new projects. By default this is the JRE container as
-	 * selected by the user.
+	 * Returns the default class path entries to be added on new projects. By default this is the JRE
+	 * container as selected by the user.
 	 *
 	 * @return returns the default class path entries
 	 */
 	public IClasspathEntry[] getDefaultClasspathEntries() {
 		IPath newPath= fJREGroup.getJREContainerPath();
 		if (newPath != null) {
-			return new IClasspathEntry[] { JavaCore.newContainerEntry(newPath) };
+			return updateWithModuleAttribute(new IClasspathEntry[] { JavaCore.newContainerEntry(newPath) }, newPath);
 		}
-		return PreferenceConstants.getDefaultJRELibrary();
+		return updateWithModuleAttribute(PreferenceConstants.getDefaultJRELibrary(), new Path("org.eclipse.jdt.launching.JRE_CONTAINER")); //$NON-NLS-1$
 	}
 
+	/**
+	 * Updates the JRE container with module info
+	 * 
+	 * @param cpEntries array containing jre container without module attribute
+	 * @param newPath JRE path
+	 * @return array containing JRE container with module attribute if modular
+	 */
+	private IClasspathEntry[] updateWithModuleAttribute(IClasspathEntry[] cpEntries, IPath newPath) {
+		try {
+			if (cpEntries.length == 1) {
+				IVMInstall vmInstall= JavaRuntime.getVMInstall(newPath);
+				if (vmInstall != null) {
+					boolean modularJava= JavaRuntime.isModularJava(vmInstall);
+					if (modularJava) {
+						IClasspathEntry jre= cpEntries[0];
+						IClasspathAttribute[] newAttributes= addModuleAttributeIfNeeded(jre.getExtraAttributes());
+						if (newAttributes != null) {
+							IClasspathEntry jreModular= JavaCore.newContainerEntry(jre.getPath(), jre.getAccessRules(),
+									newAttributes, jre.isExported());
+							if (jreModular != null) {
+								return new IClasspathEntry[] { jreModular };
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			JavaPlugin.log(e);
+		}
+		return cpEntries;
+	}
+
+	private IClasspathAttribute[] addModuleAttributeIfNeeded(IClasspathAttribute[] extraAttributes) {
+		String TRUE = "true"; //$NON-NLS-1$
+		for (int j= 0; j < extraAttributes.length; j++) {
+			IClasspathAttribute classpathAttribute= extraAttributes[j];
+			if (IClasspathAttribute.MODULE.equals(classpathAttribute.getName())) {
+				if (TRUE.equals(classpathAttribute.getValue())) {
+					return null; // no change required
+				}
+				extraAttributes[j]= JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, TRUE);
+				return extraAttributes;
+			}
+		}
+		extraAttributes= Arrays.copyOf(extraAttributes, extraAttributes.length+1);
+		extraAttributes[extraAttributes.length-1]= JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, TRUE);
+		return extraAttributes;
+	}
+	
 	/**
 	 * Returns the source class path entries to be added on new projects.
 	 * The underlying resources may not exist. All entries that are returned must be of kind
