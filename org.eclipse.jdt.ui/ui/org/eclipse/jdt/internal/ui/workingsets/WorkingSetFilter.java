@@ -98,6 +98,9 @@ public class WorkingSetFilter extends JavaViewerFilter {
 			if (fJavaElement != null && element.fJavaElement != null) {
 				IJavaElement other= element.fJavaElement;
 				if (fJavaElement.getElementType() == IJavaElement.JAVA_PROJECT) {
+					if (!((IJavaProject) fJavaElement).getProject().isAccessible()) {
+						return false;
+					}
 					IPackageFragmentRoot pkgRoot= (IPackageFragmentRoot) other.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					if (pkgRoot != null && pkgRoot.isExternal()) {
 						if (((IJavaProject) fJavaElement).isOnClasspath(other)) {
