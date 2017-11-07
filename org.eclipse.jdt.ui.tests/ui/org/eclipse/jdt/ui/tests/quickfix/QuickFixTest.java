@@ -90,6 +90,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(ReorgQuickFixTest.suite());
 		suite.addTest(ModifierCorrectionsQuickFixTest.suite());
 		suite.addTest(ModifierCorrectionsQuickFixTest17.suite());
+		suite.addTest(ModifierCorrectionsQuickFixTest9.suite());
 		suite.addTest(GetterSetterQuickFixTest.suite());
 		suite.addTest(AssistQuickFixTest.suite());
 		suite.addTest(AssistQuickFixTest17.suite());
