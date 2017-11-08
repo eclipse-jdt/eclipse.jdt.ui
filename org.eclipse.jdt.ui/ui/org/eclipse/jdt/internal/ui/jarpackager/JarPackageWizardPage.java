@@ -64,11 +64,14 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
@@ -730,8 +733,17 @@ class JarPackageWizardPage extends AbstractJarDestinationWizardPage {
 				parent= ((IResource)element).getParent();
 			else if (element instanceof IJavaElement)
 				parent= ((IJavaElement)element).getParent();
-			if (!whiteCheckedTreeItems.contains(parent) && !javaElementResources.contains(parent))
-				exportedNonContainers.add(element);
+			if (!whiteCheckedTreeItems.contains(parent) && !javaElementResources.contains(parent)) {
+				boolean addToContainers= true;
+				if (element instanceof IJavaElement) {
+					IJavaProject javaProject= ((IJavaElement) element).getJavaProject();
+					if (JavaModelUtil.is9OrHigher(javaProject) && JavaModelUtil.MODULE_INFO_JAVA.equals(((IJavaElement) element).getElementName())) {
+						addToContainers= false;
+					}
+				}
+				if (addToContainers)
+					exportedNonContainers.add(element);
+			}
 		}
 		return exportedNonContainers;
 	}

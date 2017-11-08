@@ -753,8 +753,13 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		if (!canBeExported)
 			return Collections.EMPTY_LIST.iterator();
 		IContainer classContainer= outputContainer;
-		if (pathInJar.segmentCount() > 1)
-			classContainer= outputContainer.getFolder(pathInJar.removeLastSegments(1));
+		if (pathInJar.segmentCount() > 1) {
+			String lastSegment= pathInJar.segment(pathInJar.segmentCount() - 1);
+			if (!JavaModelUtil.MODULE_INFO_JAVA.equals(lastSegment)
+					|| !JavaModelUtil.is9OrHigher(javaProject)) {
+				classContainer= outputContainer.getFolder(pathInJar.removeLastSegments(1));
+			}
+		}
 
 		if (fExportedClassContainers.contains(classContainer))
 			return Collections.EMPTY_LIST.iterator();
