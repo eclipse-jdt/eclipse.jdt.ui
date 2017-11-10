@@ -44,6 +44,8 @@ public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 	private final String fTypeName;
 	private final String fQualifierName;
 
+	private static String JAVA_BASE= "java.base"; //$NON-NLS-1$
+
 	protected AddModuleRequiresCorrectionProposal fAdditionalProposal= null;
 
 	public AddImportCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image, String qualifierName, String typeName, SimpleName node) {
@@ -115,7 +117,7 @@ public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 					}
 				}
 			}
-			if (projectModule != null && projectModule.exists() && !projectModule.equals(currentModuleDescription)) {
+			if (projectModule != null && projectModule.exists() && !projectModule.equals(currentModuleDescription) && !JAVA_BASE.equals(projectModule.getElementName())) {
 				String moduleName= projectModule.getElementName();
 				String[] args= { moduleName };
 				final String changeName= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_info, args);
