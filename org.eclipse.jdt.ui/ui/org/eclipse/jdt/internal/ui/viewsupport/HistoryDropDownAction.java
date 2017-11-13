@@ -74,6 +74,9 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 			manager.addMenuListener(new IMenuListener() {
 				@Override
 				public void menuAboutToShow(IMenuManager manager2) {
+					if (fHistory == null) {
+						return;
+					}
 					List<E> entries= fHistory.getHistoryEntries();
 					boolean checkOthers= addEntryMenuItems(manager2, entries);
 
