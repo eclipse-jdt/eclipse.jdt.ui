@@ -18,6 +18,7 @@ public class RefactoringTests {
 	public static Test suite() {
 		TestSuite suite= new TestSuite(RefactoringTests.class.getName());
 		suite.addTestSuite(IsCompletelySelectedTest.class);
+		suite.addTestSuite(ParentCheckerTest.class);
 		return suite;
 	}
 }

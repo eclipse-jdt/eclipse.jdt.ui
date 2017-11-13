@@ -11,7 +11,12 @@
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
 
@@ -175,29 +180,38 @@ public class ParentChecker {
 	}
 
 	private void removeResourcesDescendantsOfJavaElements() {
-		List<IResource> subResources= new ArrayList<>(3);
-		for (int i= 0; i < fResources.length; i++) {
-			IResource subResource= fResources[i];
-			for (int j= 0; j < fJavaElements.length; j++) {
-				IJavaElement superElements= fJavaElements[j];
-				if (isDescendantOf(subResource, superElements))
-					subResources.add(subResource);
+		Set<IResource> resourcesWithoutDescendants= filterDescendants(fResources, fJavaElements);
+		fResources= resourcesWithoutDescendants.toArray(new IResource[resourcesWithoutDescendants.size()]);
+	}
+
+	private static Set<IResource> filterDescendants(IResource[] resourcesToFilter, IJavaElement[] javaElements) {
+		List<IResource> descendants= new ArrayList<>();
+		Set<IJavaElement> elements= new HashSet<>(Arrays.asList(javaElements));
+		for (IResource currentResource : resourcesToFilter) {
+			if (hasAncestor(currentResource, elements)) {
+				descendants.add(currentResource);
 			}
 		}
-		removeFromSetToDelete(subResources.toArray(new IResource[subResources.size()]));
+		Set<IResource> filteredResources = new LinkedHashSet<>(Arrays.asList(resourcesToFilter));
+		filteredResources.removeAll(descendants);
+		return filteredResources;
 	}
 
 	private void removeJavaElementsDescendantsOfJavaElements() {
-		List<IJavaElement> subElements= new ArrayList<>(3);
-		for (int i= 0; i < fJavaElements.length; i++) {
-			IJavaElement subElement= fJavaElements[i];
-			for (int j= 0; j < fJavaElements.length; j++) {
-				IJavaElement superElement= fJavaElements[j];
-				if (isDescendantOf(subElement, superElement))
-					subElements.add(subElement);
+		Set<IJavaElement> javaElementsWithoutDescendants= filterDescendants(fJavaElements);
+		fJavaElements= javaElementsWithoutDescendants.toArray(new IJavaElement[javaElementsWithoutDescendants.size()]);
+	}
+
+	private static Set<IJavaElement> filterDescendants(IJavaElement[] elementsToFilter) {
+		List<IJavaElement> descendants= new ArrayList<>();
+		Set<IJavaElement> elements= new LinkedHashSet<>(Arrays.asList(elementsToFilter));
+		for (IJavaElement currentElement : elementsToFilter) {
+			if (hasAncestor(currentElement, elements)) {
+				descendants.add(currentElement);
 			}
 		}
-		removeFromSetToDelete(subElements.toArray(new IJavaElement[subElements.size()]));
+		elements.removeAll(descendants);
+		return elements;
 	}
 
 	private void removeResourcesDescendantsOfResources() {
@@ -213,25 +227,21 @@ public class ParentChecker {
 		removeFromSetToDelete(subResources.toArray(new IResource[subResources.size()]));
 	}
 
-	public static boolean isDescendantOf(IResource subResource, IJavaElement superElement) {
-		IResource parent= subResource.getParent();
-		while(parent != null){
-			IJavaElement el= JavaCore.create(parent);
-			if (el != null && el.exists() && el.equals(superElement))
+	private static boolean hasAncestor(IResource resource, Set<IJavaElement> elements) {
+		for (IResource parent= resource.getParent(); parent != null; parent= parent.getParent()) {
+			IJavaElement parentElement= JavaCore.create(parent);
+			if (parentElement != null && parentElement.exists() && elements.contains(parentElement)) {
 				return true;
-			parent= parent.getParent();
+			}
 		}
 		return false;
 	}
 
-	public static boolean isDescendantOf(IJavaElement subElement, IJavaElement superElement) {
-		if (subElement.equals(superElement))
-			return false;
-		IJavaElement parent= subElement.getParent();
-		while(parent != null){
-			if (parent.equals(superElement))
+	private static boolean hasAncestor(IJavaElement element, Set<IJavaElement> elements) {
+		for (IJavaElement parent= element.getParent(); parent != null; parent= parent.getParent()) {
+			if (elements.contains(parent)) {
 				return true;
-			parent= parent.getParent();
+			}
 		}
 		return false;
 	}
@@ -244,7 +254,12 @@ public class ParentChecker {
 		fResources= ReorgUtils.setMinus(fResources, resourcesToNotDelete);
 	}
 
-	private void removeFromSetToDelete(IJavaElement[] elementsToNotDelete) {
-		fJavaElements= ReorgUtils.setMinus(fJavaElements, elementsToNotDelete);
+	public static boolean isDescendantOf(IResource subResource, IJavaElement superElement) {
+		return hasAncestor(subResource, Collections.singleton(superElement));
 	}
+
+	public static boolean isDescendantOf(IJavaElement subElement, IJavaElement superElement) {
+		return hasAncestor(subElement, Collections.singleton(superElement));
+	}
+
 }
