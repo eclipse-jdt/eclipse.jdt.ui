@@ -44,6 +44,18 @@
                id="org.eclipse.jdt.junit.wizards.NewTestCaseCreationWizard">
          </newWizardShortcut>
       </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.debug.ui.DebugPerspective">
+         <view
+               relative="org.eclipse.debug.ui.DebugView"
+               visible="false"
+               id="org.eclipse.jdt.junit.ResultView"
+               relationship="stack">
+         </view>
+         <viewShortcut
+               id="org.eclipse.jdt.junit.ResultView">
+         </viewShortcut>
+      </perspectiveExtension>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">
