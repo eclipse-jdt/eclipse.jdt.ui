@@ -103,6 +103,7 @@
             loaderClass="org.eclipse.jdt.internal.junit5.runner.JUnit5TestLoader">
          <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit5.runtime" />
          <runtimeClasspathEntry pluginId="org.eclipse.jdt.junit.runtime" />
+         <runtimeClasspathEntry pluginId="org.junit.platform.launcher" />
       </kind>
    </extension>
    <extension
