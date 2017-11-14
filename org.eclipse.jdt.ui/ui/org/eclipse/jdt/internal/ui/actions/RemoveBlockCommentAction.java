@@ -16,9 +16,12 @@ import java.util.ResourceBundle;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPartitioningException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
+
+import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -63,7 +66,11 @@ public class RemoveBlockCommentAction extends BlockCommentAction {
 		while (partEndOffset < endOffset) {
 
 			if (partition.getType() == IJavaPartitions.JAVA_MULTI_LINE_COMMENT) {
+				// remove first '/*'
 				edits.add(factory.createEdit(partOffset, tokenLength, "")); //$NON-NLS-1$
+				// remove first '*' from each line after
+				removeToken(partition, partOffset, factory, edits);
+				// remove last '*/'
 				edits.add(factory.createEdit(partEndOffset - tokenLength, tokenLength, "")); //$NON-NLS-1$
 			}
 
@@ -73,7 +80,11 @@ public class RemoveBlockCommentAction extends BlockCommentAction {
 		}
 
 		if (partition.getType() == IJavaPartitions.JAVA_MULTI_LINE_COMMENT) {
+			// remove first '/*'
 			edits.add(factory.createEdit(partOffset, tokenLength, "")); //$NON-NLS-1$
+			// remove first '*' from each line after
+			removeToken(partition, partOffset, factory, edits);
+			// remove last '*/'
 			edits.add(factory.createEdit(partEndOffset - tokenLength, tokenLength, "")); //$NON-NLS-1$
 		}
 
@@ -81,11 +92,42 @@ public class RemoveBlockCommentAction extends BlockCommentAction {
 	}
 
 	/*
+	 * Remove the first '*' token from each line if it is the first character, from block comment.
+	 */
+	private void removeToken(final ITypedRegion partition, int partOffset, final Edit.EditFactory factory, final List<Edit> edits) throws BadLocationException {
+		IEditorInput editorInput = getTextEditor().getEditorInput();
+		IDocument document = getTextEditor().getDocumentProvider().getDocument(editorInput);
+		int startLine = document.getLineOfOffset(partOffset);
+		int lines = document.getNumberOfLines(partOffset, partition.getLength());
+		
+		for(int line = startLine; line < startLine + lines; line++) {
+			int lineOffset = document.getLineOffset(line);
+			int lineLength = document.getLineLength(line);
+			char ch1 = document.getChar(lineOffset);
+			int pos = 0;
+			// skip all character codes <= 0x20 from start of line
+			while(pos < lineLength && ((ch1 = document.getChar(lineOffset + pos)) <= 0x20)) {
+				pos++;
+			}
+			if(ch1 == '*') {
+				/* next char after '*' must NOT be a '/', this is handled separately */
+				if(pos + 1 < lineLength) {
+					char ch2 = document.getChar(lineOffset + pos + 1);
+					if(ch2 == '/') {
+						continue; // do next line
+					}
+				}
+				Edit edit= factory.createEdit(lineOffset + pos, 1, ""); //$NON-NLS-1$
+				edits.add(edit);
+			}
+		}
+	}
+	
+	/*
 	 * @see org.eclipse.jdt.internal.ui.actions.AddBlockCommentAction#validSelection(org.eclipse.jface.text.ITextSelection)
 	 */
 	@Override
 	protected boolean isValidSelection(ITextSelection selection) {
 		return selection != null && !selection.isEmpty();
 	}
-
 }
