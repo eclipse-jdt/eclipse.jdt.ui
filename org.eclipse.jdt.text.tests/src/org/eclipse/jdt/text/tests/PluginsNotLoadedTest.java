@@ -137,8 +137,6 @@ public class PluginsNotLoadedTest extends TestCase {
 			"org.eclipse.ui.win32",
 			"org.eclipse.ui.workbench.compatibility",
 			"org.eclipse.ui.workbench.texteditor.tests",
-			"org.eclipse.update.core.win32",
-			"org.eclipse.update.core.linux",
 			"org.eclipse.update.ui",
 			"org.junit",
 			"org.junit4",

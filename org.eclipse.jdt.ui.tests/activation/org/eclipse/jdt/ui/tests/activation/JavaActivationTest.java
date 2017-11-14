@@ -88,9 +88,7 @@ public class JavaActivationTest extends TestCase {
 		        "org.eclipse.ui.ide",
 		        "org.eclipse.ui.views",
 		        "org.eclipse.ui.workbench",
-		        "org.eclipse.ui.workbench.texteditor",
-		        "org.eclipse.update.core",
-		        "org.eclipse.update.scheduler" // ???
+		        "org.eclipse.ui.workbench.texteditor"
 		};
 		ICompilationUnit unit= createTestCU();
 		EditorUtility.openInEditor(unit);
