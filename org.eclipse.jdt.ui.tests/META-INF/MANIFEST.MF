@@ -52,6 +52,7 @@ Require-Bundle:
  org.eclipse.jdt.junit,
  org.eclipse.jdt.junit.runtime,
  org.eclipse.jdt.junit4.runtime,
+ org.eclipse.jdt.junit5.runtime,
  org.eclipse.jdt.launching,
  org.eclipse.jdt.ui,
  org.eclipse.jface.text,

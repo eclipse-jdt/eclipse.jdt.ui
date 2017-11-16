@@ -39,6 +39,8 @@ public class JUnitLaunchConfigurationConstants {
 
 	public static final String ATTR_PORT= JUnitCorePlugin.PLUGIN_ID+".PORT"; //$NON-NLS-1$
 
+	public static final String ATTR_DONT_ADD_MISSING_JUNIT5_DEPENDENCY= JUnitCorePlugin.PLUGIN_ID + ".DONT_ADD_MISSING_JUNIT5_DEPENDENCY"; //$NON-NLS-1$
+
 	/**
 	 * The test method name (followed by a comma-separated list of fully qualified parameter type
 	 * names in parentheses, if exists), or "" iff running the whole test type.

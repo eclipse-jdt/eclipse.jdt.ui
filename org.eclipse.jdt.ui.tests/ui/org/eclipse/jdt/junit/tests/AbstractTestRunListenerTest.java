@@ -23,6 +23,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -114,6 +116,12 @@ public class AbstractTestRunListenerTest extends TestCase {
 	
 	protected void launchJUnit(IJavaElement aTest, String testKindID, String testName) throws CoreException {
 		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+		IMarker[] markers= aTest.getJavaProject().getProject().findMarkers(null, true, IResource.DEPTH_INFINITE);
+		for (IMarker marker : markers) {
+			if(marker.getAttribute(IMarker.SEVERITY, 0) >= IMarker.SEVERITY_ERROR) {
+				fail("unexpected errors, e.g. :" + marker.toString());
+			}
+		}
 
 		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
 		lm.removeLaunches(lm.getLaunches());

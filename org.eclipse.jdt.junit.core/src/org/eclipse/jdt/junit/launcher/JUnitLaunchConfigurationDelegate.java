@@ -160,6 +160,22 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			// Classpath
 			String[] classpath= getClasspath(configuration);
 
+			if (TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(getTestRunnerKind(configuration).getId())) {
+				if (!configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_DONT_ADD_MISSING_JUNIT5_DEPENDENCY, false)) {
+					if (!Arrays.stream(classpath).anyMatch(s -> s.contains("junit-platform-launcher") || s.contains("org.junit.platform.launcher"))) { //$NON-NLS-1$ //$NON-NLS-2$
+						try {
+							JUnitRuntimeClasspathEntry x= new JUnitRuntimeClasspathEntry("org.junit.platform.launcher", null); //$NON-NLS-1$
+							String entryString= new ClasspathLocalizer(Platform.inDevelopmentMode()).entryString(x);
+							int length= classpath.length;
+							System.arraycopy(classpath, 0, classpath= new String[length + 1], 0, length);
+							classpath[length]= entryString;
+						} catch (IOException | URISyntaxException e) {
+							throw new CoreException(new Status(IStatus.ERROR, JUnitCorePlugin.CORE_PLUGIN_ID, IStatus.ERROR, "", e)); //$NON-NLS-1$
+						}
+					}
+				}
+			}
+
 			// Create VM config
 			VMRunnerConfiguration runConfig= new VMRunnerConfiguration(mainTypeName, classpath);
 			runConfig.setVMArguments(vmArguments.toArray(new String[vmArguments.size()]));
