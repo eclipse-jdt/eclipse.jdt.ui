@@ -90,6 +90,14 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	private UIJob fUpdateJob;
 
 	/**
+	 * We use a cache to know whether a package has a single child for the hierarchical representation.
+	 * This avoids looping over all packages for each call to
+	 * {@link #getHierarchicalPackageParent(IPackageFragment)}. The cache is cleared on any Java model
+	 * change, as we aim to improve operations which go over all packages on by one.
+	 */
+	private final PackageCache.PerRootCache packageCache;
+
+	/**
 	 * Creates a new content provider for Java elements.
 	 * @param provideMembers if set, members of compilation units and class files are shown
 	 */
@@ -102,6 +110,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
 
 		fUpdateJob= null;
+		packageCache= new PackageCache.PerRootCache();
 	}
 
 	private boolean arePackagesFoldedInHierarchicalLayout(){
@@ -116,6 +125,8 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	public void elementChanged(final ElementChangedEvent event) {
 		final ArrayList<Runnable> runnables= new ArrayList<>();
 		try {
+			clearPackageCache();
+
 			// 58952 delete project does not update Package Explorer [package explorer]
 			// if the input to the viewer is deleted then refresh to avoid the display of stale elements
 			if (inputDeleted(runnables))
@@ -214,9 +225,14 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 	@Override
 	public void dispose() {
-		super.dispose();
+		clearPackageCache();
 		JavaCore.removeElementChangedListener(this);
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
+		super.dispose();
+	}
+
+	private void clearPackageCache() {
+		packageCache.clear();
 	}
 
 	@Override
@@ -227,7 +243,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 		// hierarchical package mode
 		ArrayList<Object> result= new ArrayList<>();
-		getHierarchicalPackageChildren(root, null, result);
+		getHierarchicalPackageRootChildren(root, result);
 		if (!isProjectPackageFragmentRoot(root)) {
 			Object[] nonJavaResources= root.getNonJavaResources();
 			for (int i= 0; i < nonJavaResources.length; i++) {
@@ -246,7 +262,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		// hierarchical package mode
 		ArrayList<Object> result= new ArrayList<>();
 
-		getHierarchicalPackageChildren((IPackageFragmentRoot) fragment.getParent(), fragment, result);
+		getHierarchicalPackageChildren(fragment, result);
 		Object[] nonPackages= super.getPackageContent(fragment);
 		if (result.isEmpty())
 			return nonPackages;
@@ -402,27 +418,24 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 	// hierarchical packages
 	/**
-	 * Returns the hierarchical packages inside a given fragment or root.
+	 * Returns the hierarchical packages inside a given root.
 	 *
 	 * @param parent the parent package fragment root
-	 * @param fragment the package to get the children for or 'null' to get the children of the root
 	 * @param result Collection where the resulting elements are added
 	 * @throws JavaModelException if fetching the children fails
 	 */
-	private void getHierarchicalPackageChildren(IPackageFragmentRoot parent, IPackageFragment fragment, Collection<Object> result) throws JavaModelException {
+	private void getHierarchicalPackageRootChildren(IPackageFragmentRoot parent, Collection<Object> result) throws JavaModelException {
 		IJavaElement[] children= parent.getChildren();
-		String prefix= fragment != null ? fragment.getElementName() + '.' : ""; //$NON-NLS-1$
-		int prefixLen= prefix.length();
 		boolean is9OrHigher= JavaModelUtil.is9OrHigher(parent.getJavaProject());
 		for (int i= 0; i < children.length; i++) {
 			IPackageFragment curr= (IPackageFragment) children[i];
 			String name= curr.getElementName();
-			if (name.startsWith(prefix) && name.length() > prefixLen && name.indexOf('.', prefixLen) == -1) {
+			if (!name.isEmpty() && name.indexOf('.') == -1) {
 				if (fFoldPackages) {
-					curr= getFolded(children, curr);
+					curr= getFolded(curr);
 				}
 				result.add(curr);
-			} else if (fragment == null && curr.isDefaultPackage()) {
+			} else if (curr.isDefaultPackage()) {
 				if (isRelevantPackage(curr, is9OrHigher))
 					result.add(curr);
 				IJavaElement emptyModuleInfo= emptyModuleInfo(curr, is9OrHigher);
@@ -430,13 +443,29 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 					result.add(emptyModuleInfo);
 			}
 		}
-		if (fragment == null) {
-			if (is9OrHigher) {
-				IModuleDescription module= parent.getModuleDescription();
-				if (module != null) {
-					result.add(module.getParent());
-				}
+
+		if (is9OrHigher) {
+			IModuleDescription module= parent.getModuleDescription();
+			if (module != null) {
+				result.add(module.getParent());
 			}
+		}
+	}
+
+	/**
+	 * Returns the hierarchical packages inside a given fragment.
+	 *
+	 * @param fragment the package to get the children for or 'null' to get the children of the root
+	 * @param result Collection where the resulting elements are added
+	 * @throws JavaModelException if fetching the children fails
+	 */
+	private void getHierarchicalPackageChildren(IPackageFragment fragment, Collection<Object> result) throws JavaModelException {
+		List<IPackageFragment> children = packageCache.getDirectChildren(fragment);
+		for (IPackageFragment child : children) {
+			if (fFoldPackages) {
+				child= getFolded(child);
+			}
+			result.add(child);
 		}
 	}
 
@@ -475,8 +504,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				if (element instanceof IPackageFragment) {
 					if (fFoldPackages) {
 						IPackageFragment fragment= (IPackageFragment) element;
-						IPackageFragmentRoot root= (IPackageFragmentRoot) fragment.getParent();
-						element= getFolded(root.getChildren(), fragment);
+						element= getFolded(fragment);
 					}
 					result.add(element);
 				}
@@ -493,7 +521,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			IPackageFragment element= parent.getPackageFragment(realParentName);
 			if (element.exists()) {
 				try {
-					if (fFoldPackages && isEmpty(element) && findSinglePackageChild(element, parent.getChildren()) != null) {
+					if (fFoldPackages && isEmpty(element) && packageCache.hasSingleChild(element)) {
 						return getHierarchicalPackageParent(element);
 					}
 				} catch (JavaModelException e) {
@@ -513,9 +541,9 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		return parent;
 	}
 
-	private static IPackageFragment getFolded(IJavaElement[] children, IPackageFragment pack) throws JavaModelException {
+	private IPackageFragment getFolded(IPackageFragment pack) throws JavaModelException {
 		while (isEmpty(pack)) {
-			IPackageFragment collapsed= findSinglePackageChild(pack, children);
+			IPackageFragment collapsed= packageCache.getSingleChild(pack);
 			if (collapsed == null) {
 				return pack;
 			}
@@ -526,24 +554,6 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 
 	private static boolean isEmpty(IPackageFragment fragment) throws JavaModelException {
 		return !fragment.containsJavaResources() && fragment.getNonJavaResources().length == 0;
-	}
-
-	private static IPackageFragment findSinglePackageChild(IPackageFragment fragment, IJavaElement[] children) {
-		String prefix= fragment.getElementName() + '.';
-		int prefixLen= prefix.length();
-		IPackageFragment found= null;
-		for (int i= 0; i < children.length; i++) {
-			IJavaElement element= children[i];
-			String name= element.getElementName();
-			if (name.startsWith(prefix) && name.length() > prefixLen && name.indexOf('.', prefixLen) == -1) {
-				if (found == null) {
-					found= (IPackageFragment) element;
-				} else {
-					return null;
-				}
-			}
-		}
-		return found;
 	}
 
 	// ------ delta processing ------

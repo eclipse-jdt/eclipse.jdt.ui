@@ -29,6 +29,7 @@ public class PackageExplorerTests {
 		suite.addTest(PackageExplorerShowInTests.suite());
 		suite.addTestSuite(WorkingSetDropAdapterTest.class);
 		suite.addTest(HierarchicalContentProviderTests.suite());
+		suite.addTestSuite(PackageCacheTest.class);
 		//$JUnit-END$
 		return suite;
 	}
