@@ -17,9 +17,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
@@ -304,24 +307,19 @@ public class ReorgUtils {
 	}
 
 	public static IJavaElement[] union(IJavaElement[] set1, IJavaElement[] set2) {
-		List<IJavaElement> union= new ArrayList<>(set1.length + set2.length);//use lists to avoid sequence problems
-		addAll(set1, union);
-		addAll(set2, union);
+		//use linked set to keep element order
+		Set<IJavaElement> union= new LinkedHashSet<>(set1.length + set2.length);
+		union.addAll(Arrays.asList(set1));
+		union.addAll(Arrays.asList(set2));
 		return union.toArray(new IJavaElement[union.size()]);
 	}
 
 	public static IResource[] union(IResource[] set1, IResource[] set2) {
-		List<IResource> union= new ArrayList<>(set1.length + set2.length);//use lists to avoid sequence problems
-		addAll(ReorgUtils.getNotNulls(set1), union);
-		addAll(ReorgUtils.getNotNulls(set2), union);
+		Stream<IResource> nonNullResources= Stream.concat(Arrays.stream(set1), Arrays.stream(set2)).filter(Objects::nonNull);
+		//use linked set to keep element order
+		Set<IResource> union= new LinkedHashSet<>(set1.length + set2.length);
+		nonNullResources.forEach(x -> union.add(x));
 		return union.toArray(new IResource[union.size()]);
-	}
-
-	private static <T> void addAll(T[] array, List<T> list) {
-		for (int i= 0; i < array.length; i++) {
-			if (! list.contains(array[i]))
-				list.add(array[i]);
-		}
 	}
 
 	public static IType[] getMainTypes(IJavaElement[] javaElements) throws JavaModelException {
@@ -550,17 +548,17 @@ public class ReorgUtils {
 	}
 
 	public static IResource[] getNotNulls(IResource[] resources) {
-		Collection<IResource> result= new ArrayList<>(resources.length);
+		Set<IResource> result= new LinkedHashSet<>(resources.length);
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
-			if (resource != null && ! result.contains(resource))
+			if (resource != null)
 				result.add(resource);
 		}
 		return result.toArray(new IResource[result.size()]);
 	}
 
 	public static IResource[] getNotLinked(IResource[] resources) {
-		Collection<IResource> result= new ArrayList<>(resources.length);
+		Collection<IResource> result= new LinkedHashSet<>(resources.length);
 		for (int i= 0; i < resources.length; i++) {
 			IResource resource= resources[i];
 			if (resource != null && ! result.contains(resource) && ! resource.isLinked())

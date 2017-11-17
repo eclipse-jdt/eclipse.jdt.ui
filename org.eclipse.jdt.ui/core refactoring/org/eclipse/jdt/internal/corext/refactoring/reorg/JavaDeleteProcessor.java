@@ -787,24 +787,19 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	}
 
 	private Set<ICompilationUnit> getCusToEmpty() throws JavaModelException {
+		Set<IJavaElement> deletedElements= new HashSet<>(Arrays.asList(fJavaElements));
 		Set<ICompilationUnit> result= new HashSet<>();
 		for (int i= 0; i < fJavaElements.length; i++) {
 			IJavaElement element= fJavaElements[i];
 			ICompilationUnit cu= ReorgUtils.getCompilationUnit(element);
-			if (cu != null && ! result.contains(cu) && willHaveAllTopLevelTypesDeleted(cu))
+			if (cu != null && !result.contains(cu) && deletedElements.containsAll(topLevelTypes(cu)))
 				result.add(cu);
 		}
 		return result;
 	}
 
-	private boolean willHaveAllTopLevelTypesDeleted(ICompilationUnit cu) throws JavaModelException {
-		Set<IJavaElement> elementSet= new HashSet<>(Arrays.asList(fJavaElements));
-		IType[] topLevelTypes= cu.getTypes();
-		for (int i= 0; i < topLevelTypes.length; i++) {
-			if (! elementSet.contains(topLevelTypes[i]))
-				return false;
-		}
-		return true;
+	private static List<IType> topLevelTypes(ICompilationUnit cu) throws JavaModelException {
+		return Arrays.asList(cu.getTypes());
 	}
 
 	private RefactoringStatus initialize(JavaRefactoringArguments extended) {
