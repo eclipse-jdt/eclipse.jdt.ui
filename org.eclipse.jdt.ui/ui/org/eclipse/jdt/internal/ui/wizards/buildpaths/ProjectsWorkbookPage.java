@@ -16,18 +16,31 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.ListSelectionDialog;
+import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.IAccessRule;
@@ -66,6 +79,9 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	private Control fSWTControl;
 
 	private final IWorkbenchPreferenceContainer fPageContainer;
+	
+	private boolean dragDropEnabled;
+	private Object draggedItemsProject;
 
 	public ProjectsWorkbookPage(ListDialogField<CPListElement> classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
@@ -160,6 +176,127 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		
 		fProjectsList.setElements(checkedProjects);
 		fProjectsList.enableButton(IDX_ADDPROJECT, false);
+		if (!dragDropEnabled) {
+			enableDragDropSupport();
+		}
+	}
+	
+	private void enableDragDropSupport() {
+		dragDropEnabled= true;
+		int ops= DND.DROP_MOVE | DND.DROP_DEFAULT;
+		Transfer[] transfers= new Transfer[] { ResourceTransfer.getInstance(), FileTransfer.getInstance() };
+
+		fProjectsList.getTreeViewer().addDragSupport(DND.DROP_MOVE | DND.DROP_COPY, transfers, new DragSourceListener() {
+			@Override
+			public void dragStart(DragSourceEvent event) {
+				IStructuredSelection ssel= (IStructuredSelection) fProjectsList.getTreeViewer().getSelection();
+				if (ssel == null || ssel.isEmpty()) {
+					event.doit= false;
+				}
+				if (ssel != null) {
+					Object[] ele= ssel.toArray();
+					for (Object element : ele) {
+						if (element instanceof RootCPListElement) {
+							event.doit= false;
+							break;
+						}
+					}
+				}
+			}
+
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				IStructuredSelection ssel= (IStructuredSelection) fProjectsList.getTreeViewer().getSelection();
+				event.data= ssel.toArray();
+				draggedItemsProject= ssel.toArray();
+			}
+
+			@Override
+			public void dragFinished(DragSourceEvent event) {
+				draggedItemsProject= null;
+			}
+		});
+
+		fProjectsList.getTreeViewer().addDropSupport(ops, transfers, new ViewerDropAdapter(fProjectsList.getTreeViewer()) {
+			@Override
+			public void dragEnter(DropTargetEvent event) {
+				Object target= determineTarget(event);
+				if (target == null && event.detail == DND.DROP_COPY) {
+					event.detail= DND.DROP_MOVE;
+				}
+				super.dragEnter(event);
+			}
+
+			@Override
+			public void dragOperationChanged(DropTargetEvent event) {
+				Object target= determineTarget(event);
+				if (target == null && event.detail == DND.DROP_COPY) {
+					event.detail= DND.DROP_MOVE;
+				}
+				super.dragOperationChanged(event);
+			}
+
+			@Override
+			public void dragOver(DropTargetEvent event) {
+				Object target= determineTarget(event);
+				if (target == null && event.detail == DND.DROP_COPY) {
+					event.detail= DND.DROP_MOVE;
+				}
+				super.dragOver(event);
+			}
+
+			@Override
+			protected int determineLocation(DropTargetEvent event) {
+				if (!(event.item instanceof Item)) {
+					return LOCATION_NONE;
+				}
+				Item item= (Item) event.item;
+				Point coordinates= new Point(event.x, event.y);
+				coordinates= getViewer().getControl().toControl(coordinates);
+				if (item != null) {
+					Rectangle bounds= getBounds(item);
+					if (bounds == null) {
+						return LOCATION_NONE;
+					}
+				}
+				return LOCATION_ON;
+			}
+
+			@Override
+			public boolean performDrop(Object data) {
+				Object[] objects= (data == null) ? (Object[]) draggedItemsProject : (Object[]) data;
+				if (objects == null)
+					return false;
+				Object target= getCurrentTarget();
+				if (target instanceof RootCPListElement) {
+					for (Object object : objects) {
+						if (!(object instanceof CPListElement))
+							return false;
+						if(object instanceof RootCPListElement)
+							return false;
+						boolean contains= ((RootCPListElement) target).getChildren().contains(object);
+						if (contains == true)
+							return false;
+						RootCPListElement rootNode= (RootCPListElement) target;
+						boolean isModular= rootNode.isModulePathRootNode();
+						RootNodeChange direction= RootNodeChange.fromOldAndNew(!isModular, isModular);
+						if (direction != RootNodeChange.NoChange) {
+							moveCPElementAcrossNode(fProjectsList, (CPListElement) object, direction);
+						}
+						((CPListElement) object).setAttribute(IClasspathAttribute.MODULE, isModular ? new ModuleEncapsulationDetail[0] : null);
+					}
+					return true;
+
+				}
+				return false;
+			}
+
+			@Override
+			public boolean validateDrop(Object target, int operation, TransferData transferType) {
+				return (target instanceof RootCPListElement);
+			}
+		});
+
 	}
 
 	// -------- UI creation ---------
