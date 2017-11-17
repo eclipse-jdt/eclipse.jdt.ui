@@ -67,7 +67,6 @@ public class JavaActivationTest extends TestCase {
 		        "org.eclipse.osgi.services",
 		        "org.eclipse.osgi.util",
 		        "org.eclipse.core.runtime",
-		        "org.eclipse.update.configurator",
 		        "org.eclipse.compare",
 		        "org.eclipse.core.filebuffers",
 		        "org.eclipse.core.resources",
