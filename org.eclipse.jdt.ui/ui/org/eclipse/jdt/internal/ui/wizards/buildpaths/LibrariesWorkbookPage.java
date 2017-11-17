@@ -21,10 +21,20 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DragSourceListener;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
@@ -42,12 +52,15 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.PixelConverter;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.IAccessRule;
@@ -105,6 +118,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	private final int IDX_REPLACE= 10;
 
+	private boolean dragDropEnabled = false;
+	private Object draggedItemsLibrary = null;
+	
 	public LibrariesWorkbookPage(CheckedListDialogField<CPListElement> classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
 		fPageContainer= pageContainer;
@@ -200,8 +216,133 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		fLibrariesList.enableButton(IDX_ADDJAR, false);
 		fLibrariesList.enableButton(IDX_ADDLIB, false);
 		fLibrariesList.enableButton(IDX_ADDVAR, false);
+		
+		if(dragDropEnabled == false) {
+			enableDragDropSupport();
+		}
+		
 	}
 	
+	private void enableDragDropSupport() {
+		dragDropEnabled= true;
+		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_DEFAULT;
+		Transfer[] transfers= new Transfer[] { ResourceTransfer.getInstance(), FileTransfer.getInstance() };
+		fLibrariesList.getTreeViewer().addDragSupport(DND.DROP_MOVE | DND.DROP_COPY, transfers, new DragSourceListener() {
+			@Override
+			public void dragStart(DragSourceEvent event) {
+				IStructuredSelection ssel= (IStructuredSelection) fLibrariesList.getTreeViewer().getSelection();
+				if (ssel == null || ssel.isEmpty()) {
+					event.doit= false;
+				}
+				if (ssel != null) {
+					Object[] ele= ssel.toArray();
+					for (Object element : ele) {
+						// dont start drag on root nodes
+						if (element instanceof RootCPListElement) {
+							event.doit= false;
+							break;
+						}
+					}
+				}
+			}
+
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				IStructuredSelection ssel= (IStructuredSelection) fLibrariesList.getTreeViewer().getSelection();
+				event.data= ssel.toArray();
+				draggedItemsLibrary= ssel.toArray();
+			}
+
+			@Override
+			public void dragFinished(DragSourceEvent event) {
+				draggedItemsLibrary= null;
+			}
+		});
+
+		fLibrariesList.getTreeViewer().addDropSupport(ops, transfers, new ViewerDropAdapter(fLibrariesList.getTreeViewer()) {
+			@Override
+			public void dragEnter(DropTargetEvent event) {
+				Object target= determineTarget(event);
+				if (target == null && event.detail == DND.DROP_COPY) {
+					event.detail= DND.DROP_MOVE;
+				}
+				super.dragEnter(event);
+			}
+
+			@Override
+			public void dragOperationChanged(DropTargetEvent event) {
+				Object target= determineTarget(event);
+				if (target == null && event.detail == DND.DROP_COPY) {
+					event.detail= DND.DROP_MOVE;
+				}
+				super.dragOperationChanged(event);
+			}
+
+			@Override
+			public void dragOver(DropTargetEvent event) {
+				Object target= determineTarget(event);
+				if (target == null && event.detail == DND.DROP_COPY) {
+					event.detail= DND.DROP_MOVE;
+				}
+				super.dragOver(event);
+			}
+
+			@Override
+			protected int determineLocation(DropTargetEvent event) {
+				if (!(event.item instanceof Item)) {
+					return LOCATION_NONE;
+				}
+				Item item= (Item) event.item;
+				Point coordinates= new Point(event.x, event.y);
+				coordinates= getViewer().getControl().toControl(coordinates);
+				if (item != null) {
+					Rectangle bounds= getBounds(item);
+					if (bounds == null) {
+						return LOCATION_NONE;
+					}
+				}
+				return LOCATION_ON;
+			}
+
+			@Override
+			public boolean performDrop(Object data) {
+				Object[] objects= (data == null) ? (Object[]) draggedItemsLibrary : (Object[]) data;
+				if (objects == null)
+					return false;
+				Object target= getCurrentTarget();
+				if (target instanceof RootCPListElement) {
+					for (Object object : objects) {
+						if (!(object instanceof CPListElement))
+							return false;
+						if(object instanceof RootCPListElement)
+							return false;
+						boolean contains= ((RootCPListElement) target).getChildren().contains(object);
+						if (contains == true)
+							return false;
+						RootCPListElement rootNode= (RootCPListElement) target;
+						boolean isModular= rootNode.isModulePathRootNode();
+						RootNodeChange direction= RootNodeChange.fromOldAndNew(!isModular, isModular);
+						if (direction != RootNodeChange.NoChange) {
+							moveCPElementAcrossNode(fLibrariesList, (CPListElement) object, direction);
+						}
+						((CPListElement) object).setAttribute(IClasspathAttribute.MODULE, isModular ? new ModuleEncapsulationDetail[0] : null);
+					}
+					return true;
+
+				}
+				return false;
+			}
+
+			@Override
+			public boolean validateDrop(Object target, int operation, TransferData transferType) {
+				return (target instanceof RootCPListElement);
+			}
+
+		});
+
+
+	}
+
 	boolean hasRootNodes(){
 		if (fLibrariesList == null)
 			return false;
