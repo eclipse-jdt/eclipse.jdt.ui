@@ -1023,6 +1023,17 @@ public class CPListElement {
 	}
 	
 	public void updateExtraAttributeOfClasspathEntry() {
+		if (fChildren != null) {
+			for (int i= 0; i < fChildren.size(); i++) {
+				Object curr= fChildren.get(i);
+				if (curr instanceof CPListElementAttribute) {
+					CPListElementAttribute elem= (CPListElementAttribute) curr;
+					String key= elem.getKey();
+					if (MODULE.equals(key))
+						return;
+				}
+			}
+		}
 		this.createAttributeElement(MODULE, new ModuleEncapsulationDetail[0], true);
 		//refresh the cached classpath entry
 		fCachedEntry= null;

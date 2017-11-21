@@ -337,6 +337,23 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 						boolean isModular= rootNode.isModulePathRootNode();
 						RootNodeChange direction= RootNodeChange.fromOldAndNew(!isModular, isModular);
 						if (direction != RootNodeChange.NoChange) {
+							// pre-process container items while moving to modulepath
+							CPListElement cpe= (CPListElement) object;
+							if (cpe.getEntryKind() == IClasspathEntry.CPE_CONTAINER && isModular) {
+								IClasspathEntry entry= cpe.getClasspathEntry();
+								IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();
+								boolean hasModAttr= false;
+								for (IClasspathAttribute attr : extraAttributes) {
+									if (IClasspathAttribute.MODULE.equals(attr.getName())) {
+										hasModAttr= true;
+										break;
+									}
+								}
+								if (hasModAttr == false) {
+									cpe.updateExtraAttributeOfClasspathEntry();
+								}
+							}
+
 							moveCPElementAcrossNode(fLibrariesList, (CPListElement) object, direction);
 						}
 						((CPListElement) object).setAttribute(IClasspathAttribute.MODULE, isModular ? new ModuleEncapsulationDetail[0] : null);
