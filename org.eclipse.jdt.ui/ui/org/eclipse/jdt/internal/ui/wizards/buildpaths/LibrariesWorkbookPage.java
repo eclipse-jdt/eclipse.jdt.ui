@@ -242,6 +242,20 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 							event.doit= false;
 							break;
 						}
+						if (element instanceof CPListElement) {
+							CPListElement cpe= (CPListElement) element;
+							if (cpe.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+								IPath path= cpe.getPath();
+								if (path != null) {
+									IVMInstall vmInstall= JavaRuntime.getVMInstall(path);
+									if (vmInstall != null) {
+										event.doit= false;
+										break;
+									}
+								}
+							}
+						}
+
 					}
 				}
 			}
