@@ -118,8 +118,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	private final int IDX_REPLACE= 10;
 
-	private boolean dragDropEnabled = false;
-	private Object draggedItemsLibrary = null;
+	private boolean dragDropEnabled;
+	private Object draggedItemsLibrary;
 	
 	public LibrariesWorkbookPage(CheckedListDialogField<CPListElement> classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
@@ -217,7 +217,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		fLibrariesList.enableButton(IDX_ADDLIB, false);
 		fLibrariesList.enableButton(IDX_ADDVAR, false);
 		
-		if(dragDropEnabled == false) {
+		if (!dragDropEnabled) {
 			enableDragDropSupport();
 		}
 		
@@ -225,7 +225,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private void enableDragDropSupport() {
 		dragDropEnabled= true;
-		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_DEFAULT;
+		int ops= DND.DROP_MOVE | DND.DROP_DEFAULT;
 		Transfer[] transfers= new Transfer[] { ResourceTransfer.getInstance(), FileTransfer.getInstance() };
 		fLibrariesList.getTreeViewer().addDragSupport(DND.DROP_MOVE | DND.DROP_COPY, transfers, new DragSourceListener() {
 			@Override
@@ -349,7 +349,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 										break;
 									}
 								}
-								if (hasModAttr == false) {
+								if (!hasModAttr) {
 									cpe.updateExtraAttributeOfClasspathEntry();
 								}
 							}

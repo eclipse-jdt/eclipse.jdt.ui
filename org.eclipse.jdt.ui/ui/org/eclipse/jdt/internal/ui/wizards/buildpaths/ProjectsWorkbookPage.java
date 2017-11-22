@@ -80,8 +80,8 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 
 	private final IWorkbenchPreferenceContainer fPageContainer;
 	
-	private boolean dragDropEnabled = false;
-	private Object draggedItemsProject = null;
+	private boolean dragDropEnabled;
+	private Object draggedItemsProject;
 
 	public ProjectsWorkbookPage(ListDialogField<CPListElement> classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
@@ -176,14 +176,14 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		
 		fProjectsList.setElements(checkedProjects);
 		fProjectsList.enableButton(IDX_ADDPROJECT, false);
-		if(dragDropEnabled == false) {
+		if (!dragDropEnabled) {
 			enableDragDropSupport();
 		}
 	}
 	
 	private void enableDragDropSupport() {
 		dragDropEnabled= true;
-		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_DEFAULT;
+		int ops= DND.DROP_MOVE | DND.DROP_DEFAULT;
 		Transfer[] transfers= new Transfer[] { ResourceTransfer.getInstance(), FileTransfer.getInstance() };
 
 		fProjectsList.getTreeViewer().addDragSupport(DND.DROP_MOVE | DND.DROP_COPY, transfers, new DragSourceListener() {
