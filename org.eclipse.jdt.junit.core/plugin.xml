@@ -11,7 +11,7 @@
             name="%Launch.label"
             delegateDescription="%JUnitLaunchDelegate.description"
             delegateName="%JUnitLaunchDelegate.name"
-            delegate="org.eclipse.jdt.junit.launcher.JUnitLaunchConfigurationDelegate"
+            delegate="org.eclipse.jdt.junit.launcher.AdvancedJUnitLaunchConfigurationDelegate"
             modes="run, debug"
             id="org.eclipse.jdt.junit.launchconfig"
             sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
