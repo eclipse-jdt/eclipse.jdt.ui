@@ -30,16 +30,20 @@ import org.eclipse.jdt.internal.junit.runner.IListensToTestExecutions;
 import org.eclipse.jdt.internal.junit.runner.ITestIdentifier;
 import org.eclipse.jdt.internal.junit.runner.MessageIds;
 import org.eclipse.jdt.internal.junit.runner.RemoteTestRunner;
+import org.eclipse.jdt.internal.junit.runner.TestIdMap;
 import org.eclipse.jdt.internal.junit.runner.TestReferenceFailure;
 
 public class JUnit5TestListener implements TestExecutionListener {
 
 	private final IListensToTestExecutions fNotified;
 
+	private RemoteTestRunner fRemoteTestRunner;
+
 	private TestPlan fTestPlan;
 
-	public JUnit5TestListener(IListensToTestExecutions notified) {
+	public JUnit5TestListener(IListensToTestExecutions notified, RemoteTestRunner remoteTestRunner) {
 		fNotified= notified;
+		fRemoteTestRunner= remoteTestRunner;
 	}
 
 	@Override
@@ -165,9 +169,20 @@ public class JUnit5TestListener implements TestExecutionListener {
 				hasChildren= false;
 				testCount= 1;
 			}
-			String parentId= JUnit5TestReference.getParentId(testIdentifier, fTestPlan);
-			RemoteTestRunner.fgTestRunServer.visitTreeEntry(dynamicTestIdentifier, hasChildren, testCount, true, parentId);
+			String parentId= getParentId(testIdentifier, fTestPlan);
+			fRemoteTestRunner.visitTreeEntry(dynamicTestIdentifier, hasChildren, testCount, true, parentId);
 		}
+	}
+
+	/**
+	 * @param testIdentifier the test identifier whose parent id is required
+	 * @param testPlan the test plan containing the test
+	 * @return the parent id from {@link TestIdMap} if the parent is present, otherwise
+	 *         <code>"-1"</code>
+	 */
+	private String getParentId(TestIdentifier testIdentifier, TestPlan testPlan) {
+		// Same as JUnit5TestReference.getParentId(TestIdentifier testIdentifier, TestPlan testPlan).
+		return testPlan.getParent(testIdentifier).map(parent -> fRemoteTestRunner.getTestId(new JUnit5Identifier(parent))).orElse("-1"); //$NON-NLS-1$
 	}
 
 	private ITestIdentifier getIdentifier(TestIdentifier testIdentifier, boolean ignored, boolean assumptionFailed) {

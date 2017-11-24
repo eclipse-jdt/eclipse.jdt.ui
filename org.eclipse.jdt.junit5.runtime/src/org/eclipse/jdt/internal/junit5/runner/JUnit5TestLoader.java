@@ -30,8 +30,11 @@ public class JUnit5TestLoader implements ITestLoader {
 
 	private Launcher fLauncher= LauncherFactory.create();
 
+	private RemoteTestRunner fRemoteTestRunner;
+
 	@Override
 	public ITestReference[] loadTests(Class[] testClasses, String testName, String[] failureNames, String[] packages, String[][] includeExcludeTags, String uniqueId, RemoteTestRunner listener) {
+		fRemoteTestRunner= listener;
 		ITestReference[] refs= new ITestReference[0];
 		if (uniqueId != null && !uniqueId.trim().isEmpty()) {
 			refs= new ITestReference[1];
@@ -62,12 +65,12 @@ public class JUnit5TestLoader implements ITestLoader {
 
 	private ITestReference createFilteredTest(Class<?> clazz, String testName, String[][] includeExcludeTags) {
 		LauncherDiscoveryRequest request= LauncherDiscoveryRequestBuilder.request().selectors(DiscoverySelectors.selectMethod(clazz.getName() + "#" + testName)).filters(getTagFilters(includeExcludeTags)).build(); //$NON-NLS-1$
-		return new JUnit5TestReference(request, fLauncher);
+		return new JUnit5TestReference(request, fLauncher, fRemoteTestRunner);
 	}
 
 	private ITestReference createUnfilteredTest(Class<?> clazz, String[][] includeExcludeTags) {
 		LauncherDiscoveryRequest request= LauncherDiscoveryRequestBuilder.request().selectors(DiscoverySelectors.selectClass(clazz)).filters(getTagFilters(includeExcludeTags)).build();
-		return new JUnit5TestReference(request, fLauncher);
+		return new JUnit5TestReference(request, fLauncher, fRemoteTestRunner);
 	}
 
 	private ITestReference createTest(String pkg, String[][] includeExcludeTags) {
@@ -87,12 +90,12 @@ public class JUnit5TestLoader implements ITestLoader {
 				.filters(getTagFilters(includeExcludeTags))
 				.build();
 
-		return new JUnit5TestReference(request, fLauncher);
+		return new JUnit5TestReference(request, fLauncher, fRemoteTestRunner);
 	}
 
 	private ITestReference createUniqueIdTest(String uniqueId, String[][] includeExcludeTags) {
 		LauncherDiscoveryRequest request= LauncherDiscoveryRequestBuilder.request().selectors(DiscoverySelectors.selectUniqueId(uniqueId)).filters(getTagFilters(includeExcludeTags)).build();
-		return new JUnit5TestReference(request, fLauncher);
+		return new JUnit5TestReference(request, fLauncher, fRemoteTestRunner);
 	}
 
 	private Filter<?>[] getTagFilters(String[][] includeExcludeTags) {

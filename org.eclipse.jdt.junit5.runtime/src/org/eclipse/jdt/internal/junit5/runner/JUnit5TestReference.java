@@ -33,9 +33,12 @@ public class JUnit5TestReference implements ITestReference {
 
 	private TestPlan fTestPlan;
 
-	public JUnit5TestReference(LauncherDiscoveryRequest request, Launcher launcher) {
+	private RemoteTestRunner fRemoteTestRunner;
+
+	public JUnit5TestReference(LauncherDiscoveryRequest request, Launcher launcher, RemoteTestRunner remoteTestRunner) {
 		fRequest= request;
 		fLauncher= launcher;
+		fRemoteTestRunner= remoteTestRunner;
 		fTestPlan= fLauncher.discover(fRequest);
 	}
 
@@ -53,7 +56,7 @@ public class JUnit5TestReference implements ITestReference {
 		}
 	}
 
-	void sendTree(IVisitsTestTrees notified, TestIdentifier testIdentifier) {
+	private void sendTree(IVisitsTestTrees notified, TestIdentifier testIdentifier) {
 		JUnit5Identifier identifier= new JUnit5Identifier(testIdentifier);
 		String parentId= getParentId(testIdentifier, fTestPlan);
 		if (testIdentifier.isTest()) {
@@ -73,13 +76,14 @@ public class JUnit5TestReference implements ITestReference {
 	 * @return the parent id from {@link TestIdMap} if the parent is present, otherwise
 	 *         <code>"-1"</code>
 	 */
-	static String getParentId(TestIdentifier testIdentifier, TestPlan testPlan) {
-		return testPlan.getParent(testIdentifier).map(parent -> RemoteTestRunner.fgTestRunServer.getTestId(new JUnit5Identifier(parent))).orElse("-1"); //$NON-NLS-1$
+	private String getParentId(TestIdentifier testIdentifier, TestPlan testPlan) {
+		// Same as JUnit5TestListener.getParentId(TestIdentifier testIdentifier, TestPlan testPlan)
+		return testPlan.getParent(testIdentifier).map(parent -> fRemoteTestRunner.getTestId(new JUnit5Identifier(parent))).orElse("-1"); //$NON-NLS-1$
 	}
 
 	@Override
 	public void run(TestExecution execution) {
-		fLauncher.execute(fRequest, new JUnit5TestListener(execution.getListener()));
+		fLauncher.execute(fRequest, new JUnit5TestListener(execution.getListener(), fRemoteTestRunner));
 	}
 
 	@Override
