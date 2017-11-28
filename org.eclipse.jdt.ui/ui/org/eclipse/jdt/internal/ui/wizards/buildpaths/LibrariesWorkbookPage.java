@@ -24,17 +24,13 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
-import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
@@ -225,9 +221,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private void enableDragDropSupport() {
 		dragDropEnabled= true;
-		int ops= DND.DROP_MOVE | DND.DROP_DEFAULT;
+		int ops= DND.DROP_MOVE;
 		Transfer[] transfers= new Transfer[] { ResourceTransfer.getInstance(), FileTransfer.getInstance() };
-		fLibrariesList.getTreeViewer().addDragSupport(DND.DROP_MOVE | DND.DROP_COPY, transfers, new DragSourceListener() {
+		fLibrariesList.getTreeViewer().addDragSupport(DND.DROP_MOVE, transfers, new DragSourceListener() {
 			@Override
 			public void dragStart(DragSourceEvent event) {
 				IStructuredSelection ssel= (IStructuredSelection) fLibrariesList.getTreeViewer().getSelection();
@@ -274,50 +270,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		});
 
 		fLibrariesList.getTreeViewer().addDropSupport(ops, transfers, new ViewerDropAdapter(fLibrariesList.getTreeViewer()) {
-			@Override
-			public void dragEnter(DropTargetEvent event) {
-				Object target= determineTarget(event);
-				if (target == null && event.detail == DND.DROP_COPY) {
-					event.detail= DND.DROP_MOVE;
-				}
-				super.dragEnter(event);
-			}
-
-			@Override
-			public void dragOperationChanged(DropTargetEvent event) {
-				Object target= determineTarget(event);
-				if (target == null && event.detail == DND.DROP_COPY) {
-					event.detail= DND.DROP_MOVE;
-				}
-				super.dragOperationChanged(event);
-			}
-
-			@Override
-			public void dragOver(DropTargetEvent event) {
-				Object target= determineTarget(event);
-				if (target == null && event.detail == DND.DROP_COPY) {
-					event.detail= DND.DROP_MOVE;
-				}
-				super.dragOver(event);
-			}
-
-			@Override
-			protected int determineLocation(DropTargetEvent event) {
-				if (!(event.item instanceof Item)) {
-					return LOCATION_NONE;
-				}
-				Item item= (Item) event.item;
-				Point coordinates= new Point(event.x, event.y);
-				coordinates= getViewer().getControl().toControl(coordinates);
-				if (item != null) {
-					Rectangle bounds= getBounds(item);
-					if (bounds == null) {
-						return LOCATION_NONE;
-					}
-				}
-				return LOCATION_ON;
-			}
-
 			@Override
 			public boolean performDrop(Object data) {
 				Object[] objects= (data == null) ? (Object[]) draggedItemsLibrary : (Object[]) data;
