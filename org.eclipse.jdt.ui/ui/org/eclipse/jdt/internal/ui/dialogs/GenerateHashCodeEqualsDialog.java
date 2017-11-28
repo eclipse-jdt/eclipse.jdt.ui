@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2011 IBM Corporation and others.
+ * Copyright (c) 2005, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -126,7 +126,7 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 		super(shell, new BindingLabelProvider(), new GenerateHashCodeEqualsContentProvider(allFields), editor, type, false);
 		setEmptyListMessage(JavaUIMessages.GenerateHashCodeEqualsDialog_no_entries);
 
-		setInitialSelections(selectedFields);
+		setInitialSelections((Object[]) selectedFields);
 
 		setTitle(JavaUIMessages.GenerateHashCodeEqualsDialog_dialog_title);
 		setMessage(JavaUIMessages.GenerateHashCodeEqualsDialog_select_fields_to_include);

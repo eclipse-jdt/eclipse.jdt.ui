@@ -305,7 +305,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		dialog.setInput(type);
 
 		if (preselected.length > 0) {
-			dialog.setInitialSelections(preselected);
+			dialog.setInitialSelections((Object[]) preselected);
 			dialog.setExpandedElements(preselected);
 		}
 		final Set<IField> keySet= new LinkedHashSet<>(entries.keySet());

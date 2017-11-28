@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2013 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -447,7 +447,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	protected void handleManifestFileBrowseButtonPressed() {
 		ElementTreeSelectionDialog dialog= createWorkspaceFileSelectionDialog(JarPackagerMessages.JarManifestWizardPage_manifestSelectionDialog_title, JarPackagerMessages.JarManifestWizardPage_manifestSelectionDialog_message);
 		if (fJarPackage.isManifestAccessible())
-			dialog.setInitialSelections(new IResource[] {fJarPackage.getManifestFile()});
+			dialog.setInitialSelections(fJarPackage.getManifestFile());
 		if (dialog.open() ==  Window.OK) {
 			Object[] resources= dialog.getResult();
 			if (resources.length != 1)
@@ -511,7 +511,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		SelectionDialog dialog= createPackageDialog(getPackagesForSelectedResources());
 		dialog.setTitle(JarPackagerMessages.JarManifestWizardPage_sealedPackagesSelectionDialog_title);
 		dialog.setMessage(JarPackagerMessages.JarManifestWizardPage_sealedPackagesSelectionDialog_message);
-		dialog.setInitialSelections(fJarPackage.getPackagesToSeal());
+		dialog.setInitialSelections((Object[]) fJarPackage.getPackagesToSeal());
 		if (dialog.open() == Window.OK)
 			fJarPackage.setPackagesToSeal(getPackagesFromDialog(dialog));
 		updateSealingInfo();
@@ -521,7 +521,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 		SelectionDialog dialog= createPackageDialog(getPackagesForSelectedResources());
 		dialog.setTitle(JarPackagerMessages.JarManifestWizardPage_unsealedPackagesSelectionDialog_title);
 		dialog.setMessage(JarPackagerMessages.JarManifestWizardPage_unsealedPackagesSelectionDialog_message);
-		dialog.setInitialSelections(fJarPackage.getPackagesToUnseal());
+		dialog.setInitialSelections((Object[]) fJarPackage.getPackagesToUnseal());
 		if (dialog.open() == Window.OK)
 			fJarPackage.setPackagesToUnseal(getPackagesFromDialog(dialog));
 		updateSealingInfo();

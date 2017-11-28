@@ -843,7 +843,7 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 		String methodName= fTestMethodText.getText();
 
 		if (methodNames.contains(methodName)) {
-			dialog.setInitialSelections(new String[] { methodName });
+			dialog.setInitialSelections(methodName);
 		}
 
 		dialog.setAllowDuplicates(false);
