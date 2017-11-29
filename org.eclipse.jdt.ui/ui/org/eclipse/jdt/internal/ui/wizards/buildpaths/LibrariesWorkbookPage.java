@@ -223,7 +223,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		dragDropEnabled= true;
 		int ops= DND.DROP_MOVE;
 		Transfer[] transfers= new Transfer[] { ResourceTransfer.getInstance(), FileTransfer.getInstance() };
-		fLibrariesList.getTreeViewer().addDragSupport(DND.DROP_MOVE, transfers, new DragSourceListener() {
+		fLibrariesList.getTreeViewer().addDragSupport(ops, transfers, new DragSourceListener() {
 			@Override
 			public void dragStart(DragSourceEvent event) {
 				IStructuredSelection ssel= (IStructuredSelection) fLibrariesList.getTreeViewer().getSelection();

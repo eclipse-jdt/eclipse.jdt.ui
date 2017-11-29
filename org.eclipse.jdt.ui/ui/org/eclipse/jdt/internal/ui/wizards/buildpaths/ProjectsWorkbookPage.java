@@ -182,7 +182,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		int ops= DND.DROP_MOVE;
 		Transfer[] transfers= new Transfer[] { ResourceTransfer.getInstance(), FileTransfer.getInstance() };
 
-		fProjectsList.getTreeViewer().addDragSupport(DND.DROP_MOVE, transfers, new DragSourceListener() {
+		fProjectsList.getTreeViewer().addDragSupport(ops, transfers, new DragSourceListener() {
 			@Override
 			public void dragStart(DragSourceEvent event) {
 				IStructuredSelection ssel= (IStructuredSelection) fProjectsList.getTreeViewer().getSelection();
