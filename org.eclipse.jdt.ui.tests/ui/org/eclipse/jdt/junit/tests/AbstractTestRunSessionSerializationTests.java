@@ -141,6 +141,13 @@ public class AbstractTestRunSessionSerializationTests extends TestCase {
 		if (ibmJava6BugOffset > 0) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=197842
 			actual= new StringBuffer(actual).insert(ibmJava6BugOffset + 1, " ").toString();
 
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=526754
+		String regex4= "</actual>\\s*";
+		String replacement4= "</actual>";
+		String regex5= "\\s*</failure>";
+		String replacement5= " </failure>";
+		actual= actual.replaceAll(regex4, replacement4).replaceAll(regex5, replacement5);
+
 		/*
 		 * Strip all whitespace
 		 */
