@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.layout.PixelConverter;
@@ -47,6 +48,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.buildpath.BuildpathDelta;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.IBuildpathModifierListener;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.ScrolledPageContent;
@@ -72,7 +74,10 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     private HintTextGroup fHintTextGroup;
     private DialogPackageExplorer fPackageExplorer;
     private SelectionButtonDialogField fUseFolderOutputs;
-	private final StringDialogField fOutputLocationField;
+    private SelectionButtonDialogField fCreateModuleInfoFileButton;
+    private boolean fCreateModuleInfoFile;
+    private String fCompilerCompliance;
+    private final StringDialogField fOutputLocationField;
 	private DialogPackageExplorerActionGroup fActionGroup;
 
 	private IJavaProject fJavaProject;
@@ -102,6 +107,12 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
         fUseFolderOutputs= new SelectionButtonDialogField(SWT.CHECK);
         fUseFolderOutputs.setSelection(false);
         fUseFolderOutputs.setLabelText(NewWizardMessages.SourceContainerWorkbookPage_folders_check);
+
+
+		fCreateModuleInfoFileButton= new SelectionButtonDialogField(SWT.CHECK);
+		fCreateModuleInfoFileButton.setSelection(true);
+		fCreateModuleInfoFile= true;
+		fCreateModuleInfoFileButton.setLabelText(NewWizardMessages.SourceContainerWorkbookPage_create_moduleinfo_check);
 
 		fPackageExplorer= new DialogPackageExplorer();
 		fHintTextGroup= new HintTextGroup();
@@ -150,6 +161,21 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 		}
 		fUseFolderOutputs.setSelection(useFolderOutputs);
     }
+
+	public void setCompilerCompliance(String compilerCompliance) {
+		if (compilerCompliance != null) {
+			fCompilerCompliance= compilerCompliance;
+			try {
+				setCreateModuleInfoFile(false);
+			} catch (JavaModelException e) {
+				//do nothing
+			}
+		}
+	}
+
+	public boolean isCreateModuleInfoFile() {
+		return fCreateModuleInfoFile;
+	}
 
     public void dispose() {
     	if (fActionGroup != null) {
@@ -211,6 +237,16 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 
         excomposite.setClient(fHintTextGroup.createControl(excomposite));
         fUseFolderOutputs.doFillIntoGrid(body, 1);
+
+		fCreateModuleInfoFileButton.doFillIntoGrid(body, 1);
+
+		fCreateModuleInfoFileButton.setDialogFieldListener(new IDialogFieldListener() {
+			@Override
+			public void dialogFieldChanged(DialogField field) {
+				fCreateModuleInfoFile= fCreateModuleInfoFileButton.isSelected();
+			}
+		});
+
 
         fActionGroup= new DialogPackageExplorerActionGroup(fHintTextGroup, fContext, fPackageExplorer, this);
 		fActionGroup.addBuildpathModifierListener(this);
@@ -391,10 +427,45 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 
         try {
 	        fOutputLocationField.setText(fJavaProject.getOutputLocation().makeRelative().toString());
+			setCreateModuleInfoFile(true);
         } catch (JavaModelException e) {
 	        JavaPlugin.log(e);
         }
     }
+
+	private void setCreateModuleInfoFile(boolean buildpathChanged) throws JavaModelException {
+		boolean selection= fCreateModuleInfoFileButton.isSelected();
+		boolean enabled= fCreateModuleInfoFileButton.isEnabled();
+		boolean setEnabled= true;
+		boolean setSelection= true;
+		if (JavaModelUtil.is9OrHigher(fCompilerCompliance)) {
+			IPackageFragmentRoot[] packageFragmentRoots= fJavaProject.getPackageFragmentRoots();
+			List<IPackageFragmentRoot> packageFragmentRootsAsList= new ArrayList<>(Arrays.asList(packageFragmentRoots));
+			for (IPackageFragmentRoot packageFragmentRoot : packageFragmentRoots) {
+				IResource res= packageFragmentRoot.getCorrespondingResource();
+				if (res == null || res.getType() != IResource.FOLDER || packageFragmentRoot.getKind() != IPackageFragmentRoot.K_SOURCE) {
+					packageFragmentRootsAsList.remove(packageFragmentRoot);
+				}
+			}
+
+			if (packageFragmentRootsAsList.size() == 0) {
+				setSelection= false;
+				setEnabled= false;
+			} else {
+				if (buildpathChanged) {
+					setSelection= true;
+					setEnabled= true;
+				} else {
+					setSelection= !enabled ? true : selection;
+				}
+			}
+		} else {
+			setEnabled= false;
+			setSelection= false;
+		}
+		fCreateModuleInfoFileButton.setEnabled(setEnabled);
+		fCreateModuleInfoFileButton.setSelection(setSelection);
+	}
 
 	public void commitDefaultOutputFolder() {
 		if (!fBuildPathsBlock.isOKStatus())
