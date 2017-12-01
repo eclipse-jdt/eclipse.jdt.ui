@@ -116,6 +116,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	private boolean dragDropEnabled;
 	private Object draggedItemsLibrary;
+	private boolean fromModularLibrary;
 	
 	public LibrariesWorkbookPage(CheckedListDialogField<CPListElement> classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
@@ -240,6 +241,16 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 						}
 						if (element instanceof CPListElement) {
 							CPListElement cpe= (CPListElement) element;
+							List<CPListElement> elements= fLibrariesList.getElements();
+							for (Object cpListElement : elements) {
+								if (cpListElement instanceof RootCPListElement) {
+									RootCPListElement root= (RootCPListElement) cpListElement;
+									if (root.getChildren().contains(cpe)) {
+										fromModularLibrary= root.isModulePathRootNode();
+										break;
+									}
+								}
+							}
 							if (cpe.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 								IPath path= cpe.getPath();
 								if (path != null) {
@@ -318,7 +329,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 			@Override
 			public boolean validateDrop(Object target, int operation, TransferData transferType) {
-				return (target instanceof RootCPListElement);
+				if (!(target instanceof RootCPListElement))
+					return false;
+				RootCPListElement root= (RootCPListElement) target;
+				return fromModularLibrary ? root.isClassPathRootNode() : root.isModulePathRootNode();
 			}
 
 		});
