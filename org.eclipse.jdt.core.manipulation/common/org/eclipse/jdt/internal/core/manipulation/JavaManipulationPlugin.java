@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,9 @@ package org.eclipse.jdt.internal.core.manipulation;
 
 import org.osgi.framework.BundleContext;
 
+import org.eclipse.osgi.service.debug.DebugOptions;
+import org.eclipse.osgi.service.debug.DebugOptionsListener;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Plugin;
@@ -22,7 +25,9 @@ import org.eclipse.jdt.core.manipulation.JavaManipulation;
 /**
  * The main plug-in class to be used in the workbench.
  */
-public class JavaManipulationPlugin extends Plugin {
+public class JavaManipulationPlugin extends Plugin implements DebugOptionsListener {
+
+	public static boolean DEBUG_AST_PROVIDER;
 
 	//The shared instance.
 	private static JavaManipulationPlugin fgDefault;
@@ -78,5 +83,10 @@ public class JavaManipulationPlugin extends Plugin {
 
 	public static void log(Throwable e) {
 		log(new Status(IStatus.ERROR, getPluginId(), IStatusConstants.INTERNAL_ERROR, JavaManipulationMessages.JavaManipulationMessages_internalError, e));
+	}
+
+	@Override
+	public void optionsChanged(DebugOptions options) {
+		DEBUG_AST_PROVIDER= options.getBooleanOption("org.eclipse.jdt.core.manipulation/debug/ASTProvider", false); //$NON-NLS-1$
 	}
 }

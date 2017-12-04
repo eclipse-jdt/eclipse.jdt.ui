@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -611,7 +611,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			fTypeImports= null;
 			fStaticImports= null;
 			TextEdit edits= rewrite.rewriteImports(new SubProgressMonitor(monitor, 1));
-			JavaElementUtil.applyEdit(targetUnit, edits, false, new SubProgressMonitor(monitor, 1));
+			JavaModelUtil.applyEdit(targetUnit, edits, false, new SubProgressMonitor(monitor, 1));
 		} finally {
 			monitor.done();
 		}

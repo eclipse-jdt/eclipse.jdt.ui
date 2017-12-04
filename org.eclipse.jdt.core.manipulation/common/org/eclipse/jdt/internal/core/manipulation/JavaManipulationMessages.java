@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,4 +26,9 @@ public class JavaManipulationMessages extends NLS {
 
 	public static String JavaManipulationMessages_internalError;
 	public static String UndoCompilationUnitChange_no_file;
+
+	public static String OrganizeImportsOperation_description;
+	public static String JavaModelUtil_applyedit_operation;
+	public static String Resources_fileModified;
+	public static String Resources_modifiedResources;
 }

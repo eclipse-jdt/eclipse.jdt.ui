@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.codemanipulation;
+package org.eclipse.jdt.core.manipulation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
@@ -60,23 +61,22 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationMessages;
+import org.eclipse.jdt.internal.core.manipulation.Messages;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
-import org.eclipse.jdt.ui.SharedASTProvider;
 
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
-import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
 
+/**
+ * @since 1.10
+ */
 public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	public static interface IChooseImportQuery {
 		/**
@@ -141,7 +141,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 
 		private static ImportDeclaration getProblematicImport(IProblem problem, CompilationUnit cu) {
-			ASTNode coveringNode= new ProblemLocation(problem).getCoveringNode(cu);
+			ASTNode coveringNode= new NodeFinder(cu, problem.getSourceStart(),
+					problem.getSourceEnd() - problem.getSourceStart() + 1).getCoveringNode();
 			if (coveringNode != null) {
 				ASTNode importNode= ASTNodes.getParent(coveringNode, ASTNode.IMPORT_DECLARATION);
 				if (importNode instanceof ImportDeclaration) {
@@ -189,13 +190,15 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	private static class TypeReferenceProcessor {
 
 		private static class UnresolvedTypeData {
+
+
 			final SimpleName ref;
 			final int typeKinds;
 			final List<TypeNameMatch> foundInfos;
 
 			public UnresolvedTypeData(SimpleName ref) {
 				this.ref= ref;
-				this.typeKinds= org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getPossibleTypeKinds(ref, true);
+				this.typeKinds= ASTResolving.getPossibleTypeKinds(ref, true);
 				this.foundInfos= new ArrayList<>(3);
 			}
 
@@ -443,15 +446,15 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private boolean isOfKind(TypeNameMatch curr, int typeKinds, boolean is50OrHigher) {
 			int flags= curr.getModifiers();
 			if (Flags.isAnnotation(flags)) {
-				return is50OrHigher && (typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0;
+				return is50OrHigher && (typeKinds & TypeKinds.ANNOTATIONS) != 0;
 			}
 			if (Flags.isEnum(flags)) {
-				return is50OrHigher && (typeKinds & SimilarElementsRequestor.ENUMS) != 0;
+				return is50OrHigher && (typeKinds & TypeKinds.ENUMS) != 0;
 			}
 			if (Flags.isInterface(flags)) {
-				return (typeKinds & SimilarElementsRequestor.INTERFACES) != 0;
+				return (typeKinds & TypeKinds.INTERFACES) != 0;
 			}
-			return (typeKinds & SimilarElementsRequestor.CLASSES) != 0;
+			return (typeKinds & TypeKinds.CLASSES) != 0;
 		}
 
 		private boolean isVisible(TypeNameMatch curr) {
@@ -506,6 +509,16 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 	private final boolean fAllowSyntaxErrors;
 
+	/**
+	 * Creates a new OrganizeImportsOperation operation.
+	 *
+	 * @param cu The compilation unit
+	 * @param astRoot the compilation unit AST node
+	 * @param ignoreLowerCaseNames when true, type names starting with a lower case are ignored
+	 * @param save If set, the result will be saved
+	 * @param allowSyntaxErrors If set, the operation will only proceed when the compilation unit has no syntax errors
+	 * @param chooseImportQuery Query element to be used for UI interaction or <code>null</code> to not select anything
+	 */
 	public OrganizeImportsOperation(ICompilationUnit cu, CompilationUnit astRoot, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) {
 		fCompilationUnit= cu;
 		fASTRoot= astRoot;
@@ -533,13 +546,13 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			monitor= new NullProgressMonitor();
 		}
 		try {
-			monitor.beginTask(Messages.format(CodeGenerationMessages.OrganizeImportsOperation_description, BasicElementLabels.getFileName(fCompilationUnit)), 10);
+			monitor.beginTask(Messages.format(JavaManipulationMessages.OrganizeImportsOperation_description, BasicElementLabels.getFileName(fCompilationUnit)), 10);
 
     		TextEdit edit= createTextEdit(new SubProgressMonitor(monitor, 9));
     		if (edit == null)
     			return;
 
-			JavaElementUtil.applyEdit(fCompilationUnit, edit, fDoSave, new SubProgressMonitor(monitor, 1));
+			JavaModelUtil.applyEdit(fCompilationUnit, edit, fDoSave, new SubProgressMonitor(monitor, 1));
 		} finally {
 			monitor.done();
 		}
@@ -553,18 +566,21 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			fNumberOfImportsAdded= 0;
 			fNumberOfImportsRemoved= 0;
 
-			monitor.beginTask(Messages.format(CodeGenerationMessages.OrganizeImportsOperation_description, BasicElementLabels.getFileName(fCompilationUnit)), 9);
+			monitor.beginTask(Messages.format(JavaManipulationMessages.OrganizeImportsOperation_description, BasicElementLabels.getFileName(fCompilationUnit)), 9);
 
 			CompilationUnit astRoot= fASTRoot;
 			if (astRoot == null) {
-				astRoot= SharedASTProvider.getAST(fCompilationUnit, SharedASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 2));
+				astRoot= CoreASTProvider.getInstance().getAST(fCompilationUnit, CoreASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 2));
 				if (monitor.isCanceled())
 					throw new OperationCanceledException();
 			} else {
 				monitor.worked(2);
 			}
 
-			ImportRewrite importsRewrite= StubUtility.createImportRewrite(astRoot, false);
+			ImportRewrite importsRewrite = CodeStyleConfiguration.createImportRewrite(astRoot, false);
+			if (astRoot.getAST().hasResolvedBindings()) {
+				importsRewrite.setUseContextToFilterImplicitImports(true);
+			}
 
 			Set<String> oldSingleImports= new HashSet<>();
 			Set<String>  oldDemandImports= new HashSet<>();
@@ -719,10 +735,16 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		return fParsingError;
 	}
 
+	/**
+	 * @return Returns the number of import statements added for this operation
+	 */
 	public int getNumberOfImportsAdded() {
 		return fNumberOfImportsAdded;
 	}
 
+	/**
+	 * @return Returns the number of import statements removed for this operation
+	 */
 	public int getNumberOfImportsRemoved() {
 		return fNumberOfImportsRemoved;
 	}

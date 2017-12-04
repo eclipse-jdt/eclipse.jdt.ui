@@ -28,23 +28,13 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.manipulation.TypeKinds;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
 public class SimilarElementsRequestor extends CompletionRequestor {
-
-	public static final int CLASSES= 1 << 1;
-	public static final int INTERFACES= 1 << 2;
-	public static final int ANNOTATIONS= 1 << 3;
-	public static final int ENUMS= 1 << 4;
-	public static final int VARIABLES= 1 << 5;
-	public static final int PRIMITIVETYPES= 1 << 6;
-	public static final int VOIDTYPE= 1 << 7;
-	public static final int REF_TYPES= CLASSES | INTERFACES | ENUMS | ANNOTATIONS;
-	public static final int REF_TYPES_AND_VAR= REF_TYPES | VARIABLES;
-	public static final int ALL_TYPES= PRIMITIVETYPES | REF_TYPES_AND_VAR;
 
 	private static final String[] PRIM_TYPES= { "boolean", "byte", "char", "short", "int", "long", "float", "double" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 
@@ -188,35 +178,35 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 	 * Method addPrimitiveTypes.
 	 */
 	private void processKeywords() {
-		if (isKind(PRIMITIVETYPES)) {
+		if (isKind(TypeKinds.PRIMITIVETYPES)) {
 			for (int i= 0; i < PRIM_TYPES.length; i++) {
 				if (NameMatcher.isSimilarName(fName, PRIM_TYPES[i])) {
-					addResult(new SimilarElement(PRIMITIVETYPES, PRIM_TYPES[i], 50));
+					addResult(new SimilarElement(TypeKinds.PRIMITIVETYPES, PRIM_TYPES[i], 50));
 				}
 			}
 		}
-		if (isKind(VOIDTYPE)) {
+		if (isKind(TypeKinds.VOIDTYPE)) {
 			String voidType= "void"; //$NON-NLS-1$
 			if (NameMatcher.isSimilarName(fName, voidType)) {
-				addResult(new SimilarElement(PRIMITIVETYPES, voidType, 50));
+				addResult(new SimilarElement(TypeKinds.PRIMITIVETYPES, voidType, 50));
 			}
 		}
 	}
 
 	private static final int getKind(int flags, char[] typeNameSig) {
 		if (Signature.getTypeSignatureKind(typeNameSig) == Signature.TYPE_VARIABLE_SIGNATURE) {
-			return VARIABLES;
+			return TypeKinds.VARIABLES;
 		}
 		if (Flags.isAnnotation(flags)) {
-			return ANNOTATIONS;
+			return TypeKinds.ANNOTATIONS;
 		}
 		if (Flags.isInterface(flags)) {
-			return INTERFACES;
+			return TypeKinds.INTERFACES;
 		}
 		if (Flags.isEnum(flags)) {
-			return ENUMS;
+			return TypeKinds.ENUMS;
 		}
-		return CLASSES;
+		return TypeKinds.CLASSES;
 	}
 
 

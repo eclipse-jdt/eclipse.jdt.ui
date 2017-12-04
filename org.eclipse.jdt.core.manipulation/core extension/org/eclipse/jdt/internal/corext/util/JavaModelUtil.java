@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,10 +19,17 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubMonitor;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
+
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.ltk.core.refactoring.resource.Resources;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.Flags;
@@ -47,6 +54,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationMessages;
+
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
@@ -66,7 +75,9 @@ public final class JavaModelUtil {
 	static {
 		VERSION_LATEST= JavaCore.VERSION_9; // make sure it is not inlined
 	}
-	
+
+	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10003;
+
 	/**
 	 * Only use this suffix for creating new .java files.
 	 * In general, use one of the three *JavaLike*(..) methods in JavaCore or create
@@ -1026,5 +1037,30 @@ public final class JavaModelUtil {
 
 	public static boolean isPolymorphicSignature(IMethod method) {
 		return method.getAnnotation("java.lang.invoke.MethodHandle$PolymorphicSignature").exists(); //$NON-NLS-1$
+	}
+
+	/**
+	 * Applies a text edit to a compilation unit.
+	 * 
+	 * @param cu the compilation unit to apply the edit to
+	 * @param edit the edit to apply
+	 * @param save is set, save the CU after the edit has been applied
+	 * @param monitor the progress monitor to use
+	 * @throws CoreException Thrown when the access to the CU failed
+	 * @throws ValidateEditException if validate edit fails
+	 */
+	public static void applyEdit(ICompilationUnit cu, TextEdit edit, boolean save, IProgressMonitor monitor) throws CoreException, ValidateEditException {
+		SubMonitor subMonitor= SubMonitor.convert(monitor, JavaManipulationMessages.JavaModelUtil_applyedit_operation, 2);
+		IFile file= (IFile) cu.getResource();
+		if (!save || !file.exists()) {
+			cu.applyTextEdit(edit, subMonitor.split(2));
+		} else {
+			IStatus status= Resources.makeCommittable(new IResource [] {file}, null);
+			if (!status.isOK()) {
+				throw new ValidateEditException(status);
+			}
+			cu.applyTextEdit(edit, subMonitor.split(1));
+			cu.save(subMonitor.split(1), true);
+		}
 	}
 }

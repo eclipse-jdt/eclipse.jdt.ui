@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -45,8 +45,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 
@@ -1852,7 +1851,7 @@ public class AddImportTest extends CoreTests {
 
 	private void apply(ImportRewrite rewrite) throws CoreException {
 		TextEdit edit= rewrite.rewriteImports(null);
-		JavaElementUtil.applyEdit(rewrite.getCompilationUnit(), edit, true, null);
+		JavaModelUtil.applyEdit(rewrite.getCompilationUnit(), edit, true, null);
 	}
 
 }

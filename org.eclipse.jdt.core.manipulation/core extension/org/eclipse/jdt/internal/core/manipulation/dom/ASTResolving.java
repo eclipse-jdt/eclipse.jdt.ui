@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
+import org.eclipse.jdt.core.manipulation.TypeKinds;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -73,7 +74,9 @@ import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -1009,5 +1012,119 @@ public class ASTResolving {
 		astParser.setStatementsRecovery(IASTSharedValues.SHARED_AST_STATEMENT_RECOVERY);
 		astParser.setBindingsRecovery(IASTSharedValues.SHARED_BINDING_RECOVERY);
 		return (CompilationUnit) astParser.createAST(monitor);
+	}
+
+	public static int getPossibleTypeKinds(ASTNode node, boolean is50OrHigher) {
+		int kinds= internalGetPossibleTypeKinds(node);
+		if (!is50OrHigher) {
+			kinds &= (TypeKinds.INTERFACES | TypeKinds.CLASSES);
+		}
+		return kinds;
+	}
+
+	private static int internalGetPossibleTypeKinds(ASTNode node) {
+		int kind= TypeKinds.ALL_TYPES;
+
+		int mask= TypeKinds.ALL_TYPES | TypeKinds.VOIDTYPE;
+
+		ASTNode parent= node.getParent();
+		while (parent instanceof QualifiedName) {
+			if (node.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY) {
+				return TypeKinds.REF_TYPES;
+			}
+			node= parent;
+			parent= parent.getParent();
+			mask= TypeKinds.REF_TYPES;
+		}
+		while (parent instanceof Type) {
+			if (parent instanceof QualifiedType) {
+				if (node.getLocationInParent() == QualifiedType.QUALIFIER_PROPERTY) {
+					return mask & (TypeKinds.REF_TYPES);
+				}
+				mask&= TypeKinds.REF_TYPES;
+			} else if (parent instanceof NameQualifiedType) {
+				if (node.getLocationInParent() == NameQualifiedType.QUALIFIER_PROPERTY) {
+					return mask & (TypeKinds.REF_TYPES);
+				}
+				mask&= TypeKinds.REF_TYPES;
+			} else if (parent instanceof ParameterizedType) {
+				if (node.getLocationInParent() == ParameterizedType.TYPE_ARGUMENTS_PROPERTY) {
+					return mask & TypeKinds.REF_TYPES_AND_VAR;
+				}
+				mask&= TypeKinds.CLASSES | TypeKinds.INTERFACES;
+			} else if (parent instanceof WildcardType) {
+				if (node.getLocationInParent() == WildcardType.BOUND_PROPERTY) {
+					return mask & TypeKinds.REF_TYPES_AND_VAR;
+				}
+			}
+			node= parent;
+			parent= parent.getParent();
+		}
+
+		if (parent != null) {
+			switch (parent.getNodeType()) {
+				case ASTNode.TYPE_DECLARATION:
+					if (node.getLocationInParent() == TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY) {
+						kind= TypeKinds.INTERFACES;
+					} else if (node.getLocationInParent() == TypeDeclaration.SUPERCLASS_TYPE_PROPERTY) {
+						kind= TypeKinds.CLASSES;
+					}
+					break;
+				case ASTNode.ENUM_DECLARATION:
+					kind= TypeKinds.INTERFACES;
+					break;
+				case ASTNode.METHOD_DECLARATION:
+					if (node.getLocationInParent() == MethodDeclaration.THROWN_EXCEPTION_TYPES_PROPERTY) {
+						kind= TypeKinds.CLASSES;
+					} else if (node.getLocationInParent() == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
+						kind= TypeKinds.ALL_TYPES | TypeKinds.VOIDTYPE;
+					}
+					break;
+				case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
+					kind= TypeKinds.PRIMITIVETYPES | TypeKinds.ANNOTATIONS | TypeKinds.ENUMS;
+					break;
+				case ASTNode.INSTANCEOF_EXPRESSION:
+					kind= TypeKinds.REF_TYPES;
+					break;
+				case ASTNode.THROW_STATEMENT:
+					kind= TypeKinds.CLASSES;
+					break;
+				case ASTNode.CLASS_INSTANCE_CREATION:
+					if (((ClassInstanceCreation) parent).getAnonymousClassDeclaration() == null) {
+						kind= TypeKinds.CLASSES;
+					} else {
+						kind= TypeKinds.CLASSES | TypeKinds.INTERFACES;
+					}
+					break;
+				case ASTNode.SINGLE_VARIABLE_DECLARATION:
+					int superParent= parent.getParent().getNodeType();
+					if (superParent == ASTNode.CATCH_CLAUSE) {
+						kind= TypeKinds.CLASSES;
+					} else if (superParent == ASTNode.ENHANCED_FOR_STATEMENT) {
+						kind= TypeKinds.REF_TYPES;
+					}
+					break;
+				case ASTNode.TAG_ELEMENT:
+					kind= TypeKinds.REF_TYPES;
+					break;
+				case ASTNode.MARKER_ANNOTATION:
+				case ASTNode.SINGLE_MEMBER_ANNOTATION:
+				case ASTNode.NORMAL_ANNOTATION:
+					kind= TypeKinds.ANNOTATIONS;
+					break;
+				case ASTNode.TYPE_PARAMETER:
+					if (((TypeParameter) parent).typeBounds().indexOf(node) > 0) {
+						kind= TypeKinds.INTERFACES;
+					} else {
+						kind= TypeKinds.REF_TYPES_AND_VAR;
+					}
+					break;
+				case ASTNode.TYPE_LITERAL:
+					kind= TypeKinds.REF_TYPES;
+					break;
+				default:
+			}
+		}
+		return kind & mask;
 	}
 }

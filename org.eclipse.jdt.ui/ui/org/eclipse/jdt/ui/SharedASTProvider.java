@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2017 IBM Corporation and others.
+ * Copyright (c) 2007, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,8 +17,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.core.manipulation.CoreASTProvider;
 
 
 /**
@@ -125,7 +124,15 @@ public final class SharedASTProvider {
 	 *         </dl>
 	 */
 	public static CompilationUnit getAST(ITypeRoot element, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
-		return JavaPlugin.getDefault().getASTProvider().getAST(element, waitFlag, progressMonitor);
+		CoreASTProvider.WAIT_FLAG finalWaitFlag = null;
+		if (waitFlag == WAIT_ACTIVE_ONLY) {
+			finalWaitFlag = CoreASTProvider.WAIT_ACTIVE_ONLY;
+		} else if (waitFlag == WAIT_NO) {
+			finalWaitFlag= CoreASTProvider.WAIT_NO;
+		} else if (waitFlag == WAIT_YES) {
+			finalWaitFlag= CoreASTProvider.WAIT_YES;
+		}
+		return CoreASTProvider.getInstance().getAST(element, finalWaitFlag, progressMonitor);
 	}
 
 	private SharedASTProvider() {

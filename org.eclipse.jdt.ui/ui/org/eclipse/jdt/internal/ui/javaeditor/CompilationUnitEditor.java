@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -112,6 +112,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.core.manipulation.CoreASTProvider;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpPreferenceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -1660,7 +1661,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	public void aboutToBeReconciled() {
 
 		// Notify AST provider
-		JavaPlugin.getDefault().getASTProvider().aboutToBeReconciled(getInputJavaElement());
+		CoreASTProvider.getInstance().aboutToBeReconciled(getInputJavaElement());
 
 		// Notify listeners
 		for (IJavaReconcilingListener listener : fReconcilingListeners) {
@@ -1681,7 +1682,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			return;
 
 		// Always notify AST provider
-		javaPlugin.getASTProvider().reconciled(ast, getInputJavaElement(), progressMonitor);
+		CoreASTProvider.getInstance().reconciled(ast, getInputJavaElement(), progressMonitor);
 
 		// Notify listeners
 		for (IJavaReconcilingListener listener : fReconcilingListeners) {

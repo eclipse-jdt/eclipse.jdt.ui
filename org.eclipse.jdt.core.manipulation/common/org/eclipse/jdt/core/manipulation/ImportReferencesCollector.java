@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.codemanipulation;
+package org.eclipse.jdt.core.manipulation;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -65,12 +65,34 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
+/**
+ * @since 1.10
+ */
 public class ImportReferencesCollector extends GenericVisitor {
 
+	/**
+	 * Collect import statements from an AST node.
+	 *
+	 * @param node The AST node
+	 * @param project The Java project
+	 * @param rangeLimit The range within the source file
+	 * @param resultingTypeImports The collected import references
+	 * @param resultingStaticImports The collected static imports
+	 */
 	public static void collect(ASTNode node, IJavaProject project, Region rangeLimit, Collection<SimpleName> resultingTypeImports, Collection<SimpleName> resultingStaticImports) {
 		collect(node, project, rangeLimit, false, resultingTypeImports, resultingStaticImports);
 	}
 
+	/**
+	 * Collect import statements from an AST node.
+	 *
+	 * @param node The AST node
+	 * @param project The Java project
+	 * @param rangeLimit The range within the source file
+	 * @param skipMethodBodies If set, do not visit method bodies
+	 * @param resultingTypeImports  The collected import references
+	 * @param resultingStaticImports The collected static imports
+	 */
 	public static void collect(ASTNode node, IJavaProject project, Region rangeLimit, boolean skipMethodBodies, Collection<SimpleName> resultingTypeImports, Collection<SimpleName> resultingStaticImports) {
 		ASTNode root= node.getRoot();
 		CompilationUnit astRoot= root instanceof CompilationUnit ? (CompilationUnit) root : null;

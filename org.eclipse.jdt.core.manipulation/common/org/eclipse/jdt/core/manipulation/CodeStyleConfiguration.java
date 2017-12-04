@@ -9,9 +9,12 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.ui;
+package org.eclipse.jdt.core.manipulation;
+
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
@@ -23,12 +26,40 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
  * <p>
  * This class is not intended to be subclassed or instantiated by clients.
  * </p>
- * @since 3.2
+ * @since 1.10
  *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class CodeStyleConfiguration {
+
+	private static final Pattern SEMICOLON_PATTERN= Pattern.compile(";"); //$NON-NLS-1$
+
+	/**
+	 * A named preference that holds a list of semicolon separated package names. The list specifies the import order used by
+	 * the "Organize Imports" operation.
+	 * <p>
+	 * Value is of type <code>String</code>: semicolon separated list of package
+	 * names
+	 * </p>
+	 */
+	public static final String ORGIMPORTS_IMPORTORDER= "org.eclipse.jdt.ui.importorder"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that specifies the number of imports added before a star-import declaration is used.
+	 * <p>
+	 * Value is of type <code>Integer</code>: positive value specifying the number of non star-import is used
+	 * </p>
+	 */
+	public static final String ORGIMPORTS_ONDEMANDTHRESHOLD= "org.eclipse.jdt.ui.ondemandthreshold"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that specifies the number of static imports added before a star-import declaration is used.
+	 * <p>
+	 * Value is of type <code>Integer</code>: positive value specifying the number of non star-import is used
+	 * </p>
+	 */
+	public static final String ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD= "org.eclipse.jdt.ui.staticondemandthreshold"; //$NON-NLS-1$
 
 	private CodeStyleConfiguration() {
 		// do not instantiate and subclass
@@ -48,7 +79,7 @@ public class CodeStyleConfiguration {
 	 * @see ImportRewrite#create(ICompilationUnit, boolean)
 	 */
 	public static ImportRewrite createImportRewrite(ICompilationUnit cu, boolean restoreExistingImports) throws JavaModelException {
-		return org.eclipse.jdt.core.manipulation.CodeStyleConfiguration.createImportRewrite(cu, restoreExistingImports);
+		return configureImportRewrite(ImportRewrite.create(cu, restoreExistingImports));
 	}
 
 	/**
@@ -62,6 +93,37 @@ public class CodeStyleConfiguration {
 	 * @see ImportRewrite#create(CompilationUnit, boolean)
 	 */
 	public static ImportRewrite createImportRewrite(CompilationUnit astRoot, boolean restoreExistingImports) {
-		return org.eclipse.jdt.core.manipulation.CodeStyleConfiguration.createImportRewrite(astRoot, restoreExistingImports);
+		return configureImportRewrite(ImportRewrite.create(astRoot, restoreExistingImports));
 	}
+
+	private static ImportRewrite configureImportRewrite(ImportRewrite rewrite) {
+		IJavaProject project= rewrite.getCompilationUnit().getJavaProject();
+		String order= JavaManipulation.getPreference(ORGIMPORTS_IMPORTORDER, project);
+		if (order.endsWith(";")) { //$NON-NLS-1$
+			order= order.substring(0, order.length() - 1);
+		}
+		String[] split= SEMICOLON_PATTERN.split(order, -1);
+		rewrite.setImportOrder(split);
+
+		String thres= JavaManipulation.getPreference(ORGIMPORTS_ONDEMANDTHRESHOLD, project);
+		try {
+			int num= Integer.parseInt(thres);
+			if (num == 0)
+				num= 1;
+			rewrite.setOnDemandImportThreshold(num);
+		} catch (NumberFormatException e) {
+			// ignore
+		}
+		String thresStatic= JavaManipulation.getPreference(ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD, project);
+		try {
+			int num= Integer.parseInt(thresStatic);
+			if (num == 0)
+				num= 1;
+			rewrite.setStaticOnDemandImportThreshold(num);
+		} catch (NumberFormatException e) {
+			// ignore
+		}
+		return rewrite;
+	}
+
 }

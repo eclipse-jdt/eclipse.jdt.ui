@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,8 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.manipulation.TypeKinds;
+import org.eclipse.jdt.core.manipulation.TypeNameMatchCollector;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -64,17 +66,14 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.TypeNameMatchCollector;
 
 import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
-import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
 
 
 /**
@@ -187,7 +186,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			fResultingEdit= res;
 
 			if (fApply) {
-				JavaElementUtil.applyEdit(fCompilationUnit, res, fDoSave, new SubProgressMonitor(monitor, 1));
+				JavaModelUtil.applyEdit(fCompilationUnit, res, fDoSave, new SubProgressMonitor(monitor, 1));
 			}
 		} finally {
 			monitor.done();
@@ -434,10 +433,10 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	}
 
 	private int getSearchForConstant(int typeKinds) {
-		final int CLASSES= SimilarElementsRequestor.CLASSES;
-		final int INTERFACES= SimilarElementsRequestor.INTERFACES;
-		final int ENUMS= SimilarElementsRequestor.ENUMS;
-		final int ANNOTATIONS= SimilarElementsRequestor.ANNOTATIONS;
+		final int CLASSES= TypeKinds.CLASSES;
+		final int INTERFACES= TypeKinds.INTERFACES;
+		final int ENUMS= TypeKinds.ENUMS;
+		final int ANNOTATIONS= TypeKinds.ANNOTATIONS;
 
 		switch (typeKinds & (CLASSES | INTERFACES | ENUMS | ANNOTATIONS)) {
 			case CLASSES: return IJavaSearchConstants.CLASS;
@@ -457,7 +456,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	private TypeNameMatch[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, SimpleName nameNode, IProgressMonitor monitor) throws JavaModelException {
 		boolean is50OrHigher= JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject());
 
-		int typeKinds= SimilarElementsRequestor.ALL_TYPES;
+		int typeKinds= TypeKinds.ALL_TYPES;
 		if (nameNode != null) {
 			typeKinds= ASTResolving.getPossibleTypeKinds(nameNode, is50OrHigher);
 		}
@@ -482,15 +481,15 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	private boolean isOfKind(TypeNameMatch curr, int typeKinds, boolean is50OrHigher) {
 		int flags= curr.getModifiers();
 		if (Flags.isAnnotation(flags)) {
-			return is50OrHigher && (typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0;
+			return is50OrHigher && (typeKinds & TypeKinds.ANNOTATIONS) != 0;
 		}
 		if (Flags.isEnum(flags)) {
-			return is50OrHigher && (typeKinds & SimilarElementsRequestor.ENUMS) != 0;
+			return is50OrHigher && (typeKinds & TypeKinds.ENUMS) != 0;
 		}
 		if (Flags.isInterface(flags)) {
-			return (typeKinds & SimilarElementsRequestor.INTERFACES) != 0;
+			return (typeKinds & TypeKinds.INTERFACES) != 0;
 		}
-		return (typeKinds & SimilarElementsRequestor.CLASSES) != 0;
+		return (typeKinds & TypeKinds.CLASSES) != 0;
 	}
 
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,10 +19,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
 
 import org.eclipse.core.runtime.Assert;
-import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-
-import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -38,6 +35,8 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.manipulation.CodeStyleConfiguration;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
@@ -394,7 +393,7 @@ public class PreferenceConstants {
 	 * names
 	 * </p>
 	 */
-	public static final String ORGIMPORTS_IMPORTORDER= "org.eclipse.jdt.ui.importorder"; //$NON-NLS-1$
+	public static final String ORGIMPORTS_IMPORTORDER= CodeStyleConfiguration.ORGIMPORTS_IMPORTORDER;
 
 	/**
 	 * A named preference that specifies the number of imports added before a star-import declaration is used.
@@ -402,7 +401,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Integer</code>: positive value specifying the number of non star-import is used
 	 * </p>
 	 */
-	public static final String ORGIMPORTS_ONDEMANDTHRESHOLD= "org.eclipse.jdt.ui.ondemandthreshold"; //$NON-NLS-1$
+	public static final String ORGIMPORTS_ONDEMANDTHRESHOLD= CodeStyleConfiguration.ORGIMPORTS_ONDEMANDTHRESHOLD;
 
 	/**
 	 * A named preference that specifies the number of static imports added before a star-import declaration is used.
@@ -411,7 +410,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @since 3.2
 	 */
-	public static final String ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD= "org.eclipse.jdt.ui.staticondemandthreshold"; //$NON-NLS-1$
+	public static final String ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD= CodeStyleConfiguration.ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD;
 
 	/**
 	 * A named preferences that controls if types that start with a lower case letters get added by the
@@ -4198,18 +4197,7 @@ public class PreferenceConstants {
 	 * @since 3.1
 	 */
 	public static String getPreference(String key, IJavaProject project) {
-		String val;
-		if (project != null) {
-			val= new ProjectScope(project.getProject()).getNode(JavaUI.ID_PLUGIN).get(key, null);
-			if (val != null) {
-				return val;
-			}
-		}
-		val= InstanceScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).get(key, null);
-		if (val != null) {
-			return val;
-		}
-		return DefaultScope.INSTANCE.getNode(JavaUI.ID_PLUGIN).get(key, null);
+		return JavaManipulation.getPreference(key, project);
 	}
 
 	/**
