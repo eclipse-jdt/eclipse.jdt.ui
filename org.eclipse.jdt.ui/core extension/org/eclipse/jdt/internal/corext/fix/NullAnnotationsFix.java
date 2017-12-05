@@ -216,7 +216,11 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 				continue;
 			}
 
-			boolean isArgumentProblem= isComplainingAboutArgument(problem.getCoveredNode(compilationUnit));
+			ASTNode coveredNode= problem.getCoveredNode(compilationUnit);
+			boolean isArgumentProblem= isComplainingAboutArgument(coveredNode);
+			if(!isArgumentProblem && !isComplainingAboutReturn(coveredNode)) {
+				continue;
+			}
 			Builder builder= new Builder(problem, compilationUnit, nullableAnnotationName, nonNullAnnotationName,
 											/*allowRemove*/false, isArgumentProblem, ChangeKind.LOCAL);
 			boolean addNonNull= false;
