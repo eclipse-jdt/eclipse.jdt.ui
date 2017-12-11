@@ -937,7 +937,7 @@ public class JavadocView extends AbstractInfoView {
 		if (input instanceof String) {
 			javadocHtml= (String) input;
 		} else {
-			StringBuffer buffer= new StringBuffer();
+			StringBuilder buffer= new StringBuilder();
 			HTMLPrinter.insertPageProlog(buffer, 0, fForegroundColorRGB, fBackgroundColorRGB, fgStyleSheet);
 			HTMLPrinter.addPageEpilog(buffer);
 			javadocHtml= buffer.toString();
@@ -957,7 +957,7 @@ public class JavadocView extends AbstractInfoView {
 			if (javadocHtml != null && javadocHtml.length() > 0) {
 				boolean RTL= (getSite().getShell().getStyle() & SWT.RIGHT_TO_LEFT) != 0;
 				if (RTL) {
-					StringBuffer buffer= new StringBuffer(javadocHtml);
+					StringBuilder buffer= new StringBuilder(javadocHtml);
 					HTMLPrinter.insertStyles(buffer, new String[] { "direction:rtl" } ); //$NON-NLS-1$
 					javadocHtml= buffer.toString();
 				}
@@ -988,7 +988,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @return a string with the Javadoc in HTML format, or <code>null</code> if none
 	 */
 	private String getJavadocHtml(IJavaElement[] result, IWorkbenchPart activePart, ISelection selection, IProgressMonitor monitor) {
-		StringBuffer buffer= new StringBuffer();
+		StringBuilder buffer= new StringBuilder();
 		int nResults= result.length;
 
 		if (nResults == 0)

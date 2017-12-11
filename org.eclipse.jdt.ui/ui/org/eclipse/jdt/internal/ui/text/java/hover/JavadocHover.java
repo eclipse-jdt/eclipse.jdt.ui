@@ -717,7 +717,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 	 * @since 3.4
 	 */
 	public static JavadocBrowserInformationControlInput getHoverInfo(IJavaElement[] elements, ITypeRoot editorInputElement, IRegion hoverRegion, JavadocBrowserInformationControlInput previousInput) {
-		StringBuffer buffer= new StringBuffer();
+		StringBuilder buffer= new StringBuilder();
 		boolean hasContents= false;
 		String base= null;
 		IJavaElement element= null;
@@ -1142,7 +1142,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		return buf.toString();
 	}
 
-	public static void addAnnotations(StringBuffer buf, IJavaElement element, ITypeRoot editorInputElement, IRegion hoverRegion) {
+	public static void addAnnotations(StringBuilder buf, IJavaElement element, ITypeRoot editorInputElement, IRegion hoverRegion) {
 		try {
 			if (element instanceof IAnnotatable) {
 				String annotationString= getAnnotations(element, editorInputElement, hoverRegion);

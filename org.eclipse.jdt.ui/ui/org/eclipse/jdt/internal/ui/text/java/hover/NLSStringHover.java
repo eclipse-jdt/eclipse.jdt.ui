@@ -215,7 +215,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 	}
 
 	private String toHtml(String header, String string, String errorString, boolean addPreFormatted) {
-		StringBuffer buffer= new StringBuffer();
+		StringBuilder buffer= new StringBuilder();
 		HTMLPrinter.addSmallHeader(buffer, header);
 
 		if (string != null) {

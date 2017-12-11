@@ -602,7 +602,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		if (getProposalInfo() != null) {
 			String info= getProposalInfo().getInfo(monitor);
 			if (info != null && info.length() > 0) {
-				StringBuffer buffer= new StringBuffer();
+				StringBuilder buffer= new StringBuilder();
 
 				ColorRegistry registry = JFaceResources.getColorRegistry();
 				RGB fgRGB = registry.getRGB("org.eclipse.jdt.ui.Javadoc.foregroundColor"); //$NON-NLS-1$ 

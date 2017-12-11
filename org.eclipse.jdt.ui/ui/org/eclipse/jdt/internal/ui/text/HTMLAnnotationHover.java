@@ -42,7 +42,7 @@ public class HTMLAnnotationHover extends DefaultAnnotationHover {
 	 */
 	@Override
 	protected String formatSingleMessage(String message) {
-		StringBuffer buffer= new StringBuffer();
+		StringBuilder buffer= new StringBuilder();
 		HTMLPrinter.addPageProlog(buffer);
 		HTMLPrinter.addParagraph(buffer, HTMLPrinter.convertToHTMLContent(message));
 		HTMLPrinter.addPageEpilog(buffer);
@@ -54,7 +54,7 @@ public class HTMLAnnotationHover extends DefaultAnnotationHover {
 	 */
 	@Override
 	protected String formatMultipleMessages(List<String> messages) {
-		StringBuffer buffer= new StringBuffer();
+		StringBuilder buffer= new StringBuilder();
 		HTMLPrinter.addPageProlog(buffer);
 		HTMLPrinter.addParagraph(buffer, HTMLPrinter.convertToHTMLContent(JavaUIMessages.JavaAnnotationHover_multipleMarkersAtThisLine));
 
