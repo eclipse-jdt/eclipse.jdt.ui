@@ -11,6 +11,9 @@
 package org.eclipse.jdt.internal.ui.javadocexport;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -144,9 +147,12 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		createLabel(inner, SWT.NONE, JavadocExportMessages.JavadocSpecificsWizardPage_sourcecompatibility_label, createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, 0));
 
 		fSourceCombo= createCombo(inner, SWT.NONE, fStore.getSource(), createGridData(1));
-		String[] versions= { "-", //$NON-NLS-1$
-				JavaCore.VERSION_1_3, JavaCore.VERSION_1_4, JavaCore.VERSION_1_5, JavaCore.VERSION_1_6, JavaCore.VERSION_1_7, JavaCore.VERSION_1_8, JavaCore.VERSION_9 };
-		fSourceCombo.setItems(versions);
+		List<String> versions= new ArrayList<>();
+		versions.add("-"); //$NON-NLS-1$
+		versions.addAll(JavaCore.getAllVersions());
+		versions.removeAll(Arrays.asList(JavaCore.VERSION_CLDC_1_1, JavaCore.VERSION_1_1, JavaCore.VERSION_1_2));
+		fSourceCombo.setItems(versions.toArray(new String[versions.size()]));
+
 		fSourceCombo.setText(fStore.getSource());
 
 
