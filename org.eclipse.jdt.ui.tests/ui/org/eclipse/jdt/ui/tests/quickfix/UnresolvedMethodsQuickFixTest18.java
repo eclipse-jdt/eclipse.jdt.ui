@@ -15,6 +15,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.NullTestUtils;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.core.runtime.Path;
@@ -602,6 +603,54 @@ public class UnresolvedMethodsQuickFixTest18 extends QuickFixTest {
 		buf.append("	}\n");
 		buf.append("}");
 		assertProposalPreviewEquals(buf.toString(), "Create method 'g(Number, Number)' in type 'I2'", proposals2);		
+	}
+	public void testBug528876() throws Exception {
+		NullTestUtils.prepareNullTypeAnnotations(fSourceFolder);
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package pack;\n");
+			buf.append("import annots.*;\n");
+			buf.append("@NonNullByDefault\n");
+			buf.append("@interface Annot {\n");
+			buf.append("}\n");
+			buf.append("\n");
+			buf.append("@NonNullByDefault\n");
+			buf.append("@Annot(x = Bla.VALUE)\n");
+			buf.append("public class Bla {\n");
+			buf.append("    public static final String VALUE = \"\";\n");
+			buf.append("}\n");
+			buf.append("\n");
+			buf.append("");
+			ICompilationUnit cu= pack1.createCompilationUnit("Bla.java", buf.toString(), false, null);
+		
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		
+			assertCorrectLabels(proposals);
+			assertNumberOfProposals(proposals, 1);
+		
+			buf= new StringBuffer();
+			buf.append("package pack;\n");
+			buf.append("import annots.*;\n");
+			buf.append("@NonNullByDefault\n");
+			buf.append("@interface Annot {\n");
+			buf.append("\n");
+			buf.append("    String x();\n");
+			buf.append("}\n");
+			buf.append("\n");
+			buf.append("@NonNullByDefault\n");
+			buf.append("@Annot(x = Bla.VALUE)\n");
+			buf.append("public class Bla {\n");
+			buf.append("    public static final String VALUE = \"\";\n");
+			buf.append("}\n");
+			buf.append("\n");
+			buf.append("");
+		
+			assertProposalPreviewEquals(buf.toString(), "Create attribute 'x()'", proposals);
+		} finally {
+			NullTestUtils.disableAnnotationBasedNullAnalysis(fSourceFolder);
+		}
 	}
 
 }
