@@ -198,6 +198,11 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			if (JavaRuntime.isModularProject(javaProject)) {
 				// modulepath
 				runConfig.setModulepath(modulepath);
+				if (!configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_MODULE_CLI_OPTIONS, true)) {
+					runConfig.setOverrideDependencies(configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MODULE_CLI_OPTIONS, "")); //$NON-NLS-1$
+				} else {
+					runConfig.setOverrideDependencies(getModuleCLIOptions(configuration));
+				}
 			} else {
 				// Bootpath
 				runConfig.setBootClassPath(getBootpath(configuration));
