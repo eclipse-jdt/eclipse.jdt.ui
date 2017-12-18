@@ -2446,6 +2446,12 @@
          <part
                id="org.eclipse.jdt.ui.SourceView">
          </part>
+         <part
+               id="org.eclipse.jdt.ui.ModuleInfoEditor">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.ModuleInfoClassFileEditor">
+         </part>
       </actionSetPartAssociation>
    </extension>
 <!-- End Java Open action contributions  -->
@@ -2975,6 +2981,12 @@
          <part
                id="org.eclipse.jdt.ui.MembersView">
          </part>
+         <part
+               id="org.eclipse.jdt.ui.ModuleInfoEditor">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.ModuleInfoClassFileEditor">
+         </part>
       </actionSetPartAssociation>
    </extension>
 <!-- Begin Java Search action set -->
@@ -3275,6 +3287,12 @@
          <part
                id="org.eclipse.search.SearchResultView">
          </part>
+         <part
+               id="org.eclipse.jdt.ui.ModuleInfoEditor">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.ModuleInfoClassFileEditor">
+         </part>
       </actionSetPartAssociation>
    </extension>
 <!-- End Java contributions for Search view -->
@@ -3288,6 +3306,12 @@
          <part
                id="org.eclipse.jdt.ui.ClassFileEditor">
          </part>
+         <part
+               id="org.eclipse.jdt.ui.ModuleInfoEditor">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.ModuleInfoClassFileEditor">
+         </part>
       </actionSetPartAssociation>
       <actionSetPartAssociation
             targetID="org.eclipse.ui.edit.text.actionSet.presentation">
@@ -3299,6 +3323,12 @@
          </part>
          <part
                id="org.eclipse.jdt.ui.PropertiesFileEditor">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.ModuleInfoEditor">
+         </part>
+         <part
+               id="org.eclipse.jdt.ui.ModuleInfoClassFileEditor">
          </part>
       </actionSetPartAssociation>
    </extension>
