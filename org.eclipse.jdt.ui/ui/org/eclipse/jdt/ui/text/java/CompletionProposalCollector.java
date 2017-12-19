@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -561,7 +561,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * <li>POTENTIAL_METHOD_DECLARATION</li>
 	 * <li>ANONYMOUS_CLASS_DECLARATION</li>
 	 * <li>FIELD_REF</li>
-	 * <li>PACKAGE_REF (returns the package, but no type)</li>
+	 * <li>PACKAGE_REF (returns the package name, but no type)</li>
+	 * <li>MODULE_REF (returns the module name, but no type)</li>
 	 * <li>TYPE_REF</li>
 	 * </ul>
 	 *
@@ -604,6 +605,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			case CompletionProposal.JAVADOC_BLOCK_TAG:
 			case CompletionProposal.JAVADOC_INLINE_TAG:
 			case CompletionProposal.JAVADOC_PARAM_REF:
+			case CompletionProposal.MODULE_DECLARATION:
 				return null;
 			default:
 				Assert.isTrue(false);
