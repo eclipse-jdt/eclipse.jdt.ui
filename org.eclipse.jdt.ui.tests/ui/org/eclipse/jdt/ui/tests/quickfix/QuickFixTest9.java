@@ -146,4 +146,27 @@ public class QuickFixTest9 extends QuickFixTest {
 		proposals= collectCorrections(cu, astRoot, 2, 1);
 		assertProposalExists(proposals, proposalStr);
 	}
+	
+	public void testAddModuleRequiresProposalForFullyQualifiedType() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n\n");
+		buf.append("public class Cls {\n");
+		buf.append("    java.defaultProject.One one;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, 0);
+
+		String[] args= { "java.defaultProject" };
+		final String proposalStr= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_info, args);
+
+		assertProposalExists(proposals, proposalStr);
+	}
 }

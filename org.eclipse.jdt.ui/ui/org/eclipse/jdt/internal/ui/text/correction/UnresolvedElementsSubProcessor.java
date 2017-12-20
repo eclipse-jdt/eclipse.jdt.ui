@@ -845,6 +845,9 @@ public class UnresolvedElementsSubProcessor {
 				}
 			}
 		}
+		if (elements.length == 0) {
+			addRequiresModuleProposals(cu, node, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, true);
+		}
 	}
 
 	private static ChangeCorrectionProposal getCompositeChangeProposal(ChangeCorrectionProposal proposal) throws CoreException {
@@ -1106,7 +1109,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 
 		List<IPackageFragment> matchingPackageFragments= new ArrayList<>();
-		if (node.isSimpleName()) {
+		if (node.isSimpleName() && !isOnDemand) {
 			matchingPackageFragments.add((IPackageFragment) cu.getParent());
 		} else {
 			String qualifiedName= node.getFullyQualifiedName();
