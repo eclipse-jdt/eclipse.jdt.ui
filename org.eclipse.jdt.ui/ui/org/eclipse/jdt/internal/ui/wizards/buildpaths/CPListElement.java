@@ -137,6 +137,7 @@ public class CPListElement {
 				createAttributeElement(IGNORE_OPTIONAL_PROBLEMS, null, false);
 				createAttributeElement(TEST, null, false);
 				break;
+			case IClasspathEntry.CPE_JRT_SYSTEM:
 			case IClasspathEntry.CPE_LIBRARY:
 			case IClasspathEntry.CPE_VARIABLE:
 				createAttributeElement(SOURCEATTACHMENT, null, true);
@@ -271,6 +272,11 @@ public class CPListElement {
 				IPath[] exclusionPattern= (IPath[]) getAttribute(EXCLUSION);
 				IPath outputLocation= (IPath) getAttribute(OUTPUT);
 				return JavaCore.newSourceEntry(fPath, inclusionPattern, exclusionPattern, outputLocation, extraAttributes);
+			case IClasspathEntry.CPE_JRT_SYSTEM: {
+				IPath attach= (IPath) getAttribute(SOURCEATTACHMENT);
+				IAccessRule[] accesRules= (IAccessRule[]) getAttribute(ACCESSRULES);
+				return JavaCore.newJrtEntry(fPath, attach, null, accesRules, extraAttributes, isExported());
+			}
 			case IClasspathEntry.CPE_LIBRARY: {
 				IPath attach= (IPath) getAttribute(SOURCEATTACHMENT);
 				IAccessRule[] accesRules= (IAccessRule[]) getAttribute(ACCESSRULES);
@@ -932,6 +938,7 @@ public class CPListElement {
 		case IClasspathEntry.CPE_LIBRARY:
 		case IClasspathEntry.CPE_PROJECT:
 		case IClasspathEntry.CPE_VARIABLE:
+		case IClasspathEntry.CPE_JRT_SYSTEM:
 		default:
 			cpList.add(element);
 			break;

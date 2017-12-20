@@ -316,6 +316,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 	public String getCPListElementText(CPListElement cpentry) {
 		IPath path= cpentry.getPath();
 		switch (cpentry.getEntryKind()) {
+			case IClasspathEntry.CPE_JRT_SYSTEM:
 			case IClasspathEntry.CPE_LIBRARY: {
 				IModuleDescription module= cpentry.getModule();
 				if (module != null) {
@@ -443,6 +444,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 						return JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT_TESTSOURCES;
 					return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_PACKFRAG_ROOT);
 				}
+			case IClasspathEntry.CPE_JRT_SYSTEM:
 			case IClasspathEntry.CPE_LIBRARY:
 				if (cpentry.getModule() != null) {
 					return JavaPluginImages.DESC_OBJS_MODULE;

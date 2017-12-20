@@ -44,6 +44,7 @@ public class CPListElementSorter extends ViewerComparator {
 			}
 			switch (element.getEntryKind()) {
 			case IClasspathEntry.CPE_LIBRARY:
+			case IClasspathEntry.CPE_JRT_SYSTEM:
 				return LIBRARY;
 			case IClasspathEntry.CPE_PROJECT:
 				return PROJECT;
