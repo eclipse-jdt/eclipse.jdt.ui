@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -735,6 +735,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		setIgnored(CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER, true);
 		setIgnored(CompletionProposal.PACKAGE_REF, true);
 		setIgnored(CompletionProposal.MODULE_REF, true);
+		setIgnored(CompletionProposal.MODULE_DECLARATION, true);
 		setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, true);
 		setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
 		setIgnored(CompletionProposal.TYPE_REF, true);

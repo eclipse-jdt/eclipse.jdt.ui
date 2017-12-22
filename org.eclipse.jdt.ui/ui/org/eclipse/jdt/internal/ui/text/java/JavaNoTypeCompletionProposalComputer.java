@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -42,6 +42,7 @@ public class JavaNoTypeCompletionProposalComputer extends JavaCompletionProposal
 		collector.setIgnored(CompletionProposal.METHOD_REF_WITH_CASTED_RECEIVER, false);
 		collector.setIgnored(CompletionProposal.PACKAGE_REF, false);
 		collector.setIgnored(CompletionProposal.MODULE_REF, false);
+		collector.setIgnored(CompletionProposal.MODULE_DECLARATION, false);
 		collector.setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, false);
 		collector.setIgnored(CompletionProposal.VARIABLE_DECLARATION, false);
 		return collector;

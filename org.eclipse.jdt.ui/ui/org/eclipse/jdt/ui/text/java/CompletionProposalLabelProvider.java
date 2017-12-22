@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,12 +15,12 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.StyledString;
 
-
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -29,7 +29,6 @@ import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 
@@ -510,8 +509,11 @@ public class CompletionProposalLabelProvider {
 	}
 
 	StyledString createModuleProposalLabel(CompletionProposal proposal) {
-		Assert.isTrue(proposal.getKind() == CompletionProposal.MODULE_REF);
-		return Strings.markJavaElementLabelLTR(new StyledString(String.valueOf(proposal.getDeclarationSignature())));
+		int kind= proposal.getKind();
+		Assert.isTrue(kind == CompletionProposal.MODULE_REF || kind == CompletionProposal.MODULE_DECLARATION);
+		char[] label= proposal.getDeclarationSignature();
+		Assert.isNotNull(label);
+		return Strings.markJavaElementLabelLTR(new StyledString(String.valueOf(label)));
 	}
 
 	StyledString createPackageProposalLabel(CompletionProposal proposal) {
@@ -594,6 +596,7 @@ public class CompletionProposalLabelProvider {
 			case CompletionProposal.PACKAGE_REF:
 				return createPackageProposalLabel(proposal);
 			case CompletionProposal.MODULE_REF:
+			case CompletionProposal.MODULE_DECLARATION:
 				return createModuleProposalLabel(proposal);
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
 			case CompletionProposal.FIELD_REF:
@@ -657,6 +660,7 @@ public class CompletionProposalLabelProvider {
 				descriptor= JavaPluginImages.DESC_OBJS_PACKAGE;
 				break;
 			case CompletionProposal.MODULE_REF:
+			case CompletionProposal.MODULE_DECLARATION:
 				descriptor= JavaPluginImages.DESC_OBJS_MODULE;
 				break;
 			case CompletionProposal.KEYWORD:
