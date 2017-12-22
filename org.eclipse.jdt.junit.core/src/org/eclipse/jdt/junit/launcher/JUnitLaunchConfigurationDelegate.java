@@ -548,9 +548,6 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		}
 	}
 
-	/**
-	 * @since 3.10
-	 */
 	@Override
 	public String[][] getClasspathAndModulepath(ILaunchConfiguration configuration) throws CoreException {
 		String[][] cpmp= super.getClasspathAndModulepath(configuration);
