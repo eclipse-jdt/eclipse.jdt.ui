@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -406,6 +406,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
 				return createPackageProposal(proposal);
 			case CompletionProposal.MODULE_REF:
 				return createModuleProposal(proposal);
+			case CompletionProposal.MODULE_DECLARATION:
+				return createModuleProposal(proposal);
 			case CompletionProposal.TYPE_REF:
 				return createTypeProposal(proposal);
 			case CompletionProposal.JAVADOC_TYPE_REF:
@@ -563,6 +565,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * <li>FIELD_REF</li>
 	 * <li>PACKAGE_REF (returns the package name, but no type)</li>
 	 * <li>MODULE_REF (returns the module name, but no type)</li>
+	 * <li>MODULE_DECLARATION (returns the possible name of the module that is being declared, but no type)</li>
 	 * <li>TYPE_REF</li>
 	 * </ul>
 	 *
@@ -594,6 +597,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 				return Signature.toCharArray(declaration);
 			case CompletionProposal.PACKAGE_REF:
 			case CompletionProposal.MODULE_REF:
+			case CompletionProposal.MODULE_DECLARATION:
 				return proposal.getDeclarationSignature();
 			case CompletionProposal.JAVADOC_TYPE_REF:
 			case CompletionProposal.TYPE_REF:
@@ -605,7 +609,6 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			case CompletionProposal.JAVADOC_BLOCK_TAG:
 			case CompletionProposal.JAVADOC_INLINE_TAG:
 			case CompletionProposal.JAVADOC_PARAM_REF:
-			case CompletionProposal.MODULE_DECLARATION:
 				return null;
 			default:
 				Assert.isTrue(false);
