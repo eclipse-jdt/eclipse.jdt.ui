@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -191,9 +191,14 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		List<CPListElement> libelements= new ArrayList<>(cpelements.size());
 
 		int nElements= cpelements.size();
+		int size= fLibrariesList.getElements().size();
 		for (int i= 0; i < nElements; i++) {
 			CPListElement cpe= cpelements.get(i);
 			if (isEntryKind(cpe.getEntryKind())) {
+				if (size > 0) {
+					// only for update
+					cpe= checkAndUpdateIfModularJRE(cpe);
+				}
 				Object mod= cpe.getAttribute(CPListElement.MODULE);
 				if(mod == null) {
 					rootClasspath.addCPListElement(cpe);
@@ -220,6 +225,20 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		
 	}
 	
+ private CPListElement checkAndUpdateIfModularJRE(CPListElement cpe) {
+	 	boolean modularJava= false;
+	 	IVMInstall vmInstall= JavaRuntime.getVMInstall(cpe.getPath());
+	 	if (vmInstall != null) {
+	 		modularJava= JavaRuntime.isModularJava(vmInstall);
+	 	}
+	 	if (modularJava) {
+	 		// If JRE is updated to modular JRE, then cpe element has to be recreated
+	 		// so as to have the modular structure 
+	 		cpe= CPListElement.create(cpe.getClasspathEntry(), true, fCurrJProject);
+	 	}
+	 	return cpe;
+	 }
+
 	private void enableDragDropSupport() {
 		dragDropEnabled= true;
 		int ops= DND.DROP_MOVE;
@@ -871,8 +890,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 		if (res != null && res.length > 0) {
 			CPListElement curr= res[0];
+			Object attrib= curr.getAttribute(CPListElement.MODULE);
 			curr.setExported(elem.isExported());
 			curr.setAttributesFromExisting(elem);
+			// the module attribute may be changed in curr with respect to elem
+			if(attrib !=null) {
+				curr.setAttribute(IClasspathAttribute.MODULE, attrib);
+			}
 			if (hasRootNodes()) {
 				for (int i= 0; i < fLibrariesList.getElements().size(); i++) {
 					CPListElement cpe= fLibrariesList.getElement(i);
@@ -1307,6 +1331,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			IClasspathEntry created= BuildPathDialogAccess.configureContainerEntry(getShell(), existingEntry, fCurrJProject, getRawClasspath());
 			if (created != null) {
 				CPListElement elem= new CPListElement(null, fCurrJProject, created, IClasspathEntry.CPE_CONTAINER, created.getPath(), null, ! created.equals(existingEntry), null, null);
+				IVMInstall vmInstall= JavaRuntime.getVMInstall(created.getPath());
+				if (vmInstall != null) {
+					if(JavaRuntime.isModularJava(vmInstall)) {
+						elem.updateExtraAttributeOfClasspathEntry();
+					}
+				}
 				return new CPListElement[] { elem };
 			}
 		}
