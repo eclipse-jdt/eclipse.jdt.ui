@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Jesper S Møller - Bug 529432 - Allow JDT UI to target Java 10
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -122,6 +123,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String VERSION_1_7= JavaCore.VERSION_1_7;
 	private static final String VERSION_1_8= JavaCore.VERSION_1_8;
 	private static final String VERSION_9= JavaCore.VERSION_9;
+	private static final String VERSION_10= JavaCore.VERSION_10;
 	private static final String VERSION_JSR14= "jsr14"; //$NON-NLS-1$
 
 	private static final String ERROR= JavaCore.ERROR;
@@ -261,7 +263,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private Composite createComplianceTabContent(Composite folder) {
 
 		final String[] complianceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10 };
 		final String[] complianceLabels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_version13,
 			PreferencesMessages.ComplianceConfigurationBlock_version14,
@@ -270,10 +272,11 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.ComplianceConfigurationBlock_version17,
 			PreferencesMessages.ComplianceConfigurationBlock_version18,
 			PreferencesMessages.ComplianceConfigurationBlock_version9,
+			PreferencesMessages.ComplianceConfigurationBlock_version10,
 		};
 		
 		String[] targetVersions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10 };
 		String[] targetLabels= new String[] {
 				PreferencesMessages.ComplianceConfigurationBlock_versionCLDC11,
 				PreferencesMessages.ComplianceConfigurationBlock_version11,
@@ -285,6 +288,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.ComplianceConfigurationBlock_version17,
 				PreferencesMessages.ComplianceConfigurationBlock_version18,
 				PreferencesMessages.ComplianceConfigurationBlock_version9,
+				PreferencesMessages.ComplianceConfigurationBlock_version10,
 		};
 		if (ComplianceConfigurationBlock.VERSION_JSR14.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM))) {
 			targetVersions= append(targetVersions, ComplianceConfigurationBlock.VERSION_JSR14);
@@ -292,7 +296,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		}
 		
 		String[] sourceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10 };
 		String[] sourceLabels= new String[] {
 				PreferencesMessages.ComplianceConfigurationBlock_version13,
 				PreferencesMessages.ComplianceConfigurationBlock_version14,
@@ -301,6 +305,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.ComplianceConfigurationBlock_version17,
 				PreferencesMessages.ComplianceConfigurationBlock_version18,
 				PreferencesMessages.ComplianceConfigurationBlock_version9,
+				PreferencesMessages.ComplianceConfigurationBlock_version10,
 		};
 		
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
