@@ -264,13 +264,15 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 								if (path != null) {
 									IVMInstall vmInstall= JavaRuntime.getVMInstall(path);
 									if (vmInstall != null) {
-										event.doit= false;
-										break;
+										boolean isJRE= isJREContainer(path);
+										if (isJRE == true) {
+											event.doit= false;
+											break;
+										}
 									}
 								}
 							}
 						}
-
 					}
 				}
 			}
@@ -345,6 +347,18 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	}
 
+	private boolean isJREContainer(IPath path) {
+		if (path == null)
+			return false;
+		String[] segments= path.segments();
+		for (String seg : segments) {
+			if (seg.contains("JRE_CONTAINER")) { //$NON-NLS-1${
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	boolean hasRootNodes(){
 		if (fLibrariesList == null)
 			return false;
