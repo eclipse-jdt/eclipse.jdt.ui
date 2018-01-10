@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,7 +44,6 @@ import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -325,12 +324,12 @@ public class DeleteTest extends RefactoringTest {
 		verifyDisabled(elements);
 	}
 
-	public void testEnabled_defaultPackage() throws Exception{
+	public void testDisabled_defaultPackage() throws Exception {
 		IPackageFragment defaultPackage= getRoot().getPackageFragment("");
 		defaultPackage.createCompilationUnit("A.java", "", false, new NullProgressMonitor());
 
 		Object[] elements= {defaultPackage};
-		verifyEnabled(elements);
+		verifyDisabled(elements);
 	}
 
 	public void testDisabled_simpleProject() throws Exception{
@@ -1087,41 +1086,6 @@ public class DeleteTest extends RefactoringTest {
 		doTestUndoRedo(deleted, exist);
 	}
 
-	public void testDeletePackage11() throws Exception {
-		// Test deletion of default package of a project which is its own source folder
-		// (default) <- delete
-		// (default).A
-		// (default) x.txt <- don't delete
-		// expected: x.txt must not be deleted
-
-		IJavaProject newJavaProject= JavaProjectHelper.createJavaProject("TestProject"+System.currentTimeMillis(), "bin");
-		JavaProjectHelper.addRTJar(newJavaProject);
-		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(newJavaProject, null);
-
-		IPackageFragment defaultP= root.getPackageFragment("");
-		IFile file= ((IContainer)defaultP.getResource()).getFile(new Path("Z.txt"));
-		file.create(getStream("123"), true, null);
-
-		ICompilationUnit a= defaultP.createCompilationUnit("A.java", "public class A {}", false, null);
-
-		ParticipantTesting.reset();
-		final Object[] markedForDelete= new Object[] { defaultP };
-		String[] deleteHandles= ParticipantTesting.createHandles(new Object[] { defaultP, a.getResource() });
-
-		verifyEnabled(markedForDelete);
-		mustPerformDummySearch();
-		DeleteRefactoring ref= createRefactoring(markedForDelete);
-		RefactoringStatus status= performRefactoring(ref, true);
-		assertEquals("expected to pass", null, status);
-
-		ParticipantTesting.testDelete(deleteHandles);
-		Object[] deleted= new Object[]{a};
-		Object[] exist= new Object[]{defaultP, file};
-		doTestUndoRedo(deleted, exist);
-
-		JavaProjectHelper.delete(newJavaProject);
-	}
-
 	public void testDeletePackage12() throws Exception {
 		// a0		<- delete
 		// a0.a1	<- delete
@@ -1196,46 +1160,6 @@ public class DeleteTest extends RefactoringTest {
 	}
 
 	/* Don't rename! See #suite() */
-	public void test_END_DeletePackageSub2() throws Exception {
-		// (default)	<- delete
-		// a0
-		// a0.a1
-		// expected: nothing deleted; no notification about deletion
-		IPackageFragment[] frags= createPackagePath(2);
-		IPackageFragment p= getRoot().getPackageFragment("p");
-		if (p.exists()) p.delete(true, null);
-		final IPackageFragment defaultPackage= getRoot().getPackageFragment("");
-		executeDeletePackage(new Object[] { defaultPackage }, new IPackageFragment[] { defaultPackage }, new Object[0], true);
-		Object[] deleted= null;
-		Object[] exist= new Object[]{frags[1], frags[0], defaultPackage};
-		doTestUndoRedo(deleted, exist);
-	}
-
-	/* Don't rename! See #suite() */
-	public void test_END_DeletePackageSub3() throws Exception {
-		// (default)	<- delete
-		// (default).A
-		// (default)/file.txt
-		// a0
-		// a0.a1
-		// expected: A deleted; notification about deletion of:
-		// PackageFragments: <default>
-		// Folders: -
-		// Files: A.java (NOT other files in root, like file.txt).
-		IPackageFragment[] frags= createPackagePath(2);
-		final IPackageFragment defaultPackage= getRoot().getPackageFragment("");
-		IPackageFragment p= getRoot().getPackageFragment("p");
-		if (p.exists()) p.delete(true, null);
-		ICompilationUnit a= defaultPackage.createCompilationUnit("A.java", "public class A {}", false, null);
-		IFile file= ((IContainer)defaultPackage.getResource()).getFile(new Path("file.txt"));
-		file.create(getStream("123"), true, null);
-		executeDeletePackage(new Object[] { defaultPackage }, new IPackageFragment[0], new Object[] { defaultPackage, a.getResource() } , true);
-		Object[] deleted= new Object[]{a};
-		Object[] exist= new Object[]{frags[1], frags[0], defaultPackage, file};
-		doTestUndoRedo(deleted, exist);
-	}
-
-	/* Don't rename! See #suite() */
 	public void test_END_DeletePackageSub4() throws Exception {
 		// (default)
 		// a0 <- delete
@@ -1248,27 +1172,6 @@ public class DeleteTest extends RefactoringTest {
 		if (p.exists()) p.delete(true, null);
 		executeDeletePackage(new Object[] { frags[0] }, frags, new Object[] { frags[0].getResource() } , true);
 		Object[] deleted= new Object[]{frags[1], frags[0]};
-		Object[] exist= null;
-		doTestUndoRedo(deleted, exist);
-	}
-
-	/* Don't rename! See #suite() */
-	public void test_END_DeletePackageSub5() throws Exception {
-		// (default)	<- delete
-		// (default).A
-		// a0 <- delete
-		// a0.a1
-		// expected: everything deleted; notification about deletion of:
-		// PackageFragments: a0, a0.a1, <default>
-		// Folders: a0 (NOT the folder of the default package)
-		// Files: A.java (NOT other files in root, like .classpath).
-		IPackageFragment[] frags= createPackagePath(2);
-		final IPackageFragment defaultPackage= getRoot().getPackageFragment("");
-		IPackageFragment p= getRoot().getPackageFragment("p");
-		if (p.exists()) p.delete(true, null);
-		ICompilationUnit a= defaultPackage.createCompilationUnit("A.java", "public class A {}", false, null);
-		executeDeletePackage(new Object[] { defaultPackage, frags[0] }, frags, new Object[] { defaultPackage, a.getResource(), frags[0].getResource() } , true);
-		Object[] deleted= new Object[]{frags[1], frags[0], a};
 		Object[] exist= null;
 		doTestUndoRedo(deleted, exist);
 	}
