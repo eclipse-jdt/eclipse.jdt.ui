@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -44,6 +44,7 @@ public final class NewWizardMessages extends NLS {
 
 	public static String AddSourceFolderWizardPage_description;
 	public static String AddSourceFolderWizardPage_addSinglePattern;
+	public static String AddSourceFolderWizardPage_dialog_title;
 	public static String AddSourceFolderWizardPage_directory_message;
 	public static String AddSourceFolderWizardPage_conflictWarning;
 	public static String AddSourceFolderWizardPage_error_NotARelativePathName;
@@ -210,6 +211,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewJavaProjectWizardPage_title;
 	public static String NewJavaProjectWizardPage_description;
 	public static String NewJavaProjectWizardPageTwo_error_message;
+	public static String NewJavaProjectWizardPageOne_dialog_title;
 	public static String NewJavaProjectWizardPageOne_directory_message;
 	public static String NewJavaProjectWizardPageOne_JREGroup_link_description;
 	public static String NewJavaProjectWizardPageOne_JREGroup_default_compliance;
