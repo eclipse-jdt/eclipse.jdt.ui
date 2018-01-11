@@ -199,6 +199,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					// only for update
 					cpe= checkAndUpdateIfModularJRE(cpe);
 				}
+				if (cpe.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+					if (cpe.getAttribute(CPListElement.MODULE) == null && !isJREContainer(cpe.getPath())) {
+						cpe.updateExtraAttributeOfClasspathEntry();
+						cpe.setAttribute(CPListElement.MODULE, null);
+					}
+				}
 				Object mod= cpe.getAttribute(CPListElement.MODULE);
 				if(mod == null) {
 					rootClasspath.addCPListElement(cpe);
@@ -366,7 +372,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			return false;
 		String[] segments= path.segments();
 		for (String seg : segments) {
-			if (seg.contains("JRE_CONTAINER")) { //$NON-NLS-1${
+			if (seg.equals(JavaRuntime.JRE_CONTAINER)) {
 				return true;
 			}
 		}
