@@ -225,19 +225,19 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		
 	}
 	
- private CPListElement checkAndUpdateIfModularJRE(CPListElement cpe) {
-	 	boolean modularJava= false;
-	 	IVMInstall vmInstall= JavaRuntime.getVMInstall(cpe.getPath());
-	 	if (vmInstall != null) {
-	 		modularJava= JavaRuntime.isModularJava(vmInstall);
-	 	}
-	 	if (modularJava) {
-	 		// If JRE is updated to modular JRE, then cpe element has to be recreated
-	 		// so as to have the modular structure 
-	 		cpe= CPListElement.create(cpe.getClasspathEntry(), true, fCurrJProject);
-	 	}
-	 	return cpe;
-	 }
+	private CPListElement checkAndUpdateIfModularJRE(CPListElement cpe) {
+		boolean modularJava= false;
+		IVMInstall vmInstall= JavaRuntime.getVMInstall(cpe.getPath());
+		if (vmInstall != null) {
+			modularJava= JavaRuntime.isModularJava(vmInstall);
+		}
+		if (modularJava) {
+			// If JRE is updated to modular JRE, then cpe element has to be recreated
+			// so as to have the modular structure 
+			cpe= CPListElement.create(cpe.getClasspathEntry(), true, fCurrJProject);
+		}
+		return cpe;
+	}
 
 	private void enableDragDropSupport() {
 		dragDropEnabled= true;
@@ -908,7 +908,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			curr.setExported(elem.isExported());
 			curr.setAttributesFromExisting(elem);
 			// the module attribute may be changed in curr with respect to elem
-			if(attrib !=null) {
+			if (attrib != null) {
 				curr.setAttribute(IClasspathAttribute.MODULE, attrib);
 			}
 			if (hasRootNodes()) {
@@ -1334,7 +1334,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				CPListElement[] res= new CPListElement[created.length];
 				for (int i= 0; i < res.length; i++) {
 					res[i]= CPListElement.create(created[i], true, fCurrJProject);
-					if(shouldAddModule && res[i].getClasspathEntry().getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+					if (shouldAddModule && res[i].getClasspathEntry().getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 						res[i].updateExtraAttributeOfClasspathEntry();
 					}
 				}
