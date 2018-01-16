@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,14 +38,20 @@ import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 
+import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.CollectionsUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
-import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
+import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 
@@ -95,6 +101,9 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 			if (JavaElementHyperlinkDetector.class == getClass() && findBreakOrContinueTarget(input, region) != null)
 				return new IHyperlink[] { new JavaElementHyperlink(wordRegion, (SelectionDispatchAction)openAction, null, false) };
 			
+			if (JavaElementHyperlinkDetector.class == getClass() && findSwitchCaseTarget(input, region) != null)
+				return new IHyperlink[] { new JavaElementHyperlink(wordRegion, (SelectionDispatchAction) openAction, null, false) };
+
 			IJavaElement[] elements;
 			long modStamp= documentProvider.getModificationStamp(editorInput);
 			if (input.equals(fLastInput) && modStamp == fLastModStamp && wordRegion.equals(fLastWordRegion)) {
@@ -232,5 +241,36 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 			}
 		}
 		return null;
-	}	
+	}
+
+	/**
+	 * Finds the target for switch-case node.
+	 * 
+	 * @param input the editor input
+	 * @param region the region
+	 * @return the switch-case target location or <code>null</code> if none
+	 * @since 3.14
+	 */
+	public static OccurrenceLocation findSwitchCaseTarget(ITypeRoot input, IRegion region) {
+		CompilationUnit astRoot= SharedASTProvider.getAST(input, SharedASTProvider.WAIT_NO, null);
+		if (astRoot == null) {
+			return null;
+		}
+
+		ASTNode node= NodeFinder.perform(astRoot, region.getOffset(), region.getLength());
+		if (!(node instanceof SwitchCase)) {
+			return null;
+		}
+		SwitchCase caseNode= (SwitchCase) node;
+
+		ASTNode parent= caseNode.getParent();
+		if (!(parent instanceof SwitchStatement)) {
+			return null;
+		}
+		SwitchStatement switchNode= (SwitchStatement) parent;
+
+		String description= Messages.format(SearchMessages.BreakContinueTargetFinder_occurrence_description, BasicElementLabels.getJavaElementName(ASTNodes.asString(caseNode)));
+		return new OccurrenceLocation(switchNode.getStartPosition(), 6, 0, description); // '6' is the length of 'switch'
+	}
+
 }
