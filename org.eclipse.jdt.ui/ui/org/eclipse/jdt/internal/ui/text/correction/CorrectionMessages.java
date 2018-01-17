@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -88,6 +88,7 @@ public final class CorrectionMessages extends NLS {
 	public static String ReorgCorrectionsSubProcessor_organizeimports_description;
 	public static String ReorgCorrectionsSubProcessor_addcp_project_description;
 	public static String ReorgCorrectionsSubProcessor_addcp_archive_description;
+	public static String ReorgCorrectionsSubProcessor_move_cpentry_mpentry_description;
 	public static String ReorgCorrectionsSubProcessor_addcp_classfolder_description;
 	public static String ReorgCorrectionsSubProcessor_change_project_compliance_description;
 	public static String ReorgCorrectionsSubProcessor_change_workspace_compliance_description;
