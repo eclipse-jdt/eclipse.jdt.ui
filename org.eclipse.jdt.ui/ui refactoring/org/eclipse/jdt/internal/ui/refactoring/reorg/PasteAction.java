@@ -381,15 +381,19 @@ public class PasteAction extends SelectionDispatchAction{
 				if (unit.types().size() > 0)
 					return parseAsTypes(text, unit);
 
-				parser.setProject(javaProject);
+				if (javaProject != null) {
+					parser.setProject(javaProject);
+				} else if (compilerCompliance != null) {
+					Map<String, String> options= JavaCore.getOptions();
+					JavaModelUtil.setComplianceOptions(options, compilerCompliance);
+					parser.setCompilerOptions(options);
+				}
 				parser.setSource(text.toCharArray());
 				parser.setStatementsRecovery(true);
 				parser.setUnitName(JavaModelUtil.MODULE_INFO_JAVA);
 				unit= (CompilationUnit) parser.createAST(null);
 				if (unit.getModule() != null) {
 					return Collections.singletonList(new ParsedCu(text, ASTParser.K_COMPILATION_UNIT, null, null, true));
-				} else {
-					parser.setUnitName(null);
 				}
 
 				parser.setProject(javaProject);
