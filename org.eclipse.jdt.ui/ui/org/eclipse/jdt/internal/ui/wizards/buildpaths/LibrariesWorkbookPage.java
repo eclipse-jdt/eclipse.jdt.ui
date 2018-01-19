@@ -1358,8 +1358,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				CPListElement[] res= new CPListElement[created.length];
 				for (int i= 0; i < res.length; i++) {
 					res[i]= CPListElement.create(created[i], true, fCurrJProject);
-					if (shouldAddModule && res[i].getClasspathEntry().getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-						res[i].updateExtraAttributeOfClasspathEntry();
+					if (res[i].getClasspathEntry().getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+						if (!isJREContainer(res[i].getPath())) {
+							res[i].updateExtraAttributeOfClasspathEntry();
+						}
+						if (!shouldAddModule) {
+							res[i].setAttribute(CPListElement.MODULE, null);
+						}
 					}
 				}
 				return res;
