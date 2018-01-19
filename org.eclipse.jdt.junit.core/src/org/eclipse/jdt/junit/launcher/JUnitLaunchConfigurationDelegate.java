@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -46,6 +46,8 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -316,7 +318,24 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 
 		boolean isJUnit5= TestKindRegistry.JUNIT5_TEST_KIND_ID.equals(getTestRunnerKind(configuration).getId());
 		boolean isModularProject= JavaRuntime.isModularProject(getJavaProject(configuration));
-		boolean addOpensRequired= isJUnit5 && isModularProject;
+		String addOpensTargets;
+		if (isModularProject) {
+			if (isJUnit5) {
+				if (isOnModulePath(getJavaProject(configuration), "org.junit.jupiter.api.Test")) { //$NON-NLS-1$
+					addOpensTargets= "org.junit.platform.commons,ALL-UNNAMED"; //$NON-NLS-1$
+				} else {
+					addOpensTargets= "ALL-UNNAMED"; //$NON-NLS-1$
+				}
+			} else {
+				if (isOnModulePath(getJavaProject(configuration), "junit.framework.TestCase")) { //$NON-NLS-1$
+					addOpensTargets= "junit,ALL-UNNAMED"; //$NON-NLS-1$
+				} else {
+					addOpensTargets= "ALL-UNNAMED"; //$NON-NLS-1$
+				}
+			}
+		} else {
+			addOpensTargets= null;
+		}
 		List<String> addOpensVmArgs= new ArrayList<>();
 
 		/*
@@ -352,12 +371,12 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 				IMethod method= (IMethod) testElement;
 				programArguments.add("-test"); //$NON-NLS-1$
 				programArguments.add(method.getDeclaringType().getFullyQualifiedName() + ':' + method.getElementName());
-				collectAddOpensVmArgs(addOpensRequired, addOpensVmArgs, method, configuration);
+				collectAddOpensVmArgs(addOpensTargets, addOpensVmArgs, method, configuration);
 			} else if (testElement instanceof IType) {
 				IType type= (IType) testElement;
 				programArguments.add("-classNames"); //$NON-NLS-1$
 				programArguments.add(type.getFullyQualifiedName());
-				collectAddOpensVmArgs(addOpensRequired, addOpensVmArgs, type, configuration);
+				collectAddOpensVmArgs(addOpensTargets, addOpensVmArgs, type, configuration);
 			} else if (testElement instanceof IPackageFragment || testElement instanceof IPackageFragmentRoot || testElement instanceof IJavaProject) {
 				Set<String> pkgNames= new HashSet<>();
 				String fileName= createPackageNamesFile(testElement, testRunnerKind, pkgNames);
@@ -365,7 +384,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 				programArguments.add(fileName);
 				for (String pkgName : pkgNames) {
 					if (!DEFAULT.equals(pkgName)) { // skip --add-opens for default package 
-						collectAddOpensVmArgs(addOpensRequired, addOpensVmArgs, pkgName, configuration);
+						collectAddOpensVmArgs(addOpensTargets, addOpensVmArgs, pkgName, configuration);
 					}
 				}
 			} else {
@@ -376,7 +395,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			programArguments.add("-testNameFile"); //$NON-NLS-1$
 			programArguments.add(fileName);
 			for (IJavaElement testElement : testElements) {
-				collectAddOpensVmArgs(addOpensRequired, addOpensVmArgs, testElement, configuration);
+				collectAddOpensVmArgs(addOpensTargets, addOpensVmArgs, testElement, configuration);
 			}
 		}
 
@@ -416,28 +435,42 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			}
 		}
 
-		if (addOpensRequired) {
+		if (addOpensTargets != null) {
 			vmArguments.addAll(addOpensVmArgs);
 		}
 	}
 
-	private void collectAddOpensVmArgs(boolean addOpensRequired, List<String> addOpensVmArgs, IJavaElement javaElem, ILaunchConfiguration configuration) throws CoreException {
-		if (addOpensRequired) {
+	private static boolean isOnModulePath(IJavaProject javaProject, String typeToCheck) {
+		try {
+			IType type= javaProject.findType(typeToCheck);
+			if (type == null)
+				return false;
+			IPackageFragmentRoot packageFragmentRoot= (IPackageFragmentRoot) type.getPackageFragment().getParent();
+			IClasspathEntry resolvedClasspathEntry= packageFragmentRoot.getResolvedClasspathEntry();
+			return Arrays.stream(resolvedClasspathEntry.getExtraAttributes())
+					.anyMatch(p -> p.getName().equals(IClasspathAttribute.MODULE) && p.getValue().equals("true")); //$NON-NLS-1$
+		} catch (JavaModelException e) {
+			// if anything goes wrong, assume true (in the worst case, user get a warning because of a redundant add-opens)
+			return true;
+		}
+	}
+
+	private void collectAddOpensVmArgs(String addOpensTargets, List<String> addOpensVmArgs, IJavaElement javaElem, ILaunchConfiguration configuration) throws CoreException {
+		if (addOpensTargets != null) {
 			IPackageFragment pkg= getParentPackageFragment(javaElem);
 			if (pkg != null) {
 				String pkgName= pkg.getElementName();
-				collectAddOpensVmArgs(addOpensRequired, addOpensVmArgs, pkgName, configuration);
+				collectAddOpensVmArgs(addOpensTargets, addOpensVmArgs, pkgName, configuration);
 			}
 		}
 	}
 
-	private void collectAddOpensVmArgs(boolean addOpensRequired, List<String> addOpensVmArgs, String pkgName, ILaunchConfiguration configuration) throws CoreException {
-		if (addOpensRequired) {
+	private void collectAddOpensVmArgs(String addOpensTargets, List<String> addOpensVmArgs, String pkgName, ILaunchConfiguration configuration) throws CoreException {
+		if (addOpensTargets != null) {
 			IJavaProject javaProject= getJavaProject(configuration);
 			String sourceModuleName= javaProject.getModuleDescription().getElementName();
-			String targetModuleName= "org.junit.platform.commons,ALL-UNNAMED"; //$NON-NLS-1$
 			addOpensVmArgs.add("--add-opens"); //$NON-NLS-1$
-			addOpensVmArgs.add(sourceModuleName + "/" + pkgName + "=" + targetModuleName); //$NON-NLS-1$ //$NON-NLS-2$			
+			addOpensVmArgs.add(sourceModuleName + "/" + pkgName + "=" + addOpensTargets); //$NON-NLS-1$ //$NON-NLS-2$			
 		}
 	}
 
