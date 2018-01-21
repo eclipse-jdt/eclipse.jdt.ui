@@ -51,11 +51,26 @@ public class JarRsrcLoader {
 			else
 				rsrcUrls[i] = new URL(JIJConstants.JAR_INTERNAL_URL_PROTOCOL_WITH_COLON + rsrcPath + JIJConstants.JAR_INTERNAL_SEPARATOR);    
 		}
-		ClassLoader jceClassLoader = new URLClassLoader(rsrcUrls, null);
+		ClassLoader jceClassLoader = new URLClassLoader(rsrcUrls, getParentClassLoader());
 		Thread.currentThread().setContextClassLoader(jceClassLoader);
 		Class c = Class.forName(mi.rsrcMainClass, true, jceClassLoader);
 		Method main = c.getMethod(JIJConstants.MAIN_METHOD_NAME, new Class[]{args.getClass()}); 
 		main.invoke((Object)null, new Object[]{args});
+	}
+
+	private static ClassLoader getParentClassLoader() throws InvocationTargetException, IllegalAccessException {
+		// On Java8, it is ok to use a null parent class loader, but, starting with Java 9,
+		// we need to provide one that has access to the restricted list of packages that
+		// otherwise would produce a SecurityException when loaded
+		try {
+			// We use reflection here because the method ClassLoader.getPlatformClassLoader()
+			// is only present starting from Java 9
+			Method platformClassLoader = ClassLoader.class.getMethod("getPlatformClassLoader");
+			return (ClassLoader) platformClassLoader.invoke(null);
+		} catch (NoSuchMethodException e) {
+			// This is a safe value to be used on Java 8 an previous versions
+			return null;
+		}
 	}
 
 	private static ManifestInfo getManifestInfo() throws IOException {
