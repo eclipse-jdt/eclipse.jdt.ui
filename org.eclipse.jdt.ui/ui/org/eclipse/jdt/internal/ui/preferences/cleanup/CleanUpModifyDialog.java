@@ -181,7 +181,7 @@ public class CleanUpModifyDialog extends ModifyDialog {
 			count+= fPages[i].getSelectedCleanUpCount();
 		}
 
-		fCountLabel.setText(Messages.format(CleanUpMessages.CleanUpModifyDialog_XofYSelected_Label, new Object[] {new Integer(count), new Integer(size)}));
+		fCountLabel.setText(Messages.format(CleanUpMessages.CleanUpModifyDialog_XofYSelected_Label, new Object[] {Integer.valueOf(count), Integer.valueOf(size)}));
 	}
 
 	/**

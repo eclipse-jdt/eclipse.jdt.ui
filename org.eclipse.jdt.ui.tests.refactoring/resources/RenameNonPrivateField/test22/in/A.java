@@ -18,7 +18,7 @@ class B {
 		Object o= a.tee;
 		
 		A<Number> an= new A<Number>();
-		an.setTee(new Double(1.3d));
+		an.setTee(Double.valueOf(1.3d));
 		
 		A<? extends Number> at= new A<Integer>();
 		Number tee=at.getTee();

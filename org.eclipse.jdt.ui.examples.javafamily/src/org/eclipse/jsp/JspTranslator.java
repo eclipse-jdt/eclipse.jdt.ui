@@ -92,7 +92,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 			char c= t.charAt(i++);
 			if (c == '\n') {
 				fContent.append("    System.out.println(\"" + out.toString() + "\");  //$NON-NLS-1$\n");  //$NON-NLS-1$//$NON-NLS-2$
-				fContentLines.add(new Integer(line++));
+				fContentLines.add(Integer.valueOf(line++));
 				out.setLength(0);
 			} else {
 				out.append(c);	
@@ -100,7 +100,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 		}
 		if (out.length() > 0)  {
 			fContent.append("    System.out.print(\"" + out.toString() + "\");  //$NON-NLS-1$\n"); //$NON-NLS-1$ //$NON-NLS-2$
-			fContentLines.add(new Integer(line));
+			fContentLines.add(Integer.valueOf(line));
 		}
 	}
 	

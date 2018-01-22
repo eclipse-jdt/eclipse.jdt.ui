@@ -2,15 +2,15 @@ package p;
 
 class A {
     public static void main(String[] args) {
-        new Generic<Number>().take(new Double(1));
-        new Generic<Integer>().take(new Integer(2));
+        new Generic<Number>().take(Double.valueOf(1));
+        new Generic<Integer>().take(Integer.valueOf(2));
 
-        new Impl().take(new Integer(3));
-        new Impl().take(new Float(4));
+        new Impl().take(Integer.valueOf(3));
+        new Impl().take(Float.valueOf(4));
         
         Generic<Number> gn= new Impl();
-        gn.take(new Integer(6));
-        gn.take(new Double(7));
+        gn.take(Integer.valueOf(6));
+        gn.take(Double.valueOf(7));
     }
 }
 

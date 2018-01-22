@@ -244,7 +244,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			if (!modelElement.isGrayed()) {
 				return BasicElementLabels.getWorkingSetLabel(workingSet);
 			} else {
-				return Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_XofY_label, new Object[] { BasicElementLabels.getWorkingSetLabel(workingSet), new Integer(modelElement.getCheckCount()), new Integer(modelElement.getElementCount())});
+				return Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_XofY_label, new Object[] { BasicElementLabels.getWorkingSetLabel(workingSet), Integer.valueOf(modelElement.getCheckCount()), Integer.valueOf(modelElement.getElementCount())});
 			}
 
 		}
@@ -655,7 +655,7 @@ public final class ConfigureWorkingSetAssignementAction extends SelectionDispatc
 			}
 			dialog.setMessage(Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_DialogMessage_specific, elementName));
 		} else {
-			dialog.setMessage(Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_DialogMessage_multi, new Integer(elements.length)));
+			dialog.setMessage(Messages.format(WorkingSetMessages.ConfigureWorkingSetAssignementAction_DialogMessage_multi, Integer.valueOf(elements.length)));
 		}
 		if (dialog.open() == Window.OK) {
 			updateWorkingSets(dialog.getSelection(), dialog.getGrayed(), elements);

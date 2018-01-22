@@ -453,7 +453,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	private void updateSelectedClassesLabel() {
 		int noOfClassesChecked= fClassesInSuiteTable.getCheckedElements().length;
 		String key= (noOfClassesChecked==1) ? WizardMessages.NewTestClassWizPage_treeCaption_classSelected : WizardMessages.NewTestClassWizPage_treeCaption_classesSelected;
-		fSelectedClassesLabel.setText(Messages.format(key, new Integer(noOfClassesChecked)));
+		fSelectedClassesLabel.setText(Messages.format(key, Integer.valueOf(noOfClassesChecked)));
 	}
 
 

@@ -12,6 +12,6 @@ class Tuple<T1, T2> {
 
 class Main {
 	public static void main(String[] args) {
-		Tuple<String, Integer> t= new Tuple<String, Integer>(new String(), new Integer(10));
+		Tuple<String, Integer> t= new Tuple<String, Integer>(new String(), Integer.valueOf(10));
 	}
 }

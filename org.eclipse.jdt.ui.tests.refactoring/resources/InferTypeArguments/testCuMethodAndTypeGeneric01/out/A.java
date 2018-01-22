@@ -2,7 +2,7 @@ package p;
 
 class A {
     void call(My<String> my) {
-        my.method("Eclipse1", new Integer(1));
+        my.method("Eclipse1", Integer.valueOf(1));
     }
 }
 

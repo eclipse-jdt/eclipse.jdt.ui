@@ -1179,7 +1179,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fCUHandle));
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fNewMethodName);
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + 1, JavaRefactoringDescriptorUtil.elementToHandle(project, binding.getJavaElement()));
-			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.valueOf(fSelectionStart).toString() + " " + Integer.valueOf(fSelectionLength).toString()); //$NON-NLS-1$
 			arguments.put(ATTRIBUTE_PROTECT, Boolean.valueOf(fProtectConstructor).toString());
 			final DynamicValidationStateChange result= new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.IntroduceFactory_name);
 			boolean hitInFactoryClass= false;

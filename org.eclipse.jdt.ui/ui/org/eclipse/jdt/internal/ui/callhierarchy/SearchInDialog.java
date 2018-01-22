@@ -207,7 +207,7 @@ class SearchInDialog extends TrayDialog {
 	private Button createButton(Composite parent, int style, String text, int data, boolean isSelected) {
 		Button button= new Button(parent, style);
 		button.setText(text);
-		button.setData(new Integer(data));
+		button.setData(Integer.valueOf(data));
 		button.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 		button.setSelection(isSelected);
 		return button;

@@ -3043,7 +3043,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			buf.append("        if (integer != null) {\n");
 			buf.append("            return integer;\n");
 			buf.append("        } else {\n");
-			buf.append("            return new Double(Double.MAX_VALUE);\n");
+			buf.append("            return Double.valueOf(Double.MAX_VALUE);\n");
 			buf.append("        }\n");
 			buf.append("    }\n");
 			buf.append("}\n");
@@ -3061,7 +3061,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 			buf.append("package test1;\n");
 			buf.append("public class E {\n");
 			buf.append("    public Number foo(Integer integer) {\n");
-			buf.append("        return integer != null ? integer : (Number) new Double(Double.MAX_VALUE);\n");
+			buf.append("        return integer != null ? integer : (Number) Double.valueOf(Double.MAX_VALUE);\n");
 			buf.append("    }\n");
 			buf.append("}\n");
 			String expected1= buf.toString();

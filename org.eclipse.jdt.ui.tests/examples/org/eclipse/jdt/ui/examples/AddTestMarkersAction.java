@@ -126,10 +126,10 @@ public class AddTestMarkersAction extends Action implements IActionDelegate {
 		HashMap<String, Object> map= new HashMap<>();
 		map.put(IMarker.LOCATION, cu.getElementName());
 		map.put(IMarker.MESSAGE, "Test marker");
-		map.put(IMarker.SEVERITY, new Integer(IMarker.SEVERITY_ERROR));
-		map.put(IMarker.LINE_NUMBER, new Integer(line));
-		map.put(IMarker.CHAR_START, new Integer(offset));
-		map.put(IMarker.CHAR_END, new Integer(offset + len));
+		map.put(IMarker.SEVERITY, Integer.valueOf(IMarker.SEVERITY_ERROR));
+		map.put(IMarker.LINE_NUMBER, Integer.valueOf(line));
+		map.put(IMarker.CHAR_START, Integer.valueOf(offset));
+		map.put(IMarker.CHAR_END, Integer.valueOf(offset + len));
 
 		MarkerUtilities.createMarker(cu.getResource(), map, MARKER_TYPE);
 	}

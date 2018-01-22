@@ -7,7 +7,7 @@ public class A {
 	void foo() {
 		List l= new ArrayList();
 		l.add("Eclipse");
-		l.add(new Integer(10));
+		l.add(Integer.valueOf(10));
 		bar(l);
 	}
 	void bar(Object o) {

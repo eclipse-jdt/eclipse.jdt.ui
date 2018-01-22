@@ -68,7 +68,7 @@ public class MultiStateCellEditor extends CellEditor {
 	 */
 	@Override
 	protected Object doGetValue() {
-		return new Integer(fValue);
+		return Integer.valueOf(fValue);
 	}
 
 	/*

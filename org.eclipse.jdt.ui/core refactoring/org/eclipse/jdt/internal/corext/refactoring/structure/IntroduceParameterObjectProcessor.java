@@ -358,13 +358,13 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 		Map<Integer, ParameterInfo> paramIndex= new HashMap<>();
 		for (Iterator<ParameterInfo> iter= pis.iterator(); iter.hasNext();) {
 			ParameterInfo pi= iter.next();
-			paramIndex.put(new Integer(pi.getOldIndex()), pi);
+			paramIndex.put(Integer.valueOf(pi.getOldIndex()), pi);
 		}
-		paramIndex.put(new Integer(ParameterInfo.INDEX_FOR_ADDED), fParameterObjectReference);
+		paramIndex.put(Integer.valueOf(ParameterInfo.INDEX_FOR_ADDED), fParameterObjectReference);
 		pis.clear();
 		for (int i= 0; i < parameters.length; i++) {
 			Parameter param= parameters[i];
-			ParameterInfo pi= paramIndex.get(new Integer(param.getIndex()));
+			ParameterInfo pi= paramIndex.get(Integer.valueOf(param.getIndex()));
 			pis.add(pi);
 			if (param != IntroduceParameterObjectDescriptor.PARAMETER_OBJECT) {
 				pi.setCreateField(param.isCreateField());

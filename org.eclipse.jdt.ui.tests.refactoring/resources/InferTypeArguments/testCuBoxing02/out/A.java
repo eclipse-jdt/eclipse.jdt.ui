@@ -20,7 +20,7 @@ class CellTest {
 		Cell<Number> c2= null;
 		c2.setT(18);
 		Cell<Number> c3= new Cell<Number>();
-		c3.setT(new Long(23));
+		c3.setT(Long.valueOf(23));
 		c2= c3;
 	}
 }

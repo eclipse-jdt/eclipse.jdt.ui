@@ -16,6 +16,6 @@ class A {
 	void fooInteger() {
 		List<String> lInteger= new ArrayList<String>();
 		lInteger.add("Eclipse");
-		boolean has= lInteger.contains(new Integer(1));
+		boolean has= lInteger.contains(Integer.valueOf(1));
 	}
 }

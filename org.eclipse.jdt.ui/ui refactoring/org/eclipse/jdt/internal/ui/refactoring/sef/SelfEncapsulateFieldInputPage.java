@@ -321,13 +321,13 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		Integer[] data= null;
 		if (Flags.isPrivate(visibility)) {
 			labels= new String[] { pub, pro, def, priv };
-			data= new Integer[] {new Integer(Flags.AccPublic), new Integer(Flags.AccProtected), new Integer(0), new Integer(Flags.AccPrivate) };
+			data= new Integer[] {Integer.valueOf(Flags.AccPublic), Integer.valueOf(Flags.AccProtected), Integer.valueOf(0), Integer.valueOf(Flags.AccPrivate) };
 		} else if (Flags.isProtected(visibility)) {
 			labels= new String[] { pub, pro };
-			data= new Integer[] {new Integer(Flags.AccPublic), new Integer(Flags.AccProtected)};
+			data= new Integer[] {Integer.valueOf(Flags.AccPublic), Integer.valueOf(Flags.AccProtected)};
 		} else {
 			labels= new String[] { pub, def };
-			data= new Integer[] {new Integer(Flags.AccPublic), new Integer(0)};
+			data= new Integer[] {Integer.valueOf(Flags.AccPublic), Integer.valueOf(0)};
 		}
 		return new Object[] {labels, data};
 	}

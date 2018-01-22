@@ -440,9 +440,9 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 		}
 		String label= ""; //$NON-NLS-1$
 		if (checkedMethodCount == 1)
-			label= Messages.format(WizardMessages.NewTestCaseWizardPageTwo_selected_methods_label_one, new Integer(checkedMethodCount));
+			label= Messages.format(WizardMessages.NewTestCaseWizardPageTwo_selected_methods_label_one, Integer.valueOf(checkedMethodCount));
 		else
-			label= Messages.format(WizardMessages.NewTestCaseWizardPageTwo_selected_methods_label_many, new Integer(checkedMethodCount));
+			label= Messages.format(WizardMessages.NewTestCaseWizardPageTwo_selected_methods_label_many, Integer.valueOf(checkedMethodCount));
 		fSelectedMethodsLabel.setText(label);
 	}
 

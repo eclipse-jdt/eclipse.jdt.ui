@@ -20,6 +20,6 @@ public class TestVarArgsReordered {
 		foo(new FooParameter(new int[] {1,2,3,4}, new String[0]));
 		foo(new FooParameter(new int[]{1, 2, 3, 4, 5}, new String[0]));
 		foo(new FooParameter(new int[]{Integer.parseInt("5")}, new String[0]));
-		foo(new FooParameter(new int[]{new Integer(6).intValue(), 2, 3}, new String[0]));
+		foo(new FooParameter(new int[]{Integer.valueOf(6).intValue(), 2, 3}, new String[0]));
 	}
 }

@@ -6312,7 +6312,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        int i= 0;\n");
-		buf.append("        Integer in= new Integer(i++);\n");
+		buf.append("        Integer in= Integer.valueOf(i++);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);

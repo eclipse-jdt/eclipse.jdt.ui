@@ -71,13 +71,13 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 		IFile file= (IFile)unit.getResource();
 
 		IMarker marker= file.createMarker(markerType);
-		marker.setAttribute(IMarker.LINE_NUMBER, new Integer(lineNumber));
+		marker.setAttribute(IMarker.LINE_NUMBER, Integer.valueOf(lineNumber));
 
 		IDocument document= new Document(unit.getBuffer().getContents());
 		int offset= document.getLineOffset(lineNumber - 1);
-		marker.setAttribute(IMarker.CHAR_START, new Integer(offset));
+		marker.setAttribute(IMarker.CHAR_START, Integer.valueOf(offset));
 		int lenght= offset + document.getLineLength(lineNumber - 1) - 1;
-		marker.setAttribute(IMarker.CHAR_END, new Integer(lenght));
+		marker.setAttribute(IMarker.CHAR_END, Integer.valueOf(lenght));
 
 		assertMarker(marker.getId(), unit, lineNumber, offset, lenght);
 

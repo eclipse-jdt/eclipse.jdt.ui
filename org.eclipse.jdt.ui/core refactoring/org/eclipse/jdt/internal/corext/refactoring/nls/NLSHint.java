@@ -144,7 +144,7 @@ public class NLSHint {
 					if (superType != null && NLS.class.getName().equals(superType.getQualifiedName())) {
 						Integer line;
 						try {
-							line = new Integer(document.getLineOfOffset(node.getStartPosition()));
+							line = Integer.valueOf(document.getLineOfOffset(node.getStartPosition()));
 						} catch (BadLocationException e) {
 							return true; // ignore and continue
 						}

@@ -564,10 +564,10 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			comment.addSetting(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_declare_static);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(projectName, fCu));
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fClassName);
-		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + ' ' + new Integer(fSelectionLength).toString());
+		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.valueOf(fSelectionStart).toString() + ' ' + Integer.valueOf(fSelectionLength).toString());
 		arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
 		arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
-		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
+		arguments.put(ATTRIBUTE_VISIBILITY, Integer.valueOf(fVisibility).toString());
 
 		ConvertAnonymousDescriptor descriptor= RefactoringSignatureDescriptorFactory.createConvertAnonymousDescriptor(projectName, description, comment.asString(), arguments, flags);
 		return new RefactoringChangeDescriptor(descriptor);

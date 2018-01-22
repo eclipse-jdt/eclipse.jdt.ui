@@ -8334,7 +8334,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        Object o = true ? new Integer(1) + 2 : new Double(0.0) + 3;\n");
+		buf.append("        Object o = true ? Integer.valueOf(1) + 2 : Double.valueOf(0.0) + 3;\n");
 		buf.append("        System.out.println(o);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -8349,7 +8349,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        Object o = (double) (new Integer(1) + 2);\n");
+		buf.append("        Object o = (double) (Integer.valueOf(1) + 2);\n");
 		buf.append("        System.out.println(o);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -8368,7 +8368,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        Object o = true ? new Integer(1) : new Double(0.0);\n");
+		buf.append("        Object o = true ? Integer.valueOf(1) : Double.valueOf(0.0);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -8382,7 +8382,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        Object o = (double) new Integer(1);\n");
+		buf.append("        Object o = (double) Integer.valueOf(1);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String[] expected= new String[] { buf.toString() };

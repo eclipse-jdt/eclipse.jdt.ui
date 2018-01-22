@@ -248,7 +248,7 @@ public class JavaSearchQuery implements ISearchQuery {
 					return Messages.format(SearchMessages.JavaSearchQuery_singularReferencesWithMatchLocations, new Object[] { args[0], args[1], matchLocations });
 			}
 		} else {
-			Object[] args= { getSearchPatternDescription(), new Integer(nMatches), getFirstSpecification().getScopeDescription() };
+			Object[] args= { getSearchPatternDescription(), Integer.valueOf(nMatches), getFirstSpecification().getScopeDescription() };
 			switch (limitTo) {
 				case IJavaSearchConstants.IMPLEMENTORS:
 					return Messages.format(SearchMessages.JavaSearchOperation_pluralImplementorsPostfix, args);

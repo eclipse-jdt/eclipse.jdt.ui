@@ -5,6 +5,6 @@ public class A implements I {
 	 * @see p.I#m()
 	 */
 	public void m() {
-        int[] array= { new Integer(1) };
+        int[] array= { Integer.valueOf(1) };
 	}
 }

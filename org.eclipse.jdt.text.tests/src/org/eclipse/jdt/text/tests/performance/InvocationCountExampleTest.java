@@ -36,10 +36,10 @@ public class InvocationCountExampleTest extends TestCase {
 		try {
 			Set<Double> set= new HashSet<>();
 			performanceMeter.start();
-			set.add(new Double(10));
-			set.add(new Double(9));
-			set.add(new Double(11));
-			set.add(new Double(10));
+			set.add(Double.valueOf(10));
+			set.add(Double.valueOf(9));
+			set.add(Double.valueOf(11));
+			set.add(Double.valueOf(10));
 			performanceMeter.stop();
 			performanceMeter.commit();
 		} finally {

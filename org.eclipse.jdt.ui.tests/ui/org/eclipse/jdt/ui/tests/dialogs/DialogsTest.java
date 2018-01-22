@@ -168,12 +168,12 @@ public class DialogsTest extends TestCase {
 
 	public void testElementListSelectionDialog2() throws Exception {
 		Object[] elements= new Integer[] {
-			new Integer(0),
-			new Integer(1),
-			new Integer(2),
-			new Integer(7),
-			new Integer(12),
-			new Integer(42)
+			Integer.valueOf(0),
+			Integer.valueOf(1),
+			Integer.valueOf(2),
+			Integer.valueOf(7),
+			Integer.valueOf(12),
+			Integer.valueOf(42)
 		};
 
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new TestLabelProvider());
@@ -182,13 +182,13 @@ public class DialogsTest extends TestCase {
 		dialog.setMessage("Message");
 		dialog.setEmptyListMessage("empty messgae");
 		dialog.setElements(elements);
-		dialog.setInitialSelections(new Object[] {new Integer(7)});
+		dialog.setInitialSelections(new Object[] {Integer.valueOf(7)});
 
 		DialogCheck.assertDialog(dialog);
 
 		Object[] results= dialog.getResult();
 		assertTrue(results.length == 1);
-		assertEquals(new Integer(7), results[0]);
+		assertEquals(Integer.valueOf(7), results[0]);
 	}
 
 }

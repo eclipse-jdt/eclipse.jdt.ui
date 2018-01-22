@@ -90,7 +90,7 @@ public class TestRunHandler extends DefaultHandler {
 			if (line - 20 >= fLastReportedLine) {
 				line -= line % 20;
 				fLastReportedLine= line;
-				fMonitor.subTask(NLS.bind(ModelMessages.TestRunHandler_lines_read, new Integer(line)));
+				fMonitor.subTask(NLS.bind(ModelMessages.TestRunHandler_lines_read, Integer.valueOf(line)));
 			}
 		}
 		if (Thread.interrupted())

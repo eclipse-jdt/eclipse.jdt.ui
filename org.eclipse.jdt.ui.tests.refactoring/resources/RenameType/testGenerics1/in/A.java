@@ -15,6 +15,6 @@ class X {
     void x(A a) {
         new A<Integer>();
         new A<Integer>(null);
-        new <String>A<Integer>(new Integer(1), "x");
+        new <String>A<Integer>(Integer.valueOf(1), "x");
     };
 }

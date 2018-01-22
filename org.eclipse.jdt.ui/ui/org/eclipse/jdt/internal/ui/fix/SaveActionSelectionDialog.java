@@ -73,7 +73,7 @@ public class SaveActionSelectionDialog extends CleanUpSelectionDialog {
 
 	@Override
 	protected String getSelectionCountMessage(int selectionCount, int size) {
-		return Messages.format(SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_XofYSelected_Label, new Object[] {new Integer(selectionCount), new Integer(size)});
+		return Messages.format(SaveParticipantMessages.CleanUpSaveParticipantConfigurationModifyDialog_XofYSelected_Label, new Object[] {Integer.valueOf(selectionCount), Integer.valueOf(size)});
 	}
 
 	@Override

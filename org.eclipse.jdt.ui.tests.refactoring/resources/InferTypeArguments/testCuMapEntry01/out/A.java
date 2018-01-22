@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 class A {
 	void sets() {
 		Map<String, Integer> map= new HashMap<String, Integer>();
-		map.put("key", new Integer(17));
+		map.put("key", Integer.valueOf(17));
 		Iterator<Entry<String, Integer>> iter= map.entrySet().iterator();
 		Entry<String, Integer> entry= iter.next();
 	}

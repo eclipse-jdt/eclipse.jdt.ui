@@ -459,8 +459,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			comment.addSetting(RefactoringCoreMessages.SelfEncapsulateField_generate_comments);
 		final EncapsulateFieldDescriptor descriptor= RefactoringSignatureDescriptorFactory.createEncapsulateFieldDescriptor(project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fField));
-		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
-		arguments.put(ATTRIBUTE_INSERTION, new Integer(fInsertionIndex).toString());
+		arguments.put(ATTRIBUTE_VISIBILITY, Integer.valueOf(fVisibility).toString());
+		arguments.put(ATTRIBUTE_INSERTION, Integer.valueOf(fInsertionIndex).toString());
 		arguments.put(ATTRIBUTE_SETTER, fSetterName);
 		arguments.put(ATTRIBUTE_GETTER, fGetterName);
 		arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fGenerateJavadoc).toString());

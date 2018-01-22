@@ -69,7 +69,7 @@ public class InlineTempWizard extends RefactoringWizard {
 
 				default:
 					return Messages.format(RefactoringMessages.InlineTempInputPage_message_multi, new Object[] {
-							new Integer(occurrences), identifier });
+							Integer.valueOf(occurrences), identifier });
 			}
 		}
 	}

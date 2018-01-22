@@ -565,7 +565,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 
 		final Map<String, String> arguments= new HashMap<>();
 		arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());
-		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.valueOf(fSelectionStart).toString() + " " + Integer.valueOf(fSelectionLength).toString()); //$NON-NLS-1$
 		arguments.putAll(argumentsMap);
 		String signature= fChangeSignatureProcessor.getMethodName();
 		try {

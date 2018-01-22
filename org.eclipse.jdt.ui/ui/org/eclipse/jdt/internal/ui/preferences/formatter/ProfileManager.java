@@ -473,7 +473,7 @@ public abstract class ProfileManager extends Observable {
 	 */
 	protected void notifyObservers(int message) {
 		setChanged();
-		notifyObservers(new Integer(message));
+		notifyObservers(Integer.valueOf(message));
 	}
 
 	public static boolean hasProjectSpecificSettings(IScopeContext context, KeySet[] keySets) {

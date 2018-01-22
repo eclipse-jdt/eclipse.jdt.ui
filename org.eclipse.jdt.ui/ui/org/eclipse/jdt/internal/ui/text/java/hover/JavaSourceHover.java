@@ -279,7 +279,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 				endLine= document.getLineInformation(line1 + noOfSourceLines);
 				fUpwardShiftInLines= noOfSourceLines;
 				if (skippedLines > 0) {
-					fBracketHoverStatus= Messages.format(JavaHoverMessages.JavaSourceHover_skippedLines, new Integer(skippedLines));
+					fBracketHoverStatus= Messages.format(JavaHoverMessages.JavaSourceHover_skippedLines, Integer.valueOf(skippedLines));
 				}
 			} else {
 				noOfSourceLines= line2 - line1;
@@ -403,7 +403,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 		if (fUpwardShiftInLines == 0)
 			return null;
 		if ((totalSkippedLines) > 0) {
-			fBracketHoverStatus= Messages.format(JavaHoverMessages.JavaSourceHover_skippedLines, new Integer(totalSkippedLines));
+			fBracketHoverStatus= Messages.format(JavaHoverMessages.JavaSourceHover_skippedLines, Integer.valueOf(totalSkippedLines));
 		}
 		return hoverText;
 	}

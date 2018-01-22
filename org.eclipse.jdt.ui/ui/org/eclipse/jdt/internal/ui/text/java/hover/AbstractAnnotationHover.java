@@ -518,7 +518,7 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			GridData layoutData= new GridData(SWT.FILL, SWT.CENTER, true, false);
 			String linkText;
 			if (isMultiFix) {
-				linkText= Messages.format(JavaHoverMessages.AbstractAnnotationHover_multifix_variable_description, new Integer(count));
+				linkText= Messages.format(JavaHoverMessages.AbstractAnnotationHover_multifix_variable_description, Integer.valueOf(count));
 			} else {
 				linkText= proposal.getDisplayString();
 			}

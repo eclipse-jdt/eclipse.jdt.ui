@@ -34,19 +34,19 @@ public class CellEditorTester extends TestCase {
 
 	public void test0(){
 		MultiStateCellEditor ce= new MultiStateCellEditor(null, 3, 0);
-		assertTrue(ce.getValue().equals(new Integer(0)));
+		assertTrue(ce.getValue().equals(Integer.valueOf(0)));
 	}
 
 	public void test1(){
 		MultiStateCellEditor ce= new MultiStateCellEditor(null, 3, 0);
 		ce.activate();
-		assertTrue(ce.getValue().equals(new Integer(1)));
+		assertTrue(ce.getValue().equals(Integer.valueOf(1)));
 	}
 	public void test2(){
 		MultiStateCellEditor ce= new MultiStateCellEditor(null, 3, 0);
 		ce.activate();
 		ce.activate();
-		assertTrue(ce.getValue().equals(new Integer(2)));
+		assertTrue(ce.getValue().equals(Integer.valueOf(2)));
 	}
 
 	public void test3(){
@@ -54,20 +54,20 @@ public class CellEditorTester extends TestCase {
 		ce.activate();
 		ce.activate();
 		ce.activate();
-		assertTrue(ce.getValue().equals(new Integer(0)));
+		assertTrue(ce.getValue().equals(Integer.valueOf(0)));
 	}
 
 	public void test4(){
 		MultiStateCellEditor ce= new MultiStateCellEditor(null, 3, 0);
-		ce.setValue(new Integer(1));
-		assertTrue(ce.getValue().equals(new Integer(1)));
+		ce.setValue(Integer.valueOf(1));
+		assertTrue(ce.getValue().equals(Integer.valueOf(1)));
 	}
 
 	public void test5(){
 		MultiStateCellEditor ce= new MultiStateCellEditor(null, 3, 0);
-		ce.setValue(new Integer(2));
+		ce.setValue(Integer.valueOf(2));
 		ce.activate();
-		assertTrue(ce.getValue().equals(new Integer(0)));
+		assertTrue(ce.getValue().equals(Integer.valueOf(0)));
 	}
 }
 

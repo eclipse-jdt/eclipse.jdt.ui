@@ -65,9 +65,9 @@ public class PromoteTempWizard extends RefactoringWizard {
 							RefactoringMessages.PromoteTempInputPage_Current_method,
 							RefactoringMessages.PromoteTempInputPage_constructors};
 		private static final Integer[] RADIO_BUTTON_DATA= {
-							new Integer(PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD),
-							new Integer(PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD),
-							new Integer(PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR)};
+							Integer.valueOf(PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD),
+							Integer.valueOf(PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD),
+							Integer.valueOf(PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR)};
 		private Button fDeclareStaticCheckbox;
 		private Button fDeclareFinalCheckbox;
 		private Button[] fInitializeInRadioButtons;

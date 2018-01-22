@@ -585,7 +585,7 @@ public class JavaElementLabelsTest extends CoreTests {
 	}
 	
 	public void testMethodLabelVarargsReference3() throws Exception {
-		assertMethodLabelVarargsReference("1, 2, new Integer(3)");
+		assertMethodLabelVarargsReference("1, 2, Integer.valueOf(3)");
 	}
 	
 	private void assertMethodLabelVarargsReference(String args) throws CoreException, JavaModelException {

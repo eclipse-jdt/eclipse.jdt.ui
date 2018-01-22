@@ -670,7 +670,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		TreeInfoCollector collector= new TreeInfoCollector(root);
 
 		String msg= "{0} ({1}).  Creation time: {2,number} ms.  Size: {3,number} nodes, {4,number} bytes (AST nodes only)."; //$NON-NLS-1$
-		Object[] args= { element.getElementName(), version, new Long(time),  new Integer(collector.getNumberOfNodes()), new Integer(collector.getSize())};
+		Object[] args= { element.getElementName(), version, Long.valueOf(time),  Integer.valueOf(collector.getNumberOfNodes()), Integer.valueOf(collector.getSize())};
 		setContentDescription(MessageFormat.format(msg, args));
 
 	}

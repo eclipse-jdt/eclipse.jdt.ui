@@ -100,9 +100,9 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 
 			String message;
 			if (count == 1) {
-				message= Messages.format(WizardMessages.UpdateAllTests_selected_methods_label_one, new Integer(count));
+				message= Messages.format(WizardMessages.UpdateAllTests_selected_methods_label_one, Integer.valueOf(count));
 			} else {
-				message= Messages.format(WizardMessages.UpdateAllTests_selected_methods_label_many, new Integer(count));
+				message= Messages.format(WizardMessages.UpdateAllTests_selected_methods_label_many, Integer.valueOf(count));
 			}
 			return new JUnitStatus(IStatus.INFO, message);
 		}

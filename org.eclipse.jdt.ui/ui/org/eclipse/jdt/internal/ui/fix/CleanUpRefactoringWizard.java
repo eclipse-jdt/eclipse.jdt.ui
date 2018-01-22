@@ -200,7 +200,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 
 			@Override
 			protected String getSelectionCountMessage(int selectionCount, int size) {
-				return Messages.format(MultiFixMessages.CleanUpRefactoringWizard_XofYCleanUpsSelected_message, new Object[] {new Integer(selectionCount), new Integer(size)});
+				return Messages.format(MultiFixMessages.CleanUpRefactoringWizard_XofYCleanUpsSelected_message, new Object[] {Integer.valueOf(selectionCount), Integer.valueOf(size)});
 			}
 
 			@Override
@@ -263,9 +263,9 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			if (cleanUpTargetsSize == 1) {
 				setMessage(MultiFixMessages.CleanUpRefactoringWizard_CleaningUp11_Title);
 			} else if (projects.length == 1) {
-				setMessage(Messages.format(MultiFixMessages.CleanUpRefactoringWizard_CleaningUpN1_Title, new Integer(cleanUpTargetsSize)));
+				setMessage(Messages.format(MultiFixMessages.CleanUpRefactoringWizard_CleaningUpN1_Title, Integer.valueOf(cleanUpTargetsSize)));
 			} else {
-				setMessage(Messages.format(MultiFixMessages.CleanUpRefactoringWizard_CleaningUpNN_Title, new Object[] {new Integer(cleanUpTargetsSize), new Integer(projects.length)}));
+				setMessage(Messages.format(MultiFixMessages.CleanUpRefactoringWizard_CleaningUpNN_Title, new Object[] {Integer.valueOf(cleanUpTargetsSize), Integer.valueOf(projects.length)}));
 			}
         }
 

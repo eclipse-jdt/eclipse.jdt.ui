@@ -653,7 +653,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 					}
 			} catch (IOException exception) {
 				if (line > 0) {
-					String message= Messages.format(JavaUIMessages.AbstractSpellingDictionary_encodingError, new Object[] { new Integer(line), BasicElementLabels.getURLPart(url.toString()) });
+					String message= Messages.format(JavaUIMessages.AbstractSpellingDictionary_encodingError, new Object[] { Integer.valueOf(line), BasicElementLabels.getURLPart(url.toString()) });
 					IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, exception);
 					JavaPlugin.log(status);
 				} else

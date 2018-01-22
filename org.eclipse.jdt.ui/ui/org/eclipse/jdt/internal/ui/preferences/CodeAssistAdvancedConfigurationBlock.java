@@ -692,7 +692,7 @@ final class CodeAssistAdvancedConfigurationBlock extends OptionsConfigurationBlo
 					int max= 5000;
 					if (number < min || number > max) {
 						String msgFormat= PreferencesMessages.CodeAssistAdvancedConfigurationBlock_parameterNameFromAttachedJavadoc_timeout_invalidRange;
-						String msg= Messages.format(msgFormat, new Object[] {new Integer(min), new Integer(max)});
+						String msg= Messages.format(msgFormat, new Object[] {Integer.valueOf(min), Integer.valueOf(max)});
 						status.setError(msg);
 					}
 				} catch (NumberFormatException ex) {

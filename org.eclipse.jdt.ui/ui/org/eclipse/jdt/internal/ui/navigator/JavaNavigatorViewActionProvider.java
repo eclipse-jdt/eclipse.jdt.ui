@@ -147,7 +147,7 @@ public class JavaNavigatorViewActionProvider extends CommonActionProvider {
 		// If no memento try an restore from preference store
 		if (state == null) {
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-			state= new Integer(store.getInt(TAG_LAYOUT));
+			state= Integer.valueOf(store.getInt(TAG_LAYOUT));
 		}
 
 		if (state.intValue() == FLAT_LAYOUT)

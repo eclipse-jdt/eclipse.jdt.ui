@@ -470,7 +470,7 @@ public class TypeInfoViewer {
 			} else {
 				return Messages.format(
 					JavaUIMessages.TypeInfoViewer_progress_label,
-					new Object[] { fName, new Integer((int)((fWorked * 100) / fTotalWork)) });
+					new Object[] { fName, Integer.valueOf((int)((fWorked * 100) / fTotalWork)) });
 			}
 		}
 	}

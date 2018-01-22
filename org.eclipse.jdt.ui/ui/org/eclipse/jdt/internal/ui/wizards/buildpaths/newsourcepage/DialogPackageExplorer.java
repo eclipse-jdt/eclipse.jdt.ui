@@ -169,7 +169,7 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
                         if (excluded == 1)
                             return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_SingleExcluded, text);
                         else if (excluded > 1)
-                            return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_MultiExcluded, new Object[] {text, new Integer(excluded)});
+                            return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_MultiExcluded, new Object[] {text, Integer.valueOf(excluded)});
                     }
                 }
                 if (element instanceof IJavaProject) {
@@ -182,7 +182,7 @@ public class DialogPackageExplorer implements IMenuListener, IPostSelectionProvi
                             if (excluded == 1)
                                 return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_SingleExcluded, text);
                             else if (excluded > 1)
-                                return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_MultiExcluded, new Object[] {text, new Integer(excluded)});
+                                return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_MultiExcluded, new Object[] {text, Integer.valueOf(excluded)});
                         }
                     }
                 }

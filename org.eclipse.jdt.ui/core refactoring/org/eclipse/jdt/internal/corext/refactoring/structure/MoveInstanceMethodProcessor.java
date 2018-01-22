@@ -1783,7 +1783,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			arguments.put(ATTRIBUTE_INLINE, Boolean.valueOf(fInline).toString());
 			arguments.put(ATTRIBUTE_USE_GETTER, Boolean.valueOf(fUseGetters).toString());
 			arguments.put(ATTRIBUTE_USE_SETTER, Boolean.valueOf(fUseSetters).toString());
-			arguments.put(ATTRIBUTE_TARGET_INDEX, new Integer(getTargetIndex()).toString());
+			arguments.put(ATTRIBUTE_TARGET_INDEX, Integer.valueOf(getTargetIndex()).toString());
 			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.MoveInstanceMethodRefactoring_name, list.toArray(new Change[list.size()]));
 		} finally {
 			monitor.done();

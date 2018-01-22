@@ -3825,7 +3825,7 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("            System.out.println(\"hey\");\n");
 		buf.append("        }\n");
 		buf.append("    };\n");
-		buf.append("    Function<String, Integer> a5= s ->/*[5]*/ new Integer(s+1);\n");
+		buf.append("    Function<String, Integer> a5= s ->/*[5]*/ Integer.valueOf(s+1);\n");
 		buf.append("\n");
 		buf.append("    BiFunction<Integer, Integer, int[][][]> a6 = (a, b) ->/*[6]*/ new int[a][b][];\n");
 		buf.append("    IntFunction<Integer[][][]> a61 = value ->/*[61]*/ new Integer[][][] {{{7, 8}}};\n");

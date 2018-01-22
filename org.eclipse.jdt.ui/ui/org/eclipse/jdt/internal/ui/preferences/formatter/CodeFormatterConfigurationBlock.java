@@ -51,7 +51,7 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
     		"private final LinkedList fStack;" + //$NON-NLS-1$
     		"public MyIntStack(){fStack= new LinkedList();}" + //$NON-NLS-1$
     		"public int pop(){return ((Integer)fStack.removeFirst()).intValue();}" + //$NON-NLS-1$
-    		"public void push(int elem){fStack.addFirst(new Integer(elem));}" + //$NON-NLS-1$
+    		"public void push(int elem){fStack.addFirst(Integer.valueOf(elem));}" + //$NON-NLS-1$
     		"public boolean isEmpty() {return fStack.isEmpty();}" + //$NON-NLS-1$
     		"}"; //$NON-NLS-1$
 

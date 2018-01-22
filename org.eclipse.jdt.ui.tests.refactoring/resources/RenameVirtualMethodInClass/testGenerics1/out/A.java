@@ -1,14 +1,14 @@
 class Test {
     public static void main(String[] args) {
-        new A<Number>().k(new Double(1));
-        new A<Integer>().k(new Integer(2));
+        new A<Number>().k(Double.valueOf(1));
+        new A<Integer>().k(Integer.valueOf(2));
 
-        new Impl().m(new Integer(3));
-        new Impl().k(new Float(4));
+        new Impl().m(Integer.valueOf(3));
+        new Impl().k(Float.valueOf(4));
         
         A<Number> a= new Impl();
-        a.k(new Integer(6));
-        a.k(new Double(7));
+        a.k(Integer.valueOf(6));
+        a.k(Double.valueOf(7));
     }
 }
 

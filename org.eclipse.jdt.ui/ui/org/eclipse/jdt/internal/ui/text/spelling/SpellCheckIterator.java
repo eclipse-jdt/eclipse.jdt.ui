@@ -121,7 +121,7 @@ public class SpellCheckIterator implements ISpellCheckIterator {
 		int offset= iterator.current();
 		while (offset != BreakIterator.DONE) {
 
-			fSentenceBreaks.add(new Integer(offset));
+			fSentenceBreaks.add(Integer.valueOf(offset));
 			offset= iterator.next();
 		}
 	}

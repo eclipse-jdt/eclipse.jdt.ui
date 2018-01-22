@@ -6,7 +6,7 @@ import java.util.List;
 class A {
 	void foo() {
 		List l= new ArrayList();
-		l.add(new Integer(1));
+		l.add(Integer.valueOf(1));
 		Number n= (Number) l.get(0);
 		Object o1= (Number) l.get(0);
 		Object o2= l.get(0);

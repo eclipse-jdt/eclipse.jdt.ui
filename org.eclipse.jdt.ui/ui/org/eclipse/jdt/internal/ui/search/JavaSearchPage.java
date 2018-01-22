@@ -824,7 +824,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 			int totNum= MatchLocations.getTotalNumberOfSettings(searchFor);
 			int currNum= MatchLocations.getNumberOfSelectedSettings(fMatchLocations, searchFor);
 
-			fMatchLocationsLink.setText(Messages.format(SearchMessages.JavaSearchPage_match_location_link_label, new Object[] { new Integer(currNum), new Integer(totNum) }));
+			fMatchLocationsLink.setText(Messages.format(SearchMessages.JavaSearchPage_match_location_link_label, new Object[] { Integer.valueOf(currNum), Integer.valueOf(totNum) }));
 			fMatchLocationsLink.setToolTipText(SearchMessages.JavaSearchPage_match_location_link_label_tooltip);
 		}
 	}
@@ -883,7 +883,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage {
 	private Button createButton(Composite parent, int style, String text, int data, boolean isSelected) {
 		Button button= new Button(parent, style);
 		button.setText(text);
-		button.setData(new Integer(data));
+		button.setData(Integer.valueOf(data));
 		button.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 		button.setSelection(isSelected);
 		return button;

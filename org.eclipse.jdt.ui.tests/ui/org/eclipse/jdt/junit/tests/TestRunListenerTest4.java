@@ -165,7 +165,7 @@ public class TestRunListenerTest4 extends AbstractTestRunListenerTest {
 			"	@Test public void testEquals() {\n" +
 			"		assertEquals(12, 12);\n" +
 			"		assertEquals(12L, 12L);\n" +
-			"		assertEquals(new Long(12), new Long(12));\n" +
+			"		assertEquals(Long.valueOf(12), Long.valueOf(12));\n" +
 			"\n" +
 			"		assertEquals(\"Size\", String.valueOf(12), String.valueOf(13));\n" +
 			"	}\n" +

@@ -8,7 +8,7 @@ public class A {
 	void foo() {
 		List<Serializable> l= new ArrayList<Serializable>();
 		l.add("Eclipse");
-		l.add(new Integer(10));
+		l.add(Integer.valueOf(10));
 		bar(l);
 	}
 	void bar(Object o) {

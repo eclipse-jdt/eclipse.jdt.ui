@@ -39,7 +39,7 @@ class OccurrencesSearchLabelProvider extends TextSearchLabelProvider implements 
 	}
 
 	private String getLineNumberLabel(JavaElementLine element) {
-		return Messages.format(SearchMessages.OccurrencesSearchLabelProvider_line_number, new Integer(element.getLineNumber() + 1));
+		return Messages.format(SearchMessages.OccurrencesSearchLabelProvider_line_number, Integer.valueOf(element.getLineNumber() + 1));
 	}
 
 	private String internalGetText(Object element) {

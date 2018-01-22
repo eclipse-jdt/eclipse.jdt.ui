@@ -248,7 +248,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		} else if (count < 2) {
 			return null;
 		} else {
-			return Messages.format(CorrectionMessages.FixCorrectionProposal_hitCtrlEnter_variable_description, new Integer(count));
+			return Messages.format(CorrectionMessages.FixCorrectionProposal_hitCtrlEnter_variable_description, Integer.valueOf(count));
 		}
 	}
 

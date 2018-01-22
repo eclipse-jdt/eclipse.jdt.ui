@@ -128,7 +128,7 @@ public class JavaParameterListValidatorTest extends TestCase {
 			switch (ch) {
 	            case ',':
 	            	if (angleLevel == 0)
-	            		positions.add(new Integer(pos));
+	            		positions.add(Integer.valueOf(pos));
 		            break;
 	            case '<':
 	        	    angleLevel++;

@@ -949,7 +949,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				comment.addSetting(RefactoringCoreMessages.InlineConstantRefactoring_replace_references);
 			final InlineConstantDescriptor descriptor= RefactoringSignatureDescriptorFactory.createInlineConstantDescriptor(project, description, comment.asString(), arguments, flags);
 			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fSelectionCu));
-			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+			arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.valueOf(fSelectionStart).toString() + " " + Integer.valueOf(fSelectionLength).toString()); //$NON-NLS-1$
 			arguments.put(ATTRIBUTE_REMOVE, Boolean.valueOf(fRemoveDeclaration).toString());
 			arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllReferences).toString());
 			return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.InlineConstantRefactoring_inline, fChanges);

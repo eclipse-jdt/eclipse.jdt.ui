@@ -18,7 +18,7 @@ class B {
 		Object o= a.thing;
 		
 		A<Number> an= new A<Number>();
-		an.setThing(new Double(1.3d));
+		an.setThing(Double.valueOf(1.3d));
 		
 		A<? extends Number> at= new A<Integer>();
 		Number tee=at.getThing();

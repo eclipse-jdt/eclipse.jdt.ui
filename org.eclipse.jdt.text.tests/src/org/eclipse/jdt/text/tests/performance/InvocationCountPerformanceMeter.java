@@ -237,7 +237,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 				fResultsMap.put(key1, results);
 				value= 0;
 			}
-			results.put(key2, new Integer(value + 1));
+			results.put(key2, Integer.valueOf(value + 1));
 		}
 
 		/**

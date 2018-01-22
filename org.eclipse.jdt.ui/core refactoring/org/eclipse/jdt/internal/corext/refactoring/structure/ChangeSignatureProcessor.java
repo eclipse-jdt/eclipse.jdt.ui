@@ -1276,7 +1276,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 				arguments.put(ATTRIBUTE_RETURN, fReturnTypeInfo.getNewTypeName());
 			try {
 				if (!isVisibilitySameAsInitial())
-					arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
+					arguments.put(ATTRIBUTE_VISIBILITY, Integer.valueOf(fVisibility).toString());
 			} catch (JavaModelException exception) {
 				JavaPlugin.log(exception);
 			}
@@ -1317,7 +1317,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			for (final Iterator<ExceptionInfo> iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
 				final ExceptionInfo info= iterator.next();
 				arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_ELEMENT + count, JavaRefactoringDescriptorUtil.elementToHandle(project,info.getElement()));
-				arguments.put(ATTRIBUTE_KIND + count, new Integer(info.getKind()).toString());
+				arguments.put(ATTRIBUTE_KIND + count, Integer.valueOf(info.getKind()).toString());
 				count++;
 			}
 		} catch (JavaModelException exception) {
@@ -2803,7 +2803,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 					fVisibility= JdtFlags.getVisibilityCode(fMethod);
 					fReturnTypeInfo= new ReturnTypeInfo(Signature.toString(Signature.getReturnType(fMethod.getSignature())));
 				} catch (JavaModelException exception) {
-					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { new Integer(fVisibility),
+					return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { Integer.valueOf(fVisibility),
 							ATTRIBUTE_VISIBILITY }));
 				}
 			}

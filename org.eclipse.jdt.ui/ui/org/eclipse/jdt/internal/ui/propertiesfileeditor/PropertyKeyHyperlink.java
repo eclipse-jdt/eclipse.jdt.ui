@@ -157,7 +157,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 					if (document != null) {
 						int line= document.getLineOfOffset(offset) + 1;
 						String pathLabel= BasicElementLabels.getPathLabel(resource.getFullPath(), false);
-						Object[] args= new Object[] { new Integer(line), pathLabel };
+						Object[] args= new Object[] { Integer.valueOf(line), pathLabel };
 						return showLineNumber ? Messages.format(PropertiesFileEditorMessages.OpenAction_SelectionDialog_elementLabel, args) : pathLabel;
 					}
 				} finally {
@@ -326,7 +326,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 					}
 				}
 				if (count > 1) {
-					Object[] args= new Object[] { BasicElementLabels.getResourceName(name), new Integer(count) };
+					Object[] args= new Object[] { BasicElementLabels.getResourceName(name), Integer.valueOf(count) };
 					name= Messages.format(PropertiesFileEditorMessages.OpenAction_SelectionDialog_elementLabelWithMatchCount, args);
 				}
 

@@ -134,7 +134,7 @@ public class DeleteAction extends SelectionDispatchAction {
 			};
 		} else {
 			dialog= new MessageDialog(getShell(), ReorgMessages.DeleteWorkingSet_multiple, null, MessageFormat.format(ReorgMessages.DeleteWorkingSet_removeorhideworkingset_multiple,
-					new Object[] { new Integer(selection.size()) }),
+					new Object[] { Integer.valueOf(selection.size()) }),
 					MessageDialog.QUESTION, new String[] { ReorgMessages.DeleteWorkingSet_Hide, ReorgMessages.DeleteWorkingSet_Remove,
 							IDialogConstants.CANCEL_LABEL }, 0);
 		}

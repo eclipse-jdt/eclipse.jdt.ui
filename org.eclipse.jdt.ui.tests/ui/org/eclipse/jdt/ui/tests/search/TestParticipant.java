@@ -46,7 +46,7 @@ public class TestParticipant implements IQueryParticipant {
 	@Override
 	public void search(ISearchRequestor requestor, QuerySpecification data, IProgressMonitor monitor) throws CoreException {
 		for (int i= 0; i < 20; i++) {
-			requestor.reportMatch(new Match(new Integer(fgRandom.nextInt()), -1, -1));
+			requestor.reportMatch(new Match(Integer.valueOf(fgRandom.nextInt()), -1, -1));
 		}
 	}
 

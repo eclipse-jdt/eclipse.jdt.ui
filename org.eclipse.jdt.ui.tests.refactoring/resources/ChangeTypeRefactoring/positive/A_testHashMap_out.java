@@ -27,14 +27,14 @@ public class A_testHashMap_in {
 class A {
 	public Vector e(){
 		Vector v2 = new Vector();	/* A2 */
-		Integer i2 = new Integer(17);
+		Integer i2 = Integer.valueOf(17);
 		insert(v2, i2);
 		Integer i3 = (Integer)v2.iterator().next(); /* C3 */
 		return v2;
 	}
 	public void f(){
 		Vector v3 = new Vector();	/* A3 */
-		v3.add(new Integer(18));
+		v3.add(Integer.valueOf(18));
 		reverse(v3);
 		Integer i4 = (Integer)v3.get(0); /* C4 */
 	}
@@ -51,7 +51,7 @@ class A {
 	}
 	public void k(Map m2){
 		Vector v5 = new Vector(); /* A6 */
-		v5.add(new Integer(18));
+		v5.add(Integer.valueOf(18));
 		v5.addAll(m2.keySet());
 	}
 	public void insert(Vector v6, Object o2){

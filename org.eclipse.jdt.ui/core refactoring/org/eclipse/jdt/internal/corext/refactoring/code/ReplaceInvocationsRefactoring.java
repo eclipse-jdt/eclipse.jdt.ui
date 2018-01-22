@@ -453,8 +453,8 @@ public class ReplaceInvocationsRefactoring extends Refactoring {
 			comment.addSetting(RefactoringCoreMessages.ReplaceInvocationsRefactoring_replace_references);
 		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_REPLACE_INVOCATIONS, project, description, comment.asString(), arguments, flags){}; //REVIEW Unregistered ID!
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fSelectionTypeRoot));
-		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-		arguments.put(ATTRIBUTE_MODE, new Integer(fTargetProvider.isSingle() ? 0 : 1).toString());
+		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.valueOf(fSelectionStart).toString() + " " + Integer.valueOf(fSelectionLength).toString()); //$NON-NLS-1$
+		arguments.put(ATTRIBUTE_MODE, Integer.valueOf(fTargetProvider.isSingle() ? 0 : 1).toString());
 		return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.ReplaceInvocationsRefactoring_change_name, fChangeManager.getAllChanges());
 	}
 

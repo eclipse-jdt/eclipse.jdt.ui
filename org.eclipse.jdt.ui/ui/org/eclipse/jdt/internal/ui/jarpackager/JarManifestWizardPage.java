@@ -569,7 +569,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 			else if (i == 1)
 				fSealJarLabel.setText(JarPackagerMessages.JarManifestWizardPage_jarSealedExceptOne);
 			else
-				fSealJarLabel.setText(Messages.format(JarPackagerMessages.JarManifestWizardPage_jarSealedExceptSome, new Integer(i)));
+				fSealJarLabel.setText(Messages.format(JarPackagerMessages.JarManifestWizardPage_jarSealedExceptSome, Integer.valueOf(i)));
 
 		}
 		else {
@@ -580,7 +580,7 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 			else if (i == 1)
 				fSealPackagesLabel.setText(JarPackagerMessages.JarManifestWizardPage_onePackageSealed);
 			else
-				fSealPackagesLabel.setText(Messages.format(JarPackagerMessages.JarManifestWizardPage_somePackagesSealed, new Integer(i)));
+				fSealPackagesLabel.setText(Messages.format(JarPackagerMessages.JarManifestWizardPage_somePackagesSealed, Integer.valueOf(i)));
 		}
 	}
 	/*

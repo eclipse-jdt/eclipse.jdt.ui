@@ -2,9 +2,9 @@ package p;
 
 class A {
     void call(Ex ex) {
-        ex.method("Eclipse1", new Integer(1));
+        ex.method("Eclipse1", Integer.valueOf(1));
         Top top= ex;
-        top.method("Eclipse2", new Integer(2));
+        top.method("Eclipse2", Integer.valueOf(2));
     }
 }
 

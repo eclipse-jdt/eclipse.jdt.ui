@@ -393,9 +393,9 @@ public class InlineMethodRefactoring extends Refactoring {
 			comment.addSetting(RefactoringCoreMessages.InlineMethodRefactoring_replace_references);
 		final InlineMethodDescriptor descriptor= RefactoringSignatureDescriptorFactory.createInlineMethodDescriptor(project, description, comment.asString(), arguments, flags);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fInitialTypeRoot));
-		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.valueOf(fSelectionStart).toString() + " " + Integer.valueOf(fSelectionLength).toString()); //$NON-NLS-1$
 		arguments.put(ATTRIBUTE_DELETE, Boolean.valueOf(fDeleteSource).toString());
-		arguments.put(ATTRIBUTE_MODE, new Integer(fCurrentMode == Mode.INLINE_ALL ? 1 : 0).toString());
+		arguments.put(ATTRIBUTE_MODE, Integer.valueOf(fCurrentMode == Mode.INLINE_ALL ? 1 : 0).toString());
 		return new DynamicValidationRefactoringChange(descriptor, RefactoringCoreMessages.InlineMethodRefactoring_edit_inlineCall, fChangeManager.getAllChanges());
 	}
 

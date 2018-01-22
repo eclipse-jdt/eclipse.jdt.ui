@@ -709,11 +709,11 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		final ConvertLocalVariableDescriptor descriptor= RefactoringSignatureDescriptorFactory.createConvertLocalVariableDescriptor(project, description, comment.asString(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_INPUT, JavaRefactoringDescriptorUtil.elementToHandle(project, fCu));
 		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_NAME, fFieldName);
-		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+		arguments.put(JavaRefactoringDescriptorUtil.ATTRIBUTE_SELECTION, Integer.valueOf(fSelectionStart).toString() + " " + Integer.valueOf(fSelectionLength).toString()); //$NON-NLS-1$
 		arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
 		arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
-		arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
-		arguments.put(ATTRIBUTE_INITIALIZE, new Integer(fInitializeIn).toString());
+		arguments.put(ATTRIBUTE_VISIBILITY, Integer.valueOf(fVisibility).toString());
+		arguments.put(ATTRIBUTE_INITIALIZE, Integer.valueOf(fInitializeIn).toString());
 		return descriptor;
 	}
 

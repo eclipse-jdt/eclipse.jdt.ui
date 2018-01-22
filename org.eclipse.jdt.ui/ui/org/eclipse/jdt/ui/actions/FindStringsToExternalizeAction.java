@@ -358,7 +358,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			setInput(Arrays.asList(input));
 			setTitle(ActionMessages.FindStringsToExternalizeAction_dialog_title);
 			String message= count == 1 ? ActionMessages.FindStringsToExternalizeAction_non_externalized_singular : Messages.format(
-					ActionMessages.FindStringsToExternalizeAction_non_externalized_plural, new Object[] { new Integer(count) });
+					ActionMessages.FindStringsToExternalizeAction_non_externalized_plural, new Object[] { Integer.valueOf(count) });
 			setMessage(message);
 			setContentProvider(new ArrayContentProvider());
 			setLabelProvider(createLabelProvider());
@@ -423,7 +423,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 					String elementName= BasicElementLabels.getPathLabel(nlsel.cu.getResource().getFullPath(), false);
 					return Messages.format(
 						ActionMessages.FindStringsToExternalizeAction_foundStrings,
-						new Object[] {new Integer(nlsel.count), elementName} );
+						new Object[] {Integer.valueOf(nlsel.count), elementName} );
 				}
 				@Override
 				public Image getImage(Object element) {

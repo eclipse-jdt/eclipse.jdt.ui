@@ -107,7 +107,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		}
 		JavaElementLine lineElement= null;
 		try {
-			Integer key= new Integer(lineNumber);
+			Integer key= Integer.valueOf(lineNumber);
 			lineElement= lineToGroup.get(key);
 			if (lineElement == null) {
 				int lineStartOffset= astRoot.getPosition(lineNumber, 0);
@@ -134,7 +134,7 @@ public class OccurrencesSearchQuery implements ISearchQuery {
 		if (nMatches == 1) {
 			return Messages.format(fSingularLabel, new Object[] { fName, BasicElementLabels.getFileName(fElement) });
 		} else {
-			return Messages.format(fPluralLabel, new Object[] { fName, new Integer(nMatches), BasicElementLabels.getFileName(fElement) });
+			return Messages.format(fPluralLabel, new Object[] { fName, Integer.valueOf(nMatches), BasicElementLabels.getFileName(fElement) });
 		}
 	}
 

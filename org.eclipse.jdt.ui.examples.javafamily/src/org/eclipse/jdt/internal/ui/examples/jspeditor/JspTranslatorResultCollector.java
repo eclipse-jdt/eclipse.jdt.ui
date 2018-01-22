@@ -50,18 +50,18 @@ public class JspTranslatorResultCollector implements ITranslatorResultCollector 
 	// XXX: In the real world we would need to pass a list of line numbers
 	public void appendDeclaration(String string, int lineNumber)  {
 		fDeclarations.append(string);
-		fDeclarationLines.add(new Integer(lineNumber));
+		fDeclarationLines.add(Integer.valueOf(lineNumber));
 	}
 
 	// XXX: In the real world we would need to pass a list of line numbers
 	public void appendLocalDeclaration(String string, int lineNumber)  {
 		fLocalDeclarations.append(string);
-		fLocalDeclarationLines.add(new Integer(lineNumber));
+		fLocalDeclarationLines.add(Integer.valueOf(lineNumber));
 	}
 
 	// XXX: In the real world we would need to pass a list of line numbers
 	public void appendContent(String string, int lineNumber)  {
 		fContent.append(string);
-		fContentLines.add(new Integer(lineNumber));
+		fContentLines.add(Integer.valueOf(lineNumber));
 	}
 }

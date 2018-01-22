@@ -208,7 +208,7 @@ public class MatchLocations {
 
 			Button button= new Button(parent, SWT.CHECK);
 			button.setText(text);
-			button.setData(new Integer(data));
+			button.setData(Integer.valueOf(data));
 			button.setLayoutData(new GridData());
 			button.setSelection(isSelected);
 			button.addSelectionListener(new SelectionAdapter() {

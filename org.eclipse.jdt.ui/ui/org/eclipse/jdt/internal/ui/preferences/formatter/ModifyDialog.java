@@ -1130,7 +1130,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		private void add(Control control) {
 			control.addFocusListener(this);
 			fItemList.add(fIndex, control);
-			fItemMap.put(control, new Integer(fIndex++));
+			fItemMap.put(control, Integer.valueOf(fIndex++));
 		}
 
 		@Override

@@ -430,7 +430,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 				int copyCount= 2;
 				String newName;
 				do {
-					newName= Messages.format(JavaUIMessages.GenerateToStringDialog_newTemplateNameArg, new Integer(copyCount));
+					newName= Messages.format(JavaUIMessages.GenerateToStringDialog_newTemplateNameArg, Integer.valueOf(copyCount));
 					copyCount++;
 				} while (templateNames.contains(newName));
 				return newName;

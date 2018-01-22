@@ -10,7 +10,7 @@ interface J {
 class D implements J {
 	public List getList() {
 		List<Double> dList= new ArrayList<Double>();
-		dList.add(new Double(1.2d));
+		dList.add(Double.valueOf(1.2d));
 		Double d= dList.get(0);
 		return dList;
 	}

@@ -289,8 +289,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 		for (int i= 0; i < permutation.length; i++) {
 			if (infos.get(i).isAdded())
 				continue;
-			if (! swapped.contains(new Integer(i))){
-				swapped.add(new Integer(permutation[i]));
+			if (! swapped.contains(Integer.valueOf(i))){
+				swapped.add(Integer.valueOf(permutation[i]));
 
 				ParameterInfo infoI= infos.get(i);
 				infoI.setNewName(newNameList.get(oldNameList.indexOf(infoI.getOldName())));
@@ -324,8 +324,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 			List<String> oldNameList= Arrays.asList(oldNames);
 			List<String> newNameList= Arrays.asList(newNames);
 			for (int i= 0; i < permutation.length; i++) {
-				if (! swapped.contains(new Integer(i))){
-					swapped.add(new Integer(permutation[i]));
+				if (! swapped.contains(Integer.valueOf(i))){
+					swapped.add(Integer.valueOf(permutation[i]));
 					ParameterInfo infoI= infos.get(i);
 					infoI.setNewName(newNameList.get(oldNameList.indexOf(infoI.getOldName())));
 					ParameterInfo infoI1= infos.get(permutation[i]);
