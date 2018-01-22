@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,28 +22,15 @@ import org.osgi.service.prefs.BackingStoreException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.accessibility.AccessibleAdapter;
 import org.eclipse.swt.accessibility.AccessibleEvent;
-import org.eclipse.swt.events.ControlAdapter;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.MouseTrackAdapter;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -56,9 +43,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
@@ -81,7 +65,6 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.preferences.IWorkingCopyManager;
 import org.eclipse.ui.preferences.WorkingCopyManager;
-import org.eclipse.ui.progress.WorkbenchJob;
 
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -94,9 +77,9 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.HighlightHelper;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /**
@@ -238,164 +221,7 @@ public abstract class OptionsConfigurationBlock {
 		}
 	}
 
-	/**
-	 * A node in <code>FilteredPreferenceTree</code>.
-	 */
-	protected static class PreferenceTreeNode {
-
-		public static final int NONE= 0;
-
-		public static final int CHECKBOX= 1;
-
-		public static final int COMBO= 2;
-
-		public static final int EXPANDABLE_COMPOSITE= 3;
-
-		public static final int TEXT_CONTROL= 4;
-
-		public static final int LINK= 5;
-
-		/**
-		 * Tells the type of UI control corresponding to this node. One of
-		 * <ul>
-		 * <li> <code>NONE</code></li>
-		 * <li> <code>CHECKBOX</code></li>
-		 * <li> <code>COMBO</code></li>
-		 * <li> <code>EXPANDABLE_COMPOSITE</code></li>
-		 * <li> <code>TEXT_CONTROL</code></li>
-		 * <li> <code>LINK</code></li>
-		 * </ul>
-		 */
-		private final int fControlType;
-
-		/**
-		 * Label text of the preference which is used for filtering. This text does not contain
-		 * <code>&</code> which is used to indicate mnemonics.
-		 */
-		private final String fLabel;
-
-		/**
-		 * The preference key or the local key to uniquely identify a node's corresponding UI
-		 * control. Can be <code>null</code>.
-		 */
-		private final Key fKey;
-
-		/**
-		 * Tells whether all children should be shown even if just one child matches the filter.
-		 */
-		private final boolean fShowAllChildren;
-
-		/**
-		 * Tells whether this node's UI control is visible in the UI for the current filter text.
-		 */
-		private boolean fVisible;
-
-		/**
-		 * List of children nodes.
-		 */
-		private List<PreferenceTreeNode> fChildren;
-
-		/**
-		 * Constructs a new instance of PreferenceTreeNode according to the parameters.
-		 * <p>
-		 * The <code>label</code> and the <code>key</code> must not be <code>null</code> if the node
-		 * has a corresponding UI control.
-		 * </p>
-		 * 
-		 * @param label the label text
-		 * @param key the key
-		 * @param controlType the type of UI control.
-		 * @param showAllChildren tells whether all children should be shown even if just one child
-		 *            matches the filter.
-		 */
-		public PreferenceTreeNode(String label, Key key, int controlType, boolean showAllChildren) {
-			super();
-			if (controlType != NONE && (label == null || key == null)) {
-				throw new IllegalArgumentException();
-			}
-			if (label == null) {
-				label= ""; //$NON-NLS-1$
-			}
-			fLabel= LegacyActionTools.removeMnemonics(label);
-			fKey= key;
-			fControlType= controlType;
-			fShowAllChildren= showAllChildren;
-		}
-
-		public String getLabel() {
-			return fLabel;
-		}
-
-		public Key getKey() {
-			return fKey;
-		}
-
-		public int getControlType() {
-			return fControlType;
-		}
-
-		public List<PreferenceTreeNode> getChildren() {
-			return fChildren;
-		}
-
-		public boolean isShowAllChildren() {
-			return fShowAllChildren;
-		}
-
-		public boolean isVisible() {
-			return fVisible;
-		}
-
-		private void setVisible(boolean visible, boolean recursive) {
-			fVisible= visible;
-			if (!recursive)
-				return;
-			if (fChildren != null) {
-				for (int i= 0; i < fChildren.size(); i++) {
-					fChildren.get(i).setVisible(visible, recursive);
-				}
-			}
-		}
-
-		public PreferenceTreeNode addChild(String label, Key key, int controlType, boolean showAllChildren) {
-			if (fChildren == null) {
-				fChildren= new ArrayList<>();
-			}
-			PreferenceTreeNode n= new PreferenceTreeNode(label, key, controlType, showAllChildren);
-			fChildren.add(n);
-			return n;
-		}
-
-		public boolean hasValue() {
-			if (fControlType == COMBO || fControlType == CHECKBOX || fControlType == TEXT_CONTROL) {
-				return true;
-			}
-			return false;
-		}
-	}
-
-	/**
-	 * The preference page modeled as a filtered tree.
-	 * <p>
-	 * The tree consists of an optional description label, a filter text input box, and a scrolled
-	 * area. The scrolled content contains all the UI controls which participate in filtering.
-	 * </p>
-	 * <p>
-	 * Supports '*' and '?' wildcards. A word in filter text preceded by '~' is used to filter on
-	 * preference values, e.g. ~ignore or ~off. Supported filter formats are
-	 * <ul>
-	 * <li>pattern</li>
-	 * <li>~valueFilter</li>
-	 * <li>pattern ~valueFilter</li>
-	 * <li>~valueFilter pattern</li>
-	 * </ul>
-	 * </p>
-	 */
-	protected static class FilteredPreferenceTree {
-		/**
-		 * Root node for the tree. It does not have a corresponding UI control.
-		 */
-		private final PreferenceTreeNode fRoot;
+	protected static class PreferenceTree extends FilteredPreferenceTree {
 
 		/**
 		 * The Options Configuration block.
@@ -403,349 +229,55 @@ public abstract class OptionsConfigurationBlock {
 		private final OptionsConfigurationBlock fConfigBlock;
 
 		/**
-		 * The parent composite of <code>FilteredPreferenceTree</code>.
-		 */
-		private final Composite fParentComposite;
-
-		/**
-		 * The scrolled area of the tree.
-		 */
-		private ScrolledPageContent fScrolledPageContent;
-
-		/**
-		 * Job to update the UI in a separate thread.
-		 */
-		private final WorkbenchJob fRefreshJob;
-
-		/**
-		 * Tells whether the filter text matched at least one element.
-		 */
-		private boolean fMatchFound;
-
-		/**
-		 * Label to indicate that no option matched the filter text.
-		 */
-		private Label fNoMatchFoundLabel;
-
-		/**
-		 * Constructs a new instance of FilteredPreferenceTree according to the parameters.
+		 * Constructs a new instance of PreferenceTree according to the parameters.
 		 * 
 		 * @param configBlock the Options Configuration block
 		 * @param parentComposite the parent composite
 		 * @param label the label, or <code>null</code> if none
 		 */
-		public FilteredPreferenceTree(OptionsConfigurationBlock configBlock, Composite parentComposite, String label) {
-			fRoot= new PreferenceTreeNode(null, null, PreferenceTreeNode.NONE, false);
+		public PreferenceTree(OptionsConfigurationBlock configBlock, Composite parentComposite, String label) {
+			super(parentComposite, label, PreferencesMessages.OptionsConfigurationBlock_TypeFilterText);
 			fConfigBlock= configBlock;
-			fParentComposite= parentComposite;
-
-			createDescription(label);
-			createFilterBox();
-			createScrolledArea();
-			createNoMatchFoundLabel();
-
-			fRefreshJob= doCreateRefreshJob();
-			fRefreshJob.setSystem(true);
-			fParentComposite.addDisposeListener(new DisposeListener() {
-				@Override
-				public void widgetDisposed(DisposeEvent e) {
-					fRefreshJob.cancel();
-				}
-			});
 		}
 
-		private void createDescription(String label) {
-			if (label == null)
-				return;
-			
-			Label description= new Label(fParentComposite, SWT.LEFT | SWT.WRAP);
-			description.setFont(fParentComposite.getFont());
-			description.setText(label);
-			description.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, true, false));
+		public PreferenceTreeNode<Button> addCheckBox(Composite parentComposite, String label, Key key, String[] values, int indent, PreferenceTreeNode<?> parentNode) {
+			Button checkBox= fConfigBlock.addCheckBox(parentComposite, label, key, values, indent);
+			return addChild(parentNode, new PreferenceTreeNode<>(label, checkBox, true, CHECK_BOX_MATCHER));
 		}
 
-		private void createFilterBox() {
-			//TODO: Directly use the hint flags once Bug 293230 is fixed
-			FilterTextControl filterTextControl= new FilterTextControl(fParentComposite);
-
-			final Text filterBox= filterTextControl.getFilterControl();
-			filterBox.setMessage(PreferencesMessages.OptionsConfigurationBlock_TypeFilterText);
-			
-			filterBox.addModifyListener(new ModifyListener() {
-				private String fPrevFilterText;
-
-				@Override
-				public void modifyText(ModifyEvent e) {
-					String input= filterBox.getText();
-					if (input != null && input.equalsIgnoreCase(fPrevFilterText))
-						return;
-					fPrevFilterText= input;
-					doFilter(input);
-				}
-			});
+		public PreferenceTreeNode<Button> addCheckBoxWithLink(Composite parentComposite, String label, Key key, String[] values, int indent, PreferenceTreeNode<?> parentNode, int widthHint,
+				SelectionListener listener) {
+			Button checkBox= fConfigBlock.addCheckBoxWithLink(parentComposite, label, key, values, indent, widthHint, listener);
+			PreferenceTreeNode<Button> node= addChild(parentNode, new PreferenceTreeNode<>(label, checkBox, true, CHECK_BOX_MATCHER));
+			addChild(node, new PreferenceTreeNode<>(label, fConfigBlock.getLink(key), true));
+			return node;
 		}
 
-		private void createScrolledArea() {
-			fScrolledPageContent= new ScrolledPageContent(fParentComposite);
-			fScrolledPageContent.addControlListener(new ControlAdapter() {
-				@Override
-				public void controlResized(ControlEvent e) {
-					fScrolledPageContent.getVerticalBar().setVisible(true);
-				}
-			});
+		public PreferenceTreeNode<Combo> addComboBox(Composite parentComposite, String label, Key key, String[] values, String[] valueLabels, int indent, PreferenceTreeNode<?> parentNode) {
+			Combo comboBox= fConfigBlock.addComboBox(parentComposite, label, key, values, valueLabels, indent);
+			PreferenceTreeNode<Combo> node= addChild(parentNode, new PreferenceTreeNode<>(label, comboBox, true, COMBO_VALUE_MATCHER));
+			addChild(node, new PreferenceTreeNode<>(label, fConfigBlock.fLabels.get(comboBox), true));
+			return node;
 		}
 
-		public ScrolledPageContent getScrolledPageContent() {
-			return fScrolledPageContent;
+		public PreferenceTreeNode<Text> addTextField(Composite parentComposite, String label, Key key, int indent, int widthHint, PreferenceTreeNode<?> parentNode) {
+			Text textField= fConfigBlock.addTextField(parentComposite, label, key, indent, widthHint);
+			PreferenceTreeNode<Text> node= addChild(parentNode, new PreferenceTreeNode<>(label, textField, true, TEXT_VALUE_MATCHER));
+			addChild(node, new PreferenceTreeNode<>(label, fConfigBlock.fLabels.get(textField), true));
+			return node;
 		}
 
-		private void createNoMatchFoundLabel() {
-			fNoMatchFoundLabel= new Label(fScrolledPageContent.getBody(), SWT.NONE);
-			GridData gd= new GridData(SWT.BEGINNING, SWT.CENTER, true, false);
-			gd.horizontalSpan= 3;
-			fNoMatchFoundLabel.setLayoutData(gd);
-			fNoMatchFoundLabel.setFont(fScrolledPageContent.getFont());
-			fNoMatchFoundLabel.setText(PreferencesMessages.OptionsConfigurationBlock_NoOptionMatchesTheFilter);
-			setVisible(fNoMatchFoundLabel, false);
+		public PreferenceTreeNode<ExpandableComposite> addExpandableComposite(Composite parentComposite, String label, int nColumns, Key key, PreferenceTreeNode<?> parentNode, boolean showAllChildren) {
+			ExpandableComposite expandableComposite= fConfigBlock.createStyleSection(parentComposite, label, nColumns, key);
+			return addChild(parentNode, new PreferenceTreeNode<>(label, expandableComposite, showAllChildren));
 		}
 
-		public PreferenceTreeNode addChild(PreferenceTreeNode parent, String label, Key key, int controlType, boolean showAllChildren) {
-			parent= (parent == null) ? fRoot : parent;
-			return parent.addChild(label, key, controlType, showAllChildren);
-		}
-
-		public PreferenceTreeNode addCheckBox(Composite parentComposite, String label, Key key, String[] values, int indent, PreferenceTreeNode parentNode, boolean showAllChildren) {
-			fConfigBlock.addCheckBox(parentComposite, label, key, values, indent);
-			return addChild(parentNode, label, key, PreferenceTreeNode.CHECKBOX, showAllChildren);
-		}
-
-		public PreferenceTreeNode addCheckBox(Composite parentComposite, String label, Key key, String[] values, int indent, PreferenceTreeNode parentNode) {
-			return addCheckBox(parentComposite, label, key, values, indent, parentNode, true);
-		}
-
-		public PreferenceTreeNode addCheckBoxWithLink(Composite parentComposite, String label, Key key, String[] values, int indent, PreferenceTreeNode parentNode, boolean showAllChildren, int widthHint, SelectionListener listener) {
-			fConfigBlock.addCheckBoxWithLink(parentComposite, label, key, values, indent, widthHint, listener);
-			addChild(parentNode, label, key, PreferenceTreeNode.LINK, false);
-			return addChild(parentNode, label, key, PreferenceTreeNode.CHECKBOX, showAllChildren);
-		}
-
-		public PreferenceTreeNode addComboBox(Composite parentComposite, String label, Key key, String[] values, String[] valueLabels, int indent, PreferenceTreeNode parentNode, boolean showAllChildren) {
-			fConfigBlock.addComboBox(parentComposite, label, key, values, valueLabels, indent);
-			return addChild(parentNode, label, key, PreferenceTreeNode.COMBO, showAllChildren);
-		}
-
-		public PreferenceTreeNode addComboBox(Composite parentComposite, String label, Key key, String[] values, String[] valueLabels, int indent, PreferenceTreeNode parentNode) {
-			return addComboBox(parentComposite, label, key, values, valueLabels, indent, parentNode, true);
-		}
-
-		public PreferenceTreeNode addTextField(Composite parentComposite, String label, Key key, int indent, int widthHint, PreferenceTreeNode parentNode) {
-			fConfigBlock.addTextField(parentComposite, label, key, indent, widthHint);
-			return addChild(parentNode, label, key, PreferenceTreeNode.TEXT_CONTROL, true);
-		}
-
-		public PreferenceTreeNode addExpandableComposite(Composite parentComposite, String label, int nColumns, Key key, PreferenceTreeNode parentNode, boolean showAllChildren) {
-			fConfigBlock.createStyleSection(parentComposite, label, nColumns, key);
-			return addChild(parentNode, label, key, PreferenceTreeNode.EXPANDABLE_COMPOSITE, showAllChildren);
-		}
-
-		public PreferenceTreeNode addLink(Composite parentComposite, String label, Key key, SelectionListener linkListener, int indent, int widthHint, PreferenceTreeNode parentNode) {
-			fConfigBlock.addLink(parentComposite, label, key, linkListener, indent, widthHint);
-			return addChild(parentNode, label, key, PreferenceTreeNode.LINK, false);
-		}
-		private boolean match(PreferenceTreeNode node, StringMatcher labelMatcher, StringMatcher valueMatcher) {
-			if (node.getKey() == null) {
-				return false;
-			}
-			boolean valueMatched= true;
-			boolean labelMatched= true;
-			if (labelMatcher != null) {
-				labelMatched= labelMatcher.match(node.getLabel());
-			}
-			if (valueMatcher != null) {
-				if (node.getControlType() == PreferenceTreeNode.COMBO) {
-					valueMatched= valueMatcher.match(fConfigBlock.getComboBox(node.getKey()).getText());
-				} else if (node.getControlType() == PreferenceTreeNode.CHECKBOX) {
-					boolean checked= fConfigBlock.getCheckBox(node.getKey()).getSelection();
-					if (checked) {
-						valueMatched= valueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_On) || valueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Enabled);
-					} else {
-						valueMatched= valueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Off) || valueMatcher.match(PreferencesMessages.OptionsConfigurationBlock_Disabled);
-					}
-				}
-			}
-			return labelMatched && valueMatched;
-		}
-
-		public boolean filter(PreferenceTreeNode node, StringMatcher labelMatcher, StringMatcher valueMatcher) {
-			//check this node
-			boolean visible= match(node, labelMatcher, valueMatcher);
-			if (visible) {
-				if (valueMatcher != null && !node.hasValue()) { //see bug 321818
-					labelMatcher= null;
-					visible= false;
-				} else {
-					node.setVisible(visible, true);
-					fMatchFound= true;
-					return visible;
-				}
-			}
-			//check children
-			List<PreferenceTreeNode> children= node.getChildren();
-			if (children != null) {
-				for (int i= 0; i < children.size(); i++) {
-					visible|= filter(children.get(i), labelMatcher, valueMatcher);
-				}
-				if (node.isShowAllChildren()) {
-					for (int i= 0; i < children.size(); i++) {
-						children.get(i).setVisible(visible, false);
-					}
-				}
-			}
-			node.setVisible(visible, false);
-			return visible;
-		}
-
-		public void doFilter(String filterText) {
-			fRefreshJob.cancel();
-			fRefreshJob.schedule(getRefreshJobDelay());
-			filterText= filterText.trim();
-			int index= filterText.indexOf("~"); //$NON-NLS-1$
-			StringMatcher labelMatcher= null;
-			StringMatcher valueMatcher= null;
-			if (index == -1) {
-				labelMatcher= createStringMatcher(filterText);
-			} else {
-				if (index == 0) {
-					int i= 0;
-					for (; i < filterText.length(); i++) {
-						char ch= filterText.charAt(i);
-						if (ch == ' ' || ch == '\t') {
-							break;
-						}
-					}
-					valueMatcher= createStringMatcher(filterText.substring(1, i));
-					labelMatcher= createStringMatcher(filterText.substring(i));
-				} else {
-					labelMatcher= createStringMatcher(filterText.substring(0, index));
-					if (index < filterText.length())
-						valueMatcher= createStringMatcher(filterText.substring(index + 1));
-				}
-			}
-			fMatchFound= false;
-			filter(fRoot, labelMatcher, valueMatcher);
-		}
-
-		private StringMatcher createStringMatcher(String filterText) {
-			filterText= filterText.trim();
-			if (filterText.length() > 0)
-				return new StringMatcher("*" + filterText + "*", true, false); //$NON-NLS-1$ //$NON-NLS-2$
-			return null;
-		}
-
-		/**
-		 * Return the time delay that should be used when scheduling the filter refresh job.
-		 * 
-		 * @return a time delay in milliseconds before the job should run
-		 */
-		private long getRefreshJobDelay() {
-			return 200;
-		}
-
-		private void updateUI(PreferenceTreeNode node) {
-			//update node
-			int controlType= node.getControlType();
-			Control control= null;
-			if (controlType == PreferenceTreeNode.CHECKBOX) {
-				control= fConfigBlock.getCheckBox(node.getKey());
-			} else if (controlType == PreferenceTreeNode.COMBO) {
-				control= fConfigBlock.getComboBox(node.getKey());
-			} else if (controlType == PreferenceTreeNode.TEXT_CONTROL) {
-				control= fConfigBlock.getTextControl(node.getKey());
-			} else if (controlType == PreferenceTreeNode.EXPANDABLE_COMPOSITE) {
-				control= fConfigBlock.getExpandableComposite(node.getKey());
-			} else if (controlType == PreferenceTreeNode.LINK) {
-				control= fConfigBlock.getLink(node.getKey());
-			}
-
-			if (control != null) {
-				boolean visible= node.isVisible();
-				setVisible(control, visible);
-				if (control instanceof Combo || control instanceof Text) {
-					Label label= (fConfigBlock.fLabels.get(control));
-					setVisible(label, visible);
-				}
-				if (control instanceof ExpandableComposite) {
-					((ExpandableComposite)control).setExpanded(visible);
-				}
-			}
-
-			//update children
-			List<PreferenceTreeNode> children= node.getChildren();
-			if (children != null) {
-				for (int i= 0; i < children.size(); i++) {
-					updateUI(children.get(i));
-				}
-			}
-		}
-
-		private WorkbenchJob doCreateRefreshJob() {
-			return new WorkbenchJob(PreferencesMessages.OptionsConfigurationBlock_RefreshFilter) {
-				@Override
-				public IStatus runInUIThread(IProgressMonitor monitor) {
-					updateUI(fRoot);
-					fParentComposite.layout(true, true); //relayout
-					if (fScrolledPageContent != null) {
-						setVisible(fNoMatchFoundLabel, !fMatchFound);
-						fScrolledPageContent.reflow(true);
-					}
-					return Status.OK_STATUS;
-				}
-			};
-		}
-
-		private void setVisible(Control control, boolean visible) {
-			control.setVisible(visible);
-			((GridData)control.getLayoutData()).exclude= !visible;
+		public PreferenceTreeNode<Link> addLink(Composite parentComposite, String label, Key key, SelectionListener linkListener, int indent, int widthHint, PreferenceTreeNode<?> parentNode) {
+			Link link= fConfigBlock.addLink(parentComposite, label, key, linkListener, indent, widthHint);
+			return addChild(parentNode, new PreferenceTreeNode<>(label, link, false));
 		}
 	}
 
-	private static class HighlightPainter implements PaintListener {
-		
-		private final Composite fParent;
-		private final Label fLabelControl;
-		private final Combo fComboBox;
-		int fColor;
-		
-		public HighlightPainter(Composite parent, Label labelControl, Combo comboBox, int color) {
-			fParent= parent;
-			fLabelControl= labelControl;
-			fComboBox= comboBox;
-			fColor= color;
-		}
-
-		@Override
-		public void paintControl(PaintEvent e) {
-			if (((GridData) fLabelControl.getLayoutData()).exclude) {
-				fParent.removePaintListener(this);
-				fLabelControl.setData(null);
-				return;
-			}
-			
-			int GAP= 7;
-			int ARROW= 3;
-			Rectangle l= fLabelControl.getBounds();
-			Point c= fComboBox.getLocation();
-			
-			e.gc.setForeground(e.display.getSystemColor(fColor));
-			int x2= c.x - GAP;
-			int y= l.y + l.height / 2 + 1;
-			
-			e.gc.drawLine(l.x + l.width + GAP, y, x2, y);
-			e.gc.drawLine(x2 - ARROW, y - ARROW, x2, y);
-			e.gc.drawLine(x2 - ARROW, y + ARROW, x2, y);
-		}
-	}
-	
 	private static final String REBUILD_COUNT_KEY= "preferences_build_requested"; //$NON-NLS-1$
 
 	private static final String SETTINGS_EXPANDED= "expanded"; //$NON-NLS-1$
@@ -1050,119 +582,11 @@ public abstract class OptionsConfigurationBlock {
 
 		fLabels.put(comboBox, labelControl);
 		
-		addHighlight(parent, labelControl, comboBox);
+		HighlightHelper.addHighlight(labelControl, comboBox);
 
 		return comboBox;
 	}
 	
-	protected static final int HIGHLIGHT_FOCUS = SWT.COLOR_WIDGET_DARK_SHADOW;
-	protected static final int HIGHLIGHT_MOUSE = SWT.COLOR_WIDGET_NORMAL_SHADOW;
-	protected static final int HIGHLIGHT_NONE = SWT.NONE;
-
-	private void addHighlight(final Composite parent, final Label labelControl, final Combo comboBox) {
-		comboBox.addFocusListener(new FocusListener() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				highlight(parent, labelControl, comboBox, HIGHLIGHT_NONE);
-			}
-			@Override
-			public void focusGained(FocusEvent e) {
-				highlight(parent, labelControl, comboBox, HIGHLIGHT_FOCUS);
-			}
-		});
-		
-		MouseTrackAdapter labelComboListener= new MouseTrackAdapter() {
-			@Override
-			public void mouseEnter(MouseEvent e) {
-				highlight(parent, labelControl, comboBox, comboBox.isEnabled() ? comboBox.isFocusControl() ? HIGHLIGHT_FOCUS : HIGHLIGHT_MOUSE : HIGHLIGHT_NONE);
-			}
-			@Override
-			public void mouseExit(MouseEvent e) {
-				if (! comboBox.isFocusControl())
-					highlight(parent, labelControl, comboBox, HIGHLIGHT_NONE);
-			}
-		};
-		comboBox.addMouseTrackListener(labelComboListener);
-		labelControl.addMouseTrackListener(labelComboListener);
-		
-		class MouseMoveTrackListener extends MouseTrackAdapter implements MouseMoveListener, MouseListener {
-			@Override
-			public void mouseExit(MouseEvent e) {
-				if (! comboBox.isFocusControl())
-					highlight(parent, labelControl, comboBox, HIGHLIGHT_NONE);
-			}
-			@Override
-			public void mouseMove(MouseEvent e) {
-				int color= comboBox.isEnabled() ? comboBox.isFocusControl() ? HIGHLIGHT_FOCUS : isAroundLabel(e) ? HIGHLIGHT_MOUSE : HIGHLIGHT_NONE : HIGHLIGHT_NONE;
-				highlight(parent, labelControl, comboBox, color);
-			}
-			@Override
-			public void mouseDown(MouseEvent e) {
-				if (isAroundLabel(e))
-					comboBox.setFocus();
-			}
-			@Override
-			public void mouseDoubleClick(MouseEvent e) {
-				// not used
-			}
-			@Override
-			public void mouseUp(MouseEvent e) {
-				// not used
-			}
-			private boolean isAroundLabel(MouseEvent e) {
-				int lx= labelControl.getLocation().x;
-				Rectangle c= comboBox.getBounds();
-				int x= e.x;
-				int y= e.y;
-				boolean isAroundLabel= lx - 5 < x && x < c.x && c.y - 2 < y && y < c.y + c.height + 2;
-				return isAroundLabel;
-			}
-		}
-		MouseMoveTrackListener parentListener= new MouseMoveTrackListener();
-		parent.addMouseMoveListener(parentListener);
-		parent.addMouseTrackListener(parentListener);
-		parent.addMouseListener(parentListener);
-		
-		MouseAdapter labelClickListener= new MouseAdapter() {
-			@Override
-			public void mouseDown(MouseEvent e) {
-				comboBox.setFocus();
-			}
-		};
-		labelControl.addMouseListener(labelClickListener);
-	}
-	
-	protected void highlight(final Composite parent, final Label labelControl, final Combo comboBox, final int color) {
-		Object data= labelControl.getData();
-		if (data == null) {
-			if (color != HIGHLIGHT_NONE) {
-				PaintListener painter= new HighlightPainter(parent, labelControl, comboBox, color);
-				parent.addPaintListener(painter);
-				labelControl.setData(painter);
-			} else {
-				return;
-			}
-		} else {
-			if (color == HIGHLIGHT_NONE) {
-				parent.removePaintListener((PaintListener) data);
-				labelControl.setData(null);
-			} else if (color != ((HighlightPainter) data).fColor){
-				((HighlightPainter) data).fColor= color;
-			} else {
-				return;
-			}
-		}
-		
-		parent.redraw();
-	}
-	
-	protected int getHighlight(Label labelControl) {
-		Object data= labelControl.getData();
-		if (data == null)
-			return HIGHLIGHT_NONE;
-		return ((HighlightPainter) data).fColor;
-	}
-
 	protected Combo addInversedComboBox(Composite parent, String label, Key key, String[] values, String[] valueLabels, int indent) {
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= indent;
@@ -1839,7 +1263,7 @@ public abstract class OptionsConfigurationBlock {
 		combo.setEnabled(enabled);
 		label.setEnabled(enabled);
 		if (!enabled) {
-			highlight(combo.getParent(), label, combo, HIGHLIGHT_NONE);
+			HighlightHelper.highlight(combo.getParent(), label, combo, HighlightHelper.HIGHLIGHT_NONE);
 		}
 	}
 	

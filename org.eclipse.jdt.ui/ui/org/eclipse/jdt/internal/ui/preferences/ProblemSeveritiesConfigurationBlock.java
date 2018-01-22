@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,6 +82,8 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.dialogs.TableTextCellEditor;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
+import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.HighlightHelper;
+import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.PreferenceTreeNode;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.CompletionContextRequestor;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
@@ -687,7 +689,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 	private PixelConverter fPixelConverter;
 
-	private FilteredPreferenceTree fFilteredPrefTree;
+	private PreferenceTree fFilteredPrefTree;
 
 	public ProblemSeveritiesConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
 		super(context, project, getKeys(), container);
@@ -807,7 +809,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
 		String[] disabledEnabled= new String[] { DISABLED, ENABLED };
 
-		fFilteredPrefTree= new FilteredPreferenceTree(this, folder, PreferencesMessages.ProblemSeveritiesConfigurationBlock_common_description);
+		fFilteredPrefTree= new PreferenceTree(this, folder, PreferencesMessages.ProblemSeveritiesConfigurationBlock_common_description);
 		final ScrolledPageContent sc1= fFilteredPrefTree.getScrolledPageContent();
 		
 		int nColumns= 3;
@@ -824,8 +826,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		String label;
 		ExpandableComposite excomposite;
 		Composite inner;
-		PreferenceTreeNode section;
-		PreferenceTreeNode node;
+		PreferenceTreeNode<?> section;
+		PreferenceTreeNode<?> node;
 		Key twistieKey;
 
 		// --- style
@@ -1188,7 +1190,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		fFilteredPrefTree.addComboBox(inner, label, PREF_MISSING_NONNULL_BY_DEFAULT_ANNOTATION, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, extraIndent, node);
 		
 		label= PreferencesMessages.NullAnnotationsConfigurationDialog_use_default_annotations_for_null;
-		fFilteredPrefTree.addCheckBoxWithLink(inner, label, INTR_DEFAULT_NULL_ANNOTATIONS, enabledDisabled, extraIndent, node, true, SWT.DEFAULT,
+		fFilteredPrefTree.addCheckBoxWithLink(inner, label, INTR_DEFAULT_NULL_ANNOTATIONS, enabledDisabled, extraIndent, node, SWT.DEFAULT,
 				new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
@@ -1278,19 +1280,19 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				if (ask) {
 					final Combo comboBoxNullRef= getComboBox(PREF_PB_NULL_REFERENCE);
 					final Label labelNullRef= fLabels.get(comboBoxNullRef);
-					int highlightNullRef= getHighlight(labelNullRef);
+					int highlightNullRef= HighlightHelper.getHighlight(labelNullRef);
 					final Combo comboBoxPotNullRef= getComboBox(PREF_PB_POTENTIAL_NULL_REFERENCE);
 					final Label labelPotNullRef= fLabels.get(comboBoxPotNullRef);
-					int highlightPotNullRef= getHighlight(labelPotNullRef);
-					
+					int highlightPotNullRef= HighlightHelper.getHighlight(labelPotNullRef);
+
 					getShell().getDisplay().asyncExec(new Runnable() {
 						@Override
 						public void run() {
-							highlight(comboBoxNullRef.getParent(), labelNullRef, comboBoxNullRef, HIGHLIGHT_FOCUS);
-							highlight(comboBoxPotNullRef.getParent(), labelPotNullRef, comboBoxPotNullRef, HIGHLIGHT_FOCUS);
+							HighlightHelper.highlight(comboBoxNullRef.getParent(), labelNullRef, comboBoxNullRef, HighlightHelper.HIGHLIGHT_FOCUS);
+							HighlightHelper.highlight(comboBoxPotNullRef.getParent(), labelPotNullRef, comboBoxPotNullRef, HighlightHelper.HIGHLIGHT_FOCUS);
 						}
 					});
-					
+
 					MessageDialog messageDialog= new MessageDialog(
 							getShell(),
 							PreferencesMessages.ProblemSeveritiesConfigurationBlock_adapt_null_pointer_access_settings_dialog_title,
@@ -1312,9 +1314,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 							updateCombo(getComboBox(PREF_PB_POTENTIAL_NULL_REFERENCE));
 						}
 					}
-					
-					highlight(comboBoxNullRef.getParent(), labelNullRef, comboBoxNullRef, highlightNullRef);
-					highlight(comboBoxPotNullRef.getParent(), labelPotNullRef, comboBoxPotNullRef, highlightPotNullRef);
+
+					HighlightHelper.highlight(comboBoxNullRef.getParent(), labelNullRef, comboBoxNullRef, highlightNullRef);
+					HighlightHelper.highlight(comboBoxPotNullRef.getParent(), labelPotNullRef, comboBoxPotNullRef, highlightPotNullRef);
 				}
 
 			} else if (PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING.equals(changedKey)) {

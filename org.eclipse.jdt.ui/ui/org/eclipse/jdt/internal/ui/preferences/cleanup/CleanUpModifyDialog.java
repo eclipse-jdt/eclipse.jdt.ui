@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,14 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.cleanup;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -32,17 +38,28 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpConfigurationUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.formatter.IModifyDialogTabPage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 
 public class CleanUpModifyDialog extends ModifyDialog {
 
 	/**
+	 * The key to store the number (beginning at 0) of the tab page which had the focus last time.
+	 */
+	private static final String DS_KEY_LAST_FOCUS= "modify_dialog.last_focus"; //$NON-NLS-1$
+
+	private final List<IModifyDialogTabPage> fTabPages= new ArrayList<>();
+	private TabFolder fTabFolder;
+	
+	private final String fKeyLastFocus;
+
+	/**
 	 * Constant array for boolean selection
 	 */
-	static String[] FALSE_TRUE = {
+	static final String[] FALSE_TRUE = {
 		CleanUpOptions.FALSE,
 		CleanUpOptions.TRUE
 	};
@@ -52,10 +69,52 @@ public class CleanUpModifyDialog extends ModifyDialog {
 
 	public CleanUpModifyDialog(Shell parentShell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile, String dialogPreferencesKey, String lastSavePathKey) {
 	    super(parentShell, profile, profileManager, profileStore, newProfile, dialogPreferencesKey, lastSavePathKey);
+
+		fKeyLastFocus= JavaUI.ID_PLUGIN + dialogPreferencesKey + DS_KEY_LAST_FOCUS;
     }
 
 	@Override
-	protected void addPages(final Map<String, String> values) {
+	public void create() {
+		super.create();
+		if (!fNewProfile) {
+			int lastFocusNr= 0;
+			try {
+				lastFocusNr= fDialogSettings.getInt(fKeyLastFocus);
+				if (lastFocusNr < 0) lastFocusNr= 0;
+				if (lastFocusNr > fTabPages.size() - 1) lastFocusNr= fTabPages.size() - 1;
+			} catch (NumberFormatException x) {
+				lastFocusNr= 0;
+			}
+
+			fTabFolder.setSelection(lastFocusNr);
+			((IModifyDialogTabPage)fTabFolder.getSelection()[0].getData()).setInitialFocus();
+		}
+	}
+
+	@Override
+	protected void createMainArea(Composite parent) {
+		fTabFolder = new TabFolder(parent, SWT.NONE);
+		fTabFolder.setFont(parent.getFont());
+		fTabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		addPages(fWorkingValues);
+
+		applyDialogFont(parent);
+
+		fTabFolder.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				final TabItem tabItem= (TabItem)e.item;
+				final IModifyDialogTabPage page= (IModifyDialogTabPage)tabItem.getData();
+				fDialogSettings.put(fKeyLastFocus, fTabPages.indexOf(page));
+				page.makeVisible();
+			}
+		});
+	}
+
+	private void addPages(final Map<String, String> values) {
 		CleanUpTabPageDescriptor[] descriptors= JavaPlugin.getDefault().getCleanUpRegistry().getCleanUpTabPageDescriptors(CleanUpConstants.DEFAULT_CLEAN_UP_OPTIONS);
 
 		fPages= new ICleanUpConfigurationUI[descriptors.length];
@@ -72,6 +131,15 @@ public class CleanUpModifyDialog extends ModifyDialog {
 
 			fPages[i]= page;
 		}
+	}
+	
+	private final void addTabPage(String title, IModifyDialogTabPage tabPage) {
+		final TabItem tabItem= new TabItem(fTabFolder, SWT.NONE);
+		applyDialogFont(tabItem.getControl());
+		tabItem.setText(title);
+		tabItem.setData(tabPage);
+		tabItem.setControl(tabPage.createContents(fTabFolder));
+		fTabPages.add(tabPage);
 	}
 
 	@Override

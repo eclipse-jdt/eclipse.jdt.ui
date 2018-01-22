@@ -1,0 +1,702 @@
+/*******************************************************************************
+ * Copyright (c) 2018 Mateusz Matela and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Mateusz Matela <mateusz.matela@gmail.com> - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.internal.ui.preferences;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlAdapter;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.events.MouseTrackAdapter;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import org.eclipse.jface.action.LegacyActionTools;
+import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
+import org.eclipse.ui.progress.WorkbenchJob;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.PreferenceTreeNode.ValueMatcher;
+import org.eclipse.jdt.internal.ui.util.StringMatcher;
+
+/**
+ * The preferences modeled as a filtered tree.
+ * <p>
+ * The tree consists of an optional description label, a filter text input box, and a scrolled area.
+ * The scrolled content contains all the UI controls which participate in filtering.
+ * </p>
+ * <p>
+ * Supports '*' and '?' wildcards. A word in filter text preceded by '~' is used to filter on
+ * preference values, e.g. ~ignore or ~off. Supported filter formats are
+ * <ul>
+ * <li>pattern</li>
+ * <li>~valueFilter</li>
+ * <li>pattern ~valueFilter</li>
+ * <li>~valueFilter pattern</li>
+ * </ul>
+ * </p>
+ */
+public class FilteredPreferenceTree {
+
+	/**
+	 * A node in <code>FilteredPreferenceTree</code>.
+	 * 
+	 * @param <T> type of the node's main control
+	 */
+	public static class PreferenceTreeNode<T extends Control> {
+
+		/**
+		 * @param <T> class of the node's control
+		 */
+		public interface ValueMatcher<T extends Control> {
+			boolean valueMatches(PreferenceTreeNode<T> node, StringMatcher matcher);
+		}
+
+		/**
+		 * Label text of the preference which is used for filtering. This text does not contain
+		 * <code>&</code> which is used to indicate mnemonics.
+		 */
+		private final String fLabel;
+
+		/**
+		 * A control associated with this node
+		 */
+		protected final T fControl;
+
+		/**
+		 * Tells whether all children should be shown even if just one child matches the filter.
+		 */
+		private final boolean fShowAllChildren;
+
+		private final ValueMatcher<T> fValueMatcher;
+
+		/**
+		 * Tells whether this node's UI control is visible in the UI for the current filter text.
+		 */
+		private boolean fVisible= true;
+
+		/**
+		 * List of children nodes.
+		 */
+		private List<PreferenceTreeNode<?>> fChildren;
+		private PreferenceTreeNode<?> fParent;
+
+		/**
+		 * Constructs a new instance of PreferenceTreeNode according to the parameters.
+		 * <p>
+		 * The <code>label</code> and the <code>key</code> must not be <code>null</code> if the node
+		 * has a corresponding UI control.
+		 * </p>
+		 * 
+		 * @param label the label text
+		 * @param control the control associated with this node,
+		 * @param showAllChildren tells whether all children should be shown even if just one child
+		 *            matches the filter.
+		 */
+		public PreferenceTreeNode(String label, T control, boolean showAllChildren) {
+			this(label, control, showAllChildren, null);
+		}
+
+		public PreferenceTreeNode(String label, T control, boolean showAllChildren, ValueMatcher<T> valueMatcher) {
+			if (label == null)
+				label= ""; //$NON-NLS-1$
+			fLabel= LegacyActionTools.removeMnemonics(label);
+			fControl= control;
+			fShowAllChildren= showAllChildren;
+			fValueMatcher= valueMatcher;
+		}
+
+		public T getControl() {
+			return fControl;
+		}
+
+		public List<PreferenceTreeNode<?>> getChildren() {
+			return fChildren != null ? fChildren : Collections.<PreferenceTreeNode<?>>emptyList();
+		}
+
+		public PreferenceTreeNode<?> getParent() {
+			return fParent;
+		}
+
+		public boolean isVisible() {
+			return fVisible;
+		}
+
+		public void addChild(PreferenceTreeNode<?> node) {
+			if (fChildren == null)
+				fChildren= new ArrayList<>();
+			fChildren.add(node);
+			node.fParent= this;
+		}
+
+		protected boolean filter(StringMatcher labelMatcher, String ancestorsLabel, StringMatcher valueMatcher) {
+			String currentLabel= fLabel;
+			if (ancestorsLabel != null) {
+				ancestorsLabel+= ' ' + currentLabel;
+				currentLabel= ancestorsLabel;
+			}
+
+			//check this node
+			boolean valueMatched= valueMatcher == null || (fValueMatcher != null && fValueMatcher.valueMatches(this, valueMatcher));
+			boolean matched= valueMatched && (labelMatcher == null || labelMatcher.match(currentLabel));
+			if (matched) {
+				if (!valueMatched) {
+					// label matched, now filter only by value
+					labelMatcher= null;
+					matched= false;
+				} else {
+					setVisible(true, true);
+					return true;
+				}
+			}
+			//check children
+			if (fChildren != null) {
+				for (PreferenceTreeNode<?> child : fChildren)
+					matched|= child.filter(labelMatcher, ancestorsLabel, valueMatcher);
+			}
+			setVisible(matched, fShowAllChildren);
+			return matched;
+		}
+
+		private void setVisible(boolean visible, boolean recursive) {
+			fVisible= visible;
+			if (fChildren != null && recursive) {
+				for (PreferenceTreeNode<?> node : fChildren)
+					node.setVisible(visible, recursive);
+			}
+		}
+
+		public void setEnabled(boolean enabled) {
+			fControl.setEnabled(enabled);
+			if (fChildren != null) {
+				for (PreferenceTreeNode<?> node : fChildren)
+					node.setEnabled(enabled);
+			}
+		}
+	}
+
+	public static class HighlightHelper {
+
+		private static class HighlightPainter implements PaintListener {
+
+			private final Composite fParent;
+			private final Control fLabelControl;
+			private final Control fMainControl;
+			int fColor;
+
+			public HighlightPainter(Composite parent, Control labelControl, Control mainControl, int color) {
+				fParent= parent;
+				fLabelControl= labelControl;
+				fMainControl= mainControl;
+				fColor= color;
+			}
+
+			@Override
+			public void paintControl(PaintEvent e) {
+				if (((GridData) fLabelControl.getLayoutData()).exclude) {
+					fParent.removePaintListener(this);
+					fLabelControl.setData(null);
+					return;
+				}
+
+				int GAP= 7;
+				int ARROW= 3;
+				Rectangle l= fLabelControl.getBounds();
+				Point c= fMainControl.getLocation();
+
+				e.gc.setForeground(e.display.getSystemColor(fColor));
+				int x2= c.x - GAP;
+				int y= l.y + l.height / 2 + 1;
+
+				e.gc.drawLine(l.x + l.width + GAP, y, x2, y);
+				e.gc.drawLine(x2 - ARROW, y - ARROW, x2, y);
+				e.gc.drawLine(x2 - ARROW, y + ARROW, x2, y);
+			}
+		}
+
+		public static final int HIGHLIGHT_FOCUS= SWT.COLOR_WIDGET_DARK_SHADOW;
+		public static final int HIGHLIGHT_MOUSE= SWT.COLOR_WIDGET_NORMAL_SHADOW;
+		public static final int HIGHLIGHT_NONE= SWT.NONE;
+
+		/**
+		 * Adds the highlight feature to a pair of controls, that is an arrow painted between the
+		 * label and the main control for easier selection and to show when the control has focus.
+		 * Both controls must have the same parent.
+		 * 
+		 * @param labelControl the control acting as label, <b>warning: highlight feature will use
+		 *            the data slot of this control to store internal information</b>
+		 * @param mainControl the main control
+		 */
+		public static void addHighlight(final Control labelControl, final Control mainControl) {
+			final Composite parent= labelControl.getParent();
+
+			mainControl.addFocusListener(new FocusListener() {
+				@Override
+				public void focusLost(FocusEvent e) {
+					highlight(parent, labelControl, mainControl, HIGHLIGHT_NONE);
+				}
+
+				@Override
+				public void focusGained(FocusEvent e) {
+					highlight(parent, labelControl, mainControl, HIGHLIGHT_FOCUS);
+				}
+			});
+
+			MouseTrackAdapter labelComboListener= new MouseTrackAdapter() {
+				@Override
+				public void mouseEnter(MouseEvent e) {
+					highlight(parent, labelControl, mainControl, mainControl.isEnabled() ? mainControl.isFocusControl() ? HIGHLIGHT_FOCUS : HIGHLIGHT_MOUSE : HIGHLIGHT_NONE);
+				}
+
+				@Override
+				public void mouseExit(MouseEvent e) {
+					if (!mainControl.isFocusControl())
+						highlight(parent, labelControl, mainControl, HIGHLIGHT_NONE);
+				}
+			};
+			mainControl.addMouseTrackListener(labelComboListener);
+			labelControl.addMouseTrackListener(labelComboListener);
+
+			class MouseMoveTrackListener extends MouseTrackAdapter implements MouseMoveListener, MouseListener {
+				@Override
+				public void mouseExit(MouseEvent e) {
+					if (!mainControl.isFocusControl())
+						highlight(parent, labelControl, mainControl, HIGHLIGHT_NONE);
+				}
+
+				@Override
+				public void mouseMove(MouseEvent e) {
+					int color= mainControl.isEnabled() ? mainControl.isFocusControl() ? HIGHLIGHT_FOCUS : isAroundLabel(e) ? HIGHLIGHT_MOUSE : HIGHLIGHT_NONE : HIGHLIGHT_NONE;
+					highlight(parent, labelControl, mainControl, color);
+				}
+
+				@Override
+				public void mouseDown(MouseEvent e) {
+					if (isAroundLabel(e))
+						mainControl.setFocus();
+				}
+
+				@Override
+				public void mouseDoubleClick(MouseEvent e) {
+					// not used
+				}
+
+				@Override
+				public void mouseUp(MouseEvent e) {
+					// not used
+				}
+
+				private boolean isAroundLabel(MouseEvent e) {
+					int lx= labelControl.getLocation().x;
+					Rectangle c= mainControl.getBounds();
+					int x= e.x;
+					int y= e.y;
+					boolean isAroundLabel= lx - 5 < x && x < c.x && c.y - 2 < y && y < c.y + c.height + 2;
+					return isAroundLabel;
+				}
+			}
+			MouseMoveTrackListener parentListener= new MouseMoveTrackListener();
+			parent.addMouseMoveListener(parentListener);
+			parent.addMouseTrackListener(parentListener);
+			parent.addMouseListener(parentListener);
+
+			if (labelControl instanceof Label) {
+				labelControl.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseDown(MouseEvent e) {
+						mainControl.setFocus();
+					}
+				});
+			}
+		}
+
+		public static void highlight(final Composite parent, final Control labelControl, final Control mainControl, final int color) {
+			Object data= labelControl.getData();
+			if (data == null) {
+				if (color != HIGHLIGHT_NONE) {
+					PaintListener painter= new HighlightPainter(parent, labelControl, mainControl, color);
+					parent.addPaintListener(painter);
+					labelControl.setData(painter);
+				} else {
+					return;
+				}
+			} else {
+				if (color == HIGHLIGHT_NONE) {
+					parent.removePaintListener((PaintListener) data);
+					labelControl.setData(null);
+				} else if (color != ((HighlightPainter) data).fColor) {
+					((HighlightPainter) data).fColor= color;
+				} else {
+					return;
+				}
+			}
+
+			parent.redraw();
+		}
+
+		public static int getHighlight(Label labelControl) {
+			Object data= labelControl.getData();
+			if (data == null)
+				return HIGHLIGHT_NONE;
+			return ((HighlightPainter) data).fColor;
+		}
+	}
+
+	/**
+	 * Subclass of {@link ScrolledPageContent} that can disable layout reflows for optimization
+	 * purposes.
+	 */
+	protected static class ReflowControlScrolledPageContent extends ScrolledPageContent {
+		private boolean fReflow= true;
+
+		public ReflowControlScrolledPageContent(Composite parent) {
+			super(parent);
+		}
+
+		public void setReflow(boolean reflow) {
+			fReflow= reflow;
+			if (reflow)
+				reflow(true);
+		}
+
+		@Override
+		public void reflow(boolean flushCache) {
+			if (fReflow)
+				super.reflow(flushCache);
+		}
+	}
+
+	public static final ValueMatcher<Combo> COMBO_VALUE_MATCHER= (node, matcher) -> matcher.match(node.getControl().getText());
+
+	public static final ValueMatcher<Text> TEXT_VALUE_MATCHER= (node, matcher) -> matcher.match(node.getControl().getText());
+
+	public static final ValueMatcher<Spinner> SPINNER_VALUE_MATCHER= (node, matcher) -> matcher.match(Integer.toString(node.getControl().getSelection()));
+
+	public static final ValueMatcher<Button> CHECK_BOX_MATCHER= (node, matcher) -> {
+		boolean checked= node.getControl().getSelection();
+		if (checked) {
+			return matcher.match(PreferencesMessages.OptionsConfigurationBlock_On) || matcher.match(PreferencesMessages.OptionsConfigurationBlock_Enabled);
+		} else {
+			return matcher.match(PreferencesMessages.OptionsConfigurationBlock_Off) || matcher.match(PreferencesMessages.OptionsConfigurationBlock_Disabled);
+		}
+	};
+
+	/**
+	 * Root node for the tree. It does not have a corresponding UI control.
+	 */
+	protected final PreferenceTreeNode<Composite> fRoot;
+
+	private boolean fConcatAncestorLabels= false;
+	private boolean fExpectMultiWordValueMatch= false;
+
+	/**
+	 * The parent composite of <code>FilteredPreferenceTree</code>.
+	 */
+	private final Composite fParentComposite;
+
+	/**
+	 * The scrolled area of the tree.
+	 */
+	protected ReflowControlScrolledPageContent fScrolledPageContent;
+	
+	/**
+	 * Job to update the UI in a separate thread.
+	 */
+	private final WorkbenchJob fRefreshJob;
+
+	/**
+	 * Tells whether the filter text matched at least one element.
+	 */
+	private boolean fMatchFound;
+
+	/**
+	 * Label to indicate that no option matched the filter text.
+	 */
+	private Label fNoMatchFoundLabel;
+
+	private ToolItem fExpandAllItem;
+	private ToolItem fCollapseAllItem;
+
+	public FilteredPreferenceTree(Composite parentComposite, String label, String hint) {
+		fParentComposite= parentComposite;
+		fRoot= new PreferenceTreeNode<>(null, null, false);
+
+		createDescription(label);
+		createFilterBox(hint);
+		createScrolledArea();
+		createNoMatchFoundLabel();
+
+		fRefreshJob= doCreateRefreshJob();
+		fRefreshJob.setSystem(true);
+		fParentComposite.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				fRefreshJob.cancel();
+			}
+		});
+	}
+
+	private void createDescription(String label) {
+		if (label == null)
+			return;
+
+		Label description= new Label(fParentComposite, SWT.LEFT | SWT.WRAP);
+		description.setFont(fParentComposite.getFont());
+		description.setText(label);
+		description.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+	}
+
+	private void createFilterBox(String hint) {
+		Composite composite= new Composite(fParentComposite, SWT.NONE);
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		GridLayout layout= new GridLayout(2, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.horizontalSpacing= 40;
+		composite.setLayout(layout);
+
+		//TODO: Directly use the hint flags once Bug 293230 is fixed
+		FilterTextControl filterTextControl= new FilterTextControl(composite);
+
+		final Text filterBox= filterTextControl.getFilterControl();
+		filterBox.setMessage(hint);
+
+		filterBox.addModifyListener(new ModifyListener() {
+			private String fPrevFilterText;
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				String input= filterBox.getText();
+				fExpandAllItem.setEnabled(input.isEmpty());
+				fCollapseAllItem.setEnabled(input.isEmpty());
+				if (!input.equalsIgnoreCase(fPrevFilterText)) {
+					fPrevFilterText= input;
+					doFilter(input);
+				}
+			}
+		});
+
+		ToolBar toolbar= new ToolBar(composite, SWT.FLAT);
+		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		fExpandAllItem= createExpansionItem(toolbar, true, JavaPluginImages.DESC_ELCL_EXPANDALL, JavaPluginImages.DESC_DLCL_EXPANDALL,
+				PreferencesMessages.FilteredPreferencesTree_expandAll_tooltip);
+		fCollapseAllItem= createExpansionItem(toolbar, false, JavaPluginImages.DESC_ELCL_COLLAPSEALL, JavaPluginImages.DESC_DLCL_COLLAPSEALL,
+				PreferencesMessages.FilteredPreferencesTree_collapseAll_tooltip);
+	}
+
+	private ToolItem createExpansionItem(ToolBar toolBar, final boolean expand, ImageDescriptor image, ImageDescriptor disabledImage, String tooltip) {
+		ToolItem item= new ToolItem(toolBar, SWT.PUSH);
+		final Image createdImage= image.createImage();
+		final Image createdDisabledImage= disabledImage.createImage();
+		item.setImage(createdImage);
+		item.setDisabledImage(createdDisabledImage);
+		item.setToolTipText(tooltip);
+		item.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				setAllExpanded(expand);
+			}
+		});
+		item.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				createdImage.dispose();
+				createdDisabledImage.dispose();
+			}
+		});
+		return item;
+	}
+
+	private void createScrolledArea() {
+		fScrolledPageContent= new ReflowControlScrolledPageContent(fParentComposite);
+		fScrolledPageContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, ((GridLayout) fParentComposite.getLayout()).numColumns, 0));
+		fScrolledPageContent.addControlListener(new ControlAdapter() {
+			@Override
+			public void controlResized(ControlEvent e) {
+				fScrolledPageContent.getVerticalBar().setVisible(true);
+			}
+		});
+	}
+
+	public ScrolledPageContent getScrolledPageContent() {
+		return fScrolledPageContent;
+	}
+
+	private void createNoMatchFoundLabel() {
+		fNoMatchFoundLabel= new Label(fScrolledPageContent.getBody(), SWT.NONE);
+		GridData gd= new GridData(SWT.BEGINNING, SWT.CENTER, true, false);
+		gd.horizontalSpan= 3;
+		fNoMatchFoundLabel.setLayoutData(gd);
+		fNoMatchFoundLabel.setFont(fScrolledPageContent.getFont());
+		fNoMatchFoundLabel.setText(PreferencesMessages.OptionsConfigurationBlock_NoOptionMatchesTheFilter);
+		setVisible(fNoMatchFoundLabel, false);
+	}
+
+	/**
+	 * @param concat if {@code true}, filtering will work as if each node has labels of its
+	 *            ancestors concatenated at the beginning of its own label
+	 */
+	public void setConcatAncestorLabels(boolean concat) {
+		fConcatAncestorLabels= concat;
+	}
+
+	/**
+	 * @param expect if {@code true}, filter text starting with {@code ~} will be whole treated as value
+	 *            filter instead of only the first word
+	 */
+	public void setExpectMultiWordValueMatch(boolean expect) {
+		fExpectMultiWordValueMatch= expect;
+	}
+
+	public void doFilter(String filterText) {
+		fRefreshJob.cancel();
+		fRefreshJob.schedule(getRefreshJobDelay());
+		filterText= filterText.trim();
+		int index= filterText.indexOf("~"); //$NON-NLS-1$
+		StringMatcher labelMatcher= null;
+		StringMatcher valueMatcher= null;
+		if (index == -1) {
+			labelMatcher= createStringMatcher(filterText);
+		} else {
+			if (index == 0 && !fExpectMultiWordValueMatch) {
+				int i= 0;
+				for (; i < filterText.length(); i++) {
+					char ch= filterText.charAt(i);
+					if (ch == ' ' || ch == '\t') {
+						break;
+					}
+				}
+				valueMatcher= createStringMatcher(filterText.substring(1, i));
+				labelMatcher= createStringMatcher(filterText.substring(i));
+			} else {
+				labelMatcher= createStringMatcher(filterText.substring(0, index));
+				if (index < filterText.length())
+					valueMatcher= createStringMatcher(filterText.substring(index + 1));
+			}
+		}
+		fMatchFound= fRoot.filter(labelMatcher, fConcatAncestorLabels ? "" : null, valueMatcher); //$NON-NLS-1$
+	}
+
+	private StringMatcher createStringMatcher(String filterText) {
+		filterText= filterText.trim();
+		if (filterText.length() > 0)
+			return new StringMatcher("*" + filterText + "*", true, false); //$NON-NLS-1$ //$NON-NLS-2$
+		return null;
+	}
+
+	/**
+	 * Return the time delay that should be used when scheduling the filter refresh job.
+	 * 
+	 * @return a time delay in milliseconds before the job should run
+	 */
+	private long getRefreshJobDelay() {
+		return 200;
+	}
+
+	protected void updateUI(PreferenceTreeNode<?> node) {
+		//update node
+		Control control= node.getControl();
+
+		if (control != null) {
+			boolean visible= node.isVisible();
+			setVisible(control, visible);
+			if (control instanceof ExpandableComposite) {
+				((ExpandableComposite) control).setExpanded(visible);
+			}
+		}
+
+		//update children
+		List<PreferenceTreeNode<?>> children= node.getChildren();
+		if (children != null) {
+			for (int i= 0; i < children.size(); i++) {
+				updateUI(children.get(i));
+			}
+		}
+	}
+
+	private WorkbenchJob doCreateRefreshJob() {
+		return new WorkbenchJob(PreferencesMessages.OptionsConfigurationBlock_RefreshFilter) {
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				fScrolledPageContent.setRedraw(false);
+				fScrolledPageContent.setReflow(false);
+				updateUI(fRoot);
+				setVisible(fNoMatchFoundLabel, !fMatchFound);
+				fScrolledPageContent.setReflow(true);
+				Display.getCurrent().asyncExec(() -> fScrolledPageContent.setRedraw(true));
+				return Status.OK_STATUS;
+			}
+		};
+	}
+
+	private void setVisible(Control control, boolean visible) {
+		control.setVisible(visible);
+		((GridData) control.getLayoutData()).exclude= !visible;
+	}
+
+	public <T extends PreferenceTreeNode<?>> T addChild(PreferenceTreeNode<?> parent, T node) {
+		parent= (parent == null) ? fRoot : parent;
+		parent.addChild(node);
+		return node;
+	}
+
+	protected void setAllExpanded(boolean expanded) {
+		fScrolledPageContent.setRedraw(false);
+		fScrolledPageContent.setReflow(false);
+
+		ArrayList<PreferenceTreeNode<?>> bfsNodes= new ArrayList<>();
+		bfsNodes.addAll(fRoot.getChildren());
+		for (int i= 0; i < bfsNodes.size(); i++) {
+			PreferenceTreeNode<?> node= bfsNodes.get(i);
+			bfsNodes.addAll(bfsNodes.get(i).getChildren());
+			if (node.getControl() instanceof ExpandableComposite)
+				((ExpandableComposite) node.getControl()).setExpanded(expanded);
+		}
+
+		fScrolledPageContent.setReflow(true);
+		Display.getCurrent().asyncExec(() -> fScrolledPageContent.setRedraw(true));
+	}
+}

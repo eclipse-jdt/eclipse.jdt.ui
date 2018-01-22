@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,8 @@ import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.core.resources.IProject;
 
+import org.eclipse.jdt.core.formatter.CodeFormatter;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
@@ -36,8 +38,6 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
  */
 
 public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
-
-    private static final String FORMATTER_DIALOG_PREFERENCE_KEY= "formatter_page"; //$NON-NLS-1$
 
 	private static final String DIALOGSTORE_LASTSAVELOADPATH= JavaUI.ID_PLUGIN + ".codeformatter"; //$NON-NLS-1$
 
@@ -88,7 +88,7 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
     /**
 	 * The JavaPreview.
 	 */
-	private CompilationUnitPreview fJavaPreview;
+	private JavaPreview fJavaPreview;
 
 	protected CustomCodeFormatterBlock fCustomCodeFormatterBlock;
 
@@ -117,9 +117,9 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
 		fCustomCodeFormatterBlock.createContents(composite, numColumns);
 
 		createLabel(composite, FormatterMessages.CodingStyleConfigurationBlock_preview_label_text, numColumns);
-		CompilationUnitPreview result= new CompilationUnitPreview(profileManager.getSelected().getSettings(), composite);
+		JavaPreview result= new JavaPreview(profileManager.getSelected().getSettings(), composite);
 		result.setFormatterId(fCustomCodeFormatterBlock.getFormatterId());
-        result.setPreviewText(PREVIEW);
+		result.setPreviewText(PREVIEW, CodeFormatter.K_COMPILATION_UNIT);
 		fJavaPreview= result;
 
 		final GridData gd = new GridData(GridData.FILL_VERTICAL | GridData.HORIZONTAL_ALIGN_FILL);
@@ -136,7 +136,8 @@ public class CodeFormatterConfigurationBlock extends ProfileConfigurationBlock {
 
     @Override
 	protected ModifyDialog createModifyDialog(Shell shell, Profile profile, ProfileManager profileManager, ProfileStore profileStore, boolean newProfile) {
-        return new FormatterModifyDialog(shell, profile, profileManager, profileStore, newProfile, FORMATTER_DIALOG_PREFERENCE_KEY, DIALOGSTORE_LASTSAVELOADPATH);
+		// TODO pass custom formatter id for preview?
+        return new FormatterModifyDialog(shell, profile, profileManager, profileStore, newProfile, DIALOGSTORE_LASTSAVELOADPATH);
     }
 
 	@Override

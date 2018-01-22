@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -486,7 +486,38 @@ public class JavaPluginImages {
     public static final ImageDescriptor DESC_TOOL_NEWPACKROOT= createUnManaged(T_ETOOL, "newpackfolder_wiz.png");         //$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_TOOL_CLASSPATH_ORDER= createUnManaged(T_OBJ, "cp_order_obj.png"); 		//$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_EXPANDALL= createUnManaged(T_ELCL, "expandall.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_EXPANDALL= createUnManaged(T_DLCL, "expandall.png"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_ELCL_COLLAPSEALL= createUnManaged(T_ELCL, "collapseall.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_COLLAPSEALL= createUnManaged(T_DLCL, "collapseall.png"); //$NON-NLS-1$
+
+	public static final ImageDescriptor DESC_ELCL_MODIFYALL= createUnManaged(T_ELCL, "modifyall.png"); //$NON-NLS-1$
+
+	// Image descriptors used for formatter line wrapping preferences
+	public static final ImageDescriptor DESC_ELCL_INDENT_COLUMN= createUnManaged(T_ELCL, "indent_column.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_INDENT_COLUMN= createUnManaged(T_DLCL, "indent_column.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_INDENT_DEFAULT= createUnManaged(T_ELCL, "indent_default.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_INDENT_DEFAULT= createUnManaged(T_DLCL, "indent_default.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_INDENT_ONE= createUnManaged(T_ELCL, "indent_one.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_INDENT_ONE= createUnManaged(T_DLCL, "indent_one.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_WRAP_AFTER= createUnManaged(T_ELCL, "wrap_after.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_WRAP_AFTER= createUnManaged(T_DLCL, "wrap_after.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_WRAP_ALL= createUnManaged(T_ELCL, "wrap_all.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_WRAP_ALL= createUnManaged(T_DLCL, "wrap_all.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_WRAP_ALL_INDENT= createUnManaged(T_ELCL, "wrap_all_indent.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_WRAP_ALL_INDENT= createUnManaged(T_DLCL, "wrap_all_indent.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_WRAP_ALL_NOT_FIRST= createUnManaged(T_ELCL, "wrap_all_not_first.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_WRAP_ALL_NOT_FIRST= createUnManaged(T_DLCL, "wrap_all_not_first.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_WRAP_BEFORE= createUnManaged(T_ELCL, "wrap_before.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_WRAP_BEFORE= createUnManaged(T_DLCL, "wrap_before.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_WRAP_FIRST_NECESSARY= createUnManaged(T_ELCL, "wrap_first_necessary.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_WRAP_FIRST_NECESSARY= createUnManaged(T_DLCL, "wrap_first_necessary.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_WRAP_FORCE= createUnManaged(T_ELCL, "wrap_force.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_WRAP_FORCE= createUnManaged(T_DLCL, "wrap_force.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_WRAP_NECESSARY= createUnManaged(T_ELCL, "wrap_necessary.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_WRAP_NECESSARY= createUnManaged(T_DLCL, "wrap_necessary.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_WRAP_NOT= createUnManaged(T_ELCL, "wrap_not.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_DLCL_WRAP_NOT= createUnManaged(T_DLCL, "wrap_not.png"); //$NON-NLS-1$
 
 	// Keys for correction proposal. We have to put the image into the registry since "code assist" doesn't
 	// have a life cycle. So no chance to dispose icons.
