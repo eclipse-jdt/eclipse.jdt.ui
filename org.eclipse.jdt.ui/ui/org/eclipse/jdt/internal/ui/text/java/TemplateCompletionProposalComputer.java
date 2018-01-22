@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -44,6 +44,7 @@ public class TemplateCompletionProposalComputer extends AbstractTemplateCompleti
 	private final TemplateEngine fJavaStatementsTemplateEngine;
 	private final TemplateEngine fJavaMembersTemplateEngine;
 	private final TemplateEngine fJavaModuleTemplateEngine;
+	private final TemplateEngine fJavaEmptyTemplateEngine;
 
 	private final TemplateEngine fJavadocTemplateEngine;
 
@@ -54,6 +55,7 @@ public class TemplateCompletionProposalComputer extends AbstractTemplateCompleti
 		fJavaStatementsTemplateEngine= createTemplateEngine(templateContextRegistry, JavaContextType.ID_STATEMENTS);
 		fJavadocTemplateEngine= createTemplateEngine(templateContextRegistry, JavaDocContextType.ID);
 		fJavaModuleTemplateEngine= createTemplateEngine(templateContextRegistry, JavaContextType.ID_MODULE);
+		fJavaEmptyTemplateEngine= createTemplateEngine(templateContextRegistry, JavaContextType.ID_EMPTY);
 	}
 
 	private static TemplateEngine createTemplateEngine(ContextTypeRegistry templateContextRegistry, String contextTypeId) {
@@ -81,6 +83,8 @@ public class TemplateCompletionProposalComputer extends AbstractTemplateCompleti
 				}
 				if (JavaModelUtil.MODULE_INFO_JAVA.equals(context.getCompilationUnit().getElementName())) {
 					return fJavaModuleTemplateEngine;
+				} else if (context.getDocument().get().trim().length() == 0) {
+					return fJavaEmptyTemplateEngine;
 				} else {
 					return fJavaTemplateEngine;
 				}

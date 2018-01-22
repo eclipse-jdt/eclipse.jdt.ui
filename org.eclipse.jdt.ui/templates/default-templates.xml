@@ -257,4 +257,22 @@ ${result}[${array}.length]= ${var};</template>
 	${cursor}
 }</template>
 
+<template name="new_class" description="%Templates.new_class" id="org.eclipse.jdt.ui.templates.new_class" context="java-empty" enabled="true" autoinsert="false">${package_declaration}
+
+public class ${class_name} ${line_selection}${cursor} {
+
+}</template>
+
+<template name="new_iface" description="%Templates.new_iface" id="org.eclipse.jdt.ui.templates.new_iface" context="java-empty" enabled="true" autoinsert="false">${package_declaration}
+
+public interface ${class_name} ${line_selection}${cursor} {
+
+}</template>
+
+<template name="new_enum" description="%Templates.new_enum" id="org.eclipse.jdt.ui.templates.new_enum" context="java-empty" enabled="true" autoinsert="false">${package_declaration}
+
+public enum ${class_name} ${line_selection}${cursor} {
+
+}</template>
+
 </templates>

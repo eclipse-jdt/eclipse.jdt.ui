@@ -229,7 +229,8 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 			if (!template.matches("", contextId) || !lineSelectionMatcher.find() && !wordSelectionMatcher.find()) //$NON-NLS-1$
 				return false;
 		} else {
-			if (template.matches("", JavaDocContextType.ID) || !lineSelectionMatcher.find()) //$NON-NLS-1$
+			if (template.matches("", JavaDocContextType.ID) || !lineSelectionMatcher.find() //$NON-NLS-1$
+					|| template.matches("", JavaContextType.ID_EMPTY)) //$NON-NLS-1$
 				return false;
 		}
 		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(template.getContextTypeId());

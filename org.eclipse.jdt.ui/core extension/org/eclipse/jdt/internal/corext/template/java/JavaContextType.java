@@ -33,6 +33,11 @@ public class JavaContextType extends AbstractJavaContextType {
 	public static final String ID_ALL= "java"; //$NON-NLS-1$
 
 	/**
+	 * The context type id for templates working on empty Java source files
+	 */
+	public static final String ID_EMPTY= "java-empty"; //$NON-NLS-1$
+
+	/**
 	 * The context type id for templates working on member locations
 	 */
 	public static final String ID_MEMBERS= "java-members"; //$NON-NLS-1$
@@ -50,7 +55,7 @@ public class JavaContextType extends AbstractJavaContextType {
 	@Override
 	protected void initializeContext(IJavaContext context) {
 		// Separate 'module' context type from 'java' context type
-		if (getId().equals(ID_MODULE)) {
+		if (getId().equals(ID_MODULE) || getId().equals(ID_EMPTY)) {
 			return;
 		}
 		if (!getId().equals(JavaContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere
