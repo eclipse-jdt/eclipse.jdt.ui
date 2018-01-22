@@ -65,10 +65,10 @@ public class JarRsrcLoader {
 		try {
 			// We use reflection here because the method ClassLoader.getPlatformClassLoader()
 			// is only present starting from Java 9
-			Method platformClassLoader = ClassLoader.class.getMethod("getPlatformClassLoader");
-			return (ClassLoader) platformClassLoader.invoke(null);
+			Method platformClassLoader = ClassLoader.class.getMethod("getPlatformClassLoader", (Class[])null); //$NON-NLS-1$
+			return (ClassLoader) platformClassLoader.invoke(null, (Object[]) null);
 		} catch (NoSuchMethodException e) {
-			// This is a safe value to be used on Java 8 an previous versions
+			// This is a safe value to be used on Java 8 and previous versions
 			return null;
 		}
 	}
