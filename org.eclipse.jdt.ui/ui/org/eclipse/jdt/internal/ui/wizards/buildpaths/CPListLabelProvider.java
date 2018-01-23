@@ -25,9 +25,10 @@ import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 
+import org.eclipse.ui.IDecoratorManager;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
-
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -43,6 +44,7 @@ import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration;
 import org.eclipse.jdt.ui.wizards.ClasspathAttributeConfiguration.ClasspathAttributeAccess;
 
@@ -68,6 +70,9 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 
 	private ClasspathAttributeConfigurationDescriptors fAttributeDescriptors;
 
+	private boolean fDecorateTestCodeContainerIcons;
+
+	private boolean fDecorateWithoutTestCode;
 
 	public CPListLabelProvider() {
 		fNewLabel= NewWizardMessages.CPListLabelProvider_new;
@@ -81,6 +86,10 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 
 		fProjectImage= workbench.getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
 		fAttributeDescriptors= JavaPlugin.getDefault().getClasspathAttributeConfigurationDescriptors();
+
+		fDecorateTestCodeContainerIcons= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.DECORATE_TEST_CODE_CONTAINER_ICONS);
+		IDecoratorManager decoratorMgr= PlatformUI.getWorkbench().getDecoratorManager();
+		fDecorateWithoutTestCode= decoratorMgr.getEnabled("org.eclipse.jdt.internal.ui.without.test.code.decorator"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -423,12 +432,14 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 	}
 
 	private ImageDescriptor getCPListElementBaseImage(CPListElement cpentry, boolean isTest) {
+		boolean useTestIcon = isTest && fDecorateTestCodeContainerIcons;
+
 		switch (cpentry.getEntryKind()) {
 			case IClasspathEntry.CPE_SOURCE:
 				if (cpentry.getPath().segmentCount() == 1) {
 					return fProjectImage;
 				} else {
-					if(isTest)
+					if(useTestIcon)
 						return JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT_TESTSOURCES;
 					return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_PACKFRAG_ROOT);
 				}
@@ -441,50 +452,50 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 				if (res == null) {
 					if (ArchiveFileFilter.isArchivePath(cpentry.getPath(), true)) {
 						if (path == null || path.isEmpty()) {
-							if(isTest)
+							if(useTestIcon)
 								return JavaPluginImages.DESC_OBJS_EXTJAR_TEST;
 							return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_EXTERNAL_ARCHIVE);
 						} else {
-							if(isTest)
+							if(useTestIcon)
 								return JavaPluginImages.DESC_OBJS_EXTJAR_WSRC_TEST;
 							return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_EXTERNAL_ARCHIVE_WITH_SOURCE);
 						}
 					} else {
 						if (path == null || path.isEmpty()) {
-							if(isTest)
+							if(useTestIcon)
 								return JavaPluginImages.DESC_OBJS_CLASSFOLDER_TEST;
 							return JavaPluginImages.DESC_OBJS_CLASSFOLDER;
 						} else {
-							if(isTest)
+							if(useTestIcon)
 								return JavaPluginImages.DESC_OBJS_CLASSFOLDER_WSRC_TEST;
 							return JavaPluginImages.DESC_OBJS_CLASSFOLDER_WSRC;
 						}
 					}
 				} else if (res instanceof IFile) {
 					if (path == null || path.isEmpty()) {
-						if(isTest)
+						if(useTestIcon)
 							return JavaPluginImages.DESC_OBJS_JAR_TEST;
 						return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_JAR);
 					} else {
-						if(isTest)
+						if(useTestIcon)
 							return JavaPluginImages.DESC_OBJS_JAR_WSRC_TEST;
 						return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_JAR_WITH_SOURCE);
 					}
 				} else {
-					if(isTest)
+					if(useTestIcon)
 						return JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT_TEST;
 					return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_PACKFRAG_ROOT);
 				}
 			case IClasspathEntry.CPE_PROJECT:
-				return isTest ? JavaPluginImages.DESC_OBJS_PROJECT_TEST : fProjectImage;
+				return useTestIcon ? JavaPluginImages.DESC_OBJS_PROJECT_TEST : fProjectImage;
 			case IClasspathEntry.CPE_VARIABLE:
-				ImageDescriptor variableImage= isTest ? JavaPluginImages.DESC_OBJS_ENV_VAR_TEST : fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_CLASSPATH_VAR_ENTRY);
+				ImageDescriptor variableImage= useTestIcon ? JavaPluginImages.DESC_OBJS_ENV_VAR_TEST : fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_CLASSPATH_VAR_ENTRY);
 				if (cpentry.isDeprecated()) {
 					return new JavaElementImageDescriptor(variableImage, JavaElementImageDescriptor.DEPRECATED, JavaElementImageProvider.SMALL_SIZE);
 				}
 				return variableImage;
 			case IClasspathEntry.CPE_CONTAINER:
-				if(isTest)
+				if(useTestIcon)
 					return JavaPluginImages.DESC_OBJS_LIBRARY_TEST;
 				return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_LIBRARY);
 			default:
@@ -561,7 +572,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 
 			StyledString styledString= new StyledString();
 			styledString.append(getText(element));
-			if (classpathEntry != null && classpathEntry.isWithoutTestCode()) {
+			if (fDecorateWithoutTestCode && classpathEntry != null && classpathEntry.isWithoutTestCode()) {
 				styledString.append(JavaUIMessages.WithoutTestCodeDecorator_suffix_withoutTestCode, StyledString.DECORATIONS_STYLER);
 			}
 			return styledString;

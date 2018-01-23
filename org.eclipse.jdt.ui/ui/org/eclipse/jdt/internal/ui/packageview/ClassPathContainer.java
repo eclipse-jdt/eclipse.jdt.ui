@@ -37,6 +37,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -48,6 +50,7 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 
 	private IClasspathEntry fClassPathEntry;
 	private IClasspathContainer fContainer;
+	private boolean fDecorateTestCodeContainerIcons;
 
 	public static class RequiredProjectWrapper implements IAdaptable, IWorkbenchAdapter {
 
@@ -151,6 +154,7 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 		} catch (JavaModelException e) {
 			fContainer= null;
 		}
+		fDecorateTestCodeContainerIcons= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.DECORATE_TEST_CODE_CONTAINER_ICONS);
 	}
 
 	@Override
@@ -205,7 +209,7 @@ public class ClassPathContainer extends PackageFragmentRootContainer {
 
 	@Override
 	public ImageDescriptor getImageDescriptor() {
-		return fClassPathEntry.isTest() ? JavaPluginImages.DESC_OBJS_LIBRARY_TEST : JavaPluginImages.DESC_OBJS_LIBRARY;
+		return fDecorateTestCodeContainerIcons && fClassPathEntry.isTest() ? JavaPluginImages.DESC_OBJS_LIBRARY_TEST : JavaPluginImages.DESC_OBJS_LIBRARY;
 	}
 
 	@Override
