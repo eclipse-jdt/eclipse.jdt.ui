@@ -1281,7 +1281,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 
 		Predicate<String> validator= value -> {
 			String errorText= null;
-			if (!value.isEmpty()) {
+			if (value != null && !value.isEmpty()) {
 				if (Character.isWhitespace(value.charAt(0))) {
 					errorText= FormatterMessages.FormatterModifyDialog_offOn_error_startsWithWhitespace;
 				} else if (Character.isWhitespace(value.charAt(value.length() - 1))) {
