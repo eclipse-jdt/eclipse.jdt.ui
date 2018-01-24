@@ -169,7 +169,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		fJavaProject= project;
 		fCompilationUnit= cu;
 		
-		fIsTestCodeExcluded = !isTestSource(project, cu);
+		fIsTestCodeExcluded = cu != null && !isTestSource(project, cu);
 
 		fUserReplacementLength= -1;
 		if (!ignoreAll) {
