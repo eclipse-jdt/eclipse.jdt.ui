@@ -47,6 +47,7 @@ import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
 import org.eclipse.ui.wizards.datatransfer.ZipFileStructureProvider;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -519,6 +520,21 @@ public class JavaProjectHelper {
 	 * @throws CoreException Creation failed
 	 */
 	public static IPackageFragmentRoot addSourceContainer(IJavaProject jproject, String containerName, IPath[] inclusionFilters, IPath[] exclusionFilters, String outputLocation) throws CoreException {
+		return addSourceContainer(jproject, containerName, inclusionFilters, exclusionFilters, outputLocation,
+				new IClasspathAttribute[0]);
+	}
+	/**
+	 * Adds a source container to a IJavaProject.
+	 * @param jproject The parent project
+	 * @param containerName The name of the new source container
+	 * @param inclusionFilters Inclusion filters to set
+	 * @param exclusionFilters Exclusion filters to set
+	 * @param outputLocation The location where class files are written to, <b>null</b> for project output folder
+	 * @param attributes The classpath attributes to set
+	 * @return The handle to the new source container
+	 * @throws CoreException Creation failed
+	 */
+	public static IPackageFragmentRoot addSourceContainer(IJavaProject jproject, String containerName, IPath[] inclusionFilters, IPath[] exclusionFilters, String outputLocation, IClasspathAttribute[] attributes) throws CoreException {
 		IProject project= jproject.getProject();
 		IContainer container= null;
 		if (containerName == null || containerName.length() == 0) {
@@ -540,7 +556,7 @@ public class JavaProjectHelper {
 			}
 			outputPath= folder.getFullPath();
 		}
-		IClasspathEntry cpe= JavaCore.newSourceEntry(root.getPath(), inclusionFilters, exclusionFilters, outputPath);
+		IClasspathEntry cpe= JavaCore.newSourceEntry(root.getPath(), inclusionFilters, exclusionFilters, outputPath, attributes);
 		addToClasspath(jproject, cpe);
 		return root;
 	}

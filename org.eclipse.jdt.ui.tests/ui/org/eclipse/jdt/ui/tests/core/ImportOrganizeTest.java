@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 import org.eclipse.core.resources.ProjectScope;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
@@ -3472,6 +3473,41 @@ public class ImportOrganizeTest extends CoreTests {
 		buf2.append("}\n");
 
 		assertEqualString(cu2.getSource(), buf2.toString());
+	}
+
+	public void testBug530193() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragmentRoot testSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src-tests", new Path[0], new Path[0], "bin-tests",
+				new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.TEST, "true") });
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package pp;\n");
+		buf1.append("public class C1 {\n");
+		buf1.append("    Tests at=new Tests();\n");
+		buf1.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("C1.java", buf1.toString(), false, null);
+
+		IPackageFragment pack2= testSourceFolder.createPackageFragment("pt", false, null);
+		StringBuffer buf2= new StringBuffer();
+		buf2.append("package pt;\n");
+		buf2.append("public class Tests {\n");
+		buf2.append("}\n");
+		pack2.createCompilationUnit("Tests.java", buf2.toString(), false, null);
+
+		String[] order= new String[0];
+		IChooseImportQuery query= createQuery("T", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu1, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf1= new StringBuffer();
+		buf1.append("package pp;\n");
+		buf1.append("public class C1 {\n");
+		buf1.append("    Tests at=new Tests();\n");
+		buf1.append("}\n");
+
+		assertEqualString(cu1.getSource(), buf1.toString());
 	}
 
 	protected OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean allowSyntaxErrors, IChooseImportQuery chooseImportQuery) {

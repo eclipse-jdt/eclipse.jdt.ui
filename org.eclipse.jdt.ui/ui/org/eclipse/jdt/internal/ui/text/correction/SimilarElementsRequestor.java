@@ -12,10 +12,14 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.HashSet;
 
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.CompletionRequestor;
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -48,6 +52,30 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 	private String fName;
 
 	private HashSet<SimilarElement> fResult;
+	private boolean fExcludeTestCode;
+
+	private static boolean isTestSource(ICompilationUnit cu) {
+		try {
+			IJavaProject javaProject= cu.getJavaProject();
+			if(javaProject==null) {
+				return false;
+			}
+			IClasspathEntry[] resolvedClasspath= javaProject.getResolvedClasspath(true);
+			final IPath resourcePath= cu.getResource().getFullPath();
+			for (IClasspathEntry e : resolvedClasspath) {
+				if (e.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+					if (e.isTest()) {
+						if (e.getPath().isPrefixOf(resourcePath)) {
+							return true;
+						}
+					}
+				}
+			}
+		} catch (JavaModelException e) {
+			return false;
+		}
+		return false;
+	}
 
 	public static SimilarElement[] findSimilarElement(ICompilationUnit cu, Name name, int kind) throws JavaModelException {
 		int pos= name.getStartPosition();
@@ -69,7 +97,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 				cu= preparedCU;
 			}
 
-			SimilarElementsRequestor requestor= new SimilarElementsRequestor(identifier, kind, nArguments, returnType);
+			SimilarElementsRequestor requestor= new SimilarElementsRequestor(identifier, kind, nArguments, returnType, !isTestSource(cu));
 			requestor.setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, true);
 			requestor.setIgnored(CompletionProposal.ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION, true);
 			requestor.setIgnored(CompletionProposal.KEYWORD, true);
@@ -126,11 +154,13 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 	 * @param kind the type kind
 	 * @param nArguments the number of arguments
 	 * @param preferredType the preferred type
+	 * @param excludeTestCode if true, exclude results in test code
 	 */
-	private SimilarElementsRequestor(String name, int kind, int nArguments, String preferredType) {
+	private SimilarElementsRequestor(String name, int kind, int nArguments, String preferredType, boolean excludeTestCode) {
 		super();
 		fName= name;
 		fKind= kind;
+		fExcludeTestCode= excludeTestCode;
 
 		fResult= new HashSet<>();
 		// nArguments and preferredType not yet used
@@ -268,5 +298,8 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 		}
 	}
 
-	
+	@Override
+	public boolean isTestCodeExcluded() {
+		return fExcludeTestCode;
+	}
 }

@@ -17,8 +17,11 @@ import java.util.Hashtable;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -1591,5 +1594,29 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		expected[0]= buf.toString();
 		
 		assertExpectedExistInProposals(proposals, expected);
+	}
+	public void testBug530193() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragmentRoot testSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src-tests", new Path[0], new Path[0], "bin-tests",
+				new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.TEST, "true") });
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pp", false, null);
+		StringBuffer buf1= new StringBuffer();
+		buf1.append("package pp;\n");
+		buf1.append("public class C1 {\n");
+		buf1.append("    Tests at=new Tests();\n");
+		buf1.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("C1.java", buf1.toString(), false, null);
+
+		IPackageFragment pack2= testSourceFolder.createPackageFragment("pt", false, null);
+		StringBuffer buf2= new StringBuffer();
+		buf2.append("package pt;\n");
+		buf2.append("public class Tests {\n");
+		buf2.append("}\n");
+		pack2.createCompilationUnit("Tests.java", buf2.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot, 2, 1);
+		assertFalse(proposals.stream().anyMatch(p -> p.getDisplayString().equals("Import 'Tests' (pt)")));
 	}
 }

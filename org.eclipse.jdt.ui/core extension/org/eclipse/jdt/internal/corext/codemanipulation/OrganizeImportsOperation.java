@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -349,7 +350,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 				final ArrayList<TypeNameMatch> typesFound= new ArrayList<>();
 				final IJavaProject project= fCurrPackage.getJavaProject();
-				IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { project });
+				boolean excludeTestCode= !((IPackageFragmentRoot)fCurrPackage.getParent()).getResolvedClasspathEntry().isTest();
+				IJavaSearchScope scope= SearchEngine.createJavaSearchScope(excludeTestCode, new IJavaElement[] { project }, true);
 				TypeNameMatchCollector collector= new TypeNameMatchCollector(typesFound);
 				new SearchEngine().searchAllTypeNames(null, allTypes, scope, collector, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 
