@@ -27,6 +27,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ui.IWorkingSet;
@@ -170,7 +171,14 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 
 	private IStatus updateElements(IWorkingSet[] workingSets, IProgressMonitor monitor) {
 		// final boolean isTestSourcesWorkingSet= TEST_NAME.equals(workingSet.getName());
-		IJavaModel model= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+		IWorkspaceRoot root;
+		try {
+			root= ResourcesPlugin.getWorkspace().getRoot();
+		} catch (IllegalStateException e1) {
+			// can happen during shutdown
+			return Status.CANCEL_STATUS;
+		}
+		IJavaModel model= JavaCore.create(root);
 		List<IAdaptable> testResult= new ArrayList<>();
 		List<IAdaptable> mainResult= new ArrayList<>();
 		try {
