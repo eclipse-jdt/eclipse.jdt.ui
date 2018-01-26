@@ -17,6 +17,7 @@ import java.util.Map;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -190,5 +191,21 @@ public class CleanUpModifyDialog extends ModifyDialog {
 	@Override
 	protected String getHelpContextId() {
 		return IJavaHelpContextIds.CLEAN_UP_PREFERENCE_PAGE;
+	}
+
+	@Override
+	protected Point getInitialSize() {
+		Point initialSize= super.getInitialSize();
+		try {
+			int lastWidth= fDialogSettings.getInt(fKeyPreferredWidth);
+			if (initialSize.x > lastWidth)
+				lastWidth= initialSize.x;
+			int lastHeight= fDialogSettings.getInt(fKeyPreferredHight);
+			if (initialSize.y > lastHeight)
+				lastHeight= initialSize.y;
+			return new Point(lastWidth, lastHeight);
+		} catch (NumberFormatException ex) {
+		}
+		return initialSize;
 	}
 }

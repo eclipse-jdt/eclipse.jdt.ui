@@ -39,8 +39,6 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
@@ -1151,6 +1149,8 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 	private static final String DS_KEY_PREFERRED_HEIGHT= "modify_dialog.preferred_height"; //$NON-NLS-1$
 	private static final String DS_KEY_PREFERRED_X= "modify_dialog.preferred_x"; //$NON-NLS-1$
 	private static final String DS_KEY_PREFERRED_Y= "modify_dialog.preferred_y"; //$NON-NLS-1$
+	private static final String DS_KEY_SASH_FORM_LEFT_WIDTH= "modify_dialog.sash_form_left_width"; //$NON-NLS-1$
+	private static final String DS_KEY_SASH_FORM_RIGHT_WIDTH= "modify_dialog.sash_form_rigth_width"; //$NON-NLS-1$
 
 	private static final String DS_KEY_PREFERENCE_TREE_EXPANSION= ".preference_tree_expansion"; //$NON-NLS-1$
 	private static final String DS_KEY_PREFERENCE_SCROLL_POSITION= ".preference_scroll_position"; //$NON-NLS-1$
@@ -1163,10 +1163,12 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 	protected final IDialogSettings fDialogSettings;
 	protected final boolean fNewProfile;
 
-	private final String fKeyPreferredWidth;
-	private final String fKeyPreferredHight;
+	protected final String fKeyPreferredWidth;
+	protected final String fKeyPreferredHight;
 	private final String fKeyPreferredX;
 	private final String fKeyPreferredY;
+	private final String fKeySashFormLeftWidth;
+	private final String fKeySashFormRightWidth;
 	protected final String fKeyPreferenceTreeExpansion;
 	protected final String fKeyPreferenceScrollPosition;
 	protected final String fKeyLastFocusIndex;
@@ -1178,6 +1180,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 	private Button fSaveButton;
 	private StringDialogField fProfileNameField;
 
+	private SashForm fSashForm;
 	protected JavaPreview fPreview;
 	protected ProfilePreferenceTree fTree;
 	protected final Images fImages;
@@ -1195,6 +1198,8 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		fKeyPreferredHight= JavaUI.ID_PLUGIN + dialogPreferencesKey + DS_KEY_PREFERRED_HEIGHT;
 		fKeyPreferredX= JavaUI.ID_PLUGIN + dialogPreferencesKey + DS_KEY_PREFERRED_X;
 		fKeyPreferredY= JavaUI.ID_PLUGIN + dialogPreferencesKey + DS_KEY_PREFERRED_Y;
+		fKeySashFormLeftWidth= JavaUI.ID_PLUGIN + dialogPreferencesKey + DS_KEY_SASH_FORM_LEFT_WIDTH;
+		fKeySashFormRightWidth= JavaUI.ID_PLUGIN + dialogPreferencesKey + DS_KEY_SASH_FORM_RIGHT_WIDTH;
 		fKeyPreferenceTreeExpansion= JavaUI.ID_PLUGIN + dialogPreferencesKey + DS_KEY_PREFERENCE_TREE_EXPANSION;
 		fKeyPreferenceScrollPosition= JavaUI.ID_PLUGIN + dialogPreferencesKey + DS_KEY_PREFERENCE_SCROLL_POSITION;
 		fKeyLastFocusIndex= JavaUI.ID_PLUGIN + dialogPreferencesKey + DS_KEY_LAST_FOCUS_INDEX;
@@ -1237,14 +1242,23 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 	}
 
 	protected void createMainArea(Composite parent) {
-		final SashForm sashForm= new SashForm(parent, SWT.HORIZONTAL);
-		sashForm.setFont(parent.getFont());
-		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		fSashForm= new SashForm(parent, SWT.HORIZONTAL);
+		fSashForm.setFont(parent.getFont());
+		fSashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		createPreferenceTree(sashForm);
+		createPreferenceTree(fSashForm);
 		fTree.unifySectionTitlesHeights(null);
 		fTree.restoreExpansionState();
-		createPreviewPane(sashForm);
+		createPreviewPane(fSashForm);
+
+		try {
+			fSashForm.setWeights(new int[] { fDialogSettings.getInt(fKeySashFormLeftWidth), fDialogSettings.getInt(fKeySashFormRightWidth) });
+		} catch (NumberFormatException e) {
+			Control[] children= fSashForm.getChildren();
+			int treeWidth= children[0].computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+			int previewWidth= children[1].computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+			fSashForm.setWeights(new int[] { treeWidth, previewWidth });
+		}
 	}
 
 	protected void createPreferenceTree(Composite parent) {
@@ -1262,13 +1276,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		fTree.setExpectMultiWordValueMatch(true);
 
 		// restoring scroll position must wait until layout is complete
-		getShell().addShellListener(new ShellAdapter() {
-			@Override
-			public void shellActivated(ShellEvent e) {
-				fTree.restoreScrollPosition();
-				getShell().removeShellListener(this);
-			}
-		});
+		Display.getCurrent().asyncExec(fTree::restoreScrollPosition);
 	}
 
 	private void createNameArea(final Composite parent) {
@@ -1309,24 +1317,6 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 	}
 
 	@Override
-	protected Point getInitialSize() {
-		Point initialSize= super.getInitialSize();
-		try {
-			int lastWidth= fDialogSettings.getInt(fKeyPreferredWidth);
-			if (initialSize.x > lastWidth)
-				lastWidth= initialSize.x;
-			int lastHeight= fDialogSettings.getInt(fKeyPreferredHight);
-			if (initialSize.y > lastHeight)
-				lastHeight= initialSize.y;
-			return new Point(lastWidth, lastHeight);
-		} catch (NumberFormatException ex) {
-			// this is the first time
-			initialSize.y= Math.max(initialSize.y, 760);
-		}
-		return initialSize;
-	}
-
-	@Override
 	protected Point getInitialLocation(Point initialSize) {
 		try {
 			return new Point(fDialogSettings.getInt(fKeyPreferredX), fDialogSettings.getInt(fKeyPreferredY));
@@ -1342,6 +1332,11 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		fDialogSettings.put(fKeyPreferredHight, shell.height);
 		fDialogSettings.put(fKeyPreferredX, shell.x);
 		fDialogSettings.put(fKeyPreferredY, shell.y);
+		if (fSashForm != null) {
+			Control[] children= fSashForm.getChildren();
+			fDialogSettings.put(fKeySashFormLeftWidth, children[0].getSize().x);
+			fDialogSettings.put(fKeySashFormRightWidth, children[1].getSize().x);
+		}
 
 		if (fTree != null)
 			fTree.saveState();

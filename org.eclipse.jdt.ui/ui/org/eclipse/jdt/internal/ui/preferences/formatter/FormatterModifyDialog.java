@@ -1300,6 +1300,25 @@ public class FormatterModifyDialog extends ModifyDialog {
 		Predicate<String> checker= valueAcceptor(DefaultCodeFormatterConstants.TRUE);
 		checkbox.addDependant(disableTagPref, checker);
 		checkbox.addDependant(enableTagPref, checker);
+
+		// for some tree widths, description wrapping seems to cause wrong height calculation
+		// and fields may be partially hidden, extra gaps mitigate this
+		fTree.addGap(section);
+		fTree.addGap(section);
+	}
+
+	@Override
+	protected Point getInitialSize() {
+		try {
+			int lastWidth= fDialogSettings.getInt(fKeyPreferredWidth);
+			int lastHeight= fDialogSettings.getInt(fKeyPreferredHight);
+			return new Point(lastWidth, lastHeight);
+		} catch (NumberFormatException ex) {
+			// this is the first time
+			Point initialSize= super.getInitialSize();
+			initialSize.y= 760;
+			return initialSize;
+		}
 	}
 
 	@Override
