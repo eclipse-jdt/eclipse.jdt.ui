@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
+import org.eclipse.jdt.core.dom.IModuleBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -135,6 +136,15 @@ public class RedundantNullnessTypeAnnotationsFilter {
 							ITypeBinding annotationType= annotationBinding.getAnnotationType();
 							if (annotationType != null && annotationType.getQualifiedName().equals(nonNullByDefaultName)) {
 								return annotationBinding;
+							}
+						}
+						IModuleBinding module= packageBinding.getModule();
+						if(module != null) {
+							for (IAnnotationBinding annotationBinding : module.getAnnotations()) {
+								ITypeBinding annotationType= annotationBinding.getAnnotationType();
+								if (annotationType != null && annotationType.getQualifiedName().equals(nonNullByDefaultName)) {
+									return annotationBinding;
+								}
 							}
 						}
 					}

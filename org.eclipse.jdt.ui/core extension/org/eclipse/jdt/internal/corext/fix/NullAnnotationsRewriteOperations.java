@@ -42,6 +42,8 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IModuleBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -245,6 +247,12 @@ public class NullAnnotationsRewriteOperations {
 					return hasNonNullDefault308(typeBinding.getDeclaringClass(), -1, defaultLocation, true);
 				else
 					return hasNonNullDefault308(typeBinding.getPackage(), -1, defaultLocation, true);
+			} else if(enclosingElement instanceof IPackageBinding) {
+				IPackageBinding packageBinding= (IPackageBinding) enclosingElement;
+				IModuleBinding module= packageBinding.getModule();
+				if(module != null) {
+					return hasNonNullDefault308(module, -1, defaultLocation, true);
+				}
 			}
 			return false;
 		}
