@@ -1536,14 +1536,18 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 	}
 
 	protected void updatePreviewCode() {
-		if (fPreview != null)
-			fPreview.setPreviewText(getPreviewCode(), fCurrentPreviewType);
+		if (fPreview != null) {
+			String previewCode= getPreviewCode();
+			if (previewCode == null || previewCode.trim().isEmpty())
+				previewCode= "// " + FormatterMessages.ModifyDialog_previewMissing_comment; //$NON-NLS-1$
+			fPreview.setPreviewText(previewCode, fCurrentPreviewType);
+		}
 	}
 
-	protected String getPreviewCode() {
+	private String getPreviewCode() {
 		PreferenceTreeNode<?> currentNode= fFocusManager.fCurrentlyFocused;
 		if (currentNode == null)
-			return "// " + FormatterMessages.ModifyDialog_previewMissing_comment; //$NON-NLS-1$
+			return null;
 		
 		// try this node
 		String previewCode= doGetPreviewCode(currentNode);
@@ -1581,7 +1585,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 			node= node.getParent();
 		}
 
-		return "// " + FormatterMessages.ModifyDialog_previewMissing_comment; //$NON-NLS-1$
+		return null;
 	}
 
 	private String doGetPreviewCode(PreferenceTreeNode<?> node) {
