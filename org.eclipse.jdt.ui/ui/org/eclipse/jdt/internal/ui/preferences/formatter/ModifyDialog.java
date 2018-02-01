@@ -54,6 +54,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
@@ -93,6 +95,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree;
 import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.HighlightHelper;
 import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.PreferenceTreeNode;
+import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
 import org.eclipse.jdt.internal.ui.preferences.formatter.IModifyDialogTabPage.IModificationListener;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
@@ -119,7 +122,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 				boolean fExpandLock= false;
 				{
 					textLabel.addListener(SWT.MouseEnter, e -> fHasFocusBeforeClick= toggle.isFocusControl());
-					textLabel.addListener(SWT.MouseDown, e -> fExpandLock= !fHasFocusBeforeClick);
+					textLabel.addListener(SWT.MouseDown, e -> fExpandLock= !fHasFocusBeforeClick || e.button != 1);
 				}
 
 				@Override
@@ -131,6 +134,12 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 					} else {
 						super.internalSetExpanded(expanded);
 					}
+				}
+
+				@Override
+				public void setMenu(Menu menu) {
+					// add only to header, not the rest of the composite
+					textLabel.setMenu(menu);
 				}
 			};
 			excomposite.clientVerticalSpacing= 0;
@@ -884,6 +893,17 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 			ExpandableComposite excomposite= section.getControl();
 			getScrolledPageContent().adaptChild(excomposite);
 
+			Menu expandAllMenu= new Menu(excomposite);
+			MenuItem expandAllItem= new MenuItem(expandAllMenu, SWT.NONE);
+			expandAllItem.setText(PreferencesMessages.FilteredPreferencesTree_expandAll_tooltip);
+			expandAllItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					setAllExpanded(section, true);
+				}
+			});
+			excomposite.setMenu(expandAllMenu);
+
 			return addChild(parent, section);
 		}
 
@@ -1039,7 +1059,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 
 		public void unifySectionTitlesHeights(Section section) {
 			List<PreferenceTreeNode<?>> children= section == null ? fRoot.getChildren() : section.getChildren();
-			int maxHeightDiff= 5;
+			int maxHeightDiff= 0;
 			for (PreferenceTreeNode<?> child : children) {
 				if (child instanceof Section)
 					maxHeightDiff= Math.max(maxHeightDiff, ((Section) child).getControl().getTextClientHeightDifference());

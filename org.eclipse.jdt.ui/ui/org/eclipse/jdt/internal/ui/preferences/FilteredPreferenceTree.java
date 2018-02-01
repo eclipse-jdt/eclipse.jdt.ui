@@ -537,7 +537,7 @@ public class FilteredPreferenceTree {
 		item.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				setAllExpanded(expand);
+				setAllExpanded(null, expand);
 			}
 		});
 		item.addDisposeListener(new DisposeListener() {
@@ -683,12 +683,16 @@ public class FilteredPreferenceTree {
 		return node;
 	}
 
-	protected void setAllExpanded(boolean expanded) {
+	protected void setAllExpanded(PreferenceTreeNode<?> start, boolean expanded) {
 		fScrolledPageContent.setRedraw(false);
 		fScrolledPageContent.setReflow(false);
 
 		ArrayList<PreferenceTreeNode<?>> bfsNodes= new ArrayList<>();
-		bfsNodes.addAll(fRoot.getChildren());
+		if (start != null) {
+			bfsNodes.add(start);
+		} else {
+			bfsNodes.addAll(fRoot.getChildren());
+		}
 		for (int i= 0; i < bfsNodes.size(); i++) {
 			PreferenceTreeNode<?> node= bfsNodes.get(i);
 			bfsNodes.addAll(bfsNodes.get(i).getChildren());
