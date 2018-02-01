@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2017, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -147,6 +147,222 @@ public class ModifierCorrectionsQuickFixTest9 extends QuickFixTest {
 		buf.append("    }\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	// Bug 530600 - [9][quick fix] should handle new variants of IProblem.OverridingDeprecatedMethod
+	// - since
+	public void testMethodOverrideDeprecated1() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Deprecated(since=\"3\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}    \n");
+		buf.append("\n");
+		buf.append("class F extends E {\n");
+		buf.append("    /**\n");
+		buf.append("     */\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Deprecated(since=\"3\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}    \n");
+		buf.append("\n");
+		buf.append("class F extends E {\n");
+		buf.append("    /**\n");
+		buf.append("     * @deprecated\n");
+		buf.append("     */\n");
+		buf.append("    @Deprecated\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Deprecated(since=\"3\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}    \n");
+		buf.append("\n");
+		buf.append("class F extends E {\n");
+		buf.append("    /**\n");
+		buf.append("     */\n");
+		buf.append("    @SuppressWarnings(\"deprecation\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	// Bug 530600 - [9][quick fix] should handle new variants of IProblem.OverridingDeprecatedMethod
+	// - forRemoval
+	public void testMethodOverrideDeprecated2() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Deprecated(forRemoval=true)\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}    \n");
+		buf.append("\n");
+		buf.append("class F extends E {\n");
+		buf.append("    /**\n");
+		buf.append("     */\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Deprecated(forRemoval=true)\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}    \n");
+		buf.append("\n");
+		buf.append("class F extends E {\n");
+		buf.append("    /**\n");
+		buf.append("     * @deprecated\n");
+		buf.append("     */\n");
+		buf.append("    @Deprecated\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Deprecated(forRemoval=true)\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}    \n");
+		buf.append("\n");
+		buf.append("class F extends E {\n");
+		buf.append("    /**\n");
+		buf.append("     */\n");
+		buf.append("    @SuppressWarnings(\"removal\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	// Bug 530600 - [9][quick fix] should handle new variants of IProblem.OverridingDeprecatedMethod
+	// - since and forRemoval
+	public void testMethodOverrideDeprecated3() throws Exception {
+		Hashtable<String, String> options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_DEPRECATION_WHEN_OVERRIDING_DEPRECATED_METHOD, JavaCore.ENABLED);
+		JavaCore.setOptions(options);
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Deprecated(since=\"4.2\",forRemoval=true)\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}    \n");
+		buf.append("\n");
+		buf.append("class F extends E {\n");
+		buf.append("    /**\n");
+		buf.append("     */\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Deprecated(since=\"4.2\",forRemoval=true)\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}    \n");
+		buf.append("\n");
+		buf.append("class F extends E {\n");
+		buf.append("    /**\n");
+		buf.append("     * @deprecated\n");
+		buf.append("     */\n");
+		buf.append("    @Deprecated\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @Deprecated(since=\"4.2\",forRemoval=true)\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}    \n");
+		buf.append("\n");
+		buf.append("class F extends E {\n");
+		buf.append("    /**\n");
+		buf.append("     */\n");
+		buf.append("    @SuppressWarnings(\"removal\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		expected[1]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
