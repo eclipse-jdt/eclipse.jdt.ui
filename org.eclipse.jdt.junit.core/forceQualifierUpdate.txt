@@ -1,0 +1,2 @@
+# To force a version qualifier update, add the bug here
+Bug 530709 - Comparator errors in jdt debug and jdt ui in I20180204-2000
