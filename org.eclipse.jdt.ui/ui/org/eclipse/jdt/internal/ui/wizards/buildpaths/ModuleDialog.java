@@ -681,8 +681,8 @@ public class ModuleDialog extends StatusDialog {
 				includedNames.addAll(limitModules.fExplicitlyIncludedModules);
 				availableNames.removeAll(limitModules.fExplicitlyIncludedModules);
 			}
-		} else if (isJava9JRE) {
-			includedNames= defaultIncludedModuleNames();
+		} else if (isJava9JRE && isUnnamedModule()) {
+			includedNames= defaultIncludedModuleNamesForUnnamedModule();
 			availableNames.removeAll(includedNames);
 		} else {
 			includedNames= availableNames;
@@ -774,7 +774,7 @@ public class ModuleDialog extends StatusDialog {
 		return fModuleNames= moduleNames;
 	}
 
-	private List<String> defaultIncludedModuleNames() {
+	private List<String> defaultIncludedModuleNamesForUnnamedModule() {
 		if (fJavaElements != null) {
 			List<IPackageFragmentRoot> roots= new ArrayList<>();
 			for (int i= 0; i < fJavaElements.length; i++) {
@@ -864,6 +864,16 @@ public class ModuleDialog extends StatusDialog {
 			JavaPlugin.log(e);
 		}
 		return module != null ? module.getElementName() : JavaModelUtil.ALL_UNNAMED;
+	}
+	
+	private boolean isUnnamedModule() {
+		IModuleDescription module= null;
+		try {
+			module= fCurrCPElement.getJavaProject().getModuleDescription();
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		return module == null;		
 	}
 
 	// -------- TypeRestrictionAdapter --------
@@ -985,12 +995,17 @@ public class ModuleDialog extends StatusDialog {
 		if (fModuleLists[IDX_AVAILABLE].fNames.isEmpty() && fModuleLists[IDX_IMPLICITLY_INCLUDED].fNames.isEmpty()) {
 			return false; // all modules are "included" - this includes the single-module case.
 		}
-		Set<String> initialNames = new HashSet<>(defaultIncludedModuleNames());
-		for (String name : fModuleLists[IDX_INCLUDED].fNames) {
-			if (!initialNames.remove(name))
-				return true;
+		if (isUnnamedModule()) {
+			// for an unnamed module we need to compare current selection state against defaults per JEP 261:
+			Set<String> initialNames = new HashSet<>(defaultIncludedModuleNamesForUnnamedModule());
+			for (String name : fModuleLists[IDX_INCLUDED].fNames) {
+				if (!initialNames.remove(name))
+					return true;
+			}
+			return !initialNames.isEmpty();
+		} else {
+			return true;
 		}
-		return !initialNames.isEmpty();
 	}
 
 	/*
