@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2015 IBM Corporation and others.
+ * Copyright (c) 2007, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,6 +62,10 @@ import org.eclipse.jface.bindings.keys.IKeyLookup;
 import org.eclipse.jface.bindings.keys.KeyLookupFactory;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.resource.ColorRegistry;
+import org.eclipse.jface.resource.JFaceColors;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.Geometry;
 import org.eclipse.jface.util.Util;
 
@@ -701,8 +705,8 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 
 	private void createContent(Composite parent) {
 		Display display= parent.getDisplay();
-		Color foreground= display.getSystemColor(SWT.COLOR_INFO_FOREGROUND);
-		Color background= display.getSystemColor(SWT.COLOR_INFO_BACKGROUND);
+		Color foreground= getInformationForegroundColor(display);
+		Color background= getInformationBackgroundColor(display);
 		addMoveSupport(fPopup, parent);
 
 		StyledText hint= new StyledText(fPopup, SWT.READ_ONLY | SWT.SINGLE);
@@ -915,5 +919,27 @@ public class RenameInformationPopup implements IWidgetTokenKeeper, IWidgetTokenK
 		if (fToolBar != null && ! fToolBar.isDisposed())
 			showMenu(fToolBar);
 		return true;
+	}
+
+	private static Color getInformationForegroundColor(Display display) {
+		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
+		Color foreground = colorRegistry.get(JFacePreferences.INFORMATION_FOREGROUND_COLOR);
+
+		if (foreground == null) {
+			return JFaceColors.getInformationViewerForegroundColor(display);
+		}
+
+		return foreground;
+	}
+
+	private static Color getInformationBackgroundColor(Display display) {
+		ColorRegistry colorRegistry = JFaceResources.getColorRegistry();
+		Color background = colorRegistry.get(JFacePreferences.INFORMATION_BACKGROUND_COLOR);
+
+		if (background == null) {
+			return JFaceColors.getInformationViewerBackgroundColor(display);
+		}
+
+		return background;
 	}
 }
