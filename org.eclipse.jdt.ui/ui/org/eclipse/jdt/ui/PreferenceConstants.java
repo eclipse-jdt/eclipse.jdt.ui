@@ -2511,6 +2511,13 @@ public class PreferenceConstants {
 	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX="semanticHighlighting."; //$NON-NLS-1$
 
 	/**
+	 * A named preference prefix for Java code mining preferences.
+	 *
+	 * @since 3.14
+	 */
+	public static final String EDITOR_JAVA_CODEMINING_PREFIX="java.codemining."; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls if semantic highlighting is enabled.
 	 * <p>
 	 * Value is of type <code>Boolean</code>:<code>true</code> if enabled.

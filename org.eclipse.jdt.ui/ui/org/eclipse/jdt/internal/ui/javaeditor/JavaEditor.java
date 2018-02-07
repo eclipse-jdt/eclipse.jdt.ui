@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *     Tom Eicher <eclipse@tom.eicher.name> - [formatting] 'Format Element' in JavaDoc does also format method body - https://bugs.eclipse.org/bugs/show_bug.cgi?id=238746
  *     Tom Eicher (Avaloq Evolution AG) - block selection mode
  *     Stefan Xenos (sxenos@gmail.com) - bug 306646, make editor margins follow the java formatter preference
+ *     Angelo Zerr <angelo.zerr@gmail.com> - [CodeMining] Update CodeMinings with IJavaReconcilingListener - Bug 530825
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
@@ -100,6 +101,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.jface.text.codemining.ICodeMiningProvider;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.jface.text.reconciler.IReconciler;
@@ -113,6 +115,7 @@ import org.eclipse.jface.text.source.ICharacterPairMatcher;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.ISourceViewerExtension2;
+import org.eclipse.jface.text.source.ISourceViewerExtension5;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.IVerticalRulerColumn;
 import org.eclipse.jface.text.source.LineChangeHover;
@@ -1756,6 +1759,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	private List<IRegion> fPreviousSelections;
 
 	/**
+	 * Java code mining manager
+	 * 
+	 * @since 3.14
+	 */
+	private JavaCodeMiningManager fJavaCodeMiningManager;
+	
+	/**
 	 * Returns the most narrow java element including the given offset.
 	 *
 	 * @param offset the offset inside of the requested element
@@ -2661,6 +2671,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fBreadcrumb= null;
 		}
 
+		uninstallJavaCodeMining();
+
 		super.dispose();
 		fSelectionProvider= null;
 	}
@@ -2929,6 +2941,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				return;
 			}
 
+			if (affectsJavaCodeMining(event)) {
+				if (isJavaCodeMiningEnabled()) {
+					installJavaCodeMining();
+				} else {
+					uninstallJavaCodeMining();
+				}
+				return;
+			}
+
 			if (JavaCore.COMPILER_SOURCE.equals(property)) {
 				if (event.getNewValue() instanceof String)
 					fBracketMatcher.setSourceVersion((String) event.getNewValue());
@@ -3103,6 +3124,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fIsBreadcrumbVisible= isBreadcrumbShown();
 		if (fIsBreadcrumbVisible)
 			showBreadcrumb();
+
+		if (isJavaCodeMiningEnabled()) {
+			installJavaCodeMining();
+		}
 
 		PlatformUI.getWorkbench().addWindowListener(fActivationListener);
 	}
@@ -4251,6 +4276,76 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		public Class<?>[] getClassContext() {
 			return super.getClassContext();
 		}
+	}
+
+	/**
+	 * Install Java code mining.
+	 *
+	 * @since 3.14
+	 */
+	private void installJavaCodeMining() {
+		if (fJavaCodeMiningManager == null) {
+			fJavaCodeMiningManager= new JavaCodeMiningManager();
+			fJavaCodeMiningManager.install(this, (JavaSourceViewer) getSourceViewer(), getPreferenceStore());
+		}
+	}
+
+	/**
+	 * Uninstall Java code mining.
+	 *
+	 * @since 3.14
+	 */
+	private void uninstallJavaCodeMining() {
+		if (fJavaCodeMiningManager != null) {
+			fJavaCodeMiningManager.uninstall();
+			fJavaCodeMiningManager= null;
+		}
+	}
+
+	/**
+	 * @return <code>true</code> if Java code mining is enabled.
+	 *
+	 * @since 3.14
+	 */
+	boolean isJavaCodeMiningEnabled() {
+		// check if there is a registered Java code mining.
+		ISourceViewer viewer= getViewer();
+		if (viewer instanceof ISourceViewerExtension5) {
+			return ((ISourceViewerExtension5) viewer).hasCodeMiningProviders();
+		}
+		return false;
+	}
+
+	/**
+	 * Determines whether the preference change encoded by the given event changes the Java code mining.
+	 *
+	 * @param event the event to be investigated
+	 * @return <code>true</code> if event causes a change
+	 * @since 3.14
+	 */
+	protected boolean affectsJavaCodeMining(PropertyChangeEvent event) {
+		boolean isJavaCodeMiningPreference= isJavaCodeMiningPreference(event.getProperty());
+		if (isJavaCodeMiningPreference) {
+			// It's a code mining preference, recompute the list of code mining providers.
+			installCodeMinigProviders();
+		}
+		return isJavaCodeMiningPreference;
+	}
+
+	/**
+	 * Note that by convention, a Java code mining preference starts with
+	 * {@link PreferenceConstants#EDITOR_JAVA_CODEMINING_PREFIX}. It provides the capability for
+	 * external plug-ins to contribute with a custom {@link ICodeMiningProvider} and refresh the Java
+	 * Editor mining when preferences changed.
+	 * 
+	 * @param property the name of the preference property that changed
+	 * 
+	 * @return <code>true</code> if the given property is a Java code mining preference.
+	 * 
+	 * @since 3.14
+	 */
+	private boolean isJavaCodeMiningPreference(String property) {
+		return property.startsWith(PreferenceConstants.EDITOR_JAVA_CODEMINING_PREFIX);
 	}
 
 }
