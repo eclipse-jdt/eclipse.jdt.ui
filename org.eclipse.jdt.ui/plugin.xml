@@ -1120,7 +1120,7 @@
       <colorDefinition
             label="%JavadocBackgroundColor.label"
             categoryId="org.eclipse.jdt.ui.presentation"
-            defaultsTo="org.eclipse.ui.workbench.HOVER_BACKGROUND"
+            defaultsTo="org.eclipse.ui.workbench.INFORMATION_BACKGROUND"
             id="org.eclipse.jdt.ui.Javadoc.backgroundColor">
          <description>
             %JavadocBackgroundColor.description
@@ -1129,7 +1129,7 @@
       <colorDefinition
             label="%JavadocForegroundColor.label"
             categoryId="org.eclipse.jdt.ui.presentation"
-            defaultsTo="org.eclipse.ui.workbench.HOVER_FOREGROUND"
+            defaultsTo="org.eclipse.ui.workbench.INFORMATION_FOREGROUND"
             id="org.eclipse.jdt.ui.Javadoc.foregroundColor">
          <description>
             %JavadocForegroundColor.description

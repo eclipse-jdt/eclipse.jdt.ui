@@ -53,6 +53,7 @@ import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.resource.ColorRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 
@@ -285,11 +286,11 @@ public abstract class AbstractAnnotationHover extends AbstractJavaEditorTextHove
 			createAnnotationInformation(fParent, getAnnotationInfo().annotation);
 
 			ColorRegistry colorRegistry= JFaceResources.getColorRegistry();
-			Color foreground= colorRegistry.get("org.eclipse.ui.workbench.HOVER_FOREGROUND"); //$NON-NLS-1$
+			Color foreground= colorRegistry.get(JFacePreferences.INFORMATION_FOREGROUND_COLOR);
 			if (foreground == null) {
 				foreground= fParent.getForeground();
 			}
-			Color background= colorRegistry.get("org.eclipse.ui.workbench.HOVER_BACKGROUND"); //$NON-NLS-1$
+			Color background= colorRegistry.get(JFacePreferences.INFORMATION_BACKGROUND_COLOR);
 			if (background == null) {
 				background= fParent.getBackground();
 			}

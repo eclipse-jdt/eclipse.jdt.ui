@@ -99,6 +99,8 @@ IEclipsePreferences#org-eclipse-jdt-ui:org-eclipse-jdt-ui { /* pseudo attribute 
 IEclipsePreferences#org-eclipse-ui-workbench:org-eclipse-jdt-ui { /* pseudo attribute added to allow contributions without replacing this node, see Bug 466075 */
 	preferences:
 		'org.eclipse.jdt.ui.ColoredLabels.inherited=143,143,191'
+		'org.eclipse.jdt.ui.Javadoc.backgroundColor=52,57,61'
+		'org.eclipse.jdt.ui.Javadoc.foregroundColor=238,238,238'
 }
 
 BulletListBlock > StyledText {
