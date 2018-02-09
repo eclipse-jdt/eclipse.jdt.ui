@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.swt.widgets.Display;
 
@@ -43,7 +44,6 @@ import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -101,6 +101,8 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 	private Set<IWorkingSet> fWorkingSets= new HashSet<>();
 
 	private Job fUpdateJob;
+	
+	private AtomicBoolean isDisposed= new AtomicBoolean();
 
 	public static final String TEST_NAME= "test"; //$NON-NLS-1$
 
@@ -137,6 +139,7 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 
 	@Override
 	public void dispose() {
+		isDisposed.set(true);
 		if (fResourceChangeListener != null) {
 			ResourcesPlugin.getWorkspace().removeResourceChangeListener(fResourceChangeListener);
 			fResourceChangeListener= null;
@@ -147,8 +150,13 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 
 	public void triggerUpdate() {
 		synchronized (this) {
-			if (fUpdateJob != null)
+			if (fUpdateJob != null) {
 				fUpdateJob.cancel();
+				fUpdateJob= null;
+			}
+			if(isDisposed.get()) {
+				return;
+			}
 
 			fUpdateJob= new Job(WorkingSetMessages.JavaSourcesWorkingSets_updating) {
 				@Override
@@ -170,21 +178,17 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 	}
 
 	private IStatus updateElements(IWorkingSet[] workingSets, IProgressMonitor monitor) {
-		// final boolean isTestSourcesWorkingSet= TEST_NAME.equals(workingSet.getName());
-		IWorkspaceRoot root;
 		try {
-			root= ResourcesPlugin.getWorkspace().getRoot();
-		} catch (IllegalStateException e1) {
-			// can happen during shutdown
-			return Status.CANCEL_STATUS;
-		}
-		IJavaModel model= JavaCore.create(root);
-		List<IAdaptable> testResult= new ArrayList<>();
-		List<IAdaptable> mainResult= new ArrayList<>();
-		try {
+			if(isDisposed.get()) {
+				return Status.CANCEL_STATUS;
+			}
+			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+			IJavaModel model= JavaCore.create(root);
+			List<IAdaptable> testResult= new ArrayList<>();
+			List<IAdaptable> mainResult= new ArrayList<>();
 			IJavaProject[] jProjects= model.getJavaProjects();
 			for (int i= 0; i < jProjects.length; i++) {
-				if (monitor.isCanceled())
+				if (monitor.isCanceled() || isDisposed.get())
 					return Status.CANCEL_STATUS;
 
 				final IJavaProject project= jProjects[i];
@@ -217,8 +221,9 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 					});
 				}
 			}
-		} catch (JavaModelException e) {
+		} catch (Exception e) {
 			JavaPlugin.log(e);
+			return Status.CANCEL_STATUS;
 		}
 		return Status.OK_STATUS;
 	}
