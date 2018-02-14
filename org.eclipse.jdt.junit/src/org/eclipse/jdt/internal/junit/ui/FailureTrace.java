@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -151,8 +151,16 @@ public class FailureTrace implements IMenuListener {
 	private Action createOpenEditorAction(String traceLine) {
 		try {
 			String testName= traceLine;
-			testName= testName.substring(testName.indexOf(FRAME_PREFIX));
+			int indexOfFramePrefix= testName.indexOf(FRAME_PREFIX);
+			if (indexOfFramePrefix == -1) {
+				return null;
+			}
+			testName= testName.substring(indexOfFramePrefix);
 			testName= testName.substring(FRAME_PREFIX.length(), testName.lastIndexOf('(')).trim();
+			int indexOfModuleSeparator= testName.lastIndexOf('/');
+			if (indexOfModuleSeparator != -1) {
+				testName= testName.substring(indexOfModuleSeparator + 1);
+			}
 			testName= testName.substring(0, testName.lastIndexOf('.'));
 			int innerSeparatorIndex= testName.indexOf('$');
 			if (innerSeparatorIndex != -1)
