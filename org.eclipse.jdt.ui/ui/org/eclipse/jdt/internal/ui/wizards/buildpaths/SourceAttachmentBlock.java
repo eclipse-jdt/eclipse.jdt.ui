@@ -139,7 +139,7 @@ public class SourceAttachmentBlock {
 		}
 		
 		int kind= entry.getEntryKind();
-		Assert.isTrue(kind == IClasspathEntry.CPE_LIBRARY || kind == IClasspathEntry.CPE_VARIABLE || kind == IClasspathEntry.CPE_JRT_SYSTEM);
+		Assert.isTrue(kind == IClasspathEntry.CPE_LIBRARY || kind == IClasspathEntry.CPE_VARIABLE);
 
 		fWorkspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
 
@@ -734,8 +734,8 @@ public class SourceAttachmentBlock {
 		}
 
 		int kind= entry.getEntryKind();
-		if (kind != IClasspathEntry.CPE_LIBRARY && kind != IClasspathEntry.CPE_VARIABLE && kind != IClasspathEntry.CPE_JRT_SYSTEM) {
-			throw new IllegalArgumentException("Entry must be of kind CPE_LIBRARY or CPE_VARIABLE OR CPE_JRT_SYSTEM"); //$NON-NLS-1$
+		if (kind != IClasspathEntry.CPE_LIBRARY && kind != IClasspathEntry.CPE_VARIABLE) {
+			throw new IllegalArgumentException("Entry must be of kind CPE_LIBRARY or CPE_VARIABLE"); //$NON-NLS-1$
 		}
 
 		IClasspathAttribute[] extraAttributes= entry.getExtraAttributes();

@@ -455,7 +455,6 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 		case IClasspathEntry.CPE_LIBRARY:
 		case IClasspathEntry.CPE_PROJECT:
 		case IClasspathEntry.CPE_VARIABLE:
-		case IClasspathEntry.CPE_JRT_SYSTEM:
 		default:
 			entries.add(entry);
 			break;

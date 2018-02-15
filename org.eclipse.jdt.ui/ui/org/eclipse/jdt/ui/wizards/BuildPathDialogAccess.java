@@ -130,7 +130,7 @@ public final class BuildPathDialogAccess {
 			throw new IllegalArgumentException();
 		}
 		int entryKind= initialEntry.getEntryKind();
-		if (entryKind != IClasspathEntry.CPE_LIBRARY && entryKind != IClasspathEntry.CPE_VARIABLE && entryKind != IClasspathEntry.CPE_JRT_SYSTEM) {
+		if (entryKind != IClasspathEntry.CPE_LIBRARY && entryKind != IClasspathEntry.CPE_VARIABLE) {
 			throw new IllegalArgumentException();
 		}
 
@@ -214,7 +214,7 @@ public final class BuildPathDialogAccess {
 			throw new IllegalArgumentException();
 		}
 		int entryKind= initialEntry.getEntryKind();
-		if (entryKind != IClasspathEntry.CPE_LIBRARY && entryKind != IClasspathEntry.CPE_VARIABLE && entryKind != IClasspathEntry.CPE_JRT_SYSTEM) {
+		if (entryKind != IClasspathEntry.CPE_LIBRARY && entryKind != IClasspathEntry.CPE_VARIABLE) {
 			throw new IllegalArgumentException();
 		}
 

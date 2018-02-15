@@ -889,7 +889,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		case IClasspathEntry.CPE_CONTAINER:
 			res= openContainerSelectionDialog(elem);
 			break;
-		case IClasspathEntry.CPE_JRT_SYSTEM:
 		case IClasspathEntry.CPE_LIBRARY:
 			IResource resource= elem.getResource();
 			if (resource == null) {

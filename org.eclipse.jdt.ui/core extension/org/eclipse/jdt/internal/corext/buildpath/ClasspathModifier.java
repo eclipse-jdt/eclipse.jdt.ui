@@ -1405,9 +1405,7 @@ public class ClasspathModifier {
 	}
 
 	private static boolean isExternalArchiveOrLibrary(CPListElement entry) {
-		if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY || 
-				entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER ||
-				entry.getEntryKind() == IClasspathEntry.CPE_JRT_SYSTEM) {
+		if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY || entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 			if (entry.getResource() instanceof IFolder) {
 				return false;
 			}

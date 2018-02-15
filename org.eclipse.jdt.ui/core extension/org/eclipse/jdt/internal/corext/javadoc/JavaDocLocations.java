@@ -172,7 +172,7 @@ public class JavaDocLocations {
 		}
 
 		int kind= entry.getEntryKind();
-		if (kind != IClasspathEntry.CPE_LIBRARY && kind != IClasspathEntry.CPE_VARIABLE && kind != IClasspathEntry.CPE_JRT_SYSTEM) {
+		if (kind != IClasspathEntry.CPE_LIBRARY && kind != IClasspathEntry.CPE_VARIABLE) {
 			throw new IllegalArgumentException("Entry must be of kind CPE_LIBRARY or CPE_VARIABLE"); //$NON-NLS-1$
 		}
 
