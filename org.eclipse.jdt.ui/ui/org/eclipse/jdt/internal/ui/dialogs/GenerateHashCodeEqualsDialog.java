@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -202,5 +203,11 @@ public class GenerateHashCodeEqualsDialog extends SourceActionDialog {
 
 	public void setUseBlocks(boolean useBlocks) {
 		fUseBlocks= useBlocks;
+	}
+
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		createButton(parent, IDialogConstants.OK_ID, JavaUIMessages.GenerateHashCodeEqualsDialog_generate, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}
 }
