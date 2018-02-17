@@ -66,6 +66,9 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 	private static final Key PREF_SHOW_IMPLEMENTATIONS= getJDTUIKey(
 			PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS);
 
+	private static final Key PREF_SHOW_PARAMETER_NAMES= getJDTUIKey(
+			PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAMES);
+
 	private static final String SETTINGS_SECTION_NAME= "JavaEditorCodeMiningConfigurationBlock"; //$NON-NLS-1$
 
 	private static final String[] TRUE_FALSE= new String[] { "true", "false" }; //$NON-NLS-1$ //$NON-NLS-2$
@@ -84,7 +87,7 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 	public static Key[] getAllKeys() {
 		return new Key[] { PREF_CODEMINING_ENABLED, PREF_SHOW_CODEMINING_AT_LEAST_ONE, PREF_SHOW_REFERENCES, PREF_SHOW_REFERENCES_ON_TYPES, PREF_SHOW_REFERENCES_ON_FIELDS,
 				PREF_SHOW_REFERENCES_ON_METHODS,
-				PREF_SHOW_IMPLEMENTATIONS };
+				PREF_SHOW_IMPLEMENTATIONS, PREF_SHOW_PARAMETER_NAMES };
 	}
 
 	@Override
@@ -181,6 +184,12 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 		fFilteredPrefTree.addCheckBox(inner,
 				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showImplementations_label,
 				PREF_SHOW_IMPLEMENTATIONS, TRUE_FALSE, defaultIndent, section);
+
+		// - Show parameter names
+		fFilteredPrefTree.addCheckBox(inner,
+				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showParameterNames_label,
+				PREF_SHOW_PARAMETER_NAMES, TRUE_FALSE, defaultIndent, section);
+
 	}
 
 	private void updateEnableStates() {
@@ -193,6 +202,7 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 			getCheckBox(PREF_SHOW_REFERENCES_ON_METHODS).setEnabled(showReferences);
 			// Show implementations checkboxes
 			getCheckBox(PREF_SHOW_IMPLEMENTATIONS).getSelection();
+			getCheckBox(PREF_SHOW_PARAMETER_NAMES).getSelection();
 		} else {
 			atLeastOneCheckBox.setEnabled(false);
 			fFilteredPrefTree.setEnabled(false);

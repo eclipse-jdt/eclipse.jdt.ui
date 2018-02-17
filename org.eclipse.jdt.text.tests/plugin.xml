@@ -16,7 +16,7 @@
    <extension
          point="org.eclipse.ui.workbench.texteditor.codeMiningProviders">
       <codeMiningProvider
-            class="org.eclipse.jdt.text.tests.CodeMiningTest$TestCodeMiningProvider"
+            class="org.eclipse.jdt.text.tests.codemining.CodeMiningTriggerTest$TestCodeMiningProvider"
             id="org.eclipse.jdt.text.tests.codeMiningProvider"
             label="test codemining provider">
          <enabledWhen>
@@ -29,7 +29,7 @@
    <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
-            class="org.eclipse.jdt.text.tests.CodeMiningTest$TestCodeMiningProviderPropertyTester"
+            class="org.eclipse.jdt.text.tests.codemining.CodeMiningTriggerTest$TestCodeMiningProviderPropertyTester"
             id="org.eclipse.jdt.text.tests.testCodeMiningProvider"
             namespace="org.eclipse.jdt.text.tests"
             properties="isOn"

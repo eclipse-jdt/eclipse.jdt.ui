@@ -14,6 +14,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
+import org.eclipse.jdt.text.tests.codemining.ParameterNamesCodeMiningTest;
+import org.eclipse.jdt.text.tests.codemining.CodeMiningTriggerTest;
 import org.eclipse.jdt.text.tests.contentassist.ContentAssistTestSuite;
 import org.eclipse.jdt.text.tests.spelling.SpellCheckEngineTestCase;
 import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
@@ -71,7 +73,8 @@ public class JdtTextTestSuite {
 		suite.addTest(IndentActionTest.suite());
 		suite.addTest(TemplatesTestSuite.suite());
 		suite.addTest(JavaElementPrefixPatternMatcherTest.suite());
-		suite.addTest(CodeMiningTest.suite());
+		suite.addTest(CodeMiningTriggerTest.suite());
+		suite.addTest(ParameterNamesCodeMiningTest.suite());
 		//$JUnit-END$
 
 		return suite;

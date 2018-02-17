@@ -12,7 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
  *     Red Hat Inc - modify to use CodeGenerationSettingsConstants
- *     Angelo Zerr <angelo.zerr@gmail.com> - [CodeMining] Provide Java References/Implementation CodeMinings - Bug 529127     
+ *     Angelo Zerr <angelo.zerr@gmail.com> - [CodeMining] Provide Java References/Implementation CodeMinings - Bug 529127
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
@@ -2996,7 +2996,7 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 * 
+	 *
 	 * @since 3.16
 	 * @see ContentAssistant#enableCompletionProposalTriggerChars(boolean)
 	 */
@@ -3841,7 +3841,7 @@ public class PreferenceConstants {
 	 * @since 3.16
 	 */
 	public static final String EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_FIELDS= "java.codemining.references.onFields"; //$NON-NLS-1$
-	
+
 	/**
 	 * A named preference that stores the value for "Show references" on methods.
 	 * <p>
@@ -3862,6 +3862,18 @@ public class PreferenceConstants {
 	 * @since 3.16
 	 */
 	public static final String EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS = "java.codemining.implementations"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that stores the value for "Show parameter names"
+	 * codemining.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.18
+	 */
+	public static final String EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAMES = "java.codemining.parameterNames"; //$NON-NLS-1$
+
 
 	/**
 	 * Initializes the given preference store with the default values.
@@ -4094,8 +4106,9 @@ public class PreferenceConstants {
 			store.setValue(isInitializedKey, true);
 			Locale locale= SpellCheckEngine.getDefaultLocale();
 			locale= SpellCheckEngine.findClosestLocale(locale);
-			if (locale != null)
+			if (locale != null) {
 				store.setValue(PreferenceConstants.SPELLING_LOCALE, locale.toString());
+			}
 		}
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_DIGITS, true);
 		store.setDefault(PreferenceConstants.SPELLING_IGNORE_MIXED, true);
@@ -4281,8 +4294,9 @@ public class PreferenceConstants {
 		String encodedPreference= getPreference(CODEASSIST_EXCLUDED_CATEGORIES, null);
 		StringTokenizer tokenizer= new StringTokenizer(encodedPreference, "\0"); //$NON-NLS-1$
 		String[] result= new String[tokenizer.countTokens()];
-		for (int i= 0; i < result.length; i++)
+		for (int i= 0; i < result.length; i++) {
 			result[i]= tokenizer.nextToken();
+		}
 		return result;
 	}
 
@@ -4297,8 +4311,8 @@ public class PreferenceConstants {
 	public static void setExcludedCompletionProposalCategories(String[] categories) {
 		Assert.isLegal(categories != null);
 		StringBuilder buf= new StringBuilder(50 * categories.length);
-		for (int i= 0; i < categories.length; i++) {
-			buf.append(categories[i]);
+		for (String category : categories) {
+			buf.append(category);
 			buf.append('\0');
 		}
 		getPreferenceStore().setValue(CODEASSIST_EXCLUDED_CATEGORIES, buf.toString());
@@ -4350,10 +4364,12 @@ public class PreferenceConstants {
 		}
 
 		// Workaround for https://bugs.eclipse.org/306736
-		if (bgRGB == null)
+		if (bgRGB == null) {
 			bgRGB= new RGB(255, 255, 255);
-		if (fgRGB == null)
+		}
+		if (fgRGB == null) {
 			fgRGB= new RGB(0, 0, 0);
+		}
 
 		setRGBValue(store, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, bgRGB);
 		setRGBValue(store, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, fgRGB);

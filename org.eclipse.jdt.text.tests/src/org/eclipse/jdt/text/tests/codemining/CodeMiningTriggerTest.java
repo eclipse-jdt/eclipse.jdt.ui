@@ -8,7 +8,7 @@
  * Contributors:
  *     Pivotal, Inc. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.text.tests;
+package org.eclipse.jdt.text.tests.codemining;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -64,10 +64,10 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 @SuppressWarnings("unchecked")
-public class CodeMiningTest extends TestCase {
+public class CodeMiningTriggerTest extends TestCase {
 
 	public static Test suite() {
-		return new TestSuite(CodeMiningTest.class);
+		return new TestSuite(CodeMiningTriggerTest.class);
 	}
 
 	private IPreferenceStore fPreferenceStore;

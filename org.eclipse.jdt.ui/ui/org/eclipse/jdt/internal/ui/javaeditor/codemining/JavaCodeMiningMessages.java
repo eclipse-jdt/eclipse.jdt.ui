@@ -1,6 +1,6 @@
-/**
- *  Copyright (c) 2018 Angelo ZERR.
- *  
+/*******************************************************************************
+ * Copyright (c) 2018 Angelo Zerr and others.
+ *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
@@ -8,9 +8,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *
- *  Contributors:
- *     Angelo Zerr <angelo.zerr@gmail.com> - [code mining] 0 reference / implementation - Bug 541396
- */
+ * Contributors:
+ * - Angelo Zerr: initial API and implementation
+ *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor.codemining;
 
 import org.eclipse.osgi.util.NLS;
