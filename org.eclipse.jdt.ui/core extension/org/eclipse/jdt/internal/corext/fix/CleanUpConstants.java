@@ -857,6 +857,18 @@ public class CleanUpConstants {
 	 */
 	public static final String REMOVE_REDUNDANT_TYPE_ARGUMENTS= "cleanup.remove_redundant_type_arguments"; //$NON-NLS-1$
 
+	/**
+	 * Removes redundant modifiers.<br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * <br>
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 3.14
+	 */
+	public static final String REMOVE_REDUNDANT_MODIFIERS= "cleanup.remove_redundant_modifiers"; //$NON-NLS-1$
+
 
 	/**
 	 * Controls whether missing annotations should be added to the code. For detailed settings use:<br>
@@ -1220,6 +1232,7 @@ public class CleanUpConstants {
 		options.setOption(REMOVE_UNNECESSARY_NLS_TAGS, CleanUpOptions.TRUE);
 		options.setOption(INSERT_INFERRED_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
+		options.setOption(REMOVE_REDUNDANT_MODIFIERS, CleanUpOptions.FALSE);
 
 		//Missing Code
 		options.setOption(ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
@@ -1307,6 +1320,7 @@ public class CleanUpConstants {
 		options.setOption(REMOVE_UNNECESSARY_NLS_TAGS, CleanUpOptions.FALSE);
 		options.setOption(INSERT_INFERRED_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
 		options.setOption(REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpOptions.FALSE);
+		options.setOption(REMOVE_REDUNDANT_MODIFIERS, CleanUpOptions.FALSE);
 
 		//Missing Code
 		options.setOption(ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);

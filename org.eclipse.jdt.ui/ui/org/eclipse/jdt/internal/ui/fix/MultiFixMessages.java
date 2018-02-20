@@ -105,6 +105,8 @@ public class MultiFixMessages extends NLS {
 	public static String TypeParametersCleanUp_InsertInferredTypeArguments_description;
 	public static String TypeParametersCleanUp_RemoveUnnecessaryTypeArguments_description;
 
+	public static String RedundantModifiersCleanup_description;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, MultiFixMessages.class);

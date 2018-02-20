@@ -9110,4 +9110,50 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
 	}
 
+	public void testRemoveRedundantModifiers () throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public interface IFoo {\n");
+		buf.append("  public static final int MAGIC_NUMBER = 646;\n");
+		buf.append("  public abstract int foo ();\n");
+		buf.append("  abstract void func ();\n");
+		buf.append("  public int bar (int bazz);\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("IFoo.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public interface IFoo {\n");
+		buf.append("  int MAGIC_NUMBER = 646;\n");
+		buf.append("  int foo ();\n");
+		buf.append("  void func ();\n");
+		buf.append("  int bar (int bazz);\n");
+		buf.append("}\n");
+		String expected1 = buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public final class Sealed {\n");
+		buf.append("  public final void foo () {};\n");
+		buf.append("  \n");
+		buf.append("  static interface INested {\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("Sealed.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public final class Sealed {\n");
+		buf.append("  public void foo () {};\n");
+		buf.append("  \n");
+		buf.append("  interface INested {\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		String expected2 = buf.toString();
+		
+		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
+
+	}
 }

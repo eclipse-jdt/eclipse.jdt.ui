@@ -21,6 +21,7 @@ import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 
 public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
@@ -34,12 +35,13 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 	@Override
 	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] {
-        		new UnusedCodeCleanUp(values),
-        		new UnnecessaryCodeCleanUp(values),
-        		new StringCleanUp(values),
-        		new TypeParametersCleanUp(values)
-        };
-    }
+				new UnusedCodeCleanUp(values),
+				new UnnecessaryCodeCleanUp(values),
+				new StringCleanUp(values),
+				new TypeParametersCleanUp(values),
+				new RedundantModifiersCleanUp(values)
+		};
+	}
 
     @Override
 	protected void doCreatePreferences(Composite composite, int numColumns) {
@@ -70,6 +72,9 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 
 		CheckboxPreference typeArgs= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantTypeArguments, CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS, CleanUpModifyDialog.FALSE_TRUE);
 		registerPreference(typeArgs);
+
+		CheckboxPreference modifiers= createCheckboxPref(unnecessaryGroup, numColumns, CleanUpMessages.UnnecessaryCodeTabPage_CheckboxName_RedundantModifiers, CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS, CleanUpModifyDialog.FALSE_TRUE);
+		registerPreference(modifiers);
     }
 
 }
