@@ -3249,7 +3249,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		buf= new StringBuffer();
-		buf.append("@annots.NonNullByDefault\n");
+		buf.append("@annots.NonNullByDefault(true)\n");
 		buf.append("package test;\n");
 		pack1.createCompilationUnit("package-info.java", buf.toString(), false, null);
 
@@ -3259,7 +3259,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("import annots.*;\n");
 		buf.append("\n");
 		buf.append("abstract class A {\n");
-		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    @SuppressWarnings({\"unused\", \"null\"})\n");
 		buf.append("    public abstract @NonNull Object foo(@Nullable Object i1, @NonNull Object i2);\n");
 		buf.append("}\n");
 		buf.append("@NonNullByDefault(false)\n");
@@ -3280,7 +3280,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("import annots.*;\n");
 		buf.append("\n");
 		buf.append("abstract class A {\n");
-		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    @SuppressWarnings({\"unused\", \"null\"})\n");
 		buf.append("    public abstract @NonNull Object foo(@Nullable Object i1, @NonNull Object i2);\n");
 		buf.append("}\n");
 		buf.append("@NonNullByDefault(false)\n");
