@@ -2238,8 +2238,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    /**\n");
         buf.append("     * Sets the name of the suite.\n");
         buf.append("     * \n");
-        buf.append("     * @param name\n");
-        buf.append("     *            The name to set\n");
+        buf.append("     * @param name The name to set\n");
         buf.append("     */\n");
         buf.append("    public void setName(final String name) {\n");
         buf.append("        this.fName = name;\n");
@@ -3790,12 +3789,9 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    /**\n");
         buf.append("     * Constructs a comparison failure.\n");
         buf.append("     * \n");
-        buf.append("     * @param message\n");
-        buf.append("     *            the identifying message or null\n");
-        buf.append("     * @param expected\n");
-        buf.append("     *            the expected string value\n");
-        buf.append("     * @param actual\n");
-        buf.append("     *            the actual string value\n");
+        buf.append("     * @param message  the identifying message or null\n");
+        buf.append("     * @param expected the expected string value\n");
+        buf.append("     * @param actual   the actual string value\n");
         buf.append("     */\n");
         buf.append("    public ComparisonFailure(final String message, final String expected,\n");
         buf.append("            final String actual) {\n");
@@ -4847,8 +4843,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    /**\n");
         buf.append("     * Runs the bare test sequence.\n");
         buf.append("     * \n");
-        buf.append("     * @exception Throwable\n");
-        buf.append("     *                if any exception is thrown\n");
+        buf.append("     * @exception Throwable if any exception is thrown\n");
         buf.append("     */\n");
         buf.append("    public void runBare() throws Throwable {\n");
         buf.append("        this.setUp();\n");
@@ -4861,8 +4856,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    /**\n");
         buf.append("     * Override to run the test and assert its state.\n");
         buf.append("     * \n");
-        buf.append("     * @exception Throwable\n");
-        buf.append("     *                if any exception is thrown\n");
+        buf.append("     * @exception Throwable if any exception is thrown\n");
         buf.append("     */\n");
         buf.append("    protected void runTest() throws Throwable {\n");
         buf.append("        Assert.assertNotNull(this.fName);\n");
@@ -4893,8 +4887,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
         buf.append("    /**\n");
         buf.append("     * Sets the name of a TestCase\n");
         buf.append("     * \n");
-        buf.append("     * @param name\n");
-        buf.append("     *            The name to set\n");
+        buf.append("     * @param name The name to set\n");
         buf.append("     */\n");
         buf.append("    public void setName(final String name) {\n");
         buf.append("        this.fName = name;\n");
