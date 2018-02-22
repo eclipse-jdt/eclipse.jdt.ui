@@ -21,6 +21,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 public class ToggleJspBreakpointRulerActionDelegate extends AbstractRulerActionDelegate {
 
 
+	@Override
 	protected IAction createAction(ITextEditor editor, IVerticalRulerInfo rulerInfo) {
 		return new ToggleJspBreakpointAction(editor, rulerInfo);
 	}

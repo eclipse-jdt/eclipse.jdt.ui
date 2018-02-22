@@ -42,6 +42,7 @@ public class TagHandlerFactory implements ITagHandlerFactory {
 	/*
 	 * @see org.eclipse.jface.text.source.ITagHandlerFactory#getHandler(java.lang.String)
 	 */
+	@Override
 	public ITagHandler getHandler(String tag) {
 		Assert.isNotNull(tag);
 
@@ -51,6 +52,7 @@ public class TagHandlerFactory implements ITagHandlerFactory {
 	/*
 	 * @see org.eclipse.jface.text.source.ITagHandlerFactory#findHandler(java.lang.String)
 	 */
+	@Override
 	public ITagHandler findHandler(String text) {
 		Assert.isNotNull(text);
 

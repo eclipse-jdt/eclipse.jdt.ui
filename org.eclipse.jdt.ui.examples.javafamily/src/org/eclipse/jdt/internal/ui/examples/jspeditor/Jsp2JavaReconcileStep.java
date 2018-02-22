@@ -66,6 +66,7 @@ public class Jsp2JavaReconcileStep extends AbstractReconcileStep {
 	/*
 	 * @see AbstractReconcileStep#reconcileModel(DirtyRegion, IRegion)
 	 */
+	@Override
 	protected IReconcileResult[] reconcileModel(DirtyRegion dirtyRegion, IRegion subRegion) {
 		Assert.isTrue(getInputModel() instanceof DocumentAdapter, "wrong model"); //$NON-NLS-1$
 
@@ -87,6 +88,7 @@ public class Jsp2JavaReconcileStep extends AbstractReconcileStep {
 	/*
 	 * @see AbstractReconcileStep#getModel()
 	 */
+	@Override
 	public IReconcilableModel getModel() {
 		return fModel;
 	}
@@ -94,6 +96,7 @@ public class Jsp2JavaReconcileStep extends AbstractReconcileStep {
 	/*
 	 * @see AbstractReconcileStep#convertToInputModel(IReconcileResult[])
 	 */
+	@Override
 	protected IReconcileResult[] convertToInputModel(IReconcileResult[] inputResults) {
 
 		if (inputResults == null)

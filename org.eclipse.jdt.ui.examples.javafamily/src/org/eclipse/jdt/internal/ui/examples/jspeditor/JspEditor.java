@@ -46,6 +46,7 @@ public class JspEditor extends TextEditor {
 	/*
 	 * @see TextEditor#createAnnotationAccess()
 	 */
+	@Override
 	protected IAnnotationAccess createAnnotationAccess() {
 		return new DefaultMarkerAnnotationAccess();
 	}

@@ -39,23 +39,28 @@ public class RenameTypeParticipant extends RenameParticipant {
 
 	private IType fType;
 
+	@Override
 	protected boolean initialize(Object element) {
 		fType= (IType)element;
 		return true;
 	}
 
+	@Override
 	public String getName() {
 		return JspMessages.RenameTypeParticipant_name; 
 	}
 	
+	@Override
 	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) {
 		return new RefactoringStatus();
 	}
 
+	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		final Map changes= new HashMap();
 		final String newName= computeNewName();
 		ISearchResultCollector collector= new ISearchResultCollector() {
+			@Override
 			public void accept(IResource resource, int start, int length) throws CoreException {
 				TextFileChange change= (TextFileChange)changes.get(resource);
 				if (change == null) {

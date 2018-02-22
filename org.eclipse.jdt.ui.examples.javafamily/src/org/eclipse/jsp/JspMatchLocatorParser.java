@@ -33,10 +33,12 @@ public class JspMatchLocatorParser extends AbstractJspParser {
 		super();
 	}
 
+	@Override
 	protected void startTag(boolean endTag, String name, int startName) {
 		fInUseBean= "jsp:useBean".equals(name); //$NON-NLS-1$
 	}
 
+	@Override
 	protected void tagAttribute(String attrName, String value, int startName, int startValue) {
 		if (fInUseBean && "class".equals(attrName) && fMatchString.equals(value)) { //$NON-NLS-1$
 			try {

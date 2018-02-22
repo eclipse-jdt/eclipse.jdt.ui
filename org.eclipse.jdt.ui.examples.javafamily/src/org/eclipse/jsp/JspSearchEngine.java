@@ -27,6 +27,7 @@ public class JspSearchEngine {
 		JspUIPlugin.getDefault().search(
 			query,
 			new ISearchResultCollector() {
+				@Override
 				public void accept(IResource resource, int start, int length) throws CoreException {
 					System.out.println("  accept: " + resource); //$NON-NLS-1$
 					collector.accept(resource, start, start+length, null, 999);

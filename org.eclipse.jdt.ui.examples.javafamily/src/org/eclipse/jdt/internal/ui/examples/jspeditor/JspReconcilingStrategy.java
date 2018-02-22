@@ -57,6 +57,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#setDocument(org.eclipse.jface.text.IDocument)
 	 */
+	@Override
 	public void setDocument(IDocument document) {
 		fFirstStep.setInputModel(new DocumentAdapter(document));
 	}
@@ -64,6 +65,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.reconciler.DirtyRegion, org.eclipse.jface.text.IRegion)
 	 */
+	@Override
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
 		removeTemporaryAnnotations();
 		process(fFirstStep.reconcile(dirtyRegion, subRegion));
@@ -72,6 +74,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#reconcile(org.eclipse.jface.text.IRegion)
 	 */
+	@Override
 	public void reconcile(IRegion partition) {
 		removeTemporaryAnnotations();
 		process(fFirstStep.reconcile(partition));
@@ -80,6 +83,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension#setProgressMonitor(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	public void setProgressMonitor(IProgressMonitor monitor) {
 		fFirstStep.setProgressMonitor(monitor);
 		fProgressMonitor= monitor;
@@ -89,6 +93,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension#initialReconcile()
 	 */
+	@Override
 	public void initialReconcile() {
 		fFirstStep.reconcile(null);
 		
@@ -103,6 +108,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 			/*
 			 * @see org.eclipse.ui.actions.WorkspaceModifyOperation#execute(org.eclipse.core.runtime.IProgressMonitor)
 			 */
+			@Override
 			protected void execute(IProgressMonitor monitor) throws CoreException, InvocationTargetException, InterruptedException {
 				for (int i= 0; i < results.length; i++) {				
 

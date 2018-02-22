@@ -44,17 +44,20 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 		fResultCollector= new JspTranslatorResultCollector(fDeclarations, fLocalDeclarations, fContent, fDeclarationLines, fLocalDeclarationLines, fContentLines);
 	}
 		
+	@Override
 	protected void startTag(boolean endTag, String name, int startName) {
 
 		fCurrentTagHandler= fTagHandlerFactor.getHandler(name);
 	}
 	
+	@Override
 	protected void tagAttribute(String attrName, String value, int startName, int startValue) {
 
 		if (fCurrentTagHandler != null)
 			fCurrentTagHandler.addAttribute(attrName, value, fLines);
 	}
 	
+	@Override
 	protected void endTag(boolean end) {
 
 		if (fCurrentTagHandler != null)
@@ -65,6 +68,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 			}
 	}
 	
+	@Override
 	protected void java(char ch, String java, int line) {
 
 		if (ch == '!')
@@ -85,6 +89,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 		}
 	}
 	
+	@Override
 	protected void text(String t, int line) {
 		int i= 0;
 		StringBuffer out= new StringBuffer();
@@ -115,6 +120,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 		
 	}
 
+	@Override
 	public String translate(Reader reader, String name) throws IOException  {
 
 		StringBuffer buffer= new StringBuffer();
@@ -176,6 +182,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 		return buffer.toString();
 	}
 	
+	@Override
 	public int[] getLineMapping()  {
 		return fSmap;
 	}
@@ -183,6 +190,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 	/*
 	 * @see org.eclipse.jface.text.source.ITranslator#setTagHandlerFactory(org.eclipse.jface.text.source.ITagHandlerFactory)
 	 */
+	@Override
 	public void setTagHandlerFactory(ITagHandlerFactory tagHandlerFactory) {
 		fTagHandlerFactor= tagHandlerFactory;
 	}
@@ -190,6 +198,7 @@ public class JspTranslator extends AbstractJspParser implements ITranslator {
 	/*
 	 * @see ITranslator#backTranslateOffsetInLine(String, String, int)
 	 */
+	@Override
 	public int backTranslateOffsetInLine(String originalLine, String translatedLine, int offsetInTranslatedLine, String tag)  {
 
 		ITagHandler handler;

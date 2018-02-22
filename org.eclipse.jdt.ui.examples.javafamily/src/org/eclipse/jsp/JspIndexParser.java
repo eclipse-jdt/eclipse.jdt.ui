@@ -37,10 +37,12 @@ public class JspIndexParser extends AbstractJspParser implements IIndexer {
 		fFile= resource;
 	}
 	
+	@Override
 	protected void startTag(boolean endTag, String name, int startName) {
 		fInUseBean= "jsp:useBean".equals(name); //$NON-NLS-1$
 	}
 	
+	@Override
 	protected void tagAttribute(String attrName, String value, int startName, int startValue) {
 		if (fInUseBean) {
 			if ("id".equals(attrName)) //$NON-NLS-1$
@@ -50,6 +52,7 @@ public class JspIndexParser extends AbstractJspParser implements IIndexer {
 		}
 	}
 	
+	@Override
 	protected void endTag(boolean end) {
 		if (fInUseBean) {
 			if (fId != null && fClass != null) {
@@ -64,6 +67,7 @@ public class JspIndexParser extends AbstractJspParser implements IIndexer {
 		}
 	}
 	
+	@Override
 	public void index(IIndex indexerOutput) throws IOException {
 		
 		String type= fFile.getFileExtension();

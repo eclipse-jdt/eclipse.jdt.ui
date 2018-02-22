@@ -78,6 +78,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	/**
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#createControl(Composite)
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		
 		Font font = parent.getFont();
@@ -108,6 +109,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		fTomcatDir.setLayoutData(gd);
 		fTomcatDir.setFont(font);
 		fTomcatDir.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent evt) {
 				updateLaunchConfigurationDialog();
 			}
@@ -115,6 +117,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		
 		fBrowseButton = createPushButton(composite, LaunchingMessages.TomcatTab_21, null);
 		fBrowseButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent evt) {
 				handleTomcatBrowseButtonSelected();
 			}
@@ -135,6 +138,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		fProjectText.setLayoutData(gd);
 		fProjectText.setFont(font);
 		fProjectText.addModifyListener(new ModifyListener() {
+			@Override
 			public void modifyText(ModifyEvent evt) {
 				updateLaunchConfigurationDialog();
 			}
@@ -142,6 +146,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		
 		fProjectButton = createPushButton(composite, LaunchingMessages.TomcatTab_23, null);
 		fProjectButton.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent evt) {
 				handleProjectBrowseButtonSelected();
 			}
@@ -191,6 +196,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	/**
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#dispose()
 	 */
+	@Override
 	public void dispose() {
 		// empty implementation
 	}
@@ -198,6 +204,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	/**
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#isValid(ILaunchConfiguration)
 	 */
+	@Override
 	public boolean isValid(ILaunchConfiguration config) {
 		setErrorMessage(null);
 		setMessage(null);
@@ -238,6 +245,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	/**
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(ILaunchConfigurationWorkingCopy)
 	 */
+	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
 		config.setAttribute(TomcatLaunchDelegate.ATTR_CATALINA_HOME, "${catalina_home}"); //$NON-NLS-1$
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, TomcatLaunchDelegate.ID_TOMCAT_CLASSPATH_PROVIDER);
@@ -247,6 +255,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	/**
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#initializeFrom(ILaunchConfiguration)
 	 */
+	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		try {
 			fTomcatDir.setText(configuration.getAttribute(TomcatLaunchDelegate.ATTR_CATALINA_HOME, "")); //$NON-NLS-1$
@@ -282,6 +291,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	/**
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#performApply(ILaunchConfigurationWorkingCopy)
 	 */
+	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		configuration.setAttribute(TomcatLaunchDelegate.ATTR_CATALINA_HOME, getAttributeValueFrom(fTomcatDir));
 		String projectName = getAttributeValueFrom(fProjectText);
@@ -305,6 +315,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	/**
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getName()
 	 */
+	@Override
 	public String getName() {
 		return LaunchingMessages.TomcatTab_7;
 	}
@@ -312,6 +323,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	/**
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#getImage()
 	 */
+	@Override
 	public Image getImage() {
 		return JspPluginImages.getImage(JspPluginImages.IMG_OBJ_TOMCAT);
 	}

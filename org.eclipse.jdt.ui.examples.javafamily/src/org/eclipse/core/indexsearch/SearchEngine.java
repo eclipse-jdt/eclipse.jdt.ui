@@ -37,6 +37,7 @@ public class SearchEngine {
 		
 		private HashMap fMap= new HashMap();
 		
+		@Override
 		public void addRef(String word, String path) {
 			System.err.println("Index.add: " + path + " " + word); //$NON-NLS-1$ //$NON-NLS-2$
 			HashMap words= (HashMap) fMap.get(path);
@@ -47,11 +48,13 @@ public class SearchEngine {
 			words.put(word, word);
 		}
 		
+		@Override
 		public void remove(String path) {
 			System.err.println("Index.remove: " + path); //$NON-NLS-1$
 			fMap.remove(path);
 		}
 		
+		@Override
 		public void queryPrefix(HashSet results, String w) {
 			Iterator iter= fMap.keySet().iterator();
 			while (iter.hasNext()) {

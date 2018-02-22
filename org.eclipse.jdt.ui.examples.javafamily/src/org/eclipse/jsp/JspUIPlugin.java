@@ -77,6 +77,7 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 				
 				IResourceProxyVisitor visitor=
 					new IResourceProxyVisitor() {
+						@Override
 						public boolean visit(IResourceProxy proxy) throws CoreException {
 							String name= proxy.getName();
 							int pos= name.lastIndexOf('.');
@@ -114,6 +115,7 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 		return fgJSPIndexingIsEnabled;
 	}
 	
+	@Override
 	public void resourceChanged(IResourceChangeEvent event) {
 		if ( !fgJSPIndexingIsEnabled || event == null)
 			return;
@@ -123,6 +125,7 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 		try {
 			d.accept(
 				new IResourceDeltaVisitor() {
+					@Override
 					public boolean visit(IResourceDelta delta) {
 						if (delta != null) {
 							IResource r= delta.getResource();
@@ -174,11 +177,13 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 		fSearchEngine.search(query, resultCollector, pm, SearchEngine.WAIT_UNTIL_READY_TO_SEARCH);
 	}
 	
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		initializeDefaultPreferences();
 	}
 		
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		try {
 			controlJSPIndexing(false);
@@ -205,6 +210,7 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 		return display;		
 	}
 	
+	@Override
 	protected ImageRegistry createImageRegistry() {
 		return JspPluginImages.initializeImageRegistry();
 	}	

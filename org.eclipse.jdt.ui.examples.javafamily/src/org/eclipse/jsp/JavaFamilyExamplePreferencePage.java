@@ -23,6 +23,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 public class JavaFamilyExamplePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
+	@Override
 	protected Control createContents(Composite parent) {
 		Composite c= new Composite(parent, SWT.NULL);
 		//c.setLayout(new FillLayout());
@@ -30,6 +31,7 @@ public class JavaFamilyExamplePreferencePage extends PreferencePage implements I
 		final Button b= new Button(c, SWT.NULL);
 		b.setText(getButtonLabel());
 		b.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				JspUIPlugin.getDefault().controlJSPIndexing(!JspUIPlugin.getDefault().isJSPIndexingOn());
 				b.setText(getButtonLabel());
@@ -46,6 +48,7 @@ public class JavaFamilyExamplePreferencePage extends PreferencePage implements I
 		return "Start JSP Indexing"; //$NON-NLS-1$
 	}
 	
+	@Override
 	public void init(IWorkbench workbench) {
 		// empty implementation
 	}
