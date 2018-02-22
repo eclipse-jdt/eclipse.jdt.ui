@@ -32,6 +32,9 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 public class NLSScanner {
 
+	@SuppressWarnings("deprecation")
+	private static final int InternalTokenNameIdentifier = ITerminalSymbols.TokenNameIdentifier;
+
 	//no instances
 	private NLSScanner() {
 	}
@@ -81,7 +84,7 @@ public class NLSScanner {
 					insideAnnotation.clear(); //e.g. @interface
 					break;
 
-				case ITerminalSymbols.TokenNameIdentifier:
+				case InternalTokenNameIdentifier:
 					if (! insideAnnotation.isEmpty()) {
 						int[] parenCounter= insideAnnotation.getLast();
 						if (parenCounter[0] == -1)

@@ -369,7 +369,7 @@ public class MoveCuUpdateCreator {
 			try {
 				int tokenType= fScanner.getNextToken();
 				while (tokenType != ITerminalSymbols.TokenNameEOF) {
-					if (tokenType == ITerminalSymbols.TokenNameIdentifier)
+					if (tokenType == ITerminalSymbols.TokenNameIdentifier) // TODO: could we be in the context of module-info.java, conflicting with restricted keywords?
 						lastIdentifierStart= fScanner.getCurrentTokenStartPosition();
 					tokenType= fScanner.getNextToken();
 				}

@@ -69,7 +69,7 @@ public class TypeOccurrenceCollector extends CuCollectingSearchRequestor {
 		try {
 			int token = scanner.getNextToken();
 			while (token != ITerminalSymbols.TokenNameEOF) {
-				if (token == ITerminalSymbols.TokenNameIdentifier) {
+				if (token == ITerminalSymbols.TokenNameIdentifier) { // type reference can occur in module-info.java and collide with a restricted keyword.
 					simpleNameStart= scanner.getCurrentTokenStartPosition();
 					simpleNameEnd= scanner.getCurrentTokenEndPosition();
 				}

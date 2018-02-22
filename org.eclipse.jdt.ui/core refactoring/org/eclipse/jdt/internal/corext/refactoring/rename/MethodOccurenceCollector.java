@@ -26,6 +26,13 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContex
 
 class MethodOccurenceCollector extends CuCollectingSearchRequestor {
 
+	/**
+	 * Warning-free alias for <code>ITerminalSymbols.TokenNameIdentifier</code>.
+	 * Should ideally use this only when you are sure it's not module-info.java
+	 */
+	@SuppressWarnings("deprecation")
+	private static final int InternalTokenNameIdentifier= ITerminalSymbols.TokenNameIdentifier;
+	
 	private final String fName;
 
 	public MethodOccurenceCollector(String methodName) {
@@ -76,7 +83,7 @@ class MethodOccurenceCollector extends CuCollectingSearchRequestor {
 		try {
 			int token = scanner.getNextToken();
 			while (token != ITerminalSymbols.TokenNameEOF && token != ITerminalSymbols.TokenNameLPAREN) { // reference in code includes arguments in parentheses
-				if (token == ITerminalSymbols.TokenNameIdentifier) {
+				if (token == InternalTokenNameIdentifier) {
 					simpleNameStart= scanner.getCurrentTokenStartPosition();
 					simpleNameEnd= scanner.getCurrentTokenEndPosition();
 				}
