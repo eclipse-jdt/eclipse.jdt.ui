@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -640,7 +640,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			for (int i= 0; i < unimplementedMethods.length; i++) {
 				IMethodBinding unImplementedMethod= unimplementedMethods[i];
 				MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(fCUHandle, unitRewriter, fImportRewriter, context,
-						unImplementedMethod, unImplementedMethod.getDeclaringClass(), settings, false, fFactoryOwningClass.resolveBinding());
+						unImplementedMethod, unImplementedMethod.getDeclaringClass(), settings, false, new NodeFinder(fFactoryCU, decl.getStartPosition(), 0).getCoveringNode());
 				decl.bodyDeclarations().add(newMethodDecl);
 			}
 			newCtorCall.setAnonymousClassDeclaration(decl);

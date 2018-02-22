@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -69,23 +68,20 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 		if (unimplementedMethods.length == 0)
 			return;
 
-		ImportRewriteContext context= new ContextSensitiveImportRewriteContext((CompilationUnit) fTypeNode.getRoot(), fTypeNode.getStartPosition(), cuRewrite.getImportRewrite());
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext(fTypeNode, cuRewrite.getImportRewrite());
 		ASTRewrite rewrite= cuRewrite.getASTRewrite();
 		ICompilationUnit unit= cuRewrite.getCu();
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(unit.getJavaProject());
 
 		ListRewrite listRewrite;
-		ITypeBinding currentType= null;
 
 		if (fTypeNode instanceof AnonymousClassDeclaration) {
 			AnonymousClassDeclaration decl= (AnonymousClassDeclaration) fTypeNode;
 			listRewrite= rewrite.getListRewrite(decl, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 			settings.createComments= false;
-			currentType= decl.resolveBinding();
 		} else if (fTypeNode instanceof AbstractTypeDeclaration) {
 			AbstractTypeDeclaration decl= (AbstractTypeDeclaration) fTypeNode;
 			listRewrite= rewrite.getListRewrite(decl, decl.getBodyDeclarationsProperty());
-			currentType= decl.resolveBinding();
 		} else if (fTypeNode instanceof EnumConstantDeclaration) {
 			EnumConstantDeclaration enumConstantDeclaration= (EnumConstantDeclaration) fTypeNode;
 			AnonymousClassDeclaration anonymousClassDeclaration= enumConstantDeclaration.getAnonymousClassDeclaration();
@@ -105,7 +101,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 
 		for (int i= 0; i < unimplementedMethods.length; i++) {
 			IMethodBinding curr= unimplementedMethods[i];
-			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(unit, rewrite, imports, context, curr, curr.getDeclaringClass(), settings, false, currentType);
+			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(unit, rewrite, imports, context, curr, curr.getDeclaringClass(), settings, false, fTypeNode);
 			listRewrite.insertLast(newMethodDecl, createTextEditGroup(CorrectionMessages.AddUnimplementedMethodsOperation_AddMissingMethod_group, cuRewrite));
 		}
 	}

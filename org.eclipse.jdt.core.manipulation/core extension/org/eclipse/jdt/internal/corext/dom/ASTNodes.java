@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1166,29 +1166,6 @@ public class ASTNodes {
 				return ((AbstractTypeDeclaration)node).resolveBinding();
 			} else if (node instanceof AnonymousClassDeclaration) {
 				return ((AnonymousClassDeclaration)node).resolveBinding();
-			}
-			node= node.getParent();
-		}
-		return null;
-	}
-
-	public static IBinding getEnclosingDeclaration(ASTNode node) {
-		while(node != null) {
-			if (node instanceof AbstractTypeDeclaration) {
-				return ((AbstractTypeDeclaration)node).resolveBinding();
-			} else if (node instanceof AnonymousClassDeclaration) {
-				return ((AnonymousClassDeclaration)node).resolveBinding();
-			} else if (node instanceof MethodDeclaration) {
-				return ((MethodDeclaration)node).resolveBinding();
-			} else if (node instanceof FieldDeclaration) {
-				List<?> fragments= ((FieldDeclaration)node).fragments();
-				if (fragments.size() > 0)
-					return ((VariableDeclarationFragment)fragments.get(0)).resolveBinding();
-			} else if (node instanceof VariableDeclarationFragment) {
-				IVariableBinding variableBinding= ((VariableDeclarationFragment)node).resolveBinding();
-				if (variableBinding.getDeclaringMethod() != null || variableBinding.getDeclaringClass() != null)
-					return variableBinding;
-				// workaround for incomplete wiring of DOM bindings: keep searching when variableBinding is unparented
 			}
 			node= node.getParent();
 		}

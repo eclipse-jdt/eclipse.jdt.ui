@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013, 2017 IBM Corporation and others.
+ * Copyright (c) 2013, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.text.edits.TextEditGroup;
 
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -495,13 +494,8 @@ public class LambdaExpressionsFix extends CompilationUnitRewriteOperationsFix {
 				ImportRewrite importRewrite= cuRewrite.getImportRewrite();
 				ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(lambdaExpression, importRewrite);
 
-				IBinding contextBinding= null; // used to find @NonNullByDefault effective at that current context
-				if (cuRewrite.getCu().getJavaProject().getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED)) {
-					contextBinding= ASTNodes.getEnclosingDeclaration(lambdaExpression);
-				}
-
 				MethodDeclaration methodDeclaration= StubUtility2.createImplementationStub(cuRewrite.getCu(), rewrite, importRewrite, importContext,
-						methodBinding, parameterNames, lambdaTypeBinding, settings, false, contextBinding);
+						methodBinding, parameterNames, lambdaTypeBinding, settings, false, lambdaExpression);
 
 				// Qualify reference to this or super
 				ASTNode parentType= ASTResolving.findParentType(lambdaExpression);

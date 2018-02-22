@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Till Brychcy and others.
+ * Copyright (c) 2017, 2018 Till Brychcy and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
+import java.lang.annotation.ElementType;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -50,9 +53,9 @@ public class RedundantNullnessTypeAnnotationsFilter {
 	 * </ul>
 	 */
 	private static final EnumSet<TypeLocation> NEVER_NULLNESS_LOCATIONS= EnumSet.of(
-					TypeLocation.LOCAL_VARIABLE, TypeLocation.CAST,
-					TypeLocation.EXCEPTION, TypeLocation.NEW,
-					TypeLocation.INSTANCEOF, TypeLocation.RECEIVER);
+			TypeLocation.LOCAL_VARIABLE, TypeLocation.CAST,
+			TypeLocation.EXCEPTION, TypeLocation.NEW,
+			TypeLocation.INSTANCEOF, TypeLocation.RECEIVER);
 
 	public static /* @Nullable */ RedundantNullnessTypeAnnotationsFilter createIfConfigured(/* @Nullable */ ASTNode node) {
 		if (node == null) {
@@ -67,11 +70,11 @@ public class RedundantNullnessTypeAnnotationsFilter {
 				if (JavaCore.ENABLED.equals(javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true))) {
 					String nonNullAnnotationName= javaProject.getOption(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, true);
 					String nullableAnnotationName= javaProject.getOption(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, true);
-					String nonNullByDefaultName= javaProject.getOption(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME, true);
-					if (nonNullAnnotationName == null || nullableAnnotationName == null || nonNullByDefaultName == null) {
+					Set<String> nonNullByDefaultNames= determineNonNullByDefaultNames(javaProject);
+					if (nonNullAnnotationName == null || nullableAnnotationName == null || nonNullByDefaultNames == null) {
 						return null;
 					}
-					EnumSet<TypeLocation> nonNullByDefaultLocations= determineNonNullByDefaultLocations(node, nonNullByDefaultName);
+					EnumSet<TypeLocation> nonNullByDefaultLocations= determineNonNullByDefaultLocations(node, nonNullByDefaultNames);
 					return new RedundantNullnessTypeAnnotationsFilter(nonNullAnnotationName, nullableAnnotationName, nonNullByDefaultLocations);
 				}
 			}
@@ -79,42 +82,85 @@ public class RedundantNullnessTypeAnnotationsFilter {
 		return null;
 	}
 
-	public static EnumSet<TypeLocation> determineNonNullByDefaultLocations(ASTNode astNode, String nonNullByDefaultName) {
+	public static /* Nullable */ Set<String> determineNonNullByDefaultNames(IJavaProject javaProject) {
+		String nonNullByDefaultName= javaProject.getOption(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME, true);
+		if (nonNullByDefaultName == null) {
+			return null;
+		}
+		LinkedHashSet<String> nonNullByDefaultNames= new LinkedHashSet<>();
+		nonNullByDefaultNames.add(nonNullByDefaultName);
+		String secondaryNNBDNames= javaProject.getOption(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_SECONDARY_NAMES, true);
+		if (secondaryNNBDNames != null) {
+			for (String string : secondaryNNBDNames.split(",")) { //$NON-NLS-1$
+				string= string.trim();
+				if (string.length() > 0) {
+					nonNullByDefaultNames.add(string);
+				}
+			}
+		}
+		return nonNullByDefaultNames;
+	}
+
+	public static EnumSet<TypeLocation> determineNonNullByDefaultLocations(ASTNode astNode, Set<String> nonNullByDefaultNames) {
 		// look for first @NonNullByDefault
 		while (astNode != null) {
-			IAnnotationBinding annot= getNNBDAnnotation(astNode, nonNullByDefaultName);
-			if (annot != null) {
-				return determineNNBDValue(annot);
+			List<IAnnotationBinding> annots= getNNBDAnnotations(astNode, nonNullByDefaultNames);
+			if (annots != null) {
+				return determineNNBDValue(annots);
 			}
 			astNode= astNode.getParent();
 		}
 		return EnumSet.noneOf(TypeLocation.class);
 	}
 
-	private static EnumSet<TypeLocation> determineNNBDValue(IAnnotationBinding annot) {
+	private static EnumSet<TypeLocation> determineNNBDValue(List<IAnnotationBinding> annots) {
 		EnumSet<TypeLocation> result= EnumSet.noneOf(TypeLocation.class);
-		IMemberValuePairBinding[] pairs= annot.getAllMemberValuePairs();
-		for (final IMemberValuePairBinding pair : pairs) {
-			if (pair.getKey() == null || pair.getKey().equals("value")) { //$NON-NLS-1$
-				Object value= pair.getValue();
-				if (value instanceof Object[]) {
-					Object[] values= (Object[]) value;
-					for (int k= 0; k < values.length; k++) {
-						if (values[k] instanceof IVariableBinding) {
-							String name= ((IVariableBinding) values[k]).getName();
-							try {
-								result.add(TypeLocation.valueOf(name));
-							} catch (IllegalArgumentException e) {
-								// ignore
+		for (IAnnotationBinding annot : annots) {
+			IMemberValuePairBinding[] pairs= annot.getAllMemberValuePairs();
+			if (pairs.length == 0) {
+				ITypeBinding annotationType= annot.getAnnotationType();
+				boolean foundTypeQualifierDefault= false;
+				if (annotationType != null) {
+					IAnnotationBinding[] annotationAnnotations= annotationType.getAnnotations();
+					for (IAnnotationBinding nestedBinding : annotationAnnotations) {
+						ITypeBinding nestedAnnotationType= nestedBinding.getAnnotationType();
+						if (nestedAnnotationType != null) {
+							if (nestedAnnotationType.getName().equals("TypeQualifierDefault")) { //$NON-NLS-1$
+								foundTypeQualifierDefault= true;
+								for (final IMemberValuePairBinding pair : nestedBinding.getAllMemberValuePairs()) {
+									if (pair.getKey() == null || pair.getKey().equals("value")) { //$NON-NLS-1$
+										Object value= pair.getValue();
+										if (value instanceof Object[]) {
+											Object[] values= (Object[]) value;
+											for (Object elem : values) {
+												addElementTypesAsTypeLocationValues(result, elem);
+											}
+										} else {
+											addElementTypesAsTypeLocationValues(result, value);
+										}
+									}
+								}
+								break;
 							}
 						}
 					}
-				} else if (value instanceof IVariableBinding) {
-					String name= ((IVariableBinding) value).getName();
-					try {
-						result.add(TypeLocation.valueOf(name));
-					} catch (IllegalArgumentException e) {
-						// ignore
+				}
+				if (!foundTypeQualifierDefault) {
+					// unconfigurable NonNullByDefault annotation
+					addAsTypeLocationValues(result, Boolean.TRUE);
+				}
+			} else {
+				for (final IMemberValuePairBinding pair : pairs) {
+					if (pair.getKey() == null || pair.getKey().equals("value")) { //$NON-NLS-1$
+						Object value= pair.getValue();
+						if (value instanceof Object[]) {
+							Object[] values= (Object[]) value;
+							for (Object elem : values) {
+								addAsTypeLocationValues(result, elem);
+							}
+						} else {
+							addAsTypeLocationValues(result, value);
+						}
 					}
 				}
 			}
@@ -122,30 +168,71 @@ public class RedundantNullnessTypeAnnotationsFilter {
 		return result;
 	}
 
+	private static void addAsTypeLocationValues(EnumSet<TypeLocation> result, Object value) {
+		if (value instanceof IVariableBinding) {
+			String name= ((IVariableBinding) value).getName();
+			try {
+				result.add(TypeLocation.valueOf(name));
+			} catch (IllegalArgumentException e) {
+				// ignore
+			}
+		} else if (value instanceof Boolean) {
+			if (((Boolean) value).booleanValue()) {
+				result.add(TypeLocation.RETURN_TYPE);
+				result.add(TypeLocation.PARAMETER);
+				result.add(TypeLocation.FIELD);
+			}
+		}
+	}
+
+	private static void addElementTypesAsTypeLocationValues(EnumSet<TypeLocation> result, Object value) {
+		if (value instanceof IVariableBinding) {
+			String name= ((IVariableBinding) value).getName();
+			if (ElementType.PARAMETER.name().equals(name)) {
+				result.add(TypeLocation.PARAMETER);
+			} else if (ElementType.METHOD.name().equals(name)) {
+				result.add(TypeLocation.RETURN_TYPE);
+			} else if (ElementType.FIELD.name().equals(name)) {
+				result.add(TypeLocation.FIELD);
+			}
+		}
+	}
+
 	// based on org.eclipse.jdt.apt.core.internal.declaration.ASTBasedDeclarationImpl.getAnnotationInstancesFromAST()
-	private static /* @Nullable */ IAnnotationBinding getNNBDAnnotation(ASTNode astNode, String nonNullByDefaultName) {
+	private static /* @Nullable */ List<IAnnotationBinding> getNNBDAnnotations(ASTNode astNode, Set<String> nonNullByDefaultNames) {
 		List<IExtendedModifier> extendsMods= null;
+		ArrayList<IAnnotationBinding> list= null;
 		switch (astNode.getNodeType()) {
 			case ASTNode.COMPILATION_UNIT: {
-				// special case: when reaching the root of the ast, check the package annotations.
+				// special case: when reaching the root of the ast, check the package and module annotations.
 				PackageDeclaration packageDeclaration= ((CompilationUnit) astNode).getPackage();
 				if (packageDeclaration != null) {
 					IPackageBinding packageBinding= packageDeclaration.resolveBinding();
 					if (packageBinding != null) {
 						for (IAnnotationBinding annotationBinding : packageBinding.getAnnotations()) {
 							ITypeBinding annotationType= annotationBinding.getAnnotationType();
-							if (annotationType != null && annotationType.getQualifiedName().equals(nonNullByDefaultName)) {
-								return annotationBinding;
-							}
-						}
-						IModuleBinding module= packageBinding.getModule();
-						if(module != null) {
-							for (IAnnotationBinding annotationBinding : module.getAnnotations()) {
-								ITypeBinding annotationType= annotationBinding.getAnnotationType();
-								if (annotationType != null && annotationType.getQualifiedName().equals(nonNullByDefaultName)) {
-									return annotationBinding;
+							if (annotationType != null) {
+								if (nonNullByDefaultNames.contains(annotationType.getQualifiedName())) {
+									if (list == null)
+										list= new ArrayList<>();
+									list.add(annotationBinding);
 								}
 							}
+						}
+						if (list != null)
+							return list;
+						IModuleBinding module= packageBinding.getModule();
+						if (module != null) {
+							for (IAnnotationBinding annotationBinding : module.getAnnotations()) {
+								ITypeBinding annotationType= annotationBinding.getAnnotationType();
+								if (annotationType != null && nonNullByDefaultNames.contains(annotationType.getQualifiedName())) {
+									if (list == null)
+										list= new ArrayList<>();
+									list.add(annotationBinding);
+								}
+							}
+							if (list != null)
+								return list;
 						}
 					}
 				}
@@ -188,12 +275,16 @@ public class RedundantNullnessTypeAnnotationsFilter {
 					IAnnotationBinding annotationBinding= annotation.resolveAnnotationBinding();
 					if (annotationBinding != null) {
 						ITypeBinding annotationType= annotationBinding.getAnnotationType();
-						if (annotationType != null && annotationType.getQualifiedName().equals(nonNullByDefaultName)) {
-							return annotationBinding;
+						if (annotationType != null && nonNullByDefaultNames.contains(annotationType.getQualifiedName())) {
+							if (list == null)
+								list= new ArrayList<>();
+							list.add(annotationBinding);
 						}
 					}
 				}
 			}
+			if (list != null)
+				return list;
 		}
 		return null;
 	}
@@ -213,10 +304,10 @@ public class RedundantNullnessTypeAnnotationsFilter {
 	public IAnnotationBinding[] removeUnwantedTypeAnnotations(IAnnotationBinding[] annotations, TypeLocation location, ITypeBinding type) {
 		if (location == TypeLocation.OTHER)
 			return NO_ANNOTATIONS;
-		if(type.isTypeVariable() || type.isWildcardType()) {
+		if (type.isTypeVariable() || type.isWildcardType()) {
 			return annotations;
 		}
-		boolean excludeAllNullAnnotations = NEVER_NULLNESS_LOCATIONS.contains(location);
+		boolean excludeAllNullAnnotations= NEVER_NULLNESS_LOCATIONS.contains(location);
 		if (excludeAllNullAnnotations || fNonNullByDefaultLocations.contains(location)) {
 			ArrayList<IAnnotationBinding> list= new ArrayList<>(annotations.length);
 			for (IAnnotationBinding annotation : annotations) {

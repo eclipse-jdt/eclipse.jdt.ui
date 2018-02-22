@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -126,9 +126,12 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 		Document recoveredDocument= new Document();
 		CompilationUnit unit= getRecoveredAST(document, offset, recoveredDocument);
 		ImportRewriteContext context;
+		ASTNode astNode;
 		if (importRewrite != null) {
-			context= new ContextSensitiveImportRewriteContext(unit, offset, importRewrite);
+			astNode= new NodeFinder(unit, offset, 0).getCoveringNode();
+			context= new ContextSensitiveImportRewriteContext(astNode, importRewrite);
 		} else {
+			astNode= null;
 			importRewrite= StubUtility.createImportRewrite(unit, true); // create a dummy import rewriter to have one
 			context= new ImportRewriteContext() { // forces that all imports are fully qualified
 				@Override
@@ -158,7 +161,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 			}
 			if (methodToOverride != null) {
 				CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
-				MethodDeclaration stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType, settings, declaringType.isInterface(), declaringType);
+				MethodDeclaration stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, context, methodToOverride, declaringType, settings, declaringType.isInterface(), astNode);
 				ListRewrite rewriter= rewrite.getListRewrite(node, descriptor);
 				rewriter.insertFirst(stub, null);
 

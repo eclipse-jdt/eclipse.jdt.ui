@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 GK Software AG and others.
+ * Copyright (c) 2011, 2018 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -40,10 +41,7 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
-import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.IModuleBinding;
-import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -59,10 +57,12 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.corext.codemanipulation.RedundantNullnessTypeAnnotationsFilter;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
@@ -104,7 +104,7 @@ public class NullAnnotationsRewriteOperations {
 		protected String fMessage;
 		// assigned after the constructor:
 		boolean fRemoveIfNonNullByDefault;
-		String fNonNullByDefaultName;
+		Set<String> fNonNullByDefaultNames;
 
 		protected SignatureAnnotationRewriteOperation(Builder builder) {
 			fUnit= builder.fUnit;
@@ -161,112 +161,36 @@ public class NullAnnotationsRewriteOperations {
 			return true;
 		}
 
-		/* Is the given element affected by a @NonNullByDefault v1.x? */
-		boolean hasNonNullDefault(IBinding enclosingElement) {
-			if (!fRemoveIfNonNullByDefault) return false;
-			IAnnotationBinding[] annotations = enclosingElement.getAnnotations();
-			for (int i= 0; i < annotations.length; i++) {
-				IAnnotationBinding annot = annotations[i];
-				if (annot.getAnnotationType().getQualifiedName().equals(fNonNullByDefaultName)) {
-					IMemberValuePairBinding[] pairs= annot.getDeclaredMemberValuePairs();
-					if (pairs.length > 0) {
-						// is default cancelled by "false" or "value=false" ?
-						for (int j= 0; j < pairs.length; j++)
-							if (pairs[j].getKey() == null || pairs[j].getKey().equals("value")) //$NON-NLS-1$
-								return (pairs[j].getValue() != Boolean.FALSE);
-					}
-					return true;
-				}
-			}
+		boolean hasNonNullDefault(ASTNode astNode, IBinding enclosingElement, int parameterRank, DefaultLocation defaultLocation) {
+			if (!fRemoveIfNonNullByDefault || fNonNullByDefaultNames == null)
+				return false;
+			ITypeBinding affectedType= null;
 			if (enclosingElement instanceof IMethodBinding) {
-				return hasNonNullDefault(((IMethodBinding)enclosingElement).getDeclaringClass());
-			} else if (enclosingElement instanceof ITypeBinding) {
-				ITypeBinding typeBinding= (ITypeBinding)enclosingElement;
-				if (typeBinding.isLocal())
-					return hasNonNullDefault(typeBinding.getDeclaringMethod());
-				else if (typeBinding.isMember())
-					return hasNonNullDefault(typeBinding.getDeclaringClass());
-				else
-					return hasNonNullDefault(typeBinding.getPackage());
-			}
-			return false;
-		}
-
-		/* Is the given element affected by a 308-style @NonNullByDefault? */
-		boolean hasNonNullDefault308(IBinding enclosingElement, int parameterRank, DefaultLocation defaultLocation, boolean recursiveCall) {
-			if (!fRemoveIfNonNullByDefault) return false;
-			if (!recursiveCall) {
-				ITypeBinding affectedType= null;
-				if (enclosingElement instanceof IMethodBinding) {
-					switch (defaultLocation) {
-						case RETURN_TYPE:
-							affectedType= ((IMethodBinding) enclosingElement).getReturnType();
-							break;
-						case PARAMETER:
-							affectedType= ((IMethodBinding) enclosingElement).getParameterTypes()[parameterRank];
-							break;
-						default:
-							// no other locations supported yet (fields?)
-					}
-				} else if (enclosingElement instanceof IVariableBinding) {
-					affectedType= ((IVariableBinding) enclosingElement).getType();
+				switch (defaultLocation) {
+					case RETURN_TYPE:
+						affectedType= ((IMethodBinding) enclosingElement).getReturnType();
+						break;
+					case PARAMETER:
+						affectedType= ((IMethodBinding) enclosingElement).getParameterTypes()[parameterRank];
+						break;
+					default:
+						// no other locations supported yet (fields?)
 				}
-				if (affectedType != null) {
-					if (affectedType.isTypeVariable() || affectedType.isWildcardType()) {
-						return false; // not affected by @NonNullByDefault
-					}
+			} else if (enclosingElement instanceof IVariableBinding) {
+				affectedType= ((IVariableBinding) enclosingElement).getType();
+			}
+			if (affectedType != null) {
+				if (affectedType.isTypeVariable() || affectedType.isWildcardType()) {
+					return false; // not affected by @NonNullByDefault
 				}
 			}
-			IAnnotationBinding[] annotations= enclosingElement.getAnnotations();
-			for (int i= 0; i < annotations.length; i++) {
-				IAnnotationBinding annot= annotations[i];
-				ITypeBinding annotationType= annot.getAnnotationType();
-				if (annotationType != null && annotationType.getQualifiedName().equals(fNonNullByDefaultName)) {
-					IMemberValuePairBinding[] pairs= annot.getDeclaredMemberValuePairs();
-					if (pairs.length > 0) {
-						// does the default's set of locations contain `defaultLocation`?
-						for (int j= 0; j < pairs.length; j++)
-							if (pairs[j].getKey() == null || pairs[j].getKey().equals("value")) { //$NON-NLS-1$
-								return matchesLocation(pairs[j].getValue(), defaultLocation);
-							}
-					}
-					return true;
-				}
-			}
-			if (enclosingElement instanceof IVariableBinding) {
-				IVariableBinding variable= (IVariableBinding) enclosingElement;
-				enclosingElement= variable.isParameter() ? variable.getDeclaringMethod() : variable.getDeclaringClass();
-				return hasNonNullDefault308(enclosingElement, -1, defaultLocation, true);
-			} else if (enclosingElement instanceof IMethodBinding) {
-				return hasNonNullDefault308(((IMethodBinding)enclosingElement).getDeclaringClass(), -1, defaultLocation, true);
-			} else if (enclosingElement instanceof ITypeBinding) {
-				ITypeBinding typeBinding= (ITypeBinding)enclosingElement;
-				if (typeBinding.isLocal())
-					return hasNonNullDefault308(typeBinding.getDeclaringMethod(), -1, defaultLocation, true);
-				else if (typeBinding.isMember())
-					return hasNonNullDefault308(typeBinding.getDeclaringClass(), -1, defaultLocation, true);
-				else
-					return hasNonNullDefault308(typeBinding.getPackage(), -1, defaultLocation, true);
-			} else if(enclosingElement instanceof IPackageBinding) {
-				IPackageBinding packageBinding= (IPackageBinding) enclosingElement;
-				IModuleBinding module= packageBinding.getModule();
-				if(module != null) {
-					return hasNonNullDefault308(module, -1, defaultLocation, true);
-				}
-			}
-			return false;
-		}
-		
-		private boolean matchesLocation(Object value, DefaultLocation location) {
-			if (value instanceof Object[]) {
-				Object[] values= (Object[]) value;
-				for (int i= 0; i < values.length; i++) {
-					if (matchesLocation(values[i], location))
-						return true;
-				}
-			} else if (value instanceof IVariableBinding) {
-				String name= ((IVariableBinding) value).getName();
-				return location.name().equals(name);
+			EnumSet<TypeLocation> nonNullByDefaultLocations= RedundantNullnessTypeAnnotationsFilter.determineNonNullByDefaultLocations(astNode,
+					fNonNullByDefaultNames);
+			switch (defaultLocation) {
+				case PARAMETER:
+					return nonNullByDefaultLocations.contains(TypeLocation.PARAMETER);
+				case RETURN_TYPE:
+					return nonNullByDefaultLocations.contains(TypeLocation.RETURN_TYPE);
 			}
 			return false;
 		}
@@ -301,9 +225,7 @@ public class NullAnnotationsRewriteOperations {
 			if (!checkExisting(listRewrite, group))
 				return;
 			if (!fRequireExplicitAnnotation) {
-				if (fUseNullTypeAnnotations
-						? hasNonNullDefault308(fBodyDeclaration.resolveBinding(), /*parameterRank*/-1, DefaultLocation.RETURN_TYPE, false)
-						: hasNonNullDefault(fBodyDeclaration.resolveBinding()))
+				if (hasNonNullDefault(fBodyDeclaration, fBodyDeclaration.resolveBinding(), /*parameterRank*/-1, DefaultLocation.RETURN_TYPE))
 					return; // should be safe, as in this case checkExisting() should've already produced a change (remove existing annotation).
 			}
 			Annotation newAnnotation= ast.newMarkerAnnotation();
@@ -365,9 +287,7 @@ public class NullAnnotationsRewriteOperations {
 			if (!checkExisting(listRewrite, group))
 				return;
 			if (!fRequireExplicitAnnotation) {
-				if (fUseNullTypeAnnotations
-						? hasNonNullDefault308(fArgument.resolveBinding(), fParameterRank, DefaultLocation.PARAMETER, false)
-						: hasNonNullDefault(fArgument.resolveBinding()))
+				if (hasNonNullDefault(fArgument, fArgument.resolveBinding(), fParameterRank, DefaultLocation.PARAMETER))
 					return; // should be safe, as in this case checkExisting() should've already produced a change (remove existing annotation).
 			}
 			Annotation newAnnotation= ast.newMarkerAnnotation();

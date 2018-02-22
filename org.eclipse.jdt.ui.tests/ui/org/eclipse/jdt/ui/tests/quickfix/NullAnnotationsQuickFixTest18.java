@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 GK Software AG and others.
+ * Copyright (c) 2017, 2018 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.tests.quickfix;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Map;
 
 import org.osgi.framework.Bundle;
 
@@ -22,6 +23,10 @@ import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -38,7 +43,6 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.Java18ProjectTestSetup;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
@@ -94,7 +98,6 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "", null);
 
 		fJProject1= Java18ProjectTestSetup.getProject();
-
 		if (this.ANNOTATION_JAR_PATH == null) {
 			String version= "[2.0.0,3.0.0)"; // tests run at 1.8, need the "new" null annotations
 			Bundle[] bundles= Platform.getBundles("org.eclipse.jdt.annotation", version);
@@ -111,7 +114,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 
 	@Override
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
+		JavaProjectHelper.clear(fJProject1, Java18ProjectTestSetup.getDefaultClasspath());
 	}
 
 	/*
@@ -1292,5 +1295,260 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		} finally {
 			JavaCore.setOptions(options);
 		}
+	}
+	public void runBug531511Test(boolean useTypeAnnotations, String defaultNullnessAnnotations, boolean expectReturnAnnotation, boolean expectParamAnnotation) throws Exception {		
+		Map<String, String> options= fJProject1.getOptions(false);
+		try {
+			Hashtable<String, String> myOptions= new Hashtable<>(options);
+			myOptions.put(JavaCore.COMPILER_NULLABLE_ANNOTATION_NAME, "my.Nullable");
+			myOptions.put(JavaCore.COMPILER_NONNULL_ANNOTATION_NAME, "my.NonNull");
+			myOptions.put(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME, "my.NonNullByDefault");
+			myOptions.put(JavaCore.COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_SECONDARY_NAMES, "my.NNApi,my.NNFields,my.NNParams,my.NNReturn,my.NNBDBoolean,my.NNBDUnconfigurable");
+			myOptions.put(JavaCore.COMPILER_INHERIT_NULL_ANNOTATIONS, JavaCore.DISABLED);
+			fJProject1.setOptions(myOptions);
+
+			IPackageFragment my= fSourceFolder.createPackageFragment("my", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package my;\n");
+			buf.append("\n");
+			if(useTypeAnnotations) {
+				buf.append("import java.lang.annotation.ElementType;\n");
+				buf.append("import java.lang.annotation.Target;\n");
+				buf.append("@Target({ElementType.TYPE_USE})\n");
+			}
+			buf.append("public @interface Nullable {\n");
+			buf.append("}\n");
+			my.createCompilationUnit("Nullable.java", buf.toString(), false, null);
+
+			buf= new StringBuffer();
+			buf.append("package my;\n");
+			buf.append("\n");
+			buf.append("\n");
+			if(useTypeAnnotations) {
+				buf.append("import java.lang.annotation.ElementType;\n");
+				buf.append("import java.lang.annotation.Target;\n");
+				buf.append("@Target({ElementType.TYPE_USE})\n");
+			}
+			buf.append("public @interface NonNull {\n");
+			buf.append("}\n");
+			my.createCompilationUnit("NonNull.java", buf.toString(), false, null);
+
+			buf= new StringBuffer();
+			buf.append("package my;\n");
+			buf.append("\n");
+			buf.append("public enum DefaultLocation {\n");
+			buf.append("	PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT\n");
+			buf.append("}\n");
+			buf.append("");
+			my.createCompilationUnit("DefaultLocation.java", buf.toString(), false, null);
+
+			buf= new StringBuffer();
+			buf.append("package my;\n");
+			buf.append("\n");
+			buf.append("public @interface TypeQualifierDefault {\n");
+			buf.append("	java.lang.annotation.ElementType[] value();\n");
+			buf.append("}\n");
+			buf.append("");
+			my.createCompilationUnit("TypeQualifierDefault.java", buf.toString(), false, null);
+
+			buf= new StringBuffer();
+			buf.append("package my;\n");
+			buf.append("\n");
+			buf.append("import static my.DefaultLocation.*;\n");
+			buf.append("\n");
+			buf.append("public @interface NonNullByDefault {\n");
+			buf.append("	DefaultLocation[] value() default { PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT };\n");
+			buf.append("}\n");
+			buf.append("");
+			my.createCompilationUnit("NonNullByDefault.java", buf.toString(), false, null);
+
+			buf= new StringBuffer();
+			buf.append("package my;\n");
+			buf.append("\n");
+			buf.append("import java.lang.annotation.ElementType;\n");
+			buf.append("\n");
+			buf.append("@TypeQualifierDefault({ElementType.METHOD,ElementType.PARAMETER})\n");
+			buf.append("public @interface NNApi {\n");
+			buf.append("}\n");
+			buf.append("");
+			my.createCompilationUnit("NNApi.java", buf.toString(), false, null);
+
+			buf= new StringBuffer();
+			buf.append("package my;\n");
+			buf.append("\n");
+			buf.append("import java.lang.annotation.ElementType;\n");
+			buf.append("\n");
+			buf.append("@TypeQualifierDefault({ElementType.PARAMETER})\n");
+			buf.append("public @interface NNParams {\n");
+			buf.append("}\n");
+			buf.append("");
+			my.createCompilationUnit("NNParams.java", buf.toString(), false, null);
+
+			buf= new StringBuffer();
+			buf.append("package my;\n");
+			buf.append("\n");
+			buf.append("import java.lang.annotation.ElementType;\n");
+			buf.append("\n");
+			buf.append("@TypeQualifierDefault({ElementType.METHOD})\n");
+			buf.append("public @interface NNReturn {\n");
+			buf.append("}\n");
+			buf.append("");
+			my.createCompilationUnit("NNReturn.java", buf.toString(), false, null);
+
+			buf= new StringBuffer();
+			buf.append("package my;\n");
+			buf.append("\n");
+			buf.append("import java.lang.annotation.ElementType;\n");
+			buf.append("\n");
+			buf.append("@TypeQualifierDefault(ElementType.FIELD)\n");
+			buf.append("public @interface NNFields {\n");
+			buf.append("}\n");
+			buf.append("");
+			my.createCompilationUnit("NNFields.java", buf.toString(), false, null);
+
+			buf= new StringBuffer();
+			buf.append("package my;\n");
+			buf.append("\n");
+			buf.append("public @interface NNBDBoolean {\n");
+			buf.append("boolean value() default true;\n");
+			buf.append("}\n");
+			buf.append("");
+			my.createCompilationUnit("NNBDBoolean.java", buf.toString(), false, null);
+
+			buf= new StringBuffer();
+			buf.append("package my;\n");
+			buf.append("\n");
+			buf.append("public @interface NNBDUnconfigurable {\n");
+			buf.append("}\n");
+			buf.append("");
+			my.createCompilationUnit("NNBDUnconfigurable.java", buf.toString(), false, null);
+
+
+			IPackageFragment api= fSourceFolder.createPackageFragment("api", false, null);
+			buf= new StringBuffer();
+			buf.append("package api;\n");
+			buf.append("import my.*;\n");
+			buf.append("public interface I {\n");
+			buf.append("   @NonNull public Object someMethod(@NonNull Object p);\n");
+			buf.append("}\n");
+			api.createCompilationUnit("I.java", buf.toString(), false, null);
+			
+			IPackageFragment test= fSourceFolder.createPackageFragment("test", false, null);
+			buf= new StringBuffer();
+			buf.append("@my.NonNullByDefault(my.DefaultLocation.TYPE_BOUND)\n"); // create irrelevant package default, so no tested combination will be redunant
+			buf.append("package test;\n");
+			test.createCompilationUnit("package-info.java", buf.toString(), false, null);
+
+			// ensure the support classes are problem-free
+			fJProject1.getProject().getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+			IMarker[] markers= fJProject1.getResource().findMarkers(null, true, IResource.DEPTH_INFINITE);
+			assertEquals(0, markers.length);
+			
+			// actual test begins here
+			buf= new StringBuffer();
+			buf.append("package test;\n");
+			buf.append("import my.*;\n");
+			buf.append(defaultNullnessAnnotations+ "\n");
+			buf.append("public class A implements api.I {\n");
+			buf.append("}\n");
+			ICompilationUnit cu= test.createCompilationUnit("A.java", buf.toString(), false, null);
+
+			CompilationUnit astRoot= getASTRoot(cu);
+			ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+			assertNumberOfProposals(proposals, 2);
+
+			buf= new StringBuffer();
+			buf.append("package test;\n");
+			buf.append("import my.*;\n");
+			buf.append(defaultNullnessAnnotations+ "\n");
+			buf.append("public class A implements api.I {\n");
+			buf.append("\n");
+			buf.append("    @Override\n");
+			if (useTypeAnnotations) {
+				buf.append("    public " + (expectReturnAnnotation ? "@NonNull " : "")
+						+ "Object someMethod(" + (expectParamAnnotation ? "@NonNull " : "")
+						+ "Object p) {\n");
+			} else {
+				if (expectReturnAnnotation) {
+					buf.append("    @NonNull\n");
+				}
+				buf.append("    public Object someMethod(" + (expectParamAnnotation ? "@NonNull " : "")
+						+ "Object p) {\n");
+			}
+			buf.append("        return null;\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			buf.append("");
+			assertProposalPreviewEquals(buf.toString(), "Add unimplemented methods", proposals);
+		} finally {
+			fJProject1.setOptions(options);
+		}
+	}
+
+	public void testBug531511_none_type() throws Exception {		
+		runBug531511Test(true, "", true, true);
+	}
+	public void testBug531511_none_decl() throws Exception {		
+		runBug531511Test(false, "", true, true);
+	}
+	public void testBug531511_combined_multi_first_type() throws Exception {		
+		runBug531511Test(true, "@NNApi @NNFields", false, false);
+	}
+	public void testBug531511_combined_multi_first_decl() throws Exception {		
+		runBug531511Test(false, "@NNApi @NNFields", false, false);
+	}
+	public void testBug531511_combined_multi_second_type() throws Exception {		
+		runBug531511Test(true, "@NNApi @NNFields", false, false);
+	}
+	public void testBug531511_combined_multi_second_decl() throws Exception {		
+		runBug531511Test(false, "@NNApi @NNFields", false, false);
+	}
+	public void testBug531511_param_multi_first_type() throws Exception {		
+		runBug531511Test(true, "@NNParams @NNFields", true, false);
+	}
+	public void testBug531511_param_multi_first_decl() throws Exception {		
+		runBug531511Test(false, "@NNParams @NNFields", true, false);
+	}
+	public void testBug531511_param_multi_second_type() throws Exception {		
+		runBug531511Test(true, "@NNFields @NNParams", true, false);
+	}
+	public void testBug531511_param_multi_second_decl() throws Exception {		
+		runBug531511Test(false, "@NNFields @NNParams", true, false);
+	}
+	public void testBug531511_return_multi_first_type() throws Exception {		
+		runBug531511Test(true, "@NNReturn @NNFields", false, true);
+	}
+	public void testBug531511_return_multi_first_decl() throws Exception {		
+		runBug531511Test(false, "@NNReturn @NNFields", false, true);
+	}
+	public void testBug531511_return_multi_second_type() throws Exception {		
+		runBug531511Test(true, "@NNFields @NNReturn", false, true);
+	}
+	public void testBug531511_return_multi_second_decl() throws Exception {		
+		runBug531511Test(false, "@NNFields @NNReturn", false, true);
+	}
+	public void testBug531511_boolean_default_type() throws Exception {		
+		runBug531511Test(true, "@NNBDBoolean", false, false);
+	}
+	public void testBug531511_boolean_default_decl() throws Exception {		
+		runBug531511Test(false, "@NNBDBoolean", false, false);
+	}
+	public void testBug531511_boolean_true_type() throws Exception {		
+		runBug531511Test(true, "@NNBDBoolean(true)", false, false);
+	}
+	public void testBug531511_boolean_true_decl() throws Exception {		
+		runBug531511Test(false, "@NNBDBoolean(true)", false, false);
+	}
+	public void testBug531511_boolean_false_type() throws Exception {		
+		runBug531511Test(true, "@NNBDBoolean(false)", true, true);
+	}
+	public void testBug531511_boolean_false_decl() throws Exception {		
+		runBug531511Test(false, "@NNBDBoolean(false)", true, true);
+	}
+	public void testBug531511_unconfigurable_type() throws Exception {		
+		runBug531511Test(true, "@NNBDUnconfigurable", false, false);
+	}
+	public void testBug531511_unconfigurable_decl() throws Exception {		
+		runBug531511Test(false, "@NNBDUnconfigurable", false, false);
 	}
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,7 +48,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -65,7 +64,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
@@ -236,10 +234,11 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 				}
 				methodsToOverride= result.toArray(new IMethodBinding[result.size()]);
 			}
-			IBinding contextBinding= null; // used to find @NonNullByDefault effective at that current context
+			ASTNode focusNode; // used to find @NonNullByDefault effective
 			if (fCompilationUnit.getJavaProject().getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true).equals(JavaCore.ENABLED)) {
-				ASTNode focusNode= NodeFinder.perform(astRoot, getReplacementOffset()+dummyClassContent.length(), 0);
-				contextBinding= ASTNodes.getEnclosingDeclaration(focusNode);
+				focusNode= NodeFinder.perform(astRoot, getReplacementOffset()+dummyClassContent.length(), 0);
+			} else {
+				focusNode= null;
 			}
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 			ITrackedNodePosition trackedDeclaration= rewrite.track(declaration);
@@ -247,7 +246,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			ListRewrite rewriter= rewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
 			for (int i= 0; i < methodsToOverride.length; i++) {
 				IMethodBinding curr= methodsToOverride[i];
-				MethodDeclaration stub= StubUtility2.createImplementationStub(workingCopy, rewrite, importRewrite, context, curr, dummyTypeBinding, settings, dummyTypeBinding.isInterface(), contextBinding);
+				MethodDeclaration stub= StubUtility2.createImplementationStub(workingCopy, rewrite, importRewrite, context, curr, dummyTypeBinding, settings, dummyTypeBinding.isInterface(), focusNode);
 				rewriter.insertFirst(stub, null);
 			}
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2017 GK Software AG and others.
+ * Copyright (c) 2011, 2018 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.RedundantNullnessTypeAnnotationsFilter;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.AddMissingDefaultNullnessRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.Builder;
@@ -141,7 +142,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 
 		if (addNonNull) {
 			operation.fRemoveIfNonNullByDefault= true;
-			operation.fNonNullByDefaultName= getNonNullByDefaultAnnotationName(javaElement, false);
+			operation.fNonNullByDefaultNames= RedundantNullnessTypeAnnotationsFilter.determineNonNullByDefaultNames(javaElement.getJavaProject());
 		}
 		return new NullAnnotationsFix(operation.getMessage(), operation.getCompilationUnit(), // note that this uses the findings from createAddAnnotationOperation(..)
 				new NullAnnotationsRewriteOperations.SignatureAnnotationRewriteOperation[] { operation });
@@ -251,7 +252,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 			if (fix != null) {
 				if (addNonNull) {
 					fix.fRemoveIfNonNullByDefault= true;
-					fix.fNonNullByDefaultName= getNonNullByDefaultAnnotationName(compilationUnit.getJavaElement(), false);
+					fix.fNonNullByDefaultNames= RedundantNullnessTypeAnnotationsFilter.determineNonNullByDefaultNames(compilationUnit.getJavaElement().getJavaProject());
 				}
 				result.add(fix);
 			}
