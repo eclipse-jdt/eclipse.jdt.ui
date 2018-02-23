@@ -1189,7 +1189,7 @@ public class NullAnnotationsQuickFixTest18 extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	public void testBugXXX() throws Exception {		
+	public void testBug525424() throws Exception {		
 		Hashtable<String, String> options= JavaCore.getOptions();
 		try {
 			Hashtable<String, String> myOptions= new Hashtable<>(options);
