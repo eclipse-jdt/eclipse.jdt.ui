@@ -519,7 +519,9 @@ public class FormatterModifyDialog extends ModifyDialog {
 		lineWidthPane.setLayout(layout);
 		Label lineWidthLabel= new Label(lineWidthPane, SWT.WRAP | SWT.CENTER);
 		lineWidthLabel.setText(FormatterMessages.FormatterModifyDialog_preview_line_width_label);
+		lineWidthLabel.setFont(previewPane.getFont());
 		Spinner lineWidthSpinner= NumberPreference.createSpinner(lineWidthPane, 0, 9999);
+		lineWidthSpinner.setFont(previewPane.getFont());
 		lineWidthSpinner.setLayoutData(null);
 		int previewLineSplit;
 		try {

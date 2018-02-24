@@ -1303,6 +1303,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		Composite nameComposite= new Composite(parent, SWT.NONE);
 		nameComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		nameComposite.setLayout(new GridLayout(3, false));
+		nameComposite.setFont(parent.getFont());
 
 		fProfileNameField= new StringDialogField();
 		fProfileNameField.setLabelText(FormatterMessages.ModifyDialog_ProfileName_Label);

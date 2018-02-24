@@ -497,6 +497,7 @@ public class FilteredPreferenceTree {
 		layout.marginWidth= 0;
 		layout.horizontalSpacing= 40;
 		composite.setLayout(layout);
+		composite.setFont(fParentComposite.getFont());
 
 		//TODO: Directly use the hint flags once Bug 293230 is fixed
 		FilterTextControl filterTextControl= new FilterTextControl(composite);

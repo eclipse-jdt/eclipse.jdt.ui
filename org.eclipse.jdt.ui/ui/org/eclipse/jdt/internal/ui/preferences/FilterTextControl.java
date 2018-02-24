@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2015 IBM Corporation and others.
+ * Copyright (c) 2010, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -143,6 +143,7 @@ public class FilterTextControl {
 		} else {
 			fTextControl= new Text(parent, SWT.SINGLE);
 		}
+		fTextControl.setFont(parent.getFont());
 
 		GridData gridData= new GridData(SWT.FILL, SWT.CENTER, true, false);
 		// if the text widget supported cancel then it will have it's own
