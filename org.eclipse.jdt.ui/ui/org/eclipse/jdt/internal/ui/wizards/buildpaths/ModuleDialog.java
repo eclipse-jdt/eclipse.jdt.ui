@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 GK Software AG, and others.
+ * Copyright (c) 2017, 2018 GK Software SE, and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,7 +66,6 @@ import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.provisional.JavaModelAccess;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -752,7 +751,7 @@ public class ModuleDialog extends StatusDialog {
 						recordModule(module, moduleNames);
 					} else {
 						try {
-							recordModule(JavaModelAccess.getAutomaticModuleDescription(fJavaElements[i]), moduleNames);
+							recordModule(JavaCore.getAutomaticModuleDescription(fJavaElements[i]), moduleNames);
 						} catch (JavaModelException e) {
 							JavaPlugin.log(e);
 						}
@@ -763,7 +762,7 @@ public class ModuleDialog extends StatusDialog {
 						if (module != null) {
 							recordModule(module, moduleNames);
 						} else {
-							recordModule(JavaModelAccess.getAutomaticModuleDescription(fJavaElements[i]), moduleNames);
+							recordModule(JavaCore.getAutomaticModuleDescription(fJavaElements[i]), moduleNames);
 						}
 					} catch (JavaModelException e) {
 						JavaPlugin.log(e);
@@ -782,7 +781,7 @@ public class ModuleDialog extends StatusDialog {
 					roots.add((IPackageFragmentRoot) fJavaElements[i]);
 				}
 			}
-			return JavaModelAccess.defaultRootModules(roots);
+			return JavaCore.defaultRootModules(roots);
 		}
 		return Collections.emptyList();
 	}
@@ -791,7 +790,7 @@ public class ModuleDialog extends StatusDialog {
 		String moduleName= module.getElementName();
 		if (moduleNames.add(moduleName)) {
 			try {
-				for (String required : JavaModelAccess.getRequiredModules(module)) {
+				for (String required : module.getRequiredModuleNames()) {
 					List<String> requiredModules= fModule2RequiredModules.get(moduleName);
 					if (requiredModules == null) {
 						requiredModules= new ArrayList<>();
