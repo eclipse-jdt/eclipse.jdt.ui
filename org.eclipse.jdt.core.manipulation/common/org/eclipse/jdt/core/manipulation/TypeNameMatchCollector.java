@@ -97,14 +97,14 @@ public class TypeNameMatchCollector extends TypeNameMatchRequestor {
 
 	private static String getPreference(String key) {
 		String val;
-		IEclipsePreferences node= InstanceScope.INSTANCE.getNode(JavaManipulation.getJavaUIPluginId());
+		IEclipsePreferences node= InstanceScope.INSTANCE.getNode(JavaManipulation.getPreferenceNodeId());
 		if (node != null) {
 			val= node.get(key, null);
 			if (val != null) {
 				return val;
 			}
 		}
-		node= DefaultScope.INSTANCE.getNode(JavaManipulation.getJavaUIPluginId());
+		node= DefaultScope.INSTANCE.getNode(JavaManipulation.getPreferenceNodeId());
 		if (node != null) {
 			return node.get(key, null);
 		}

@@ -32,23 +32,34 @@ public class JavaManipulation {
 	 * in the JDT UI preference node. If JDT UI is not present in runtime, there are
 	 * sane defaults, but if it exists, the preference node should be checked.
 	 */
-	private static String JAVA_UI_ID_PLUGIN;
+	private static String fgPreferenceNodeId;
 
 	/**
-	 * @return The id of the Java plug-in (value <code>"org.eclipse.jdt.ui"</code>).
+	 * @return The id of the preference node for some basic Java preferences.
+	 * Generally this will be <code>"org.eclipse.jdt.ui"</code> but some
+	 * environments may not have the 'org.eclipse.jdt.ui' bundle, so a
+	 * different one can be set.
 	 * @since 1.10
 	 */
-	public static final String getJavaUIPluginId () {
-		return JAVA_UI_ID_PLUGIN;
+	public static final String getPreferenceNodeId () {
+		return fgPreferenceNodeId;
 	}
 
 	/**
-	 * Sets JAVA_UI_ID_PLUGIN to the JDT UI plug-in Id.
-	 * @param id the Id to set for JAVA_UI_ID_PLUGIN
+	 * Sets the preference node to be used for basic Java preferences.
+	 * The client should set the value back to null when finished.
+	 *
+	 * @param id the Id to use for the preference node
+	 * @return true if the value was set, and false otherwise.
 	 * @since 1.10
 	 */
-	public static final void setJavaUIPluginId (String id) {
-		JAVA_UI_ID_PLUGIN = id;
+	public static final boolean setPreferenceNodeId (String id) {
+		if (fgPreferenceNodeId == null || id == null) {
+			fgPreferenceNodeId= id;
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -63,15 +74,15 @@ public class JavaManipulation {
 	public static String getPreference(String key, IJavaProject project) {
 		String val;
 		if (project != null) {
-			val= new ProjectScope(project.getProject()).getNode(JavaManipulation.JAVA_UI_ID_PLUGIN).get(key, null);
+			val= new ProjectScope(project.getProject()).getNode(JavaManipulation.fgPreferenceNodeId).get(key, null);
 			if (val != null) {
 				return val;
 			}
 		}
-		val= InstanceScope.INSTANCE.getNode(JavaManipulation.JAVA_UI_ID_PLUGIN).get(key, null);
+		val= InstanceScope.INSTANCE.getNode(JavaManipulation.fgPreferenceNodeId).get(key, null);
 		if (val != null) {
 			return val;
 		}
-		return DefaultScope.INSTANCE.getNode(JavaManipulation.JAVA_UI_ID_PLUGIN).get(key, null);
+		return DefaultScope.INSTANCE.getNode(JavaManipulation.fgPreferenceNodeId).get(key, null);
 	}
 }

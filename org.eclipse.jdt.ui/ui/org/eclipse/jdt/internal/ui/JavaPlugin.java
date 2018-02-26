@@ -426,7 +426,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			new InitializeAfterLoadJob().schedule(); // last call in start, see bug 191193
 		}
 
-		JavaManipulation.setJavaUIPluginId(getPluginId());
+		JavaManipulation.setPreferenceNodeId(getPluginId());
 	}
 
 	private void createOrUpdateWorkingSet(String name, String label, final String id) {
@@ -543,6 +543,8 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			// must add here to guarantee that it is the first in the listener list
 
 			OpenTypeHistory.shutdown();
+
+			JavaManipulation.setPreferenceNodeId(null);
 		} finally {
 			super.stop(context);
 		}
