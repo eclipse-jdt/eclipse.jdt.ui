@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -251,9 +252,13 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(shell, IJavaHelpContextIds.ADD_DELEGATE_METHODS_SELECTION_DIALOG);
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
-		 */
+		@Override
+		protected void createButtonsForButtonBar(Composite parent) {
+			createButton(parent, IDialogConstants.OK_ID,ActionMessages.AddDelegateMethodsAction_generate_button , true);
+			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+
+		}
+
 		@Override
 		protected Control createLinkControl(Composite composite) {
 			Link link= new Link(composite, SWT.WRAP);

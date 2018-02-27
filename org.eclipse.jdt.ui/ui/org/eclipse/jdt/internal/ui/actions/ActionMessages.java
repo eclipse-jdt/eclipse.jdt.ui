@@ -28,12 +28,14 @@ public final class ActionMessages extends NLS {
 
 	public static String AddDelegateMethodsAction_template_link_message;
 	public static String AddDelegateMethodsAction_template_link_tooltip;
+	public static String AddDelegateMethodsAction_generate_button;
 	public static String AddGetterSetterAction_allow_setters_for_finals_description;
 	public static String AddGetterSetterAction_error_not_in_source_file;
 	public static String AddGetterSetterAction_template_link_description;
 	public static String AddGetterSetterAction_template_link_tooltip;
 	public static String AddUnimplementedConstructorsAction_template_link_message;
 	public static String AddUnimplementedConstructorsAction_template_link_tooltip;
+	public static String AddUnimplementedConstructorsAction_button_generate;
 
 	public static String GenerateConstructorUsingFieldsSelectionDialog_template_link_message;
 	public static String GenerateConstructorUsingFieldsSelectionDialog_template_link_tooltip;
@@ -225,6 +227,7 @@ public final class ActionMessages extends NLS {
 	public static String GenerateConstructorUsingFieldsSelectionDialog_up_button;
 	public static String GenerateConstructorUsingFieldsSelectionDialog_down_button;
 	public static String GenerateConstructorUsingFieldsSelectionDialog_sort_constructor_choices_label;
+	public static String GenerateConstructorUsingFieldsSelectionDialog_button_generate;
 	public static String GenerateConstructorUsingFieldsSelectionDialog_omit_super;
 	public static String GenerateConstructorUsingFieldsAction_error_anonymous_class;
 

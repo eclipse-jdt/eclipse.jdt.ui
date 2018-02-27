@@ -286,9 +286,12 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			return entryComposite;
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog#createLinkControl(org.eclipse.swt.widgets.Composite)
-		 */
+		@Override
+		protected void createButtonsForButtonBar(Composite parent) {
+			createButton(parent, IDialogConstants.OK_ID, ActionMessages.AddUnimplementedConstructorsAction_button_generate, true);
+			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+		}
+
 		@Override
 		protected Control createLinkControl(Composite composite) {
 			Link link= new Link(composite, SWT.WRAP);
