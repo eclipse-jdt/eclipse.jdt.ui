@@ -61,6 +61,7 @@ IEclipsePreferences#org-eclipse-jdt-ui:org-eclipse-jdt-ui { /* pseudo attribute 
 		'semanticHighlighting.enum.italic=true'
 		'semanticHighlighting.field.color=102,225,248'
 		'semanticHighlighting.field.enabled=true'
+		'semanticHighlighting.inheritedField.color=143,143,191'
 		'semanticHighlighting.inheritedMethodInvocation.color=205,246,104'
 		'semanticHighlighting.inheritedMethodInvocation.enabled=true'
 		'semanticHighlighting.interface.color=128,242,246'
@@ -93,11 +94,13 @@ IEclipsePreferences#org-eclipse-jdt-ui:org-eclipse-jdt-ui { /* pseudo attribute 
 		'sourceHoverBackgroundColor=68,68,68'
 }
 
+
+IEclipsePreferences#org-eclipse-ui-workbench:org-eclipse-jdt-ui { /* pseudo attribute added to allow contributions without replacing this node, see Bug 466075 */
+	preferences:
+		'org.eclipse.jdt.ui.ColoredLabels.inherited=143,143,191'
+}
+
 BulletListBlock > StyledText {
     background-color: #3f4447;
     color: #BBBBBB;
 }
-
-
-
-
