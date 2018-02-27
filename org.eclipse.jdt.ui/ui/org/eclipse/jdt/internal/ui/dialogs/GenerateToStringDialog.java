@@ -1316,6 +1316,12 @@ public class GenerateToStringDialog extends SourceActionDialog {
 	}
 
 	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		createButton(parent, IDialogConstants.OK_ID, JavaUIMessages.GenerateToStringDialog_generate_button, true);
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
+	}
+	
+	@Override
 	protected void buttonPressed(int buttonId) {
 		super.buttonPressed(buttonId);
 		switch (buttonId) {
