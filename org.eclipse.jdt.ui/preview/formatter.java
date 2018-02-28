@@ -33,7 +33,7 @@
  * 
  * When a node does not have a preview assigned directly, then its descendants
  * are checked, level by level. The first level that has some previews is used
- * to construct the preview by concatenating previews from all nodes in that
+ * to construct the preview by concatenating previews from all the nodes in that
  * level. If none of the descendants have a preview assigned, then the closest
  * ancestor node is used instead.
  * 
@@ -829,11 +829,12 @@ int foo3();
  * 
  * 
  * Descriptions of parameters and return values are best appended at end of the javadoc comment.
- * @param a The first parameter. For an optimum result, this should be an odd number
+ * @param first The first parameter. For an optimum result, this should be an odd number
  * between 0 and 100.
- * @param b The second parameter.
+ * @param second The second parameter.
+ * @throws Exception when the foo operation cannot be performed for one reason or another.
  * @return The result of the foo operation, usually within 0 and 1000.
- */ int foo(int a, int b);
+ */ int foo(int first, int second) throws Exception;
 }
 class Test {
 		void trailingCommented() {

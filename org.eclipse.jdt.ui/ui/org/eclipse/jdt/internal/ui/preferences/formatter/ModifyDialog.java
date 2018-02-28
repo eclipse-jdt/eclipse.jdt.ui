@@ -972,7 +972,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 			return getScrolledPageContent().getBody();
 		}
 
-		private int getIndent(PreferenceTreeNode<?> parent) {
+		protected int getIndent(PreferenceTreeNode<?> parent) {
 			int indent= 0;
 			while (parent != null) {
 				if (parent instanceof Section)

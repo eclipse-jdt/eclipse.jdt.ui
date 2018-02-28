@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -71,7 +71,11 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_comments_pref_format_html;
 	public static String FormatterModifyDialog_comments_pref_format_line_comments_on_first_column;
 	public static String FormatterModifyDialog_comments_pref_indent_description_after_param;
-	public static String FormatterModifyDialog_comments_pref_indent_javadoc_tags;
+	public static String FormatterModifyDialog_comments_pref_javadoc_align;
+	public static String FormatterModifyDialog_comments_pref_javadoc_align_none;
+	public static String FormatterModifyDialog_comments_pref_javadoc_align_names_and_descriptions;
+	public static String FormatterModifyDialog_comments_pref_javadoc_align_descriptions_grouped;
+	public static String FormatterModifyDialog_comments_pref_javadoc_align_descriptions_to_tag;
 	public static String FormatterModifyDialog_comments_pref_line_width;
 	public static String FormatterModifyDialog_comments_pref_line_width_count_from_starting_position;
 	public static String FormatterModifyDialog_comments_pref_never_indent_block_comments_on_first_column;

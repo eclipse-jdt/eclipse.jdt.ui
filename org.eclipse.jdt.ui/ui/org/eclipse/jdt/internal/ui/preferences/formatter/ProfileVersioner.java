@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -41,8 +41,9 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static final int VERSION_11= 11; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=49412
 	private static final int VERSION_12= 12; // https://bugs.eclipse.org/318010
 	private static final int VERSION_13= 13; // https://bugs.eclipse.org/514019
+	private static final int VERSION_14= 14; // https://bugs.eclipse.org/128653
 
-	private static final int CURRENT_VERSION= VERSION_13;
+	private static final int CURRENT_VERSION= VERSION_14;
 
 	@Override
 	public int getFirstVersion() {
@@ -103,6 +104,9 @@ public class ProfileVersioner implements IProfileVersioner {
 			//$FALL-THROUGH$
 		case VERSION_12 :
 			version12to13(oldSettings);
+			//$FALL-THROUGH$
+		case VERSION_13 :
+			version13to14(oldSettings);
 			//$FALL-THROUGH$
 		default:
 		    for (final Iterator<String> iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
@@ -626,6 +630,10 @@ public class ProfileVersioner implements IProfileVersioner {
 				DefaultCodeFormatterConstants.FALSE);
 	}
 
+	private static void version13to14(Map<String, String> oldSettings) {
+		if (DefaultCodeFormatterConstants.FALSE.equals(oldSettings.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_ROOT_TAGS)))
+			oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION, DefaultCodeFormatterConstants.FALSE);
+	}
 
 	/* old format constant values */
 

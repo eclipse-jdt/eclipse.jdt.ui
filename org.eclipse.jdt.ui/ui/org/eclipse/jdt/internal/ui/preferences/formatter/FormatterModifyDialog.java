@@ -33,6 +33,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
@@ -62,7 +63,9 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree;
 import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.HighlightHelper;
 import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.PreferenceTreeNode;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog.ProfilePreferenceTree.SimpleTreeBuilder;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 
@@ -1219,12 +1222,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_format_html, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML)
 						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_format_code_snippets, DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE)
 						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_blank_line_before_javadoc_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS)
-						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_indent_javadoc_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_ROOT_TAGS, pref -> {
-							CheckboxPreference child= fTree.addCheckbox(pref, FormatterMessages.FormatterModifyDialog_comments_pref_indent_description_after_param,
-									DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION, CheckboxPreference.FALSE_TRUE);
-							pref.addDependant(child, valueAcceptor(DefaultCodeFormatterConstants.TRUE));
-						})
-						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_new_line_after_param_tags, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER)
+						.node(createJavadocAlignOptions())
+						.gap()
 						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_new_lines_at_javadoc_boundaries, DefaultCodeFormatterConstants.FORMATTER_COMMENT_NEW_LINES_AT_JAVADOC_BOUNDARIES)
 						.pref(FormatterMessages.FormatterModifyDialog_comments_pref_remove_blank_lines, DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES_IN_JAVADOC_COMMENT))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_comments_tree_block_comments, "-blockcomments") //$NON-NLS-1$
@@ -1237,7 +1236,6 @@ public class FormatterModifyDialog extends ModifyDialog {
 						case DefaultCodeFormatterConstants.FORMATTER_JOIN_LINES_IN_COMMENTS:
 							return fTree.addCheckbox(parent, label, key, CheckboxPreference.TRUE_FALSE);
 						case DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS:
-						case DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER:
 							return fTree.addCheckbox(parent, label, key, CheckboxPreference.DO_NOT_INSERT_INSERT);
 						default:
 							return fTree.addCheckbox(parent, label, key, CheckboxPreference.FALSE_TRUE);
@@ -1267,6 +1265,82 @@ public class FormatterModifyDialog extends ModifyDialog {
 			blockMaster.addDependant(pref, blockChecker);
 			headerMaster.addDependant(pref, blockChecker);
 		}
+	}
+
+	private SimpleTreeBuilder<?> createJavadocAlignOptions() {
+		String[] items= {
+				FormatterMessages.FormatterModifyDialog_comments_pref_javadoc_align_names_and_descriptions,
+				FormatterMessages.FormatterModifyDialog_comments_pref_javadoc_align_descriptions_grouped,
+				FormatterMessages.FormatterModifyDialog_comments_pref_javadoc_align_descriptions_to_tag,
+				FormatterMessages.FormatterModifyDialog_comments_pref_javadoc_align_none,
+		};
+		List<String> prefs= Arrays.asList(
+				DefaultCodeFormatterConstants.FORMATTER_COMMENT_ALIGN_TAGS_NAMES_DESCRIPTIONS,
+				DefaultCodeFormatterConstants.FORMATTER_COMMENT_ALIGN_TAGS_DESCREIPTIONS_GROUPED,
+				DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_ROOT_TAGS,
+				null);
+
+		String[] values= CheckboxPreference.FALSE_TRUE;
+
+		class AlignPreference extends Preference<Combo> {
+
+			AlignPreference(Combo combo, String label) {
+				super(combo, label, null, FilteredPreferenceTree.COMBO_VALUE_MATCHER);
+				combo.addSelectionListener(new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						updateValue();
+					}
+				});
+			}
+
+			@Override
+			protected void updateWidget() {
+				int selected= prefs.indexOf(null);
+				for (int i= 0; i < prefs.size(); i++) {
+					if (prefs.get(i) != null && values[1].equals(fWorkingValues.get(prefs.get(i))))
+						selected= i;
+				}
+				fControl.select(selected);
+			}
+
+			@Override
+			protected void updateValue() {
+				int selected= fControl.getSelectionIndex();
+				for (int i= 0; i < prefs.size(); i++) {
+					if (prefs.get(i) != null)
+						fWorkingValues.put(prefs.get(i), values[i == selected ? 1 : 0]);
+				}
+				valuesModified();
+			}
+
+			@Override
+			protected String getValue() {
+				throw new AssertionError("Method not used in this implementation"); //$NON-NLS-1$
+			}
+		}
+
+		return fTree.new SimpleTreeBuilder<PreferenceTreeNode<?>>(null, null, null) {
+
+			@Override
+			protected PreferenceTreeNode<?> build(Section parent, PreferenceBuilder prefBuilder) {
+				Combo combo= new Combo(parent.fInnerComposite, SWT.SINGLE | SWT.READ_ONLY);
+				combo.setItems(items);
+				combo.setFont(parent.fInnerComposite.getFont());
+				SWTUtil.setDefaultVisibleItemCount(combo);
+				combo.setLayoutData(createGridData(1, GridData.HORIZONTAL_ALIGN_FILL, combo.computeSize(SWT.DEFAULT, SWT.DEFAULT).x, 0));
+
+				AlignPreference alignPref= new AlignPreference(combo, FormatterMessages.FormatterModifyDialog_comments_pref_javadoc_align);
+				alignPref.addLabel(FormatterMessages.FormatterModifyDialog_comments_pref_javadoc_align, true, fTree.getIndent(parent));
+				fTree.addChild(parent, alignPref);
+
+				fTree.addCheckbox(alignPref, FormatterMessages.FormatterModifyDialog_comments_pref_indent_description_after_param,
+						DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION, CheckboxPreference.FALSE_TRUE);
+				fTree.addCheckbox(alignPref, FormatterMessages.FormatterModifyDialog_comments_pref_new_line_after_param_tags,
+						DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER, CheckboxPreference.DO_NOT_INSERT_INSERT);
+				return alignPref;
+			}
+		};
 	}
 
 	private void createOffOnTree() {
