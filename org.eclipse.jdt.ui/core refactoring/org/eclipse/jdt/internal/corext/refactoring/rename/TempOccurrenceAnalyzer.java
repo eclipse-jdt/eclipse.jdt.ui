@@ -51,7 +51,7 @@ public class TempOccurrenceAnalyzer extends ASTVisitor {
 	}
 
 	public void perform() {
-		ASTNode cuNode= ASTNodes.getParent(fTempDeclaration, CompilationUnit.class);
+		CompilationUnit cuNode= ASTNodes.getParent(fTempDeclaration, CompilationUnit.class);
 		cuNode.accept(this);
 	}
 

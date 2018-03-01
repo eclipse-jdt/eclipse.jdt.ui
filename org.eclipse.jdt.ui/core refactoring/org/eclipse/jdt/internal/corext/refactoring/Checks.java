@@ -879,7 +879,7 @@ public class Checks {
 		ASTNode initializer= ASTNodes.getParent(tempDeclaration, astNodeClass);
 		if (initializer == null)
 			return false;
-		ASTNode anonymous= ASTNodes.getParent(tempDeclaration, AnonymousClassDeclaration.class);
+		AnonymousClassDeclaration anonymous= ASTNodes.getParent(tempDeclaration, AnonymousClassDeclaration.class);
 		if (anonymous == null)
 			return true;
 		// stupid code. Is to find out if the variable declaration isn't a field.

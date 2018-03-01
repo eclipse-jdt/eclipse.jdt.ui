@@ -311,7 +311,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     		fAnonymousInnerClassNode= getAnonymousInnerClass(NodeFinder.perform(fCompilationUnitNode, fSelectionStart, fSelectionLength));
     	}
 		if (fAnonymousInnerClassNode != null) {
-			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class);
+			final AbstractTypeDeclaration declaration= ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class);
 			if (declaration instanceof TypeDeclaration) {
 				final AbstractTypeDeclaration[] nested= ((TypeDeclaration) declaration).getTypes();
 				fClassNamesUsed= new HashSet<>(nested.length);
@@ -338,7 +338,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
             if (anon != null)
                 return anon;
         }
-        return (AnonymousClassDeclaration)ASTNodes.getParent(node, AnonymousClassDeclaration.class);
+        return ASTNodes.getParent(node, AnonymousClassDeclaration.class);
     }
 
     public RefactoringStatus validateInput() {
@@ -425,7 +425,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 
     private List<IVariableBinding> getAllEnclosingAnonymousTypesField() {
 		final List<IVariableBinding> ans= new ArrayList<>();
-		final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class);
+		final AbstractTypeDeclaration declaration= ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class);
 		AnonymousClassDeclaration anonymous= (AnonymousClassDeclaration) ASTNodes.getParent(fAnonymousInnerClassNode, ASTNode.ANONYMOUS_CLASS_DECLARATION);
 		while (anonymous != null) {
 			if (ASTNodes.isParent(anonymous, declaration)) {
@@ -442,7 +442,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 	}
 
     private boolean classNameHidesEnclosingType() {
-        ITypeBinding type= ((AbstractTypeDeclaration) ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class)).resolveBinding();
+        ITypeBinding type= ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class).resolveBinding();
         while (type != null) {
             if (fClassName.equals(type.getName()))
                 return true;
@@ -643,7 +643,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     private void addNestedClass(CompilationUnitRewrite rewrite, ITypeBinding[] typeParameters) throws CoreException {
-        final AbstractTypeDeclaration declarations= (AbstractTypeDeclaration) ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class);
+        final AbstractTypeDeclaration declarations= ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class);
         int index= findIndexOfFistNestedClass(declarations.bodyDeclarations());
         if (index == -1)
             index= 0;
@@ -1093,7 +1093,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     public boolean mustInnerClassBeStatic() {
-        ITypeBinding typeBinding = ((AbstractTypeDeclaration) ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class)).resolveBinding();
+        ITypeBinding typeBinding = ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class).resolveBinding();
         ASTNode current = fAnonymousInnerClassNode.getParent();
         boolean ans = false;
         while(current != null) {

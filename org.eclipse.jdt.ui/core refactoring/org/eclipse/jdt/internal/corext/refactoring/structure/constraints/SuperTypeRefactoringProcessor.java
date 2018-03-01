@@ -642,7 +642,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	protected final List<IField> getReferencingFields(final ASTNode node, final IJavaProject project) throws JavaModelException {
 		List<IField> result= Collections.emptyList();
 		if (node instanceof Type) {
-			final BodyDeclaration parent= (BodyDeclaration) ASTNodes.getParent(node, BodyDeclaration.class);
+			final BodyDeclaration parent= ASTNodes.getParent(node, BodyDeclaration.class);
 			if (parent instanceof FieldDeclaration) {
 				final List<VariableDeclarationFragment> fragments= ((FieldDeclaration) parent).fragments();
 				result= new ArrayList<>(fragments.size());
@@ -669,7 +669,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 */
 	protected final IMethod getReferencingMethod(final ASTNode node) throws JavaModelException {
 		if (node instanceof Type) {
-			final BodyDeclaration parent= (BodyDeclaration) ASTNodes.getParent(node, BodyDeclaration.class);
+			final BodyDeclaration parent= ASTNodes.getParent(node, BodyDeclaration.class);
 			if (parent instanceof MethodDeclaration) {
 				final IMethodBinding binding= ((MethodDeclaration) parent).resolveBinding();
 				if (binding != null) {

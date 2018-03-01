@@ -65,7 +65,7 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 		ASTNode node= getFirstSelectedNode();
 		if (node == null)
 			return null;
-		return (BodyDeclaration)ASTNodes.getParent(node, BodyDeclaration.class);
+		return ASTNodes.getParent(node, BodyDeclaration.class);
 	}
 
 	@Override

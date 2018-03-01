@@ -418,7 +418,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 
 		RefactoringASTParser parser= new RefactoringASTParser(astLevel);
 		CompilationUnit unit= parser.parse(cu, true);
-		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, testClass.getNameRange()), AbstractTypeDeclaration.class);
+		AbstractTypeDeclaration declaration= ASTNodes.getParent(NodeFinder.perform(unit, testClass.getNameRange()), AbstractTypeDeclaration.class);
 		assertNotNull("Could not find type declaration node", declaration);
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
@@ -445,7 +445,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	private void testHelper(IType testClass, int insertionPos, boolean implementAllOverridable) throws JavaModelException, CoreException {
 		RefactoringASTParser parser= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL);
 		CompilationUnit unit= parser.parse(testClass.getCompilationUnit(), true);
-		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, testClass.getNameRange()), AbstractTypeDeclaration.class);
+		AbstractTypeDeclaration declaration= ASTNodes.getParent(NodeFinder.perform(unit, testClass.getNameRange()), AbstractTypeDeclaration.class);
 		assertNotNull("Could not find type declaration node", declaration);
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);

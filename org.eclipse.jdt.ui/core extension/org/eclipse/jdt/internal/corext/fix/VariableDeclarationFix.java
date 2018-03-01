@@ -255,7 +255,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
             }
 
 			MethodDeclaration constructor= writingConstructors.get(0);
-			TypeDeclaration typeDecl= (TypeDeclaration)ASTNodes.getParent(constructor, TypeDeclaration.class);
+			TypeDeclaration typeDecl= ASTNodes.getParent(constructor, TypeDeclaration.class);
 			if (typeDecl == null)
 				return false;
 
@@ -346,7 +346,7 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
         }
 
 		private MethodDeclaration getWritingConstructor(SimpleName name) {
-			Assignment assignement= (Assignment)ASTNodes.getParent(name, Assignment.class);
+			Assignment assignement= ASTNodes.getParent(name, Assignment.class);
 			if (assignement == null)
 				return null;
 
@@ -546,8 +546,8 @@ public class VariableDeclarationFix extends CompilationUnitRewriteOperationsFix 
 		if (Modifier.isFinal(modifiers) || Modifier.isVolatile(modifiers) || Modifier.isTransient(modifiers))
 			return false;
 
-		ASTNode parent= ASTNodes.getParent(declNode, VariableDeclarationExpression.class);
-		if (parent != null && ((VariableDeclarationExpression)parent).fragments().size() > 1)
+		VariableDeclarationExpression parent= ASTNodes.getParent(declNode, VariableDeclarationExpression.class);
+		if (parent != null && parent.fragments().size() > 1)
 			return false;
 
 		if (varbinding.isField() && !Modifier.isPrivate(modifiers))

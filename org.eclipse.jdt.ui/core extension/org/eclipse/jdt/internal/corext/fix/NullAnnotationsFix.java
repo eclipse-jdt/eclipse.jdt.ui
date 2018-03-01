@@ -67,7 +67,7 @@ public class NullAnnotationsFix extends CompilationUnitRewriteOperationsFix {
 		IBinding binding= nameNode.resolveBinding();
 		if (binding.getKind() == IBinding.VARIABLE && ((IVariableBinding) binding).isParameter())
 			return true;
-		VariableDeclaration argDecl= (VariableDeclaration) ASTNodes.getParent(selectedNode, VariableDeclaration.class);
+		VariableDeclaration argDecl= ASTNodes.getParent(selectedNode, VariableDeclaration.class);
 		if (argDecl != null)
 			binding= argDecl.resolveBinding();
 		if (binding.getKind() == IBinding.VARIABLE && ((IVariableBinding) binding).isParameter())

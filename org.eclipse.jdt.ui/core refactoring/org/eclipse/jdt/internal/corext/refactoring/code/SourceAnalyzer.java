@@ -218,7 +218,7 @@ class SourceAnalyzer  {
 		@Override
 		public boolean visit(MethodDeclaration node) {
 			if (node.isConstructor()) {
-				AbstractTypeDeclaration decl= (AbstractTypeDeclaration) ASTNodes.getParent(node, AbstractTypeDeclaration.class);
+				AbstractTypeDeclaration decl= ASTNodes.getParent(node, AbstractTypeDeclaration.class);
 				NameData name= fNames.get(decl.getName().resolveBinding());
 				if (name != null) {
 					name.addReference(node.getName());

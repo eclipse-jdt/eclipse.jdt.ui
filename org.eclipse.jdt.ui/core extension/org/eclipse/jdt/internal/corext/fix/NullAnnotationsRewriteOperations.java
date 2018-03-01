@@ -716,7 +716,7 @@ public class NullAnnotationsRewriteOperations {
 		}
 
 		private ParameterAnnotationRewriteOperation.IndexedParameter findParameterDeclaration(ASTNode selectedNode) {
-			VariableDeclaration argDecl= (selectedNode instanceof VariableDeclaration) ? (VariableDeclaration) selectedNode : (VariableDeclaration) ASTNodes.getParent(selectedNode,
+			VariableDeclaration argDecl= (selectedNode instanceof VariableDeclaration) ? (VariableDeclaration) selectedNode : ASTNodes.getParent(selectedNode,
 					VariableDeclaration.class);
 			if (argDecl != null) {
 				StructuralPropertyDescriptor locationInParent= argDecl.getLocationInParent();

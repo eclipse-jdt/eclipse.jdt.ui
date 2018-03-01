@@ -357,7 +357,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 			Name	ctorOwnerName= (Name) NodeFinder.perform(fFactoryCU, ctorOwningType.getNameRange());
 
-			fCtorOwningClass= (AbstractTypeDeclaration) ASTNodes.getParent(ctorOwnerName, AbstractTypeDeclaration.class);
+			fCtorOwningClass= ASTNodes.getParent(ctorOwnerName, AbstractTypeDeclaration.class);
 			fFactoryOwningClass= fCtorOwningClass;
 
 			pm.worked(1);
@@ -575,7 +575,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		int			numArgs= fCtorBinding.getParameterTypes().length;
 		String[]	names= new String[numArgs];
 
-		CompilationUnit		ctorUnit= (CompilationUnit) ASTNodes.getParent(fCtorOwningClass, CompilationUnit.class);
+		CompilationUnit		ctorUnit= ASTNodes.getParent(fCtorOwningClass, CompilationUnit.class);
 		MethodDeclaration	ctorDecl= (MethodDeclaration) ctorUnit.findDeclaringNode(fCtorBinding.getKey());
 
 		if (ctorDecl != null) {
@@ -858,7 +858,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		// Need to use a qualified name for the factory method if we're not
 		// in the context of the class holding the factory.
-		AbstractTypeDeclaration	callOwner= (AbstractTypeDeclaration) ASTNodes.getParent(ctorCall, AbstractTypeDeclaration.class);
+		AbstractTypeDeclaration	callOwner= ASTNodes.getParent(ctorCall, AbstractTypeDeclaration.class);
 		ITypeBinding callOwnerBinding= callOwner.resolveBinding();
 
 		if (callOwnerBinding == null || !Bindings.equals(callOwner.resolveBinding(), fFactoryOwningClass.resolveBinding())) {
@@ -1321,7 +1321,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 					fFactoryCU= getASTFor(factoryUnitHandle);
 					fFactoryUnitHandle= factoryUnitHandle;
 				}
-				fFactoryOwningClass= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(fFactoryCU, factoryType.getNameRange()), AbstractTypeDeclaration.class);
+				fFactoryOwningClass= ASTNodes.getParent(NodeFinder.perform(fFactoryCU, factoryType.getNameRange()), AbstractTypeDeclaration.class);
 
 				String factoryPkg= factoryType.getPackageFragment().getElementName();
 				String ctorPkg= fCtorOwningClass.resolveBinding().getPackage().getName();

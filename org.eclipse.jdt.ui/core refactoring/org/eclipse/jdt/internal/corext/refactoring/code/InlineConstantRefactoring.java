@@ -371,7 +371,7 @@ public class InlineConstantRefactoring extends Refactoring {
 				if (fNamesDeclaredLocallyAtNewLocation != null)
 					return fNamesDeclaredLocallyAtNewLocation;
 
-				BodyDeclaration enclosingBodyDecl= (BodyDeclaration) ASTNodes.getParent(fNewLocation, BodyDeclaration.class);
+				BodyDeclaration enclosingBodyDecl= ASTNodes.getParent(fNewLocation, BodyDeclaration.class);
 				Assert.isTrue(!(enclosingBodyDecl instanceof AbstractTypeDeclaration));
 
 				return fNamesDeclaredLocallyAtNewLocation= getLocallyDeclaredNames(enclosingBodyDecl);
@@ -501,9 +501,9 @@ public class InlineConstantRefactoring extends Refactoring {
 		}
 
 		private void inlineReference(Expression reference) throws CoreException {
-			ASTNode importDecl= ASTNodes.getParent(reference, ImportDeclaration.class);
+			ImportDeclaration importDecl= ASTNodes.getParent(reference, ImportDeclaration.class);
 			if (importDecl != null) {
-				fCuRewrite.getImportRemover().registerInlinedStaticImport((ImportDeclaration) importDecl);
+				fCuRewrite.getImportRemover().registerInlinedStaticImport(importDecl);
 				return;
 			}
 

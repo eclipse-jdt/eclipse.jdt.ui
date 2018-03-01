@@ -110,7 +110,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	private AddUnimplementedConstructorsOperation createOperation(IType type, int insertPos) throws CoreException {
 		RefactoringASTParser parser= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL);
 		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
-		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
+		AbstractTypeDeclaration declaration= ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
 		assertNotNull("Could not find type declararation node", declaration);
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);

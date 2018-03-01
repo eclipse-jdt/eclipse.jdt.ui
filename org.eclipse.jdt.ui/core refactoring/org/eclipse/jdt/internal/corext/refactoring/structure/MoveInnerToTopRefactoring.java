@@ -1263,26 +1263,26 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	private boolean isInAnonymousTypeInsideInputType(ASTNode node, AbstractTypeDeclaration declaration) {
-		final AnonymousClassDeclaration anonymous= (AnonymousClassDeclaration) ASTNodes.getParent(node, AnonymousClassDeclaration.class);
+		final AnonymousClassDeclaration anonymous= ASTNodes.getParent(node, AnonymousClassDeclaration.class);
 		return anonymous != null && ASTNodes.isParent(anonymous, declaration);
 	}
 
 	private boolean isInLocalTypeInsideInputType(ASTNode node, AbstractTypeDeclaration declaration) {
-		final TypeDeclarationStatement statement= (TypeDeclarationStatement) ASTNodes.getParent(node, TypeDeclarationStatement.class);
+		final TypeDeclarationStatement statement= ASTNodes.getParent(node, TypeDeclarationStatement.class);
 		return statement != null && ASTNodes.isParent(statement, declaration);
 	}
 
 	private boolean isInNonStaticMemberTypeInsideInputType(ASTNode node, AbstractTypeDeclaration declaration) {
-		final AbstractTypeDeclaration nested= (AbstractTypeDeclaration) ASTNodes.getParent(node, AbstractTypeDeclaration.class);
+		final AbstractTypeDeclaration nested= ASTNodes.getParent(node, AbstractTypeDeclaration.class);
 		return nested != null && !declaration.equals(nested) && !Modifier.isStatic(nested.getFlags()) && ASTNodes.isParent(nested, declaration);
 	}
 
 	private boolean isInsideSubclassOfDeclaringType(ASTNode node) {
 		Assert.isTrue((node instanceof ClassInstanceCreation) || (node instanceof SuperConstructorInvocation));
-		final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(node, AbstractTypeDeclaration.class);
+		final AbstractTypeDeclaration declaration= ASTNodes.getParent(node, AbstractTypeDeclaration.class);
 		Assert.isNotNull(declaration);
 
-		final AnonymousClassDeclaration anonymous= (AnonymousClassDeclaration) ASTNodes.getParent(node, AnonymousClassDeclaration.class);
+		final AnonymousClassDeclaration anonymous= ASTNodes.getParent(node, AnonymousClassDeclaration.class);
 		boolean isAnonymous= anonymous != null && ASTNodes.isParent(anonymous, declaration);
 		if (isAnonymous)
 			return anonymous != null && isSubclassBindingOfEnclosingType(anonymous.resolveBinding());
@@ -1291,7 +1291,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 
 	private boolean isInsideTypeNestedInDeclaringType(ASTNode node) {
 		Assert.isTrue((node instanceof ClassInstanceCreation) || (node instanceof SuperConstructorInvocation));
-		final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(node, AbstractTypeDeclaration.class);
+		final AbstractTypeDeclaration declaration= ASTNodes.getParent(node, AbstractTypeDeclaration.class);
 		Assert.isNotNull(declaration);
 		ITypeBinding enclosing= declaration.resolveBinding();
 		while (enclosing != null) {
@@ -1565,7 +1565,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	private void updateTypeReference(ITypeBinding[] parameters, ASTNode node, CompilationUnitRewrite rewrite, ICompilationUnit cu) {
-		ImportDeclaration enclosingImport= (ImportDeclaration) ASTNodes.getParent(node, ImportDeclaration.class);
+		ImportDeclaration enclosingImport= ASTNodes.getParent(node, ImportDeclaration.class);
 		if (enclosingImport != null)
 			updateReferenceInImport(enclosingImport, node, rewrite);
 		else {

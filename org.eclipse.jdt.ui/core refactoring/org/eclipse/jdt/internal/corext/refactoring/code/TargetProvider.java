@@ -187,7 +187,7 @@ abstract class TargetProvider {
 				return new BodyDeclaration[0];
 			fastDone(pm);
 			return new BodyDeclaration[] {
-				(BodyDeclaration)ASTNodes.getParent(fInvocation, BodyDeclaration.class)
+				ASTNodes.getParent(fInvocation, BodyDeclaration.class)
 			};
 		}
 
@@ -389,7 +389,7 @@ abstract class TargetProvider {
 					@Override
 					public void endVisit(Block node) {
 						if (fCurrent.hasInvocations()) {
-							result.put((BodyDeclaration) ASTNodes.getParent(node, BodyDeclaration.class), fCurrent);
+							result.put(ASTNodes.getParent(node, BodyDeclaration.class), fCurrent);
 						}
 						endVisitBodyDeclaration();
 					}

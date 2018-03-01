@@ -122,7 +122,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		public AddUnimplementedConstructorsContentProvider(IType type) throws JavaModelException {
 			RefactoringASTParser parser= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL);
 			fUnit= parser.parse(type.getCompilationUnit(), true);
-			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()), AbstractTypeDeclaration.class);
+			AbstractTypeDeclaration declaration= ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()), AbstractTypeDeclaration.class);
 			if (declaration != null) {
 				ITypeBinding binding= declaration.resolveBinding();
 				if (binding != null)

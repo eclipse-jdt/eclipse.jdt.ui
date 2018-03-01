@@ -464,18 +464,18 @@ public class ExternalNullAnnotationChangeProposals {
 			StructuralPropertyDescriptor locationInParent= outer.getLocationInParent();
 			ProposalCreator creator= null;
 			if (locationInParent == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
-				MethodDeclaration method= (MethodDeclaration) ASTNodes.getParent(coveringNode, MethodDeclaration.class);
+				MethodDeclaration method= ASTNodes.getParent(coveringNode, MethodDeclaration.class);
 				creator= new ReturnProposalCreator(cu, resolveBinding(method));
 			} else if (locationInParent == SingleVariableDeclaration.TYPE_PROPERTY) {
 				ASTNode param= outer.getParent();
 				if (param.getLocationInParent() == MethodDeclaration.PARAMETERS_PROPERTY) {
-					MethodDeclaration method= (MethodDeclaration) ASTNodes.getParent(coveringNode, MethodDeclaration.class);
+					MethodDeclaration method= ASTNodes.getParent(coveringNode, MethodDeclaration.class);
 					int paramIdx= method.parameters().indexOf(param);
 					if (paramIdx != -1)
 						creator= new ParameterProposalCreator(cu, resolveBinding(method), paramIdx);
 				}
 			} else if (locationInParent == FieldDeclaration.TYPE_PROPERTY) {
-				FieldDeclaration field= (FieldDeclaration) ASTNodes.getParent(coveringNode, FieldDeclaration.class);
+				FieldDeclaration field= ASTNodes.getParent(coveringNode, FieldDeclaration.class);
 				if (field.fragments().size() > 0) {
 					VariableDeclarationFragment fragment= (VariableDeclarationFragment) field.fragments().get(0);
 					creator= new FieldProposalCreator(cu, resolveBinding(fragment));

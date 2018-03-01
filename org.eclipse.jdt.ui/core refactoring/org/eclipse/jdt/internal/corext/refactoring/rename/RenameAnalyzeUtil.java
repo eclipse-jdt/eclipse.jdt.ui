@@ -446,7 +446,7 @@ class RenameAnalyzeUtil {
 			return (VariableDeclaration) node.getParent();
 
 		if (binding != null && binding.getKind() == IBinding.VARIABLE) {
-			CompilationUnit cu= (CompilationUnit) ASTNodes.getParent(node, CompilationUnit.class);
+			CompilationUnit cu= ASTNodes.getParent(node, CompilationUnit.class);
 			return ASTNodes.findVariableDeclaration( ((IVariableBinding) binding), cu);
 		}
 		return null;

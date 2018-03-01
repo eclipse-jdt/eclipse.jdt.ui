@@ -420,7 +420,7 @@ public class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor 
 		if (selectedNode == null) {
 			return mappingErrorFound(status, selectedNode);
 		}
-		fMethodDeclaration= (MethodDeclaration) ASTNodes.getParent(selectedNode, MethodDeclaration.class);
+		fMethodDeclaration= ASTNodes.getParent(selectedNode, MethodDeclaration.class);
 		if (fMethodDeclaration == null) {
 			return mappingErrorFound(status, selectedNode);
 		}

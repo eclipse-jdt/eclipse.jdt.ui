@@ -151,7 +151,7 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 				for (int index= 0; index < fMapping.length; index++) {
 					name= binding.getName();
 					if (fMapping[index].getSourceName().equals(name) && node.getIdentifier().equals(name)) {
-						final MethodDeclaration declaration= (MethodDeclaration) ASTNodes.getParent(node, MethodDeclaration.class);
+						final MethodDeclaration declaration= ASTNodes.getParent(node, MethodDeclaration.class);
 						if (declaration != null) {
 							final IMethodBinding method= declaration.resolveBinding();
 							if (method != null) {

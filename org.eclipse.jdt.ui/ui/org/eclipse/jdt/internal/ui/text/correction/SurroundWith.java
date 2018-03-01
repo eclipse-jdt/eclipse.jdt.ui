@@ -220,7 +220,7 @@ public abstract class SurroundWith {
 
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
-		BodyDeclaration enclosingBodyDeclaration= (BodyDeclaration)ASTNodes.getParent(selectedNodes[0], BodyDeclaration.class);
+		BodyDeclaration enclosingBodyDeclaration= ASTNodes.getParent(selectedNodes[0], BodyDeclaration.class);
 		int maxVariableId= LocalVariableIndex.perform(enclosingBodyDeclaration) + 1;
 
 		fIsNewContext= isNewContext();
@@ -309,10 +309,10 @@ public abstract class SurroundWith {
 
 		List<Statement> statements;
 		if (startNode.getLocationInParent() == SwitchStatement.STATEMENTS_PROPERTY) {
-			SwitchStatement block= (SwitchStatement)ASTNodes.getParent(startNode, SwitchStatement.class);
+			SwitchStatement block= ASTNodes.getParent(startNode, SwitchStatement.class);
 			statements= block.statements();
 		} else {
-			Block block= (Block)ASTNodes.getParent(startNode, Block.class);
+			Block block= ASTNodes.getParent(startNode, Block.class);
 			statements= block.statements();
 		}
 		List<Statement> bodyAfterSelection= statements.subList(statements.indexOf(startNode) + 1, statements.size());

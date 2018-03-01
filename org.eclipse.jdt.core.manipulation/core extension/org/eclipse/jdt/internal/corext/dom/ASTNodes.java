@@ -1009,11 +1009,11 @@ public class ASTNodes {
 	 * @param parentClass the class of the sought ancestor node
 	 * @return the closest ancestor of <code>node</code> that is an instance of <code>parentClass</code>, or <code>null</code> if none
 	 */
-	public static ASTNode getParent(ASTNode node, Class<? extends ASTNode> parentClass) {
+	public static <T extends ASTNode> T getParent(ASTNode node, Class<T> parentClass) {
 		do {
 			node= node.getParent();
 		} while (node != null && !parentClass.isInstance(node));
-		return node;
+		return parentClass.cast(node);
 	}
 
 	/**
@@ -1153,7 +1153,7 @@ public class ASTNodes {
 			return exp.resolveTypeBinding();
 		}
 		else {
-			AbstractTypeDeclaration type= (AbstractTypeDeclaration)getParent(invocation, AbstractTypeDeclaration.class);
+			AbstractTypeDeclaration type= getParent(invocation, AbstractTypeDeclaration.class);
 			if (type != null)
 				return type.resolveBinding();
 		}
@@ -1376,12 +1376,12 @@ public class ASTNodes {
 						return declaration.resolveBinding();
 				}
 			} else {
-				final ClassInstanceCreation creation= (ClassInstanceCreation) getParent(NodeFinder.perform(root, type.getNameRange()), ClassInstanceCreation.class);
+				final ClassInstanceCreation creation= getParent(NodeFinder.perform(root, type.getNameRange()), ClassInstanceCreation.class);
 				if (creation != null)
 					return creation.resolveTypeBinding();
 			}
 		} else {
-			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) getParent(NodeFinder.perform(root, type.getNameRange()), AbstractTypeDeclaration.class);
+			final AbstractTypeDeclaration declaration= getParent(NodeFinder.perform(root, type.getNameRange()), AbstractTypeDeclaration.class);
 			if (declaration != null)
 				return declaration.resolveBinding();
 		}

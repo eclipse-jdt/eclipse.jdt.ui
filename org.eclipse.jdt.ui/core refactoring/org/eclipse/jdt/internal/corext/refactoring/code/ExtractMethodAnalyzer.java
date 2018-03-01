@@ -764,7 +764,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 				status.addFatalError(RefactoringCoreMessages.ExtractMethodAnalyzer_invalid_selection);
 				break superCall;
 			}
-			fEnclosingBodyDeclaration= (BodyDeclaration)ASTNodes.getParent(getFirstSelectedNode(), BodyDeclaration.class);
+			fEnclosingBodyDeclaration= ASTNodes.getParent(getFirstSelectedNode(), BodyDeclaration.class);
 			if (fEnclosingBodyDeclaration == null ||
 					(fEnclosingBodyDeclaration.getNodeType() != ASTNode.METHOD_DECLARATION &&
 					 fEnclosingBodyDeclaration.getNodeType() != ASTNode.FIELD_DECLARATION &&

@@ -34,7 +34,7 @@ public class ReturnTypeVariable extends ConstraintVariable{
 	}
 
 	public static MethodDeclaration getMethod(ReturnStatement returnStatement) {
-		return (MethodDeclaration)ASTNodes.getParent(returnStatement, MethodDeclaration.class);
+		return ASTNodes.getParent(returnStatement, MethodDeclaration.class);
 	}
 
 	@Override

@@ -259,7 +259,7 @@ class AccessAnalyzer extends ASTVisitor {
 			return result;
 
 		if (binding instanceof IVariableBinding) {
-			AbstractTypeDeclaration type= (AbstractTypeDeclaration)ASTNodes.getParent(node, AbstractTypeDeclaration.class);
+			AbstractTypeDeclaration type= ASTNodes.getParent(node, AbstractTypeDeclaration.class);
 			if (type != null) {
 				ITypeBinding declaringType= type.resolveBinding();
 				return !Bindings.equals(fDeclaringClassBinding, declaringType);

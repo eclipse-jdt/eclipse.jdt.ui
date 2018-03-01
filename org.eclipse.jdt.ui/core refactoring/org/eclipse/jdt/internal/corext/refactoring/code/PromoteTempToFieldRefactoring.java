@@ -299,7 +299,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
 
     private MethodDeclaration getMethodDeclaration(){
-    	return (MethodDeclaration)ASTNodes.getParent(fTempDeclarationNode, MethodDeclaration.class);
+    	return ASTNodes.getParent(fTempDeclarationNode, MethodDeclaration.class);
     }
 
     private boolean isDeclaredInAnonymousClass() {
@@ -429,7 +429,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
 
     private VariableDeclarationStatement getTempDeclarationStatement() {
-        return (VariableDeclarationStatement) ASTNodes.getParent(fTempDeclarationNode, VariableDeclarationStatement.class);
+        return ASTNodes.getParent(fTempDeclarationNode, VariableDeclarationStatement.class);
     }
 
     private boolean isTempAnExceptionInCatchBlock() {
@@ -607,7 +607,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	}
 
 	private AbstractTypeDeclaration getEnclosingType() {
-		return (AbstractTypeDeclaration)ASTNodes.getParent(getTempDeclarationStatement(), AbstractTypeDeclaration.class);
+		return ASTNodes.getParent(getTempDeclarationStatement(), AbstractTypeDeclaration.class);
 	}
 
 	private Javadoc getNewConstructorComment(ASTRewrite rewrite) throws CoreException {

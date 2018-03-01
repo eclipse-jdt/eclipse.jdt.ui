@@ -875,10 +875,9 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	}
 
 	private AbstractTypeDeclaration getDestinationNode() throws JavaModelException {
-		AbstractTypeDeclaration destination= (AbstractTypeDeclaration)
-				ASTNodes.getParent(
-						NodeFinder.perform(fTarget.getRoot(), fDestinationType.getNameRange()),
-						AbstractTypeDeclaration.class);
+		AbstractTypeDeclaration destination= ASTNodes.getParent(
+				NodeFinder.perform(fTarget.getRoot(), fDestinationType.getNameRange()),
+				AbstractTypeDeclaration.class);
 		return destination;
 	}
 
@@ -1078,7 +1077,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		for (int i= 0; i < fMembersToMove.length; i++) {
 			IMember member= fMembersToMove[i];
 			ASTNode node= NodeFinder.perform(fSource.getRoot(), member.getNameRange());
-			result[i]= (BodyDeclaration)ASTNodes.getParent(node, BodyDeclaration.class);
+			result[i]= ASTNodes.getParent(node, BodyDeclaration.class);
 
 			//Fix for bug 42383: exclude multiple VariableDeclarationFragments ("int a=1, b=2")
 			//ReferenceAnalyzer#visit(FieldDeclaration node) depends on fragments().size() != 1 !

@@ -528,7 +528,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		final String header= Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_descriptor_description, new String[] { BasicElementLabels.getJavaElementName(fTempName), BasicElementLabels.getJavaCodeString(expression)});
 		final JDTRefactoringDescriptorComment comment= new JDTRefactoringDescriptorComment(project, this, header);
 		comment.addSetting(Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_name_pattern, BasicElementLabels.getJavaElementName(fTempName)));
-		final BodyDeclaration decl= (BodyDeclaration) ASTNodes.getParent(fSelectedExpression.getAssociatedExpression(), BodyDeclaration.class);
+		final BodyDeclaration decl= ASTNodes.getParent(fSelectedExpression.getAssociatedExpression(), BodyDeclaration.class);
 		if (decl instanceof MethodDeclaration) {
 			final IMethodBinding method= ((MethodDeclaration) decl).resolveBinding();
 			final String label= method != null ? BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED) : BasicElementLabels.getJavaElementName('{' + JavaElementLabels.ELLIPSIS_STRING + '}');

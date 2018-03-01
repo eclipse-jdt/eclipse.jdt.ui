@@ -246,7 +246,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		if (node == null) {
 			return mappingErrorFound(result, node);
 		}
-		fFieldDeclaration= (VariableDeclarationFragment)ASTNodes.getParent(node, VariableDeclarationFragment.class);
+		fFieldDeclaration= ASTNodes.getParent(node, VariableDeclarationFragment.class);
 		if (fFieldDeclaration == null) {
 			return mappingErrorFound(result, node);
 		}
@@ -363,7 +363,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		sub.beginTask(NO_NAME, affectedCUs.length);
 		IVariableBinding fieldIdentifier= fFieldDeclaration.resolveBinding();
 		ITypeBinding declaringClass=
-			((AbstractTypeDeclaration)ASTNodes.getParent(fFieldDeclaration, AbstractTypeDeclaration.class)).resolveBinding();
+			ASTNodes.getParent(fFieldDeclaration, AbstractTypeDeclaration.class).resolveBinding();
 		List<TextEditGroup> ownerDescriptions= new ArrayList<>();
 		ICompilationUnit owner= fField.getCompilationUnit();
 		fImportRewrite= StubUtility.createImportRewrite(fRoot, true);
@@ -498,7 +498,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 
 	private void checkInHierarchy(RefactoringStatus status, boolean usingLocalGetter, boolean usingLocalSetter) {
-		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration)ASTNodes.getParent(fFieldDeclaration, AbstractTypeDeclaration.class);
+		AbstractTypeDeclaration declaration= ASTNodes.getParent(fFieldDeclaration, AbstractTypeDeclaration.class);
 		ITypeBinding type= declaration.resolveBinding();
 		if (type != null) {
 			ITypeBinding fieldType= fFieldDeclaration.resolveBinding().getType();
@@ -615,7 +615,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 
 	private MethodDeclaration createSetterMethod(AST ast, ASTRewrite rewriter, String lineDelimiter) throws CoreException {
-		FieldDeclaration field= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
+		FieldDeclaration field= ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
 		Type type= field.getType();
 		MethodDeclaration result= ast.newMethodDeclaration();
 		result.setName(ast.newSimpleName(fSetterName));
@@ -664,7 +664,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	}
 
 	private MethodDeclaration createGetterMethod(AST ast, ASTRewrite rewriter, String lineDelimiter) throws CoreException {
-		FieldDeclaration field= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
+		FieldDeclaration field= ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
 		Type type= field.getType();
 		MethodDeclaration result= ast.newMethodDeclaration();
 		result.setName(ast.newSimpleName(fGetterName));
@@ -745,7 +745,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		if (type instanceof AbstractTypeDeclaration) {
 			return ((AbstractTypeDeclaration)type).getName().getIdentifier();
 		} else if (type instanceof AnonymousClassDeclaration) {
-			ClassInstanceCreation node= (ClassInstanceCreation)ASTNodes.getParent(type, ClassInstanceCreation.class);
+			ClassInstanceCreation node= ASTNodes.getParent(type, ClassInstanceCreation.class);
 			return ASTNodes.asString(node.getType());
 		}
 		Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$

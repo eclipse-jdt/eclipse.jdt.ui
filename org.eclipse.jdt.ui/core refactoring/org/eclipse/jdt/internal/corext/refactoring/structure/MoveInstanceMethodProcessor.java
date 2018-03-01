@@ -1980,7 +1980,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 									list.replace(argument, rewrite.createCopyTarget(invocation.getExpression()), group);
 								else {
 									final ThisExpression expression= rewrite.getAST().newThisExpression();
-									final AbstractTypeDeclaration member= (AbstractTypeDeclaration) ASTNodes.getParent(invocation, AbstractTypeDeclaration.class);
+									final AbstractTypeDeclaration member= ASTNodes.getParent(invocation, AbstractTypeDeclaration.class);
 									if (member != null) {
 										final ITypeBinding resolved= member.resolveBinding();
 										if (ASTNodes.getParent(invocation, AnonymousClassDeclaration.class) != null || resolved != null && resolved.isMember()) {

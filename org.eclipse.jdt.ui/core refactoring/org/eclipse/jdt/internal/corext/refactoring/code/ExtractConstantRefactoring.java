@@ -643,7 +643,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private boolean isInTypeDeclarationAnnotation(ASTNode node) throws JavaModelException {
-		ASTNode enclosingAnnotation= ASTNodes.getParent(node, Annotation.class);
+		Annotation enclosingAnnotation= ASTNodes.getParent(node, Annotation.class);
 		return enclosingAnnotation != null && enclosingAnnotation.getParent() == getContainingTypeDeclarationNode();
 	}
 
@@ -853,7 +853,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	 * @throws JavaModelException shouldn't happen
 	 */
 	private AbstractTypeDeclaration getContainingTypeDeclarationNode() throws JavaModelException {
-		AbstractTypeDeclaration result= (AbstractTypeDeclaration) ASTNodes.getParent(getSelectedExpression().getAssociatedNode(), AbstractTypeDeclaration.class);
+		AbstractTypeDeclaration result= ASTNodes.getParent(getSelectedExpression().getAssociatedNode(), AbstractTypeDeclaration.class);
 		Assert.isNotNull(result);
 		return result;
 	}

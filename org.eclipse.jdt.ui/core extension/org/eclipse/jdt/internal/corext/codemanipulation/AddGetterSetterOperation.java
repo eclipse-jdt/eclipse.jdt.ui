@@ -205,7 +205,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 			ASTNode insertion= StubUtility2.getNodeToInsertBefore(rewrite, sibling);
 			addNewAccessor(type, field, GetterSetterUtil.getSetterStub(field, name, fSettings.createComments, fVisibility | (field.getFlags() & Flags.AccStatic)), rewrite, insertion);
 			if (Flags.isFinal(field.getFlags())) {
-				ASTNode fieldDecl= ASTNodes.getParent(NodeFinder.perform(fASTRoot, field.getNameRange()), FieldDeclaration.class);
+				FieldDeclaration fieldDecl= ASTNodes.getParent(NodeFinder.perform(fASTRoot, field.getNameRange()), FieldDeclaration.class);
 				if (fieldDecl != null) {
 					ModifierRewrite.create(astRewrite, fieldDecl).setModifiers(0, Modifier.FINAL, null);
 				}
@@ -279,7 +279,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 * @throws JavaModelException if an error occurs
 	 */
 	private void removeExistingAccessor(final IMethod accessor, final ListRewrite rewrite) throws JavaModelException {
-		final MethodDeclaration declaration= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getParent().getRoot(), accessor.getNameRange()), MethodDeclaration.class);
+		final MethodDeclaration declaration= ASTNodes.getParent(NodeFinder.perform(rewrite.getParent().getRoot(), accessor.getNameRange()), MethodDeclaration.class);
 		if (declaration != null)
 			rewrite.remove(declaration, null);
 	}
@@ -298,14 +298,14 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 			final ASTRewrite astRewrite= ASTRewrite.create(fASTRoot.getAST());
 			ListRewrite listRewriter= null;
 			if (fType.isAnonymous()) {
-				final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(fASTRoot, fType.getNameRange()), ClassInstanceCreation.class);
+				final ClassInstanceCreation creation= ASTNodes.getParent(NodeFinder.perform(fASTRoot, fType.getNameRange()), ClassInstanceCreation.class);
 				if (creation != null) {
 					final AnonymousClassDeclaration declaration= creation.getAnonymousClassDeclaration();
 					if (declaration != null)
 						listRewriter= astRewrite.getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 				}
 			} else {
-				final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(fASTRoot, fType.getNameRange()), AbstractTypeDeclaration.class);
+				final AbstractTypeDeclaration declaration= ASTNodes.getParent(NodeFinder.perform(fASTRoot, fType.getNameRange()), AbstractTypeDeclaration.class);
 				if (declaration != null)
 					listRewriter= astRewrite.getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
 			}

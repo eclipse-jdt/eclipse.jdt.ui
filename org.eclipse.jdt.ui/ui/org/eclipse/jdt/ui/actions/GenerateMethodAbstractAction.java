@@ -398,7 +398,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 		fUnit= parser.parse(type.getCompilationUnit(), true);
 		fTypeBinding= null;
 		// type cannot be anonymous
-		final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()),
+		final AbstractTypeDeclaration declaration= ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()),
 				AbstractTypeDeclaration.class);
 		if (declaration != null)
 			fTypeBinding= declaration.resolveBinding();

@@ -1492,7 +1492,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		Iterator<ParameterInfo> iter= getNotDeletedInfos().iterator();
 		while (iter.hasNext()) {
 			ParameterInfo info= iter.next();
-			Expression newExpression= createNewExpression(info, getParameterInfos(), superCall.arguments(), cuRewrite, (MethodDeclaration) ASTNodes.getParent(superCall, MethodDeclaration.class));
+			Expression newExpression= createNewExpression(info, getParameterInfos(), superCall.arguments(), cuRewrite, ASTNodes.getParent(superCall, MethodDeclaration.class));
 			if (newExpression != null)
 				superCall.arguments().add(newExpression);
 		}
@@ -1652,7 +1652,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			return new DocReferenceUpdate(node, cuRewrite, result);
 
 		else if (ASTNodes.getParent(node, ImportDeclaration.class) != null)
-			return new StaticImportUpdate((ImportDeclaration) ASTNodes.getParent(node, ImportDeclaration.class), cuRewrite, result);
+			return new StaticImportUpdate(ASTNodes.getParent(node, ImportDeclaration.class), cuRewrite, result);
 
 		else if (node instanceof LambdaExpression)
 			return new LambdaExpressionUpdate((LambdaExpression) node, cuRewrite, result);
@@ -1907,7 +1907,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		@Override
 		protected Expression createNewParamgument(ParameterInfo info, List<ParameterInfo> parameterInfos, List<Expression> nodes) {
 			CompilationUnitRewrite cuRewrite= getCompilationUnitRewrite();
-			MethodDeclaration declaration= (MethodDeclaration) ASTNodes.getParent(fNode, MethodDeclaration.class);
+			MethodDeclaration declaration= ASTNodes.getParent(fNode, MethodDeclaration.class);
 			if (isRecursiveReference()) {
 				return createNewExpressionRecursive(info, parameterInfos, nodes, cuRewrite, declaration);
 			} else
@@ -1933,7 +1933,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		}
 
 		private boolean isRecursiveReference() {
-			MethodDeclaration enclosingMethodDeclaration= (MethodDeclaration) ASTNodes.getParent(fNode, MethodDeclaration.class);
+			MethodDeclaration enclosingMethodDeclaration= ASTNodes.getParent(fNode, MethodDeclaration.class);
 			if (enclosingMethodDeclaration == null)
 				return false;
 

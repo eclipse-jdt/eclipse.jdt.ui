@@ -181,7 +181,7 @@ public class CodeStyleFix extends CompilationUnitRewriteOperationsFix {
 			ITypeBinding declaringClass= varbinding.getDeclaringClass();
 			if (Modifier.isStatic(varbinding.getModifiers())) {
 				if (fFindUnqualifiedStaticAccesses) {
-					Initializer initializer= (Initializer) ASTNodes.getParent(node, Initializer.class);
+					Initializer initializer= ASTNodes.getParent(node, Initializer.class);
 					//Do not qualify assignments to static final fields in static initializers (would result in compile error)
 					StructuralPropertyDescriptor parentDescription= node.getLocationInParent();
 					if (initializer != null && Modifier.isStatic(initializer.getModifiers())

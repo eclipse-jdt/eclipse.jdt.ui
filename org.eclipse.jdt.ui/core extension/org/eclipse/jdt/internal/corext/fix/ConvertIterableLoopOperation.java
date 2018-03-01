@@ -257,7 +257,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 			if (body instanceof Block) {
 				list= astRewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY);
 				for (final Iterator<Expression> iterator= fOccurrences.iterator(); iterator.hasNext();) {
-					final Statement parent= (Statement)ASTNodes.getParent(iterator.next(), Statement.class);
+					final Statement parent= ASTNodes.getParent(iterator.next(), Statement.class);
 					if (parent != null && list.getRewrittenList().contains(parent)) {
 						list.remove(parent, null);
 						remover.registerRemovedNode(parent);
@@ -300,7 +300,7 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 					if (fElementVariable != null) {
 						final IBinding binding= node.resolveBinding();
 						if (binding != null && binding.equals(fElementVariable)) {
-							final Statement parent= (Statement)ASTNodes.getParent(node, Statement.class);
+							final Statement parent= ASTNodes.getParent(node, Statement.class);
 							if (parent != null && (list == null || list.getRewrittenList().contains(parent)))
 								pg.addPosition(astRewrite.track(node), false);
 						}

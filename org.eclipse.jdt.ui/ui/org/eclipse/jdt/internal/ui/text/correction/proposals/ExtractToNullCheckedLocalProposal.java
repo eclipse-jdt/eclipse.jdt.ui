@@ -224,7 +224,7 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 		getLinkedProposalModel().addPositionGroup(localNameGroup);
 
 		// AST context:
-		Statement origStmt= (Statement) ASTNodes.getParent(this.fieldReference, Statement.class);
+		Statement origStmt= ASTNodes.getParent(this.fieldReference, Statement.class);
 		// determine suitable strategy for rearranging elements towards a new code structure:
 		RearrangeStrategy rearrangeStrategy= RearrangeStrategy.create(origStmt, rewrite, group);
 		

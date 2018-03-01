@@ -674,7 +674,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 				if (name != null) {
 					IBinding binding= name.resolveBinding();
 					if (binding instanceof IVariableBinding && !isFormalParameterInEnhancedForStatement(name) && (!((IVariableBinding) binding).isField() || isSideEffectFree(name, compilationUnit))) {
-						VariableDeclarationFragment parent= (VariableDeclarationFragment) ASTNodes.getParent(name, VariableDeclarationFragment.class);
+						VariableDeclarationFragment parent= ASTNodes.getParent(name, VariableDeclarationFragment.class);
 						if (parent != null) {
 							ASTNode varDecl= parent.getParent();
 							if (!variableDeclarations.containsKey(varDecl)) {

@@ -66,17 +66,17 @@ public class RefactoringAnalyzeUtil {
 
 	public static LambdaExpression getLambdaExpression(TextEdit edit, TextChange change, CompilationUnit cuNode) {
 		ASTNode decl= RefactoringAnalyzeUtil.findSimpleNameNode(RefactoringAnalyzeUtil.getNewTextRange(edit, change), cuNode);
-		return ((LambdaExpression) ASTNodes.getParent(decl, LambdaExpression.class));
+		return (ASTNodes.getParent(decl, LambdaExpression.class));
 	}
 
 	public static MethodDeclaration getMethodDeclaration(TextEdit edit, TextChange change, CompilationUnit cuNode){
 		ASTNode decl= RefactoringAnalyzeUtil.findSimpleNameNode(RefactoringAnalyzeUtil.getNewTextRange(edit, change), cuNode);
-		return ((MethodDeclaration)ASTNodes.getParent(decl, MethodDeclaration.class));
+		return (ASTNodes.getParent(decl, MethodDeclaration.class));
 	}
 
 	public static Block getBlock(TextEdit edit, TextChange change, CompilationUnit cuNode){
 		ASTNode decl= RefactoringAnalyzeUtil.findSimpleNameNode(RefactoringAnalyzeUtil.getNewTextRange(edit, change), cuNode);
-		return ((Block)ASTNodes.getParent(decl, Block.class));
+		return (ASTNodes.getParent(decl, Block.class));
 	}
 
 	public static IProblem[] getIntroducedCompileProblems(CompilationUnit newCUNode, CompilationUnit oldCuNode) {

@@ -123,11 +123,11 @@ public class ASTNodeSearchUtil {
 	}
 
 	public static MethodDeclaration getMethodDeclarationNode(IMethod iMethod, CompilationUnit cuNode) throws JavaModelException {
-		return (MethodDeclaration)ASTNodes.getParent(getNameNode(iMethod, cuNode), MethodDeclaration.class);
+		return ASTNodes.getParent(getNameNode(iMethod, cuNode), MethodDeclaration.class);
 	}
 
 	public static AnnotationTypeMemberDeclaration getAnnotationTypeMemberDeclarationNode(IMethod iMethod, CompilationUnit cuNode) throws JavaModelException {
-		return (AnnotationTypeMemberDeclaration) ASTNodes.getParent(getNameNode(iMethod, cuNode), AnnotationTypeMemberDeclaration.class);
+		return ASTNodes.getParent(getNameNode(iMethod, cuNode), AnnotationTypeMemberDeclaration.class);
 	}
 
 	public static BodyDeclaration getMethodOrAnnotationTypeMemberDeclarationNode(IMethod iMethod, CompilationUnit cuNode) throws JavaModelException {
@@ -141,15 +141,15 @@ public class ASTNodeSearchUtil {
 		ASTNode node= getNameNode(iField, cuNode);
 		if (node instanceof VariableDeclarationFragment)
 			return  (VariableDeclarationFragment)node;
-		return (VariableDeclarationFragment)ASTNodes.getParent(node, VariableDeclarationFragment.class);
+		return ASTNodes.getParent(node, VariableDeclarationFragment.class);
 	}
 
 	public static FieldDeclaration getFieldDeclarationNode(IField iField, CompilationUnit cuNode) throws JavaModelException {
-		return (FieldDeclaration) ASTNodes.getParent(getNameNode(iField, cuNode), FieldDeclaration.class);
+		return ASTNodes.getParent(getNameNode(iField, cuNode), FieldDeclaration.class);
 	}
 
 	public static EnumConstantDeclaration getEnumConstantDeclaration(IField iField, CompilationUnit cuNode) throws JavaModelException {
-		return (EnumConstantDeclaration) ASTNodes.getParent(getNameNode(iField, cuNode), EnumConstantDeclaration.class);
+		return ASTNodes.getParent(getNameNode(iField, cuNode), EnumConstantDeclaration.class);
 	}
 
 	public static BodyDeclaration getFieldOrEnumConstantDeclaration(IField iField, CompilationUnit cuNode) throws JavaModelException {
@@ -160,27 +160,27 @@ public class ASTNodeSearchUtil {
 	}
 
 	public static EnumDeclaration getEnumDeclarationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
-		return (EnumDeclaration) ASTNodes.getParent(getNameNode(iType, cuNode), EnumDeclaration.class);
+		return ASTNodes.getParent(getNameNode(iType, cuNode), EnumDeclaration.class);
 	}
 
 	public static AnnotationTypeDeclaration getAnnotationTypeDeclarationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
-		return (AnnotationTypeDeclaration) ASTNodes.getParent(getNameNode(iType, cuNode), AnnotationTypeDeclaration.class);
+		return ASTNodes.getParent(getNameNode(iType, cuNode), AnnotationTypeDeclaration.class);
 	}
 
 	public static BodyDeclaration getBodyDeclarationNode(IMember iMember, CompilationUnit cuNode) throws JavaModelException {
-		return (BodyDeclaration) ASTNodes.getParent(getNameNode(iMember, cuNode), BodyDeclaration.class);
+		return ASTNodes.getParent(getNameNode(iMember, cuNode), BodyDeclaration.class);
 	}
 
 	public static AbstractTypeDeclaration getAbstractTypeDeclarationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
-		return (AbstractTypeDeclaration) ASTNodes.getParent(getNameNode(iType, cuNode), AbstractTypeDeclaration.class);
+		return ASTNodes.getParent(getNameNode(iType, cuNode), AbstractTypeDeclaration.class);
 	}
 
 	public static TypeDeclaration getTypeDeclarationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
-		return (TypeDeclaration) ASTNodes.getParent(getNameNode(iType, cuNode), TypeDeclaration.class);
+		return ASTNodes.getParent(getNameNode(iType, cuNode), TypeDeclaration.class);
 	}
 
 	public static ClassInstanceCreation getClassInstanceCreationNode(IType iType, CompilationUnit cuNode) throws JavaModelException {
-		return (ClassInstanceCreation) ASTNodes.getParent(getNameNode(iType, cuNode), ClassInstanceCreation.class);
+		return ASTNodes.getParent(getNameNode(iType, cuNode), ClassInstanceCreation.class);
 	}
 
 	public static List<BodyDeclaration> getBodyDeclarationList(IType iType, CompilationUnit cuNode) throws JavaModelException {

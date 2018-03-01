@@ -347,7 +347,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, cuRewrite.getRoot(), message);
 			}
 
-			MethodDeclaration methodDeclaration= (MethodDeclaration) ASTNodes.getParent(fSelectedExpression, MethodDeclaration.class);
+			MethodDeclaration methodDeclaration= ASTNodes.getParent(fSelectedExpression, MethodDeclaration.class);
 			if (methodDeclaration == null || ASTNodes.getParent(fSelectedExpression, Annotation.class) != null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method);
 			if (methodDeclaration.resolveBinding() == null)
