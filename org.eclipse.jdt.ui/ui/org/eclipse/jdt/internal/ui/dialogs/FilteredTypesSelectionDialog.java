@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -57,7 +56,6 @@ import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelP
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.StyledString.Styler;
 
@@ -128,15 +126,7 @@ import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
  */
 public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog implements ITypeSelectionComponent {
 
-	/**
-	 * Disabled "Show Container for Duplicates because of
-	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=184693 .
-	 */
-	private static final boolean BUG_184693= true;
-
 	private static final String DIALOG_SETTINGS= "org.eclipse.jdt.internal.ui.dialogs.FilteredTypesSelectionDialog"; //$NON-NLS-1$
-
-	private static final String SHOW_CONTAINER_FOR_DUPLICATES= "ShowContainerForDuplicates"; //$NON-NLS-1$
 
 	private static final String WORKINGS_SET_SETTINGS= "WorkingSet"; //$NON-NLS-1$
 
@@ -145,8 +135,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	private final TypeItemLabelProvider fTypeInfoLabelProvider;
 
 	private String fTitle;
-
-	private ShowContainerForDuplicatesAction fShowContainerForDuplicatesAction;
 
 	private IJavaSearchScope fSearchScope;
 
@@ -301,10 +289,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	protected void storeDialog(IDialogSettings settings) {
 		super.storeDialog(settings);
 
-		if (! BUG_184693) {
-			settings.put(SHOW_CONTAINER_FOR_DUPLICATES, fShowContainerForDuplicatesAction.isChecked());
-		}
-
 		if (fFilterActionGroup != null) {
 			XMLMemento memento= XMLMemento.createWriteRoot("workingSet"); //$NON-NLS-1$
 			fFilterActionGroup.saveState(memento);
@@ -323,14 +307,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	@Override
 	protected void restoreDialog(IDialogSettings settings) {
 		super.restoreDialog(settings);
-
-		if (! BUG_184693) {
-			boolean showContainer= settings.getBoolean(SHOW_CONTAINER_FOR_DUPLICATES);
-			fShowContainerForDuplicatesAction.setChecked(showContainer);
-			fTypeInfoLabelProvider.setContainerInfo(showContainer);
-		} else {
-			fTypeInfoLabelProvider.setContainerInfo(true);
-		}
 
 		if (fAllowScopeSwitching) {
 			String setting= settings.get(WORKINGS_SET_SETTINGS);
@@ -365,10 +341,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	protected void fillViewMenu(IMenuManager menuManager) {
 		super.fillViewMenu(menuManager);
 
-		if (! BUG_184693) {
-			fShowContainerForDuplicatesAction= new ShowContainerForDuplicatesAction();
-			menuManager.add(fShowContainerForDuplicatesAction);
-		}
 		if (fAllowScopeSwitching) {
 			fFilterActionGroup= new WorkingSetFilterActionGroup(getShell(), JavaPlugin.getActivePage(), new IPropertyChangeListener() {
 				@Override
@@ -655,25 +627,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		applyFilter();
 	}
 
-	/**
-	 * The <code>ShowContainerForDuplicatesAction</code> provides means to
-	 * show/hide container information for duplicate elements.
-	 */
-	private class ShowContainerForDuplicatesAction extends Action {
-
-		/**
-		 * Creates a new instance of the class
-		 */
-		public ShowContainerForDuplicatesAction() {
-			super(JavaUIMessages.FilteredTypeSelectionDialog_showContainerForDuplicatesAction, IAction.AS_CHECK_BOX);
-		}
-
-		@Override
-		public void run() {
-			fTypeInfoLabelProvider.setContainerInfo(isChecked());
-		}
-	}
-
 	private class TypeFiltersPreferencesAction extends Action {
 
 		public TypeFiltersPreferencesAction() {
@@ -693,7 +646,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 	 */
 	private class TypeItemLabelProvider extends LabelProvider implements ILabelDecorator, IStyledLabelProvider {
 
-		private boolean fContainerInfo;
 		private LocalResourceManager fImageManager;
 
 		private BoldStylerProvider fBoldStylerProvider;
@@ -717,11 +669,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			}
 		}
 
-		public void setContainerInfo(boolean containerInfo) {
-			fContainerInfo= containerInfo;
-			fireLabelProviderChanged(new LabelProviderChangedEvent(this));
-		}
-
 		@Override
 		public Image getImage(Object element) {
 			if (!(element instanceof TypeNameMatch)) {
@@ -740,16 +687,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			if (!(element instanceof TypeNameMatch)) {
 				return super.getText(element);
 			}
-			TypeNameMatch typeMatch= (TypeNameMatch) element;
-			if (fContainerInfo && isDuplicateElement(element)) {
-				return BasicElementLabels.getJavaElementName(fTypeInfoUtil.getFullyQualifiedText(typeMatch));
-			}
-
-			if (!fContainerInfo && isDuplicateElement(element)) {
-				return BasicElementLabels.getJavaElementName(fTypeInfoUtil.getQualifiedText(typeMatch));
-			}
-
-			return BasicElementLabels.getJavaElementName(typeMatch.getSimpleTypeName());
+			return BasicElementLabels.getJavaElementName(fTypeInfoUtil.getFullyQualifiedText((TypeNameMatch) element));
 		}
 
 		@Override
@@ -762,12 +700,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 			if (!(element instanceof TypeNameMatch)) {
 				return null;
 			}
-
-			if (fContainerInfo && isDuplicateElement(element)) {
-				return BasicElementLabels.getJavaElementName(fTypeInfoUtil.getFullyQualifiedText((TypeNameMatch) element));
-			}
-
-			return BasicElementLabels.getJavaElementName(fTypeInfoUtil.getQualifiedText((TypeNameMatch) element));
+			return BasicElementLabels.getJavaElementName(fTypeInfoUtil.getFullyQualifiedText((TypeNameMatch) element));
 		}
 
 		@Override
@@ -908,21 +841,6 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 		private String getFormattedLabel(String name) {
 			return Messages.format(JavaUIMessages.FilteredTypesSelectionDialog_library_name_format, name);
-		}
-
-
-
-		public String getQualifiedText(TypeNameMatch type) {
-			StringBuilder result= new StringBuilder();
-			result.append(type.getSimpleTypeName());
-			String containerName= type.getTypeContainerName();
-			result.append(JavaElementLabels.CONCAT_STRING);
-			if (containerName.length() > 0) {
-				result.append(containerName);
-			} else {
-				result.append(JavaUIMessages.FilteredTypesSelectionDialog_default_package);
-			}
-			return result.toString();
 		}
 
 		public String getFullyQualifiedText(TypeNameMatch type) {
