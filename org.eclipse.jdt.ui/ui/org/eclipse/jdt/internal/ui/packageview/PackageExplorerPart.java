@@ -1498,10 +1498,10 @@ public class PackageExplorerPart extends ViewPart
 	}
 
 	private void setComparator() {
+		boolean sortLibraryEntriesByName = JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_SORT_LIBRARY_ENTRIES_BY_NAME);
 		if (getRootMode() == WORKING_SETS_AS_ROOTS) {
-			fViewer.setComparator(new WorkingSetAwareJavaElementSorter());
+			fViewer.setComparator(new WorkingSetAwareJavaElementSorter(sortLibraryEntriesByName));
 		} else {
-			boolean sortLibraryEntriesByName = JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_SORT_LIBRARY_ENTRIES_BY_NAME);
 			fViewer.setComparator(new JavaElementComparator(sortLibraryEntriesByName));
 		}
 	}
