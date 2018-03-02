@@ -414,7 +414,7 @@ public class EditorUtility {
 	public static String getEditorID(IEditorInput input) throws PartInitException {
 		Assert.isNotNull(input);
 		if (input instanceof IFileEditorInput)
-			return IDE.getEditorDescriptor(((IFileEditorInput)input).getFile()).getId();
+			return IDE.getEditorDescriptor(((IFileEditorInput)input).getFile(), true, false).getId();
 
 		String name= input.getName();
 
@@ -435,7 +435,7 @@ public class EditorUtility {
 			}
 		}
 
-		return IDE.getEditorDescriptor(name).getId();
+		return IDE.getEditorDescriptor(name, true, false).getId();
 	}
 
 	/**
