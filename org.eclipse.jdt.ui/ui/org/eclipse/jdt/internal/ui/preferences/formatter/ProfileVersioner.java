@@ -41,7 +41,7 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static final int VERSION_11= 11; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=49412
 	private static final int VERSION_12= 12; // https://bugs.eclipse.org/318010
 	private static final int VERSION_13= 13; // https://bugs.eclipse.org/514019
-	private static final int VERSION_14= 14; // https://bugs.eclipse.org/128653
+	private static final int VERSION_14= 14; // https://bugs.eclipse.org/128653, https://bugs.eclipse.org/531826
 
 	private static final int CURRENT_VERSION= VERSION_14;
 
@@ -633,6 +633,8 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static void version13to14(Map<String, String> oldSettings) {
 		if (DefaultCodeFormatterConstants.FALSE.equals(oldSettings.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_ROOT_TAGS)))
 			oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION, DefaultCodeFormatterConstants.FALSE);
+
+		oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_ALIGN_TAGS_DESCREIPTIONS_GROUPED, DefaultCodeFormatterConstants.FALSE);
 	}
 
 	/* old format constant values */
