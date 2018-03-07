@@ -798,6 +798,10 @@ public final class JavaModelUtil {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_5);
 	}
 	
+	public static boolean is16OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_1_6);
+	}
+	
 	public static boolean is17OrHigher(String compliance) {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_1_7);
 	}

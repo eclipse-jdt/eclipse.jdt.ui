@@ -60,7 +60,7 @@ public class BuildPathSupport {
 	private static final String[] PREFS_COMPLIANCE= new String[] {
 			JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.COMPILER_PB_ENUM_IDENTIFIER,
 			JavaCore.COMPILER_SOURCE, JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM,
-			JavaCore.COMPILER_COMPLIANCE
+			JavaCore.COMPILER_COMPLIANCE, JavaCore.COMPILER_RELEASE
 	};
 
 
@@ -384,7 +384,10 @@ public class BuildPathSupport {
 			if (eeOptions != null) {
 				for (int i= 0; i < PREFS_COMPLIANCE.length; i++) {
 					String option= PREFS_COMPLIANCE[i];
-					options.put(option, eeOptions.get(option));
+					String val= eeOptions.get(option);
+					if (val != null) {
+						options.put(option, val);
+					}
 				}
 				
 				if (newProjectCompliance != null) {

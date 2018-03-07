@@ -455,7 +455,7 @@ public abstract class OptionsConfigurationBlock {
 
 	protected abstract Control createContents(Composite parent);
 
-	protected Button addCheckBox(Composite parent, String label, Key key, String[] values, int indent) {
+	protected Button addCheckBox(Composite parent, String label, Key key, String[] values, int indent, boolean addToCheckBoxesList) {
 		ControlData data= new ControlData(key, values);
 
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -473,9 +473,15 @@ public abstract class OptionsConfigurationBlock {
 
 		updateCheckBox(checkBox);
 
-		fCheckBoxes.add(checkBox);
+		if (addToCheckBoxesList) {
+			fCheckBoxes.add(checkBox);
+		}
 
 		return checkBox;
+	}
+
+	protected Button addCheckBox(Composite parent, String label, Key key, String[] values, int indent) {
+		return addCheckBox(parent, label, key, values, indent, true);
 	}
 
 	protected Button addCheckBoxWithLink(Composite parent, final String label, Key key, String[] values, int indent, int widthHint, final SelectionListener listener) {
