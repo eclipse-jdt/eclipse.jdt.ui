@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -482,7 +482,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					if (i1 instanceof IVMInstall2 && i0 instanceof IVMInstall2) {
 						String cc0= JavaModelUtil.getCompilerCompliance((IVMInstall2) i0, JavaCore.VERSION_1_4);
 						String cc1= JavaModelUtil.getCompilerCompliance((IVMInstall2) i1, JavaCore.VERSION_1_4);
-						int result= cc1.compareTo(cc0);
+						int result= JavaCore.compareJavaVersions(cc1, cc0);
 						if (result != 0)
 							return result;
 					}
