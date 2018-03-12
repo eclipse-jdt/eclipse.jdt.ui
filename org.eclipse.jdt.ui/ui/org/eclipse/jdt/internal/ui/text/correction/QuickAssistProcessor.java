@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids <sdavids@gmx.de> - Bug 37432 getInvertEqualsProposal
@@ -187,6 +191,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistPr
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
@@ -315,6 +320,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getMakeVariableDeclarationFinalProposals(context, resultingCollections);
 				getConvertStringConcatenationProposals(context, resultingCollections);
 				getMissingCaseStatementProposals(context, coveringNode, resultingCollections);
+				getConvertVarTypeToResolvedTypeProposals(context, coveringNode, resultingCollections);
 			}
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -3625,6 +3631,48 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		LocalCorrectionsSubProcessor.createMissingCaseProposals(context, switchStatement, missingEnumCases, proposals);
 		return true;
+	}
+
+	private static boolean getConvertVarTypeToResolvedTypeProposals(IInvocationContext context, ASTNode node, Collection<ICommandAccess> proposals) {
+		if (!(node instanceof SimpleName))
+			return false;
+
+		SimpleName name= (SimpleName) node;
+		IBinding binding= name.resolveBinding();
+		if (!(binding instanceof IVariableBinding))
+			return false;
+		IVariableBinding varBinding= (IVariableBinding) binding;
+		if (varBinding.isField() || varBinding.isParameter())
+			return false;
+
+		ICompilationUnit cu= context.getCompilationUnit();
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode declaration= astRoot.findDeclaringNode(varBinding);
+		ITypeBinding typeBinding= varBinding.getType();
+		Type type= null;
+
+		if (declaration instanceof SingleVariableDeclaration) {
+			SingleVariableDeclaration svDecl= (SingleVariableDeclaration) declaration;
+			type= svDecl.getType();
+		} else if (declaration instanceof VariableDeclarationFragment) {
+			ASTNode parent= declaration.getParent();
+			if (parent instanceof VariableDeclarationStatement) {
+				VariableDeclarationStatement vdStmt= (VariableDeclarationStatement) parent;
+				type= vdStmt.getType();
+			} else if (parent instanceof VariableDeclarationExpression) {
+				VariableDeclarationExpression vdExpr= (VariableDeclarationExpression) parent;
+				type= vdExpr.getType();
+			}
+		}
+
+		if (type == null || typeBinding == null) {
+			return false;
+		}
+		if (type.isVar()) {
+			proposals.add(new TypeChangeCorrectionProposal(cu, varBinding, astRoot, typeBinding, false, IProposalRelevance.CHANGE_VARIABLE));
+		}
+		return true;
+
 	}
 
 
