@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.core.manipulation;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
@@ -50,16 +51,11 @@ public class JavaManipulation {
 	 * The client should set the value back to null when finished.
 	 *
 	 * @param id the Id to use for the preference node
-	 * @return true if the value was set, and false otherwise.
 	 * @since 1.10
 	 */
-	public static final boolean setPreferenceNodeId (String id) {
-		if (fgPreferenceNodeId == null || id == null) {
-			fgPreferenceNodeId= id;
-			return true;
-		}
-
-		return false;
+	public static final void setPreferenceNodeId (String id) {
+		Assert.isLegal(fgPreferenceNodeId == null || id == null, "Preference node already set"); //$NON-NLS-1$
+		fgPreferenceNodeId= id;
 	}
 
 	/**
