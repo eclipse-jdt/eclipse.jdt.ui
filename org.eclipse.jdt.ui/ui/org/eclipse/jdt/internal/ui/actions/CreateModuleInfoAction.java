@@ -14,7 +14,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -22,9 +24,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IObjectActionDelegate;
@@ -43,6 +47,27 @@ import org.eclipse.jdt.internal.ui.wizards.NewModuleInfoWizard;
 
 public class CreateModuleInfoAction implements IObjectActionDelegate {
 
+	private class ModuleInfoCreationDialog extends WizardDialog {
+
+		public ModuleInfoCreationDialog(Shell parentShell, IWizard newWizard) {
+			super(parentShell, newWizard);
+		}
+		
+		@Override
+		public void create() {
+			super.create();
+			Button cancel= this.getButton(CANCEL);
+			Button finish= this.getButton(IDialogConstants.FINISH_ID);
+			if (cancel != null) {
+				cancel.setText(ActionMessages.CreateModuleInfoAction_dialog_cancel_button_label);
+			}
+			if (finish != null) {
+				finish.setText(ActionMessages.CreateModuleInfoAction_dialog_finish_button_label);
+			}
+		}
+		
+	}
+	
 	private static final String MODULE_INFO_JAVA_FILENAME= JavaModelUtil.MODULE_INFO_JAVA;
 
 	private ISelection fSelection;
@@ -108,7 +133,7 @@ public class CreateModuleInfoAction implements IObjectActionDelegate {
 				}
 
 				IWorkbenchWizard moduleInfoWizard= new NewModuleInfoWizard(javaProject, packageFragmentRoots, targetPkgFragmentRoot);
-				WizardDialog dialog= new WizardDialog(getDisplay().getActiveShell(), moduleInfoWizard);
+				WizardDialog dialog= new ModuleInfoCreationDialog(getDisplay().getActiveShell(), moduleInfoWizard);
 				dialog.setHelpAvailable(false);
 				dialog.create();				
 				dialog.open();

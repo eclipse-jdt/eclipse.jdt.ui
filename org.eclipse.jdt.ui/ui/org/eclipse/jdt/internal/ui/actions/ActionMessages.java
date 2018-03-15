@@ -440,6 +440,8 @@ public final class ActionMessages extends NLS {
 	public static String CreateModuleInfoAction_error_message_no_source_folder;
 	public static String CreateModuleInfoAction_error_title;
 	public static String CreateModuleInfoAction_question_message_overwrite_module_info;
+	public static String CreateModuleInfoAction_dialog_finish_button_label;
+	public static String CreateModuleInfoAction_dialog_cancel_button_label;
 
 	public static String GenerateToStringAction_label;
 	public static String GenerateToStringAction_description;
