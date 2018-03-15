@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -40,6 +44,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
@@ -50,6 +55,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.HighlightedPosition;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingManager.Highlighting;
 import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.DeprecatedMemberHighlighting;
+import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings.VarKeywordHighlighting;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 
 
@@ -156,6 +162,24 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 				}
 			}
 			return true;
+		}
+
+		@Override
+		public boolean visit(SimpleType node) {
+			if (node.isVar()) {
+				int offset= node.getStartPosition();
+				int length= node.getLength();
+				if (offset > -1 && length > 0) {
+					for (int i= 0; i < fJobSemanticHighlightings.length; i++) {
+						SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
+						if (semanticHighlighting instanceof VarKeywordHighlighting) {
+							addPosition(offset, length, fJobHighlightings[i]);
+							break;
+						}
+					}
+				}
+			}
+			return false;
 		}
 
 		/*

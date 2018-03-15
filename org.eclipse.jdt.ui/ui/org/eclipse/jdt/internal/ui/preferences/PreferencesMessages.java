@@ -145,6 +145,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_singleLineComment;
 	public static String JavaEditorPreferencePage_returnKeyword;
 	public static String JavaEditorPreferencePage_keywords;
+	public static String JavaEditorPreferencePage_varKeyword;
 	public static String JavaEditorPreferencePage_strings;
 	public static String JavaEditorPreferencePage_others;
 	public static String JavaEditorPreferencePage_operators;
