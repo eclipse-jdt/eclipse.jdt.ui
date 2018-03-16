@@ -261,6 +261,44 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 
 	}
+	
+	public void testChangeVarToTypeNoTypeChangeProposal() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class Cls {\n");
+		buf.append(" {\n");
+		buf.append("   var one = new Object() {     // inferred\n");
+		buf.append("       int field = 2;\n");
+		buf.append("   };\n");
+		buf.append("   var two= (CharSequence & Comparable<String>) \"x\";\n");
+		buf.append(" }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("one");
+
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= getExpectedProposals(collectAssists(context, false), TYPE_CHANGE_PROPOSAL_TYPE);
+
+		assertNumberOfProposals(proposals, 0);
+
+		offset= buf.toString().indexOf("two");
+
+		context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		proposals= getExpectedProposals(collectAssists(context, false), TYPE_CHANGE_PROPOSAL_TYPE);
+
+		assertNumberOfProposals(proposals, 0);
+
+	}
 
 	private static final ArrayList<IJavaCompletionProposal> getExpectedProposals(ArrayList<IJavaCompletionProposal> proposals, Class<?>[] expectedTypes) {
 		ArrayList<IJavaCompletionProposal> expected= new ArrayList<>(proposals);

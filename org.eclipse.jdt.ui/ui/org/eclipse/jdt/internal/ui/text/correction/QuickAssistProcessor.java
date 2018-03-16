@@ -3672,6 +3672,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
+		ITypeBinding typeBinding= varBinding.getType();
+		if (typeBinding == null || typeBinding.isAnonymous() || typeBinding.isIntersectionType() || typeBinding.isWildcardType()) {
+			return false;
+		}
+
 		Type type= null;
 		if (varDeclaration instanceof SingleVariableDeclaration) {
 			type= ((SingleVariableDeclaration) varDeclaration).getType();
@@ -3683,15 +3688,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				type= ((VariableDeclarationExpression) parent).getType();
 			}
 		}
-		if (type == null) {
-			return false;
-		}
-		if (!type.isVar()) {
-			return false;
-		}
-
-		ITypeBinding typeBinding= type.resolveBinding();
-		if (typeBinding == null) {
+		if (type == null || !type.isVar()) {
 			return false;
 		}
 
@@ -3735,6 +3732,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Expression expression= null;
 
 		ITypeBinding typeBinding= varBinding.getType();
+		if (typeBinding == null) {
+			return false;
+		}
 		ITypeBinding expressionTypeBinding= null;
 
 		if (varDeclaration instanceof SingleVariableDeclaration) {
@@ -3780,10 +3780,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 
-		if (type == null || typeBinding == null) {
-			return false;
-		}
-		if (type.isVar()) {
+		if (type == null || type.isVar()) {
 			return false;
 		}
 		if (expression == null || expression instanceof ArrayInitializer || expression instanceof LambdaExpression || expression instanceof MethodReference) {
