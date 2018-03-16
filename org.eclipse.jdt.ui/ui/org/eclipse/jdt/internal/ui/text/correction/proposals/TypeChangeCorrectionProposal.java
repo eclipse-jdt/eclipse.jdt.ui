@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -66,27 +70,58 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 	private final IBinding fBinding;
 	private final CompilationUnit fAstRoot;
 	private final ITypeBinding fNewType;
+	private final ITypeBinding fOldType;
 	private final ITypeBinding[] fTypeProposals;
 	private final TypeLocation fTypeLocation;
+	private final boolean fIsNewTypeVar;
+	private static String VAR_TYPE= "var"; //$NON-NLS-1$
 
 	public TypeChangeCorrectionProposal(ICompilationUnit targetCU, IBinding binding, CompilationUnit astRoot, ITypeBinding newType, boolean offerSuperTypeProposals, int relevance) {
+		this(targetCU, binding, astRoot, newType, false, offerSuperTypeProposals, relevance);
+	}
+
+	//This needs to be used to convert a given type to var type.
+	public TypeChangeCorrectionProposal(ICompilationUnit targetCU, IBinding binding, CompilationUnit astRoot, ITypeBinding oldType, int relevance) {
+		this(targetCU, binding, astRoot, oldType, true, false, relevance);
+	}
+
+	private TypeChangeCorrectionProposal(ICompilationUnit targetCU, IBinding binding, CompilationUnit astRoot, ITypeBinding newType, boolean isNewTypeVar, boolean offerSuperTypeProposals,
+			int relevance) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
 
 		Assert.isTrue(binding != null && (binding.getKind() == IBinding.METHOD || binding.getKind() == IBinding.VARIABLE) && Bindings.isDeclarationBinding(binding));
 
 		fBinding= binding; // must be generic method or (generic) variable
 		fAstRoot= astRoot;
+		fIsNewTypeVar= isNewTypeVar;
 
 		if (offerSuperTypeProposals) {
 			fTypeProposals= ASTResolving.getRelaxingTypes(astRoot.getAST(), newType);
 			sortTypes(fTypeProposals);
-			fNewType= fTypeProposals[0];
+			if (!fIsNewTypeVar) {
+				fNewType= fTypeProposals[0];
+				fOldType= null;
+			} else {
+				fOldType= newType;
+				fNewType= null;
+			}
 		} else {
-			fNewType= newType;
+			if (!fIsNewTypeVar) {
+				fNewType= newType;
+				fOldType= null;
+			} else {
+				fOldType= newType;
+				fNewType= null;
+			}
 			fTypeProposals= null;
 		}
 		
-		String typeName= BindingLabelProvider.getBindingLabel(fNewType, JavaElementLabels.ALL_DEFAULT);
+		String typeName;
+		if (isNewTypeVar) {
+			typeName= VAR_TYPE;
+		} else {
+			typeName= BindingLabelProvider.getBindingLabel(fNewType, JavaElementLabels.ALL_DEFAULT);
+		}
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding varBinding= (IVariableBinding) binding;
 			String[] args= { BasicElementLabels.getJavaElementName(varBinding.getName()),  BasicElementLabels.getJavaElementName(typeName)};
@@ -124,7 +159,12 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 			ImportRewrite imports= createImportRewrite(newRoot);
 
 			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(newRoot, declNode.getStartPosition(), imports);
-			Type type= imports.addImport(fNewType, ast, context, fTypeLocation);
+			Type type;
+			if (fIsNewTypeVar) {
+				type= fAstRoot.getAST().newSimpleType(fAstRoot.getAST().newName(VAR_TYPE));
+			} else {
+				type= imports.addImport(fNewType, ast, context, fTypeLocation);
+			}
 
 			if (declNode instanceof MethodDeclaration) {
 				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
@@ -190,6 +230,9 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 					} else {
 						rewrite.set(varDecl, VariableDeclarationStatement.TYPE_PROPERTY, type, null);
 						DimensionRewrite.removeAllChildren(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
+						if (fIsNewTypeVar) {
+							TypeAnnotationRewrite.removePureTypeAnnotations(parent, VariableDeclarationStatement.MODIFIERS2_PROPERTY, rewrite, null);
+						}
 					}
 				} else if (parent instanceof VariableDeclarationExpression) {
 					VariableDeclarationExpression varDecl= (VariableDeclarationExpression) parent;
