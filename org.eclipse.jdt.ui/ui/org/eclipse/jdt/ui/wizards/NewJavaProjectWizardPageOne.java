@@ -523,12 +523,6 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			}
 
 			fInstalledEEs= JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments();
-			Arrays.sort(fInstalledEEs, new Comparator<IExecutionEnvironment>() {
-				@Override
-				public int compare(IExecutionEnvironment arg0, IExecutionEnvironment arg1) {
-					return Policy.getComparator().compare(arg0.getId(), arg1.getId());
-				}
-			});
 			selectionIndex= -1;//find new index
 			String[] eeLabels= new String[fInstalledEEs.length];
 			fEECompliance= new String[fInstalledEEs.length];
