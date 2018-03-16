@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -70,7 +70,6 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 	private final IBinding fBinding;
 	private final CompilationUnit fAstRoot;
 	private final ITypeBinding fNewType;
-	private final ITypeBinding fOldType;
 	private final ITypeBinding[] fTypeProposals;
 	private final TypeLocation fTypeLocation;
 	private final boolean fIsNewTypeVar;
@@ -100,17 +99,13 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 			sortTypes(fTypeProposals);
 			if (!fIsNewTypeVar) {
 				fNewType= fTypeProposals[0];
-				fOldType= null;
 			} else {
-				fOldType= newType;
 				fNewType= null;
 			}
 		} else {
 			if (!fIsNewTypeVar) {
 				fNewType= newType;
-				fOldType= null;
 			} else {
-				fOldType= newType;
 				fNewType= null;
 			}
 			fTypeProposals= null;
