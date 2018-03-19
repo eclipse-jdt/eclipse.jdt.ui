@@ -45,8 +45,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 
 	private class ResourceChangeListener implements IResourceChangeListener {
@@ -222,7 +220,6 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 				}
 			}
 		} catch (Exception e) {
-			JavaPlugin.log(e);
 			return Status.CANCEL_STATUS;
 		}
 		return Status.OK_STATUS;
