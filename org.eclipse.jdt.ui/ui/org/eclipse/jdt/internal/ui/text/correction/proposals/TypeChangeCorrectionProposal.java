@@ -97,11 +97,7 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 		if (offerSuperTypeProposals) {
 			fTypeProposals= ASTResolving.getRelaxingTypes(astRoot.getAST(), newType);
 			sortTypes(fTypeProposals);
-			if (!fIsNewTypeVar) {
-				fNewType= fTypeProposals[0];
-			} else {
-				fNewType= null;
-			}
+			fNewType= fTypeProposals[0];
 		} else {
 			if (!fIsNewTypeVar) {
 				fNewType= newType;
@@ -156,7 +152,7 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(newRoot, declNode.getStartPosition(), imports);
 			Type type;
 			if (fIsNewTypeVar) {
-				type= fAstRoot.getAST().newSimpleType(fAstRoot.getAST().newName(VAR_TYPE));
+				type= ast.newSimpleType(ast.newName(VAR_TYPE));
 			} else {
 				type= imports.addImport(fNewType, ast, context, fTypeLocation);
 			}
@@ -234,6 +230,9 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 
 					rewrite.set(varDecl, VariableDeclarationExpression.TYPE_PROPERTY, type, null);
 					DimensionRewrite.removeAllChildren(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
+					if (fIsNewTypeVar) {
+						TypeAnnotationRewrite.removePureTypeAnnotations(parent, VariableDeclarationExpression.MODIFIERS2_PROPERTY, rewrite, null);
+					}
 				}
 			} else if (declNode instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration variableDeclaration= (SingleVariableDeclaration) declNode;
