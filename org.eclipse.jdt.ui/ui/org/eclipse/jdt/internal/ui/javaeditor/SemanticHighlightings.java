@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -50,6 +50,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
 
 	/**
  * Semantic highlightings
@@ -196,6 +198,11 @@ public class SemanticHighlightings {
 	 * @since 3.8
 	 */
 	public static final String INHERITED_FIELD="inheritedField"; //$NON-NLS-1$
+
+	/**
+	 * A named preference part that controls the highlighting of 'var' keywords.
+	 */
+	public static final String VAR_KEYWORD= "varKeyword"; //$NON-NLS-1$
 
 	/**
 	 * Semantic highlightings
@@ -1917,6 +1924,47 @@ public class SemanticHighlightings {
 	}
 
 	/**
+	 * Semantic highlighting for 'var' keyword.
+	 */
+	static final class VarKeywordHighlighting extends SemanticHighlighting {
+
+		@Override
+		public String getPreferenceKey() {
+			return VAR_KEYWORD;
+		}
+
+		@Override
+		public RGB getDefaultDefaultTextColor() {
+			return new RGB(127, 0, 85);
+		}
+
+		@Override
+		public boolean isBoldByDefault() {
+			return true;
+		}
+
+		@Override
+		public boolean isItalicByDefault() {
+			return false;
+		}
+
+		@Override
+		public boolean isEnabledByDefault() {
+			return true;
+		}
+
+		@Override
+		public String getDisplayName() {
+			return PreferencesMessages.JavaEditorPreferencePage_varKeyword;
+		}
+
+		@Override
+		public boolean consumes(SemanticToken token) {
+			return false;
+		}
+	}
+
+	/**
 	 * A named preference that controls the given semantic highlighting's color.
 	 *
 	 * @param semanticHighlighting the semantic highlighting
@@ -2007,6 +2055,7 @@ public class SemanticHighlightings {
 				new AnnotationHighlighting(), // before interfaces
 				new InterfaceHighlighting(),
 				new NumberHighlighting(),
+				new VarKeywordHighlighting(),
 			};
 		return fgSemanticHighlightings;
 	}

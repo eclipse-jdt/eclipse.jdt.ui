@@ -228,7 +228,9 @@ public class ImportReferencesCollector extends GenericVisitor {
 	 */
 	@Override
 	public boolean visit(SimpleType node) {
-		typeRefFound(node.getName());
+		if (!node.isVar()) {
+			typeRefFound(node.getName());
+		}
 		visitAnnotations(node);
 		return false;
 	}

@@ -16,6 +16,7 @@
  *     				[compiler][null] inheritance of null annotations as an option - https://bugs.eclipse.org/388281
  *     				Warning option for bug 410218 - https://bugs.eclipse.org/461999
  *     Gábor Kövesdán - Contribution for Bug 350000 - [content assist] Include non-prefix matches in auto-complete suggestions
+ *     Jesper S Møller - Contributions for bug 529432 - Allow JDT UI to target Java 10
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -140,6 +141,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_singleLineComment;
 	public static String JavaEditorPreferencePage_returnKeyword;
 	public static String JavaEditorPreferencePage_keywords;
+	public static String JavaEditorPreferencePage_varKeyword;
 	public static String JavaEditorPreferencePage_strings;
 	public static String JavaEditorPreferencePage_others;
 	public static String JavaEditorPreferencePage_operators;
@@ -816,6 +818,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_version17;
 	public static String ComplianceConfigurationBlock_version18;
 	public static String ComplianceConfigurationBlock_version9;
+	public static String ComplianceConfigurationBlock_version10;
 	public static String ComplianceConfigurationBlock_versionCLDC11;
 	public static String ComplianceConfigurationBlock_src_greater_compliance;
 	public static String ComplianceConfigurationBlock_classfile_greater_compliance;

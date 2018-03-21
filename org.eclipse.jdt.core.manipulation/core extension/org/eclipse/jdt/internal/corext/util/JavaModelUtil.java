@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Matt Chapman, mpchapman@gmail.com - 89977 Make JDT .java agnostic
+ *     Jesper S Møller - Bug 529432 - Allow JDT UI to target Java 10
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
@@ -73,7 +74,7 @@ public final class JavaModelUtil {
 	 */
 	public static final String VERSION_LATEST;
 	static {
-		VERSION_LATEST= JavaCore.VERSION_9; // make sure it is not inlined
+		VERSION_LATEST= JavaCore.VERSION_10; // make sure it is not inlined
 	}
 
 	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10003;
@@ -784,13 +785,7 @@ public final class JavaModelUtil {
 	 * @return <code>true</code> iff version1 is less than version2
 	 */
 	public static boolean isVersionLessThan(String version1, String version2) {
-		if (JavaCore.VERSION_CLDC_1_1.equals(version1)) {
-			version1= JavaCore.VERSION_1_1 + 'a';
-		}
-		if (JavaCore.VERSION_CLDC_1_1.equals(version2)) {
-			version2= JavaCore.VERSION_1_1 + 'a';
-		}
-		return version1.compareTo(version2) < 0;
+		return JavaCore.compareJavaVersions(version1, version2) < 0;
 	}
 
 
@@ -814,6 +809,10 @@ public final class JavaModelUtil {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_9);
 	}
 	
+	public static boolean is10OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_10);
+	}
+
 	/**
 	 * Checks if the given project or workspace has source compliance 1.5 or greater.
 	 *
@@ -856,6 +855,16 @@ public final class JavaModelUtil {
 		return is9OrHigher(getSourceCompliance(project));
 	}
 
+	/**
+	 * Checks if the given project or workspace has source compliance 10 or greater.
+	 * 
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 10 or greater.
+	 */
+	public static boolean is10OrHigher(IJavaProject project) {
+		return is10OrHigher(getSourceCompliance(project));
+	}
+
 	private static String getSourceCompliance(IJavaProject project) {
 		return project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
 	}
@@ -889,6 +898,8 @@ public final class JavaModelUtil {
 		String version= vMInstall.getJavaVersion();
 		if (version == null) {
 			return defaultCompliance;
+		} else if (version.startsWith(JavaCore.VERSION_10)) {
+			return JavaCore.VERSION_10;
 		} else if (version.startsWith(JavaCore.VERSION_9)) {
 			return JavaCore.VERSION_9;
 		} else if (version.startsWith(JavaCore.VERSION_1_8)) {
@@ -921,7 +932,9 @@ public final class JavaModelUtil {
 		
 		// fallback:
 		String desc= executionEnvironment.getId();
-		if (desc.indexOf(JavaCore.VERSION_9) != -1) {
+		if (desc.indexOf(JavaCore.VERSION_10) != -1) {
+			return JavaCore.VERSION_10;
+		} else if (desc.indexOf(JavaCore.VERSION_9) != -1) {
 			return JavaCore.VERSION_9;
 		} else if (desc.indexOf(JavaCore.VERSION_1_8) != -1) {
 			return JavaCore.VERSION_1_8;

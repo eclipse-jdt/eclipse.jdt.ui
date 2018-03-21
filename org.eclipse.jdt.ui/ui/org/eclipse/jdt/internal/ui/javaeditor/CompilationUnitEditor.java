@@ -1531,7 +1531,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		IPreferenceStore preferenceStore= getPreferenceStore();
 		boolean closeBrackets= preferenceStore.getBoolean(CLOSE_BRACKETS);
 		boolean closeStrings= preferenceStore.getBoolean(CLOSE_STRINGS);
-		boolean closeAngularBrackets= JavaCore.VERSION_1_5.compareTo(preferenceStore.getString(JavaCore.COMPILER_SOURCE)) <= 0;
+		boolean closeAngularBrackets= JavaCore.compareJavaVersions(JavaCore.VERSION_1_5, preferenceStore.getString(JavaCore.COMPILER_SOURCE)) <= 0;
 
 		fBracketInserter.setCloseBracketsEnabled(closeBrackets);
 		fBracketInserter.setCloseStringsEnabled(closeStrings);
@@ -1610,7 +1610,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				}
 
 				if (JavaCore.COMPILER_SOURCE.equals(p)) {
-					boolean closeAngularBrackets= JavaCore.VERSION_1_5.compareTo(getPreferenceStore().getString(p)) <= 0;
+					boolean closeAngularBrackets= JavaCore.compareJavaVersions(JavaCore.VERSION_1_5, getPreferenceStore().getString(p)) <= 0;
 					fBracketInserter.setCloseAngularBracketsEnabled(closeAngularBrackets);
 				}
 

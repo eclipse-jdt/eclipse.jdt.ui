@@ -483,7 +483,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 					if (i1 instanceof IVMInstall2 && i0 instanceof IVMInstall2) {
 						String cc0= JavaModelUtil.getCompilerCompliance((IVMInstall2) i0, JavaCore.VERSION_1_4);
 						String cc1= JavaModelUtil.getCompilerCompliance((IVMInstall2) i1, JavaCore.VERSION_1_4);
-						int result= cc1.compareTo(cc0);
+						int result= JavaCore.compareJavaVersions(cc1, cc0);
 						if (result != 0)
 							return result;
 					}
@@ -524,12 +524,6 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			}
 
 			fInstalledEEs= JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments();
-			Arrays.sort(fInstalledEEs, new Comparator<IExecutionEnvironment>() {
-				@Override
-				public int compare(IExecutionEnvironment arg0, IExecutionEnvironment arg1) {
-					return Policy.getComparator().compare(arg0.getId(), arg1.getId());
-				}
-			});
 			selectionIndex= -1;//find new index
 			String[] eeLabels= new String[fInstalledEEs.length];
 			fEECompliance= new String[fInstalledEEs.length];

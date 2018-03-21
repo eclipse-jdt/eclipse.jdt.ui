@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Sebastian Davids <sdavids@gmx.de> - Bug 37432 getInvertEqualsProposal
@@ -188,6 +188,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistPr
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewDefiningMethodProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.TypeChangeCorrectionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
@@ -316,6 +317,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getMakeVariableDeclarationFinalProposals(context, resultingCollections);
 				getConvertStringConcatenationProposals(context, resultingCollections);
 				getMissingCaseStatementProposals(context, coveringNode, resultingCollections);
+				getConvertVarTypeToResolvedTypeProposal(context, coveringNode, resultingCollections);
+				getConvertResolvedTypeToVarTypeProposal(context, coveringNode, resultingCollections);
 			}
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -3637,6 +3640,162 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
+	private static boolean getConvertVarTypeToResolvedTypeProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> proposals) {
+		CompilationUnit astRoot= context.getASTRoot();
+		IJavaElement root= astRoot.getJavaElement();
+		if (root == null) {
+			return false;
+		}
+		IJavaProject javaProject= root.getJavaProject();
+		if (javaProject == null) {
+			return false;
+		}
+		if (!JavaModelUtil.is10OrHigher(javaProject)) {
+			return false;
+		}
+
+		if (!(node instanceof SimpleName)) {
+			return false;
+		}
+		SimpleName name= (SimpleName) node;
+		IBinding binding= name.resolveBinding();
+		if (!(binding instanceof IVariableBinding)) {
+			return false;
+		}
+		IVariableBinding varBinding= (IVariableBinding) binding;
+		if (varBinding.isField() || varBinding.isParameter()) {
+			return false;
+		}
+
+		ASTNode varDeclaration= astRoot.findDeclaringNode(varBinding);
+		if (varDeclaration == null) {
+			return false;
+		}
+
+		Type type= null;
+		if (varDeclaration instanceof SingleVariableDeclaration) {
+			type= ((SingleVariableDeclaration) varDeclaration).getType();
+		} else if (varDeclaration instanceof VariableDeclarationFragment) {
+			ASTNode parent= varDeclaration.getParent();
+			if (parent instanceof VariableDeclarationStatement) {
+				type= ((VariableDeclarationStatement) parent).getType();
+			} else if (parent instanceof VariableDeclarationExpression) {
+				type= ((VariableDeclarationExpression) parent).getType();
+			}
+		}
+		if (type == null) {
+			return false;
+		}
+		if (!type.isVar()) {
+			return false;
+		}
+
+		ITypeBinding typeBinding= type.resolveBinding();
+		if (typeBinding == null) {
+			return false;
+		}
+
+		proposals.add(new TypeChangeCorrectionProposal(context.getCompilationUnit(), varBinding, astRoot, typeBinding, false, IProposalRelevance.CHANGE_VARIABLE));
+		return true;
+	}
+
+	private static boolean getConvertResolvedTypeToVarTypeProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> proposals) {
+		CompilationUnit astRoot= context.getASTRoot();
+		IJavaElement root= astRoot.getJavaElement();
+		if (root == null) {
+			return false;
+		}
+		IJavaProject javaProject= root.getJavaProject();
+		if (javaProject == null) {
+			return false;
+		}
+		if (!JavaModelUtil.is10OrHigher(javaProject)) {
+			return false;
+		}
+
+		if (!(node instanceof SimpleName)) {
+			return false;
+		}
+		SimpleName name= (SimpleName) node;
+		IBinding binding= name.resolveBinding();
+		if (!(binding instanceof IVariableBinding)) {
+			return false;
+		}
+		IVariableBinding varBinding= (IVariableBinding) binding;
+		if (varBinding.isField() || varBinding.isParameter()) {
+			return false;
+		}
+
+		ASTNode varDeclaration= astRoot.findDeclaringNode(varBinding);
+		if (varDeclaration == null) {
+			return false;
+		}
+
+		Type type= null;
+		Expression expression= null;
+
+		ITypeBinding typeBinding= varBinding.getType();
+		ITypeBinding expressionTypeBinding= null;
+
+		if (varDeclaration instanceof SingleVariableDeclaration) {
+			SingleVariableDeclaration svDecl= (SingleVariableDeclaration) varDeclaration;
+			type= svDecl.getType();
+			expression= svDecl.getInitializer();
+			if (expression != null) {
+				expressionTypeBinding= expression.resolveTypeBinding();
+			} else {
+				ASTNode parent= svDecl.getParent();
+				if (parent instanceof EnhancedForStatement) {
+					EnhancedForStatement efStmt= (EnhancedForStatement) parent;
+					expression= efStmt.getExpression();
+					if (expression != null) {
+						ITypeBinding expBinding= expression.resolveTypeBinding();
+						if (expBinding != null) {
+							if (expBinding.isArray()) {
+								expressionTypeBinding= expBinding.getElementType();
+							} else {
+								ITypeBinding iterable= Bindings.findTypeInHierarchy(expBinding, "java.lang.Iterable"); //$NON-NLS-1$
+								if (iterable != null) {
+									ITypeBinding[] typeArguments= iterable.getTypeArguments();
+									if (typeArguments.length == 1) {
+										expressionTypeBinding= typeArguments[0];
+										expressionTypeBinding= Bindings.normalizeForDeclarationUse(expressionTypeBinding, context.getASTRoot().getAST());
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		} else if (varDeclaration instanceof VariableDeclarationFragment) {
+			ASTNode parent= varDeclaration.getParent();
+			expression= ((VariableDeclarationFragment) varDeclaration).getInitializer();
+			if (expression != null) {
+				expressionTypeBinding= expression.resolveTypeBinding();
+			}
+			if (parent instanceof VariableDeclarationStatement) {
+				type= ((VariableDeclarationStatement) parent).getType();
+			} else if (parent instanceof VariableDeclarationExpression) {
+				type= ((VariableDeclarationExpression) parent).getType();
+			}
+		}
+
+		if (type == null || typeBinding == null) {
+			return false;
+		}
+		if (type.isVar()) {
+			return false;
+		}
+		if (expression == null || expression instanceof ArrayInitializer || expression instanceof LambdaExpression || expression instanceof MethodReference) {
+			return false;
+		}
+		if (expressionTypeBinding == null || !expressionTypeBinding.isEqualTo(typeBinding)) {
+			return false;
+		}
+
+		proposals.add(new TypeChangeCorrectionProposal(context.getCompilationUnit(), varBinding, astRoot, typeBinding, IProposalRelevance.CHANGE_VARIABLE));
+		return true;
+	}
 
 	private static boolean getConvertLocalToFieldProposal(IInvocationContext context, final ASTNode node, Collection<ICommandAccess> proposals) throws CoreException {
 		if (!(node instanceof SimpleName))
