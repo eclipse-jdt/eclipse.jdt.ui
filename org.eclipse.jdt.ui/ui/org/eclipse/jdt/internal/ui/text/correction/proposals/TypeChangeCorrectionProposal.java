@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRe
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
 import org.eclipse.jdt.internal.corext.dom.TypeAnnotationRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -146,6 +147,7 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 			ImportRewrite imports= createImportRewrite(newRoot);
 
 			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(newRoot, declNode.getStartPosition(), imports);
+			ImportRemover remover= new ImportRemover(getCompilationUnit().getJavaProject(), newRoot);
 			Type type;
 			if (fIsNewTypeVar) {
 				type= ast.newSimpleType(ast.newName(VAR_TYPE));
@@ -215,26 +217,39 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 							listRewrite.insertAfter(newStat, parent, null);
 						}
 					} else {
+						Type oldType= (Type) rewrite.get(varDecl, VariableDeclarationStatement.TYPE_PROPERTY);
 						rewrite.set(varDecl, VariableDeclarationStatement.TYPE_PROPERTY, type, null);
 						DimensionRewrite.removeAllChildren(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
 						if (fIsNewTypeVar) {
 							TypeAnnotationRewrite.removePureTypeAnnotations(parent, VariableDeclarationStatement.MODIFIERS2_PROPERTY, rewrite, null);
+							if (oldType != null) {
+								remover.registerRemovedNode(oldType);
+							}
 						}
 					}
 				} else if (parent instanceof VariableDeclarationExpression) {
 					VariableDeclarationExpression varDecl= (VariableDeclarationExpression) parent;
-
+					Type oldType= (Type) rewrite.get(varDecl, VariableDeclarationExpression.TYPE_PROPERTY);
 					rewrite.set(varDecl, VariableDeclarationExpression.TYPE_PROPERTY, type, null);
 					DimensionRewrite.removeAllChildren(declNode, VariableDeclarationFragment.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
 					if (fIsNewTypeVar) {
 						TypeAnnotationRewrite.removePureTypeAnnotations(parent, VariableDeclarationExpression.MODIFIERS2_PROPERTY, rewrite, null);
+						if (oldType != null) {
+							remover.registerRemovedNode(oldType);
+						}
 					}
 				}
 			} else if (declNode instanceof SingleVariableDeclaration) {
 				SingleVariableDeclaration variableDeclaration= (SingleVariableDeclaration) declNode;
+				Type oldType= (Type) rewrite.get(variableDeclaration, SingleVariableDeclaration.TYPE_PROPERTY);
 				rewrite.set(variableDeclaration, SingleVariableDeclaration.TYPE_PROPERTY, type, null);
 				DimensionRewrite.removeAllChildren(declNode, SingleVariableDeclaration.EXTRA_DIMENSIONS2_PROPERTY, rewrite, null);
 				TypeAnnotationRewrite.removePureTypeAnnotations(declNode, SingleVariableDeclaration.MODIFIERS2_PROPERTY, rewrite, null);
+				if (fIsNewTypeVar) {
+					if (oldType != null) {
+						remover.registerRemovedNode(oldType);
+					}
+				}
 			}
 
 			// set up linked mode
@@ -244,6 +259,9 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 				for (int i= 0; i < fTypeProposals.length; i++) {
 					addLinkedPositionProposal(KEY_TYPE, fTypeProposals[i]);
 				}
+			}
+			if (fIsNewTypeVar) {
+				remover.applyRemoves(imports);
 			}
 			return rewrite;
 		}
