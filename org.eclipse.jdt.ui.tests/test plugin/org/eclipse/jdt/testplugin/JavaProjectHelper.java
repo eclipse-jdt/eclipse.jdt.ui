@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -96,6 +96,7 @@ public class JavaProjectHelper {
 	public static final IPath RT_STUBS_17= new Path("testresources/rtstubs17.jar");
 	public static final IPath RT_STUBS_18= new Path("testresources/rtstubs18.jar");
 	public static final IPath RT_STUBS_9= new Path("testresources/rtstubs9.jar");
+	public static final IPath RT_STUBS_10= new Path("testresources/rtstubs10.jar");
 	public static final IPath JUNIT_SRC_381= new Path("testresources/junit381-noUI-src.zip");
 	public static final String JUNIT_SRC_ENCODING= "ISO-8859-1";
 
@@ -209,6 +210,18 @@ public class JavaProjectHelper {
 	}
 
 	/**
+	 * Sets the compiler options to 10 for the given project.
+	 * 
+	 * @param project the java project
+	 * @since 3.14
+	 */
+	public static void set10CompilerOptions(IJavaProject project) {
+		Map<String, String> options= project.getOptions(false);
+		set10CompilerOptions(options);
+		project.setOptions(options);
+	}
+
+	/**
 	 * Sets the compiler options to 1.8 for the given project.
 	 * 
 	 * @param project the java project
@@ -269,6 +282,16 @@ public class JavaProjectHelper {
 	 */
 	public static void set9CompilerOptions(Map<String, String> options) {
 		JavaCore.setComplianceOptions(JavaCore.VERSION_9, options);
+	}
+
+	/**
+	 * Sets the compiler options to 10.
+	 * 
+	 * @param options the compiler options to configure
+	 * @since 3.14
+	 */
+	public static void set10CompilerOptions(Map<String, String> options) {
+		JavaCore.setComplianceOptions(JavaCore.VERSION_10, options);
 	}
 
 	/**
