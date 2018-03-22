@@ -366,7 +366,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	private static final String RETURN= "return"; //$NON-NLS-1$
 	private static String[] fgJava14Keywords= { "assert" }; //$NON-NLS-1$
 	private static String[] fgJava15Keywords= { "enum" }; //$NON-NLS-1$
-	private static String[] fgJava9ModuleInfoKeywords= { "module", "requires", "exports", "to", "provides", "with", "uses", "open", "opens", "transitive", "import" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$
+	private static String[] fgJava9ModuleInfoKeywords= { "module", "requires", "exports", "to", "provides", "with", "uses", "open", "opens", "transitive", "import", "static" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$
 
 	private static String[] fgTypes= { "void", "boolean", "char", "byte", "short", "strictfp", "int", "long", "float", "double" }; //$NON-NLS-1$ //$NON-NLS-5$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-8$ //$NON-NLS-9$  //$NON-NLS-10$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-2$
 
