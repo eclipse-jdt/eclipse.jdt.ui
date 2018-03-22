@@ -4327,7 +4327,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		boolean isJavaCodeMiningPreference= isJavaCodeMiningPreference(event.getProperty());
 		if (isJavaCodeMiningPreference) {
 			// It's a code mining preference, recompute the list of code mining providers.
-			installCodeMinigProviders();
+			installCodeMiningProviders();
 		}
 		return isJavaCodeMiningPreference;
 	}
