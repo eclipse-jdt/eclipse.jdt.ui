@@ -116,32 +116,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		private final Control fToggle;
 
 		public static Section create(Composite parentComposite, String label, String previewKey) {
-			final ExpandableComposite excomposite= new ExpandableComposite(parentComposite, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT) {
-				// don't expand/collapse when click on header label gives focus
-				boolean fHasFocusBeforeClick= false;
-				boolean fExpandLock= false;
-				{
-					textLabel.addListener(SWT.MouseEnter, e -> fHasFocusBeforeClick= toggle.isFocusControl());
-					textLabel.addListener(SWT.MouseDown, e -> fExpandLock= !fHasFocusBeforeClick || e.button != 1);
-				}
-
-				@Override
-				protected void internalSetExpanded(boolean expanded) {
-					if (fExpandLock) {
-						toggle.setExpanded(isExpanded());
-						fHasFocusBeforeClick= true;
-						fExpandLock= false;
-					} else {
-						super.internalSetExpanded(expanded);
-					}
-				}
-
-				@Override
-				public void setMenu(Menu menu) {
-					// add only to header, not the rest of the composite
-					textLabel.setMenu(menu);
-				}
-			};
+			final ExpandableComposite excomposite= new FormatterPreferenceSectionComposite(parentComposite, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
 			excomposite.clientVerticalSpacing= 0;
 			excomposite.setText(label);
 			excomposite.setExpanded(false);

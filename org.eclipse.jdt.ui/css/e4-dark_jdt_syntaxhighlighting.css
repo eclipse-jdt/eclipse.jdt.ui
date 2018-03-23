@@ -105,3 +105,9 @@ BulletListBlock > StyledText {
     background-color: #3f4447;
     color: #BBBBBB;
 }
+
+FormatterPreferenceSectionComposite {
+    background-color:#515658;
+    color:#eeeeee;
+    swt-titlebar-color: #cccccc;
+}
