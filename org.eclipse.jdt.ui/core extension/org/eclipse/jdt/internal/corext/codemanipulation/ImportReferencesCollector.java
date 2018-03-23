@@ -206,7 +206,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 	 */
 	@Override
 	public boolean visit(SimpleType node) {
-		if (!node.isVar()) {
+		if (node.getAST().apiLevel() < AST.JLS10 || !node.isVar()) {
 			typeRefFound(node.getName());
 		}
 		visitAnnotations(node);
