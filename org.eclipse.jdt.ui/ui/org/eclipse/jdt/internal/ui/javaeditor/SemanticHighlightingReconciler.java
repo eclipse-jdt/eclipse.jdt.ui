@@ -31,6 +31,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IWorkbenchPartSite;
 
 import org.eclipse.jdt.core.ITypeRoot;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
@@ -162,7 +163,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 
 		@Override
 		public boolean visit(SimpleType node) {
-			if (node.isVar()) {
+			if (node.getAST().apiLevel() >= AST.JLS10 && node.isVar()) {
 				int offset= node.getStartPosition();
 				int length= node.getLength();
 				if (offset > -1 && length > 0) {
@@ -175,7 +176,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 					}
 				}
 			}
-			return false;
+			return true;
 		}
 
 		/*
