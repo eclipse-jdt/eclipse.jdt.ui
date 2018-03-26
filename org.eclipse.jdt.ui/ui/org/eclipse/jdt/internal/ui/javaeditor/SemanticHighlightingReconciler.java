@@ -171,7 +171,7 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 						SemanticHighlighting semanticHighlighting= fJobSemanticHighlightings[i];
 						if (semanticHighlighting instanceof VarKeywordHighlighting) {
 							addPosition(offset, length, fJobHighlightings[i]);
-							break;
+							return false;
 						}
 					}
 				}
