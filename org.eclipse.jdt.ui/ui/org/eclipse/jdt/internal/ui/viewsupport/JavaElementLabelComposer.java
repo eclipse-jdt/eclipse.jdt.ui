@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -865,7 +865,11 @@ public class JavaElementLabelComposer {
 				break;
 			case Signature.INTERSECTION_TYPE_SIGNATURE:
 				String[] typeBounds= Signature.getIntersectionTypeBounds(typeSig);
-				appendTypeBoundsSignaturesLabel(enclosingElement, typeBounds, flags);
+				appendTypeBoundsSignaturesLabel(enclosingElement, typeBounds, flags, false);
+				break;
+			case Signature.UNION_TYPE_SIGNATURE:
+				typeBounds= Signature.getUnionTypeBounds(typeSig);
+				appendTypeBoundsSignaturesLabel(enclosingElement, typeBounds, flags, true);
 				break;
 			default:
 				// unknown
@@ -908,10 +912,14 @@ public class JavaElementLabelComposer {
 		}
 	}
 
-	private void appendTypeBoundsSignaturesLabel(IJavaElement enclosingElement, String[] typeArgsSig, long flags) {
+	private void appendTypeBoundsSignaturesLabel(IJavaElement enclosingElement, String[] typeArgsSig, long flags, boolean isIntersection) {
 		for (int i = 0; i < typeArgsSig.length; i++) {
 			if (i > 0) {
-				fBuffer.append(" | "); //$NON-NLS-1$
+				if (isIntersection) {
+					fBuffer.append(" & "); //$NON-NLS-1$
+				} else {
+					fBuffer.append(" | "); //$NON-NLS-1$
+				}
 			}
 			appendTypeSignatureLabel(enclosingElement, typeArgsSig[i], flags);
 		}
