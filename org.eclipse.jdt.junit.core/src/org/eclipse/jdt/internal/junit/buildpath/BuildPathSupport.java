@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -334,7 +334,7 @@ public class BuildPathSupport {
 			JUnitPreferencesConstants.JUNIT_PLATFORM_SUITE_API_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_VINTAGE_ENGINE_PLUGIN= new JUnitPluginDescription(
-			"org.junit.vintage.engine", new VersionRange("[4.12.0,5.0.0)"), "org.junit.vintage.engine.jar", "", "org.junit.vintage.engine.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
+			"org.junit.vintage.engine", new VersionRange("[4.12.0,6.0.0)"), "org.junit.vintage.engine.jar", "", "org.junit.vintage.engine.source", "", //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$//$NON-NLS-5$//$NON-NLS-6$
 			JUnitPreferencesConstants.JUNIT_VINTAGE_ENGINE_JAVADOC);
 
 	public static final JUnitPluginDescription JUNIT_OPENTEST4J_PLUGIN= new JUnitPluginDescription(
