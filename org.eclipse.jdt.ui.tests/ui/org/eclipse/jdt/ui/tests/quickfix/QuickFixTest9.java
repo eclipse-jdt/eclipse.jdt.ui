@@ -169,4 +169,26 @@ public class QuickFixTest9 extends QuickFixTest {
 
 		assertProposalExists(proposals, proposalStr);
 	}
+	
+	public void testAddNewTypeProposals() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("  exports test.examples;");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		ICompilationUnit cu= def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot, 1, 0);
+
+		String[] args= { "test.examples" };
+		String proposalStr= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewclass_inpackage_description, args);
+		assertProposalExists(proposals, proposalStr);
+		proposalStr= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewinterface_inpackage_description, args);
+		assertProposalExists(proposals, proposalStr);
+		proposalStr= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewannotation_inpackage_description, args);
+		assertProposalExists(proposals, proposalStr);
+		proposalStr= Messages.format(CorrectionMessages.NewCUCompletionUsingWizardProposal_createnewenum_inpackage_description, args);
+		assertProposalExists(proposals, proposalStr);
+	}
 }

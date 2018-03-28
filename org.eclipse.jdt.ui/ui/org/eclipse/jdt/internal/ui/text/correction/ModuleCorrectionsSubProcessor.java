@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IModuleDescription;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -56,6 +57,7 @@ import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
 
 public class ModuleCorrectionsSubProcessor {
 
@@ -79,6 +81,40 @@ public class ModuleCorrectionsSubProcessor {
 		}
 	}
 
+
+	public static void getPackageDoesNotExistProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode == null) {
+			return;
+		}
+		Name node= null;
+		if (selectedNode instanceof Name) {
+			node= (Name) selectedNode;
+		} else {
+			return;
+		}
+
+		IJavaProject javaProject= cu.getJavaProject();
+
+		IModuleDescription moduleDescription= cu.getModule();
+		if (moduleDescription != null && moduleDescription.exists()
+				&& javaProject != null && JavaModelUtil.is9OrHigher(javaProject)) {
+			ICompilationUnit moduleCompilationUnit= moduleDescription.getCompilationUnit();
+			if (cu.equals(moduleCompilationUnit)) {
+				IPackageFragmentRoot root= (IPackageFragmentRoot) moduleDescription.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+				if (root != null) {
+					String name= node.getFullyQualifiedName();
+					IPackageFragment pack= root.getPackageFragment(name);
+					proposals.add(new NewCUUsingWizardProposal(cu, null, NewCUUsingWizardProposal.K_CLASS, pack, IProposalRelevance.NEW_TYPE));
+					proposals.add(new NewCUUsingWizardProposal(cu, null, NewCUUsingWizardProposal.K_INTERFACE, pack, IProposalRelevance.NEW_TYPE));
+					proposals.add(new NewCUUsingWizardProposal(cu, null, NewCUUsingWizardProposal.K_ENUM, pack, IProposalRelevance.NEW_TYPE));
+					proposals.add(new NewCUUsingWizardProposal(cu, null, NewCUUsingWizardProposal.K_ANNOTATION, pack, IProposalRelevance.NEW_TYPE));
+				}
+
+			}
+		}
+	}
 
 	public static void getUndefinedModuleProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();

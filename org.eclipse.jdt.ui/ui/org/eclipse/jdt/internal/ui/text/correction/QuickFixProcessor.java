@@ -289,6 +289,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalAnnotationForBaseType:
 			case IProblem.MissingNonNullByDefaultAnnotationOnPackage:
 			case IProblem.UndefinedModule:
+			case IProblem.PackageDoesNotExistOrIsEmpty:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -811,6 +812,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.UndefinedModule:
 				ModuleCorrectionsSubProcessor.getUndefinedModuleProposals(context, problem, proposals);
+				break;
+			case IProblem.PackageDoesNotExistOrIsEmpty:
+				ModuleCorrectionsSubProcessor.getPackageDoesNotExistProposals(context, problem, proposals);
 				break;
 			default:
 		}
