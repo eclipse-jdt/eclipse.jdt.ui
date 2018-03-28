@@ -52,7 +52,7 @@ IEclipsePreferences#org-eclipse-jdt-ui:org-eclipse-jdt-ui { /* pseudo attribute 
 		'semanticHighlighting.annotationElementReference.enabled=true'
 		'semanticHighlighting.class.color=18,144,195'
 		'semanticHighlighting.class.enabled=true'
-		'semanticHighlighting.deprecatedMember.color=171,31,54'
+		'semanticHighlighting.deprecatedMember.color=128,128,128'
 		'semanticHighlighting.deprecatedMember.enabled=true'
 		'semanticHighlighting.deprecatedMember.underline=false'
 		'semanticHighlighting.deprecatedMember.strikethrough=true'
