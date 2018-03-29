@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,13 +16,16 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.SimpleName;
 
@@ -30,6 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -37,6 +41,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -116,11 +121,16 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 			try {
 				JavaTextSelection javaTextSelection= (JavaTextSelection)selection;
 				IJavaElement[] elements= javaTextSelection.resolveElementAtOffset();
-				if (elements.length == 1) {
-					setEnabled(RefactoringAvailabilityTester.isRenameElementAvailable(elements[0]));
-				} else {
-					ASTNode node= javaTextSelection.resolveCoveringNode();
-					setEnabled(node instanceof SimpleName);
+				if (isVarTypeSelection(javaTextSelection)) {
+					setEnabled(false);
+				}
+				else {
+					if (elements.length == 1) {
+						setEnabled(RefactoringAvailabilityTester.isRenameElementAvailable(elements[0]));						
+					} else {
+						ASTNode node= javaTextSelection.resolveCoveringNode();
+						setEnabled(node instanceof SimpleName);
+					}
 				}
 			} catch (CoreException e) {
 				setEnabled(false);
@@ -134,7 +144,7 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isEditable(fEditor))
 			return;
-		if (canRunInEditor())
+		if (canRunInEditor() && !isVarTypeSelection(selection))
 			doRun();
 		else
 			MessageDialog.openInformation(getShell(), RefactoringMessages.RenameAction_rename, RefactoringMessages.RenameAction_unavailable);
@@ -213,5 +223,24 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		} else {
 			RefactoringExecutionStarter.startRenameRefactoring(element, getShell());
 		}
+	}
+
+	private boolean isVarTypeSelection(ITextSelection textSelection) {
+		if (textSelection instanceof JavaTextSelection) {
+			ASTNode node= ((JavaTextSelection) textSelection).resolveCoveringNode();
+			if (node instanceof SimpleName && node.getAST().apiLevel() >= AST.JLS10 && ((SimpleName) node).isVar()) {
+				return true;
+			}
+		} else if (textSelection != null) {
+			ITypeRoot typeRoot= EditorUtility.getEditorInputJavaElement(fEditor, true);
+			if (typeRoot != null) {
+				IDocument document= JavaUI.getDocumentProvider().getDocument(fEditor.getEditorInput());
+				if (document != null) {
+					JavaTextSelection javaTextSelection= new JavaTextSelection(typeRoot, document, textSelection.getOffset(), textSelection.getLength());
+					return isVarTypeSelection(javaTextSelection);
+				}
+			}
+		}
+		return false;
 	}
 }
