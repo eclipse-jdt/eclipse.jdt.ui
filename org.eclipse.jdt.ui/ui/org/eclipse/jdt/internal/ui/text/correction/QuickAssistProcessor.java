@@ -3782,7 +3782,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (parent instanceof VariableDeclarationStatement) {
 				type= ((VariableDeclarationStatement) parent).getType();
 			} else if (parent instanceof VariableDeclarationExpression) {
-				type= ((VariableDeclarationExpression) parent).getType();
+				VariableDeclarationExpression varDecl= (VariableDeclarationExpression) parent;
+				// cannot convert a VariableDeclarationExpression with multiple fragments to var.
+				if (varDecl.fragments().size() > 1) {
+					return false;
+				}
+				type= varDecl.getType();
 			}
 		}
 

@@ -43,11 +43,11 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 public class TypeParametersFix extends CompilationUnitRewriteOperationsFix {
 
-	private static final class InsertTypeArgumentsVisitor extends ASTVisitor {
+	public static final class InsertTypeArgumentsVisitor extends ASTVisitor {
 
 		private final ArrayList<ASTNode> fNodes;
 
-		private InsertTypeArgumentsVisitor(ArrayList<ASTNode> nodes) {
+		public InsertTypeArgumentsVisitor(ArrayList<ASTNode> nodes) {
 			fNodes= nodes;
 		}
 

@@ -399,6 +399,45 @@ public class AssistQuickFixTest10 extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 
+	public void testChangeParametrizedTypeToVarTypeProposalDoesNotLoseTypeArguments() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("module test {\n");
+		buf.append("}\n");
+		IPackageFragment def= fSourceFolder.createPackageFragment("", false, null);
+		def.createCompilationUnit("module-info.java", buf.toString(), false, null);
+		
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		buf= new StringBuffer();
+		buf.append("package test;\n\n");
+		buf.append("import java.util.ArrayList;\n\n");
+		buf.append("public class Cls {\n");
+		buf.append(" {\n");
+		buf.append("    ArrayList<String> one= new ArrayList<>();\n");
+		buf.append(" }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack.createCompilationUnit("Cls.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("one");
+
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= getExpectedProposals(collectAssists(context, false), TYPE_CHANGE_PROPOSAL_TYPE);
+
+		assertNumberOfProposals(proposals, 1);
+
+		String preview= getPreviewContent((TypeChangeCorrectionProposal) proposals.get(0));
+		buf= new StringBuffer();
+		buf.append("package test;\n\n");
+		buf.append("import java.util.ArrayList;\n\n");
+		buf.append("public class Cls {\n");
+		buf.append(" {\n");
+		buf.append("    var one= new ArrayList<String>();\n");
+		buf.append(" }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+
+	}
+	
 	private static final ArrayList<IJavaCompletionProposal> getExpectedProposals(ArrayList<IJavaCompletionProposal> proposals, Class<?>[] expectedTypes) {
 		ArrayList<IJavaCompletionProposal> expected= new ArrayList<>(proposals);
 		if (expectedTypes != null && expectedTypes.length > 0) {
