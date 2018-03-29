@@ -2571,6 +2571,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		SimpleName name= (SimpleName) node;
+		if (name.isVar()) {
+			return false;
+		}
 		IBinding binding= name.resolveBinding();
 		if (binding != null && (binding.getKind() == IBinding.PACKAGE || binding.getKind() == IBinding.MODULE)) {
 			return false;
@@ -2606,6 +2609,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		SimpleName name= (SimpleName) node;
+		if (name.isVar()) {
+			return false;
+		}
 		IBinding binding= name.resolveBinding();
 		if (binding == null) {
 			return false;
