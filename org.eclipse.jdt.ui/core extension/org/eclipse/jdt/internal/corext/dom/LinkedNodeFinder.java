@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.dom;
 import java.util.ArrayList;
 
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.BreakStatement;
@@ -124,6 +125,9 @@ public class LinkedNodeFinder  {
 
 
 	public static SimpleName[] findByProblems(ASTNode parent, SimpleName nameNode) {
+		if (nameNode.getAST().apiLevel() >= AST.JLS10 && nameNode.isVar()) {
+			return null;
+		}
 		ArrayList<SimpleName> res= new ArrayList<>();
 
 		ASTNode astRoot = parent.getRoot();
@@ -152,7 +156,10 @@ public class LinkedNodeFinder  {
 				if ((nameNodeKind & currKind) != 0) {
 					ASTNode node= NodeFinder.perform(parent, probStart, (probEnd - probStart));
 					if (node instanceof SimpleName && name.equals(((SimpleName) node).getIdentifier())) {
-						res.add((SimpleName) node);
+						if (node instanceof SimpleName && name.equals(((SimpleName) node).getIdentifier())) {
+							if (node.getAST().apiLevel() < AST.JLS10 || !((SimpleName) node).isVar())
+								res.add((SimpleName) node);
+						}
 					}
 				}
 			}
@@ -222,6 +229,9 @@ public class LinkedNodeFinder  {
 
 		@Override
 		public boolean visit(SimpleName node) {
+			if (node.getAST().apiLevel() >= AST.JLS10 && node.isVar()) {
+				return false;
+			}
 			IBinding binding= node.resolveBinding();
 			if (binding == null) {
 				return false;
