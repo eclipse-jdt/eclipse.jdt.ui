@@ -36,6 +36,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.IBindingService;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.SimpleName;
 
@@ -129,7 +130,11 @@ public class CorrectionCommandHandler extends AbstractHandler {
 	private ICompletionProposal getLocalRenameProposal(IInvocationContext context) {
 		ASTNode node= context.getCoveringNode();
 		if (node instanceof SimpleName) {
-			return new LinkedNamesAssistProposal(context, (SimpleName) node);
+			SimpleName name= (SimpleName) node;
+			if (name.getAST().apiLevel() >= AST.JLS10 && name.isVar()) {
+				return null;
+			}
+			return new LinkedNamesAssistProposal(context, name);
 		}
 		return null;
 	}
