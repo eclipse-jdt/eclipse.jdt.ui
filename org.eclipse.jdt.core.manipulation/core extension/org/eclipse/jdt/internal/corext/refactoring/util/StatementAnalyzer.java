@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,12 +37,11 @@ import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationMessages;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 
 /**
  * Analyzer to check if a selection covers a valid set of statements of an abstract syntax
@@ -86,7 +85,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 						setSelection(Selection.createFromStartEnd(start, lastNodeEnd - 1));
 					} else {
 						ISourceRange range= new SourceRange(lastNodeEnd, pos - lastNodeEnd);
-						invalidSelection(RefactoringCoreMessages.StatementAnalyzer_end_of_selection, JavaStatusContext.create(fCUnit, range));
+						invalidSelection(JavaManipulationMessages.StatementAnalyzer_end_of_selection, JavaStatusContext.create(fCUnit, range));
 					}
 				}
 				return; // success
@@ -95,7 +94,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 			// fall through
 		}
 		ISourceRange range= new SourceRange(selectionOffset, node.getStartPosition() - selectionOffset + 1);
-		invalidSelection(RefactoringCoreMessages.StatementAnalyzer_beginning_of_selection, JavaStatusContext.create(fCUnit, range));
+		invalidSelection(JavaManipulationMessages.StatementAnalyzer_beginning_of_selection, JavaStatusContext.create(fCUnit, range));
 	}
 
 	public RefactoringStatus getStatus() {
@@ -132,7 +131,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode[] selectedNodes= getSelectedNodes();
 		if (doAfterValidation(node, selectedNodes)) {
 			if (contains(selectedNodes, node.getBody()) && contains(selectedNodes, node.getExpression())) {
-				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_do_body_expression);
+				invalidSelection(JavaManipulationMessages.StatementAnalyzer_do_body_expression);
 			}
 		}
 		super.endVisit(node);
@@ -145,11 +144,11 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 			boolean containsExpression= contains(selectedNodes, node.getExpression());
 			boolean containsUpdaters= contains(selectedNodes, node.updaters());
 			if (contains(selectedNodes, node.initializers()) && containsExpression) {
-				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_for_initializer_expression);
+				invalidSelection(JavaManipulationMessages.StatementAnalyzer_for_initializer_expression);
 			} else if (containsExpression && containsUpdaters) {
-				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_for_expression_updater);
+				invalidSelection(JavaManipulationMessages.StatementAnalyzer_for_expression_updater);
 			} else if (containsUpdaters && contains(selectedNodes, node.getBody())) {
-				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_for_updater_body);
+				invalidSelection(JavaManipulationMessages.StatementAnalyzer_for_updater_body);
 			}
 		}
 		super.endVisit(node);
@@ -163,7 +162,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 			for (int i= 0; i < selectedNodes.length; i++) {
 				ASTNode topNode= selectedNodes[i];
 				if (cases.contains(topNode)) {
-					invalidSelection(RefactoringCoreMessages.StatementAnalyzer_switch_statement);
+					invalidSelection(JavaManipulationMessages.StatementAnalyzer_switch_statement);
 					break;
 				}
 			}
@@ -176,7 +175,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode firstSelectedNode= getFirstSelectedNode();
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
 			if (firstSelectedNode == node.getBody()) {
-				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_synchronized_statement);
+				invalidSelection(JavaManipulationMessages.StatementAnalyzer_synchronized_statement);
 			}
 		}
 		super.endVisit(node);
@@ -187,15 +186,15 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode firstSelectedNode= getFirstSelectedNode();
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.AFTER) {
 			if (firstSelectedNode == node.getBody() || firstSelectedNode == node.getFinally()) {
-				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_try_statement);
+				invalidSelection(JavaManipulationMessages.StatementAnalyzer_try_statement);
 			} else {
 				List<CatchClause> catchClauses= node.catchClauses();
 				for (Iterator<CatchClause> iterator= catchClauses.iterator(); iterator.hasNext();) {
 					CatchClause element= iterator.next();
 					if (element == firstSelectedNode || element.getBody() == firstSelectedNode) {
-						invalidSelection(RefactoringCoreMessages.StatementAnalyzer_try_statement);
+						invalidSelection(JavaManipulationMessages.StatementAnalyzer_try_statement);
 					} else if (element.getException() == firstSelectedNode) {
-						invalidSelection(RefactoringCoreMessages.StatementAnalyzer_catch_argument);
+						invalidSelection(JavaManipulationMessages.StatementAnalyzer_catch_argument);
 					}
 				}
 			}
@@ -208,7 +207,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		ASTNode[] selectedNodes= getSelectedNodes();
 		if (doAfterValidation(node, selectedNodes)) {
 			if (contains(selectedNodes, node.getExpression()) && contains(selectedNodes, node.getBody())) {
-				invalidSelection(RefactoringCoreMessages.StatementAnalyzer_while_expression_body);
+				invalidSelection(JavaManipulationMessages.StatementAnalyzer_while_expression_body);
 			}
 		}
 		super.endVisit(node);

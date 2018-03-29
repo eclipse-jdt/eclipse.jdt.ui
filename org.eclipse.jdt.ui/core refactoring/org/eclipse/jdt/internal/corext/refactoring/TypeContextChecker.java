@@ -79,14 +79,15 @@ import org.eclipse.jdt.core.search.TypeNameMatch;
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
-import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
+
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -225,15 +225,7 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ClasspathChange_progress_message;
 
-	public static String CodeAnalyzer_array_initializer;
-
 	public static String CodeRefactoringUtil_error_message;
-
-	public static String CommentAnalyzer_ends_inside_comment;
-
-	public static String CommentAnalyzer_internal_error;
-
-	public static String CommentAnalyzer_starts_inside_comment;
 
 	public static String CompilationUnitChange_label;
 
@@ -2289,29 +2281,7 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String SourceCreationOperation_creating_source_folder;
 
-	public static String StatementAnalyzer_beginning_of_selection;
-
-	public static String StatementAnalyzer_catch_argument;
-
-	public static String StatementAnalyzer_do_body_expression;
-
 	public static String StatementAnalyzer_doesNotCover;
-
-	public static String StatementAnalyzer_end_of_selection;
-
-	public static String StatementAnalyzer_for_expression_updater;
-
-	public static String StatementAnalyzer_for_initializer_expression;
-
-	public static String StatementAnalyzer_for_updater_body;
-
-	public static String StatementAnalyzer_switch_statement;
-
-	public static String StatementAnalyzer_synchronized_statement;
-
-	public static String StatementAnalyzer_try_statement;
-
-	public static String StatementAnalyzer_while_expression_body;
 
 	public static String StubCreationOperation_creating_type_stubs;
 
@@ -2327,17 +2297,7 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String SuperTypeRefactoringProcessor_user_supertype_setting;
 
-	public static String SurroundWithTryCatchAnalyzer_cannotHandleSuper;
-
-	public static String SurroundWithTryCatchAnalyzer_cannotHandleThis;
-
-	public static String SurroundWithTryCatchAnalyzer_compile_errors;
-
 	public static String SurroundWithTryCatchAnalyzer_doesNotContain;
-
-	public static String SurroundWithTryCatchAnalyzer_doesNotCover;
-
-	public static String SurroundWithTryCatchAnalyzer_onlyStatements;
 
 	public static String SurroundWithTryCatchRefactoring_name;
 

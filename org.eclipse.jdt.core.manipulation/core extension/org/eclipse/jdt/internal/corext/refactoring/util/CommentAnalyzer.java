@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,8 +19,8 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationMessages;
 import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 public class CommentAnalyzer {
 
@@ -49,18 +49,18 @@ public class CommentAnalyzer {
 					case ITerminalSymbols.TokenNameCOMMENT_BLOCK:
 					case ITerminalSymbols.TokenNameCOMMENT_JAVADOC:
 						if (checkStart(scanner, selection.getOffset())) {
-							result.addFatalError(RefactoringCoreMessages.CommentAnalyzer_starts_inside_comment);
+							result.addFatalError(JavaManipulationMessages.CommentAnalyzer_starts_inside_comment);
 							break loop;
 						}
 						if (checkEnd(scanner, selection.getInclusiveEnd())) {
-							result.addFatalError(RefactoringCoreMessages.CommentAnalyzer_ends_inside_comment);
+							result.addFatalError(JavaManipulationMessages.CommentAnalyzer_ends_inside_comment);
 							break loop;
 						}
 						break;
 				}
 			}
 		} catch (InvalidInputException e) {
-			result.addFatalError(RefactoringCoreMessages.CommentAnalyzer_internal_error);
+			result.addFatalError(JavaManipulationMessages.CommentAnalyzer_internal_error);
 		}
 	}
 

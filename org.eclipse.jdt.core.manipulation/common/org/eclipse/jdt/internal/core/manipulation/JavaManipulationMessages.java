@@ -31,4 +31,29 @@ public class JavaManipulationMessages extends NLS {
 	public static String JavaModelUtil_applyedit_operation;
 	public static String Resources_fileModified;
 	public static String Resources_modifiedResources;
+
+	public static String CodeAnalyzer_array_initializer;
+
+	public static String CommentAnalyzer_starts_inside_comment;
+	public static String CommentAnalyzer_ends_inside_comment;
+	public static String CommentAnalyzer_internal_error;
+
+	public static String StatementAnalyzer_end_of_selection;
+	public static String StatementAnalyzer_beginning_of_selection;
+	public static String StatementAnalyzer_do_body_expression;
+	public static String StatementAnalyzer_for_initializer_expression;
+	public static String StatementAnalyzer_for_expression_updater;
+	public static String StatementAnalyzer_for_updater_body;
+	public static String StatementAnalyzer_switch_statement;
+	public static String StatementAnalyzer_synchronized_statement;
+	public static String StatementAnalyzer_try_statement;
+	public static String StatementAnalyzer_catch_argument;
+	public static String StatementAnalyzer_while_expression_body;
+
+	public static String SurroundWithTryCatchAnalyzer_compile_errors;
+	public static String SurroundWithTryCatchAnalyzer_doesNotContain;
+	public static String SurroundWithTryCatchAnalyzer_doesNotCover;
+	public static String SurroundWithTryCatchAnalyzer_cannotHandleThis;
+	public static String SurroundWithTryCatchAnalyzer_cannotHandleSuper;
+	public static String SurroundWithTryCatchAnalyzer_onlyStatements;
 }

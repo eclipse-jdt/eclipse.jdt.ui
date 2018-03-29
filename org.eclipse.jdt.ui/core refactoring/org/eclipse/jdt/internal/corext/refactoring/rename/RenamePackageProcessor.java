@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -83,7 +83,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenamePackageChange;
@@ -96,6 +95,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.Changes;
 import org.eclipse.jdt.internal.corext.refactoring.util.CommentAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;

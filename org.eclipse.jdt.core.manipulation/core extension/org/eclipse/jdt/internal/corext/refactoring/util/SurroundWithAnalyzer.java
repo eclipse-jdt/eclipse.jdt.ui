@@ -1,6 +1,6 @@
 /*******************************************************************************
 
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.surround;
+package org.eclipse.jdt.internal.corext.refactoring.util;
 
 import java.util.List;
 
@@ -32,12 +32,10 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationMessages;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 
 public class SurroundWithAnalyzer extends CodeAnalyzer {
 
@@ -86,12 +84,12 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 					Block block= (Block)coveringNode;
 					Message[] messages= ASTNodes.getMessages(block, ASTNodes.NODE_ONLY);
 					if (messages.length > 0) {
-						invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_compile_errors,
+						invalidSelection(JavaManipulationMessages.SurroundWithTryCatchAnalyzer_compile_errors,
 							JavaStatusContext.create(getCompilationUnit(), block));
 						break superCall;
 					}
 				}
-				invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_doesNotCover);
+				invalidSelection(JavaManipulationMessages.SurroundWithTryCatchAnalyzer_doesNotCover);
 				break superCall;
 			}
 			enclosingNode= getEnclosingNode(getFirstSelectedNode());
@@ -100,11 +98,11 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 				isValidEnclosingNode= isValidEnclosingNode || enclosingNode instanceof MethodReference || enclosingNode.getLocationInParent() == LambdaExpression.BODY_PROPERTY;
 			}
 			if (!isValidEnclosingNode) {
-				invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_doesNotContain);
+				invalidSelection(JavaManipulationMessages.SurroundWithTryCatchAnalyzer_doesNotContain);
 				break superCall;
 			}
 			if (!validSelectedNodes()) {
-				invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_onlyStatements);
+				invalidSelection(JavaManipulationMessages.SurroundWithTryCatchAnalyzer_onlyStatements);
 			}
 			fLocals= LocalDeclarationAnalyzer.perform(enclosingNode, getSelection());
 		}
@@ -114,7 +112,7 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 	@Override
 	public void endVisit(SuperConstructorInvocation node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
-			invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_cannotHandleSuper, JavaStatusContext.create(fCUnit, node));
+			invalidSelection(JavaManipulationMessages.SurroundWithTryCatchAnalyzer_cannotHandleSuper, JavaStatusContext.create(fCUnit, node));
 		}
 		super.endVisit(node);
 	}
@@ -122,7 +120,7 @@ public class SurroundWithAnalyzer extends CodeAnalyzer {
 	@Override
 	public void endVisit(ConstructorInvocation node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
-			invalidSelection(RefactoringCoreMessages.SurroundWithTryCatchAnalyzer_cannotHandleThis, JavaStatusContext.create(fCUnit, node));
+			invalidSelection(JavaManipulationMessages.SurroundWithTryCatchAnalyzer_cannotHandleThis, JavaStatusContext.create(fCUnit, node));
 		}
 		super.endVisit(node);
 	}

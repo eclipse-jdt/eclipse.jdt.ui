@@ -62,10 +62,10 @@ import org.eclipse.jdt.core.manipulation.ImportReferencesCollector;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 
 class SourceAnalyzer  {
 
