@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,9 @@ import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
+import org.eclipse.core.resources.ProjectScope;
+
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -97,6 +101,19 @@ public class FormatterProfileManager extends ProfileManager {
 		return getEclipseSettings();
 	}
 
+	public static Map<String, String> getProjectSettings(IJavaProject javaProject) {
+		Map<String, String> options= new HashMap<>(javaProject.getOptions(true));
+		ProfileVersioner versioner= new ProfileVersioner();
+		IEclipsePreferences prefs= new ProjectScope(javaProject.getProject()).getNode(JavaUI.ID_PLUGIN);
+		if (prefs == null)
+			return options;
+		int profileVersion= prefs.getInt(FORMATTER_SETTINGS_VERSION, versioner.getCurrentVersion());
+		if (profileVersion == versioner.getCurrentVersion())
+			return options;
+		CustomProfile profile= new CustomProfile(null, options, profileVersion, null);
+		versioner.update(profile);
+		return profile.getSettings();
+	}
 
 	@Override
 	protected String getSelectedProfileId(IScopeContext instanceScope) {

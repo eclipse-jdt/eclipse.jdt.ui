@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ChangeMethodSignatureDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.IntroduceParameterDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -96,7 +97,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 
 
 public class IntroduceParameterRefactoring extends Refactoring implements IDelegateUpdating {
@@ -285,7 +286,8 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 				AST ast= cuRewrite.getAST();				
 				Type type= importRewrite.addImport(typeBinding, ast, importRewriteContext);				
 				classInstanceCreation.setType(type);    // Should not touch the original AST ...
-				defaultValue= ASTNodes.asFormattedString(classInstanceCreation,  0, StubUtility.getLineDelimiterUsed(cuRewrite.getCu()), cuRewrite.getCu().getJavaProject().getOptions(true));
+				defaultValue= ASTNodes.asFormattedString(classInstanceCreation, 0, StubUtility.getLineDelimiterUsed(cuRewrite.getCu()),
+						FormatterProfileManager.getProjectSettings(cuRewrite.getCu().getJavaProject()));
 				classInstanceCreation.setType(cicType); // ... so let's restore it right away.
 			}
 		}

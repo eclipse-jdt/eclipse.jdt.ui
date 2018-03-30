@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2013 GK Software AG and others.
+ * Copyright (c) 2012, 2018 GK Software AG and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 
 
 /**
@@ -278,7 +279,7 @@ public class ExtractToNullCheckedLocalProposal extends LinkedCorrectionProposal 
 			Type returnType= newType(((ReturnStatement)origStmt).getExpression().resolveTypeBinding(), ast, imports);
 			ReturnStatement returnStatement= ast.newReturnStatement();
 			returnStatement.setExpression(ASTNodeFactory.newDefaultExpression(ast, returnType, 0));
-			elseStatement+= '\n'+ASTNodes.asFormattedString(returnStatement, 0, String.valueOf('\n'), getCompilationUnit().getJavaProject().getOptions(true));
+			elseStatement+= '\n' + ASTNodes.asFormattedString(returnStatement, 0, String.valueOf('\n'), FormatterProfileManager.getProjectSettings(getCompilationUnit().getJavaProject()));
 		}
 
 		EmptyStatement todoNode= (EmptyStatement) rewrite.createStringPlaceholder(elseStatement, ASTNode.EMPTY_STATEMENT);

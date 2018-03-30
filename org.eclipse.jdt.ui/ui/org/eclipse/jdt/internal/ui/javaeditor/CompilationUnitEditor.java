@@ -135,6 +135,7 @@ import org.eclipse.jdt.internal.ui.actions.RemoveBlockCommentAction;
 import org.eclipse.jdt.internal.ui.actions.SurroundWithActionGroup;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
 import org.eclipse.jdt.internal.ui.preferences.SaveParticipantPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
@@ -237,7 +238,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			if (javaProject == null)
 				preferences= new HashMap<>(JavaCore.getOptions());
 			else
-				preferences= new HashMap<>(javaProject.getOptions(true));
+				preferences= FormatterProfileManager.getProjectSettings(javaProject);
 
 			context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, preferences);
 			context.setProperty(JavaFormattingContext.KEY_SOURCE_PATH, inputJavaElement != null ? inputJavaElement.getPath().toString() : null);

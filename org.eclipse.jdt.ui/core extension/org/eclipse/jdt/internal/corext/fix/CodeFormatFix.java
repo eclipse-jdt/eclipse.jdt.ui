@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -48,6 +47,7 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.IndentAction;
 import org.eclipse.jdt.internal.ui.fix.MultiFixMessages;
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 
 public class CodeFormatFix implements ICleanUpFix {
 
@@ -59,7 +59,7 @@ public class CodeFormatFix implements ICleanUpFix {
 
 		MultiTextEdit formatEdit= new MultiTextEdit();
 		if (format) {
-			Map<String, String> formatterSettings= new HashMap<>(cu.getJavaProject().getOptions(true));
+			Map<String, String> formatterSettings= FormatterProfileManager.getProjectSettings(cu.getJavaProject());
 
 			String content= cu.getBuffer().getContents();
 			Document document= new Document(content);

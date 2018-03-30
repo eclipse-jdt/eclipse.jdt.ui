@@ -57,6 +57,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
+
 /**
  * Workspace runnable to add accessor methods to fields.
  *
@@ -151,7 +153,9 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 */
 	private void addNewAccessor(final IType type, final IField field, final String contents, final ListRewrite rewrite, final ASTNode insertion) throws JavaModelException {
 		final String delimiter= StubUtility.getLineDelimiterUsed(type);
-		final MethodDeclaration declaration= (MethodDeclaration) rewrite.getASTRewrite().createStringPlaceholder(CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, contents, 0, delimiter, field.getJavaProject()), ASTNode.METHOD_DECLARATION);
+		final MethodDeclaration declaration= (MethodDeclaration) rewrite.getASTRewrite().createStringPlaceholder(
+				CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, contents, 0, delimiter, FormatterProfileManager.getProjectSettings(field.getJavaProject())),
+				ASTNode.METHOD_DECLARATION);
 		if (insertion != null)
 			rewrite.insertBefore(declaration, insertion, null);
 		else

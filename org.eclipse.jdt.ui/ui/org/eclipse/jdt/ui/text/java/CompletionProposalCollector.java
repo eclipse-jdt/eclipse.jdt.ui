@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.corext.util.CollectionsUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 import org.eclipse.jdt.internal.ui.text.java.AnnotationAtttributeProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.AnonymousTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.AnonymousTypeProposalInfo;
@@ -743,7 +744,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 */
 	private IJavaCompletionProposal createFieldWithCastedReceiverProposal(CompletionProposal proposal) {
 		String completion= String.valueOf(proposal.getCompletion());
-		completion= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, completion, 0, "\n", fJavaProject); //$NON-NLS-1$
+		completion= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, completion, 0, "\n", FormatterProfileManager.getProjectSettings(fJavaProject)); //$NON-NLS-1$
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
 		StyledString label= fLabelProvider.createStyledLabel(proposal);

@@ -74,13 +74,14 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperat
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
 
 /**
  * Utilities for code generation based on AST rewrite.
@@ -162,7 +163,7 @@ public final class StubUtility2 {
 				varDecl= iterator.next();
 				invocation.arguments().add(ast.newSimpleName(varDecl.getName().getIdentifier()));
 			}
-			bodyStatement= ASTNodes.asFormattedString(invocation, 0, delimiter, unit.getJavaProject().getOptions(true));
+			bodyStatement= ASTNodes.asFormattedString(invocation, 0, delimiter, FormatterProfileManager.getProjectSettings(unit.getJavaProject()));
 		}
 
 		if (todo) {
@@ -393,7 +394,7 @@ public final class StubUtility2 {
 		if (!inInterface || (declaringType != typeObject && JavaModelUtil.is18OrHigher(javaProject))) {
 			// generate a method body
 
-			Map<String, String> options= javaProject.getOptions(true);
+			Map<String, String> options= FormatterProfileManager.getProjectSettings(javaProject);
 
 			Block body= ast.newBlock();
 			decl.setBody(body);
