@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
+
+import java.util.ArrayList;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -35,6 +37,8 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 /**
  * Java element declared type hyperlink for variables.
@@ -125,31 +129,53 @@ public class JavaElementDeclaredTypeHyperlink implements IHyperlink {
 			typeSignature= Signature.getElementType(typeSignature);
 		} else if (kind == Signature.CLASS_TYPE_SIGNATURE) {
 			typeSignature= Signature.getTypeErasure(typeSignature);
+		} else if (kind == Signature.UNION_TYPE_SIGNATURE) {
+			String[] typeBounds= Signature.getUnionTypeBounds(typeSignature);
+			ArrayList<IType> types= new ArrayList<>();
+			for (int i= 0; i < typeBounds.length; i++) {
+				String typeErasure= Signature.getTypeErasure(typeBounds[i]);
+				IType type= getType(typeErasure);
+				if (type != null) {
+					types.add(type);
+				}
+			}
+			if (types.size() > 0) {
+				IJavaElement element= SelectionConverter.selectJavaElement(types.toArray(new IType[types.size()]), fOpenAction.getShell(), ActionMessages.OpenAction_error_title, ActionMessages.OpenAction_select_element);
+				if (element != null) {
+					fOpenAction.run(new StructuredSelection(element));
+				}
+				return;
+			}
 		}
+
+		IType type= getType(typeSignature);
+		if (type != null) {
+			fOpenAction.run(new StructuredSelection(type));
+			return;
+		}
+		openElementAndShowErrorInStatusLine();
+	}
+
+	private IType getType(String typeSignature) {
 		String typeName= Signature.toString(typeSignature);
 
 		IJavaElement parent= fElement.getAncestor(IJavaElement.TYPE);
 		if (parent == null) {
-			openElementAndShowErrorInStatusLine();
-			return;
+			return null;
 		}
+		IType type= null;
 		try {
 			String[][] resolvedType= ((IType)parent).resolveType(typeName);
 			if (resolvedType == null || resolvedType.length == 0) {
-				openElementAndShowErrorInStatusLine();
-				return;
+				return null;
 			}
 			String qualTypeName= JavaModelUtil.concatenateName(resolvedType[0][0], resolvedType[0][1]);
-			IType type= fElement.getJavaProject().findType(qualTypeName, (IProgressMonitor)null);
-			if (type != null) {
-				fOpenAction.run(new StructuredSelection(type));
-				return;
-			}
-			openElementAndShowErrorInStatusLine();
+			type= fElement.getJavaProject().findType(qualTypeName, (IProgressMonitor)null);
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-			return;
+			return null;
 		}
+		return type;
 	}
 
 	/**
