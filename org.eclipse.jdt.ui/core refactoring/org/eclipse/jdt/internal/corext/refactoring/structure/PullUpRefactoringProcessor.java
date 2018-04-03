@@ -23,6 +23,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -353,10 +354,10 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	}
 
 	private static void mergeMaps(final Map<IMember, Set<IMember>> result, final Map<IMember, Set<IMember>> map) {
-		for (final Iterator<IMember> iter= result.keySet().iterator(); iter.hasNext();) {
-			final IMember key= iter.next();
+		for (final Entry<IMember, Set<IMember>> entry : result.entrySet()) {
+			final IMember key= entry.getKey();
 			if (map.containsKey(key)) {
-				final Set<IMember> resultSet= result.get(key);
+				final Set<IMember> resultSet= entry.getValue();
 				final Set<IMember> mapSet= map.get(key);
 				resultSet.addAll(mapSet);
 			}
@@ -364,10 +365,10 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	}
 
 	private static void upgradeMap(final Map<IMember, Set<IMember>> result, final Map<IMember, Set<IMember>> map) {
-		for (final Iterator<IMember> iter= map.keySet().iterator(); iter.hasNext();) {
-			final IMember key= iter.next();
+		for (final Entry<IMember, Set<IMember>> entry : map.entrySet()) {
+			final IMember key= entry.getKey();
 			if (!result.containsKey(key)) {
-				final Set<IMember> mapSet= map.get(key);
+				final Set<IMember> mapSet= entry.getValue();
 				final Set<IMember> resultSet= new HashSet<>(mapSet);
 				result.put(key, resultSet);
 			}
@@ -1233,10 +1234,10 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				adjustor.rewriteVisibility(new SubProgressMonitor(monitor, 1));
 			final TextEditBasedChangeManager manager= new TextEditBasedChangeManager();
 			if (fReplace) {
-				final Set<ICompilationUnit> set= fCompilationUnitRewrites.keySet();
-				for (final Iterator<ICompilationUnit> iterator= set.iterator(); iterator.hasNext();) {
-					ICompilationUnit unit= iterator.next();
-					CompilationUnitRewrite rewrite= fCompilationUnitRewrites.get(unit);
+				final Set<Entry<ICompilationUnit, CompilationUnitRewrite>> entrySet= fCompilationUnitRewrites.entrySet();
+				for (final Entry<ICompilationUnit, CompilationUnitRewrite> entry : entrySet) {
+					ICompilationUnit unit= entry.getKey();
+					CompilationUnitRewrite rewrite= entry.getValue();
 					if (rewrite != null) {
 						final CompilationUnitChange change= rewrite.createChange(false);
 						if (change != null)
@@ -1248,9 +1249,9 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 				final Map<ICompilationUnit, ICompilationUnit> workingcopies= new HashMap<>();
 				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
 				try {
-					subMonitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, set.size());
-					for (final Iterator<ICompilationUnit> iterator= set.iterator(); iterator.hasNext();) {
-						ICompilationUnit unit= iterator.next();
+					subMonitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, entrySet.size());
+					for (final Entry<ICompilationUnit, CompilationUnitRewrite> entry : entrySet) {
+						ICompilationUnit unit= entry.getKey();
 						change= manager.get(unit);
 						if (change instanceof TextChange) {
 							edit= ((TextChange) change).getEdit();
@@ -1824,15 +1825,12 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	}
 
 	protected void registerChanges(final TextEditBasedChangeManager manager) throws CoreException {
-		ICompilationUnit unit= null;
-		CompilationUnitRewrite rewrite= null;
-		for (final Iterator<ICompilationUnit> iterator= fCompilationUnitRewrites.keySet().iterator(); iterator.hasNext();) {
-			unit= iterator.next();
-			rewrite= fCompilationUnitRewrites.get(unit);
+		for (final Entry<ICompilationUnit, CompilationUnitRewrite> entry : fCompilationUnitRewrites.entrySet()) {
+			CompilationUnitRewrite rewrite= entry.getValue();
 			if (rewrite != null) {
 				final CompilationUnitChange change= rewrite.createChange(true);
 				if (change != null)
-					manager.manage(unit, change);
+					manager.manage(entry.getKey(), change);
 			}
 		}
 	}
