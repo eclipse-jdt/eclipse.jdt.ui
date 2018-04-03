@@ -265,8 +265,8 @@ public class EditorTestHelper {
 
 	public static void joinBackgroundActivities() throws CoreException {
 		// Join Building
-		Logger.global.entering("EditorTestHelper", "joinBackgroundActivities");
-		Logger.global.finer("join builder");
+		Logger.getGlobal().entering("EditorTestHelper", "joinBackgroundActivities");
+		Logger.getGlobal().finer("join builder");
 		boolean interrupted= true;
 		while (interrupted) {
 			try {
@@ -277,7 +277,7 @@ public class EditorTestHelper {
 			}
 		}
 		// Join indexing
-		Logger.global.finer("join indexer");
+		Logger.getGlobal().finer("join indexer");
 		new SearchEngine().searchAllTypeNames(
 				null,
 				SearchPattern.R_EXACT_MATCH,
@@ -290,11 +290,11 @@ public class EditorTestHelper {
 				null);
 		// Join jobs
 		joinJobs(0, 0, 500);
-		Logger.global.exiting("EditorTestHelper", "joinBackgroundActivities");
+		Logger.getGlobal().exiting("EditorTestHelper", "joinBackgroundActivities");
 	}
 
 	public static boolean joinJobs(long minTime, long maxTime, long intervalTime) {
-		Logger.global.entering("EditorTestHelper", "joinJobs");
+		Logger.getGlobal().entering("EditorTestHelper", "joinJobs");
 		runEventQueue(minTime);
 
 		DisplayHelper helper= new DisplayHelper() {
@@ -304,7 +304,7 @@ public class EditorTestHelper {
 			}
 		};
 		boolean quiet= helper.waitForCondition(getActiveDisplay(), maxTime > 0 ? maxTime : Long.MAX_VALUE, intervalTime);
-		Logger.global.exiting("EditorTestHelper", "joinJobs", Boolean.valueOf(quiet));
+		Logger.getGlobal().exiting("EditorTestHelper", "joinJobs", Boolean.valueOf(quiet));
 		return quiet;
 	}
 
@@ -323,7 +323,7 @@ public class EditorTestHelper {
 			Job job= jobs[i];
 			int state= job.getState();
 			if (state == Job.RUNNING || state == Job.WAITING) {
-				Logger.global.finest(job.toString());
+				Logger.getGlobal().finest(job.toString());
 				return false;
 			}
 		}
@@ -356,7 +356,7 @@ public class EditorTestHelper {
 	}
 
 	public static boolean joinReconciler(SourceViewer sourceViewer, long minTime, long maxTime, long intervalTime) {
-		Logger.global.entering("EditorTestHelper", "joinReconciler");
+		Logger.getGlobal().entering("EditorTestHelper", "joinReconciler");
 		runEventQueue(minTime);
 
 		AbstractReconciler reconciler= getReconciler(sourceViewer);
@@ -376,7 +376,7 @@ public class EditorTestHelper {
 			}
 		};
 		boolean finished= helper.waitForCondition(getActiveDisplay(), maxTime > 0 ? maxTime : Long.MAX_VALUE, intervalTime);
-		Logger.global.exiting("EditorTestHelper", "joinReconciler", Boolean.valueOf(finished));
+		Logger.getGlobal().exiting("EditorTestHelper", "joinReconciler", Boolean.valueOf(finished));
 		return finished;
 	}
 
