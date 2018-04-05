@@ -24,7 +24,6 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.events.MouseTrackListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -94,20 +93,7 @@ public class FilterTextControl {
 
 	public FilterTextControl(Composite parent) {
 		final boolean nativeField= useNativeSearchField(parent);
-		fComposite= new Composite(parent, nativeField ? SWT.NONE : SWT.BORDER) {
-			@Override
-			public void setEnabled(boolean enabled) {
-				super.setEnabled(enabled);
-				
-				if (nativeField)
-					return;
-				
-				Color color= enabled ? getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND) : getParent().getBackground();
-				setBackground(color);
-				if (fClearButton != null)
-					fClearButton.setBackground(color);
-			}
-		};
+		fComposite= new Composite(parent, nativeField ? SWT.NONE : SWT.BORDER);
 		if (!nativeField)
 			fComposite.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		
