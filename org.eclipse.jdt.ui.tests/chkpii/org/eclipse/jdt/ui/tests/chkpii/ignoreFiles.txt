@@ -6,6 +6,7 @@ ipl-*.html
 license.html
 about.html
 notice.html
+ECLIPSE_PUBLIC_LICENSE_V2.0.HTML
 customBuildCallbacks.xml
 buildnotes*.htm
 buildnotes*.html
