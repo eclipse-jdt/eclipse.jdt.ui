@@ -284,14 +284,13 @@ public class JavaNavigatorContentProvider extends
 	private boolean convertToJavaElements(Set<Object> currentChildren) {
 
 		LinkedHashSet<Object> convertedChildren = new LinkedHashSet<>();
-		IJavaElement newChild;
 		for (Iterator<Object> childrenItr = currentChildren.iterator(); childrenItr
 				.hasNext();) {
 			Object child = childrenItr.next();
 			// only convert IFolders and IFiles
 			if (child instanceof IFolder || child instanceof IFile) {
-				if ((newChild = JavaCore.create((IResource) child)) != null
-						&& newChild.exists()) {
+				IJavaElement newChild = JavaCore.create((IResource) child);
+				if (newChild != null && newChild.exists() && newChild.getJavaProject().isOnClasspath(newChild)) {
 					childrenItr.remove();
 					convertedChildren.add(newChild);
 				}
