@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2016 IBM Corporation and others.
+ * Copyright (c) 2003, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -290,9 +290,12 @@ public class JavaNavigatorContentProvider extends
 			// only convert IFolders and IFiles
 			if (child instanceof IFolder || child instanceof IFile) {
 				IJavaElement newChild = JavaCore.create((IResource) child);
-				if (newChild != null && newChild.exists() && newChild.getJavaProject().isOnClasspath(newChild)) {
-					childrenItr.remove();
-					convertedChildren.add(newChild);
+				if (newChild != null && newChild.exists()) {
+					IJavaProject javaProject= newChild.getJavaProject();
+					if (javaProject != null && javaProject.isOnClasspath(newChild)) {
+						childrenItr.remove();
+						convertedChildren.add(newChild);
+					}
 				}
 			} else if (child instanceof IJavaProject) {
 				childrenItr.remove();
