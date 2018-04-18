@@ -19,6 +19,8 @@ import java.util.ResourceBundle;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.jface.action.IAction;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.IDocument;
@@ -39,17 +41,19 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
  */
 public class AddBlockCommentAction extends BlockCommentAction {
 
+	private IAction action;
+
 	/**
 	 * Creates a new instance.
 	 *
 	 * @param bundle the resource bundle
-	 * @param prefix a prefix to be prepended to the various resource keys
-	 *   (described in <code>ResourceAction</code> constructor), or
-	 *   <code>null</code> if none
+	 * @param prefix a prefix to be prepended to the various resource keys (described in
+	 *            <code>ResourceAction</code> constructor), or <code>null</code> if none
 	 * @param editor the text editor
 	 */
 	public AddBlockCommentAction(ResourceBundle bundle, String prefix, ITextEditor editor) {
 		super(bundle, prefix, editor);
+		action= editor.getAction("Format"); //$NON-NLS-1$
 	}
 
 	/*
@@ -71,6 +75,10 @@ public class AddBlockCommentAction extends BlockCommentAction {
 		handleLastPartition(partition, edits, factory, selectionEndOffset);
 
 		executeEdits(edits);
+
+		if (action != null) {
+			action.run();
+		}
 	}
 
 	/**
@@ -79,8 +87,9 @@ public class AddBlockCommentAction extends BlockCommentAction {
 	 * @param partition the partition under the start of the selection
 	 * @param edits the list of edits to later execute
 	 * @param factory the factory for edits
-	 * @param offset the start of the selection, which must lie inside
-	 *        <code>partition</code>
+	 * @param offset the start of the selection, which must lie inside <code>partition</code>
+	 * @throws BadLocationException if accessing the document fails - this can only happen if the
+	 *             document gets modified concurrently
 	 */
 	private void handleFirstPartition(ITypedRegion partition, List<Edit> edits, Edit.EditFactory factory, int offset) throws BadLocationException {
 
@@ -96,19 +105,18 @@ public class AddBlockCommentAction extends BlockCommentAction {
 		} else if (isSpecialPartition(partType)) {
 			// special types: include the entire partition
 			edits.add(factory.createEdit(partOffset, 0, getCommentStart()));
-		}	// javadoc: no mark, will only start after comment
+		} // javadoc: no mark, will only start after comment
 
 	}
 
 	/**
-	 * Handles partition boundaries within the selection. The end of the current
-	 * partition and the start of the next partition are examined for whether
-	 * they contain comment tokens that interfere with the created comment.
+	 * Handles partition boundaries within the selection. The end of the current partition and the start
+	 * of the next partition are examined for whether they contain comment tokens that interfere with
+	 * the created comment.
 	 * <p>
-	 * Comment tokens are removed from interior multi-line comments. Javadoc
-	 * comments are left as is; instead, multi-line comment tokens are inserted
-	 * before and after Javadoc partitions to ensure that the entire selected
-	 * area is commented.
+	 * Comment tokens are removed from interior multi-line comments. Javadoc comments are left as is;
+	 * instead, multi-line comment tokens are inserted before and after Javadoc partitions to ensure
+	 * that the entire selected area is commented.
 	 * </p>
 	 * <p>
 	 * The next partition is returned.
@@ -119,12 +127,12 @@ public class AddBlockCommentAction extends BlockCommentAction {
 	 * @param factory the edit factory
 	 * @param docExtension the document to get the partitions from
 	 * @return the next partition after the current
-	 * @throws BadLocationException if accessing the document fails - this can
-	 *         only happen if the document gets modified concurrently
-	 * @throws BadPartitioningException if the document does not have a Java
-	 *         partitioning
+	 * @throws BadLocationException if accessing the document fails - this can only happen if the
+	 *             document gets modified concurrently
+	 * @throws BadPartitioningException if the document does not have a Java partitioning
 	 */
-	private ITypedRegion handleInteriorPartition(ITypedRegion partition, List<Edit> edits, Edit.EditFactory factory, IDocumentExtension3 docExtension) throws BadPartitioningException, BadLocationException {
+	private ITypedRegion handleInteriorPartition(ITypedRegion partition, List<Edit> edits, Edit.EditFactory factory, IDocumentExtension3 docExtension)
+			throws BadPartitioningException, BadLocationException {
 
 		// end of previous partition
 		String partType= partition.getType();
@@ -173,15 +181,16 @@ public class AddBlockCommentAction extends BlockCommentAction {
 	}
 
 	/**
-	 * Handles the partition under the end of the selection. For normal java
-	 * code, the comment end token is inserted at the selection end; if the
-	 * selection ends inside a special (i.e. string, character, line comment)
-	 * partition, the entire partition is included inside the comment.
+	 * Handles the partition under the end of the selection. For normal java code, the comment end token
+	 * is inserted at the selection end; if the selection ends inside a special (i.e. string, character,
+	 * line comment) partition, the entire partition is included inside the comment.
 	 *
 	 * @param partition the partition under the selection end offset
 	 * @param edits the list of edits to add to
 	 * @param factory the edit factory
 	 * @param endOffset the end offset of the selection
+	 * @throws BadLocationException if accessing the document fails - this can only happen if the
+	 *             document gets modified concurrently
 	 */
 	private void handleLastPartition(ITypedRegion partition, List<Edit> edits, Edit.EditFactory factory, int endOffset) throws BadLocationException {
 
@@ -199,12 +208,10 @@ public class AddBlockCommentAction extends BlockCommentAction {
 
 	/**
 	 * Returns whether <code>partType</code> is special, i.e. a Java
-	 * <code>String</code>,<code>Character</code>, or
-	 * <code>Line End Comment</code> partition.
+	 * <code>String</code>,<code>Character</code>, or <code>Line End Comment</code> partition.
 	 *
 	 * @param partType the partition type to check
-	 * @return <code>true</code> if <code>partType</code> is special,
-	 *         <code>false</code> otherwise
+	 * @return <code>true</code> if <code>partType</code> is special, <code>false</code> otherwise
 	 */
 	private boolean isSpecialPartition(String partType) {
 		return partType == IJavaPartitions.JAVA_CHARACTER
