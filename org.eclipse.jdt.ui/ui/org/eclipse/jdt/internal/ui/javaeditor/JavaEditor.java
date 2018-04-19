@@ -209,6 +209,7 @@ import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProviderExtension;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.CopyQualifiedNameAction;
 import org.eclipse.jdt.internal.ui.actions.FoldingActionGroup;
@@ -2114,6 +2115,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		// Copy qualified name
 		action= getAction(IJavaEditorActionConstants.COPY_QUALIFIED_NAME);
+		action.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_COPY_QUALIFIED_NAME);
+		action.setImageDescriptor(JavaPluginImages.DESC_ELCL_COPY_QUALIFIED_NAME);
 		if (menu.find(ITextEditorActionConstants.COPY) != null)
 			menu.insertAfter(ITextEditorActionConstants.COPY, action);
 		else

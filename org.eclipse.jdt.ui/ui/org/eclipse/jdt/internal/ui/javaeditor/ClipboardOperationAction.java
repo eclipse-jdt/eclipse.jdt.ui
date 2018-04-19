@@ -52,6 +52,7 @@ import org.eclipse.ui.IWorkbenchCommandConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandImageService;
 import org.eclipse.ui.progress.IProgressService;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 
@@ -230,16 +231,29 @@ public final class ClipboardOperationAction extends TextEditorAction {
 		if (operationCode == ITextOperationTarget.CUT) {
 			setHelpContextId(IAbstractTextEditorHelpContextIds.CUT_ACTION);
 			setActionDefinitionId(IWorkbenchCommandConstants.EDIT_CUT);
+			updateImages(IWorkbenchCommandConstants.EDIT_CUT);
 		} else if (operationCode == ITextOperationTarget.COPY) {
 			setHelpContextId(IAbstractTextEditorHelpContextIds.COPY_ACTION);
 			setActionDefinitionId(IWorkbenchCommandConstants.EDIT_COPY);
+			updateImages(IWorkbenchCommandConstants.EDIT_COPY);
 		} else if (operationCode == ITextOperationTarget.PASTE) {
 			setHelpContextId(IAbstractTextEditorHelpContextIds.PASTE_ACTION);
 			setActionDefinitionId(IWorkbenchCommandConstants.EDIT_PASTE);
+			updateImages(IWorkbenchCommandConstants.EDIT_PASTE);
 		} else {
 			Assert.isTrue(false, "Invalid operation code"); //$NON-NLS-1$
 		}
 		update();
+	}
+
+	private void updateImages(String commandId) {
+		ICommandImageService imgService= getTextEditor().getSite().getService(ICommandImageService.class);
+		if (imgService == null) {
+			return;
+		}
+		setImageDescriptor(imgService.getImageDescriptor(commandId));
+		setDisabledImageDescriptor(imgService.getImageDescriptor(commandId, ICommandImageService.TYPE_DISABLED));
+		setHoverImageDescriptor(imgService.getImageDescriptor(commandId, ICommandImageService.TYPE_HOVER));
 	}
 
 	private boolean isReadOnlyOperation() {
