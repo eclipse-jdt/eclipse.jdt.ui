@@ -93,8 +93,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree;
+import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.HighlightHelper;
 import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.PreferenceTreeNode;
-import org.eclipse.jdt.internal.ui.preferences.PreferenceHighlight;
 import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
 import org.eclipse.jdt.internal.ui.preferences.formatter.IModifyDialogTabPage.IModificationListener;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
@@ -159,6 +159,26 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 			};
 			control.addMouseListener(mouseListener);
 			control.getClient().addMouseListener(mouseListener);
+
+			// section with focus should be emphasized to show where current preview comes from
+			fToggle.addFocusListener(new FocusListener() {
+				@Override
+				public void focusLost(FocusEvent e) {
+					Display.getCurrent().asyncExec(() -> changeFont(false));
+				}
+
+				@Override
+				public void focusGained(FocusEvent e) {
+					Display.getCurrent().asyncExec(() -> changeFont(true));
+				}
+
+				private void changeFont(boolean italic) {
+					FontData fontData= fControl.getFont().getFontData()[0];
+					Font font= new Font(fControl.getDisplay(), new FontData(fontData.getName(), fontData.getHeight(), SWT.BOLD + (italic ? SWT.ITALIC : 0)));
+					fControl.setFont(font);
+					fControl.layout();
+				}
+			});
 		}
 
 		public String getKey() {
@@ -254,8 +274,6 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 
 		private Map<PreferenceTreeNode<?>, Predicate<String>> fDependants= new HashMap<>();
 
-		protected PreferenceHighlight fHighlight;
-
 		public Preference(T control, String label, String key, ValueMatcher<T> valueMatcher) {
 			super(label, control, true, valueMatcher);
 			assert key != null;
@@ -348,7 +366,7 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 			Label labelControl= createLabel(GRID_COLUMNS - 2, fControl.getParent(), label, indent);
 			labelControl.moveAbove(fControl);
 			if (highlight)
-				fHighlight= PreferenceHighlight.addHighlight(labelControl, fControl, false);
+				HighlightHelper.addHighlight(labelControl, fControl);
 			addChild(new PreferenceTreeNode<>(label, labelControl, true));
 		}
 	}
@@ -1094,36 +1112,11 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		public void focusGained(FocusEvent e) {
 			PreferenceTreeNode<?> focusNode= fControl2node.get(e.getSource());
 			if (focusNode != null && focusNode != fCurrentlyFocused) {
-				highlightCurrent(false);
 				fCurrentlyFocused= focusNode;
-				highlightCurrent(true);
 				updatePreviewCode();
 			}
 
 			fDialogSettings.put(fKeyLastFocusIndex, fItemMap.get(e.widget).intValue());
-		}
-
-		private void highlightCurrent(boolean focus) {
-			if (fCurrentlyFocused instanceof Preference) {
-				Preference<?> pref= (Preference<?>) fCurrentlyFocused;
-				if (pref.fHighlight != null) {
-					pref.fHighlight.setFocus(focus);
-				} else {
-					changeFont(pref.getControl(), focus);
-				}
-			} else if (fCurrentlyFocused instanceof Section) {
-				changeFont(((Section) fCurrentlyFocused).getControl(), focus);
-			}
-		}
-
-		private void changeFont(Control control, boolean italic) {
-			Display.getCurrent().asyncExec(() -> {
-				FontData fd= control.getFont().getFontData()[0];
-				int style= italic ? (fd.getStyle() | SWT.ITALIC) : (fd.getStyle() & ~SWT.ITALIC);
-				control.setFont(new Font(control.getDisplay(), new FontData(fd.getName(), fd.getHeight(), style)));
-				if (control instanceof Composite)
-					((Composite) control).layout();
-			});
 		}
 
 		@Override

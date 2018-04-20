@@ -61,8 +61,8 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree;
+import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.HighlightHelper;
 import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.PreferenceTreeNode;
-import org.eclipse.jdt.internal.ui.preferences.PreferenceHighlight;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog.ProfilePreferenceTree.SimpleTreeBuilder;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -695,7 +695,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 				addChild(spinnerNode);
 				addDependant(spinnerNode, v -> !v.equals(String.valueOf(Integer.MAX_VALUE)));
 
-				fHighlight= PreferenceHighlight.addHighlight(checkbox, spinner, false);
+				HighlightHelper.addHighlight(checkbox, spinner);
 
 				SelectionAdapter listener= new SelectionAdapter() {
 					@Override
@@ -1285,7 +1285,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 		class AlignPreference extends Preference<Combo> {
 
 			AlignPreference(Combo combo, String label) {
-				super(combo, label, "", FilteredPreferenceTree.COMBO_VALUE_MATCHER); //$NON-NLS-1$
+				super(combo, label, null, FilteredPreferenceTree.COMBO_VALUE_MATCHER);
 				combo.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
