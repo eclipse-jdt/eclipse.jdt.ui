@@ -77,7 +77,6 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.HighlightHelper;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -277,6 +276,8 @@ public abstract class OptionsConfigurationBlock {
 			return addChild(parentNode, new PreferenceTreeNode<>(label, link, false));
 		}
 	}
+
+	protected static final String DATA_PREF_HIGHLIGHT= "data_pref_highlight"; //$NON-NLS-1$
 
 	private static final String REBUILD_COUNT_KEY= "preferences_build_requested"; //$NON-NLS-1$
 
@@ -587,8 +588,8 @@ public abstract class OptionsConfigurationBlock {
 		comboBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		fLabels.put(comboBox, labelControl);
-		
-		HighlightHelper.addHighlight(labelControl, comboBox);
+
+		labelControl.setData(DATA_PREF_HIGHLIGHT, PreferenceHighlight.addHighlight(labelControl, comboBox, true));
 
 		return comboBox;
 	}
@@ -1268,9 +1269,6 @@ public abstract class OptionsConfigurationBlock {
 		Label label= fLabels.get(combo);
 		combo.setEnabled(enabled);
 		label.setEnabled(enabled);
-		if (!enabled) {
-			HighlightHelper.highlight(combo.getParent(), label, combo, HighlightHelper.HIGHLIGHT_NONE);
-		}
 	}
 	
 	protected void setTextFieldEnabled(Key key, boolean enabled) {

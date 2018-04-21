@@ -82,7 +82,6 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.dialogs.TableTextCellEditor;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
-import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.HighlightHelper;
 import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.PreferenceTreeNode;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.CompletionContextRequestor;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
@@ -1279,18 +1278,13 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				ask |= (badNullRef || badPotNullRef) && PREF_ANNOTATION_NULL_ANALYSIS.equals(changedKey);
 				if (ask) {
 					final Combo comboBoxNullRef= getComboBox(PREF_PB_NULL_REFERENCE);
-					final Label labelNullRef= fLabels.get(comboBoxNullRef);
-					int highlightNullRef= HighlightHelper.getHighlight(labelNullRef);
+					final PreferenceHighlight highlightNullRef= (PreferenceHighlight) fLabels.get(comboBoxNullRef).getData(DATA_PREF_HIGHLIGHT);
 					final Combo comboBoxPotNullRef= getComboBox(PREF_PB_POTENTIAL_NULL_REFERENCE);
-					final Label labelPotNullRef= fLabels.get(comboBoxPotNullRef);
-					int highlightPotNullRef= HighlightHelper.getHighlight(labelPotNullRef);
+					final PreferenceHighlight highlightPotNullRef= (PreferenceHighlight) fLabels.get(comboBoxPotNullRef).getData(DATA_PREF_HIGHLIGHT);
 
-					getShell().getDisplay().asyncExec(new Runnable() {
-						@Override
-						public void run() {
-							HighlightHelper.highlight(comboBoxNullRef.getParent(), labelNullRef, comboBoxNullRef, HighlightHelper.HIGHLIGHT_FOCUS);
-							HighlightHelper.highlight(comboBoxPotNullRef.getParent(), labelPotNullRef, comboBoxPotNullRef, HighlightHelper.HIGHLIGHT_FOCUS);
-						}
+					getShell().getDisplay().asyncExec(() -> {
+						highlightNullRef.setFocus(true);
+						highlightPotNullRef.setFocus(true);
 					});
 
 					MessageDialog messageDialog= new MessageDialog(
@@ -1315,8 +1309,8 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 						}
 					}
 
-					HighlightHelper.highlight(comboBoxNullRef.getParent(), labelNullRef, comboBoxNullRef, highlightNullRef);
-					HighlightHelper.highlight(comboBoxPotNullRef.getParent(), labelPotNullRef, comboBoxPotNullRef, highlightPotNullRef);
+					highlightNullRef.setFocus(false);
+					highlightPotNullRef.setFocus(false);
 				}
 
 			} else if (PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING.equals(changedKey)) {
