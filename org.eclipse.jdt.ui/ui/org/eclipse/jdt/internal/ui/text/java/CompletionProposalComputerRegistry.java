@@ -413,7 +413,7 @@ public final class CompletionProposalComputerRegistry {
 		}
 
 		if (adjusted) {
-			StringBuffer buf= new StringBuffer(50 * disabled.size());
+			StringBuilder buf= new StringBuilder(50 * disabled.size());
 			Iterator<String> iter= disabled.iterator();
 			while (iter.hasNext()) {
 				buf.append(iter.next());

@@ -105,7 +105,7 @@ public class CompilationUnitRewriteOperationsFix extends AbstractFix {
 
 	@Override
 	public String getAdditionalProposalInfo(){
-		StringBuffer sb= new StringBuffer();
+		StringBuilder sb= new StringBuilder();
 		for (int i= 0; i < fOperations.length; i++) {
 			CompilationUnitRewriteOperation operation= fOperations[i];
 			String info= operation.getAdditionalInfo();

@@ -102,7 +102,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	}
 
 	private String createDummyType(String name) throws JavaModelException {
-		StringBuffer buffer= new StringBuffer();
+		StringBuilder buffer= new StringBuilder();
 
 		buffer.append("abstract class "); //$NON-NLS-1$
 		buffer.append(name);
@@ -137,7 +137,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			// creates a type that extends the super type
 			String dummyClassContent= createDummyType(name);
 
-			StringBuffer workingCopyContents= new StringBuffer(fCompilationUnit.getSource());
+			StringBuilder workingCopyContents= new StringBuilder(fCompilationUnit.getSource());
 			int insertPosition;
 			if (sameUnit) {
 				insertPosition= range.getOffset() + range.getLength();
@@ -404,7 +404,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		boolean replacementStringEndsWithParentheses= isAnonymousConstructorInvoc || getReplacementString().endsWith(")"); //$NON-NLS-1$
 
 		// construct replacement text: an expression to be formatted
-		StringBuffer buf= new StringBuffer("new A("); //$NON-NLS-1$
+		StringBuilder buf= new StringBuilder("new A("); //$NON-NLS-1$
 		if (!replacementStringEndsWithParentheses || isAnonymousConstructorInvoc)
 			buf.append(')');
 		buf.append(newBody);

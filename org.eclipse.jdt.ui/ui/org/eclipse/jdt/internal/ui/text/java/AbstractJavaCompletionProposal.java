@@ -393,7 +393,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 					setReplacementString(replacement);
 				}
 			} else {
-				StringBuffer buffer= new StringBuffer(getReplacementString());
+				StringBuilder buffer= new StringBuilder(getReplacementString());
 
 				// fix for PR #5533. Assumes that no eating takes place.
 				if ((getCursorPosition() > 0 && getCursorPosition() <= buffer.length() && buffer.charAt(getCursorPosition() - 1) != trigger)) {
@@ -652,7 +652,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 				try {
 					url= FileLocator.toFileURL(url);
 					reader= new BufferedReader(new InputStreamReader(url.openStream()));
-					StringBuffer buffer= new StringBuffer(200);
+					StringBuilder buffer= new StringBuilder(200);
 					String line= reader.readLine();
 					while (line != null) {
 						buffer.append(line);

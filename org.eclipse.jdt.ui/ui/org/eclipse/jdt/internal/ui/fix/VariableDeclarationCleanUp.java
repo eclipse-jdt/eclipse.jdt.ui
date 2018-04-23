@@ -81,7 +81,7 @@ public class VariableDeclarationCleanUp extends AbstractCleanUp {
 
 	@Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
 		if (isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL) && isEnabled(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS)) {
 			buf.append("private final int i= 0;\n"); //$NON-NLS-1$

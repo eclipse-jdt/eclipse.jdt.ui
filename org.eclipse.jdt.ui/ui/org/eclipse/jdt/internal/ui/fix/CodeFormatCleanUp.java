@@ -88,7 +88,7 @@ public class CodeFormatCleanUp extends AbstractCleanUp {
 
 	@Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("/**\n"); //$NON-NLS-1$
 		buf.append(" *A Javadoc comment\n"); //$NON-NLS-1$
 		buf.append("* @since 2007\n"); //$NON-NLS-1$

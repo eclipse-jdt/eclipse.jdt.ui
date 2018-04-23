@@ -46,7 +46,7 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 	}
 
 	private String getQualification(Object element) {
-		StringBuffer res= new StringBuffer();
+		StringBuilder res= new StringBuilder();
 
 		ITreeContentProvider provider= (ITreeContentProvider) fPage.getViewer().getContentProvider();
 		Object visibleParent= provider.getParent(element);

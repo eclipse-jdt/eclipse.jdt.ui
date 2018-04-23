@@ -424,8 +424,8 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 
 	@Override
 	public void performOk() {
-		StringBuffer buf= new StringBuffer();
-		StringBuffer maskBuf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
+		StringBuilder maskBuf= new StringBuilder();
 		for (int i= 0; i < fHoverConfigs.length; i++) {
 			buf.append(getContributedHovers()[i].getId());
 			buf.append(JavaEditorTextHoverDescriptor.VALUE_SEPARATOR);

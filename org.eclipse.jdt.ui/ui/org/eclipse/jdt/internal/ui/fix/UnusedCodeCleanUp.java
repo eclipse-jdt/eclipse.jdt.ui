@@ -131,7 +131,7 @@ public class UnusedCodeCleanUp extends AbstractMultiFix {
 
 	@Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
 		if (isEnabled(CleanUpConstants.REMOVE_UNUSED_CODE_IMPORTS)) {
 		} else {

@@ -112,7 +112,7 @@ public class MoveCompilationUnitChange extends CompilationUnitReorgChange {
 
 		ArrayList<IPackageFragment> created= new ArrayList<>();
 
-		StringBuffer name= new StringBuffer();
+		StringBuilder name= new StringBuilder();
 		name.append(split[0]);
 		for (int i= 0; i < split.length; i++) {
 			IPackageFragment fragment= root.getPackageFragment(name.toString());

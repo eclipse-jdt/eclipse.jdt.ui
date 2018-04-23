@@ -1089,7 +1089,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 				fileComment= CodeGeneration.getFileComment(unit, separator);
 			String content= CodeGeneration.getCompilationUnitContent(unit, fileComment, null, block, separator);
 			if (content == null) {
-				final StringBuffer buffer= new StringBuffer();
+				final StringBuilder buffer= new StringBuilder();
 				if (!fType.getPackageFragment().isDefaultPackage()) {
 					buffer.append("package ").append(fType.getPackageFragment().getElementName()).append(';'); //$NON-NLS-1$
 				}
@@ -1542,7 +1542,7 @@ public final class MoveInnerToTopRefactoring extends Refactoring {
 			final ImportRewrite rewriter= rewrite.getImportRewrite();
 			if (enclosingImport.isStatic()) {
 				final String oldImport= ASTNodes.asString(node);
-				final StringBuffer buffer= new StringBuffer(oldImport);
+				final StringBuilder buffer= new StringBuilder(oldImport);
 				final String typeName= fType.getDeclaringType().getElementName();
 				final int index= buffer.indexOf(typeName);
 				if (index >= 0) {

@@ -412,7 +412,7 @@ public class EnumeratedTypeSet extends TypeSet {
 
 	@Override
 	public String toString() {
-		StringBuffer b= new StringBuffer();
+		StringBuilder b= new StringBuilder();
 		b.append("{" + fID+ ":"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (isUniverse())
 			b.append(" <universe>"); //$NON-NLS-1$

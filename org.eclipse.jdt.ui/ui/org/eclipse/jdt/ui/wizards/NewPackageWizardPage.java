@@ -597,7 +597,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	}
 
 	private static String getString(Reader reader) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		char[] buffer= new char[1024];
 		int count;
 		try {

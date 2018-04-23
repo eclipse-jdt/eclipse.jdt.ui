@@ -913,7 +913,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 
 
 		public String getQualifiedText(TypeNameMatch type) {
-			StringBuffer result= new StringBuffer();
+			StringBuilder result= new StringBuilder();
 			result.append(type.getSimpleTypeName());
 			String containerName= type.getTypeContainerName();
 			result.append(JavaElementLabels.CONCAT_STRING);
@@ -926,7 +926,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 
 		public String getFullyQualifiedText(TypeNameMatch type) {
-			StringBuffer result= new StringBuffer();
+			StringBuilder result= new StringBuilder();
 			result.append(type.getSimpleTypeName());
 			String containerName= type.getTypeContainerName();
 			if (containerName.length() > 0) {
@@ -939,7 +939,7 @@ public class FilteredTypesSelectionDialog extends FilteredItemsSelectionDialog i
 		}
 
 		public String getQualificationText(TypeNameMatch type) {
-			StringBuffer result= new StringBuffer();
+			StringBuilder result= new StringBuilder();
 			String containerName= type.getTypeContainerName();
 			if (containerName.length() > 0) {
 				result.append(containerName);

@@ -431,7 +431,7 @@ public class UnusedCodeFix extends CompilationUnitRewriteOperationsFix {
 
 		@Override
 		public String getAdditionalInfo() {
-			StringBuffer sb=new StringBuffer();
+			StringBuilder sb=new StringBuilder();
 			if (fRemovedAssignmentsCount == 1) {
 				sb.append(FixMessages.UnusedCodeFix_RemoveFieldOrLocal_RemovedAssignments_preview_singular);
 			} else if (fRemovedAssignmentsCount > 1) {

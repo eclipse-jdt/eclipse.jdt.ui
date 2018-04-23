@@ -62,7 +62,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 
 	@Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
 		if (isEnabled(MAKE_TYPE_ABSTRACT)) {
 			buf.append("public abstract class Face implements IFace {\n"); //$NON-NLS-1$
@@ -191,7 +191,7 @@ public class UnimplementedCodeCleanUp extends AbstractMultiFix {
 		if (code.length() == 0)
 			return code;
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append(indent);
 		char[] codeArray= code.toCharArray();
 		for (int i= 0; i < codeArray.length; i++) {

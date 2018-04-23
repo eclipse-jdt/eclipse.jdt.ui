@@ -411,8 +411,8 @@ public class JavadocOptionsManager {
 		fTitle= element.getAttribute(TITLE);
 
 
-		StringBuffer additionals= new StringBuffer();
-		StringBuffer vmargs= new StringBuffer();
+		StringBuilder additionals= new StringBuilder();
+		StringBuilder vmargs= new StringBuilder();
 		String extraOptions= element.getAttribute(EXTRAOPTIONS);
 		if (extraOptions.length() > 0) {
 			ExecutionArguments tokens= new ExecutionArguments("", extraOptions); //$NON-NLS-1$
@@ -665,7 +665,7 @@ public class JavadocOptionsManager {
 	}
 
 	private String flatPathList(IPath[] paths) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (int i= 0; i < paths.length; i++) {
 			if (i > 0) {
 				buf.append(File.pathSeparatorChar);
@@ -676,7 +676,7 @@ public class JavadocOptionsManager {
 	}
 
 	private String flatStringList(String[] paths) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (int i= 0; i < paths.length; i++) {
 			if (i > 0) {
 				buf.append(File.pathSeparatorChar);

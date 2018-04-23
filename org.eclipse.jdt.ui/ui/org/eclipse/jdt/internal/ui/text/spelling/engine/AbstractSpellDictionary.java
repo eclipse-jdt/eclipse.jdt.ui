@@ -188,7 +188,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		int distance= 0;
 		String hash= null;
 
-		final StringBuffer buffer= new StringBuffer(BUFFER_CAPACITY);
+		final StringBuilder buffer= new StringBuilder(BUFFER_CAPACITY);
 		final HashSet<RankedWordProposal> result= new HashSet<>(BUCKET_CAPACITY * hashs.size());
 
 		for (int index= 0; index < hashs.size(); index++) {
@@ -264,7 +264,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 		int distance= 0;
 		int minimum= Integer.MAX_VALUE;
 
-		StringBuffer buffer= new StringBuffer(BUFFER_CAPACITY);
+		StringBuilder buffer= new StringBuilder(BUFFER_CAPACITY);
 
 		final Object candidates= getCandidates(fHashProvider.getHash(word));
 		if (candidates == null)

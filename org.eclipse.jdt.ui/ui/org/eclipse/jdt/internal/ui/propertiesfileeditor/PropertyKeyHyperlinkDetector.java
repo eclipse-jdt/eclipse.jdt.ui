@@ -117,14 +117,14 @@ public class PropertyKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 
 	private String getUnicodeString(String key) {
 		StringCharacterIterator iter= new StringCharacterIterator(key);
-		StringBuffer result= new StringBuffer();
+		StringBuilder result= new StringBuilder();
 		while (iter.getIndex() < iter.getEndIndex()) {
 			char c= iter.current();
 			if (c == '\\') {
 				iter.next();
 				c= iter.current();
 				if (c == 'u') {
-					StringBuffer unicode= new StringBuffer();
+					StringBuilder unicode= new StringBuilder();
 					unicode.append(iter.next());
 					unicode.append(iter.next());
 					unicode.append(iter.next());

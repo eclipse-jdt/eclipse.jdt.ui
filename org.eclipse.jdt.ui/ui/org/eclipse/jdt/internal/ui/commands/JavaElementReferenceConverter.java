@@ -162,7 +162,7 @@ public class JavaElementReferenceConverter extends AbstractParameterValueConvert
 			throw new ParameterValueConversionException("Could not get IJavaProject for element"); //$NON-NLS-1$
 		}
 
-		StringBuffer buffer;
+		StringBuilder buffer;
 
 		if (javaElement instanceof IType) {
 			IType type= (IType) javaElement;
@@ -192,8 +192,8 @@ public class JavaElementReferenceConverter extends AbstractParameterValueConvert
 		return buffer.toString();
 	}
 
-	private StringBuffer composeTypeReference(IType type) {
-		StringBuffer buffer= new StringBuffer();
+	private StringBuilder composeTypeReference(IType type) {
+		StringBuilder buffer= new StringBuilder();
 		buffer.append(type.getJavaProject().getElementName());
 		buffer.append(PROJECT_END_CHAR);
 		buffer.append(type.getFullyQualifiedName());

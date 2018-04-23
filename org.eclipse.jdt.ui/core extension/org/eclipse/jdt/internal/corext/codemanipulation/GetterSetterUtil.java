@@ -132,7 +132,7 @@ public class GetterSetterUtil {
 		boolean isFinal= Flags.isFinal(flags);
 
 		String lineDelim= "\n"; // Use default line delimiter, as generated stub has to be formatted anyway //$NON-NLS-1$
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		if (addComments) {
 			String comment= CodeGeneration.getSetterComment(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), setterName, field.getElementName(), typeName, argname, accessorName, lineDelim);
 			if (comment != null) {
@@ -195,7 +195,7 @@ public class GetterSetterUtil {
 		String accessorName= StubUtility.getBaseName(field);
 
 		String lineDelim= "\n"; // Use default line delimiter, as generated stub has to be formatted anyway //$NON-NLS-1$
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		if (addComments) {
 			String comment= CodeGeneration.getGetterComment(field.getCompilationUnit(), parentType.getTypeQualifiedName('.'), getterName, field.getElementName(), typeName, accessorName, lineDelim);
 			if (comment != null) {

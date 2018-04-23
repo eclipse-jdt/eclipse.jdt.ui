@@ -499,7 +499,7 @@ public class IndentAction extends TextEditorAction {
 		int previousLineLength= previousLine.getLength();
 		int previousLineEnd= previousLineStart + previousLineLength;
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		int previousLineNonWS= scanner.findNonWhitespaceForwardInAnyPartition(previousLineStart, previousLineEnd);
 		if (previousLineNonWS == JavaHeuristicScanner.NOT_FOUND || document.getChar(previousLineNonWS) != '*') {
 			// align with the comment start if the previous line is not an asterisked line
@@ -554,7 +554,7 @@ public class IndentAction extends TextEditorAction {
 		String tab;
 		if (JavaCore.SPACE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, project))) {
 			int size= getTabSize(project);
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			for (int i= 0; i< size; i++)
 				buf.append(' ');
 			tab= buf.toString();

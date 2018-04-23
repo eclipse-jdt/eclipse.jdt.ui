@@ -223,7 +223,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 				int indLine= d.getLineOfOffset(reference);
 				if (indLine != -1 && indLine != line) {
 					// take the indent of the found line
-					StringBuffer replaceText= new StringBuffer(getIndentOfLine(d, indLine));
+					StringBuilder replaceText= new StringBuilder(getIndentOfLine(d, indLine));
 					// add the rest of the current line including the just added close bracket
 					replaceText.append(d.get(whiteend, c.offset - whiteend));
 					replaceText.append(c.text);
@@ -295,7 +295,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 			int p= (c.offset == docLength ? c.offset - 1 : c.offset);
 			int line= d.getLineOfOffset(p);
 
-			StringBuffer buf= new StringBuffer(c.text + indent);
+			StringBuilder buf= new StringBuilder(c.text + indent);
 
 
 			IRegion reg= d.getLineInformation(line);

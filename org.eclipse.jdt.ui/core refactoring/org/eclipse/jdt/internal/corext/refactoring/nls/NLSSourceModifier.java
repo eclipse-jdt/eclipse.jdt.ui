@@ -165,7 +165,7 @@ public class NLSSourceModifier {
 				int lineStart= getLineStart(cu.getBuffer(), position.getOffset());
 				int lineEnd= getLineEnd(cu.getBuffer(), position.getOffset());
 				String cuLine= cu.getBuffer().getText(lineStart, lineEnd - lineStart);
-				StringBuffer buf= new StringBuffer(cuLine);
+				StringBuilder buf= new StringBuilder(cuLine);
 				buf.replace(region.getOffset() - lineStart, region.getOffset() + region.getLength() - lineStart, replaceString);
 				try {
 					NLSLine[] allLines= NLSScanner.scan(buf.toString());
@@ -230,7 +230,7 @@ public class NLSSourceModifier {
 
 	// TODO: not dry
 	private String unwindEscapeChars(String s) {
-		StringBuffer sb= new StringBuffer(s.length());
+		StringBuilder sb= new StringBuilder(s.length());
 		int length= s.length();
 		for (int i= 0; i < length; i++) {
 			char c= s.charAt(i);
@@ -320,7 +320,7 @@ public class NLSSourceModifier {
 	}
 
 	private String createResourceGetter(String key, String accessorName) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append(accessorName);
 		buf.append('.');
 

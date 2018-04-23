@@ -54,7 +54,7 @@ public class FatJarRsrcUrlManifestProvider extends FatJarManifestProvider {
 	}
 
 	public String getManifestRsrcClasspath(ArrayList<String> jarNames) {
-		StringBuffer result= new StringBuffer();
+		StringBuilder result= new StringBuilder();
 		result.append(JIJConstants.CURRENT_DIR); 
 		for (Iterator<String> iterator= jarNames.iterator(); iterator.hasNext();) {
 			String jarName= iterator.next();

@@ -1540,7 +1540,7 @@ public class UnresolvedElementsSubProcessor {
 	}
 
 	private static String getTypeNames(ITypeBinding[] types) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (int i= 0; i < types.length; i++) {
 			if (i > 0) {
 				buf.append(", "); //$NON-NLS-1$

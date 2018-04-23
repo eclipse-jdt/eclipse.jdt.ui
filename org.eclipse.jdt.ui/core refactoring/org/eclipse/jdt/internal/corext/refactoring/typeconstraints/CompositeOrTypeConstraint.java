@@ -44,7 +44,7 @@ public class CompositeOrTypeConstraint implements ITypeConstraint{
 
 	@Override
 	public String toResolvedString() {
-		StringBuffer buff= new StringBuffer();
+		StringBuilder buff= new StringBuilder();
 		for (int i= 0; i < fConstraints.length; i++) {
 			ITypeConstraint constraint= fConstraints[i];
 			if (i > 0)
@@ -61,7 +61,7 @@ public class CompositeOrTypeConstraint implements ITypeConstraint{
 
 	@Override
 	public String toString() {
-		StringBuffer buff= new StringBuffer();
+		StringBuilder buff= new StringBuilder();
 		for (int i= 0; i < fConstraints.length; i++) {
 			ITypeConstraint constraint= fConstraints[i];
 			if (i > 0)

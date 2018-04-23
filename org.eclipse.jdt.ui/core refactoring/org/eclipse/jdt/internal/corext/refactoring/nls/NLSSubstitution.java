@@ -103,7 +103,7 @@ public class NLSSubstitution {
 					length= length + fPrefix.length();
 				if (fKey != null)
 					length= length + fKey.length();
-				StringBuffer sb= new StringBuffer(length);
+				StringBuilder sb= new StringBuilder(length);
 				sb.append(fPrefix);
 				sb.append(fKey);
 				fCachedPrefixPlusKey= sb.toString();

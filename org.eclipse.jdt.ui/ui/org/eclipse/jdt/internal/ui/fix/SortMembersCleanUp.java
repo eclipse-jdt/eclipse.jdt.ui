@@ -116,7 +116,7 @@ public class SortMembersCleanUp extends AbstractCleanUp {
 
 	@Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
 		buf.append("class SortExample {\n"); //$NON-NLS-1$
 

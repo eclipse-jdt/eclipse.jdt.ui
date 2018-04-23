@@ -583,7 +583,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener, ITextEditCap
 			try {
 				String curr= tracker.getLineDelimiter(i);
 				if (curr != null && !fLegalLineDelimiters.contains(curr)) {
-					StringBuffer buf= new StringBuffer("WARNING: javaeditor.DocumentAdapter added new line delimiter to code: "); //$NON-NLS-1$
+					StringBuilder buf= new StringBuilder("WARNING: javaeditor.DocumentAdapter added new line delimiter to code: "); //$NON-NLS-1$
 					for (int k= 0; k < curr.length(); k++) {
 						if (k > 0)
 							buf.append(' ');

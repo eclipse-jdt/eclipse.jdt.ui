@@ -81,7 +81,7 @@ abstract class JavaMatchFilter extends MatchFilter {
 	}
 
 	private static String encodeFilters(MatchFilter[] enabledFilters) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (int i= 0; i < enabledFilters.length; i++) {
 			MatchFilter matchFilter= enabledFilters[i];
 			buf.append(matchFilter.getID());

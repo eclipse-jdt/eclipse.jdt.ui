@@ -461,7 +461,7 @@ public class RenamingNameSuggestor {
 	}
 
 	private String concat(String[] suffixesNewEqual) {
-		StringBuffer returner= new StringBuffer();
+		StringBuilder returner= new StringBuilder();
 		for (int j= 0; j < suffixesNewEqual.length; j++) {
 			returner.append(suffixesNewEqual[j]);
 		}

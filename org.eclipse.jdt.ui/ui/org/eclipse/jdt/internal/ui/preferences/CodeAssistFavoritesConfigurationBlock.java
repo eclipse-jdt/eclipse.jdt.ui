@@ -474,7 +474,7 @@ class CodeAssistFavoritesConfigurationBlock extends OptionsConfigurationBlock {
 
 	private static String serializeFavorites(List<String> favorites) {
 		int size= favorites.size();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (int i= 0; i < size; i++) {
 			buf.append(favorites.get(i));
 			if (i < size -1)

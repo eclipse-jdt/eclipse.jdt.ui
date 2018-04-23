@@ -223,7 +223,7 @@ public class PropertyFileDocumentModel {
     }
 
 	public static String escape(String s, boolean escapeCommentCharsAndLeadingWhitespaces) {
-		StringBuffer sb= new StringBuffer(s.length());
+		StringBuilder sb= new StringBuilder(s.length());
 		int length= s.length();
 		for (int i= 0; i < length; i++){
 			char c= s.charAt(i);
@@ -235,7 +235,7 @@ public class PropertyFileDocumentModel {
 	}
 
 	private static String escapeCommentChars(String string) {
-	    StringBuffer sb = new StringBuffer(string.length() + 5);
+		StringBuilder sb = new StringBuilder(string.length() + 5);
 	    for (int i = 0; i < string.length(); i++) {
 	      char c = string.charAt(i);
 	      switch (c) {
@@ -254,7 +254,7 @@ public class PropertyFileDocumentModel {
 
 	private static String escapeLeadingWhiteSpaces(String str) {
 		int firstNonWhiteSpace= findFirstNonWhiteSpace(str);
-		StringBuffer buf= new StringBuffer(firstNonWhiteSpace);
+		StringBuilder buf= new StringBuilder(firstNonWhiteSpace);
 		for (int i = 0; i < firstNonWhiteSpace; i++) {
 			buf.append('\\');
 		    buf.append(str.charAt(i));

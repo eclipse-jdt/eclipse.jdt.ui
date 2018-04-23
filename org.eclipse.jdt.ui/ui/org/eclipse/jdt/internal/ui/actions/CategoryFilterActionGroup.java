@@ -198,7 +198,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 
 		public CategoryFilterAction(String category, int count) {
 			fCategory= category;
-			StringBuffer buf = new StringBuffer();
+			StringBuilder buf = new StringBuilder();
 			buf.append('&').append(count).append(' ').append(fCategory);
 			setText(buf.toString());
 			setChecked(!fFilteredCategories.contains(fCategory));
@@ -313,7 +313,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 		if (fFilteredCategories.size() == 0) {
 			store.setValue(getPreferenceKey(), ""); //$NON-NLS-1$
 		} else {
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			Iterator<String> iter= fFilteredCategories.iterator();
 			String element= iter.next();
 			buf.append(element);
@@ -323,7 +323,7 @@ public class CategoryFilterActionGroup extends ActionGroup {
 				buf.append(element);
 			}
 			store.setValue(getPreferenceKey(), buf.toString());
-			buf= new StringBuffer();
+			buf= new StringBuilder();
 			iter= fLRUList.values().iterator();
 			element= iter.next();
 			buf.append(element);

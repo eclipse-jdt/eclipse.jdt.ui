@@ -625,7 +625,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 				break;
 			default:
 				fReturnValue= null;
-				StringBuffer affectedLocals= new StringBuffer();
+				StringBuilder affectedLocals= new StringBuilder();
 				for (int i= 0; i < localReads.size(); i++) {
 					IVariableBinding binding= localReads.get(i);
 					String bindingName= BindingLabelProvider.getBindingLabel(binding, BindingLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_PRE_TYPE_SIGNATURE);

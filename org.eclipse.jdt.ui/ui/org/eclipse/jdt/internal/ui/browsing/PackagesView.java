@@ -104,7 +104,7 @@ public class PackagesView extends JavaBrowsingPart{
 
 		private String formatLogicalPackageMessage(LogicalPackage logicalPackage) {
 			IPackageFragment[] fragments= logicalPackage.getFragments();
-			StringBuffer buf= new StringBuffer(logicalPackage.getElementName());
+			StringBuilder buf= new StringBuilder(logicalPackage.getElementName());
 			buf.append(JavaElementLabels.CONCAT_STRING);
 			String message= ""; //$NON-NLS-1$
 			boolean firstTime= true;

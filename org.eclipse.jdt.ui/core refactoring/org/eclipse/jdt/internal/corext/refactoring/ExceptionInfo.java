@@ -85,7 +85,7 @@ public class ExceptionInfo {
 
 	@Override
 	public String toString() {
-		StringBuffer result= new StringBuffer();
+		StringBuilder result= new StringBuilder();
 		switch (fKind) {
 			case OLD : result.append("OLD: "); break; //$NON-NLS-1$
 			case ADDED : result.append("ADDED: "); break; //$NON-NLS-1$

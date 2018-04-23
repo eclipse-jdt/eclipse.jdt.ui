@@ -65,7 +65,7 @@ public class ConvertLoopCleanUp extends AbstractCleanUp {
 
 	@Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
 		if (isEnabled(CleanUpConstants.CONTROL_STATMENTS_CONVERT_FOR_LOOP_TO_ENHANCED)) {
 			buf.append("for (int element : ids) {\n"); //$NON-NLS-1$

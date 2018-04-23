@@ -48,7 +48,7 @@ public class AccessorDescription {
 	}
 
 	public String getLabel() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append(getAccessorClassPackage().getElementName());
 		if (buf.length() > 0) {
 			buf.append('.');

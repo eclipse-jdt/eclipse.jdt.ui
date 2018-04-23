@@ -59,7 +59,7 @@ public class JavaElementLine {
 		}
 		fLineStartOffset= i;
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
 		while (i < length && !IndentManipulation.isLineDelimiterChar(ch)) {
 			if (Character.isISOControl(ch)) {

@@ -109,7 +109,7 @@ public class ProblemLocation implements IProblemLocation {
 
 	@Override
 	public String toString() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("Id: ").append(getErrorCode(fId)).append('\n'); //$NON-NLS-1$
 		buf.append('[').append(fOffset).append(", ").append(fLength).append(']').append('\n'); //$NON-NLS-1$
 		String[] arg= fArguments;
@@ -121,7 +121,7 @@ public class ProblemLocation implements IProblemLocation {
 	}
 
 	private String getErrorCode(int code) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
 		if ((code & IProblem.TypeRelated) != 0) {
 			buf.append("TypeRelated + "); //$NON-NLS-1$

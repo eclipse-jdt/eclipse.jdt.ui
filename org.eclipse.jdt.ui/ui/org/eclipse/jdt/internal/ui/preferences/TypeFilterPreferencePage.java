@@ -80,7 +80,7 @@ public class TypeFilterPreferencePage extends PreferencePage implements IWorkben
 	}
 
 	private static String packOrderList(List<String> orderList) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (int i= 0; i < orderList.size(); i++) {
 			buf.append(orderList.get(i));
 			buf.append(';');

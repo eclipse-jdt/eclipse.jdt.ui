@@ -267,7 +267,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	}
 
 	private void updateList(IPreferenceStore store, ListDialogField<String> list, String str) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		List<String> curr= list.getElements();
 		for (Iterator<String> iter= curr.iterator(); iter.hasNext();) {
 			String s= iter.next();

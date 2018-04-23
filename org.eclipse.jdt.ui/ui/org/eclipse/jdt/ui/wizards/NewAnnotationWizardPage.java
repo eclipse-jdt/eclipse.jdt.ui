@@ -376,7 +376,7 @@ public class NewAnnotationWizardPage extends NewTypeWizardPage {
 		}
 
 		private String createAnnotationAndImports(List<E> selectedEnums, ImportsManager imports, String lineDelimiter) {
-			StringBuffer buffer= new StringBuffer();
+			StringBuilder buffer= new StringBuilder();
 		
 			String annotationTypeName= imports.addImport(fAnnotationClass.getName());
 			buffer.append("@"); //$NON-NLS-1$

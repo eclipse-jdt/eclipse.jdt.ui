@@ -209,7 +209,7 @@ public class ClasspathModifier {
 		if (duplicateEntries.size() > 0) {
 			String message;
 			if (duplicateEntries.size() > 1) {
-				StringBuffer buf= new StringBuffer();
+				StringBuilder buf= new StringBuilder();
 				for (Iterator<CPListElement> iterator= duplicateEntries.iterator(); iterator.hasNext();) {
 	                CPListElement dup= iterator.next();
 	                buf.append('\n').append(BasicElementLabels.getResourceName(dup.getPath().lastSegment()));
@@ -558,7 +558,7 @@ public class ClasspathModifier {
 	}
 
 	public static String escapeSpecialChars(String value) {
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		for (int i = 0; i < value.length(); i++) {
 			char c = value.charAt(i);
 

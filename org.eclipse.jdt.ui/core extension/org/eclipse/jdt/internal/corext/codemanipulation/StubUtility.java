@@ -352,7 +352,7 @@ public class StubUtility {
 	}
 
 	private static String getSeeTag(String declaringClassQualifiedName, String methodName, String[] parameterTypesQualifiedNames) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("@see "); //$NON-NLS-1$
 		buf.append(declaringClassQualifiedName);
 		buf.append('#');
@@ -749,7 +749,7 @@ public class StubUtility {
 		}
 		String lineStart= textBuffer.get(region.getOffset(), offset - region.getOffset());
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (int i= 0; i < typeParameterNames.length; i++) {
 			if (buf.length() > 0) {
 				buf.append(lineDelimiter).append(lineStart);
@@ -1095,7 +1095,7 @@ public class StubUtility {
 			return ((FieldAccess)assignedExpression).getName().getIdentifier();
 		} else if (variableKind == NamingConventions.VK_STATIC_FINAL_FIELD && (assignedExpression instanceof StringLiteral || assignedExpression instanceof NumberLiteral)) {
 			String string= assignedExpression instanceof StringLiteral ? ((StringLiteral)assignedExpression).getLiteralValue() : ((NumberLiteral)assignedExpression).getToken();
-			StringBuffer res= new StringBuffer();
+			StringBuilder res= new StringBuilder();
 			boolean needsUnderscore= false;
 			for (int i= 0; i < string.length(); i++) {
 				char ch= string.charAt(i);

@@ -222,7 +222,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 				String typeArgBaseName= name.startsWith(String.valueOf('T')) ? String.valueOf('S') : String.valueOf('T'); // use 'S' or 'T'
 
 				int nTypeArgs= ((ParameterizedType) parent.getParent()).typeArguments().size();
-				StringBuffer buf= new StringBuffer(name);
+				StringBuilder buf= new StringBuilder(name);
 				buf.append('<');
 				if (nTypeArgs == 1) {
 					buf.append(typeArgBaseName);
@@ -430,7 +430,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 	 */
 	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		switch (fTypeKind) {
 			case K_CLASS:
 				buf.append(CorrectionMessages.NewCUCompletionUsingWizardProposal_createclass_info);
@@ -496,7 +496,7 @@ public class NewCUUsingWizardProposal extends ChangeCorrectionProposal {
 		return buf.toString();
 	}
 
-	private void nameToHTML(String name, StringBuffer buf) {
+	private void nameToHTML(String name, StringBuilder buf) {
 		for (int i= 0; i < name.length(); i++) {
 			char ch= name.charAt(i);
 			if (ch == '>') {

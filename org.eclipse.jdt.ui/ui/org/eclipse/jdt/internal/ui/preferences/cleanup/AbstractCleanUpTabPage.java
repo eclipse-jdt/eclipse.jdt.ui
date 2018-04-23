@@ -54,7 +54,7 @@ public abstract class AbstractCleanUpTabPage extends CleanUpTabPage {
 			fPreviewCleanUps= createPreviewCleanUps(fValues);
 		}
 	
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (int i= 0; i < fPreviewCleanUps.length; i++) {
 			buf.append(fPreviewCleanUps[i].getPreview());
 			buf.append("\n"); //$NON-NLS-1$

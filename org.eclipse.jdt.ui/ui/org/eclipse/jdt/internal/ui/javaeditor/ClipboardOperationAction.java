@@ -494,7 +494,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 			Name curr= staticImportsRefs.get(i);
 			IBinding binding= curr.resolveBinding();
 			if (binding != null) {
-				StringBuffer buf= new StringBuffer(Bindings.getImportName(binding));
+				StringBuilder buf= new StringBuilder(Bindings.getImportName(binding));
 				if (binding.getKind() == IBinding.METHOD) {
 					buf.append("()"); //$NON-NLS-1$
 				}

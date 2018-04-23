@@ -105,7 +105,7 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 		IPath prefix= parent.getFullPath();
 		IPath fullPath= fragment.getPath();
 		if (prefix.isPrefixOf(fullPath)) {
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			for (int i= prefix.segmentCount(); i < fullPath.segmentCount(); i++) {
 				if (buf.length() > 0)
 					buf.append('.');

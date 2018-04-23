@@ -109,7 +109,7 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 
 	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-		StringBuffer result= new StringBuffer();
+		StringBuilder result= new StringBuilder();
 
 		IStatus status= getFixStatus();
 		if (status != null && !status.isOK()) {

@@ -76,7 +76,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 
 		fJavaProject= jproject;
 
-		StringBuffer buffer= new StringBuffer();
+		StringBuilder buffer= new StringBuilder();
 		buffer.append(completionProposal);
 		buffer.append(" {};"); //$NON-NLS-1$
 

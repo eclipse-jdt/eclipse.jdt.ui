@@ -234,7 +234,7 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 	
 	
 	public static String[] getStaticImportFavorites(ICompilationUnit cu, final String elementName, boolean isMethod, String[] favorites) throws JavaModelException {
-		StringBuffer dummyCU= new StringBuffer();
+		StringBuilder dummyCU= new StringBuilder();
 		String packName= cu.getParent().getElementName();
 		IType type= cu.findPrimaryType();
 		if (type == null)

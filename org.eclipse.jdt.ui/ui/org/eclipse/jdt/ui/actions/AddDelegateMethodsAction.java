@@ -148,7 +148,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 
 		private String getSignature(IMethodBinding binding) {
-			StringBuffer buf= new StringBuffer(binding.getName()).append('(');
+			StringBuilder buf= new StringBuilder(binding.getName()).append('(');
 			ITypeBinding[] parameterTypes= binding.getParameterTypes();
 			for (int i= 0; i < parameterTypes.length; i++) {
 				buf.append(parameterTypes[i].getTypeDeclaration().getName());

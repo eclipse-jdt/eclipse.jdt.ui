@@ -147,7 +147,7 @@ public class JavaElementLinks {
 			String javaElementName= javaElement.getElementName();
 			String[] individualSegmentNames= javaElementName.split("\\."); //$NON-NLS-1$
 			String packageName= null;
-			StringBuffer strBuffer= new StringBuffer();
+			StringBuilder strBuffer= new StringBuilder();
 
 			for (int i= 0; i < individualSegmentNames.length; i++) {
 				String lastSegmentName= individualSegmentNames[i];
@@ -343,7 +343,7 @@ public class JavaElementLinks {
 		 * We use an opaque URI, not ssp and fragments (to work around Safari bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=212527 (wrongly encodes #)).
 		 */
 
-		StringBuffer ssp= new StringBuffer(60);
+		StringBuilder ssp= new StringBuilder(60);
 		ssp.append(LINK_SEPARATOR); // make sure first character is not a / (would be hierarchical URI)
 
 		// replace '[' manually, since URI confuses it for an IPv6 address as per RFC 2732:

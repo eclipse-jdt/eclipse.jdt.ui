@@ -112,7 +112,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 			return CorrectionMessages.UnimplementedMethodsCorrectionProposal_enum_info;
 
 		IMethodBinding[] methodsToOverride= getMethodsToImplement();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("<b>"); //$NON-NLS-1$
 		if (methodsToOverride.length == 1) {
 			buf.append(CorrectionMessages.UnimplementedMethodsCorrectionProposal_info_singular);

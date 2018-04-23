@@ -95,7 +95,7 @@ public class ImportsCleanUp extends AbstractCleanUp {
 
     @Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+    	StringBuilder buf= new StringBuilder();
 
 		if (isEnabled(CleanUpConstants.ORGANIZE_IMPORTS)) {
 			buf.append("import org.model.Engine;\n"); //$NON-NLS-1$

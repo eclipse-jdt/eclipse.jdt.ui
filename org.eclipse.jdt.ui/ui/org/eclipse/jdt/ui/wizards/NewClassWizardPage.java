@@ -256,7 +256,7 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 		createInheritedMethods(type, doConstr, doInherited, imports, new SubProgressMonitor(monitor, 1));
 
 		if (doMain) {
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			final String lineDelim= "\n"; // OK, since content is formatted afterwards //$NON-NLS-1$
 			if (isAddComments()) {
 				String comment= CodeGeneration.getMethodComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), "main", new String[] { "args" }, new String[0], Signature.createTypeSignature("void", true), null, lineDelim); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

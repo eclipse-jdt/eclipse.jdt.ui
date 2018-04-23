@@ -455,7 +455,7 @@ public class GenerateToStringDialog extends SourceActionDialog {
 				String systemLineDelimiter= Text.DELIMITER;
 				final String javaLineDelimiter= "\n"; //$NON-NLS-1$
 				if (!systemLineDelimiter.equals(javaLineDelimiter)) {
-					StringBuffer outputBuffer= new StringBuffer(input);
+					StringBuilder outputBuffer= new StringBuilder(input);
 					int pos= outputBuffer.indexOf(systemLineDelimiter);
 					while (pos >= 0) {
 						outputBuffer.delete(pos, pos + systemLineDelimiter.length());

@@ -37,7 +37,7 @@ public class PatternStrings {
 	}
 
 	public static String getMethodSignature(IMethod method) {
-		StringBuffer buffer= new StringBuffer();
+		StringBuilder buffer= new StringBuilder();
 		buffer.append(JavaElementLabels.getElementLabel(
 			method.getDeclaringType(),
 			JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.USE_RESOLVED));
@@ -51,7 +51,7 @@ public class PatternStrings {
 	}
 
 	private static String getUnqualifiedMethodSignature(IMethod method, boolean includeName) {
-		StringBuffer buffer= new StringBuffer();
+		StringBuilder buffer= new StringBuilder();
 		if (includeName) {
 			buffer.append(method.getElementName());
 		}

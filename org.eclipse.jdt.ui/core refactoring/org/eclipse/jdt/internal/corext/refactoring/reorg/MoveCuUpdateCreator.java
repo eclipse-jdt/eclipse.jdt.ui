@@ -186,7 +186,7 @@ public class MoveCuUpdateCreator {
 		String old= importDecl.getElementName();
 		int oldPackLength= movedUnit.getParent().getElementName().length();
 
-		StringBuffer result= new StringBuffer(fDestination.getElementName());
+		StringBuilder result= new StringBuilder(fDestination.getElementName());
 		if (oldPackLength == 0) // move FROM default package
 			result.append('.').append(old);
 		else if (result.length() == 0) // move TO default package
@@ -209,7 +209,7 @@ public class MoveCuUpdateCreator {
     	String old= importDecl.getElementName();
 		int oldPackLength= movedUnit.getParent().getElementName().length();
 
-		StringBuffer result= new StringBuffer(fDestination.getElementName());
+		StringBuilder result= new StringBuilder(fDestination.getElementName());
 		if (oldPackLength == 0) // move FROM default package
 			result.append('.').append(old);
 		else if (result.length() == 0) // move TO default package

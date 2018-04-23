@@ -76,7 +76,7 @@ class CopyCallHierarchyAction extends Action {
 	 */
 	@Override
 	public void run() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		addCalls(fViewer.getTree().getSelection()[0], 0, buf);
 
 		TextTransfer plainTextTransfer= TextTransfer.getInstance();
@@ -99,7 +99,7 @@ class CopyCallHierarchyAction extends Action {
 	 * @param indent the indent size
 	 * @param buf the string buffer
 	 */
-	private void addCalls(TreeItem item, int indent, StringBuffer buf) {
+	private void addCalls(TreeItem item, int indent, StringBuilder buf) {
 		for (int i= 0; i < indent; i++) {
 			buf.append(INDENTATION);
 		}

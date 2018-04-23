@@ -60,7 +60,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 	private String displayString(String inputString, String indentation, String delimiter, boolean escapeNonAscii) {
 
 		int length = inputString.length();
-		StringBuffer buffer = new StringBuffer(length);
+		StringBuilder buffer = new StringBuilder(length);
 		StringTokenizer tokenizer= new StringTokenizer(inputString, "\n\r", true); //$NON-NLS-1$
 		while (tokenizer.hasMoreTokens()){
 
@@ -91,7 +91,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 				continue;
 			}
 
-			StringBuffer tokenBuffer = new StringBuffer();
+			StringBuilder tokenBuffer = new StringBuilder();
 			for (int i = 0; i < token.length(); i++){
 				char c = token.charAt(i);
 				switch (c) {

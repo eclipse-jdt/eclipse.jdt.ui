@@ -229,7 +229,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	 */
 	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append("<p>"); //$NON-NLS-1$
 		try {
 			Change change= getChange();

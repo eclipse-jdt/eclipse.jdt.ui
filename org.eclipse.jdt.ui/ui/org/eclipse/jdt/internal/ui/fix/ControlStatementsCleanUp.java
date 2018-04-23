@@ -82,7 +82,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 
 	@Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
 		if (isEnabled(CleanUpConstants.CONTROL_STATEMENTS_USE_BLOCKS) && isEnabled(CleanUpConstants.CONTROL_STATMENTS_USE_BLOCKS_ALWAYS)) {
 			buf.append("if (obj == null) {\n"); //$NON-NLS-1$

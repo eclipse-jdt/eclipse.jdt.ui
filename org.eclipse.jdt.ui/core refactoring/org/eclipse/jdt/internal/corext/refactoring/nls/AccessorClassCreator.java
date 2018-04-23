@@ -109,7 +109,7 @@ public class AccessorClassCreator {
 			String classContent= createClass(lineDelim);
 			String cuContent= CodeGeneration.getCompilationUnitContent(newCu, fileComment, typeComment, classContent, lineDelim);
 			if (cuContent == null) {
-				StringBuffer buf= new StringBuffer();
+				StringBuilder buf= new StringBuilder();
 				if (fileComment != null) {
 					buf.append(fileComment).append(lineDelim);
 				}
@@ -157,7 +157,7 @@ public class AccessorClassCreator {
 			String initializer= createStaticInitializer(lineDelim) + lineDelim;
 			String fields= createStaticFields() + lineDelim;
 
-			StringBuffer result= new StringBuffer();
+			StringBuilder result= new StringBuilder();
 			result.append("public class ").append(fAccessorClassName).append(" extends NLS {"); //$NON-NLS-1$ //$NON-NLS-2$
 			result.append("private static final String ").append(NLSRefactoring.BUNDLE_NAME_FIELD).append(" = \"").append(getResourceBundleName()).append("\"; "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			result.append(NLSElement.createTagText(1)).append(lineDelim);
@@ -195,7 +195,7 @@ public class AccessorClassCreator {
 			String constructor= lineDelim	+ createConstructor(lineDelim);
 			String method= lineDelim + createGetStringMethod(lineDelim);
 
-			StringBuffer result= new StringBuffer();
+			StringBuilder result= new StringBuilder();
 			result.append("public class ").append(fAccessorClassName).append(" {"); //$NON-NLS-1$ //$NON-NLS-2$
 			result.append("private static final String ").append(NLSRefactoring.BUNDLE_NAME_FIELD); //$NON-NLS-1$
 			result.append(" = \"").append(getResourceBundleName()).append("\"; ").append(NLSElement.createTagText(1)).append(lineDelim); //$NON-NLS-1$ //$NON-NLS-2$
@@ -239,7 +239,7 @@ public class AccessorClassCreator {
 				return fCollator.compare(s0.getKey(), s1.getKey());
 			}
 		});
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (Iterator<NLSSubstitution> iter= subs.iterator(); iter.hasNext();) {
 			NLSSubstitution element= iter.next();
 			appendStaticField(buf, element);
@@ -247,14 +247,14 @@ public class AccessorClassCreator {
 		return buf.toString();
 	}
 
-	private void appendStaticField(StringBuffer buf, NLSSubstitution substitution) {
+	private void appendStaticField(StringBuilder buf, NLSSubstitution substitution) {
 		buf.append("public static String "); //$NON-NLS-1$
 		buf.append(substitution.getKey());
 		buf.append(';');
 	}
 
 	private String createGetStringMethod(String lineDelim) {
-		StringBuffer result= new StringBuffer();
+		StringBuilder result= new StringBuilder();
 
 		result.append("public static String "); //$NON-NLS-1$
 		int i= fSubstitutionPattern.indexOf(NLSRefactoring.KEY);

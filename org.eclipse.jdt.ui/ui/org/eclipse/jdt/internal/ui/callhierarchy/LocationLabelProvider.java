@@ -40,7 +40,7 @@ class LocationLabelProvider extends LabelProvider implements ITableLabelProvider
     }
 
     private String removeWhitespaceOutsideStringLiterals(CallLocation callLocation) {
-        StringBuffer buf = new StringBuffer();
+    	StringBuilder buf = new StringBuilder();
         boolean withinString = false;
 
         String s= callLocation.getCallText();

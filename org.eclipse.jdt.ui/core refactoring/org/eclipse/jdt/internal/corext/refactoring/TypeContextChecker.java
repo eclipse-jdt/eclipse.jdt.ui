@@ -162,7 +162,7 @@ public class TypeContextChecker {
 			int parameterCount= types.length - 1;
 			ITypeBinding[] typeBindings= new ITypeBinding[types.length];
 
-			StringBuffer cuString= new StringBuffer();
+			StringBuilder cuString= new StringBuilder();
 			cuString.append(fStubTypeContext.getBeforeString());
 			int offsetBeforeMethodName= appendMethodDeclaration(cuString, types, parameterCount);
 			cuString.append(fStubTypeContext.getAfterString());
@@ -221,7 +221,7 @@ public class TypeContextChecker {
 			return true;
 		}
 
-		private int appendMethodDeclaration(StringBuffer cuString, String[] types, int parameterCount) throws JavaModelException {
+		private int appendMethodDeclaration(StringBuilder cuString, String[] types, int parameterCount) throws JavaModelException {
 			int flags= fMethod.getFlags();
 			if (Flags.isStatic(flags)) {
 				cuString.append("static "); //$NON-NLS-1$
@@ -432,7 +432,7 @@ public class TypeContextChecker {
 		if (! typeString.trim().equals(typeString))
 			return null;
 
-		StringBuffer cuBuff= new StringBuffer();
+		StringBuilder cuBuff= new StringBuilder();
 		cuBuff.append("interface A{"); //$NON-NLS-1$
 		int offset= cuBuff.length();
 		cuBuff.append(typeString).append(" m();}"); //$NON-NLS-1$
@@ -518,8 +518,8 @@ public class TypeContextChecker {
 	}
 
 	public static StubTypeContext createStubTypeContext(ICompilationUnit cu, CompilationUnit root, int focalPosition) throws CoreException {
-		StringBuffer bufBefore= new StringBuffer();
-		StringBuffer bufAfter= new StringBuffer();
+		StringBuilder bufBefore= new StringBuilder();
+		StringBuilder bufAfter= new StringBuilder();
 
 		int introEnd= 0;
 		PackageDeclaration pack= root.getPackage();
@@ -538,8 +538,8 @@ public class TypeContextChecker {
 		return new StubTypeContext(cu, bufBefore.toString(), bufAfter.toString());
 	}
 
-	private static void fillWithTypeStubs(final StringBuffer bufBefore, final StringBuffer bufAfter, final int focalPosition, List<? extends BodyDeclaration> types) {
-		StringBuffer buf;
+	private static void fillWithTypeStubs(final StringBuilder bufBefore, final StringBuilder bufAfter, final int focalPosition, List<? extends BodyDeclaration> types) {
+		StringBuilder buf;
 		for (Iterator<? extends BodyDeclaration> iter= types.iterator(); iter.hasNext();) {
 			BodyDeclaration bodyDeclaration= iter.next();
 			if (! (bodyDeclaration instanceof AbstractTypeDeclaration)) {
@@ -624,7 +624,7 @@ public class TypeContextChecker {
 		}
 	}
 
-	private static void appendTypeParameters(StringBuffer buf, List<TypeParameter> typeParameters) {
+	private static void appendTypeParameters(StringBuilder buf, List<TypeParameter> typeParameters) {
 		int typeParametersCount= typeParameters.size();
 		if (typeParametersCount > 0) {
 			buf.append('<');
@@ -638,7 +638,7 @@ public class TypeContextChecker {
 		}
 	}
 
-	private static void appendModifiers(StringBuffer buf, List<IExtendedModifier> modifiers) {
+	private static void appendModifiers(StringBuilder buf, List<IExtendedModifier> modifiers) {
 		for (Iterator<IExtendedModifier> iterator= modifiers.iterator(); iterator.hasNext();) {
 			IExtendedModifier extendedModifier= iterator.next();
 			if (extendedModifier.isModifier()) {
@@ -648,7 +648,7 @@ public class TypeContextChecker {
 		}
 	}
 
-	private static void appendSuperInterfaces(StringBuffer buf, List<Type> superInterfaces) {
+	private static void appendSuperInterfaces(StringBuilder buf, List<Type> superInterfaces) {
 		int superInterfaceCount= superInterfaces.size();
 		if (superInterfaceCount > 0) {
 			buf.append(" implements "); //$NON-NLS-1$
@@ -733,7 +733,7 @@ public class TypeContextChecker {
 			return null;
 		}
 
-		StringBuffer cuBuff= new StringBuffer();
+		StringBuilder cuBuff= new StringBuilder();
 		if (isInterface)
 			cuBuff.append("class __X__ implements "); //$NON-NLS-1$
 		else
@@ -766,7 +766,7 @@ public class TypeContextChecker {
 	}
 
 	public static ITypeBinding resolveSuperClass(String superclass, IType typeHandle, StubTypeContext superClassContext) {
-		StringBuffer cuString= new StringBuffer();
+		StringBuilder cuString= new StringBuilder();
 		cuString.append(superClassContext.getBeforeString());
 		cuString.append(superclass);
 		cuString.append(superClassContext.getAfterString());
@@ -797,7 +797,7 @@ public class TypeContextChecker {
 		ITypeBinding[] result= new ITypeBinding[interfaces.length];
 
 		int[] interfaceOffsets= new int[interfaces.length];
-		StringBuffer cuString= new StringBuffer();
+		StringBuilder cuString= new StringBuilder();
 		cuString.append(superInterfaceContext.getBeforeString());
 		int last= interfaces.length - 1;
 		for (int i= 0; i <= last; i++) {

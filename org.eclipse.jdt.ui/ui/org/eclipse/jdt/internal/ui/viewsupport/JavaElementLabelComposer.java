@@ -633,7 +633,7 @@ public class JavaElementLabelComposer {
 		String[] categories= member.getCategories();
 		if (categories.length > 0) {
 			int offset= fBuffer.length();
-			StringBuffer categoriesBuf= new StringBuffer();
+			StringBuilder categoriesBuf= new StringBuilder();
 			for (int i= 0; i < categories.length; i++) {
 				if (i > 0)
 					categoriesBuf.append(JavaElementLabels.CATEGORY_SEPARATOR_STRING);

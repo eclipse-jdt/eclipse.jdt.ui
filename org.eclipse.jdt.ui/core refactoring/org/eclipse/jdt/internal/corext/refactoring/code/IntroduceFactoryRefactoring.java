@@ -426,7 +426,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			return SearchPattern.createPattern(ctor, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
 		else { // perhaps a synthetic method? (but apparently not always... hmmm...)
 			// Can't find an IMethod for this method, so build a string pattern instead
-			StringBuffer	buf= new StringBuffer();
+			StringBuilder	buf= new StringBuilder();
 
 			buf.append(methodBinding.getDeclaringClass().getQualifiedName())
 			   .append("(");//$NON-NLS-1$

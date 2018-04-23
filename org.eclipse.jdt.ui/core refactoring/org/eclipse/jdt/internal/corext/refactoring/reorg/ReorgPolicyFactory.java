@@ -4370,7 +4370,7 @@ public final class ReorgPolicyFactory {
 
 	public static void storeCreateTargetExecutionLog(String project, Map<String, String> arguments, CreateTargetExecutionLog log) {
 		if (log != null) {
-			final StringBuffer buffer= new StringBuffer(64);
+			final StringBuilder buffer= new StringBuilder(64);
 			final Object[] selections= log.getSelectedElements();
 			for (int index= 0; index < selections.length; index++) {
 				final Object selection= selections[index];
@@ -4391,7 +4391,7 @@ public final class ReorgPolicyFactory {
 		}
 	}
 
-	private static boolean storeLogElement(StringBuffer buffer, String project, Object object) {
+	private static boolean storeLogElement(StringBuilder buffer, String project, Object object) {
 		if (object instanceof IJavaElement) {
 			final IJavaElement element= (IJavaElement) object;
 			buffer.append(JavaRefactoringDescriptorUtil.elementToHandle(project, element));
@@ -4409,7 +4409,7 @@ public final class ReorgPolicyFactory {
 			final Set<Object> set= new HashSet<>();
 			set.addAll(Arrays.asList(log.getProcessedElements()));
 			set.addAll(Arrays.asList(log.getRenamedElements()));
-			final StringBuffer buffer= new StringBuffer(64);
+			final StringBuilder buffer= new StringBuilder(64);
 			for (final Iterator<Object> iterator= set.iterator(); iterator.hasNext();) {
 				final Object object= iterator.next();
 				if (storeLogElement(buffer, project, object)) {

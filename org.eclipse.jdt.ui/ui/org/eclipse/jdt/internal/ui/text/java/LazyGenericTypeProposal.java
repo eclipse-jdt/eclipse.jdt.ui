@@ -129,7 +129,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 				if (proposals.length == 0)
 					return null;
 
-				StringBuffer buf= new StringBuffer();
+				StringBuilder buf= new StringBuilder();
 				for (int i= 0; i < proposals.length; i++) {
 					buf.append(proposals[i].getDisplayName());
 					if (i < proposals.length - 1)
@@ -401,7 +401,7 @@ public class LazyGenericTypeProposal extends LazyJavaTypeCompletionProposal {
 	private String computeTypeParameterDisplayName(ITypeParameter parameter, String[] bounds) {
 		if (bounds.length == 0 || bounds.length == 1 && "java.lang.Object".equals(bounds[0])) //$NON-NLS-1$
 			return parameter.getElementName();
-		StringBuffer buf= new StringBuffer(parameter.getElementName());
+		StringBuilder buf= new StringBuilder(parameter.getElementName());
 		buf.append(" extends "); //$NON-NLS-1$
 		for (int i= 0; i < bounds.length; i++) {
 			buf.append(Signature.getSimpleName(bounds[i]));

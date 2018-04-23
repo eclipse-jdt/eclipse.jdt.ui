@@ -712,7 +712,7 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	private String loadPreviewContentFromFile(String filename) {
 		String line;
 		String separator= System.getProperty("line.separator"); //$NON-NLS-1$
-		StringBuffer buffer= new StringBuffer(512);
+		StringBuilder buffer= new StringBuilder(512);
 		BufferedReader reader= null;
 		try {
 			reader= new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(filename)));

@@ -292,7 +292,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 				String local= fLocalTypes.get(Signature.getElementType(sig));
 				int dim= Signature.getArrayCount(sig);
 				if (local != null && dim > 0) {
-					StringBuffer array= new StringBuffer(local);
+					StringBuilder array= new StringBuilder(local);
 					for (int j= 0; j < dim; j++)
 						array.append("[]"); //$NON-NLS-1$
 					local= array.toString();

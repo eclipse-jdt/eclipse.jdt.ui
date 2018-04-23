@@ -211,7 +211,7 @@ public class CopyQualifiedNameAction extends SelectionDispatchAction {
 					dataTypes= new Transfer[] { TextTransfer.getInstance() };
 				}
 			} else {
-				StringBuffer buf= new StringBuffer();
+				StringBuilder buf= new StringBuilder();
 				buf.append(getQualifiedName(elements[0]));
 				for (int i= 1; i < elements.length; i++) {
 					String qualifiedName= getQualifiedName(elements[i]);

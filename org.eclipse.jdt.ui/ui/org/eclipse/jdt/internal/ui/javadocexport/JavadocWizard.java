@@ -314,7 +314,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			process= Runtime.getRuntime().exec(args);
 			if (process != null) {
 				// construct a formatted command line for the process properties
-				StringBuffer buf= new StringBuffer();
+				StringBuilder buf= new StringBuilder();
 				for (int i= 0; i < args.length; i++) {
 					buf.append(args[i]);
 					buf.append(' ');
@@ -380,7 +380,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		if (curr.indexOf(' ') == -1) {
 			return curr;
 		}
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append('\'');
 		for (int i= 0; i < curr.length(); i++) {
 			char ch= curr.charAt(i);

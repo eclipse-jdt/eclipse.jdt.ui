@@ -143,7 +143,7 @@ public class TemplateSet {
 				if (context == null)
 					throw new SAXException(JavaTemplateMessages.TemplateSet_error_missing_attribute);
 
-				StringBuffer buffer= new StringBuffer();
+				StringBuilder buffer= new StringBuilder();
 				NodeList children= node.getChildNodes();
 				for (int j= 0; j != children.getLength(); j++) {
 					String value= children.item(j).getNodeValue();

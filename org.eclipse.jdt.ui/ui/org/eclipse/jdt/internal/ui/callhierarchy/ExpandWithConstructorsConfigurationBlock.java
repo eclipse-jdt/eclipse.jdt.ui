@@ -624,7 +624,7 @@ public class ExpandWithConstructorsConfigurationBlock extends OptionsConfigurati
 	 */
 	public static String serializeMembers(List<String> list) {
 		int size= list.size();
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (int i= 0; i < size; i++) {
 			buf.append(list.get(i));
 			if (i < size - 1)

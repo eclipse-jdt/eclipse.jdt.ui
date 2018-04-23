@@ -153,7 +153,7 @@ public class JavaCompareUtilities {
 		if (je instanceof IMember && ((IMember)je).isBinary())
 			return null;
 
-		StringBuffer sb= new StringBuffer();
+		StringBuilder sb= new StringBuilder();
 
 		switch (je.getElementType()) {
 		case IJavaElement.COMPILATION_UNIT:
@@ -198,7 +198,7 @@ public class JavaCompareUtilities {
 	 * The type is encoded as a single character at the beginning of the string.
 	 */
 	static String buildID(int type, String name) {
-		StringBuffer sb= new StringBuffer();
+		StringBuilder sb= new StringBuilder();
 		switch (type) {
 		case JavaNode.CU:
 			sb.append(COMPILATIONUNIT);
@@ -294,7 +294,7 @@ public class JavaCompareUtilities {
 			return null;
 		BufferedReader reader= null;
 		try {
-			StringBuffer buffer= new StringBuffer();
+			StringBuilder buffer= new StringBuilder();
 			char[] part= new char[2048];
 			int read= 0;
 			reader= new BufferedReader(new InputStreamReader(is, encoding));
@@ -358,7 +358,7 @@ public class JavaCompareUtilities {
 		BufferedReader reader= null;
 		try {
 			reader= new BufferedReader(new InputStreamReader(is2, encoding));
-			StringBuffer sb= new StringBuffer();
+			StringBuilder sb= new StringBuilder();
 			List<String> list= new ArrayList<>();
 			while (true) {
 				int c= reader.read();
@@ -372,11 +372,11 @@ public class JavaCompareUtilities {
 					sb.append((char)c);
 					if (c == '\n') {
 						list.add(sb.toString());
-						sb= new StringBuffer();
+						sb= new StringBuilder();
 					}
 				} else if (c == '\n') {	// a single LF
 					list.add(sb.toString());
-					sb= new StringBuffer();
+					sb= new StringBuilder();
 				}
 			}
 			if (sb.length() > 0)

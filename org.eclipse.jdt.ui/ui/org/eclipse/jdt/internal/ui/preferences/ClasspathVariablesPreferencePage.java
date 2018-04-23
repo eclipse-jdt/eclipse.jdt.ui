@@ -120,7 +120,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	}
 
 	private String getCurrentSettings() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		String[] names= JavaCore.getClasspathVariableNames();
 		for (int i= 0; i < names.length; i++) {
 			String curr= names[i];

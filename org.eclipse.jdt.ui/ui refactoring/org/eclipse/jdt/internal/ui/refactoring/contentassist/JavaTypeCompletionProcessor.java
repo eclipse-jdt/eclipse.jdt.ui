@@ -164,7 +164,7 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 					char[] fullName= Signature.toCharArray(signature);
 					if (TypeFilter.isFiltered(fullName))
 						return;
-					StringBuffer buf= new StringBuffer();
+					StringBuilder buf= new StringBuilder();
 					buf.append(Signature.getSimpleName(fullName));
 					if (buf.length() == 0)
 						return; // this is the dummy class, whose $ have been converted to dots

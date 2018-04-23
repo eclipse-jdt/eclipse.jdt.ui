@@ -121,7 +121,7 @@ public class Java50CleanUp extends AbstractMultiFix {
 
 	@Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
 		buf.append("class E {\n"); //$NON-NLS-1$
 		buf.append("    /**\n"); //$NON-NLS-1$

@@ -661,7 +661,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		String trimmed= string.trim();
 		if ("".equals(trimmed)) //speed up for a common case //$NON-NLS-1$
 			return false;
-		StringBuffer cuBuff= new StringBuffer();
+		StringBuilder cuBuff= new StringBuilder();
 		cuBuff.append(CONST_CLASS_DECL)
 			  .append("Object") //$NON-NLS-1$
 			  .append(CONST_ASSIGN);
@@ -683,7 +683,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 		String trimmed= string.trim();
 		if ("".equals(trimmed)) //speed up for a common case //$NON-NLS-1$
 			return true;
-		StringBuffer cuBuff= new StringBuffer();
+		StringBuilder cuBuff= new StringBuilder();
 		cuBuff.append("class A{ {m("); //$NON-NLS-1$
 		int offset= cuBuff.length();
 		cuBuff.append(trimmed)
@@ -888,7 +888,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	}
 
 	public String getOldMethodSignature() throws JavaModelException{
-		StringBuffer buff= new StringBuffer();
+		StringBuilder buff= new StringBuilder();
 
 		int flags= getMethod().getFlags();
 		buff.append(getVisibilityString(flags));
@@ -914,7 +914,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	}
 
 	public String getNewMethodSignature() throws JavaModelException{
-		StringBuffer buff= new StringBuffer();
+		StringBuilder buff= new StringBuilder();
 
 		buff.append(getVisibilityString(fVisibility));
 		int flags= getMethod().getFlags();
@@ -946,7 +946,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	private String getMethodThrows() {
 		final String throwsString= " throws "; //$NON-NLS-1$
-		StringBuffer buff= new StringBuffer(throwsString);
+		StringBuilder buff= new StringBuilder(throwsString);
 		for (Iterator<ExceptionInfo> iter= fExceptionInfos.iterator(); iter.hasNext(); ) {
 			ExceptionInfo info= iter.next();
 			if (! info.isDeleted()) {
@@ -962,7 +962,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 
 	private String getOldMethodThrows() {
 		final String throwsString= " throws "; //$NON-NLS-1$
-		StringBuffer buff= new StringBuffer(throwsString);
+		StringBuilder buff= new StringBuilder(throwsString);
 		for (Iterator<ExceptionInfo> iter= fExceptionInfos.iterator(); iter.hasNext(); ) {
 			ExceptionInfo info= iter.next();
 			if (! info.isAdded()) {
@@ -1036,7 +1036,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	}
 
 	private String getOldMethodParameters() {
-		StringBuffer buff= new StringBuffer();
+		StringBuilder buff= new StringBuilder();
 		int i= 0;
 		for (Iterator<ParameterInfo> iter= getNotAddedInfos().iterator(); iter.hasNext(); i++) {
 			ParameterInfo info= iter.next();
@@ -1048,7 +1048,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 	}
 
 	private String getMethodParameters() {
-		StringBuffer buff= new StringBuffer();
+		StringBuilder buff= new StringBuilder();
 		int i= 0;
 		for (Iterator<ParameterInfo> iter= getNotDeletedInfos().iterator(); iter.hasNext(); i++) {
 			ParameterInfo info= iter.next();
@@ -1283,7 +1283,7 @@ public class ChangeSignatureProcessor extends RefactoringProcessor implements ID
 			int count= 1;
 			for (final Iterator<ParameterInfo> iterator= fParameterInfos.iterator(); iterator.hasNext();) {
 				final ParameterInfo info= iterator.next();
-				final StringBuffer buffer= new StringBuffer(64);
+				final StringBuilder buffer= new StringBuilder(64);
 				if (info.isAdded())
 					buffer.append("{added}"); //$NON-NLS-1$
 				else

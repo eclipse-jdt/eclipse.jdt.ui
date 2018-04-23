@@ -62,7 +62,7 @@ public final class JDTRefactoringDescriptorComment {
 	public static String createCompositeSetting(final String caption, final String[] settings) {
 		Assert.isNotNull(caption);
 		Assert.isNotNull(settings);
-		final StringBuffer buffer= new StringBuffer(128);
+		final StringBuilder buffer= new StringBuilder(128);
 		for (int index= 0; index < settings.length; index++) {
 			if (settings[index] != null && !"".equals(settings[index])) { //$NON-NLS-1$
 				buffer.append(LINE_DELIMITER);
@@ -139,7 +139,7 @@ public final class JDTRefactoringDescriptorComment {
 	 * @return this comment in string representation
 	 */
 	public String asString() {
-		final StringBuffer buffer= new StringBuffer(256);
+		final StringBuilder buffer= new StringBuilder(256);
 		buffer.append(fHeader);
 		if (fProject != null && !"".equals(fProject)) { //$NON-NLS-1$
 			buffer.append(LINE_DELIMITER);
@@ -190,7 +190,7 @@ public final class JDTRefactoringDescriptorComment {
 				if (elements.length == 1 && elements[0] != null)
 					fSettings.add(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_original_element_pattern, JavaElementLabels.getTextLabel(elements[0], JavaElementLabels.ALL_FULLY_QUALIFIED)));
 				else if (elements.length > 1) {
-					final StringBuffer buffer= new StringBuffer(128);
+					final StringBuilder buffer= new StringBuilder(128);
 					buffer.append(RefactoringCoreMessages.JavaRefactoringDescriptor_original_elements);
 					for (int index= 0; index < elements.length; index++) {
 						if (elements[index] != null) {
@@ -224,7 +224,7 @@ public final class JDTRefactoringDescriptorComment {
 				if (elements.length == 1 && elements[0] != null)
 					fSettings.add(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_original_element_pattern, JavaElementLabels.getTextLabel(elements[0], JavaElementLabels.ALL_FULLY_QUALIFIED)));
 				else if (elements.length > 1) {
-					final StringBuffer buffer= new StringBuffer(128);
+					final StringBuilder buffer= new StringBuilder(128);
 					buffer.append(RefactoringCoreMessages.JavaRefactoringDescriptor_original_elements);
 					for (int index= 0; index < elements.length; index++) {
 						if (elements[index] != null) {

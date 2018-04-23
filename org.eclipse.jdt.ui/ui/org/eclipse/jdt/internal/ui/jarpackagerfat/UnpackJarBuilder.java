@@ -104,7 +104,7 @@ public class UnpackJarBuilder extends FatJarBuilder {
 				renamedJarNames.add(jarName);
 			}
 		}
-		StringBuffer result= new StringBuffer();
+		StringBuilder result= new StringBuilder();
 		result.append("."); //$NON-NLS-1$
 		for (Iterator<String> iterator= renamedJarNames.iterator(); iterator.hasNext();) {
 			String jarName= iterator.next();

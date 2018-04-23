@@ -91,7 +91,7 @@ public class CommentAnalyzer {
 	public static String normalizeReference(String reference) {
 		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
 		scanner.setSource(reference.toCharArray());
-		StringBuffer sb= new StringBuffer();
+		StringBuilder sb= new StringBuilder();
 		try {
 			int tokenType= scanner.getNextToken();
 			while (tokenType != ITerminalSymbols.TokenNameEOF) {

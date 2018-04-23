@@ -225,7 +225,7 @@ public class FatJarPackageWizardPage extends AbstractJarDestinationWizardPage {
 
 		@Override
 		public String getLaunchConfigurationName() {
-			StringBuffer result= new StringBuffer();
+			StringBuilder result= new StringBuilder();
 
 			result.append(fLaunchConfiguration.getName());
 			result.append(" - "); //$NON-NLS-1$

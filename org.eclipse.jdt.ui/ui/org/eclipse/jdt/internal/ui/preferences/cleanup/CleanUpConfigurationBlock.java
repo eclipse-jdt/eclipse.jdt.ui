@@ -137,7 +137,7 @@ public class CleanUpConfigurationBlock extends ProfileConfigurationBlock {
     	if (cleanUps.length == 0)
     		return ""; //$NON-NLS-1$
 
-    	StringBuffer buf= new StringBuffer();
+    	StringBuilder buf= new StringBuilder();
 
     	boolean first= true;
     	for (int i= 0; i < cleanUps.length; i++) {

@@ -327,7 +327,7 @@ public class MatchLocations {
 		if (args.size() == 1) {
 			return args.get(0);
 		}
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (int i= 0; i < args.size(); i++) {
 			if (i > 0) {
 				buf.append(JavaElementLabels.COMMA_STRING);

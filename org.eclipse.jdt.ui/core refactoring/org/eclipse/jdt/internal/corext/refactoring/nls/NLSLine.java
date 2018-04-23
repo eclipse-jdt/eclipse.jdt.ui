@@ -64,7 +64,7 @@ public class NLSLine {
 	 */
 	@Override
 	public String toString() {
-		StringBuffer result= new StringBuffer();
+		StringBuilder result= new StringBuilder();
 		result.append("Line: " + fLineNumber + "\n"); //$NON-NLS-2$ //$NON-NLS-1$
 		for (Iterator<NLSElement> iter= fElements.iterator(); iter.hasNext(); ) {
 			result.append("\t"); //$NON-NLS-1$

@@ -483,7 +483,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	}
 
 	private static String packOrderList(List<ImportOrderEntry> orderList) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (int i= 0; i < orderList.size(); i++) {
 			ImportOrderEntry entry= orderList.get(i);
 			buf.append(entry.serialize());

@@ -98,7 +98,7 @@ public class StringCleanUp extends AbstractMultiFix {
 
 	@Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_NLS_TAGS)) {
 			buf.append("public String s;"); //$NON-NLS-1$

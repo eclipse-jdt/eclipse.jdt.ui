@@ -521,7 +521,7 @@ public class JavadocConfigurationBlock {
 	}
 
 	private String encodeExclamationMarks(String str) {
-		StringBuffer buf= new StringBuffer(str.length());
+		StringBuilder buf= new StringBuilder(str.length());
 		for (int i= 0; i < str.length(); i++) {
 			char ch= str.charAt(i);
 			if (ch == '!') {

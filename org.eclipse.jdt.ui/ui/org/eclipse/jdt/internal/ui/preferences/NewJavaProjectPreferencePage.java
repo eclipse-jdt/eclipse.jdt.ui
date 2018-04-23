@@ -178,7 +178,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 
 
 	public static String encodeJRELibrary(String desc, IClasspathEntry[] cpentries) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		for (int i= 0; i < cpentries.length; i++) {
 			IClasspathEntry entry= cpentries[i];
 			buf.append(encode(desc));
@@ -277,7 +277,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	}
 
 	private static String getDefaultJRELibraries() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		IClasspathEntry cntentry= getJREContainerEntry();
 		buf.append(encodeJRELibrary(PreferencesMessages.NewJavaProjectPreferencePage_jre_container_description, new IClasspathEntry[] { cntentry} ));
 		buf.append(';');

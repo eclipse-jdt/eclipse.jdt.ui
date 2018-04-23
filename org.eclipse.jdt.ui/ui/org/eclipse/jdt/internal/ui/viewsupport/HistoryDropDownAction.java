@@ -43,7 +43,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 			String label= fHistory.getText(element);
 		    if (accelerator < 10) {
 		    		//add the numerical accelerator
-			    label= new StringBuffer().append('&').append(accelerator).append(' ').append(label).toString();
+			    label= new StringBuilder().append('&').append(accelerator).append(' ').append(label).toString();
 			}
 
 			setText(label);

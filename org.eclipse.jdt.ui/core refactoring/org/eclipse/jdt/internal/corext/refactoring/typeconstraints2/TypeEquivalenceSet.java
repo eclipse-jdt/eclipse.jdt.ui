@@ -76,7 +76,7 @@ public class TypeEquivalenceSet {
 
 	@Override
 	public String toString() {
-		StringBuffer result= new StringBuffer();
+		StringBuilder result= new StringBuilder();
 		if (fVariables.length > 0)
 			result.append(fVariables[0].toString());
 		for (int i= 1; i < fVariables.length; i++) {

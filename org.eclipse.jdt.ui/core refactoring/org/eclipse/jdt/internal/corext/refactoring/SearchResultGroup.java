@@ -66,7 +66,7 @@ public class SearchResultGroup {
 
 	@Override
 	public String toString() {
-		StringBuffer buf= new StringBuffer(fResouce.getFullPath().toString());
+		StringBuilder buf= new StringBuilder(fResouce.getFullPath().toString());
 		buf.append('\n');
 		for (int i= 0; i < fSearchMatches.size(); i++) {
 			SearchMatch match= fSearchMatches.get(i);

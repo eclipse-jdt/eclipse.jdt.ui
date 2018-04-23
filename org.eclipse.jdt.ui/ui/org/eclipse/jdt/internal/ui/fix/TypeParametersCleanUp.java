@@ -119,7 +119,7 @@ public class TypeParametersCleanUp extends AbstractMultiFix {
 
 	@Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
 		if (isEnabled(CleanUpConstants.REMOVE_REDUNDANT_TYPE_ARGUMENTS)) {
 			buf.append("\nMap<Integer, String> map= new HashMap<>();"); //$NON-NLS-1$

@@ -319,7 +319,7 @@ public class JavaStructureCreator extends StructureCreator {
 			return content;
 
 		// replace whitespace by a single blank
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		char[] b= content.toCharArray();
 
 		// to avoid the trouble when dealing with Unicode
@@ -334,7 +334,7 @@ public class JavaStructureCreator extends StructureCreator {
 					case ITerminalSymbols.TokenNameCOMMENT_LINE:
 					case ITerminalSymbols.TokenNameCOMMENT_BLOCK:
 					case ITerminalSymbols.TokenNameCOMMENT_JAVADOC:
-						StringBuffer tokenStr= new StringBuffer(currentTokenSource.length);
+						StringBuilder tokenStr= new StringBuilder(currentTokenSource.length);
 						tokenStr.append(currentTokenSource);
 						StringTokenizer tokenizer= new StringTokenizer(tokenStr.toString());
 						while (tokenizer.hasMoreTokens()) {

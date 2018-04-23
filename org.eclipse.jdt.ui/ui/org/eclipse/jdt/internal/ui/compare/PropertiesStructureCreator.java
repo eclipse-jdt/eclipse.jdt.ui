@@ -272,7 +272,7 @@ public class PropertiesStructureCreator extends StructureCreator {
 	 */
 	private String convert(String s) {
 		int l= s.length();
-		StringBuffer buf= new StringBuffer(l);
+		StringBuilder buf= new StringBuilder(l);
 		int i= 0;
 
 		while (i < l) {

@@ -149,7 +149,7 @@ public class RecentSettingsStore {
 		data.setDestination(destination);
 		data.setAntpath(antpath);
 
-		StringBuffer refs= new StringBuffer();
+		StringBuilder refs= new StringBuilder();
 		for (int i= 0; i < hrefs.length; i++) {
 			if (i > 0) {
 				refs.append(REF_SEPARATOR);

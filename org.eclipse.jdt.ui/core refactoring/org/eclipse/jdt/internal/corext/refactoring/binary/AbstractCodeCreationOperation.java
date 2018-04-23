@@ -142,7 +142,7 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 			monitor= new NullProgressMonitor();
 		monitor.beginTask(getOperationLabel(), 100 * fPackages.size());
 		try {
-			final StringBuffer buffer= new StringBuffer(128);
+			final StringBuilder builder= new StringBuilder(128);
 			for (final Iterator<IPackageFragment> iterator= fPackages.iterator(); iterator.hasNext();) {
 				final IPackageFragment fragment= iterator.next();
 				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 100);
@@ -153,14 +153,14 @@ public abstract class AbstractCodeCreationOperation implements IWorkspaceRunnabl
 				IFileStore store= EFS.getStore(fOutputURI);
 				if (!"".equals(name)) { //$NON-NLS-1$
 					final String pack= name;
-					buffer.setLength(0);
-					buffer.append(name);
-					final int length= buffer.length();
+					builder.setLength(0);
+					builder.append(name);
+					final int length= builder.length();
 					for (int index= 0; index < length; index++) {
-						if (buffer.charAt(index) == '.')
-							buffer.setCharAt(index, '/');
+						if (builder.charAt(index) == '.')
+							builder.setCharAt(index, '/');
 					}
-					store= store.getChild(new Path(buffer.toString()));
+					store= store.getChild(new Path(builder.toString()));
 					if (!pack.startsWith(".")) //$NON-NLS-1$
 						createPackageFragment(store, pack, new SubProgressMonitor(subMonitor, 10));
 				} else

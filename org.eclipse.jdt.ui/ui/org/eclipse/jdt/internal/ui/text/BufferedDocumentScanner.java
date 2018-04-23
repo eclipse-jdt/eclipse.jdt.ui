@@ -120,7 +120,7 @@ public final class BufferedDocumentScanner implements ICharacterScanner {
 		try {
 			return fBuffer[fOffset++];
 		} catch (ArrayIndexOutOfBoundsException ex) {
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append("Detailed state of 'BufferedDocumentScanner:'"); //$NON-NLS-1$
 			buf.append("\n\tfOffset= "); //$NON-NLS-1$
 			buf.append(fOffset);

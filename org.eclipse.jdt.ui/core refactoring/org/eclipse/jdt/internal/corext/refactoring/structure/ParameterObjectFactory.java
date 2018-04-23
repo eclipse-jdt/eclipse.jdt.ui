@@ -695,7 +695,7 @@ public class ParameterObjectFactory {
 
 	protected String getTypeComment(ICompilationUnit parentCU, String lineDelimiter) throws CoreException {
 		if (StubUtility.doAddComments(parentCU.getJavaProject())) {
-			StringBuffer typeName= new StringBuffer();
+			StringBuilder typeName= new StringBuilder();
 			typeName.append(getClassName());
 			String[] typeParamNames= new String[0];
 			String comment= CodeGeneration.getTypeComment(parentCU, typeName.toString(), typeParamNames, lineDelimiter);

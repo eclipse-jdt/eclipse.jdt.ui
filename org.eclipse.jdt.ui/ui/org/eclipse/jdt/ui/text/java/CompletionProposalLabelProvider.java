@@ -197,7 +197,7 @@ public class CompletionProposalLabelProvider {
 		// XXX see https://bugs.eclipse.org/bugs/show_bug.cgi?id=84675
 		boolean useShortGenerics= false;
 		if (useShortGenerics) {
-			StringBuffer buf= new StringBuffer();
+			StringBuilder buf= new StringBuilder();
 			buf.append(displayName);
 			int pos;
 			do {

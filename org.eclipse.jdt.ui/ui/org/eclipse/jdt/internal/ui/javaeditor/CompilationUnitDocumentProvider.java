@@ -1115,7 +1115,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				InputStream contents= storage.getContents();
 				try {
 					in= new BufferedReader(new InputStreamReader(contents, charsetName));
-					StringBuffer buffer= new StringBuffer(BUFFER_SIZE);
+					StringBuilder buffer= new StringBuilder(BUFFER_SIZE);
 					char[] readBuffer= new char[READER_CHUNK_SIZE];
 					int n;
 					n= in.read(readBuffer);

@@ -141,7 +141,7 @@ public final class IndentUtil {
 			return result; // bail out
 
 		int tabSize= CodeFormatterUtil.getTabWidth(project);
-		StringBuffer addition= new StringBuffer();
+		StringBuilder addition= new StringBuilder();
 		int difference= subtractIndent(correct, current, addition, tabSize);
 
 		if (difference == 0)
@@ -239,7 +239,7 @@ public final class IndentUtil {
 	 * @param difference a string buffer - if the return value is positive, it will be cleared and set to the substring of <code>current</code> of that length
 	 * @return the difference in lenght of <code>correct</code> and <code>current</code>
 	 */
-	private static int subtractIndent(CharSequence correct, CharSequence current, StringBuffer difference, int tabSize) {
+	private static int subtractIndent(CharSequence correct, CharSequence current, StringBuilder difference, int tabSize) {
 		int c1= computeVisualLength(correct, tabSize);
 		int c2= computeVisualLength(current, tabSize);
 		int diff= c1 - c2;
@@ -456,7 +456,7 @@ public final class IndentUtil {
 		int previousLineLength= previousLine.getLength();
 		int previousLineEnd= previousLineStart + previousLineLength;
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		int previousLineNonWS= scanner.findNonWhitespaceForwardInAnyPartition(previousLineStart, previousLineEnd);
 		if (previousLineNonWS == JavaHeuristicScanner.NOT_FOUND || document.getChar(previousLineNonWS) != '*') {
 			// align with the comment start if the previous line is not an asterix line

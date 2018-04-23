@@ -454,7 +454,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 
 	private SearchPattern createNewMethodPattern() {
-		StringBuffer stringPattern= new StringBuffer(getNewElementName()).append('(');
+		StringBuilder stringPattern= new StringBuilder(getNewElementName()).append('(');
 		int paramCount= getMethod().getNumberOfParameters();
 		for (int i= 0; i < paramCount; i++) {
 			if (i > 0)
@@ -856,7 +856,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 
 	protected final ReplaceEdit createReplaceEdit(SearchMatch searchResult, ICompilationUnit cu) {
 		if (searchResult.isImplicit()) { // handle Annotation Element references, see bug 94062
-			StringBuffer sb= new StringBuffer(getNewElementName());
+			StringBuilder sb= new StringBuilder(getNewElementName());
 			if (JavaCore.INSERT.equals(cu.getJavaProject().getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR, true)))
 				sb.append(' ');
 			sb.append('=');

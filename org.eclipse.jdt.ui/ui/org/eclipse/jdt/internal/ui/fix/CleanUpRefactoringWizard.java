@@ -412,7 +412,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 
         private void showCustomSettings(BulletListBlock bulletListBlock) {
-			StringBuffer buf= new StringBuffer();
+        	StringBuilder buf= new StringBuilder();
 
 			final ICleanUp[] cleanUps= JavaPlugin.getDefault().getCleanUpRegistry().createCleanUps();
 			CleanUpOptions options= new MapCleanUpOptions(fCustomSettings);

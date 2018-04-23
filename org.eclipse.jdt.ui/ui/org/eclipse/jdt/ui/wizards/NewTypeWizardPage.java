@@ -2185,7 +2185,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				}
 
 				lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
-				StringBuffer content= new StringBuffer();
+				StringBuilder content= new StringBuilder();
 
 				String comment= getTypeComment(parentCU, lineDelimiter);
 				if (comment != null) {
@@ -2367,7 +2367,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				return content;
 			}
 		}
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		if (!pack.isDefaultPackage()) {
 			buf.append("package ").append(pack.getElementName()).append(';'); //$NON-NLS-1$
 		}
@@ -2442,7 +2442,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 
 	private String constructSimpleTypeStub() {
-		StringBuffer buf= new StringBuffer("public class "); //$NON-NLS-1$
+		StringBuilder buf= new StringBuilder("public class "); //$NON-NLS-1$
 		buf.append(getTypeName());
 		buf.append("{ }"); //$NON-NLS-1$
 		return buf.toString();
@@ -2585,7 +2585,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected String getTypeComment(ICompilationUnit parentCU, String lineDelimiter) {
 		if (isAddComments()) {
 			try {
-				StringBuffer typeName= new StringBuffer();
+				StringBuilder typeName= new StringBuilder();
 				if (isEnclosingTypeSelected()) {
 					typeName.append(getEnclosingType().getTypeQualifiedName('.')).append('.');
 				}

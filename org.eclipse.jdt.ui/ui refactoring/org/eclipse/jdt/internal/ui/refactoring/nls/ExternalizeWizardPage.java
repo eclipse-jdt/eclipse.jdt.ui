@@ -317,7 +317,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private static String getEscapedAsciiString(String s) {
 		if (s != null) {
-			StringBuffer sb= new StringBuffer(s.length());
+			StringBuilder sb= new StringBuilder(s.length());
 			int length= s.length();
 			for (int i= 0; i < length; i++) {
 				char c= s.charAt(i);

@@ -162,7 +162,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 			IPath[] patterns= (IPath[]) attrib.getValue();
 			if (patterns != null && patterns.length > 0) {
 				int patternsCount= 0;
-				StringBuffer buf= new StringBuffer();
+				StringBuilder buf= new StringBuilder();
 				for (int i= 0; i < patterns.length; i++) {
 					if (patterns[i].segmentCount() > 0) {
 						String pattern= BasicElementLabels.getPathLabel(patterns[i], false);
@@ -187,7 +187,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 			IPath[] patterns= (IPath[]) attrib.getValue();
 			if (patterns != null && patterns.length > 0) {
 				int patternsCount= 0;
-				StringBuffer buf= new StringBuffer();
+				StringBuilder buf= new StringBuilder();
 				for (int i= 0; i < patterns.length; i++) {
 					if (patterns[i].segmentCount() > 0) {
 						String pattern= BasicElementLabels.getPathLabel(patterns[i], false);
@@ -323,7 +323,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 				}
 				IResource resource= cpentry.getResource();
 				if (resource instanceof IContainer) {
-					StringBuffer buf= new StringBuffer(BasicElementLabels.getPathLabel(path, false));
+					StringBuilder buf= new StringBuilder(BasicElementLabels.getPathLabel(path, false));
 					IPath linkTarget= cpentry.getLinkTarget();
 					if (linkTarget != null) {
 						buf.append(JavaElementLabels.CONCAT_STRING);
@@ -378,7 +378,7 @@ public class CPListLabelProvider extends LabelProvider implements IStyledLabelPr
 				return BasicElementLabels.getPathLabel(path, false);
 			case IClasspathEntry.CPE_SOURCE: {
 				String pathLabel= BasicElementLabels.getPathLabel(path, false);
-				StringBuffer buf= new StringBuffer(pathLabel);
+				StringBuilder buf= new StringBuilder(pathLabel);
 				IPath linkTarget= cpentry.getLinkTarget();
 				if (linkTarget != null) {
 					buf.append(JavaElementLabels.CONCAT_STRING);

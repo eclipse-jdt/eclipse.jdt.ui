@@ -76,7 +76,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 
 	@Override
 	public String getName() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append(fTypeNode.getName().getIdentifier());
 		buf.append('(');
 		if (fSuperConstructor != null) {

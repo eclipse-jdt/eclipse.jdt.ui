@@ -395,7 +395,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 * @throws JavaModelException if getting the field's type signature fails
 	 */
 	private static String createSignatureKey(String methodName, IField field) throws JavaModelException {
-		StringBuffer buffer= new StringBuffer();
+		StringBuilder buffer= new StringBuilder();
 		buffer.append(methodName);
 		String fieldType= field.getTypeSignature();
 		String signature= Signature.getSimpleName(Signature.toString(fieldType));

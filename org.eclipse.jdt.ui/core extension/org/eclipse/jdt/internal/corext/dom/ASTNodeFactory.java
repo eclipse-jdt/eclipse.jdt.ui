@@ -84,7 +84,7 @@ public class ASTNodeFactory {
 	}
 
 	public static ASTNode newStatement(AST ast, String content) {
-		StringBuffer buffer= new StringBuffer(STATEMENT_HEADER);
+		StringBuilder buffer= new StringBuilder(STATEMENT_HEADER);
 		buffer.append(content);
 		buffer.append(STATEMENT_FOOTER);
 		ASTParser p= ASTParser.newParser(ast.apiLevel());
@@ -100,7 +100,7 @@ public class ASTNodeFactory {
 	}
 
 	public static TypeParameter newTypeParameter(AST ast, String content) {
-		StringBuffer buffer= new StringBuffer(TYPEPARAM_HEADER);
+		StringBuilder buffer= new StringBuilder(TYPEPARAM_HEADER);
 		buffer.append(content);
 		buffer.append(TYPEPARAM_FOOTER);
 		ASTParser p= ASTParser.newParser(ast.apiLevel());
@@ -117,7 +117,7 @@ public class ASTNodeFactory {
 
 
 	public static Type newType(AST ast, String content) {
-		StringBuffer buffer= new StringBuffer(TYPE_HEADER);
+		StringBuilder buffer= new StringBuilder(TYPE_HEADER);
 		buffer.append(content);
 		buffer.append(TYPE_FOOTER);
 		ASTParser p= ASTParser.newParser(ast.apiLevel());

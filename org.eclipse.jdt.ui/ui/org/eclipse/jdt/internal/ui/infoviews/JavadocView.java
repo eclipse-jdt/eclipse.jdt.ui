@@ -1413,7 +1413,7 @@ public class JavadocView extends AbstractInfoView {
 	 */
 	private static String formatCompilerConstantValue(Object constantValue) {
 		if (constantValue instanceof String) {
-			StringBuffer result= new StringBuffer();
+			StringBuilder result= new StringBuilder();
 			result.append('"');
 			String stringConstant= (String)constantValue;
 			if (stringConstant.length() > 80) {

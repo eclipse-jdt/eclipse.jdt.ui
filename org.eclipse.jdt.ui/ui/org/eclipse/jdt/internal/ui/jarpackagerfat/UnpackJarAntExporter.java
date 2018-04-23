@@ -99,7 +99,7 @@ public class UnpackJarAntExporter extends FatJarAntExporter {
 
 			attribute= document.createElement("attribute"); //$NON-NLS-1$
 			attribute.setAttribute("name", "Class-Path"); //$NON-NLS-1$ //$NON-NLS-2$s
-			StringBuffer classPath= new StringBuffer();
+			StringBuilder classPath= new StringBuilder();
 			classPath.append("."); //$NON-NLS-1$
 			for (int i= 0; i < sourceInfos.length; i++) {
 				SourceInfo sourceInfo= sourceInfos[i];

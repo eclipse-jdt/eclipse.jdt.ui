@@ -95,7 +95,7 @@ public class ParameterGuesser {
 		@Override
 		public String toString() {
 
-			StringBuffer buffer= new StringBuffer();
+			StringBuilder buffer= new StringBuilder();
 			buffer.append(qualifiedTypeName);
 			buffer.append(' ');
 			buffer.append(name);
@@ -408,7 +408,7 @@ public class ParameterGuesser {
 
 		int minLength= shorter.length();
 
-		StringBuffer pattern= new StringBuffer(shorter.length() + 2);
+		StringBuilder pattern= new StringBuilder(shorter.length() + 2);
 		String longestCommonSubstring= ""; //$NON-NLS-1$
 
 		for (int i= 0; i < minLength; i++) {

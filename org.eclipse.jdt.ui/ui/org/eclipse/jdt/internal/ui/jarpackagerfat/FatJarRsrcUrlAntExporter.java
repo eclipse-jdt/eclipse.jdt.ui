@@ -131,7 +131,7 @@ public class FatJarRsrcUrlAntExporter extends FatJarAntExporter {
 
 		attribute= document.createElement("attribute"); //$NON-NLS-1$
 		attribute.setAttribute("name", JIJConstants.REDIRECTED_CLASS_PATH_MANIFEST_NAME); //$NON-NLS-1$ 
-		StringBuffer rsrcClassPath= new StringBuffer();
+		StringBuilder rsrcClassPath= new StringBuilder();
 		rsrcClassPath.append(JIJConstants.CURRENT_DIR); 
 		for (int i= 0; i < sourceInfos.length; i++) {
 			SourceInfo sourceInfo= sourceInfos[i];

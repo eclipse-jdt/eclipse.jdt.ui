@@ -4195,7 +4195,7 @@ public class PreferenceConstants {
 	 */
 	public static void setExcludedCompletionProposalCategories(String[] categories) {
 		Assert.isLegal(categories != null);
-		StringBuffer buf= new StringBuffer(50 * categories.length);
+		StringBuilder buf= new StringBuilder(50 * categories.length);
 		for (int i= 0; i < categories.length; i++) {
 			buf.append(categories[i]);
 			buf.append('\0');

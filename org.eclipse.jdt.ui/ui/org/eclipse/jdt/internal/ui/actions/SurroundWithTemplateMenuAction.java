@@ -378,7 +378,7 @@ public class SurroundWithTemplateMenuAction implements IWorkbenchWindowPulldownD
 			if (proposals[i] instanceof ICompletionProposalExtension2) {
 				final IJavaCompletionProposal proposal= proposals[i];
 
-				StringBuffer actionName= new StringBuffer();
+				StringBuilder actionName= new StringBuilder();
 				if (j<10) {
 					actionName.append('&').append(j).append(' ');
 				}

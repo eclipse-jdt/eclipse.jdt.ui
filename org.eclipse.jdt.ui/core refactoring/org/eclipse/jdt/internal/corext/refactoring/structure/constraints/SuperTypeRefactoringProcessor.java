@@ -483,7 +483,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		Assert.isNotNull(imports);
 		Assert.isNotNull(content);
 		final IPackageFragment fragment= (IPackageFragment) unit.getParent();
-		final StringBuffer buffer= new StringBuffer();
+		final StringBuilder buffer= new StringBuilder();
 		final String delimiter= StubUtility.getLineDelimiterUsed(unit.getJavaProject());
 		if (!fragment.isDefaultPackage()) {
 			buffer.append("package " + fragment.getElementName() + ";"); //$NON-NLS-1$ //$NON-NLS-2$

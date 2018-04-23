@@ -44,7 +44,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal {
 	public static String getHtmlRepresentation(final String string) {
 
 		final int length= string.length();
-		final StringBuffer buffer= new StringBuffer(string);
+		final StringBuilder buffer= new StringBuilder(string);
 
 		for (int offset= length - 1; offset >= 0; offset--) {
 
@@ -97,7 +97,7 @@ public class WordCorrectionProposal implements IJavaCompletionProposal {
 		fContext= context;
 		fRelevance= relevance;
 
-		final StringBuffer buffer= new StringBuffer(80);
+		final StringBuilder buffer= new StringBuilder(80);
 
 		buffer.append("...<br>"); //$NON-NLS-1$
 		buffer.append(getHtmlRepresentation(arguments[1]));

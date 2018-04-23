@@ -538,7 +538,7 @@ public class ReorgCorrectionsSubProcessor {
 
 		@Override
 		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-			StringBuffer message= new StringBuffer();
+			StringBuilder message= new StringBuilder();
 			if (fChangeOnWorkspace) {
 				message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_required_compliance_changeworkspace_description, fRequiredVersion));
 			} else {

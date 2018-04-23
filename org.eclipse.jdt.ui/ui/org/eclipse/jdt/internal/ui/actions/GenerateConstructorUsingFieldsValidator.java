@@ -56,7 +56,7 @@ public class GenerateConstructorUsingFieldsValidator implements ISelectionStatus
 		return count;
 	}
 
-	private void createSignature(final IMethodBinding constructor, StringBuffer buffer, Object[] selection) {
+	private void createSignature(final IMethodBinding constructor, StringBuilder buffer, Object[] selection) {
 		ITypeBinding types[]= constructor.getParameterTypes();
 		for (int index= 0; index < types.length; index++)
 			buffer.append(types[index].getName());
@@ -72,7 +72,7 @@ public class GenerateConstructorUsingFieldsValidator implements ISelectionStatus
 		IMethodBinding[] methods= fType.getDeclaredMethods();
 		for (int index= 0; index < methods.length; index++) {
 			if (methods[index].isConstructor()) {
-				StringBuffer buffer= new StringBuffer();
+				StringBuilder buffer= new StringBuilder();
 				createSignature(methods[index], buffer, null);
 				existing.add(buffer.toString());
 			}
@@ -82,7 +82,7 @@ public class GenerateConstructorUsingFieldsValidator implements ISelectionStatus
 
 	@Override
 	public IStatus validate(Object[] selection) {
-		StringBuffer buffer= new StringBuffer();
+		StringBuilder buffer= new StringBuilder();
 		final IMethodBinding constructor= fDialog.getSuperConstructorChoice();
 		createSignature(constructor, buffer, selection);
 		if (fSignatures.contains(buffer.toString()))

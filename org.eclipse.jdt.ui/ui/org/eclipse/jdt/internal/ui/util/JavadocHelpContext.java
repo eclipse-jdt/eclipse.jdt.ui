@@ -212,7 +212,7 @@ public class JavadocHelpContext implements IContext2 {
 	 * @return the string
 	 */
 	private static String getString(Reader reader) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		char[] buffer= new char[1024];
 		int count;
 		try {

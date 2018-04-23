@@ -91,7 +91,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 			int firstNonWS= findEndOfWhiteSpace(d, lineOffset, offset);
 			Assert.isTrue(firstNonWS >= lineOffset, "indentation must not be negative"); //$NON-NLS-1$
 
-			StringBuffer buf= new StringBuffer(c.text);
+			StringBuilder buf= new StringBuilder(c.text);
 			IRegion prefix= findPrefixRange(d, line);
 			String indentation= d.get(prefix.getOffset(), prefix.getLength());
 			int lengthToAdd= Math.min(offset - prefix.getOffset(), prefix.getLength());

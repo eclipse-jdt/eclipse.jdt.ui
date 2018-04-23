@@ -41,7 +41,7 @@ public class ASTResolving extends org.eclipse.jdt.internal.core.manipulation.dom
 	}
 
 	public static String getMethodSignature(String name, ITypeBinding[] params, boolean isVarArgs) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		buf.append(name).append('(');
 		for (int i= 0; i < params.length; i++) {
 			if (i > 0) {

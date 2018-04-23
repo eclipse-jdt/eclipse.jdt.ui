@@ -130,7 +130,7 @@ public class MethodDeclarationCompletionProposal extends JavaTypeCompletionPropo
 		String declTypeName= fType.getTypeQualifiedName('.');
 		boolean isInterface= fType.isInterface();
 
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		if (addComments) {
 			String comment= CodeGeneration.getMethodComment(fType.getCompilationUnit(), declTypeName, fMethodName, empty, empty, fReturnTypeSig, empty, null, lineDelim);
 			if (comment != null) {

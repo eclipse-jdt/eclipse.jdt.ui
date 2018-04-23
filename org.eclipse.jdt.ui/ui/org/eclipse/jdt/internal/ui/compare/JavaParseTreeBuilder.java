@@ -216,7 +216,7 @@ class JavaParseTreeBuilder extends ASTVisitor {
     }
 
     private String getFieldName(VariableDeclarationFragment node) {
-        StringBuffer buffer= new StringBuffer();
+    	StringBuilder buffer= new StringBuilder();
         buffer.append(node.getName().toString());
         ASTNode parent= node.getParent();
         if (parent instanceof FieldDeclaration) {
@@ -228,7 +228,7 @@ class JavaParseTreeBuilder extends ASTVisitor {
     }
 
     private String getSignature(MethodDeclaration node) {
-        StringBuffer buffer= new StringBuffer();
+    	StringBuilder buffer= new StringBuilder();
         buffer.append(node.getName().toString());
         buffer.append('(');
         boolean first= true;
@@ -247,7 +247,7 @@ class JavaParseTreeBuilder extends ASTVisitor {
     }
 
     private String getSignature(AnnotationTypeMemberDeclaration node) {
-        StringBuffer buffer= new StringBuffer();
+    	StringBuilder buffer= new StringBuilder();
         buffer.append(node.getName().toString());
         buffer.append('(');
         buffer.append(')');

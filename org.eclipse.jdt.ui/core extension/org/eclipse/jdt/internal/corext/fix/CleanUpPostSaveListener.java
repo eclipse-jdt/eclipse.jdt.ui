@@ -655,7 +655,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 
 	private void showSlowCleanUpsWarning(HashSet<ICleanUp> slowCleanUps) {
 
-		final StringBuffer cleanUpNames= new StringBuffer();
+		final StringBuilder cleanUpNames= new StringBuilder();
 		for (Iterator<ICleanUp> iterator= slowCleanUps.iterator(); iterator.hasNext();) {
 			ICleanUp cleanUp= iterator.next();
 			String[] descriptions= cleanUp.getStepDescriptions();
@@ -681,7 +681,7 @@ public class CleanUpPostSaveListener implements IPostSaveListener {
 		}
 	}
 
-	private void showSlowCleanUpDialog(final StringBuffer cleanUpNames) {
+	private void showSlowCleanUpDialog(final StringBuilder cleanUpNames) {
 		if (OptionalMessageDialog.isDialogEnabled(SlowCleanUpWarningDialog.ID)) {
 			Shell shell= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 			new SlowCleanUpWarningDialog(shell, FixMessages.CleanUpPostSaveListener_SlowCleanUpDialog_title, cleanUpNames.toString()).open();

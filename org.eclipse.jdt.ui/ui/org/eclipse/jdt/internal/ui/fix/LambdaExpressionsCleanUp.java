@@ -81,7 +81,7 @@ public class LambdaExpressionsCleanUp extends AbstractCleanUp {
 
 	@Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		
 		boolean convert= isEnabled(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
 		boolean useLambda= isEnabled(CleanUpConstants.USE_LAMBDA);

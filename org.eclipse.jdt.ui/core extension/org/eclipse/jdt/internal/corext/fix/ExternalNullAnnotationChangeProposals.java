@@ -200,7 +200,7 @@ public class ExternalNullAnnotationChangeProposals {
 
 		@Override
 		public String getAdditionalProposalInfo() {
-			StringBuffer buffer= new StringBuffer();
+			StringBuilder buffer= new StringBuilder();
 			buffer.append("<dl>"); //$NON-NLS-1$
 			buffer.append("<dt>").append(getHtmlRepresentation(fSelector)).append("</dt>"); //$NON-NLS-1$ //$NON-NLS-2$
 			buffer.append("<dd>").append(getHtmlRepresentation(fSignature)).append("</dd>"); //$NON-NLS-1$ //$NON-NLS-2$

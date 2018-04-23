@@ -89,7 +89,7 @@ public class UnnecessaryCodeCleanUp extends AbstractMultiFix {
 
 	@Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
 		if (isEnabled(CleanUpConstants.REMOVE_UNNECESSARY_CASTS)) {
 			buf.append("Boolean b= Boolean.TRUE;\n"); //$NON-NLS-1$

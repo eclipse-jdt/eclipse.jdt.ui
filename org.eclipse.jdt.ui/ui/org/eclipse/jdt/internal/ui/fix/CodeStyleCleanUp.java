@@ -127,7 +127,7 @@ public class CodeStyleCleanUp extends AbstractMultiFix {
 
 	@Override
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 
 		buf.append("private int value;\n"); //$NON-NLS-1$
 		buf.append("public int get() {\n"); //$NON-NLS-1$

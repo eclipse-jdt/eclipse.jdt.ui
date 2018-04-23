@@ -217,7 +217,7 @@ public class RefactoringHandleTransplanter {
 	}
 
     private static String replaceAll(final String source, final String replaceFrom, final String replaceTo) {
-		final StringBuffer buf= new StringBuffer(source.length());
+		final StringBuilder buf= new StringBuilder(source.length());
 		int currentIndex= 0;
 		int matchIndex;
 		while ((matchIndex= source.indexOf(replaceFrom, currentIndex)) != -1) {

@@ -61,7 +61,7 @@ public class TypeInfoFilter {
 	 * Transforms o.e.j  to o*.e*.j*
 	 */
 	private String evaluatePackagePattern(String s) {
-		StringBuffer buf= new StringBuffer();
+		StringBuilder buf= new StringBuilder();
 		boolean hasWildCard= false;
 		int len= s.length();
 		for (int i= 0; i < len; i++) {

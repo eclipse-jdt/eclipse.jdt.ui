@@ -199,7 +199,7 @@ public class SuperInterfaceSelectionDialog extends OpenTypeSelectionDialog {
 		try {
 			ITypeParameter[] typeParameters= type.getTypeParameters();
 			if (typeParameters.length > 0) {
-				StringBuffer buf= new StringBuffer(superName);
+				StringBuilder buf= new StringBuilder(superName);
 				buf.append('<');
 				for (int k= 0; k < typeParameters.length; k++) {
 					if (k != 0) {

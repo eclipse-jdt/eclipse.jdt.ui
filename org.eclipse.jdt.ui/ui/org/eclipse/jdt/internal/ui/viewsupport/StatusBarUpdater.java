@@ -81,7 +81,7 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 					return container.getLabel() + JavaElementLabels.CONCAT_STRING + container.getJavaProject().getElementName();
 				} else if (elem instanceof IJarEntryResource) {
 					IJarEntryResource jarEntryResource= (IJarEntryResource) elem;
-					StringBuffer buf= new StringBuffer(BasicElementLabels.getResourceName(jarEntryResource.getName()));
+					StringBuilder buf= new StringBuilder(BasicElementLabels.getResourceName(jarEntryResource.getName()));
 					buf.append(JavaElementLabels.CONCAT_STRING);
 					IPath fullPath= jarEntryResource.getFullPath();
 					if (fullPath.segmentCount() > 1) {
