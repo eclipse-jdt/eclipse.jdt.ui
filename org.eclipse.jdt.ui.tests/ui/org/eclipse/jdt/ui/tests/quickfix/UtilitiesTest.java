@@ -214,7 +214,7 @@ public class UtilitiesTest extends QuickFixTest {
 		FieldDeclaration[] fields= ((TypeDeclaration) astRoot.types().get(0)).getFields();
 		for (int i= 0; i < fields.length; i++) {
 			ASTNode node= NodeFinder.perform(astRoot, buf.indexOf("X", fields[i].getStartPosition()), 1);
-			int kinds= org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getPossibleTypeKinds(node, true);
+			int kinds= ASTResolving.getPossibleTypeKinds(node, true);
 			if (kinds != expected[i]) {
 				assertEquals("Guessing failed for " + fields[i].toString(), expected[i], kinds);
 			}

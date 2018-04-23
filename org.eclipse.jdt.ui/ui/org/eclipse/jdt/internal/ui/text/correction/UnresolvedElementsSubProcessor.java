@@ -581,7 +581,7 @@ public class UnresolvedElementsSubProcessor {
 	}
 
 	private static int evauateTypeKind(ASTNode node, IJavaProject project) {
-		int kind= org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getPossibleTypeKinds(node, JavaModelUtil.is50OrHigher(project));
+		int kind= ASTResolving.getPossibleTypeKinds(node, JavaModelUtil.is50OrHigher(project));
 		return kind;
 	}
 
