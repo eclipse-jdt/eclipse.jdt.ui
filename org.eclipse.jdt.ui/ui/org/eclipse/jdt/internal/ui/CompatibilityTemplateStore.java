@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,11 +19,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.text.templates.TemplatePersistenceData;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.Template;
-import org.eclipse.text.templates.TemplatePersistenceData;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;

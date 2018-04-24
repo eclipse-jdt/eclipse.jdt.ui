@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,7 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.codemanipulation;
+package org.eclipse.jdt.internal.core.manipulation;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
@@ -47,9 +47,9 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateException;
+import org.eclipse.text.templates.TemplatePersistenceData;
+import org.eclipse.text.templates.TemplateStoreCore;
 import org.eclipse.jface.text.templates.TemplateVariable;
-import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
-import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
@@ -98,31 +98,22 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
+import org.eclipse.jdt.core.manipulation.CodeStyleConfiguration;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 
-import org.eclipse.jdt.ui.CodeGeneration;
-import org.eclipse.jdt.ui.CodeStyleConfiguration;
-import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
-
-import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
 
 /**
  * Implementations for {@link CodeGeneration} APIs, and other helper methods
  * to create source code stubs based on {@link IJavaElement}s.
  * 
- * @see StubUtility2
- * @see JDTUIHelperClasses
+ * See StubUtility2
+ * See JDTUIHelperClasses
  */
 public class StubUtility {
 
@@ -136,6 +127,12 @@ public class StubUtility {
 		VALID_TYPE_BODY_TEMPLATES.add(CodeTemplateContextType.ENUMBODY_ID);
 		VALID_TYPE_BODY_TEMPLATES.add(CodeTemplateContextType.ANNOTATIONBODY_ID);
 	}
+
+	//COPIED from org.eclipse.jdt.ui.PreferenceConstants
+	public static final String CODEGEN_KEYWORD_THIS= "org.eclipse.jdt.ui.keywordthis"; //$NON-NLS-1$
+	public static final String CODEGEN_IS_FOR_GETTERS= "org.eclipse.jdt.ui.gettersetter.use.is"; //$NON-NLS-1$
+	public static final String CODEGEN_EXCEPTION_VAR_NAME= "org.eclipse.jdt.ui.exception.name"; //$NON-NLS-1$
+	public static final String CODEGEN_ADD_COMMENTS= "org.eclipse.jdt.ui.javadoc"; //$NON-NLS-1$
 
 	/*
 	 * Don't use this method directly, use CodeGeneration.
@@ -311,7 +308,7 @@ public class StubUtility {
 			try {
 				insertTag(document, tagOffsets[i], position.getLength(), EMPTY, EMPTY, null, typeParameterNames, false, lineDelim);
 			} catch (BadLocationException e) {
-				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
+				throw new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), IStatus.ERROR, e.getMessage(), e));
 			}
 		}
 		return document.get();
@@ -392,7 +389,7 @@ public class StubUtility {
 	 * @param lineDelim the line delimiter to use
 	 * @return return the type body template or <code>null</code>
 	 * @throws CoreException thrown if the template could not be evaluated
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeBody(String, ICompilationUnit, String, String)
+	 * See org.eclipse.jdt.ui.CodeGeneration#getTypeBody(String, ICompilationUnit, String, String)
 	 */
 	public static String getTypeBody(String templateID, ICompilationUnit cu, String typeName, String lineDelim) throws CoreException {
 		if (!VALID_TYPE_BODY_TEMPLATES.contains(templateID)) {
@@ -477,7 +474,7 @@ public class StubUtility {
 			try {
 				insertTag(document, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, typeParameterNames, false, lineDelimiter);
 			} catch (BadLocationException e) {
-				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
+				throw new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), IStatus.ERROR, e.getMessage(), e));
 			}
 		}
 		return document.get();
@@ -687,7 +684,7 @@ public class StubUtility {
 			try {
 				insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, typeParamNames, isDeprecated, lineDelimiter);
 			} catch (BadLocationException e) {
-				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
+				throw new CoreException(new Status(IStatus.ERROR, JavaManipulationPlugin.getPluginId(), IStatus.ERROR, e.getMessage(), e));
 			}
 		}
 		return textBuffer.get();
@@ -1443,19 +1440,19 @@ public class StubUtility {
 	// -------------------- preference access -----------------------
 
 	public static boolean useThisForFieldAccess(IJavaProject project) {
-		return Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_KEYWORD_THIS, project)).booleanValue();
+		return Boolean.valueOf(JavaManipulation.getPreference(CODEGEN_KEYWORD_THIS, project)).booleanValue();
 	}
 
 	public static boolean useIsForBooleanGetters(IJavaProject project) {
-		return Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_IS_FOR_GETTERS, project)).booleanValue();
+		return Boolean.valueOf(JavaManipulation.getPreference(CODEGEN_IS_FOR_GETTERS, project)).booleanValue();
 	}
 
 	public static String getExceptionVariableName(IJavaProject project) {
-		return PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME, project);
+		return JavaManipulation.getPreference(CODEGEN_EXCEPTION_VAR_NAME, project);
 	}
 
 	public static boolean doAddComments(IJavaProject project) {
-		return Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, project)).booleanValue();
+		return Boolean.valueOf(JavaManipulation.getPreference(CODEGEN_ADD_COMMENTS, project)).booleanValue();
 	}
 
 	/**
@@ -1466,7 +1463,7 @@ public class StubUtility {
 	 * @param project not used
 	 */
 	public static void setCodeTemplate(String templateId, String pattern, IJavaProject project) {
-		TemplateStore codeTemplateStore= JavaPlugin.getDefault().getCodeTemplateStore();
+		TemplateStoreCore codeTemplateStore= JavaManipulation.getCodeTemplateStore();
 		TemplatePersistenceData data= codeTemplateStore.getTemplateData(templateId);
 		Template orig= data.getTemplate();
 		Template copy= new Template(orig.getName(), orig.getDescription(), orig.getContextTypeId(), pattern, true);
@@ -1475,12 +1472,12 @@ public class StubUtility {
 
 	public static Template getCodeTemplate(String id, IJavaProject project) {
 		if (project == null)
-			return JavaPlugin.getDefault().getCodeTemplateStore().findTemplateById(id);
+			return JavaManipulation.getCodeTemplateStore().findTemplateById(id);
 		ProjectTemplateStore projectStore= new ProjectTemplateStore(project.getProject());
 		try {
 			projectStore.load();
 		} catch (IOException e) {
-			JavaPlugin.log(e);
+			JavaManipulationPlugin.log(e);
 		}
 		return projectStore.findTemplateById(id);
 	}

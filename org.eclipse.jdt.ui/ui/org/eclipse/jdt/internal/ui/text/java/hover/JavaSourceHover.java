@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -55,8 +55,8 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -268,7 +268,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 			if ((line1 < topLine) || (wLine1 != -1 && (wLine2 - wLine1 != line2 - line1))) {
 				// match not visible or content is folded - see bug 399997
 				if (isElsePart) {
-					return getBracketHoverInfo((IfStatement) node, bracketNode, document, editorInput, delim); // see bug 377141, 410650
+					return getBracketHoverInfo((IfStatement) node, bracketNode, document, editorInput, delim); // see bug 377141, 201850
 				}
 				noOfSourceLines= 3;
 				if ((line2 - line1) < noOfSourceLines) {

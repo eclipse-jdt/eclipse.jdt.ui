@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.template.java;
+package org.eclipse.jdt.internal.core.manipulation;
 
 import java.util.Iterator;
 
@@ -30,8 +30,7 @@ import org.eclipse.jface.text.templates.TemplateVariableResolver;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 public class CodeTemplateContext extends TemplateContext {
 
@@ -39,7 +38,7 @@ public class CodeTemplateContext extends TemplateContext {
 	private IJavaProject fProject;
 
 	public CodeTemplateContext(String contextTypeName, IJavaProject project, String lineDelim) {
-		super(JavaPlugin.getDefault().getCodeTemplateContextRegistry().getContextType(contextTypeName));
+		super(JavaManipulation.getCodeTemplateContextRegistry().getContextType(contextTypeName));
 		fLineDelimiter= lineDelim;
 		fProject= project;
 	}

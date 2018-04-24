@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,7 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.viewsupport;
+package org.eclipse.jdt.internal.core.manipulation;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -20,21 +20,21 @@ import java.io.StringWriter;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.osgi.service.prefs.BackingStoreException;
+
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 
-import org.eclipse.jface.text.templates.Template;
 import org.eclipse.text.templates.TemplatePersistenceData;
 import org.eclipse.text.templates.TemplateReaderWriter;
-import org.eclipse.jface.text.templates.persistence.TemplateStore;
+import org.eclipse.text.templates.TemplateStoreCore;
 
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.eclipse.jface.text.templates.Template;
 
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 /**
  * @since 3.1
@@ -43,16 +43,16 @@ public final class ProjectTemplateStore {
 
 	private static final String KEY= "org.eclipse.jdt.ui.text.custom_code_templates"; //$NON-NLS-1$
 
-	private final TemplateStore fInstanceStore;
-	private final TemplateStore fProjectStore;
+	private final TemplateStoreCore fInstanceStore;
+	private final TemplateStoreCore fProjectStore;
 
 	public ProjectTemplateStore(IProject project) {
-		fInstanceStore= JavaPlugin.getDefault().getCodeTemplateStore();
+		fInstanceStore= JavaManipulation.getCodeTemplateStore();
 		if (project == null) {
 			fProjectStore= null;
 		} else {
-			final ScopedPreferenceStore projectSettings= new ScopedPreferenceStore(new ProjectScope(project), JavaUI.ID_PLUGIN);
-			fProjectStore= new TemplateStore(projectSettings, KEY) {
+			final IEclipsePreferences projectSettings= new ProjectScope(project).getNode(JavaManipulation.getPreferenceNodeId());
+			fProjectStore= new TemplateStoreCore(projectSettings, KEY) {
 				/*
 				 * Make sure we keep the id of added code templates - add removes
 				 * it in the usual add() method
@@ -72,22 +72,29 @@ public final class ProjectTemplateStore {
 							TemplateReaderWriter writer= new TemplateReaderWriter();
 							writer.save(getTemplateData(false), output);
 
-							projectSettings.setValue(KEY, output.toString());
-							projectSettings.save();
+							projectSettings.put(KEY, output.toString());
+							try {
+								projectSettings.flush();
+							} catch (BackingStoreException e) {
+							}
 
 							return;
 						}
 					}
 
-					projectSettings.setToDefault(KEY);
-					projectSettings.save();
+					// See IPreferenceStore for default String value
+					projectSettings.put(KEY, ""); //$NON-NLS-1$
+					try {
+						projectSettings.flush();
+					} catch (BackingStoreException e) {
+					}
 				}
 			};
 		}
 	}
 
 	public static boolean hasProjectSpecificTempates(IProject project) {
-		String pref= new ProjectScope(project).getNode(JavaUI.ID_PLUGIN).get(KEY, null);
+		String pref= new ProjectScope(project).getNode(JavaManipulation.getPreferenceNodeId()).get(KEY, null);
 		if (pref != null && pref.trim().length() > 0) {
 			Reader input= new StringReader(pref);
 			TemplateReaderWriter reader= new TemplateReaderWriter();
@@ -173,7 +180,7 @@ public final class ProjectTemplateStore {
 			try {
 				load();
 			} catch (IOException e) {
-				JavaPlugin.log(e);
+				JavaManipulationPlugin.log(e);
 			}
 		}
 	}

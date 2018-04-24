@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.core.manipulation
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.core.manipulation; singleton:=true
-Bundle-Version: 1.10.100.qualifier
+Bundle-Version: 1.11.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin
 Bundle-Localization: plugin
@@ -19,7 +19,7 @@ Export-Package: org.eclipse.jdt.core.manipulation,
  org.eclipse.jdt.core.refactoring,
  org.eclipse.jdt.core.refactoring.descriptors,
  org.eclipse.jdt.core.refactoring.participants,
- org.eclipse.jdt.internal.core.manipulation;x-friends:="org.eclipse.jdt.ui",
+ org.eclipse.jdt.internal.core.manipulation;x-friends:="org.eclipse.jdt.ui,org.eclipse.jdt.junit",
  org.eclipse.jdt.internal.core.manipulation.dom;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.core.manipulation.search;x-friends:="org.eclipse.jdt.ui,org.eclipse.jdt.text.tests",
  org.eclipse.jdt.internal.core.manipulation.util;x-friends:="org.eclipse.jdt.junit,org.eclipse.jdt.text.tests,org.eclipse.jdt.ui",

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,19 +13,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
-import org.eclipse.jface.text.templates.Template;
 import org.eclipse.text.templates.TemplatePersistenceData;
+
+import org.eclipse.jface.text.templates.Template;
 
 import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
+import org.eclipse.jdt.internal.core.manipulation.ProjectTemplateStore;
 
-import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class TemplateStoreTest extends CoreTests {
 

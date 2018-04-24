@@ -87,9 +87,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
+import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRegistry;
 import org.eclipse.jdt.internal.corext.template.java.AbstractJavaContextType;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.SWTContextType;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
@@ -120,8 +120,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ImagesOnFileSystemRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathAttributeConfigurationDescriptors;
-import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 import org.eclipse.jdt.internal.ui.workingsets.DynamicSourcesWorkingSetUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.IWorkingSetIDs;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetMessages;
 
 
@@ -432,6 +432,8 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			new InitializeAfterLoadJob().schedule(); // last call in start, see bug 191193
 		}
 
+		JavaManipulation.setCodeTemplateStore(getCodeTemplateStore());
+		JavaManipulation.setCodeTemplateContextRegistry(getCodeTemplateContextRegistry());
 	}
 
 	private void createOrUpdateWorkingSet(String name, String oldname, String label, final String id) {

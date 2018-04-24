@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -50,33 +50,6 @@ final class JavaTemplateMessages extends NLS {
 	public static String JavaContext_error_message;
 	public static String JavaContext_unexpected_error_message;
 	public static String JavaDocContextType_variable_description_word_selection;
-	public static String CodeTemplateContextType_variable_description_todo;
-	public static String CodeTemplateContextType_variable_description_packdeclaration;
-	public static String CodeTemplateContextType_variable_description_typedeclaration;
-	public static String CodeTemplateContextType_variable_description_getterfieldname;
-	public static String CodeTemplateContextType_variable_description_getterfieldtype;
-	public static String CodeTemplateContextType_variable_description_fieldname;
-	public static String CodeTemplateContextType_variable_description_fieldtype;
-	public static String CodeTemplateContextType_variable_description_barefieldname;
-	public static String CodeTemplateContextType_variable_description_param;
-	public static String CodeTemplateContextType_variable_description_typecomment;
-	public static String CodeTemplateContextType_variable_description_exceptiontype;
-	public static String CodeTemplateContextType_variable_description_exceptionvar;
-	public static String CodeTemplateContextType_variable_description_enclosingtype;
-	public static String CodeTemplateContextType_variable_description_typename;
-	public static String CodeTemplateContextType_variable_description_enclosingmethod;
-	public static String CodeTemplateContextType_variable_description_bodystatement;
-	public static String CodeTemplateContextType_variable_description_returntype;
-	public static String CodeTemplateContextType_variable_description_tags;
-	public static String CodeTemplateContextType_variable_description_see_overridden_tag;
-	public static String CodeTemplateContextType_variable_description_see_target_tag;
-	public static String CodeTemplateContextType_variable_description_filename;
-	public static String CodeTemplateContextType_variable_description_filecomment;
-	public static String CodeTemplateContextType_variable_description_packagename;
-	public static String CodeTemplateContextType_variable_description_projectname;
-	public static String CodeTemplateContextType_validate_unknownvariable;
-	public static String CodeTemplateContextType_validate_missingvariable;
-	public static String CodeTemplateContextType_validate_invalidcomment;
 	public static String TemplateSet_error_missing_attribute;
 	public static String TemplateSet_error_read;
 	public static String TemplateSet_error_write;

@@ -19,6 +19,9 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.ProjectScope;
 
+import org.eclipse.text.templates.ContextTypeRegistry;
+import org.eclipse.text.templates.TemplateStoreCore;
+
 import org.eclipse.jdt.core.IJavaProject;
 
 /**
@@ -37,6 +40,10 @@ public class JavaManipulation {
 	 * sane defaults, but if it exists, the preference node should be checked.
 	 */
 	private static String fgPreferenceNodeId;
+
+	private static TemplateStoreCore fTemplateStore;
+
+	private static ContextTypeRegistry fCodeTemplateContextTypeRegistry;
 
 	/**
 	 * @return The id of the preference node for some basic Java preferences.
@@ -59,6 +66,34 @@ public class JavaManipulation {
 	public static final void setPreferenceNodeId (String id) {
 		Assert.isLegal(fgPreferenceNodeId == null || id == null, "Preference node already set"); //$NON-NLS-1$
 		fgPreferenceNodeId= id;
+	}
+
+	/**
+	 * @since 1.11
+	 */
+	public static final TemplateStoreCore getCodeTemplateStore () {
+		return fTemplateStore;
+	}
+
+	/**
+	 * @since 1.11
+	 */
+	public static final void setCodeTemplateStore (TemplateStoreCore in) {
+		fTemplateStore= in;
+	}
+
+	/**
+	 * @since 1.11
+	 */
+	public static final ContextTypeRegistry getCodeTemplateContextRegistry () {
+		return fCodeTemplateContextTypeRegistry;
+	}
+
+	/**
+	 * @since 1.11
+	 */
+	public static final void setCodeTemplateContextRegistry (ContextTypeRegistry in) {
+		fCodeTemplateContextTypeRegistry= in;
 	}
 
 	/**
