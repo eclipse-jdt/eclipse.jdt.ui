@@ -625,6 +625,16 @@ public class UnresolvedElementsSubProcessor {
 			return;
 		}
 
+		if (node instanceof SimpleName && !JavaModelUtil.is10OrHigher(javaProject)) {
+			String[] args= problem.getProblemArguments();
+			if (args != null && args.length > 0) {
+				String name= args[0];
+				if (name.equals("var")) { //$NON-NLS-1$
+					ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_10);
+				}
+			}
+		}
+
 		// change to similar type proposals
 		addSimilarTypeProposals(kind, cu, node, IProposalRelevance.SIMILAR_TYPE, proposals);
 
