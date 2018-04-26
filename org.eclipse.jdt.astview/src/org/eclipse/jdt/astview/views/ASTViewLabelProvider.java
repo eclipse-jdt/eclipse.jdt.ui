@@ -46,7 +46,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	//to dispose:
 	private final Font fAllocatedBoldItalic;
 	private final Color fLightRed;
-	private Color selectedElemBGColor;
+	private Color fSelectedElemBGColor;
 	
 	public ASTViewLabelProvider() {
 		fSelectionStart= -1;
@@ -60,12 +60,12 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		fDarkGreen= display.getSystemColor(SWT.COLOR_DARK_GREEN);
 		fDarkRed= display.getSystemColor(SWT.COLOR_DARK_RED);
 
-		selectedElemBGColor= new Color (display, 232, 242, 254);
+		fSelectedElemBGColor= new Color(display, 232, 242, 254);
 		String currLineColor= EditorsUI.getPreferenceStore().getString(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR);
-		String [] rgb= currLineColor.split(","); //$NON-NLS-1$
+		String[] rgb= currLineColor.split(","); //$NON-NLS-1$
 		if (rgb.length == 3) {
 			try {
-				selectedElemBGColor= new Color(display, Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2]));
+				fSelectedElemBGColor= new Color(display, Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2]));
 			} catch (NumberFormatException e) {
 				// do nothing, colour would remain the backup value
 			}
@@ -171,7 +171,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			return fLightRed;
 		}
 		if (fSelectionStart != -1 && isInside(element)) {
-			return selectedElemBGColor;
+			return fSelectedElemBGColor;
 		}
 		return null;
 	}
@@ -239,7 +239,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	@Override
 	public void dispose() {
 		super.dispose();
-		selectedElemBGColor.dispose();
+		fSelectedElemBGColor.dispose();
 		fLightRed.dispose();
 		fAllocatedBoldItalic.dispose();
 	}
