@@ -63,6 +63,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_RECREATE_MODIFIED_CLASS_FILES= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_RECREATE_MODIFIED_CLASS_FILES_IN_OUTPUT_FOLDER);
 
 	private static final Key PREF_PB_STRICTLY_COMPATIBLE_JRE_NOT_AVAILABLE= getJDTLaunchingKey(JavaRuntime.PREF_STRICTLY_COMPATIBLE_JRE_NOT_AVAILABLE);
+	private static final Key PREF_PB_COMPILER_COMPLIANCE_DOES_NOT_MATCH_JRE= getJDTLaunchingKey(JavaRuntime.PREF_COMPILER_COMPLIANCE_DOES_NOT_MATCH_JRE);
 
 
 	// values
@@ -92,7 +93,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_PB_MAX_PER_UNIT, PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_INCOMPLETE_BUILDPATH, PREF_PB_CIRCULAR_BUILDPATH,
 				PREF_BUILD_CLEAN_OUTPUT_FOLDER, PREF_PB_DUPLICATE_RESOURCE,
 				PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_PB_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, PREF_ENABLE_EXCLUSION_PATTERNS, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS, 
-				PREF_RECREATE_MODIFIED_CLASS_FILES,	PREF_PB_STRICTLY_COMPATIBLE_JRE_NOT_AVAILABLE
+				PREF_RECREATE_MODIFIED_CLASS_FILES,	PREF_PB_STRICTLY_COMPATIBLE_JRE_NOT_AVAILABLE, PREF_PB_COMPILER_COMPLIANCE_DOES_NOT_MATCH_JRE
 			};
 		return keys;
 	}
@@ -201,6 +202,9 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_strictly_compatible_jre_not_available_label;
 		addComboBox(othersComposite, label, PREF_PB_STRICTLY_COMPATIBLE_JRE_NOT_AVAILABLE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, 0);
+
+		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_compiler_compliance_does_not_match_jre_label;
+		addComboBox(othersComposite, label, PREF_PB_COMPILER_COMPLIANCE_DOES_NOT_MATCH_JRE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_section_output_folder;
 		excomposite= createStyleSection(composite, label, nColumns);
