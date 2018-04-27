@@ -522,7 +522,10 @@ public final class ConvertIterableLoopOperation extends ConvertLoopOperation {
 
 					@Override
 					public final boolean visit(final ForStatement node) {
-						return false;
+						if (node.equals(getForStatement()))
+							return false;
+						else
+							return true;
 					}
 
 					@Override

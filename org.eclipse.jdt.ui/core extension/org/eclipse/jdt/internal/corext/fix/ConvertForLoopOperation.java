@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NumberLiteral;
@@ -495,7 +496,8 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 						if (current.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY)
 							return true;
 
-						if (current instanceof PrefixExpression)
+						if (current instanceof PrefixExpression
+								&& !(((PrefixExpression) current).getOperand() instanceof MethodInvocation && ((PrefixExpression) current).getOperator().equals(PrefixExpression.Operator.NOT)))
 							return true;
 
 						if (current instanceof PostfixExpression)

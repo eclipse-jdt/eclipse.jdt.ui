@@ -2205,6 +2205,117 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		assertFalse(satisfiesPrecondition(cu));
 	}
+	
+	public void testBug510758_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private Object[] array;\n");
+		buf.append("    public boolean isNull(Object object ) {\n");
+		buf.append("        boolean isNull= (object != null) ? false : true;\n");
+		buf.append("        return isNull; \n");
+		buf.append("    }\n");
+		buf.append("    public void method() {\n");
+		buf.append("        for (int i = 0; i < array.length; i++) {\n");
+		buf.append("            if (!isNull(array[i])) {\n");
+		buf.append("                System.out.println(array[i].toString()) ");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		assertTrue(satisfiesPrecondition(cu));
+		
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, cu);
+
+		assertNotNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview1= getPreviewContent(fConvertLoopProposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private Object[] array;\n");
+		buf.append("    public boolean isNull(Object object ) {\n");
+		buf.append("        boolean isNull= (object != null) ? false : true;\n");
+		buf.append("        return isNull; \n");
+		buf.append("    }\n");
+		buf.append("    public void method() {\n");
+		buf.append("        for (Object element : array) {\n");
+		buf.append("            if (!isNull(element)) {\n");
+		buf.append("                System.out.println(element.toString()) ");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview1, expected);
+	}
+	
+	public void testBug510758_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private Object[] array;\n");
+		buf.append("    public boolean isNull(Object object ) {\n");
+		buf.append("        boolean isNull= (object != null) ? false : true;\n");
+		buf.append("        return isNull; \n");
+		buf.append("    }\n");
+		buf.append("    public void method() {\n");
+		buf.append("        for (int i = 0; i < array.length; i++) {\n");
+		buf.append("            if (!isNull(array[i+1])) {\n");
+		buf.append("                System.out.println(array[i+1].toString()) ");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		assertFalse(satisfiesPrecondition(cu));
+		
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, cu);
+
+		assertNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);		
+	}
+	
+	public void testBug510758_3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private Object[] array;\n");
+		buf.append("    public boolean isNull(Object object ) {\n");
+		buf.append("        boolean isNull= (object != null) ? false : true;\n");
+		buf.append("        return isNull; \n");
+		buf.append("    }\n");
+		buf.append("    public void method() {\n");
+		buf.append("        for (int i = 0; i < array.length; i++) {\n");
+		buf.append("            if (~isNull(array[i])) {\n");
+		buf.append("                System.out.println(array[i].toString()) ");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		assertFalse(satisfiesPrecondition(cu));
+		
+		List<IJavaCompletionProposal> proposals= fetchConvertingProposal(buf, cu);
+
+		assertNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);		
+	}
 
 	private boolean satisfiesPrecondition(ICompilationUnit cu) {
 		ForStatement statement= getForStatement(cu);
