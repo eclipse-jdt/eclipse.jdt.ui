@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.junit.ui;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
@@ -154,11 +154,7 @@ public class CompareResultDialog extends TrayDialog {
 	    }
 	    @Override
 		public InputStream getContents() {
-		    try {
-		        return new ByteArrayInputStream(fContent.getBytes("UTF-8")); //$NON-NLS-1$
-		    } catch (UnsupportedEncodingException e) {
-		        return new ByteArrayInputStream(fContent.getBytes());
-		    }
+		    return new ByteArrayInputStream(fContent.getBytes(StandardCharsets.UTF_8));
 	    }
         @Override
 		public String getCharset() throws CoreException {

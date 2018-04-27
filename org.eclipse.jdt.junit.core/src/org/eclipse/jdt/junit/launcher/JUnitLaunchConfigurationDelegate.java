@@ -21,6 +21,7 @@ import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -512,7 +513,8 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		try {
 			File file= File.createTempFile("packageNames", ".txt"); //$NON-NLS-1$ //$NON-NLS-2$
 			file.deleteOnExit();
-			try (BufferedWriter bw= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"))) { //$NON-NLS-1$) 
+
+			try (BufferedWriter bw= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {
 				if (testContainer instanceof IPackageFragment) {
 					pkgNames.add(getPackageName(testContainer.getElementName()));
 				} else if (testContainer instanceof IPackageFragmentRoot) {
@@ -562,9 +564,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		try {
 			File file= File.createTempFile("testNames", ".txt"); //$NON-NLS-1$ //$NON-NLS-2$
 			file.deleteOnExit();
-			BufferedWriter bw= null;
-			try {
-				bw= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8")); //$NON-NLS-1$
+			try (BufferedWriter bw= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8));) {
 				for (int i= 0; i < testElements.length; i++) {
 					if (testElements[i] instanceof IType) {
 						IType type= (IType) testElements[i];
@@ -574,10 +574,6 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 					} else {
 						abort(JUnitMessages.JUnitLaunchConfigurationDelegate_error_wrong_input, null, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE);
 					}
-				}
-			} finally {
-				if (bw != null) {
-					bw.close();
 				}
 			}
 			return file.getAbsolutePath();

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,10 +18,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.PushbackReader;
-import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.SafeRunner;
@@ -263,16 +263,8 @@ public class RemoteTestRunnerClient {
 					System.out.println("Creating server socket "+fServerPort); //$NON-NLS-1$
 				fServerSocket= new ServerSocket(fServerPort);
 				fSocket= fServerSocket.accept();
-				try {
-				    fPushbackReader= new PushbackReader(new BufferedReader(new InputStreamReader(fSocket.getInputStream(), "UTF-8"))); //$NON-NLS-1$
-				} catch (UnsupportedEncodingException e) {
-				    fPushbackReader= new PushbackReader(new BufferedReader(new InputStreamReader(fSocket.getInputStream())));
-				}
-				try {
-				    fWriter= new PrintWriter(new OutputStreamWriter(fSocket.getOutputStream(), "UTF-8"), true); //$NON-NLS-1$
-	            } catch (UnsupportedEncodingException e1) {
-	                fWriter= new PrintWriter(new OutputStreamWriter(fSocket.getOutputStream()), true);
-	            }
+				fPushbackReader= new PushbackReader(new BufferedReader(new InputStreamReader(fSocket.getInputStream(), StandardCharsets.UTF_8)));
+				fWriter= new PrintWriter(new OutputStreamWriter(fSocket.getOutputStream(), StandardCharsets.UTF_8), true);
 				String message;
 				while(fPushbackReader != null && (message= readMessage(fPushbackReader)) != null)
 					receiveMessage(message);
