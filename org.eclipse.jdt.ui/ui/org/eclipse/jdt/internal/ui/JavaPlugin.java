@@ -395,6 +395,10 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			}
 		});
 
+		// set the Preferences node id to get preferences from which is needed
+		// by the MembersOrderPreferenceCache common logic
+		JavaManipulation.setPreferenceNodeId(getPluginId());
+
 		IPreferenceStore store= getPreferenceStore();
 
 		// must add here to guarantee that it is the first in the listener list
@@ -402,7 +406,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		fMembersOrderPreferenceCache.install(store);
 
 		FormatterProfileStore.checkCurrentOptionsVersion();
-		
+
 		// make sure org.eclipse.jdt.core.manipulation is loaded too
 		// can be removed if JavaElementPropertyTester is moved down to jdt.core (bug 127085)
 		JavaManipulation.class.toString();
@@ -426,7 +430,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			new InitializeAfterLoadJob().schedule(); // last call in start, see bug 191193
 		}
 
-		JavaManipulation.setPreferenceNodeId(getPluginId());
 	}
 
 	private void createOrUpdateWorkingSet(String name, String label, final String id) {
@@ -1020,7 +1023,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 		return JavaUIMessages.JavaPlugin_additionalInfo_affordance;
 	}
-	
+
 	/**
 	 * Returns the bundles for a given bundle name and version range,
 	 * regardless whether the bundle is resolved or not.

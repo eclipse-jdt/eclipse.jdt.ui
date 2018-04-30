@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
+import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCommon;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -149,9 +150,9 @@ public class AccessorClassCreator {
 	private String createClass(String lineDelim) throws CoreException {
 		if (fIsEclipseNLS) {
 			MembersOrderPreferenceCache sortOrder= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
-			int constructorIdx= sortOrder.getCategoryIndex(MembersOrderPreferenceCache.CONSTRUCTORS_INDEX);
-			int fieldIdx= sortOrder.getCategoryIndex(MembersOrderPreferenceCache.STATIC_FIELDS_INDEX);
-			int initIdx= sortOrder.getCategoryIndex(MembersOrderPreferenceCache.STATIC_INIT_INDEX);
+			int constructorIdx= sortOrder.getCategoryIndex(MembersOrderPreferenceCacheCommon.CONSTRUCTORS_INDEX);
+			int fieldIdx= sortOrder.getCategoryIndex(MembersOrderPreferenceCacheCommon.STATIC_FIELDS_INDEX);
+			int initIdx= sortOrder.getCategoryIndex(MembersOrderPreferenceCacheCommon.STATIC_INIT_INDEX);
 
 			String constructor= createConstructor(lineDelim) + lineDelim;
 			String initializer= createStaticInitializer(lineDelim) + lineDelim;
@@ -189,8 +190,8 @@ public class AccessorClassCreator {
 			return result.toString();
 		} else {
 			MembersOrderPreferenceCache sortOrder= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
-			int constructorIdx= sortOrder.getCategoryIndex(MembersOrderPreferenceCache.CONSTRUCTORS_INDEX);
-			int methodIdx= sortOrder.getCategoryIndex(MembersOrderPreferenceCache.METHOD_INDEX);
+			int constructorIdx= sortOrder.getCategoryIndex(MembersOrderPreferenceCacheCommon.CONSTRUCTORS_INDEX);
+			int methodIdx= sortOrder.getCategoryIndex(MembersOrderPreferenceCacheCommon.METHOD_INDEX);
 
 			String constructor= lineDelim	+ createConstructor(lineDelim);
 			String method= lineDelim + createGetStringMethod(lineDelim);
