@@ -281,7 +281,8 @@ public class BindingLinkedLabelComposer extends JavaElementLinkedLabelComposer {
 					appendTypeArgumentsBindingLabel(method.getTypeParameters(), String.valueOf(' '), flags|TP_BOUNDS);
 				}
 				if (getFlag(flags, JavaElementLabels.COLORIZE) && offset != fBuffer.length()) {
-					fBuffer.setStyle(offset, fBuffer.length() - offset, StyledString.DECORATIONS_STYLER);
+					if (fBuffer instanceof FlexibleBuffer)
+						((FlexibleBuffer)fBuffer).setStyle(offset, fBuffer.length() - offset, StyledString.DECORATIONS_STYLER);
 				}
 			}
 		}

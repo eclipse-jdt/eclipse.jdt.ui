@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - use JavaElementLabelsCore
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
@@ -40,14 +41,13 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
-
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
 
 
@@ -66,13 +66,13 @@ public class JavaElementLabels {
 	 * Method names contain parameter types.
 	 * e.g. <code>foo(int)</code>
 	 */
-	public final static long M_PARAMETER_TYPES= 1L << 0;
+	public final static long M_PARAMETER_TYPES= JavaElementLabelsCore.M_PARAMETER_TYPES;
 
 	/**
 	 * Method names contain parameter names.
 	 * e.g. <code>foo(index)</code>
 	 */
-	public final static long M_PARAMETER_NAMES= 1L << 1;
+	public final static long M_PARAMETER_NAMES= JavaElementLabelsCore.M_PARAMETER_NAMES;
 
 	/**
 	 * Method labels contain parameter annotations.
@@ -80,109 +80,109 @@ public class JavaElementLabels {
 	 * This flag is only valid if {@link #M_PARAMETER_NAMES} or {@link #M_PARAMETER_TYPES} is also set.
 	 * @since 3.8
 	 */
-	public final static long M_PARAMETER_ANNOTATIONS= 1L << 52;
+	public final static long M_PARAMETER_ANNOTATIONS= JavaElementLabelsCore.M_PARAMETER_ANNOTATIONS;
 
 	/**
 	 * Method names contain type parameters prepended.
 	 * e.g. <code>&lt;A&gt; foo(A index)</code>
 	 */
-	public final static long M_PRE_TYPE_PARAMETERS= 1L << 2;
+	public final static long M_PRE_TYPE_PARAMETERS= JavaElementLabelsCore.M_PRE_TYPE_PARAMETERS;
 
 	/**
 	 * Method names contain type parameters appended.
 	 * e.g. <code>foo(A index) &lt;A&gt;</code>
 	 */
-	public final static long M_APP_TYPE_PARAMETERS= 1L << 3;
+	public final static long M_APP_TYPE_PARAMETERS= JavaElementLabelsCore.M_APP_TYPE_PARAMETERS;
 
 	/**
 	 * Method names contain thrown exceptions.
 	 * e.g. <code>foo throws IOException</code>
 	 */
-	public final static long M_EXCEPTIONS= 1L << 4;
+	public final static long M_EXCEPTIONS= JavaElementLabelsCore.M_EXCEPTIONS;
 
 	/**
 	 * Method names contain return type (appended)
 	 * e.g. <code>foo : int</code>
 	 */
-	public final static long M_APP_RETURNTYPE= 1L << 5;
+	public final static long M_APP_RETURNTYPE= JavaElementLabelsCore.M_APP_RETURNTYPE;
 
 	/**
 	 * Method names contain return type (appended)
 	 * e.g. <code>int foo</code>
 	 */
-	public final static long M_PRE_RETURNTYPE= 1L << 6;
+	public final static long M_PRE_RETURNTYPE= JavaElementLabelsCore.M_PRE_RETURNTYPE;
 
 	/**
 	 * Method names are fully qualified.
 	 * e.g. <code>java.util.Vector.size</code>
 	 */
-	public final static long M_FULLY_QUALIFIED= 1L << 7;
+	public final static long M_FULLY_QUALIFIED= JavaElementLabelsCore.M_FULLY_QUALIFIED;
 
 	/**
 	 * Method names are post qualified.
 	 * e.g. <code>size - java.util.Vector</code>
 	 */
-	public final static long M_POST_QUALIFIED= 1L << 8;
+	public final static long M_POST_QUALIFIED= JavaElementLabelsCore.M_POST_QUALIFIED;
 
 	/**
 	 * Initializer names are fully qualified.
 	 * e.g. <code>java.util.Vector.{ ... }</code>
 	 */
-	public final static long I_FULLY_QUALIFIED= 1L << 10;
+	public final static long I_FULLY_QUALIFIED= JavaElementLabelsCore.I_FULLY_QUALIFIED;
 
 	/**
 	 * Type names are post qualified.
 	 * e.g. <code>{ ... } - java.util.Map</code>
 	 */
-	public final static long I_POST_QUALIFIED= 1L << 11;
+	public final static long I_POST_QUALIFIED= JavaElementLabelsCore.I_POST_QUALIFIED;
 
 	/**
 	 * Field names contain the declared type (appended)
 	 * e.g. <code>fHello : int</code>
 	 */
-	public final static long F_APP_TYPE_SIGNATURE= 1L << 14;
+	public final static long F_APP_TYPE_SIGNATURE= JavaElementLabelsCore.F_APP_TYPE_SIGNATURE;
 
 	/**
 	 * Field names contain the declared type (prepended)
 	 * e.g. <code>int fHello</code>
 	 */
-	public final static long F_PRE_TYPE_SIGNATURE= 1L << 15;
+	public final static long F_PRE_TYPE_SIGNATURE= JavaElementLabelsCore.F_PRE_TYPE_SIGNATURE;
 
 	/**
 	 * Fields names are fully qualified.
 	 * e.g. <code>java.lang.System.out</code>
 	 */
-	public final static long F_FULLY_QUALIFIED= 1L << 16;
+	public final static long F_FULLY_QUALIFIED= JavaElementLabelsCore.F_FULLY_QUALIFIED;
 
 	/**
 	 * Fields names are post qualified.
 	 * e.g. <code>out - java.lang.System</code>
 	 */
-	public final static long F_POST_QUALIFIED= 1L << 17;
+	public final static long F_POST_QUALIFIED= JavaElementLabelsCore.F_POST_QUALIFIED;
 
 	/**
 	 * Type names are fully qualified.
 	 * e.g. <code>java.util.Map.Entry</code>
 	 */
-	public final static long T_FULLY_QUALIFIED= 1L << 18;
+	public final static long T_FULLY_QUALIFIED= JavaElementLabelsCore.T_FULLY_QUALIFIED;
 
 	/**
 	 * Type names are type container qualified.
 	 * e.g. <code>Map.Entry</code>
 	 */
-	public final static long T_CONTAINER_QUALIFIED= 1L << 19;
+	public final static long T_CONTAINER_QUALIFIED= JavaElementLabelsCore.T_CONTAINER_QUALIFIED;
 
 	/**
 	 * Type names are post qualified.
 	 * e.g. <code>Entry - java.util.Map</code>
 	 */
-	public final static long T_POST_QUALIFIED= 1L << 20;
+	public final static long T_POST_QUALIFIED= JavaElementLabelsCore.T_POST_QUALIFIED;
 
 	/**
 	 * Type names contain type parameters.
 	 * e.g. <code>Map&lt;S, T&gt;</code>
 	 */
-	public final static long T_TYPE_PARAMETERS= 1L << 21;
+	public final static long T_TYPE_PARAMETERS= JavaElementLabelsCore.T_TYPE_PARAMETERS;
 
 	/**
 	 * Type parameters are post qualified.
@@ -190,55 +190,55 @@ public class JavaElementLabels {
 	 *
 	 * @since 3.5
 	 */
-	public final static long TP_POST_QUALIFIED= 1L << 22;
+	public final static long TP_POST_QUALIFIED= JavaElementLabelsCore.TP_POST_QUALIFIED;
 
 	/**
 	 * Declarations (import container / declaration, package declaration) are qualified.
 	 * e.g. <code>java.util.Vector.class/import container</code>
 	 */
-	public final static long D_QUALIFIED= 1L << 24;
+	public final static long D_QUALIFIED= JavaElementLabelsCore.D_QUALIFIED;
 
 	/**
 	 * Declarations (import container / declaration, package declaration) are post qualified.
 	 * e.g. <code>import container - java.util.Vector.class</code>
 	 */
-	public final static long D_POST_QUALIFIED= 1L << 25;
+	public final static long D_POST_QUALIFIED= JavaElementLabelsCore.D_POST_QUALIFIED;
 
 	/**
 	 * Class file names are fully qualified.
 	 * e.g. <code>java.util.Vector.class</code>
 	 */
-	public final static long CF_QUALIFIED= 1L << 27;
+	public final static long CF_QUALIFIED= JavaElementLabelsCore.CF_QUALIFIED;
 
 	/**
 	 * Class file names are post qualified.
 	 * e.g. <code>Vector.class - java.util</code>
 	 */
-	public final static long CF_POST_QUALIFIED= 1L << 28;
+	public final static long CF_POST_QUALIFIED= JavaElementLabelsCore.CF_POST_QUALIFIED;
 
 	/**
 	 * Compilation unit names are fully qualified.
 	 * e.g. <code>java.util.Vector.java</code>
 	 */
-	public final static long CU_QUALIFIED= 1L << 31;
+	public final static long CU_QUALIFIED= JavaElementLabelsCore.CU_QUALIFIED;
 
 	/**
 	 * Compilation unit names are post  qualified.
 	 * e.g. <code>Vector.java - java.util</code>
 	 */
-	public final static long CU_POST_QUALIFIED= 1L << 32;
+	public final static long CU_POST_QUALIFIED= JavaElementLabelsCore.CU_POST_QUALIFIED;
 
 	/**
 	 * Package names are qualified.
 	 * e.g. <code>MyProject/src/java.util</code>
 	 */
-	public final static long P_QUALIFIED= 1L << 35;
+	public final static long P_QUALIFIED= JavaElementLabelsCore.P_QUALIFIED;
 
 	/**
 	 * Package names are post qualified.
 	 * e.g. <code>java.util - MyProject/src</code>
 	 */
-	public final static long P_POST_QUALIFIED= 1L << 36;
+	public final static long P_POST_QUALIFIED= JavaElementLabelsCore.P_POST_QUALIFIED;
 
 	/**
 	 * Package names are abbreviated if
@@ -246,46 +246,46 @@ public class JavaElementLabels {
 	 * compressed if {@link PreferenceConstants#APPEARANCE_COMPRESS_PACKAGE_NAMES} is
 	 * <code>true</code>.
 	 */
-	public final static long P_COMPRESSED= 1L << 37;
+	public final static long P_COMPRESSED= JavaElementLabelsCore.P_COMPRESSED;
 
 	/**
 	 * Package Fragment Roots contain variable name if from a variable.
 	 * e.g. <code>JRE_LIB - c:\java\lib\rt.jar</code>
 	 */
-	public final static long ROOT_VARIABLE= 1L << 40;
+	public final static long ROOT_VARIABLE= JavaElementLabelsCore.ROOT_VARIABLE;
 
 	/**
 	 * Package Fragment Roots contain the project name if not an archive (prepended).
 	 * e.g. <code>MyProject/src</code>
 	 */
-	public final static long ROOT_QUALIFIED= 1L << 41;
+	public final static long ROOT_QUALIFIED= JavaElementLabelsCore.ROOT_QUALIFIED;
 
 	/**
 	 * Package Fragment Roots contain the project name if not an archive (appended).
 	 * e.g. <code>src - MyProject</code>
 	 */
-	public final static long ROOT_POST_QUALIFIED= 1L << 42;
+	public final static long ROOT_POST_QUALIFIED= JavaElementLabelsCore.ROOT_POST_QUALIFIED;
 
 	/**
 	 * Add root path to all elements except Package Fragment Roots and Java projects.
 	 * e.g. <code>java.lang.Vector - C:\java\lib\rt.jar</code>
 	 * Option only applies to getElementLabel
 	 */
-	public final static long APPEND_ROOT_PATH= 1L << 43;
+	public final static long APPEND_ROOT_PATH= JavaElementLabelsCore.APPEND_ROOT_PATH;
 
 	/**
 	 * Add root path to all elements except Package Fragment Roots and Java projects.
 	 * e.g. <code>C:\java\lib\rt.jar - java.lang.Vector</code>
 	 * Option only applies to getElementLabel
 	 */
-	public final static long PREPEND_ROOT_PATH= 1L << 44;
+	public final static long PREPEND_ROOT_PATH= JavaElementLabelsCore.PREPEND_ROOT_PATH;
 
 	/**
 	 * Post qualify referenced package fragment roots. For example
 	 * <code>jdt.jar - org.eclipse.jdt.ui</code> if the jar is referenced
 	 * from another project.
 	 */
-	public final static long REFERENCED_ROOT_POST_QUALIFIED= 1L << 45;
+	public final static long REFERENCED_ROOT_POST_QUALIFIED= JavaElementLabelsCore.REFERENCED_ROOT_POST_QUALIFIED;
 
 	/**
 	 * Specifies to use the resolved information of a IType, IMethod or IField. See {@link IType#isResolved()}.
@@ -293,87 +293,87 @@ public class JavaElementLabels {
 	 * Resolved methods render with the parameter types of the method instance.
 	 * <code>Vector&lt;String&gt;.get(String)</code>
 	 */
-	public final static long USE_RESOLVED= 1L << 48;
+	public final static long USE_RESOLVED= JavaElementLabelsCore.USE_RESOLVED;
 
 	/**
 	 * Specifies to apply color styles to labels. This flag only applies to methods taking or returning a {@link StyledString}.
 	 *
 	 * @since 3.4
 	 */
-	public final static long COLORIZE= 1L << 55;
+	public final static long COLORIZE= JavaElementLabelsCore.COLORIZE;
 
 	/**
 	 * Prepend first category (if any) to field.
 	 * @since 3.2
 	 */
-	public final static long F_CATEGORY= 1L << 49;
+	public final static long F_CATEGORY= JavaElementLabelsCore.F_CATEGORY;
 	/**
 	 * Prepend first category (if any) to method.
 	 * @since 3.2
 	 */
-	public final static long M_CATEGORY= 1L << 50;
+	public final static long M_CATEGORY= JavaElementLabelsCore.M_CATEGORY;
 	/**
 	 * Prepend first category (if any) to type.
 	 * @since 3.2
 	 */
-	public final static long T_CATEGORY= 1L << 51;
+	public final static long T_CATEGORY= JavaElementLabelsCore.T_CATEGORY;
 
 	/**
 	 * Show category for all elements.
 	 * @since 3.2
 	 */
-	public final static long ALL_CATEGORY= Long.valueOf(F_CATEGORY | M_CATEGORY | T_CATEGORY).longValue();
+	public final static long ALL_CATEGORY= JavaElementLabelsCore.ALL_CATEGORY;
 
 	/**
 	 * Qualify all elements
 	 */
-	public final static long ALL_FULLY_QUALIFIED= Long.valueOf(F_FULLY_QUALIFIED | M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED | D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED | P_QUALIFIED | ROOT_QUALIFIED).longValue();
+	public final static long ALL_FULLY_QUALIFIED= JavaElementLabelsCore.ALL_FULLY_QUALIFIED;
 
 	/**
 	 * Post qualify all elements
 	 */
-	public final static long ALL_POST_QUALIFIED= Long.valueOf(F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | TP_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED | P_POST_QUALIFIED | ROOT_POST_QUALIFIED).longValue();
+	public final static long ALL_POST_QUALIFIED= JavaElementLabelsCore.ALL_POST_QUALIFIED;
 
 	/**
 	 *  Default options (M_PARAMETER_TYPES,  M_APP_TYPE_PARAMETERS & T_TYPE_PARAMETERS enabled)
 	 */
-	public final static long ALL_DEFAULT= Long.valueOf(M_PARAMETER_TYPES | M_APP_TYPE_PARAMETERS | T_TYPE_PARAMETERS).longValue();
+	public final static long ALL_DEFAULT= JavaElementLabelsCore.ALL_DEFAULT;
 
 	/**
 	 *  Default qualify options (All except Root and Package)
 	 */
-	public final static long DEFAULT_QUALIFIED= Long.valueOf(F_FULLY_QUALIFIED | M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED | D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED).longValue();
+	public final static long DEFAULT_QUALIFIED= JavaElementLabelsCore.DEFAULT_QUALIFIED;
 
 	/**
 	 *  Default post qualify options (All except Root and Package)
 	 */
-	public final static long DEFAULT_POST_QUALIFIED= Long.valueOf(F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | TP_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED).longValue();
+	public final static long DEFAULT_POST_QUALIFIED= JavaElementLabelsCore.DEFAULT_POST_QUALIFIED;
 
 	/**
 	 * User-readable string for separating post qualified names (e.g. " - ").
 	 */
-	public final static String CONCAT_STRING= JavaUIMessages.JavaElementLabels_concat_string;
+	public final static String CONCAT_STRING= JavaElementLabelsCore.CONCAT_STRING;
 	/**
 	 * User-readable string for separating list items (e.g. ", ").
 	 */
-	public final static String COMMA_STRING= JavaUIMessages.JavaElementLabels_comma_string;
+	public final static String COMMA_STRING= JavaElementLabelsCore.COMMA_STRING;
 	/**
 	 * User-readable string for separating the return type (e.g. " : ").
 	 */
-	public final static String DECL_STRING= JavaUIMessages.JavaElementLabels_declseparator_string;
+	public final static String DECL_STRING= JavaElementLabelsCore.DECL_STRING;
 	/**
 	 * User-readable string for concatenating categories (e.g. " ").
 	 * @since 3.5
 	 */
-	public final static String CATEGORY_SEPARATOR_STRING= JavaUIMessages.JavaElementLabels_category_separator_string;
+	public final static String CATEGORY_SEPARATOR_STRING= JavaElementLabelsCore.CATEGORY_SEPARATOR_STRING;
 	/**
 	 * User-readable string for ellipsis ("...").
 	 */
-	public final static String ELLIPSIS_STRING= "..."; //$NON-NLS-1$
+	public final static String ELLIPSIS_STRING= JavaElementLabelsCore.ELLIPSIS_STRING;
 	/**
 	 * User-readable string for the default package name (e.g. "(default package)").
 	 */
-	public final static String DEFAULT_PACKAGE= JavaUIMessages.JavaElementLabels_default_package;
+	public final static String DEFAULT_PACKAGE= JavaElementLabelsCore.DEFAULT_PACKAGE;
 
 
 	private static final Styler DECORATIONS_STYLE= StyledString.DECORATIONS_STYLER;

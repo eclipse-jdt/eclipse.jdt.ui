@@ -85,6 +85,10 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 		log(new Status(IStatus.ERROR, getPluginId(), IStatusConstants.INTERNAL_ERROR, JavaManipulationMessages.JavaManipulationMessages_internalError, e));
 	}
 
+	public static void logException(String message, Throwable ex) {
+		log(new Status(IStatus.ERROR, getPluginId(), IStatusConstants.INTERNAL_ERROR, message, ex));
+	}
+
 	@Override
 	public void optionsChanged(DebugOptions options) {
 		DEBUG_AST_PROVIDER= options.getBooleanOption("org.eclipse.jdt.core.manipulation/debug/ASTProvider", false); //$NON-NLS-1$
