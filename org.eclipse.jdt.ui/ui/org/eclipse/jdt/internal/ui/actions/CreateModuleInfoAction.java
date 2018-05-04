@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
+ * Copyright (c) 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -52,20 +54,32 @@ public class CreateModuleInfoAction implements IObjectActionDelegate {
 		public ModuleInfoCreationDialog(Shell parentShell, IWizard newWizard) {
 			super(parentShell, newWizard);
 		}
-		
+
 		@Override
-		public void create() {
-			super.create();
+		protected final void createButtonsForButtonBar(final Composite parent) {
+			super.createButtonsForButtonBar(parent);
 			Button cancel= this.getButton(CANCEL);
 			Button finish= this.getButton(IDialogConstants.FINISH_ID);
 			if (cancel != null) {
 				cancel.setText(ActionMessages.CreateModuleInfoAction_dialog_cancel_button_label);
+				setButtonLayoutData(cancel);
 			}
 			if (finish != null) {
 				finish.setText(ActionMessages.CreateModuleInfoAction_dialog_finish_button_label);
+				setButtonLayoutData(finish);
 			}
 		}
-		
+
+		@Override
+		protected void setButtonLayoutData(Button button) {
+			super.setButtonLayoutData(button);
+			Object data= button.getLayoutData();
+			if (data instanceof GridData) {
+				GridData gridData= (GridData) data;
+				gridData.widthHint+= button.getText().length(); 
+				button.setLayoutData(gridData);
+			}
+		}
 	}
 	
 	private static final String MODULE_INFO_JAVA_FILENAME= JavaModelUtil.MODULE_INFO_JAVA;
