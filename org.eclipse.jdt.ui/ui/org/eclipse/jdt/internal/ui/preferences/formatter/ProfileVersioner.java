@@ -119,7 +119,10 @@ public class ProfileVersioner implements IProfileVersioner {
 		            newSettings.put(key, value);
 		        }
 		    }
-
+		    // copy over profile options (not formatter settings)
+		    if (oldSettings.containsKey(JavaCore.JAVA_FORMATTER)) {
+		        newSettings.put(JavaCore.JAVA_FORMATTER, oldSettings.get(JavaCore.JAVA_FORMATTER));
+		    }
 		}
 		setLatestCompliance(newSettings);
 		return newSettings;
