@@ -54,4 +54,25 @@
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <activation>
+        <property>
+          <name>AtLeastJava9</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eclipse.tycho</groupId>
+            <artifactId>tycho-surefire-plugin</artifactId>
+            <configuration>
+                <argLine>--add-modules ALL-SYSTEM --add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.cldr.provider=ALL-UNNAMED --add-opens jdk.localedata/sun.util.resources.provider=ALL-UNNAMED --add-opens java.base/jdk.internal.module=ALL-UNNAMED --add-opens java.base/java.lang.module=ALL-UNNAMED --add-opens java.base/jdk.internal.reflect=ALL-UNNAMED --add-opens java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/jdk.internal.math=ALL-UNNAMED --add-opens java.base/jdk.internal.misc=ALL-UNNAMED</argLine>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>
