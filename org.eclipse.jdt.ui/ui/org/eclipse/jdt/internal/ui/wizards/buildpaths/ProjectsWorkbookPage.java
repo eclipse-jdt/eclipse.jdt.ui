@@ -171,6 +171,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		checkedProjects.add(rootModulepath);
 		checkedProjects.add(rootClasspath);
 		
+		fProjectsList.setTreeExpansionLevel(2);
 		fProjectsList.setElements(checkedProjects);
 		fProjectsList.enableButton(IDX_ADDPROJECT, false);
 		if (!dragDropEnabled) {

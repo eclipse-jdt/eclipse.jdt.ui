@@ -216,6 +216,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 		libelements.add(rootModulepath);
 		libelements.add(rootClasspath);
+		fLibrariesList.setTreeExpansionLevel(2);
 		fLibrariesList.setElements(libelements);
 		
 		fLibrariesList.enableButton(IDX_ADDEXT, false);
