@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2016 IBM Corporation and others.
+ * Copyright (c) 2006, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,8 +22,13 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.Platform;
 
+import org.eclipse.jdt.core.IAnnotation;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMemberValuePair;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.JUnitCorePlugin;
 import org.eclipse.jdt.internal.junit.util.CoreTestSearchEngine;
@@ -109,8 +114,13 @@ public class TestKindRegistry {
 		if (element != null) {
 			IJavaProject project= element.getJavaProject();
 			if (CoreTestSearchEngine.is50OrHigher(project)) {
-				if (CoreTestSearchEngine.is18OrHigher(project) && CoreTestSearchEngine.hasJUnit5TestAnnotation(project)) {
-					return JUNIT5_TEST_KIND_ID;
+				if (CoreTestSearchEngine.is18OrHigher(project)) {
+					if (isRunWithJUnitPlatform(element)) {
+						return JUNIT4_TEST_KIND_ID;
+					}
+					if (CoreTestSearchEngine.hasJUnit5TestAnnotation(project)) {
+						return JUNIT5_TEST_KIND_ID;
+					}
 				}
 				if (CoreTestSearchEngine.hasJUnit4TestAnnotation(project)) {
 					return JUNIT4_TEST_KIND_ID;
@@ -118,6 +128,37 @@ public class TestKindRegistry {
 			}
 		}
 		return JUNIT3_TEST_KIND_ID;
+	}
+
+	/**
+	 * @param element the element
+	 * @return <code>true</code> if the element is a test class annotated with
+	 *         <code>@RunWith(JUnitPlatform.class)</code>
+	 */
+	private static boolean isRunWithJUnitPlatform(IJavaElement element) {
+		if (element instanceof ICompilationUnit) {
+			element= ((ICompilationUnit) element).findPrimaryType();
+		}
+		if (element instanceof IType) {
+			IType type= (IType) element;
+			try {
+				IAnnotation runWithAnnotation= type.getAnnotation("RunWith"); //$NON-NLS-1$
+				if (!runWithAnnotation.exists()) {
+					runWithAnnotation= type.getAnnotation("org.junit.runner.RunWith"); //$NON-NLS-1$
+				}
+				if (runWithAnnotation.exists()) {
+					IMemberValuePair[] memberValuePairs= runWithAnnotation.getMemberValuePairs();
+					for (IMemberValuePair memberValuePair : memberValuePairs) {
+						if (memberValuePair.getMemberName().equals("value") && memberValuePair.getValue().equals("JUnitPlatform")) { //$NON-NLS-1$ //$NON-NLS-2$
+							return true;
+						}
+					}
+				}
+			} catch (JavaModelException e) {
+				// ignore
+			}
+		}
+		return false;
 	}
 
 	public static ITestKind getContainerTestKind(IJavaElement element) {
