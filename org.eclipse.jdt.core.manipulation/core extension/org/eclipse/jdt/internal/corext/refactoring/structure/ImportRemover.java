@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - copied to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 

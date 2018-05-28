@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc, - copied to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
@@ -34,15 +35,13 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.manipulation.CodeStyleConfiguration;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 /**
  * A {@link CompilationUnitRewrite} holds all data structures that are typically
@@ -55,7 +54,7 @@ import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
  * Bindings recovery is disabled by default, but can be enabled with <code>setBindingRecovery(true)</code>.
  * </p>
  * 
- * @see JDTUIHelperClasses
+ * see JDTUIHelperClasses
  */
 public class CompilationUnitRewrite {
 	//TODO: add RefactoringStatus fStatus;?
@@ -350,18 +349,27 @@ public class CompilationUnitRewrite {
 				 * ImportRewrite#setUseContextToFilterImplicitImports(boolean) will be set to true
 				 * and ContextSensitiveImportRewriteContext etc. can be used. */
 				if (fRoot == null && ! fResolveBindings) {
-					fImportRewrite= StubUtility.createImportRewrite(fCu, true);
+					fImportRewrite= CodeStyleConfiguration.createImportRewrite(fCu, true);
 				} else {
-					fImportRewrite= StubUtility.createImportRewrite(getRoot(), true);
+					fImportRewrite= createImportRewrite(getRoot(), true);
 				}
 			} catch (CoreException e) {
-				JavaPlugin.log(e);
+				JavaManipulationPlugin.log(e);
 				throw new IllegalStateException(e.getMessage()); // like ASTParser#createAST(..) does
 			}
 		}
 		return fImportRewrite;
 
 	}
+
+	private ImportRewrite createImportRewrite(CompilationUnit astRoot, boolean restoreExistingImports) {
+		ImportRewrite rewrite= CodeStyleConfiguration.createImportRewrite(astRoot, restoreExistingImports);
+		if (astRoot.getAST().hasResolvedBindings()) {
+			rewrite.setUseContextToFilterImplicitImports(true);
+		}
+		return rewrite;
+	}
+
 
 	public ImportRemover getImportRemover() {
 		if (fImportRemover == null) {

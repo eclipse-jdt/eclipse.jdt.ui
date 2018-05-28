@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     Till Brychcy - initial API and implementation
+ *     Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 

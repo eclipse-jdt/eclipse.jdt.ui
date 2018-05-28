@@ -7,12 +7,16 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Red Hat Inc. - modified to supply logic through internal class
+ *     Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
-package org.eclipse.jdt.ui.cleanup;
+package org.eclipse.jdt.internal.corext.fix;
 
+import java.util.Collections;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
@@ -24,9 +28,8 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
  * @noextend This class is not intended to be subclassed by clients.
  */
 public class CleanUpOptions {
-	
-	// Use internal class to supply logic
-	private final org.eclipse.jdt.internal.corext.fix.CleanUpOptions fOptions;
+
+	private final Map<String, String> fOptions;
 
 	/**
 	 * True value
@@ -44,15 +47,15 @@ public class CleanUpOptions {
 	 * @param options map that maps clean ups keys (<code>String</code>) to a non-<code>null</code>
 	 *            string value
 	 */
-	protected CleanUpOptions(Map<String, String> options) {
-		fOptions= new org.eclipse.jdt.internal.corext.fix.CleanUpOptions(options);
+	public CleanUpOptions(Map<String, String> options) {
+		fOptions= options;
 	}
 
 	/**
 	 * Creates a new instance.
 	 */
 	public CleanUpOptions() {
-		fOptions= new org.eclipse.jdt.internal.corext.fix.CleanUpOptions();
+		fOptions= new Hashtable<>();
 	}
 
 	/**
@@ -64,7 +67,9 @@ public class CleanUpOptions {
 	 * @see CleanUpConstants
 	 */
 	public boolean isEnabled(String key) {
-		return fOptions.isEnabled(key);
+		Assert.isLegal(key != null);
+		Object value= fOptions.get(key);
+		return CleanUpOptions.TRUE == value || CleanUpOptions.TRUE.equals(value);
 	}
 
 	/**
@@ -75,7 +80,10 @@ public class CleanUpOptions {
 	 * @throws IllegalArgumentException if the key is null or unknown
 	 */
 	public String getValue(String key) {
-		return fOptions.getValue(key);
+		Assert.isLegal(key != null);
+		String value= fOptions.get(key);
+		Assert.isLegal(value != null);
+		return value;
 	}
 
 	/**
@@ -88,7 +96,9 @@ public class CleanUpOptions {
 	 * @see CleanUpOptions#FALSE
 	 */
 	public void setOption(String key, String value) {
-		fOptions.setOption(key, value);
+		Assert.isLegal(key != null);
+		Assert.isLegal(value != null);
+		fOptions.put(key, value);
 	}
 
 	/**
@@ -97,6 +107,6 @@ public class CleanUpOptions {
 	 * @return an unmodifiable set of all keys
 	 */
 	public Set<String> getKeys() {
-		return fOptions.getKeys();
+		return Collections.unmodifiableSet(fOptions.keySet());
 	}
 }

@@ -7,9 +7,11 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Red Hat Inc. - modified to use internal class to supply logic
+ *     Red Hat Inc. - refactored to jdt.core.manipultion
  *******************************************************************************/
-package org.eclipse.jdt.ui.cleanup;
+package org.eclipse.jdt.internal.corext.fix;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -21,9 +23,10 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
  * @since 3.5
  */
 public class CleanUpContext {
-	
-	// Use internal class to supply logic
-	private final org.eclipse.jdt.internal.corext.fix.CleanUpContext fContext;
+
+	private final ICompilationUnit fUnit;
+
+	private final CompilationUnit fAst;
 
 	/**
 	 * Creates a new clean up context.
@@ -35,7 +38,9 @@ public class CleanUpContext {
 	 *            <code>true</code>.
 	 */
 	public CleanUpContext(ICompilationUnit unit, CompilationUnit ast) {
-		fContext= new org.eclipse.jdt.internal.corext.fix.CleanUpContext(unit, ast);
+		Assert.isLegal(unit != null);
+		fUnit= unit;
+		fAst= ast;
 	}
 
 	/**
@@ -44,7 +49,7 @@ public class CleanUpContext {
 	 * @return the compilation unit to clean up
 	 */
 	public ICompilationUnit getCompilationUnit() {
-		return fContext.getCompilationUnit();
+		return fUnit;
 	}
 
 	/**
@@ -60,6 +65,6 @@ public class CleanUpContext {
 	 * @return an AST or <code>null</code> if none required
 	 */
 	public CompilationUnit getAST() {
-		return fContext.getAST();
+		return fAst;
 	}
 }

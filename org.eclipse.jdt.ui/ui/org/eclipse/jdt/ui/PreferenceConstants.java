@@ -39,7 +39,7 @@ import org.eclipse.jdt.core.manipulation.CodeStyleConfiguration;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCommon;
-import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
+import org.eclipse.jdt.internal.corext.fix.CleanUpConstantsOptions;
 
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
@@ -67,7 +67,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
  *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
-  */
+ */
 public class PreferenceConstants {
 
 	private PreferenceConstants() {
@@ -3759,7 +3759,7 @@ public class PreferenceConstants {
 	 */
 	public final static String EDITOR_SOURCE_HOVER_BACKGROUND_COLOR_SYSTEM_DEFAULT= "sourceHoverBackgroundColor.SystemDefault"; //$NON-NLS-1$
 
-	
+
 	/**
 	 * A named preference that tells whether to use different icons
 	 * for source folders marked to contain test code and classpath entries
@@ -4092,7 +4092,7 @@ public class PreferenceConstants {
 
 
 		//Code Clean Up
-		CleanUpConstants.initDefaults(store);
+		CleanUpConstantsOptions.initDefaults(store);
 
 		// Colors that are set by the current theme
 		JavaUIPreferenceInitializer.setThemeBasedPreferences(store, false);
@@ -4128,7 +4128,7 @@ public class PreferenceConstants {
 	 * @param entries an array of classpath entries to be encoded
 	 *
 	 * @return the encoded string.
-	*/
+	 */
 	public static String encodeJRELibrary(String description, IClasspathEntry[] entries) {
 		return NewJavaProjectPreferencePage.encodeJRELibrary(description, entries);
 	}

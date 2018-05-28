@@ -7,11 +7,13 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Red Hat Inc. - modified to use internal class to perform logic
+ *     Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
-package org.eclipse.jdt.ui.cleanup;
+package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.Map;
+
+import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -22,9 +24,15 @@ import org.eclipse.jdt.core.JavaCore;
  * @since 3.5
  */
 public final class CleanUpRequirements {
-	
-	// Use internal class which contains logic
-	private final org.eclipse.jdt.internal.corext.fix.CleanUpRequirements fRequirements;
+
+	private final boolean fRequiresAST;
+
+	private final Map<String, String> fCompilerOptions;
+
+	private final boolean fRequiresFreshAST;
+
+	private final boolean fRequiresChangedRegions;
+
 
 	/**
 	 * Create a new instance
@@ -35,7 +43,16 @@ public final class CleanUpRequirements {
 	 * @param compilerOptions map of compiler options or <code>null</code> if no requirements
 	 */
 	public CleanUpRequirements(boolean requiresAST, boolean requiresFreshAST, boolean requiresChangedRegions, Map<String, String> compilerOptions) {
-		this.fRequirements = new org.eclipse.jdt.internal.corext.fix.CleanUpRequirements(requiresAST, requiresFreshAST, requiresChangedRegions, compilerOptions);
+		Assert.isLegal(!requiresFreshAST || requiresAST, "Must not request fresh AST if no AST is required"); //$NON-NLS-1$
+		Assert.isLegal(compilerOptions == null || requiresAST, "Must not provide options if no AST is required"); //$NON-NLS-1$
+		fRequiresAST= requiresAST;
+		fRequiresFreshAST= requiresFreshAST;
+		fRequiresChangedRegions= requiresChangedRegions;
+
+		fCompilerOptions= compilerOptions;
+		// Make sure that compile warnings are not suppressed since some clean ups work on reported warnings
+		if (fCompilerOptions != null)
+			fCompilerOptions.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);
 	}
 
 	/**
@@ -48,7 +65,7 @@ public final class CleanUpRequirements {
 	 * @return <code>true</code> if the {@linkplain CleanUpContext context} must provide an AST
 	 */
 	public boolean requiresAST() {
-		return fRequirements.requiresAST();
+		return fRequiresAST;
 	}
 
 	/**
@@ -58,7 +75,7 @@ public final class CleanUpRequirements {
 	 * @return <code>true</code> if the caller needs an up to date AST
 	 */
 	public boolean requiresFreshAST() {
-		return fRequirements.requiresFreshAST();
+		return fRequiresFreshAST;
 	}
 
 	/**
@@ -68,7 +85,7 @@ public final class CleanUpRequirements {
 	 * @see JavaCore
 	 */
 	public Map<String, String> getCompilerOptions() {
-		return fRequirements.getCompilerOptions();
+		return fCompilerOptions;
 	}
 
 	/**
@@ -87,7 +104,7 @@ public final class CleanUpRequirements {
 	 *         regions
 	 */
 	public boolean requiresChangedRegions() {
-		return fRequirements.requiresChangedRegions();
+		return fRequiresChangedRegions;
 	}
 
 }
