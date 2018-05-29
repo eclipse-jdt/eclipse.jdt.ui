@@ -56,7 +56,6 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -73,7 +72,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -1013,12 +1011,12 @@ public class ModuleDialog extends StatusDialog {
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		String helpContextId;
-		if (fCurrCPElement.getEntryKind() == IClasspathEntry.CPE_PROJECT)
-			helpContextId= IJavaHelpContextIds.ACCESS_RULES_DIALOG_COMBINE_RULES; // FIXME
-		else
-			helpContextId= IJavaHelpContextIds.ACCESS_RULES_DIALOG; // FIXME
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, helpContextId);
+//		String helpContextId;
+//		if (fCurrCPElement.getEntryKind() == IClasspathEntry.CPE_PROJECT)
+//			helpContextId= IJavaHelpContextIds.ACCESS_RULES_DIALOG_COMBINE_RULES; // FIXME
+//		else
+//			helpContextId= IJavaHelpContextIds.ACCESS_RULES_DIALOG; // FIXME
+//		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, helpContextId);
 	}
 
 	public static StatusInfo newSilentError() {
