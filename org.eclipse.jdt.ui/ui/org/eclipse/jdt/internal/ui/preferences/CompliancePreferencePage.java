@@ -22,6 +22,8 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -31,7 +33,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class CompliancePreferencePage extends PropertyAndPreferencePage {
 
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.CompliancePreferencePage"; //$NON-NLS-1$
-	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"; //$NON-NLS-1$
+	public static final String PROP_ID= JavaUI.ID_COMPILER_COMPLIANCE_PROPERTY_PAGE;
 
 	private ComplianceConfigurationBlock fConfigurationBlock;
 
