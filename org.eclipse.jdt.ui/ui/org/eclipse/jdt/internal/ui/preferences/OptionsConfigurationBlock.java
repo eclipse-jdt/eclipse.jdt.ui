@@ -427,6 +427,13 @@ public abstract class OptionsConfigurationBlock {
 				}
 			}
 			control.setFocus();
+			if (Util.isMac()) {
+				Label label= fLabels.get(control);
+				final PreferenceHighlight highLight= label == null ? null : (PreferenceHighlight) label.getData(DATA_PREF_HIGHLIGHT);
+				if (highLight != null) {
+					highLight.setFocus(true);
+				}
+			}
 		}
 	}
 
