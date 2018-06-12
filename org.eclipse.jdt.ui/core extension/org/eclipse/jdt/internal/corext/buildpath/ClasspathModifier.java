@@ -380,8 +380,6 @@ public class ClasspathModifier {
 	 * @throws JavaModelException
 	 */
 	public static IPackageFragmentRoot getFragmentRoot(IResource resource, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
-		if (monitor == null)
-			monitor= new NullProgressMonitor();
 		IJavaElement javaElem= null;
 		if (resource.getFullPath().equals(project.getPath()))
 			return project.getPackageFragmentRoot(resource);
@@ -1219,8 +1217,6 @@ public class ClasspathModifier {
 	 * @throws JavaModelException
 	 */
 	private static List<Path> getFoldersOnCP(IPath path, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
-		if (monitor == null)
-			monitor= new NullProgressMonitor();
 		List<Path> srcFolders= new ArrayList<>();
 		IClasspathEntry[] cpEntries= project.getRawClasspath();
 		for (int i= 0; i < cpEntries.length; i++) {
