@@ -188,13 +188,12 @@ class ChangeHoverInformationControl extends SourceViewerInformationControl {
 		GC gc= new GC(widget);
 		gc.setFont(widget.getFont());
 		int maxWidth= 0;
-		String content= new String();
 
 		try {
 			for (int i= 0; i <= last; i++) {
 				IRegion line;
 				line= doc.getLineInformation(i);
-				content= doc.get(line.getOffset(), line.getLength());
+				String content= doc.get(line.getOffset(), line.getLength());
 				int width= gc.textExtent(content).x;
 				if (width > maxWidth) {
 					maxWidth= width;
