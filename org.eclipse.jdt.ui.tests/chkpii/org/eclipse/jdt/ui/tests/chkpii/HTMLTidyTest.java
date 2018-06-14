@@ -106,23 +106,25 @@ public class HTMLTidyTest extends TestCase {
 	private StringMatcher[] getIgnores() throws IOException {
 		ArrayList<StringMatcher> matchers= new ArrayList<>();
 		InputStream is= getClass().getResourceAsStream("ignoreFiles.txt");
-		BufferedReader reader= new BufferedReader(new InputStreamReader(is));
-		while (reader.ready()) {
-			String line= reader.readLine();
-			if (line.length() > 0) {
-				char first= line.charAt(0);
-				if (line.endsWith("/*"))
-					line= line.substring(0, line.length() - 2); // stops at directory during tree traversal
-				if (first != '/' && first != '*') { // relative matches
-					// emulate CHKPII specification:
-					// matchers.add(new StringMatcher(fWorkspacePath + "/" + line, true, false));
+		try (BufferedReader reader= new BufferedReader(new InputStreamReader(is)))
+		{
+			while (reader.ready()) {
+				String line= reader.readLine();
+				if (line.length() > 0) {
+					char first= line.charAt(0);
+					if (line.endsWith("/*"))
+						line= line.substring(0, line.length() - 2); // stops at directory during tree traversal
+					if (first != '/' && first != '*') { // relative matches
+						// emulate CHKPII specification:
+						// matchers.add(new StringMatcher(fWorkspacePath + "/" + line, true, false));
 
-					// emulate actual CHKPII implementation:
-					matchers.add(new StringMatcher("*/" + line, true, false));
+						// emulate actual CHKPII implementation:
+						matchers.add(new StringMatcher("*/" + line, true, false));
+					}
+					matchers.add(new StringMatcher(line, true, false));
 				}
-				matchers.add(new StringMatcher(line, true, false));
 			}
-		}
+		};
 		return matchers.toArray(new StringMatcher[matchers.size()]);
 	}
 
