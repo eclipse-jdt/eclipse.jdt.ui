@@ -135,7 +135,7 @@ public class TestKindRegistry {
 	 * @return <code>true</code> if the element is a test class annotated with
 	 *         <code>@RunWith(JUnitPlatform.class)</code>
 	 */
-	private static boolean isRunWithJUnitPlatform(IJavaElement element) {
+	public static boolean isRunWithJUnitPlatform(IJavaElement element) {
 		if (element instanceof ICompilationUnit) {
 			element= ((ICompilationUnit) element).findPrimaryType();
 		}
