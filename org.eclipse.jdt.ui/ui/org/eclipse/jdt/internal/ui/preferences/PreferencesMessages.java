@@ -4,6 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -820,6 +824,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_version18;
 	public static String ComplianceConfigurationBlock_version9;
 	public static String ComplianceConfigurationBlock_version10;
+	public static String ComplianceConfigurationBlock_version_11;
 	public static String ComplianceConfigurationBlock_versionCLDC11;
 	public static String ComplianceConfigurationBlock_src_greater_compliance;
 	public static String ComplianceConfigurationBlock_classfile_greater_compliance;

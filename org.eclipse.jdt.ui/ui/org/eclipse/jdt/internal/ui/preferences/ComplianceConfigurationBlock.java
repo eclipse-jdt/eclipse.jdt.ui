@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Jesper S Møller - Bug 529432 - Allow JDT UI to target Java 10
@@ -129,6 +133,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String VERSION_1_8= JavaCore.VERSION_1_8;
 	private static final String VERSION_9= JavaCore.VERSION_9;
 	private static final String VERSION_10= JavaCore.VERSION_10;
+	private static final String VERSION_11= JavaCore.VERSION_11;
 	private static final String VERSION_JSR14= "jsr14"; //$NON-NLS-1$
 
 	private static final String ERROR= JavaCore.ERROR;
@@ -271,7 +276,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private Composite createComplianceTabContent(Composite folder) {
 
 		final String[] complianceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11 };
 		final String[] complianceLabels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_version13,
 			PreferencesMessages.ComplianceConfigurationBlock_version14,
@@ -281,10 +286,11 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.ComplianceConfigurationBlock_version18,
 			PreferencesMessages.ComplianceConfigurationBlock_version9,
 			PreferencesMessages.ComplianceConfigurationBlock_version10,
+			PreferencesMessages.ComplianceConfigurationBlock_version_11,
 		};
 		
 		String[] targetVersions= new String[] { VERSION_CLDC_1_1, VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11 };
 		String[] targetLabels= new String[] {
 				PreferencesMessages.ComplianceConfigurationBlock_versionCLDC11,
 				PreferencesMessages.ComplianceConfigurationBlock_version11,
@@ -297,6 +303,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.ComplianceConfigurationBlock_version18,
 				PreferencesMessages.ComplianceConfigurationBlock_version9,
 				PreferencesMessages.ComplianceConfigurationBlock_version10,
+				PreferencesMessages.ComplianceConfigurationBlock_version_11,
 		};
 		if (ComplianceConfigurationBlock.VERSION_JSR14.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM))) {
 			targetVersions= append(targetVersions, ComplianceConfigurationBlock.VERSION_JSR14);
@@ -304,7 +311,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		}
 		
 		String[] sourceVersions= new String[] { VERSION_1_3, VERSION_1_4,
-				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10 };
+				VERSION_1_5, VERSION_1_6, VERSION_1_7, VERSION_1_8, VERSION_9, VERSION_10, VERSION_11 };
 		String[] sourceLabels= new String[] {
 				PreferencesMessages.ComplianceConfigurationBlock_version13,
 				PreferencesMessages.ComplianceConfigurationBlock_version14,
@@ -314,6 +321,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				PreferencesMessages.ComplianceConfigurationBlock_version18,
 				PreferencesMessages.ComplianceConfigurationBlock_version9,
 				PreferencesMessages.ComplianceConfigurationBlock_version10,
+				PreferencesMessages.ComplianceConfigurationBlock_version_11,
 		};
 		
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
@@ -689,6 +697,14 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				}
 			}
 			
+			//TODO: Remove once Java SE 11 has been shipped:
+			String selectedCompliance= getValue(PREF_COMPLIANCE);
+			if (VERSION_11.equals(selectedCompliance)) {
+				fJRE50InfoText.setText(
+						"This is an implementation of an early-draft specification developed under the Java Community Process (JCP) and is made available for testing and evaluation purposes only. The code is not compatible with any specification of the JCP."); //$NON-NLS-1$
+				isVisible= true;
+			}
+
 			fJRE50InfoText.setVisible(isVisible);
 			fJRE50InfoImage.setImage(isVisible ? image : null);
 			fJRE50InfoImage.getParent().layout();
