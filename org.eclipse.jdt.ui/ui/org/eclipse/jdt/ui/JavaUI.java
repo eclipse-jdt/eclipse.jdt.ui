@@ -292,6 +292,16 @@ public final class JavaUI {
 
 
 	/**
+	 * @since 3.15
+	 */
+	public static final String ID_COMPILER_COMPLIANCE_PROPERTY_PAGE= "org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"; //$NON-NLS-1$
+	
+	/**
+	 * @since 3.15
+	 */
+	public static final String ID_JAVA_BUILD_PREFERENCE_PROPERTY_PAGE= "org.eclipse.jdt.ui.propertyPages.JavaBuildPreferencePage"; //$NON-NLS-1$
+	
+	/**
 	 * The class org.eclipse.debug.core.model.IProcess allows attaching String properties to
 	 * processes. The Java UI contributes a property page for IProcess that will show the contents
 	 * of the property with this key. The intent of this property is to show the command line a
