@@ -860,6 +860,19 @@ public class CleanUpConstants {
 
 
 	/**
+	 * Removes redundant semicolons.<br>
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * <br>
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 3.14
+	 */
+	public static final String REMOVE_REDUNDANT_SEMICOLONS= "cleanup.remove_redundant_semicolons"; //$NON-NLS-1$
+
+
+	/**
 	 * Controls whether missing annotations should be added to the code. For detailed settings use:<br>
 	 * {@link #ADD_MISSING_ANNOTATIONS_DEPRECATED}<br> {@value #ADD_MISSING_ANNOTATIONS_OVERRIDE} <br>
 	 * <br>

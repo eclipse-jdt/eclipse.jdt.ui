@@ -6939,9 +6939,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_code">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.unnecessary_semicolons"
+            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_modifiers">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.StringCleanUp"
             id="org.eclipse.jdt.ui.cleanup.strings"
-            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_modifiers">
+            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_semicolons">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp"

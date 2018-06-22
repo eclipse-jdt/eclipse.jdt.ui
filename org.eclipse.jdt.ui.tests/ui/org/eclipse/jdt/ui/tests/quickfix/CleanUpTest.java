@@ -9174,4 +9174,48 @@ public class CleanUpTest extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3 }, new String[] { expected1, expected2, expected3 });
 
 	}
+	
+	public void testRemoveRedundantSemicolons () throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test; ;\n");
+		buf.append("enum cars { sedan, coupe };\n");
+		buf.append("public class Foo {\n");
+		buf.append("  int add(int a, int b) {return a+b;};\n");
+		buf.append("  int a= 3;; ;\n");
+		buf.append("  int b= 7; // leave this ; alone\n");
+		buf.append("  int c= 10; /* and this ; too */\n");
+		buf.append("  public int foo () {\n");
+		buf.append("    ;\n");
+		buf.append("    for (;;)\n");
+		buf.append("      ;;\n");
+		buf.append("      ;\n");
+		buf.append("    while (a++ < 1000) ;\n");
+		buf.append("  };\n");
+		buf.append("};\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("Foo.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("enum cars { sedan, coupe }\n");
+		buf.append("public class Foo {\n");
+		buf.append("  int add(int a, int b) {return a+b;}\n");
+		buf.append("  int a= 3;\n");
+		buf.append("  int b= 7; // leave this ; alone\n");
+		buf.append("  int c= 10; /* and this ; too */\n");
+		buf.append("  public int foo () {\n");
+		buf.append("    \n");
+		buf.append("    for (;;)\n");
+		buf.append("      ;\n");
+		buf.append("      \n");
+		buf.append("    while (a++ < 1000) ;\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		String expected1 = buf.toString();
+
+		enable(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 });
+
+	}
+
 }
