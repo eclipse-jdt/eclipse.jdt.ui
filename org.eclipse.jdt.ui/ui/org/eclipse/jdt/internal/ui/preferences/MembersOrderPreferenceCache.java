@@ -32,8 +32,8 @@ public class MembersOrderPreferenceCache extends MembersOrderPreferenceCacheComm
 	public void install(IPreferenceStore store) {
 		fPreferenceStore= store;
 		store.addPropertyChangeListener(this);		
-		fSortByVisibility= store.getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
 		super.install();
+		fSortByVisibility= store.getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
 	}
 
 	@Override
