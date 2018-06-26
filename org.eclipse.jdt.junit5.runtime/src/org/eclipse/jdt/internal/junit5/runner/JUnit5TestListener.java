@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016, 2017 IBM Corporation and others.
+ * Copyright (c) 2016, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -65,38 +65,30 @@ public class JUnit5TestListener implements TestExecutionListener {
 
 	@Override
 	public void executionFinished(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
-		Status result= testExecutionResult.getStatus();
+		notifyIfNotSuccessful(testIdentifier, testExecutionResult);
 		if (testIdentifier.isTest()) {
-			if (result != Status.SUCCESSFUL) {
-				String trace= ""; //$NON-NLS-1$
-				FailedComparison comparison= null;
-				String status= MessageIds.TEST_FAILED;
-
-				boolean assumptionFailed= result == Status.ABORTED;
-				Optional<Throwable> throwableOp= testExecutionResult.getThrowable();
-				if (throwableOp.isPresent()) {
-					Throwable exception= throwableOp.get();
-					trace= getTrace(exception);
-					comparison= getFailedComparison(exception);
-					status= (assumptionFailed || exception instanceof AssertionError) ? MessageIds.TEST_FAILED : MessageIds.TEST_ERROR;
-				}
-
-				ITestIdentifier identifier= getIdentifier(testIdentifier, false, assumptionFailed);
-				fNotified.notifyTestFailed(new TestReferenceFailure(identifier, status, trace, comparison));
-			}
-
 			fNotified.notifyTestEnded(getIdentifier(testIdentifier, false, false));
+		}
+	}
 
-		} else { // container
-			if (result != Status.SUCCESSFUL) {
-				Optional<Throwable> throwableOp= testExecutionResult.getThrowable();
-				String trace= ""; //$NON-NLS-1$
-				if (throwableOp.isPresent()) {
-					trace= getTrace(throwableOp.get());
-				}
-				ITestIdentifier identifier= getIdentifier(testIdentifier, false, false);
-				fNotified.notifyTestFailed(new TestReferenceFailure(identifier, MessageIds.TEST_ERROR, trace));
+	private void notifyIfNotSuccessful(TestIdentifier testIdentifier, TestExecutionResult testExecutionResult) {
+		Status result= testExecutionResult.getStatus();
+		if (result != Status.SUCCESSFUL) {
+			String trace= ""; //$NON-NLS-1$
+			FailedComparison comparison= null;
+			String status= MessageIds.TEST_FAILED;
+
+			boolean assumptionFailed= result == Status.ABORTED;
+			Optional<Throwable> throwableOp= testExecutionResult.getThrowable();
+			if (throwableOp.isPresent()) {
+				Throwable exception= throwableOp.get();
+				trace= getTrace(exception);
+				comparison= getFailedComparison(exception);
+				status= (assumptionFailed || exception instanceof AssertionError) ? MessageIds.TEST_FAILED : MessageIds.TEST_ERROR;
 			}
+
+			ITestIdentifier identifier= getIdentifier(testIdentifier, false, assumptionFailed);
+			fNotified.notifyTestFailed(new TestReferenceFailure(identifier, status, trace, comparison));
 		}
 	}
 
