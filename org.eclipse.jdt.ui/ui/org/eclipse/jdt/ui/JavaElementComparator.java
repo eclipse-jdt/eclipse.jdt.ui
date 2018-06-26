@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCommon;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -120,35 +121,35 @@ public class JavaElementComparator extends ViewerComparator {
 						{
 							IMethod method= (IMethod) je;
 							if (method.isConstructor()) {
-								return getMemberCategory(MembersOrderPreferenceCache.CONSTRUCTORS_INDEX);
+								return getMemberCategory(MembersOrderPreferenceCacheCommon.CONSTRUCTORS_INDEX);
 							}
 							int flags= method.getFlags();
 							if (Flags.isStatic(flags))
-								return getMemberCategory(MembersOrderPreferenceCache.STATIC_METHODS_INDEX);
+								return getMemberCategory(MembersOrderPreferenceCacheCommon.STATIC_METHODS_INDEX);
 							else
-								return getMemberCategory(MembersOrderPreferenceCache.METHOD_INDEX);
+								return getMemberCategory(MembersOrderPreferenceCacheCommon.METHOD_INDEX);
 						}
 					case IJavaElement.FIELD :
 						{
 							int flags= ((IField) je).getFlags();
 							if (Flags.isEnum(flags)) {
-								return getMemberCategory(MembersOrderPreferenceCache.ENUM_CONSTANTS_INDEX);
+								return getMemberCategory(MembersOrderPreferenceCacheCommon.ENUM_CONSTANTS_INDEX);
 							}
 							if (Flags.isStatic(flags))
-								return getMemberCategory(MembersOrderPreferenceCache.STATIC_FIELDS_INDEX);
+								return getMemberCategory(MembersOrderPreferenceCacheCommon.STATIC_FIELDS_INDEX);
 							else
-								return getMemberCategory(MembersOrderPreferenceCache.FIELDS_INDEX);
+								return getMemberCategory(MembersOrderPreferenceCacheCommon.FIELDS_INDEX);
 						}
 					case IJavaElement.INITIALIZER :
 						{
 							int flags= ((IInitializer) je).getFlags();
 							if (Flags.isStatic(flags))
-								return getMemberCategory(MembersOrderPreferenceCache.STATIC_INIT_INDEX);
+								return getMemberCategory(MembersOrderPreferenceCacheCommon.STATIC_INIT_INDEX);
 							else
-								return getMemberCategory(MembersOrderPreferenceCache.INIT_INDEX);
+								return getMemberCategory(MembersOrderPreferenceCacheCommon.INIT_INDEX);
 						}
 					case IJavaElement.TYPE :
-						return getMemberCategory(MembersOrderPreferenceCache.TYPE_INDEX);
+						return getMemberCategory(MembersOrderPreferenceCacheCommon.TYPE_INDEX);
 					case IJavaElement.PACKAGE_DECLARATION :
 						return PACKAGE_DECL;
 					case IJavaElement.IMPORT_CONTAINER :

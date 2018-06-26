@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.util.CompilationUnitSorter;
 
+import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCommon;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -71,37 +72,37 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 					{
 						MethodDeclaration method= (MethodDeclaration) bodyDeclaration;
 						if (method.isConstructor()) {
-							return MembersOrderPreferenceCache.CONSTRUCTORS_INDEX;
+							return MembersOrderPreferenceCacheCommon.CONSTRUCTORS_INDEX;
 						}
 						int flags= method.getModifiers();
 						if (Modifier.isStatic(flags))
-							return MembersOrderPreferenceCache.STATIC_METHODS_INDEX;
+							return MembersOrderPreferenceCacheCommon.STATIC_METHODS_INDEX;
 						else
-							return MembersOrderPreferenceCache.METHOD_INDEX;
+							return MembersOrderPreferenceCacheCommon.METHOD_INDEX;
 					}
 				case ASTNode.FIELD_DECLARATION :
 					{
 						if (JdtFlags.isStatic(bodyDeclaration))
-							return MembersOrderPreferenceCache.STATIC_FIELDS_INDEX;
+							return MembersOrderPreferenceCacheCommon.STATIC_FIELDS_INDEX;
 						else
-							return MembersOrderPreferenceCache.FIELDS_INDEX;
+							return MembersOrderPreferenceCacheCommon.FIELDS_INDEX;
 					}
 				case ASTNode.INITIALIZER :
 					{
 						int flags= ((Initializer) bodyDeclaration).getModifiers();
 						if (Modifier.isStatic(flags))
-							return MembersOrderPreferenceCache.STATIC_INIT_INDEX;
+							return MembersOrderPreferenceCacheCommon.STATIC_INIT_INDEX;
 						else
-							return MembersOrderPreferenceCache.INIT_INDEX;
+							return MembersOrderPreferenceCacheCommon.INIT_INDEX;
 					}
 				case ASTNode.TYPE_DECLARATION :
 				case ASTNode.ENUM_DECLARATION :
 				case ASTNode.ANNOTATION_TYPE_DECLARATION :
-					return MembersOrderPreferenceCache.TYPE_INDEX;
+					return MembersOrderPreferenceCacheCommon.TYPE_INDEX;
 				case ASTNode.ENUM_CONSTANT_DECLARATION :
-					return MembersOrderPreferenceCache.ENUM_CONSTANTS_INDEX;
+					return MembersOrderPreferenceCacheCommon.ENUM_CONSTANTS_INDEX;
 				case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
-					return MembersOrderPreferenceCache.METHOD_INDEX; // reusing the method index
+					return MembersOrderPreferenceCacheCommon.METHOD_INDEX; // reusing the method index
 
 			}
 			return 0; // should never happen
@@ -249,12 +250,12 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 
 		private static int sortPreservedCategory(int category) {
 			switch (category) {
-				case MembersOrderPreferenceCache.STATIC_FIELDS_INDEX:
-				case MembersOrderPreferenceCache.STATIC_INIT_INDEX:
-					return MembersOrderPreferenceCache.STATIC_FIELDS_INDEX;
-				case MembersOrderPreferenceCache.FIELDS_INDEX:
-				case MembersOrderPreferenceCache.INIT_INDEX:
-					return MembersOrderPreferenceCache.FIELDS_INDEX;
+				case MembersOrderPreferenceCacheCommon.STATIC_FIELDS_INDEX:
+				case MembersOrderPreferenceCacheCommon.STATIC_INIT_INDEX:
+					return MembersOrderPreferenceCacheCommon.STATIC_FIELDS_INDEX;
+				case MembersOrderPreferenceCacheCommon.FIELDS_INDEX:
+				case MembersOrderPreferenceCacheCommon.INIT_INDEX:
+					return MembersOrderPreferenceCacheCommon.FIELDS_INDEX;
 				default:
 					return category;
 			}

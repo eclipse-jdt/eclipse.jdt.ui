@@ -32,6 +32,8 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 	//The shared instance.
 	private static JavaManipulationPlugin fgDefault;
 
+	private MembersOrderPreferenceCacheCommon fMembersOrderPreferenceCacheCommon;
+
 	/**
 	 * The constructor.
 	 */
@@ -57,6 +59,27 @@ public class JavaManipulationPlugin extends Plugin implements DebugOptionsListen
 	 */
 	public static JavaManipulationPlugin getDefault() {
 		return fgDefault;
+	}
+
+	/**
+	 * Returns the shared Members Order Preference Common Cache
+	 *
+	 * @return the shared cache
+	 */
+	public MembersOrderPreferenceCacheCommon getMembersOrderPreferenceCacheCommon() {
+		if (fMembersOrderPreferenceCacheCommon == null) {
+			fMembersOrderPreferenceCacheCommon= new MembersOrderPreferenceCacheCommon();
+		}
+		return fMembersOrderPreferenceCacheCommon;
+	}
+
+	/**
+	 * Set the default Members Order Preference Cache Common
+	 *
+	 * @param mpcc - MembersOrderPreferenceCacheCommon default
+	 */
+	public void setMembersOrderPreferenceCacheCommon(MembersOrderPreferenceCacheCommon mpcc) {
+		fMembersOrderPreferenceCacheCommon= mpcc;
 	}
 
 	public static String getPluginId() {

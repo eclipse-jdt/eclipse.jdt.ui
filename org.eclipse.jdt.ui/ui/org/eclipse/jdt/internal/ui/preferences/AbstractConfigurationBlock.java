@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
@@ -387,18 +388,16 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 
 	private void initializeFields() {
 
-		Iterator<Button> iter= fCheckBoxes.keySet().iterator();
-		while (iter.hasNext()) {
-			Button b= iter.next();
-			String key= fCheckBoxes.get(b);
-			b.setSelection(fStore.getBoolean(key));
+		for (Entry<Button, String> entry : fCheckBoxes.entrySet()) {
+			Button b= entry.getKey();
+			String keyForStore= entry.getValue();
+			b.setSelection(fStore.getBoolean(keyForStore));
 		}
 
-		Iterator<Text> iter2= fTextFields.keySet().iterator();
-		while (iter2.hasNext()) {
-			Text t= iter2.next();
-			String key= fTextFields.get(t);
-			t.setText(fStore.getString(key));
+		for (Entry<Text, String> entry : fTextFields.entrySet()) {
+			Text t= entry.getKey();
+			String keyForStore= entry.getValue();
+			t.setText(fStore.getString(keyForStore));
 		}
 
         // Update slaves

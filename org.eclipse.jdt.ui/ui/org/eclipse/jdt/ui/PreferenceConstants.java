@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.manipulation.CodeStyleConfiguration;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
+import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCommon;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
@@ -199,7 +200,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @since 2.1
 	 */
-	public static final String APPEARANCE_MEMBER_SORT_ORDER= "outlinesortoption"; //$NON-NLS-1$
+	public static final String APPEARANCE_MEMBER_SORT_ORDER= MembersOrderPreferenceCacheCommon.APPEARANCE_MEMBER_SORT_ORDER;
 
 	/**
 	 * A named preference that defines how member elements are ordered by visibility in the
@@ -217,7 +218,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @since 3.0
 	 */
-	public static final String APPEARANCE_VISIBILITY_SORT_ORDER= "org.eclipse.jdt.ui.visibility.order"; //$NON-NLS-1$
+	public static final String APPEARANCE_VISIBILITY_SORT_ORDER= MembersOrderPreferenceCacheCommon.APPEARANCE_VISIBILITY_SORT_ORDER;
 
 	/**
 	 * A named preferences that controls if Java elements are also sorted by
@@ -227,7 +228,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @since 3.0
 	 */
-	public static final String APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER= "org.eclipse.jdt.ui.enable.visibility.order"; //$NON-NLS-1$
+	public static final String APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER= MembersOrderPreferenceCacheCommon.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER;
 
 	/**
 	 * A named preference that controls category rendering of Java elements in the UI.

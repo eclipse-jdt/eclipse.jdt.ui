@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - moved to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
@@ -22,16 +23,15 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCommon;
 
 /**
  * Rewrite helper for body declarations.
  * 
  * @see ASTNodes#getBodyDeclarationsProperty(ASTNode)
- * @see JDTUIHelperClasses
+ * 
+ * @since 1.10
  */
 public class BodyDeclarationRewrite {
 
@@ -63,14 +63,16 @@ public class BodyDeclarationRewrite {
 	 */
 	public static int getInsertionIndex(BodyDeclaration member, List<? extends BodyDeclaration> container) {
 		int containerSize= container.size();
-	
-		MembersOrderPreferenceCache orderStore= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
-	
+
+		// use MembersOrderPreferenceCacheCommon which has no UI dependencies and
+		// will get Preferences from the node specified by JavaManipulation.getPreferenceNodeId
+		MembersOrderPreferenceCacheCommon orderStore= JavaManipulationPlugin.getDefault().getMembersOrderPreferenceCacheCommon();
+
 		int orderIndex= getOrderPreference(member, orderStore);
-	
+
 		int insertPos= containerSize;
 		int insertPosOrderIndex= -1;
-	
+
 		for (int i= containerSize - 1; i >= 0; i--) {
 			int currOrderIndex= getOrderPreference(container.get(i), orderStore);
 			if (orderIndex == currOrderIndex) {
@@ -93,39 +95,39 @@ public class BodyDeclarationRewrite {
 		return insertPos;
 	}
 
-	private static int getOrderPreference(BodyDeclaration member, MembersOrderPreferenceCache store) {
+	private static int getOrderPreference(BodyDeclaration member, MembersOrderPreferenceCacheCommon store) {
 		int memberType= member.getNodeType();
 		int modifiers= member.getModifiers();
-	
+
 		switch (memberType) {
 			case ASTNode.TYPE_DECLARATION:
 			case ASTNode.ENUM_DECLARATION :
 			case ASTNode.ANNOTATION_TYPE_DECLARATION :
-				return store.getCategoryIndex(MembersOrderPreferenceCache.TYPE_INDEX) * 2;
+				return store.getCategoryIndex(MembersOrderPreferenceCacheCommon.TYPE_INDEX) * 2;
 			case ASTNode.FIELD_DECLARATION:
 				if (Modifier.isStatic(modifiers)) {
-					int index= store.getCategoryIndex(MembersOrderPreferenceCache.STATIC_FIELDS_INDEX) * 2;
+					int index= store.getCategoryIndex(MembersOrderPreferenceCacheCommon.STATIC_FIELDS_INDEX) * 2;
 					if (Modifier.isFinal(modifiers)) {
 						return index; // first final static, then static
 					}
 					return index + 1;
 				}
-				return store.getCategoryIndex(MembersOrderPreferenceCache.FIELDS_INDEX) * 2;
+				return store.getCategoryIndex(MembersOrderPreferenceCacheCommon.FIELDS_INDEX) * 2;
 			case ASTNode.INITIALIZER:
 				if (Modifier.isStatic(modifiers)) {
-					return store.getCategoryIndex(MembersOrderPreferenceCache.STATIC_INIT_INDEX) * 2;
+					return store.getCategoryIndex(MembersOrderPreferenceCacheCommon.STATIC_INIT_INDEX) * 2;
 				}
-				return store.getCategoryIndex(MembersOrderPreferenceCache.INIT_INDEX) * 2;
+				return store.getCategoryIndex(MembersOrderPreferenceCacheCommon.INIT_INDEX) * 2;
 			case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
-				return store.getCategoryIndex(MembersOrderPreferenceCache.METHOD_INDEX) * 2;
+				return store.getCategoryIndex(MembersOrderPreferenceCacheCommon.METHOD_INDEX) * 2;
 			case ASTNode.METHOD_DECLARATION:
 				if (Modifier.isStatic(modifiers)) {
-					return store.getCategoryIndex(MembersOrderPreferenceCache.STATIC_METHODS_INDEX) * 2;
+					return store.getCategoryIndex(MembersOrderPreferenceCacheCommon.STATIC_METHODS_INDEX) * 2;
 				}
 				if (((MethodDeclaration) member).isConstructor()) {
-					return store.getCategoryIndex(MembersOrderPreferenceCache.CONSTRUCTORS_INDEX) * 2;
+					return store.getCategoryIndex(MembersOrderPreferenceCacheCommon.CONSTRUCTORS_INDEX) * 2;
 				}
-				return store.getCategoryIndex(MembersOrderPreferenceCache.METHOD_INDEX) * 2;
+				return store.getCategoryIndex(MembersOrderPreferenceCacheCommon.METHOD_INDEX) * 2;
 			default:
 				return 100;
 		}
