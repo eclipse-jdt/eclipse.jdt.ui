@@ -4385,7 +4385,7 @@ public final class ReorgPolicyFactory {
 
 				}
 			}
-			final String value= new String(buffer.toString().trim());
+			final String value= buffer.toString().trim();
 			if (!"".equals(value)) //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_LOG, value);
 		}
@@ -4425,7 +4425,7 @@ public final class ReorgPolicyFactory {
 					buffer.append(DELIMITER_RECORD);
 				}
 			}
-			final String value= new String(buffer.toString().trim());
+			final String value= buffer.toString().trim();
 			if (!"".equals(value)) //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_LOG, value);
 		}

@@ -278,7 +278,7 @@ public class JavaSearchQuery implements ISearchQuery {
 		} else if (firstSpecification instanceof PatternQuerySpecification) {
 			return BasicElementLabels.getFilePattern(((PatternQuerySpecification) firstSpecification).getPattern());
 		} else {
-			return new String(""); //$NON-NLS-1$
+			return ""; //$NON-NLS-1$
 		}
 	}
 

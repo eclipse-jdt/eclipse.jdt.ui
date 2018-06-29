@@ -595,7 +595,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			if (i < tabWidth)
 				indentPrefixes[i+1]= spaces + '\t';
 			else
-				indentPrefixes[i+1]= new String(spaces);
+				indentPrefixes[i+1]= spaces;
 		}
 
 		indentPrefixes[tabWidth + 1]= ""; //$NON-NLS-1$
