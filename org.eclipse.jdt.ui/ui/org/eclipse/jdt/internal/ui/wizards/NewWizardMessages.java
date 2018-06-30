@@ -718,6 +718,8 @@ public final class NewWizardMessages extends NLS {
 	public static String NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label;
 	public static String NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_tooltip;
 	public static String NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_label;
+	public static String NewSourceContainerWorkbookPage_ToolBar_AddSelLibToTestCP_tooltip;
+	public static String NewSourceContainerWorkbookPage_ToolBar_AddSelLibToTestCP_label;
 
 	public static String NewSourceContainerWorkbookPage_ToolBar_AddJarCP_tooltip;
 	public static String NewSourceContainerWorkbookPage_ToolBar_AddJarCP_label;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,6 +62,7 @@ public abstract class BuildpathModifierAction extends Action implements ISelecti
 	public static final int CONFIGURE_BUILD_PATH= 16;
 	public static final int RESET_ALL_OUTPUT_FOLDERS= 17;
 	public static final int DROP_DOWN_ACTION= 18;
+	public static final int ADD_SEL_LIB_TO_TEST_BP= 19;
 
 	private final IWorkbenchSite fSite;
 	private final List<Object> fSelectedElements;
