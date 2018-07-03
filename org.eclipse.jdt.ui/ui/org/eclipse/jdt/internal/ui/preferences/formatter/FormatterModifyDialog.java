@@ -1115,8 +1115,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_end_of_file, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AT_END_OF_FILE_IF_MISSING)
 				.build(null, (parent, label, key) -> {
 					String[] values= CheckboxPreference.DO_NOT_INSERT_INSERT;
-					if (parent.getKey().endsWith("-controlstatements") || parent.getKey().endsWith("-ifelse") //$NON-NLS-1$ //$NON-NLS-2$
-							|| key.equals(DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE)) {
+					if (parent.getKey().endsWith("-ifelse") || DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE.equals(key)) { //$NON-NLS-1$
 						values= CheckboxPreference.FALSE_TRUE;
 					}
 					return fTree.addCheckbox(parent, label, key, values);
