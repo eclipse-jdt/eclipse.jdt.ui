@@ -10,8 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -26,11 +26,10 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.SharedASTProvider;
-
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 
 public class RefactoringASTParser {
 
@@ -147,9 +146,9 @@ public class RefactoringASTParser {
 	public static Map<String, String> getCompilerOptions(IJavaElement element) {
 		IJavaProject project= element.getJavaProject();
 		Map<String, String> options= project.getOptions(true);
-		for (Iterator<String> iter= options.keySet().iterator(); iter.hasNext();) {
-			String key= iter.next();
-			String value= options.get(key);
+		for (Entry<String, String> entry : options.entrySet()) {
+			String key = entry.getKey();
+			String value= entry.getValue();
 			if (JavaCore.ERROR.equals(value) || JavaCore.WARNING.equals(value) || JavaCore.INFO.equals(value)) {
 				// System.out.println("Ignoring - " + key);
 				options.put(key, JavaCore.IGNORE);
