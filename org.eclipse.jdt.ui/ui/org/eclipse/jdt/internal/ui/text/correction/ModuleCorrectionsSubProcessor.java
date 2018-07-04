@@ -16,10 +16,16 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+
+import org.eclipse.jface.operation.IRunnableContext;
+
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
 
@@ -46,6 +52,7 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -53,11 +60,15 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.ClasspathFixProcessor.ClasspathFixProposal;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ClasspathFixSelectionDialog;
 
 public class ModuleCorrectionsSubProcessor {
 
@@ -78,6 +89,31 @@ public class ModuleCorrectionsSubProcessor {
 		@Override
 		public Image getImage() {
 			return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		}
+	}
+	
+	private static class ModulepathFixCorrectionProposal extends CUCorrectionProposal {
+
+		private final String fModuleSearchStr;
+		
+		protected ModulepathFixCorrectionProposal(ICompilationUnit cu, String moduleSearchStr) {
+			super(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_description, cu, -10, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+			fModuleSearchStr= DefaultModulepathFixProcessor.MODULE_SEARCH + moduleSearchStr;
+		}
+
+		@Override
+		public void apply(IDocument document) {
+			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
+			if (context == null) {
+				context= new BusyIndicatorRunnableContext();
+			}
+			Shell shell= JavaPlugin.getActiveWorkbenchShell();
+			ClasspathFixSelectionDialog.openClasspathFixSelectionDialog(shell, getCompilationUnit().getJavaProject(), fModuleSearchStr, context);			
+		}		
+
+		@Override
+		public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_project_seup_fix_info, BasicElementLabels.getJavaElementName(fModuleSearchStr));
 		}
 	}
 
@@ -140,57 +176,68 @@ public class ModuleCorrectionsSubProcessor {
 				&& javaProject != null && JavaModelUtil.is9OrHigher(javaProject)) {
 			ICompilationUnit moduleCompilationUnit= moduleDescription.getCompilationUnit();
 			if (cu.equals(moduleCompilationUnit)) {
-				IJavaElement[] elements= new IJavaElement[1];
-				elements[0]= javaProject;
-				IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
-				List<IModuleDescription> moduleDescriptions= new ArrayList<>();
-				SearchRequestor requestor= new SearchRequestor() {
-					@Override
-					public void acceptSearchMatch(SearchMatch match) throws CoreException {
-						Object element= match.getElement();
-						if (element instanceof IModuleDescription) {
-							IModuleDescription moduleDesc= (IModuleDescription) element;
-							if (moduleDesc.exists() || moduleDesc.isAutoModule()) {
-								moduleDescriptions.add(moduleDesc);
-							}
+				int oldCount= proposals.size();
+				addModifyClassPathProposals(proposals, javaProject, node);
+				if (oldCount == proposals.size()) {
+					proposals.add(new ModulepathFixCorrectionProposal(context.getCompilationUnit(),  node.getFullyQualifiedName()));					
+				}
+			}
+		}
+	}
+
+	private static void addModifyClassPathProposals(Collection<ICommandAccess> proposals, IJavaProject javaProject, Name node) throws CoreException {
+		if (node == null || javaProject == null) {
+			return;
+		}
+		IJavaElement[] elements= new IJavaElement[1];
+		elements[0]= javaProject;
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
+		List<IModuleDescription> moduleDescriptions= new ArrayList<>();
+		SearchRequestor requestor= new SearchRequestor() {
+			@Override
+			public void acceptSearchMatch(SearchMatch match) throws CoreException {
+				Object element= match.getElement();
+				if (element instanceof IModuleDescription) {
+					IModuleDescription moduleDesc= (IModuleDescription) element;
+					if (moduleDesc.exists() || moduleDesc.isAutoModule()) {
+						moduleDescriptions.add(moduleDesc);
+					}
+				}
+			}
+		};
+
+		SearchPattern searchPattern= SearchPattern.createPattern(node.getFullyQualifiedName(), IJavaSearchConstants.MODULE, IJavaSearchConstants.DECLARATIONS,
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
+		try {
+			new SearchEngine().search(searchPattern, participants, scope, requestor, null);
+		} catch (CoreException e) {
+			//do nothing
+		} catch (OperationCanceledException e) {
+			//do nothing
+		}
+		
+		IClasspathEntry[] existingEntries= javaProject.readRawClasspath();
+		if (existingEntries != null && existingEntries.length > 0) {
+			for (int i= 0; i < moduleDescriptions.size(); i++) {
+				IModuleDescription moduleDesc= moduleDescriptions.get(i);
+				IPackageFragmentRoot root= (IPackageFragmentRoot) moduleDesc.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+				if (root != null) {
+					IClasspathEntry entry= null;
+					int index= -1;
+					if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
+						entry= root.getRawClasspathEntry();
+						index= getClassPathPresentByEntry(existingEntries, entry);
+					} else if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
+						IJavaProject project= root.getJavaProject();
+						IPath path= project.getPath();
+						index= getClassPathPresentByPath(existingEntries, path);
+						if (index != -1) {
+							entry= existingEntries[index];
 						}
 					}
-				};
-
-				SearchPattern searchPattern= SearchPattern.createPattern(node.getFullyQualifiedName(), IJavaSearchConstants.MODULE, IJavaSearchConstants.DECLARATIONS,
-						SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
-				SearchParticipant[] participants= new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() };
-				try {
-					new SearchEngine().search(searchPattern, participants, scope, requestor, null);
-				} catch (CoreException e) {
-					//do nothing
-				} catch (OperationCanceledException e) {
-					//do nothing
-				}
-				
-				IClasspathEntry[] existingEntries= javaProject.readRawClasspath();
-				if (existingEntries != null && existingEntries.length > 0) {
-					for (int i= 0; i < moduleDescriptions.size(); i++) {
-						IModuleDescription moduleDesc= moduleDescriptions.get(i);
-						IPackageFragmentRoot root= (IPackageFragmentRoot) moduleDesc.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-						if (root != null) {
-							IClasspathEntry entry= null;
-							int index= -1;
-							if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
-								entry= root.getRawClasspathEntry();
-								index= getClassPathPresentByEntry(existingEntries, entry);
-							} else if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
-								IJavaProject project= root.getJavaProject();
-								IPath path= project.getPath();
-								index= getClassPathPresentByPath(existingEntries, path);
-								if (index != -1) {
-									entry= existingEntries[index];
-								}
-							}
-							if (entry != null && index != -1) {
-								modifyClasspathProposal(javaProject, root, existingEntries, index, proposals);
-							}
-						}
+					if (entry != null && index != -1) {
+						modifyClasspathProposal(javaProject, root, existingEntries, index, proposals);
 					}
 				}
 			}
@@ -317,5 +364,7 @@ public class ModuleCorrectionsSubProcessor {
 		}
 		return null;
 	}
+	
+	
 
 }

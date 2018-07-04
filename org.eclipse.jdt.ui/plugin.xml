@@ -251,6 +251,11 @@
             class="org.eclipse.jdt.internal.ui.text.correction.DefaultClasspathFixProcessor"
             id="org.eclipse.jdt.ui.text.correction.DefaultClasspathFixProcessor">
       </classpathFixProcessor>
+      <classpathFixProcessor
+            class="org.eclipse.jdt.internal.ui.text.correction.DefaultModulepathFixProcessor"
+            id="org.eclipse.jdt.ui.text.correction.DefaultModulepathFixProcessor"
+            name="%defaultQuickAssistProcessor">
+      </classpathFixProcessor>
    </extension>
 
 	<!-- content assist processors - do not change their order -->  
