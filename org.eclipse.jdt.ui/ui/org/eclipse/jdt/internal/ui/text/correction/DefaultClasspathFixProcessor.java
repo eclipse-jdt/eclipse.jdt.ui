@@ -206,10 +206,12 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 					}
 					Change cuChange= null;
 					String moduleName= null;
+					boolean isModule= false;
 					if (typesWithModule.contains(curr)) {
 						moduleName= typeNameMatchToModuleName.get(curr);
 						if (moduleName != null && currentModuleDescription != null) {
 							ICompilationUnit currentCU= currentModuleDescription.getCompilationUnit();
+							isModule= true;
 							String[] args= { moduleName };
 							final String changeName= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_info, args);
 							final String changeDescription= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_description, args);
@@ -224,7 +226,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 					int entryKind= entry.getEntryKind();
 					if ((entry.isExported() || entryKind == IClasspathEntry.CPE_SOURCE) && addedClaspaths.add(other)) {
 						IClasspathEntry newEntry= null;
-						if (cuChange != null) {
+						if (isModule) {
 							IClasspathAttribute[] extraAttributes= new IClasspathAttribute[] {
 									JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true") //$NON-NLS-1$
 							};
