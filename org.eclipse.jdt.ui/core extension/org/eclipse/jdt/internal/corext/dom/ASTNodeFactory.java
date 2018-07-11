@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -237,6 +237,42 @@ public class ASTNodeFactory {
 		}
 		// fall-back
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
+	}
+
+	public static Type newNonVarType(AST ast, VariableDeclaration declaration, ImportRewrite importRewrite, ImportRewriteContext context) {
+		if (declaration.getAST().apiLevel() < AST.JLS10) {
+			return newType(ast, declaration, importRewrite, context);
+		}
+
+		if (declaration instanceof VariableDeclarationFragment && declaration.getParent() instanceof LambdaExpression) {
+			return newType((LambdaExpression) declaration.getParent(), (VariableDeclarationFragment) declaration, ast, importRewrite, context);
+		}
+
+		Type type= ASTNodes.getType(declaration);
+		Type finalType= null;
+		if (declaration instanceof SingleVariableDeclaration) {
+			finalType= ((SingleVariableDeclaration) declaration).getType();
+		} else if (type != null) {
+			finalType= type;
+		}
+		if (finalType != null && finalType.isVar()) {
+			ITypeBinding typeBinding= finalType.resolveBinding();
+			if (typeBinding != null) {
+				if (importRewrite != null) {
+					finalType= importRewrite.addImport(typeBinding, ast, context);
+					return finalType;
+				} else {
+					String qualifiedName= typeBinding.getQualifiedName();
+					if (qualifiedName.length() > 0) {
+						finalType= ast.newSimpleType(ast.newName(qualifiedName));
+						return finalType;
+					}
+				}
+			}
+			return finalType;
+		} else {
+			return newType(ast, declaration, importRewrite, context);
+		}
 	}
 
 	/**

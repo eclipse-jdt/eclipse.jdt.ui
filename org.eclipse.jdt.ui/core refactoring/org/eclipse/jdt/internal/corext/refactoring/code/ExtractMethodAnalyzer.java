@@ -277,7 +277,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 		switch (fReturnKind) {
 			case ACCESS_TO_LOCAL:
 				VariableDeclaration declaration= ASTNodes.findVariableDeclaration(fReturnValue, fEnclosingBodyDeclaration);
-				fReturnType= ASTNodeFactory.newType(ast, declaration, rewriter, new ContextSensitiveImportRewriteContext(declaration, rewriter));
+				fReturnType= ASTNodeFactory.newNonVarType(ast, declaration, rewriter, new ContextSensitiveImportRewriteContext(declaration, rewriter));
 				if (declaration.resolveBinding() != null) {
 					fReturnTypeBinding= declaration.resolveBinding().getType();
 				}

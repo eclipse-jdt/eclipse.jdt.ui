@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -758,7 +758,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			boolean isVarargs= declaration instanceof SingleVariableDeclaration
 				? ((SingleVariableDeclaration)declaration).isVarargs()
 				: false;
-			ParameterInfo info= new ParameterInfo(argument, getType(declaration, isVarargs), argument.getName(), i);
+			ParameterInfo info= new ParameterInfo(argument, getType(declaration, isVarargs, false), argument.getName(), i);
 			if (isVarargs) {
 				vararg= info;
 			} else {
@@ -930,6 +930,18 @@ public class ExtractMethodRefactoring extends Refactoring {
 			return type + ParameterInfo.ELLIPSIS;
 		else
 			return type;
+	}
+
+	private String getType(VariableDeclaration declaration, boolean isVarargs, boolean isVarTypeAllowed) {
+		if (isVarTypeAllowed) {
+			return getType(declaration, isVarargs);
+		} else {
+			String type= ASTNodes.asString(ASTNodeFactory.newNonVarType(declaration.getAST(), declaration, fImportRewriter, new ContextSensitiveImportRewriteContext(declaration, fImportRewriter)));
+			if (isVarargs)
+				return type + ParameterInfo.ELLIPSIS;
+			else
+				return type;
+		}
 	}
 
 	//---- Code generation -----------------------------------------------------------------------
@@ -1139,7 +1151,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			VariableDeclaration infoDecl= getVariableDeclaration(info);
 			SingleVariableDeclaration parameter= fAST.newSingleVariableDeclaration();
 			parameter.modifiers().addAll(ASTNodeFactory.newModifiers(fAST, ASTNodes.getModifiers(infoDecl)));
-			parameter.setType(ASTNodeFactory.newType(fAST, infoDecl, fImportRewriter, context));
+			parameter.setType(ASTNodeFactory.newNonVarType(fAST, infoDecl, fImportRewriter, context));
 			parameter.setName(fAST.newSimpleName(info.getNewName()));
 			parameter.setVarargs(info.isNewVarargs());
 			parameters.add(parameter);
