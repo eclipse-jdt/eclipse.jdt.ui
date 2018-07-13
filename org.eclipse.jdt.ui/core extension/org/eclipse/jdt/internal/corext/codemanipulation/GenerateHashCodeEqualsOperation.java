@@ -1059,7 +1059,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			}
 		}
 		IJavaProject project= fUnit.getJavaElement().getJavaProject();
-		StubUtility2.addOverrideAnnotation(fSettings, project, fRewrite.getASTRewrite(), fRewrite.getImportRewrite(), newDeclaration, copyFrom.getDeclaringClass().isInterface(), null);
+		StubUtility2Core.addOverrideAnnotation(fSettings, project, fRewrite.getASTRewrite(), fRewrite.getImportRewrite(), newDeclaration, copyFrom.getDeclaringClass().isInterface(), null);
 	}
 
 	private boolean needsNoSuperCall(ITypeBinding typeBinding, String name, ITypeBinding[] parameters) {

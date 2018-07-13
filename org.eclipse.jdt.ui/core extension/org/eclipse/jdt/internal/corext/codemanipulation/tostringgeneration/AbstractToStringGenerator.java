@@ -38,11 +38,13 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
@@ -58,11 +60,9 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.core.dom.InfixExpression.Operator;
-import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 
 import org.eclipse.jdt.ui.CodeGeneration;
@@ -241,7 +241,7 @@ public abstract class AbstractToStringGenerator {
 				toStringMethod.setJavadoc(javadoc);
 			}
 		}
-		StubUtility2.addOverrideAnnotation(fContext.getCodeGenerationSettings(), fContext.getTypeBinding().getJavaElement().getJavaProject(), fContext.getASTRewrite(), fContext.getImportRewrite(), toStringMethod, objectMethod.getDeclaringClass().isInterface(), null);
+		StubUtility2Core.addOverrideAnnotation(fContext.getCodeGenerationSettings(), fContext.getTypeBinding().getJavaElement().getJavaProject(), fContext.getASTRewrite(), fContext.getImportRewrite(), toStringMethod, objectMethod.getDeclaringClass().isInterface(), null);
 	}
 
 	/**

@@ -106,7 +106,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -537,7 +537,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		ImportRewriteUtil.addImports(rewriter, context, methodToCreateStubFor, new HashMap<Name, String>(), new HashMap<Name, String>(), true);
 		IJavaProject javaProject= newCu.getJavaProject();
 		CodeGenerationSettings codeGenerationSettings= JavaPreferencesSettings.getCodeGenerationSettings(javaProject);
-		StubUtility2.addOverrideAnnotation(codeGenerationSettings, javaProject, astRewrite, importRewrite, newMethod, getDeclaringType().isInterface(),
+		StubUtility2Core.addOverrideAnnotation(codeGenerationSettings, javaProject, astRewrite, importRewrite, newMethod, getDeclaringType().isInterface(),
 				rewriter.createCategorizedGroupDescription(RefactoringCoreMessages.PullUpRefactoring_add_override_annotation, SET_PULL_UP));
 		astRewrite.getListRewrite(typeToCreateStubIn, typeToCreateStubIn.getBodyDeclarationsProperty()).insertAt(newMethod, BodyDeclarationRewrite.getInsertionIndex(newMethod, typeToCreateStubIn.bodyDeclarations()), rewriter.createCategorizedGroupDescription(RefactoringCoreMessages.PullUpRefactoring_add_method_stub, SET_PULL_UP));
 	}
@@ -1036,7 +1036,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 	private void createAbstractMethod(final IMethod sourceMethod, final CompilationUnitRewrite sourceRewriter, final CompilationUnit declaringCuNode, final AbstractTypeDeclaration destination, final TypeVariableMaplet[] mapping, final CompilationUnitRewrite targetRewrite, final Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
 		final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode(sourceMethod, declaringCuNode);
 		ITypeBinding destinationBinding= destination.resolveBinding();
-		StubUtility2.addOverrideAnnotation(fSettings, sourceMethod.getJavaProject(), sourceRewriter.getASTRewrite(), sourceRewriter.getImportRewrite(), oldMethod,
+		StubUtility2Core.addOverrideAnnotation(fSettings, sourceMethod.getJavaProject(), sourceRewriter.getASTRewrite(), sourceRewriter.getImportRewrite(), oldMethod,
 				destinationBinding == null ? false : destinationBinding.isInterface(),
 				sourceRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.PullUpRefactoring_add_override_annotation, SET_PULL_UP));
 		final MethodDeclaration newMethod= targetRewrite.getAST().newMethodDeclaration();
@@ -1334,7 +1334,7 @@ public class PullUpRefactoringProcessor extends HierarchyProcessor {
 		final ASTRewrite rewrite= targetRewrite.getASTRewrite();
 		final AST ast= rewrite.getAST();
 		ITypeBinding destinationBinding= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getDestinationType(), targetRewrite.getRoot()).resolveBinding();
-		StubUtility2.addOverrideAnnotation(fSettings, sourceMethod.getJavaProject(), sourceRewrite.getASTRewrite(), sourceRewrite.getImportRewrite(), oldMethod,
+		StubUtility2Core.addOverrideAnnotation(fSettings, sourceMethod.getJavaProject(), sourceRewrite.getASTRewrite(), sourceRewrite.getImportRewrite(), oldMethod,
 				destinationBinding == null ? false : destinationBinding.isInterface(),
 				sourceRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.PullUpRefactoring_add_override_annotation, SET_PULL_UP));
 		final MethodDeclaration newMethod= ast.newMethodDeclaration();

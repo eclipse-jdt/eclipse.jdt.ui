@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - moved to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
@@ -39,7 +40,6 @@ import org.eclipse.jdt.core.SourceRange;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * Utility methods for the Java Model.
  * 
  * @see JavaModelUtil (a better place for new methods)
- * @see JDTUIHelperClasses
+ * see JDTUIHelperClasses
  */
 public class JavaElementUtil {
 

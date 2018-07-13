@@ -69,7 +69,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -866,7 +866,7 @@ public class ModifierCorrectionSubProcessor {
 			return;
 		}
 		MethodDeclaration methodDecl= (MethodDeclaration) selectedNode;
-		Annotation annot= StubUtility2.findAnnotation("java.lang.Override", methodDecl.modifiers()); //$NON-NLS-1$
+		Annotation annot= StubUtility2Core.findAnnotation("java.lang.Override", methodDecl.modifiers()); //$NON-NLS-1$
 		if (annot != null) {
 			ASTRewrite rewrite= ASTRewrite.create(annot.getAST());
 			rewrite.remove(annot, null);

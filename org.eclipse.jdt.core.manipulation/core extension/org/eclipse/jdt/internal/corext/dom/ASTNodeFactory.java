@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
@@ -46,14 +47,13 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
-import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 
 /**
  * JDT-UI-internal helper methods to create new {@link ASTNode}s.
  * Complements <code>AST#new*(..)</code> and <code>ImportRewrite#add*(..)</code>.
  * 
- * @see JDTUIHelperClasses
+ * see JDTUIHelperClasses
  */
 public class ASTNodeFactory {
 
@@ -410,7 +410,7 @@ public class ASTNodeFactory {
 			}
 			ParameterizedType parameterizedType= ast.newParameterizedType(baseType);
 			for (ITypeBinding typeArgument : typeBinding.getTypeArguments()) {
-				typeArgument= StubUtility2.replaceWildcardsAndCaptures(typeArgument);
+				typeArgument= StubUtility2Core.replaceWildcardsAndCaptures(typeArgument);
 				parameterizedType.typeArguments().add(importRewrite.addImport(typeArgument, ast, importContext, TypeLocation.TYPE_ARGUMENT));
 			}
 			return parameterizedType;
