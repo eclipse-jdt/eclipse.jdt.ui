@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -134,7 +135,10 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 			public boolean visit(MethodDeclaration node) {
 				TypeDeclaration typeDecl= ASTNodes.getParent(node, TypeDeclaration.class);
 				if (typeDecl != null && typeDecl.isInterface()) {
-					rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.PUBLIC | Modifier.ABSTRACT));
+					rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.ABSTRACT));
+					if (!AnonymousClassDeclaration.class.isInstance(node.getParent())) {
+						rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.PUBLIC));
+					}
 				} else if (typeDecl != null && Modifier.isFinal(typeDecl.getModifiers()) && Modifier.isFinal(node.getModifiers())) {
 					rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.FINAL));
 				}

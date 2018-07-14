@@ -9152,8 +9152,26 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("}\n");
 		String expected2 = buf.toString();
 		
+		// Anonymous class within an interface:
+		// public keyword must not be removed (see bug#536612)
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public interface X {\n");
+		buf.append("  void B();\n");
+		buf.append("  void A();\n");
+		buf.append("  default X y() {\n");
+		buf.append("    return new X() {\n");
+		buf.append("      @Override public void A() {}\n");
+		buf.append("      @Override public void B() {}\n");
+		buf.append("    };\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		String expected3 = buf.toString();
+
+		ICompilationUnit cu3= pack1.createCompilationUnit("AnonymousNestedInInterface.java", buf.toString(), false, null);
+
 		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2 }, new String[] { expected1, expected2 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3 }, new String[] { expected1, expected2, expected3 });
 
 	}
 }
