@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2015 IBM Corporation and others.
+ * Copyright (c) 2011, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,7 @@
  *     Nikolay Metchev <nikolaymetchev@gmail.com> - [inline] Inline local variable with initializer generates assignment where left-hand side is not a variable - https://bugs.eclipse.org/394721
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.corext.dom;
+package org.eclipse.jdt.internal.core.manipulation.dom;
 
 import java.util.Iterator;
 
@@ -39,9 +39,6 @@ import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
-
-import org.eclipse.jdt.internal.corext.refactoring.code.OperatorPrecedence;
-import org.eclipse.jdt.internal.corext.util.JDTUIHelperClasses;
 
 /**
  * Helper class to check if an expression requires parentheses.
