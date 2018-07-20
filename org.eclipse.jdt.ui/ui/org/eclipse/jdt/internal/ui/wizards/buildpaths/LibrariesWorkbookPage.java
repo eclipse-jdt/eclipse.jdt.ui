@@ -530,33 +530,42 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				if(selectedElements.size() != 1) {
 					return;
 				}
+				boolean isClassRootExpanded= getRootExpansionState(fLibrariesList, true);
+				boolean isModuleRootExpanded= getRootExpansionState(fLibrariesList, false);
 				fLibrariesList.removeAllElements();
 				RootCPListElement selectedCPElement= (RootCPListElement) selectedElements.get(0);
 				if(selectedCPElement.isClassPathRootNode()) {
 					for (CPListElement cpListElement : elementsToAdd) {
 						cpListElement.setAttribute(IClasspathAttribute.MODULE, null);
 					}
-				} else if(selectedCPElement.isModulePathRootNode()) {
+					isClassRootExpanded= true;
+				} else if (selectedCPElement.isModulePathRootNode()) {
 					for (CPListElement cpListElement : elementsToAdd) {
 						Object attribute= cpListElement.getAttribute(IClasspathAttribute.MODULE);
-						if(attribute == null) {
+						if (attribute == null) {
 							cpListElement.setAttribute(IClasspathAttribute.MODULE, new ModuleEncapsulationDetail[0]);
 						}
 					}
+					isModuleRootExpanded= true;
 				}
 				selectedCPElement.addCPListElement(elementsToAdd);					
 				
 				fLibrariesList.setElements(elements);
 				fLibrariesList.refresh();
-				fLibrariesList.getTreeViewer().expandToLevel(2);		
-			}	
-			
+				fLibrariesList.getTreeViewer().expandToLevel(2);
+				setRootExpansionState(fLibrariesList, isClassRootExpanded, true);
+				setRootExpansionState(fLibrariesList, isModuleRootExpanded, false);
+			}
+
 			if (index == IDX_ADDLIB || index == IDX_ADDVAR) {
 				fLibrariesList.refresh();
 			}
 			fLibrariesList.postSetSelection(new StructuredSelection(libentries));
 		}
 	}
+
+
+
 
 	private boolean hasCurrentElement(List<CPListElement> cplist, CPListElement curr) {
 		//note that the same cpelement with different attribute can be added

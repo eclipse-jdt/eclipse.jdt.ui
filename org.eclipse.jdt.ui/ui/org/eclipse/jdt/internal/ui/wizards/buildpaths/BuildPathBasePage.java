@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -278,6 +278,29 @@ public abstract class BuildPathBasePage {
 
 	public abstract void setFocus();
 	
+
+	protected boolean getRootExpansionState(TreeListDialogField<CPListElement> list, boolean isClassPathRoot) {
+		for (CPListElement cpListElement : list.getElements()) {
+			if (cpListElement.isClassPathRootNode() && isClassPathRoot) {
+				return list.getTreeViewer().getExpandedState(cpListElement);
+			}
+			if (cpListElement.isModulePathRootNode() && !isClassPathRoot) {
+				return list.getTreeViewer().getExpandedState(cpListElement);
+			}
+		}
+		return false;
+	}
+
+	protected void setRootExpansionState(TreeListDialogField<CPListElement> list, boolean state, boolean isClassPathRoot) {
+		for (CPListElement cpListElement : list.getElements()) {
+			if (cpListElement.isClassPathRootNode() && isClassPathRoot) {
+				list.getTreeViewer().setExpandedState(cpListElement, state);
+			}
+			if (cpListElement.isModulePathRootNode() && !isClassPathRoot) {
+				list.getTreeViewer().setExpandedState(cpListElement, state);
+			}
+		}
+	}
 
 
 	/**
