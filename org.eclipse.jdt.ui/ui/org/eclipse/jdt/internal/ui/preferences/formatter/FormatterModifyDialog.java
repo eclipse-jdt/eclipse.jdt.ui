@@ -1096,7 +1096,11 @@ public class FormatterModifyDialog extends ModifyDialog {
 								})
 								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_else_on_same_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_ELSE_STATEMENT_ON_SAME_LINE)
 								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_else_if_on_one_line, DefaultCodeFormatterConstants.FORMATTER_COMPACT_ELSE_IF)
-								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_guardian_clause_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_GUARDIAN_CLAUSE_ON_ONE_LINE)))
+								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_guardian_clause_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_GUARDIAN_CLAUSE_ON_ONE_LINE))
+						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_newLines_tree_simple_loops, "-simpleloops", modAll) //$NON-NLS-2$
+								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_simple_for_body_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_FOR_BODY_ON_SAME_LINE)
+								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_simple_while_body_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_WHILE_BODY_ON_SAME_LINE)
+								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_simple_do_while_body_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_DO_WHILE_BODY_ON_SAME_LINE)))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_newLines_tree_after_annotations, "-annotations", modAll) //$NON-NLS-1$
 						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_packages, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PACKAGE)
 						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_types, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_TYPE)
@@ -1115,7 +1119,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_end_of_file, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AT_END_OF_FILE_IF_MISSING)
 				.build(null, (parent, label, key) -> {
 					String[] values= CheckboxPreference.DO_NOT_INSERT_INSERT;
-					if (parent.getKey().endsWith("-ifelse") || DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE.equals(key)) { //$NON-NLS-1$
+					if (parent.getKey().endsWith("-ifelse") || parent.getKey().endsWith("-simpleloops") //$NON-NLS-1$ //$NON-NLS-2$
+							|| DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE.equals(key)) {
 						values= CheckboxPreference.FALSE_TRUE;
 					}
 					return fTree.addCheckbox(parent, label, key, values);
@@ -1167,6 +1172,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_statements, null, modAll)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_for, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_FOR_LOOP_HEADER)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_compact_if_else, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_COMPACT_IF)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_compact_loops, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_COMPACT_LOOP)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_try, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_RESOURCES_IN_TRY)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_catch, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_UNION_TYPE_IN_MULTICATCH))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_parameterized_types, null, modAll)

@@ -119,6 +119,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_lineWrap_pref_binary_exprs;
 	public static String FormatterModifyDialog_lineWrap_pref_catch;
 	public static String FormatterModifyDialog_lineWrap_pref_compact_if_else;
+	public static String FormatterModifyDialog_lineWrap_pref_compact_loops;
 	public static String FormatterModifyDialog_lineWrap_pref_conditionals;
 	public static String FormatterModifyDialog_lineWrap_pref_constant_arguments;
 	public static String FormatterModifyDialog_lineWrap_pref_constants;
@@ -189,7 +190,10 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_newLines_pref_keep_else_if_on_one_line;
 	public static String FormatterModifyDialog_newLines_pref_keep_else_on_same_line;
 	public static String FormatterModifyDialog_newLines_pref_keep_guardian_clause_on_one_line;
+	public static String FormatterModifyDialog_newLines_pref_keep_simple_do_while_body_on_one_line;
+	public static String FormatterModifyDialog_newLines_pref_keep_simple_for_body_on_one_line;
 	public static String FormatterModifyDialog_newLines_pref_keep_simple_if_on_one_line;
+	public static String FormatterModifyDialog_newLines_pref_keep_simple_while_body_on_one_line;
 	public static String FormatterModifyDialog_newLines_pref_keep_then_on_same_line;
 	public static String FormatterModifyDialog_newLines_pref_local_variables;
 	public static String FormatterModifyDialog_newLines_pref_methods;
@@ -202,6 +206,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_newLines_tree_control_statements;
 	public static String FormatterModifyDialog_newLines_tree_if_else;
 	public static String FormatterModifyDialog_newLines_tree_new_lines;
+	public static String FormatterModifyDialog_newLines_tree_simple_loops;
 	public static String FormatterModifyDialog_offOn_description;
 	public static String FormatterModifyDialog_offOn_error_endsWithWhitespace;
 	public static String FormatterModifyDialog_offOn_error_startsWithWhitespace;

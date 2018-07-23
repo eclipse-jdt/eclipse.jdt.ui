@@ -589,6 +589,11 @@ class Example {
 		if (true) return;
 		if (true) return; else if (false) return; else return;
 	}
+	void bar2() {
+		while(!stop)doSomething();
+		for(String s : myStrings)System.out.println(s);
+		do doSomethingElse();while(!stop);
+	}
 }
 //--PREVIEW--END--section-newlines-controlstatements
 
@@ -755,6 +760,10 @@ class Example {
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_compact_if
 class Example {int foo(int argument) {  if (argument==0) return 0;  if (argument==1) return 42; else return 43;}}
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_compact_if
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_compact_loops
+class Example {int foo(int argument) {  while(!stop)doSomething();  for(String s : myStrings)System.out.println(s);  do doSomethingElse();while(!stop);}}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_compact_loops
 
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_resources_in_try
 class Example {void foo() {try (FileReader reader1 = new FileReader("file1");   FileReader reader2 = new FileReader("file2")) {}}}
