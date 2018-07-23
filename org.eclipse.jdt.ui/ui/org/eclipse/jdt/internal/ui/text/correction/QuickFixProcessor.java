@@ -813,6 +813,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UndefinedModule:
 				ModuleCorrectionsSubProcessor.getUndefinedModuleProposals(context, problem, proposals);
 				break;
+			case IProblem.NotAccessibleType:
+				// Handle the case in an import statement, if a requires needs to be added.
+				ReorgCorrectionsSubProcessor.importNotFoundProposals(context, problem, proposals);
+				break;
 			case IProblem.PackageDoesNotExistOrIsEmpty:
 				ModuleCorrectionsSubProcessor.getPackageDoesNotExistProposals(context, problem, proposals);
 				break;
