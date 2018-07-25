@@ -4,6 +4,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -55,6 +60,7 @@ import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -76,6 +82,7 @@ import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -625,13 +632,35 @@ public class UnresolvedElementsSubProcessor {
 			return;
 		}
 
-		if (node instanceof SimpleName && !JavaModelUtil.is10OrHigher(javaProject)) {
-			String[] args= problem.getProblemArguments();
-			if (args != null && args.length > 0) {
-				String name= args[0];
-				if (name.equals("var")) { //$NON-NLS-1$
-					ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_10);
+		if (node instanceof SimpleName && !JavaModelUtil.is11OrHigher(javaProject)) {
+			boolean isVarTypeProblem= false;
+			if (problem.getProblemId() == IProblem.VarIsNotAllowedHere) {
+				isVarTypeProblem= true;
+			} else {
+				String[] args= problem.getProblemArguments();
+				if (args != null && args.length > 0) {
+					String name= args[0];
+					if (name.equals("var")) { //$NON-NLS-1$
+						isVarTypeProblem= true;
+					}
+				}				
+			}
+			if (isVarTypeProblem) {
+				// check if "var" is present as lambda parameter type
+				boolean isVarInLambdaParamType= false;
+				ASTNode parent= node.getParent();
+				if (parent instanceof SimpleType && parent.getLocationInParent() == SingleVariableDeclaration.TYPE_PROPERTY) {
+					parent= parent.getParent();
+					if (parent.getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
+						isVarInLambdaParamType= true;
+					}						
 				}
+				
+				if (isVarInLambdaParamType) {
+					ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_11);
+				} else {
+					ReorgCorrectionsSubProcessor.getNeedHigherComplianceProposals(context, problem, proposals, JavaCore.VERSION_10);						
+				}		
 			}
 		}
 
