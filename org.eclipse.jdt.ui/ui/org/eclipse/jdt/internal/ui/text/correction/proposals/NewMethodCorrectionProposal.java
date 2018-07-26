@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla - [quick fix] Create Method in void context should 'box' void. - https://bugs.eclipse.org/bugs/show_bug.cgi?id=107985
+ *     Jens Reimann <jreimann@redhat.com> Bug 38201: [quick assist] Allow creating abstract method - https://bugs.eclipse.org/38201
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction.proposals;
 
@@ -69,7 +70,7 @@ public class NewMethodCorrectionProposal extends AbstractMethodCorrectionProposa
 		fArguments= arguments;
 	}
 
-	private int evaluateModifiers(ASTNode targetTypeDecl) {
+	protected int evaluateModifiers(ASTNode targetTypeDecl) {
 		if (getSenderBinding().isAnnotation()) {
 			return 0;
 		}

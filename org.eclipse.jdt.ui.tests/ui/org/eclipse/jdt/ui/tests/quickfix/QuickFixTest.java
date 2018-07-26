@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Jens Reimann - add method to convert a collection of previews
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -464,6 +465,23 @@ public class QuickFixTest extends TestCase {
 
 	protected static String getPreviewContent(CUCorrectionProposal proposal) throws CoreException {
 		return proposal.getPreviewContent();
+	}
+
+	protected static String[] getAllPreviewContent(Collection<? extends IJavaCompletionProposal> proposals) throws CoreException {
+		ArrayList<String> result = new ArrayList<>(proposals.size());
+		for ( IJavaCompletionProposal proposal: proposals) {
+			if ( proposal instanceof CUCorrectionProposal) {
+				result.add(getPreviewContent((CUCorrectionProposal) proposal));
+			}
+		}
+		return result.toArray(new String[result.size()]);
+	}
+
+	protected static String[] getAllDisplayStrings(ArrayList<IJavaCompletionProposal> proposals) {
+		return proposals.stream()
+				.map(proposal -> proposal.getDisplayString())
+				.filter(displayString -> displayString != null && !displayString.isEmpty())
+				.toArray(String[]::new);
 	}
 
 	protected static String getWizardPreviewContent(NewCUUsingWizardProposal newCUWizard) throws CoreException, BadLocationException {

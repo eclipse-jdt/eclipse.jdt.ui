@@ -13,6 +13,7 @@
  *     Sandra Lions <sandra.lions-piron@oracle.com> - [quick fix] for qualified enum constants in switch-case labels - https://bugs.eclipse.org/bugs/90140
  *     Jeremie Bresson <dev@jmini.fr> - Bug 439912: [1.8][quick assist] Add quick assists to add and remove parentheses around single lambda parameter - https://bugs.eclipse.org/439912
  *     Jens Reimann <jens.reimann@ibh-systems.com>, Fabian Pfaff <fabian.pfaff@vogella.com> - Bug 197850: [quick assist] Add import static field/method - https://bugs.eclipse.org/bugs/show_bug.cgi?id=197850
+ *     Jens Reimann <jreimann@redhat.com> Bug 38201: [quick assist] Allow creating abstract method - https://bugs.eclipse.org/38201
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
@@ -189,6 +190,8 @@ public final class CorrectionMessages extends NLS {
 	public static String UnresolvedElementsSubProcessor_create_loop_variable_description;
 	public static String UnresolvedElementsSubProcessor_createmethod_description;
 	public static String UnresolvedElementsSubProcessor_createmethod_other_description;
+	public static String UnresolvedElementsSubProcessor_createmethod_abstract_description;
+	public static String UnresolvedElementsSubProcessor_createmethod_abstract_other_description;
 	public static String UnresolvedElementsSubProcessor_createconstructor_description;
 	public static String UnresolvedElementsSubProcessor_changetype_description;
 	public static String UnresolvedElementsSubProcessor_changetype_nopack_description;
