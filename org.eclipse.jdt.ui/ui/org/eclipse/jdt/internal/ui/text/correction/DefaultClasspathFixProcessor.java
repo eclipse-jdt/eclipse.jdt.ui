@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.AddModuleRequiresCo
  */
 public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 
-	private static class DefaultClasspathFixProposal extends ClasspathFixProposal {
+	protected static class DefaultClasspathFixProposal extends ClasspathFixProposal {
 
 		private String fName;
 		private Change fChange;
@@ -103,7 +103,9 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 	@Override
 	public ClasspathFixProposal[] getFixImportProposals(IJavaProject project, String missingType) throws CoreException {
 		ArrayList<DefaultClasspathFixProposal> res= new ArrayList<>();
-		collectProposals(project, missingType, res);
+		if (!missingType.startsWith(DefaultModulepathFixProcessor.MODULE_SEARCH)) {
+			collectProposals(project, missingType, res);
+		}
 		return res.toArray(new ClasspathFixProposal[res.size()]);
 	}
 
@@ -204,10 +206,12 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 					}
 					Change cuChange= null;
 					String moduleName= null;
+					boolean isModule= false;
 					if (typesWithModule.contains(curr)) {
 						moduleName= typeNameMatchToModuleName.get(curr);
 						if (moduleName != null && currentModuleDescription != null) {
 							ICompilationUnit currentCU= currentModuleDescription.getCompilationUnit();
+							isModule= true;
 							String[] args= { moduleName };
 							final String changeName= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_info, args);
 							final String changeDescription= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_description, args);
@@ -222,7 +226,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 					int entryKind= entry.getEntryKind();
 					if ((entry.isExported() || entryKind == IClasspathEntry.CPE_SOURCE) && addedClaspaths.add(other)) {
 						IClasspathEntry newEntry= null;
-						if (cuChange != null) {
+						if (isModule) {
 							IClasspathAttribute[] extraAttributes= new IClasspathAttribute[] {
 									JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true") //$NON-NLS-1$
 							};
@@ -274,7 +278,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 		}
 	}
 
-	private void addLibraryProposal(IJavaProject project, IPackageFragmentRoot root, IClasspathEntry entry, Collection<Object> addedClaspaths, Collection<DefaultClasspathFixProposal> proposals,
+	protected void addLibraryProposal(IJavaProject project, IPackageFragmentRoot root, IClasspathEntry entry, Collection<Object> addedClaspaths, Collection<DefaultClasspathFixProposal> proposals,
 			Change additionalChange) throws JavaModelException {
 		if (addedClaspaths.add(entry)) {
 			String label= getAddClasspathLabel(entry, root, project);
@@ -295,7 +299,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 		}
 	}
 
-	private boolean isNonProjectSpecificContainer(IPath containerPath) {
+	protected boolean isNonProjectSpecificContainer(IPath containerPath) {
 		if (containerPath.segmentCount() > 0) {
 			String id= containerPath.segment(0);
 			if (id.equals(JavaCore.USER_LIBRARY_CONTAINER_ID) || id.equals(JavaRuntime.JRE_CONTAINER)) {
@@ -306,7 +310,7 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 	}
 
 
-	private static String getAddClasspathLabel(IClasspathEntry entry, IPackageFragmentRoot root, IJavaProject project) {
+	protected static String getAddClasspathLabel(IClasspathEntry entry, IPackageFragmentRoot root, IJavaProject project) {
 		switch (entry.getEntryKind()) {
 			case IClasspathEntry.CPE_LIBRARY:
 				if (root.isArchive()) {
@@ -327,6 +331,8 @@ public class DefaultClasspathFixProcessor extends ClasspathFixProcessor {
 				} catch (JavaModelException e) {
 					// ignore
 				}
+				break;
+			default:
 				break;
 		}
 		return null;

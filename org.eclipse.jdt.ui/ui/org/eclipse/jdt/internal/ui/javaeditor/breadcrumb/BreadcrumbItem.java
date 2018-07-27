@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Fabio Zadrozny - Bug 465666
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
 
@@ -73,6 +74,8 @@ class BreadcrumbItem extends Item {
 		fDetailsBlock= new BreadcrumbItemDetails(this, fContainer);
 
 		fExpandBlock= new BreadcrumbItemDropDown(this, fContainer);
+
+		fContainer.setData("org.eclipse.e4.ui.css.id", "BreadcrumbItemComposite"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**

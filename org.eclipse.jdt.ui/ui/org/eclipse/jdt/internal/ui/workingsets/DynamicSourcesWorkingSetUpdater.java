@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Till Brychcy and others.
+ * Copyright (c) 2018 Till Brychcy and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -102,9 +102,13 @@ public class DynamicSourcesWorkingSetUpdater implements IWorkingSetUpdater {
 	
 	private AtomicBoolean isDisposed= new AtomicBoolean();
 
-	public static final String TEST_NAME= "test"; //$NON-NLS-1$
+	public static final String TEST_OLD_NAME= "test"; //$NON-NLS-1$
 
-	public static final String MAIN_NAME= "main"; //$NON-NLS-1$
+	public static final String MAIN_OLD_NAME= "main"; //$NON-NLS-1$
+
+	public static final String TEST_NAME= "Java Test Sources"; //$NON-NLS-1$
+
+	public static final String MAIN_NAME= "Java Main Sources"; //$NON-NLS-1$
 
 	@Override
 	public void add(IWorkingSet workingSet) {

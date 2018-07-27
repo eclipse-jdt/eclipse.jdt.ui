@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,11 +7,12 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - copied to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -25,12 +26,10 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.core.manipulation.CoreASTProvider;
 
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class RefactoringASTParser {
 
@@ -116,7 +115,7 @@ public class RefactoringASTParser {
 	 * @return the parsed CompilationUnit
 	 */
 	public static CompilationUnit parseWithASTProvider(ITypeRoot typeRoot, boolean resolveBindings, IProgressMonitor pm) {
-		CompilationUnit cuNode= SharedASTProvider.getAST(typeRoot, SharedASTProvider.WAIT_ACTIVE_ONLY, pm);
+		CompilationUnit cuNode= CoreASTProvider.getInstance().getAST(typeRoot, CoreASTProvider.WAIT_ACTIVE_ONLY, pm);
 		if (cuNode != null) {
 			return cuNode;
 		} else {
@@ -147,9 +146,9 @@ public class RefactoringASTParser {
 	public static Map<String, String> getCompilerOptions(IJavaElement element) {
 		IJavaProject project= element.getJavaProject();
 		Map<String, String> options= project.getOptions(true);
-		for (Iterator<String> iter= options.keySet().iterator(); iter.hasNext();) {
-			String key= iter.next();
-			String value= options.get(key);
+		for (Entry<String, String> entry : options.entrySet()) {
+			String key = entry.getKey();
+			String value= entry.getValue();
 			if (JavaCore.ERROR.equals(value) || JavaCore.WARNING.equals(value) || JavaCore.INFO.equals(value)) {
 				// System.out.println("Ignoring - " + key);
 				options.put(key, JavaCore.IGNORE);

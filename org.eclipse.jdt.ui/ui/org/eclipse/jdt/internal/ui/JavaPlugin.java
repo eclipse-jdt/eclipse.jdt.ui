@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -424,28 +423,33 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 			};
 			PlatformUI.getWorkbench().getThemeManager().addPropertyChangeListener(fThemeListener);
 
-			createOrUpdateWorkingSet(DynamicSourcesWorkingSetUpdater.MAIN_NAME, WorkingSetMessages.JavaMainSourcesWorkingSet_name, IWorkingSetIDs.DYNAMIC_SOURCES);
-			createOrUpdateWorkingSet(DynamicSourcesWorkingSetUpdater.TEST_NAME, WorkingSetMessages.JavaTestSourcesWorkingSet_name, IWorkingSetIDs.DYNAMIC_SOURCES);
+			createOrUpdateWorkingSet(DynamicSourcesWorkingSetUpdater.MAIN_NAME, DynamicSourcesWorkingSetUpdater.MAIN_OLD_NAME, WorkingSetMessages.JavaMainSourcesWorkingSet_name, IWorkingSetIDs.DYNAMIC_SOURCES);
+			createOrUpdateWorkingSet(DynamicSourcesWorkingSetUpdater.TEST_NAME, DynamicSourcesWorkingSetUpdater.TEST_OLD_NAME, WorkingSetMessages.JavaTestSourcesWorkingSet_name, IWorkingSetIDs.DYNAMIC_SOURCES);
 
 			new InitializeAfterLoadJob().schedule(); // last call in start, see bug 191193
 		}
 
 	}
 
-	private void createOrUpdateWorkingSet(String name, String label, final String id) {
+	private void createOrUpdateWorkingSet(String name, String oldname, String label, final String id) {
 		IWorkingSetManager workingSetManager= PlatformUI.getWorkbench().getWorkingSetManager();
-		IWorkingSet workingSet= Arrays.stream(workingSetManager.getAllWorkingSets()) // 
-				.filter(w -> id.equals(w.getId()) && name.equals(w.getName())) //
-				.findAny() //
-				.orElse(null);
+		IWorkingSet workingSet= workingSetManager.getWorkingSet(name);
 		if (workingSet == null) {
 			workingSet= workingSetManager.createWorkingSet(name, new IAdaptable[0]);
 			workingSet.setLabel(label);
 			workingSet.setId(id);
 			workingSetManager.addWorkingSet(workingSet);
 		} else {
-			if (!label.equals(workingSet.getLabel()))
-				workingSet.setLabel(label);
+			if(id.equals(workingSet.getId())) {
+				if (!label.equals(workingSet.getLabel()))
+					workingSet.setLabel(label);
+			} else {
+				logErrorMessage("found existing workingset with name=\"" + name + "\" but id=\"" + workingSet.getId() + "\""); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+			}			
+		}
+		IWorkingSet oldWorkingSet= workingSetManager.getWorkingSet(oldname);
+		if (oldWorkingSet != null && id.equals(oldWorkingSet.getId())) {
+			workingSetManager.removeWorkingSet(oldWorkingSet);
 		}
 	}
 

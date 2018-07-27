@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,13 +7,14 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - moved to jdt.core.manipulation and modified
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.core.runtime.IStatus;
 
 
-public abstract class AbstractFix implements IProposableFix, ILinkedFix {
+public abstract class AbstractFix implements IProposableFix, ILinkedFixCore {
 
 	private final String fDisplayString;
 
@@ -32,7 +33,7 @@ public abstract class AbstractFix implements IProposableFix, ILinkedFix {
 	}
 
 	@Override
-	public LinkedProposalModel getLinkedPositions() {
+	public LinkedProposalModelCore getLinkedPositionsCore() {
 		return null;
 	}
 

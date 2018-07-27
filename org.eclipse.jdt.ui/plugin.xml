@@ -251,6 +251,11 @@
             class="org.eclipse.jdt.internal.ui.text.correction.DefaultClasspathFixProcessor"
             id="org.eclipse.jdt.ui.text.correction.DefaultClasspathFixProcessor">
       </classpathFixProcessor>
+      <classpathFixProcessor
+            class="org.eclipse.jdt.internal.ui.text.correction.DefaultModulepathFixProcessor"
+            id="org.eclipse.jdt.ui.text.correction.DefaultModulepathFixProcessor"
+            name="%defaultQuickAssistProcessor">
+      </classpathFixProcessor>
    </extension>
 
 	<!-- content assist processors - do not change their order -->  
@@ -6807,6 +6812,12 @@
                refid="org.eclipse.e4.ui.css.theme.e4_dark">
          </themeid>
       </stylesheet>
+      <stylesheet
+            uri="css/e4-light_jdt_syntaxhighlighting.css">
+         <themeid
+               refid="org.eclipse.e4.ui.css.theme.e4_default">
+         </themeid>
+      </stylesheet>
    </extension>
 
    <extension
@@ -6928,9 +6939,14 @@
             runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_code">
       </cleanUp>
       <cleanUp
+            class="org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp"
+            id="org.eclipse.jdt.ui.cleanup.unnecessary_semicolons"
+            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_modifiers">
+      </cleanUp>
+      <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.StringCleanUp"
             id="org.eclipse.jdt.ui.cleanup.strings"
-            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_modifiers">
+            runAfter="org.eclipse.jdt.ui.cleanup.unnecessary_semicolons">
       </cleanUp>
       <cleanUp
             class="org.eclipse.jdt.internal.ui.fix.UnimplementedCodeCleanUp"

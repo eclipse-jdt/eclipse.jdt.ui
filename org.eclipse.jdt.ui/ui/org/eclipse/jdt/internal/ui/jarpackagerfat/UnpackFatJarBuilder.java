@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackagerfat;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
@@ -21,11 +22,10 @@ import java.util.zip.ZipFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.jarpackager.IManifestProvider;
-
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  * A jar builder wich unpacks all referenced libraries into the generated jar.
@@ -62,17 +62,32 @@ public class UnpackFatJarBuilder extends FatJarBuilder {
 	}
 
 	@Override
-	public void writeArchive(ZipFile jarFile, IProgressMonitor progressMonitor) {
-		Enumeration<? extends ZipEntry> jarEntriesEnum= jarFile.entries();
-		while (jarEntriesEnum.hasMoreElements()) {
-			ZipEntry jarEntry= jarEntriesEnum.nextElement();
-			if (!jarEntry.isDirectory()) {
-				String entryName= jarEntry.getName();
-				addFile(entryName, jarEntry, jarFile);
+	public void writeArchive(ZipFile zipFile, IProgressMonitor progressMonitor) {
+		Enumeration<? extends ZipEntry> jarEntriesEnum= zipFile.entries();
+		File zipFile1 = new File(zipFile.getName());
+		try {
+			String zipFileCanonical = zipFile1.getCanonicalPath();
+		
+			while (jarEntriesEnum.hasMoreElements()) {
+				ZipEntry zipEntry= jarEntriesEnum.nextElement();
+				if (!zipEntry.isDirectory()) {
+					String entryName= zipEntry.getName();
+					File zipEntryFile = new File(zipFile1, entryName);
+					String zipEntryCanonical = zipEntryFile.getCanonicalPath();
+					if (zipEntryCanonical.startsWith(zipFileCanonical + File.separator)) {
+						addFile(entryName, zipEntry, zipFile);
+					}
+					else {
+						addWarning("Invalid path" + entryName, null); //$NON-NLS-1$
+					}
+				}
+				progressMonitor.worked(1);
+				if (progressMonitor.isCanceled())
+					throw new OperationCanceledException();
 			}
-			progressMonitor.worked(1);
-			if (progressMonitor.isCanceled())
-				throw new OperationCanceledException();
+		} catch (IOException e) {
+			addWarning("ZipFile error" + zipFile.getName(), null); //$NON-NLS-1$
+			e.printStackTrace();
 		}
 	}
 

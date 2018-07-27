@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -167,8 +167,11 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		final AddFolderToBuildpathAction addFolder= new AddFolderToBuildpathAction(site);
 		fActions.add(addFolder);
 
-		final AddSelectedLibraryToBuildpathAction addSelectedLibrary= new AddSelectedLibraryToBuildpathAction(site);
+		final AddSelectedLibraryToBuildpathAction addSelectedLibrary= new AddSelectedLibraryToBuildpathAction(site, false);
 		fActions.add(addSelectedLibrary);
+
+		final AddSelectedLibraryToBuildpathAction addSelectedLibraryForTestsOnly= new AddSelectedLibraryToBuildpathAction(site, true);
+		fActions.add(addSelectedLibraryForTestsOnly);
 
 		final RemoveFromBuildpathAction remove= new RemoveFromBuildpathAction(site);
 		fActions.add(remove);
@@ -242,9 +245,9 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 
             if (i == 2)
                 source.add(new Separator(GROUP_BUILDPATH));
-            else if (i == 8)
+            else if (i == 9)
                 source.add(new Separator(GROUP_FILTER));
-            else if (i == 10)
+            else if (i == 11)
                 source.add(new Separator(GROUP_CUSTOMIZE));
             added+= addAction(source, action);
             i++;

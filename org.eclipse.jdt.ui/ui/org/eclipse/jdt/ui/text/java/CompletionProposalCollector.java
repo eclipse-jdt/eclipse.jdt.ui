@@ -836,7 +836,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		javaProposal.setProposalInfo(new MethodProposalInfo(fJavaProject, proposal));
 		javaProposal.setRelevance(computeRelevance(proposal));
 
-		fSuggestedMethodNames.add(new String(name));
+		fSuggestedMethodNames.add(name);
 		return javaProposal;
 	}
 

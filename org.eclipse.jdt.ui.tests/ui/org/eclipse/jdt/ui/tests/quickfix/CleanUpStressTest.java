@@ -5300,6 +5300,7 @@ public class CleanUpStressTest extends CleanUpTestCase {
 		enable(CleanUpConstants.SORT_MEMBERS_ALL);
 		
 		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
+		enable(CleanUpConstants.REMOVE_REDUNDANT_SEMICOLONS);
 
 		ICompilationUnit[] units= cus.toArray(new ICompilationUnit[cus.size()]);
 		performRefactoring(units);

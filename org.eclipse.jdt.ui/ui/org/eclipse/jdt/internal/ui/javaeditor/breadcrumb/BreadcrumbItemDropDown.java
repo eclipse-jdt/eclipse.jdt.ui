@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Fabio Zadrozny - Bug 465666
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor.breadcrumb;
 
@@ -104,19 +105,19 @@ class BreadcrumbItemDropDown {
 		@Override
 		protected void drawCompositeImage(int width, int height) {
 			Display display= fParentComposite.getDisplay();
-			
+
 			ImageDataProvider imageProvider= zoom -> {
 				Image image= new Image(display, ARROW_SIZE, ARROW_SIZE * 2);
-				
+
 				GC gc= new GC(image, fLTR ? SWT.LEFT_TO_RIGHT : SWT.RIGHT_TO_LEFT);
 				gc.setAntialias(SWT.ON);
-				
+
 				Color triangleColor= createColor(SWT.COLOR_LIST_FOREGROUND, SWT.COLOR_LIST_BACKGROUND, 20, display);
 				gc.setBackground(triangleColor);
 				gc.fillPolygon(new int[] { 0, 0, ARROW_SIZE, ARROW_SIZE, 0, ARROW_SIZE * 2 });
 				gc.dispose();
 				triangleColor.dispose();
-				
+
 				ImageData imageData= image.getImageData(zoom);
 				image.dispose();
 				int zoomedArrowSize= ARROW_SIZE * zoom / 100;
@@ -152,7 +153,7 @@ class BreadcrumbItemDropDown {
 
 	private static final int DROP_DOWN_MIN_WIDTH= 250;
 	private static final int DROP_DOWN_MAX_WIDTH= 500;
-	
+
 	private static final int DROP_DOWN_DEFAULT_MIN_HEIGHT= 200;
 	private static final int DROP_DOWN_DEFAULT_MAX_HEIGHT= 300;
 
@@ -211,6 +212,7 @@ class BreadcrumbItemDropDown {
 				}
 			});
 		}
+		fToolBar.setData("org.eclipse.e4.ui.css.id", "BreadcrumbItemDropDownToolBar"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
@@ -306,7 +308,7 @@ class BreadcrumbItemDropDown {
 		fDropDownViewer.setInput(input);
 
 		setShellBounds(fShell);
-		
+
 		fShell.addControlListener(new ControlAdapter() {
 			/*
 			 * @see org.eclipse.swt.events.ControlAdapter#controlResized(org.eclipse.swt.events.ControlEvent)
@@ -315,7 +317,7 @@ class BreadcrumbItemDropDown {
 			public void controlResized(ControlEvent e) {
 				if (isResizingProgrammatically)
 					return;
-				
+
 				Point size= fShell.getSize();
 				getDialogSettings().put(DIALOG_HEIGHT, size.y);
 			}
@@ -653,7 +655,7 @@ class BreadcrumbItemDropDown {
 			settings= javaSettings.addNewSection(DIALOG_SETTINGS);
 		return settings;
 	}
-	
+
 	private int getMaxHeight() {
 		try {
 			return getDialogSettings().getInt(DIALOG_HEIGHT);
@@ -661,7 +663,7 @@ class BreadcrumbItemDropDown {
 			return DROP_DOWN_DEFAULT_MAX_HEIGHT;
 		}
 	}
-	
+
 	/**
 	 * Calculates a useful size for the given shell.
 	 *
@@ -748,7 +750,7 @@ class BreadcrumbItemDropDown {
 		int currentHeight= size.y;
 
 		int maxHeight= getMaxHeight();
-		
+
 		if (currentHeight >= maxHeight && currentWidth >= DROP_DOWN_MAX_WIDTH)
 			return;
 

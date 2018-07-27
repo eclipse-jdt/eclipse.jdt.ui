@@ -381,17 +381,13 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		else
 			fStore.setTitle(""); //$NON-NLS-1$
 
-		//don't store the buttons if they are not enabled
-		//this will change when there is a single page aimed at the standard doclet
-		if (true) {
-			Object[] buttons= fButtonsList.toArray();
-			for (int i= 0; i < buttons.length; i++) {
-				FlaggedButton button= (FlaggedButton) buttons[i];
-				if (button.getButton().getEnabled())
-					fStore.setBoolean(button.getFlag(), !(button.getButton().getSelection() ^ button.show()));
-				else
-					fStore.setBoolean(button.getFlag(), false == button.show());
-			}
+		Object[] buttons= fButtonsList.toArray();
+		for (int i= 0; i < buttons.length; i++) {
+			FlaggedButton button= (FlaggedButton) buttons[i];
+			if (button.getButton().getEnabled())
+				fStore.setBoolean(button.getFlag(), !(button.getButton().getSelection() ^ button.show()));
+			else
+				fStore.setBoolean(button.getFlag(), false == button.show());
 		}
 
 		if (fStyleSheetText.getEnabled())

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2012 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - modified to use internal class to perform logic
  *******************************************************************************/
 package org.eclipse.jdt.ui.cleanup;
 
 import java.util.Map;
-
-import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -23,15 +22,9 @@ import org.eclipse.jdt.core.JavaCore;
  * @since 3.5
  */
 public final class CleanUpRequirements {
-
-	private final boolean fRequiresAST;
-
-	private final Map<String, String> fCompilerOptions;
-
-	private final boolean fRequiresFreshAST;
-
-	private final boolean fRequiresChangedRegions;
-
+	
+	// Use internal class which contains logic
+	private final org.eclipse.jdt.internal.corext.fix.CleanUpRequirements fRequirements;
 
 	/**
 	 * Create a new instance
@@ -42,16 +35,7 @@ public final class CleanUpRequirements {
 	 * @param compilerOptions map of compiler options or <code>null</code> if no requirements
 	 */
 	public CleanUpRequirements(boolean requiresAST, boolean requiresFreshAST, boolean requiresChangedRegions, Map<String, String> compilerOptions) {
-		Assert.isLegal(!requiresFreshAST || requiresAST, "Must not request fresh AST if no AST is required"); //$NON-NLS-1$
-		Assert.isLegal(compilerOptions == null || requiresAST, "Must not provide options if no AST is required"); //$NON-NLS-1$
-		fRequiresAST= requiresAST;
-		fRequiresFreshAST= requiresFreshAST;
-		fRequiresChangedRegions= requiresChangedRegions;
-
-		fCompilerOptions= compilerOptions;
-		// Make sure that compile warnings are not suppressed since some clean ups work on reported warnings
-		if (fCompilerOptions != null)
-			fCompilerOptions.put(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS, JavaCore.DISABLED);
+		this.fRequirements = new org.eclipse.jdt.internal.corext.fix.CleanUpRequirements(requiresAST, requiresFreshAST, requiresChangedRegions, compilerOptions);
 	}
 
 	/**
@@ -64,7 +48,7 @@ public final class CleanUpRequirements {
 	 * @return <code>true</code> if the {@linkplain CleanUpContext context} must provide an AST
 	 */
 	public boolean requiresAST() {
-		return fRequiresAST;
+		return fRequirements.requiresAST();
 	}
 
 	/**
@@ -74,7 +58,7 @@ public final class CleanUpRequirements {
 	 * @return <code>true</code> if the caller needs an up to date AST
 	 */
 	public boolean requiresFreshAST() {
-		return fRequiresFreshAST;
+		return fRequirements.requiresFreshAST();
 	}
 
 	/**
@@ -84,7 +68,7 @@ public final class CleanUpRequirements {
 	 * @see JavaCore
 	 */
 	public Map<String, String> getCompilerOptions() {
-		return fCompilerOptions;
+		return fRequirements.getCompilerOptions();
 	}
 
 	/**
@@ -103,7 +87,7 @@ public final class CleanUpRequirements {
 	 *         regions
 	 */
 	public boolean requiresChangedRegions() {
-		return fRequiresChangedRegions;
+		return fRequirements.requiresChangedRegions();
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,10 +7,9 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - modified to use internal class to supply logic
  *******************************************************************************/
 package org.eclipse.jdt.ui.cleanup;
-
-import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -22,10 +21,9 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
  * @since 3.5
  */
 public class CleanUpContext {
-
-	private final ICompilationUnit fUnit;
-
-	private final CompilationUnit fAst;
+	
+	// Use internal class to supply logic
+	private final org.eclipse.jdt.internal.corext.fix.CleanUpContext fContext;
 
 	/**
 	 * Creates a new clean up context.
@@ -37,9 +35,7 @@ public class CleanUpContext {
 	 *            <code>true</code>.
 	 */
 	public CleanUpContext(ICompilationUnit unit, CompilationUnit ast) {
-		Assert.isLegal(unit != null);
-		fUnit= unit;
-		fAst= ast;
+		fContext= new org.eclipse.jdt.internal.corext.fix.CleanUpContext(unit, ast);
 	}
 
 	/**
@@ -48,7 +44,7 @@ public class CleanUpContext {
 	 * @return the compilation unit to clean up
 	 */
 	public ICompilationUnit getCompilationUnit() {
-		return fUnit;
+		return fContext.getCompilationUnit();
 	}
 
 	/**
@@ -64,6 +60,6 @@ public class CleanUpContext {
 	 * @return an AST or <code>null</code> if none required
 	 */
 	public CompilationUnit getAST() {
-		return fAst;
+		return fContext.getAST();
 	}
 }

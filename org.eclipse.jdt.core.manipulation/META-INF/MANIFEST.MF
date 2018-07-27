@@ -24,12 +24,16 @@ Export-Package: org.eclipse.jdt.core.manipulation,
  org.eclipse.jdt.internal.core.manipulation.search;x-friends:="org.eclipse.jdt.ui,org.eclipse.jdt.text.tests",
  org.eclipse.jdt.internal.core.manipulation.util;x-friends:="org.eclipse.jdt.junit,org.eclipse.jdt.text.tests,org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.core.refactoring.descriptors;x-friends:="org.eclipse.jdt.ui",
+ org.eclipse.jdt.internal.corext.codemanipulation;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.corext.dom;manipulation=split;mandatory:=manipulation;x-friends:="org.eclipse.jdt.ui,org.eclipse.jdt.junit",
  org.eclipse.jdt.internal.corext.fix;x-friends:="org.eclipse.jdt.ui",
+ org.eclipse.jdt.internal.corext.refactoring;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.corext.refactoring.changes;manipulation=split;mandatory:=manipulation;x-friends:="org.eclipse.jdt.ui.examples.javafamily,org.eclipse.jdt.ui",
+ org.eclipse.jdt.internal.corext.refactoring.structure;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types;manipulation=split;mandatory:=manipulation;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.corext.refactoring.util;manipulation=split;mandatory:=manipulation;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.corext.template.java;manipulation=split;mandatory:=manipulation;x-friends:="org.eclipse.jdt.ui",
- org.eclipse.jdt.internal.corext.util;manipulation=split;mandatory:=manipulation;x-friends:="org.eclipse.jdt.ui,org.eclipse.jdt.junit"
+ org.eclipse.jdt.internal.corext.util;manipulation=split;mandatory:=manipulation;x-friends:="org.eclipse.jdt.ui,org.eclipse.jdt.junit",
+ org.eclipse.jdt.internal.ui.text.correction;x-friends:="org.eclipse.jdt.ui"
 Import-Package: com.ibm.icu.text
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
+import org.eclipse.jdt.core.IClasspathAttribute;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -46,28 +48,31 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ModuleEncapsulationDetail;
 
 //SelectedElements iff enabled: IFile
 public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction {
 
 	private final IRunnableContext fContext;
+	private boolean fForTestOnly;
 
-	public AddSelectedLibraryToBuildpathAction(IWorkbenchSite site) {
-		this(site, null, PlatformUI.getWorkbench().getProgressService());
+	public AddSelectedLibraryToBuildpathAction(IWorkbenchSite site, boolean forTestOnly) {
+		this(site, null, PlatformUI.getWorkbench().getProgressService(), forTestOnly);
 	}
 
 	public AddSelectedLibraryToBuildpathAction(IRunnableContext context, ISetSelectionTarget selectionTarget) {
-		this(null, selectionTarget, context);
+		this(null, selectionTarget, context, false);
     }
 
-	private AddSelectedLibraryToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context) {
-		super(site, selectionTarget, BuildpathModifierAction.ADD_SEL_LIB_TO_BP);
+	private AddSelectedLibraryToBuildpathAction(IWorkbenchSite site, ISetSelectionTarget selectionTarget, IRunnableContext context, boolean forTestOnly) {
+		super(site, selectionTarget, forTestOnly ? BuildpathModifierAction.ADD_SEL_LIB_TO_TEST_BP : BuildpathModifierAction.ADD_SEL_LIB_TO_BP);
 
 		fContext= context;
+		fForTestOnly= forTestOnly;
 
-		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_label);
-		setImageDescriptor(JavaPluginImages.DESC_OBJS_EXTJAR);
-		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_tooltip);
+		setText(forTestOnly ? NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToTestCP_label: NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_label);
+		setImageDescriptor(forTestOnly ? JavaPluginImages.DESC_OBJS_EXTJAR_TEST : JavaPluginImages.DESC_OBJS_EXTJAR);
+		setToolTipText(forTestOnly ? NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToTestCP_tooltip : NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelLibToCP_tooltip);
     }
 
 	@Override
@@ -124,7 +129,15 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_AddToBuildpath, 4);
 			for (int i= 0; i < resources.length; i++) {
 				IResource res= resources[i];
-				addedEntries.add(new CPListElement(project, IClasspathEntry.CPE_LIBRARY, res.getFullPath(), res));
+				CPListElement cpListElement= new CPListElement(project, IClasspathEntry.CPE_LIBRARY, res.getFullPath(), res);
+				if(fForTestOnly) {
+					cpListElement.setAttribute(IClasspathAttribute.TEST, "true"); //$NON-NLS-1$
+				} else {
+					if(project.getModuleDescription() != null) {
+						cpListElement.setAttribute(IClasspathAttribute.MODULE, new ModuleEncapsulationDetail[0]);
+					}
+				}
+				addedEntries.add(cpListElement);
 			}
 			monitor.worked(1);
 
@@ -165,9 +178,13 @@ public class AddSelectedLibraryToBuildpathAction extends BuildpathModifierAction
 					IJavaProject project= JavaCore.create(file.getProject());
 					if (project == null)
 						return false;
-
 					if (!ClasspathModifier.isArchive(file, project))
 						return false;
+					if (fForTestOnly) {
+						if (!Arrays.stream(project.getRawClasspath()).anyMatch(e -> e.getEntryKind() == IClasspathEntry.CPE_SOURCE && e.isTest())) {
+							return false;
+						}
+					}
 				} else {
 					return false;
 				}

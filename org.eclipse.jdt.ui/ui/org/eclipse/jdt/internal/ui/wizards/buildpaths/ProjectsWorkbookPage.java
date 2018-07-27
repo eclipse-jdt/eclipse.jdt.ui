@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -427,12 +427,15 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				// if nothing selected, do nothing
 				if(selectedElements.size()==0)
 					return;
+				boolean isClassRootExpanded= getRootExpansionState(fProjectsList, true);
+				boolean isModuleRootExpanded= getRootExpansionState(fProjectsList, false);
 				fProjectsList.removeAllElements();
 				for (int i= 0; i < selectedElements.size(); i++) {
 					if( ((CPListElement)selectedElements.get(i)).isClassPathRootNode()) {
 						for (CPListElement cpListElement : elementsToAdd) {
 							cpListElement.setAttribute(IClasspathAttribute.MODULE, null);
 						}
+						isClassRootExpanded= true;
 					}
 					if( ((CPListElement)selectedElements.get(i)).isModulePathRootNode()) {
 						for (CPListElement cpListElement : elementsToAdd) {
@@ -442,12 +445,15 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 								
 							}
 						}
+						isModuleRootExpanded= true;
 					}
 					((RootCPListElement)selectedElements.get(i)).addCPListElement(elementsToAdd);					
 				}
 				fProjectsList.setElements(elements);
 				fProjectsList.refresh();
-				fProjectsList.getTreeViewer().expandToLevel(2);	
+				fProjectsList.getTreeViewer().expandToLevel(2);
+				setRootExpansionState(fProjectsList, isClassRootExpanded, true);
+				setRootExpansionState(fProjectsList, isModuleRootExpanded, false);
 			}
 			
 			if (index == IDX_ADDPROJECT && !hasRootNodes()) {

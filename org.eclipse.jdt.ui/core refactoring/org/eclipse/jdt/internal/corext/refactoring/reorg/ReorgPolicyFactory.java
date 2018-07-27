@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2547,8 +2548,14 @@ public final class ReorgPolicyFactory {
 			Matcher m= p.matcher(fileNameNoExtension);
 			if (m.find()) {
 				// String ends with a number: increment it by 1
-				int newNumber= Integer.parseInt(m.group()) + 1;
-				String numberStr= m.replaceFirst(Integer.toString(newNumber));
+				String numberStr;
+				BigDecimal newNumber = null;
+				try {
+					newNumber = new BigDecimal(m.group()).add(new BigDecimal(1));
+					numberStr = m.replaceFirst(newNumber.toPlainString());
+				} catch (NumberFormatException e) {
+					numberStr = m.replaceFirst("2"); //$NON-NLS-1$
+				}
 				return numberStr + fileExtension;
 			} else {
 				return fileNameNoExtension + "2" + fileExtension; //$NON-NLS-1$
@@ -4385,7 +4392,7 @@ public final class ReorgPolicyFactory {
 
 				}
 			}
-			final String value= new String(buffer.toString().trim());
+			final String value= buffer.toString().trim();
 			if (!"".equals(value)) //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_LOG, value);
 		}
@@ -4425,7 +4432,7 @@ public final class ReorgPolicyFactory {
 					buffer.append(DELIMITER_RECORD);
 				}
 			}
-			final String value= new String(buffer.toString().trim());
+			final String value= buffer.toString().trim();
 			if (!"".equals(value)) //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_LOG, value);
 		}

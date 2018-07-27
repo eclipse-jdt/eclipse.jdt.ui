@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2008 IBM Corporation and others.
+ * Copyright (c) 2007, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,12 +7,11 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - moved to jdt.core.manipulation and modified
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 
 /**
  * A <code>ICleanUpFix</code> which can be used in a
@@ -20,9 +19,9 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
  * will be shown to the user and if chosen the
  * fix is executed.
  *
- * @since 3.4
+ * @since 1.10
  */
-public interface IProposableFix extends ICleanUpFix {
+public interface IProposableFix extends ICleanUpFixCore {
 
 	/**
 	 * Returns the string to be displayed in the list of completion proposals.
