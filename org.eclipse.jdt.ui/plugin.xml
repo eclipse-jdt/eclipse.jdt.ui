@@ -15,7 +15,8 @@
          Francis Upton IV, Oakland Software <francisu@ieee.org> - Add support for Go Into with the ProjectExplorer - https://bugs.eclipse.org/bugs/show_bug.cgi?id=262091
          Troy Bishop <tjbishop@ca.ibm.com> - Add support for importing/exporting Java Code Style preferences - https://bugs.eclipse.org/bugs/show_bug.cgi?id=304395
          Eugene Lucash <e.lucash@gmail.com> - [quick assist] Add key binding for Extract method Quick Assist - https://bugs.eclipse.org/424166
-         Frits Jalvingh <jal@etc.to> - Contribution for Bug 459831 - [launching] Support attaching external annotations to a JRE container 
+         Frits Jalvingh <jal@etc.to> - Contribution for Bug 459831 - [launching] Support attaching external annotations to a JRE container
+         Angelo Zerr <angelo.zerr@gmail.com> - [CodeMining] Provide Java References/Implementation CodeMinings - Bug 529127
  -->
 <plugin>
 
@@ -1740,8 +1741,15 @@
             id="org.eclipse.jdt.ui.preferences.MembersOrderPreferencePage">
          <keywordReference id="org.eclipse.jdt.ui.sortorder"/>
       </page>
+      <page
+            name="%editorCodeMiningPageName"
+            category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.JavaEditorCodeMiningPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.JavaEditorCodeMiningPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.codemining"/>
+      </page>
    </extension>
-   
+
    <extension
    		point="org.eclipse.ui.keywords">
       <keyword
@@ -1831,14 +1839,16 @@
      <keyword
             label="%preferenceKeywords.classpathcontainer"
             id="org.eclipse.jdt.ui.classpathcontainer"/>
-            
      <keyword
             label="%preferenceKeywords.wizards.java"
             id="org.eclipse.jdt.ui.wizards.java"/>
      <keyword
             label="%preferenceKeywords.jarpackager"
             id="org.eclipse.jdt.ui.jarpackager"/>
-   </extension>  
+     <keyword
+            label="%preferenceKeywords.codemining"
+            id="org.eclipse.jdt.ui.codemining"/>
+   </extension>
 <!-- =========================================================================== -->
 <!-- Work in Progress                                                            -->
 <!-- =========================================================================== -->
@@ -7141,4 +7151,42 @@
       	</action>
       </objectContribution>
   </extension>
+
+  <extension
+        point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+          id="org.eclipse.jdt.ui.preferences.JavaPreferencesPropertyTester"
+          type="java.lang.Object"
+          namespace="org.eclipse.jdt.ui"
+          properties="hasPreference"
+          class="org.eclipse.jdt.internal.ui.preferences.JavaPreferencesPropertyTester">
+      </propertyTester>
+  </extension>
+
+  <extension
+        point="org.eclipse.ui.workbench.texteditor.codeMiningProviders">
+      <codeMiningProvider
+          class="org.eclipse.jdt.internal.ui.javaeditor.codemining.JavaElementCodeMiningProvider"
+          id="org.eclipse.jdt.ui.codemining.javaelement"
+          label="%JavaElementCodeMiningProvider.label">
+        <enabledWhen>
+          <and>
+            <with variable="editorInput">
+               <or>
+	              <adapt type="org.eclipse.core.resources.IFile">
+                     <test property="org.eclipse.core.resources.contentTypeId" value="org.eclipse.jdt.core.javaSource" />                     
+	              </adapt>
+	              <adapt type="org.eclipse.jdt.core.IClassFile">
+					<instanceof value="org.eclipse.jdt.core.IClassFile" />
+	              </adapt>
+	           </or>
+           	</with>
+           	<or>
+           	   <test property="org.eclipse.jdt.ui.hasPreference" value="java.codemining.references" forcePluginActivation="true"/>
+           	   <test property="org.eclipse.jdt.ui.hasPreference" value="java.codemining.implementations" forcePluginActivation="true"/>
+           	</or>
+       	  </and>
+        </enabledWhen>
+      </codeMiningProvider>
+   </extension>
 </plugin>

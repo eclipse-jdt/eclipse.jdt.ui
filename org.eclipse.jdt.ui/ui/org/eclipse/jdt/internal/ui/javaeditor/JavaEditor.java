@@ -2948,6 +2948,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 
 			if (affectsJavaCodeMining(event)) {
+				// It's a code mining preference, recompute the list of code mining providers.
+				installCodeMiningProviders();
 				if (isJavaCodeMiningEnabled()) {
 					installJavaCodeMining();
 				} else {
@@ -4284,6 +4286,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 	}
 
+	@Override
+	protected void installCodeMiningProviders() {
+		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CODEMINING_ENABLED)) {
+			super.installCodeMiningProviders();
+		} else {
+			((JavaSourceViewer) getSourceViewer()).resetCodeMinings();
+		}
+	}
+
 	/**
 	 * Install Java code mining.
 	 *
@@ -4314,6 +4325,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.14
 	 */
 	boolean isJavaCodeMiningEnabled() {
+		if (!JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CODEMINING_ENABLED)) {
+			return false;
+		}
 		// check if there is a registered Java code mining.
 		ISourceViewer viewer= getViewer();
 		if (viewer instanceof ISourceViewerExtension5) {
@@ -4330,12 +4344,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.14
 	 */
 	protected boolean affectsJavaCodeMining(PropertyChangeEvent event) {
-		boolean isJavaCodeMiningPreference= isJavaCodeMiningPreference(event.getProperty());
-		if (isJavaCodeMiningPreference) {
-			// It's a code mining preference, recompute the list of code mining providers.
-			installCodeMiningProviders();
-		}
-		return isJavaCodeMiningPreference;
+		return isJavaCodeMiningPreference(event.getProperty());
 	}
 
 	/**
@@ -4351,7 +4360,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.14
 	 */
 	private boolean isJavaCodeMiningPreference(String property) {
-		return property.startsWith(PreferenceConstants.EDITOR_JAVA_CODEMINING_PREFIX);
+		return PreferenceConstants.EDITOR_CODEMINING_ENABLED.equals(property) || property.startsWith(PreferenceConstants.EDITOR_JAVA_CODEMINING_PREFIX);
 	}
 
 }

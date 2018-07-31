@@ -266,7 +266,7 @@ public class FilteredPreferenceTree {
 	 * The scrolled area of the tree.
 	 */
 	protected ReflowControlScrolledPageContent fScrolledPageContent;
-	
+
 	/**
 	 * Job to update the UI in a separate thread.
 	 */
@@ -282,16 +282,31 @@ public class FilteredPreferenceTree {
 	 */
 	private Label fNoMatchFoundLabel;
 
+	/**
+	 * The description which can be <code>null</code>
+	 */
+	private Label fDescription;
+
+	/**
+	 * The filter text control.
+	 */
+	private FilterTextControl fFilterTextControl;
+
 	private ToolItem fExpandAllItem;
 	private ToolItem fCollapseAllItem;
 
+
 	public FilteredPreferenceTree(Composite parentComposite, String label, String hint) {
+		this(parentComposite, label, hint, true);
+	}
+
+	public FilteredPreferenceTree(Composite parentComposite, String label, String hint, boolean showVerticalBar) {
 		fParentComposite= parentComposite;
 		fRoot= new PreferenceTreeNode<>(null, null, false);
 
 		createDescription(label);
 		createFilterBox(hint);
-		createScrolledArea();
+		createScrolledArea(showVerticalBar);
 		createNoMatchFoundLabel();
 
 		fRefreshJob= doCreateRefreshJob();
@@ -308,10 +323,10 @@ public class FilteredPreferenceTree {
 		if (label == null)
 			return;
 
-		Label description= new Label(fParentComposite, SWT.LEFT | SWT.WRAP);
-		description.setFont(fParentComposite.getFont());
-		description.setText(label);
-		description.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+		fDescription= new Label(fParentComposite, SWT.LEFT | SWT.WRAP);
+		fDescription.setFont(fParentComposite.getFont());
+		fDescription.setText(label);
+		fDescription.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 	}
 
 	private void createFilterBox(String hint) {
@@ -325,9 +340,9 @@ public class FilteredPreferenceTree {
 		composite.setFont(fParentComposite.getFont());
 
 		//TODO: Directly use the hint flags once Bug 293230 is fixed
-		FilterTextControl filterTextControl= new FilterTextControl(composite);
+		fFilterTextControl= new FilterTextControl(composite);
 
-		final Text filterBox= filterTextControl.getFilterControl();
+		Text filterBox= fFilterTextControl.getFilterControl();
 		filterBox.setMessage(hint);
 
 		filterBox.addModifyListener(new ModifyListener() {
@@ -376,13 +391,13 @@ public class FilteredPreferenceTree {
 		return item;
 	}
 
-	private void createScrolledArea() {
+	private void createScrolledArea(boolean showVerticalBar) {
 		fScrolledPageContent= new ReflowControlScrolledPageContent(fParentComposite);
 		fScrolledPageContent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, ((GridLayout) fParentComposite.getLayout()).numColumns, 0));
 		fScrolledPageContent.addControlListener(new ControlAdapter() {
 			@Override
 			public void controlResized(ControlEvent e) {
-				fScrolledPageContent.getVerticalBar().setVisible(true);
+				fScrolledPageContent.getVerticalBar().setVisible(showVerticalBar);
 			}
 		});
 	}
@@ -528,5 +543,23 @@ public class FilteredPreferenceTree {
 
 		fScrolledPageContent.setReflow(true);
 		Display.getCurrent().asyncExec(() -> fScrolledPageContent.setRedraw(true));
+	}
+
+	/**
+	 * Enables the filtered preference tree if the argument is <code>true</code>, and disables it
+	 * otherwise.
+	 *
+	 * @param enabled the new enabled state
+	 *
+	 * @since 3.16
+	 */
+	public void setEnabled(boolean enabled) {
+		if (fDescription != null) {
+			fDescription.setEnabled(enabled);
+		}
+		fFilterTextControl.setEnabled(enabled);
+		fCollapseAllItem.setEnabled(enabled);
+		fExpandAllItem.setEnabled(enabled);
+		fRoot.getChildren().forEach(node -> node.setEnabled(enabled));
 	}
 }

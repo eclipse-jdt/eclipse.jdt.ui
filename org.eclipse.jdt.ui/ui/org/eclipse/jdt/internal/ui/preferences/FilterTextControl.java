@@ -271,4 +271,26 @@ public class FilterTextControl {
 			fClearButton.setVisible(visible);
 		}
 	}
+	
+	/**
+	 * Enables the filter text control if the argument is <code>true</code>, and disables it
+	 * otherwise.
+	 *
+	 * @param enabled the new enabled state
+	 *
+	 * @since 3.16
+	 */
+	public void setEnabled(boolean enabled) {
+		if (fTextControl != null) {
+			fTextControl.setEnabled(enabled);
+		}
+		if (fClearButton != null) {
+			fClearButton.setEnabled(enabled);
+		}
+		boolean nativeField= fgUseNativeSearchField.booleanValue();
+		if (!nativeField) {
+			// in the case of native field, composite is initialized with blank, we need to manage background to avoid having a blank square on the right when the control is disabled.
+			fComposite.setBackground(enabled ? fComposite.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND) : null);
+		}
+	}
 }

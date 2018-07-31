@@ -58,8 +58,12 @@ public class JavaCodeMiningManager implements IPropertyChangeListener {
 	 */
 	private void enable() {
 		if (fEditor != null) {
-			fReconciler= new JavaCodeMiningReconciler();
-			fReconciler.install(fEditor, fSourceViewer);
+			if (fReconciler != null) {
+				fReconciler.updateCodeMinings();
+			} else {
+				fReconciler= new JavaCodeMiningReconciler();
+				fReconciler.install(fEditor, fSourceViewer);
+			}
 		}
 	}
 

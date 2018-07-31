@@ -231,14 +231,27 @@ public abstract class OptionsConfigurationBlock {
 		private final OptionsConfigurationBlock fConfigBlock;
 
 		/**
-		 * Constructs a new instance of PreferenceTree according to the parameters.
+		 * Constructs a new instance of PreferenceTree with vertical bar according to the parameters.
 		 * 
 		 * @param configBlock the Options Configuration block
 		 * @param parentComposite the parent composite
 		 * @param label the label, or <code>null</code> if none
 		 */
 		public PreferenceTree(OptionsConfigurationBlock configBlock, Composite parentComposite, String label) {
-			super(parentComposite, label, PreferencesMessages.OptionsConfigurationBlock_TypeFilterText);
+			this(configBlock, parentComposite, label, true);
+		}
+
+		/**
+		 * Constructs a new instance of PreferenceTree according to the parameters.
+		 * 
+		 * @param configBlock the Options Configuration block
+		 * @param parentComposite the parent composite
+		 * @param label the label, or <code>null</code> if none
+		 * @param showVerticalBar <code>true</code> if vertical bar must be displayed and
+		 *            <code>false</code> otherwise.
+		 */
+		public PreferenceTree(OptionsConfigurationBlock configBlock, Composite parentComposite, String label, boolean showVerticalBar) {
+			super(parentComposite, label, PreferencesMessages.OptionsConfigurationBlock_TypeFilterText, showVerticalBar);
 			fConfigBlock= configBlock;
 		}
 

@@ -20,6 +20,7 @@
  *     				Warning option for bug 410218 - https://bugs.eclipse.org/461999
  *     Gábor Kövesdán - Contribution for Bug 350000 - [content assist] Include non-prefix matches in auto-complete suggestions
  *     Jesper S Møller - Contributions for bug 529432 - Allow JDT UI to target Java 10
+ *     Angelo Zerr <angelo.zerr@gmail.com> - [CodeMining] Provide Java References/Implementation CodeMinings - Bug 529127
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -880,4 +881,14 @@ public final class PreferencesMessages extends NLS {
 	public static String FilteredPreferencesTree_expandAll_tooltip;
 	public static String FilterTextControl_Clear;
 	public static String FilterTextControl_ClearFilterField;
+
+	public static String JavaEditorCodeMiningConfigurationBlock_common_description;
+	public static String JavaEditorCodeMiningConfigurationBlock_enableCodeMining_label;
+	public static String JavaEditorCodeMiningConfigurationBlock_showCodeMining_atLeastOne_label;
+	public static String JavaEditorCodeMiningConfigurationBlock_section_general;
+	public static String JavaEditorCodeMiningConfigurationBlock_showReferences_label;
+	public static String JavaEditorCodeMiningConfigurationBlock_showReferences_onClasses_label;
+	public static String JavaEditorCodeMiningConfigurationBlock_showReferences_onFields_label;
+	public static String JavaEditorCodeMiningConfigurationBlock_showReferences_onMethods_label;
+	public static String JavaEditorCodeMiningConfigurationBlock_showImplementations_label;
 }

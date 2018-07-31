@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
  *     Red Hat Inc - modify to use CodeGenerationSettingsConstants
+ *     Angelo Zerr <angelo.zerr@gmail.com> - [CodeMining] Provide Java References/Implementation CodeMinings - Bug 529127     
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
@@ -3794,6 +3795,77 @@ public class PreferenceConstants {
 	public final static String DECORATE_TEST_CODE_CONTAINER_ICONS= "decorateTestCodeContainerIcons"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether codemining is enabled in the Java editor.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.16
+	 */
+	public static final String EDITOR_CODEMINING_ENABLED= "editor_codemining_enabled"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that stores the value for "Only if there is at least one result".
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.16
+	 */
+	public static final String EDITOR_JAVA_CODEMINING_SHOW_CODEMINING_AT_LEAST_ONE = "java.codemining.atLeastOne"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that stores the value for "Show references" codemining.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.16
+	 */
+	public static final String EDITOR_JAVA_CODEMINING_SHOW_REFERENCES = "java.codemining.references"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that stores the value for "Show references" on classes.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.16
+	 */
+	public static final String EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_CLASSES= "java.codemining.references.onClasses"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that stores the value for "Show references" on fields.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.16
+	 */
+	public static final String EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_FIELDS= "java.codemining.references.onFields"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that stores the value for "Show references" on methods.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.16
+	 */
+	public static final String EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_METHODS= "java.codemining.references.onMethods"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that stores the value for "Show implementations"
+	 * codemining.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.16
+	 */
+	public static final String EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS = "java.codemining.implementations"; //$NON-NLS-1$
+
+	/**
 	 * Initializes the given preference store with the default values.
 	 *
 	 * @param store the preference store to be initialized
@@ -4129,6 +4201,16 @@ public class PreferenceConstants {
 			store.setValue(PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS_MEMBERS, ExpandWithConstructorsConfigurationBlock.serializeMembers(Arrays.asList(oldPrefStr)));
 			store.setToDefault(CallHierarchyContentProvider.OLD_PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS);
 		}
+
+		// Code minings preferences
+		store.setDefault(PreferenceConstants.EDITOR_CODEMINING_ENABLED, false);
+		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_CODEMINING_AT_LEAST_ONE,
+				true);
+		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES, false);
+		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_CLASSES, true);
+		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_FIELDS, false);
+		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_METHODS, true);
+		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS, false);
 	}
 
 	/**
