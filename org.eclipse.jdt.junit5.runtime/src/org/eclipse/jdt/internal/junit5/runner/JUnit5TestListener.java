@@ -127,6 +127,12 @@ public class JUnit5TestListener implements TestExecutionListener {
 				}
 			}
 			return new FailedComparison(expectedStr, actualStr);
+		} else if (exception instanceof junit.framework.ComparisonFailure) {
+			junit.framework.ComparisonFailure comparisonFailure= (junit.framework.ComparisonFailure) exception;
+			return new FailedComparison(comparisonFailure.getExpected(), comparisonFailure.getActual());
+		} else if (exception instanceof org.junit.ComparisonFailure) {
+			org.junit.ComparisonFailure comparisonFailure= (org.junit.ComparisonFailure) exception;
+			return new FailedComparison(comparisonFailure.getExpected(), comparisonFailure.getActual());
 		}
 		return null;
 	}

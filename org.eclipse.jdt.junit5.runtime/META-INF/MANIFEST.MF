@@ -19,5 +19,6 @@ Require-Bundle: org.eclipse.jdt.junit.runtime;bundle-version="[3.4.600,4.0.0)",
  org.junit.platform.launcher;bundle-version="1.0.0",
  org.junit.platform.runner;bundle-version="1.0.0",
  org.junit.platform.suite.api;bundle-version="1.0.0",
- org.apiguardian;bundle-version="1.0.0"
+ org.apiguardian;bundle-version="1.0.0",
+ org.junit;bundle-version="4.7.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
