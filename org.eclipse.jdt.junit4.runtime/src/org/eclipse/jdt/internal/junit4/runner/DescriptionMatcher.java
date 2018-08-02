@@ -135,16 +135,15 @@ public abstract class DescriptionMatcher {
 	 * @return A matcher object.
 	 */
 	public static DescriptionMatcher create(Class<?> clazz, String matchString) {
+		String className= clazz.getName();
 		List<DescriptionMatcher> matchers= new ArrayList<DescriptionMatcher>();
 		matchers.add(new ExactMatcher(matchString));
 		Matcher parsed= METHOD_AND_CLASS_NAME_PATTERN.matcher(matchString);
 		if (parsed.matches()) {
-			String className= parsed.group(2);
 			String testName= parsed.group(1);
 			if (testName.equals(extractLeadingIdentifier(testName)))
 				matchers.add(new LeadingIdentifierMatcher(className, testName));
 		} else {
-			String className= clazz.getName();
 			if (!className.equals(matchString)) {
 				matchers.add(new ExactMatcher(className, matchString));
 				if (matchString.equals(extractLeadingIdentifier(matchString)))
