@@ -589,12 +589,16 @@ class Example {
 		if (true) return;
 		if (true) return; else if (false) return; else return;
 	}
+}
+//--PREVIEW--START--section-newlines-controlstatements-simpleloops
+class WrapExample {
 	void bar2() {
 		while(!stop)doSomething();
 		for(String s : myStrings)System.out.println(s);
 		do doSomethingElse();while(!stop);
 	}
 }
+//--PREVIEW--END--section-newlines-controlstatements-simpleloops
 //--PREVIEW--END--section-newlines-controlstatements
 
 }
