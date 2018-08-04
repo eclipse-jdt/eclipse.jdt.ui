@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import org.eclipse.jface.viewers.ContentViewer;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -77,6 +78,9 @@ public class CPListElementSorter extends ViewerComparator {
 
 		if (viewer instanceof ContentViewer) {
 			IBaseLabelProvider prov = ((ContentViewer) viewer).getLabelProvider();
+			if (prov instanceof DelegatingStyledCellLabelProvider) {
+				prov = ((DelegatingStyledCellLabelProvider) prov).getStyledStringProvider();
+			}
             if (prov instanceof ILabelProvider) {
                 ILabelProvider lprov = (ILabelProvider) prov;
                 String name1 = lprov.getText(e1);

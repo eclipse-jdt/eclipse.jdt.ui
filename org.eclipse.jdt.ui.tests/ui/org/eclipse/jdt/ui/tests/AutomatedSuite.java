@@ -20,7 +20,7 @@ import org.eclipse.jdt.testplugin.TestOptionsSetup;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests2;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewDeltaTests;
-import org.eclipse.jdt.ui.tests.buildpath.BuildpathModifierActionTest;
+import org.eclipse.jdt.ui.tests.buildpath.BuildpathTestSuite;
 import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyContentProviderTest;
 import org.eclipse.jdt.ui.tests.core.CoreTests;
 import org.eclipse.jdt.ui.tests.jarexport.JarExportTests;
@@ -75,7 +75,7 @@ public class AutomatedSuite extends TestSuite {
 		addTest(SearchTest.suite());
 		addTest(JUnitJUnitTests.suite());
 
-		addTest(BuildpathModifierActionTest.suite());
+		addTest(BuildpathTestSuite.suite());
 
 		addTest(JarExportTests.suite());
 		addTest(PackageJavadocTests.suite());

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,7 @@ public class BuildpathTestSuite {
 		//$JUnit-BEGIN$
 		suite.addTest(BuildpathModifierActionEnablementTest.suite());
 		suite.addTest(BuildpathModifierActionTest.suite());
+		suite.addTest(CPUserLibraryTest.suite());
 		//$JUnit-END$
 		return suite;
 	}
