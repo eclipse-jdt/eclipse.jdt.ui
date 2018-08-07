@@ -95,6 +95,7 @@ javax.xml/*
 org.apache.ant/*
 org.apache.commons.codec/*
 org.apache.commons.el/*
+org.apache.commons.logging*/*
 org.apache.felix/*
 org.apache.felix.gogo.*/*
 org.apache.jasper/*
