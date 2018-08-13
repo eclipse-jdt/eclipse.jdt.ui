@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2014 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - change to extend ChangeCorrectionProposalCore
  *******************************************************************************/
 package org.eclipse.jdt.ui.text.java.correction;
 
@@ -23,7 +24,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
@@ -48,6 +48,8 @@ import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import org.eclipse.jdt.core.manipulation.ChangeCorrectionProposalCore;
+
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -66,13 +68,10 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * 
  * @since 3.8
  */
-public class ChangeCorrectionProposal implements IJavaCompletionProposal, ICommandAccess, ICompletionProposalExtension5, ICompletionProposalExtension6 {
+public class ChangeCorrectionProposal extends ChangeCorrectionProposalCore implements IJavaCompletionProposal, ICommandAccess, ICompletionProposalExtension5, ICompletionProposalExtension6 {
 
 	private static final NullChange COMPUTING_CHANGE= new NullChange("ChangeCorrectionProposal computing..."); //$NON-NLS-1$
 	
-	private Change fChange;
-	private String fName;
-	private int fRelevance;
 	private Image fImage;
 	private String fCommandId;
 
@@ -87,12 +86,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	 *            is desired
 	 */
 	public ChangeCorrectionProposal(String name, Change change, int relevance, Image image) {
-		if (name == null) {
-			throw new IllegalArgumentException("Name must not be null"); //$NON-NLS-1$
-		}
-		fName= name;
-		fChange= change;
-		fRelevance= relevance;
+		super(name, change, relevance);
 		fImage= image;
 		fCommandId= null;
 	}
@@ -228,33 +222,6 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
-	 */
-	@Override
-	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-		StringBuilder buf= new StringBuilder();
-		buf.append("<p>"); //$NON-NLS-1$
-		try {
-			Change change= getChange();
-			if (change != null) {
-				String name= change.getName();
-				if (name.length() == 0) {
-					return null;
-				}
-				buf.append(name);
-			} else {
-				return null;
-			}
-		} catch (CoreException e) {
-			buf.append("Unexpected error when accessing this proposal:<p><pre>"); //$NON-NLS-1$
-			buf.append(e.getLocalizedMessage());
-			buf.append("</pre>"); //$NON-NLS-1$
-		}
-		buf.append("</p>"); //$NON-NLS-1$
-		return buf.toString();
-	}
-
-	/*
 	 * @see ICompletionProposal#getContextInformation()
 	 */
 	@Override
@@ -284,15 +251,6 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 			return StyledCellLabelProvider.styleDecoratedString(decorated, StyledString.QUALIFIER_STYLER, str);
 		}
 		return str;
-	}
-
-	/**
-	 * Returns the name of the proposal.
-	 *
-	 * @return the name of the proposal
-	 */
-	public String getName() {
-		return fName;
 	}
 
 	/*
@@ -328,6 +286,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	 *         the change failed
 	 * @throws CoreException when the change could not be created
 	 */
+	@Override
 	public final Change getChange() throws CoreException {
 		if (Util.isGtk()) {
 			// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=293995 :
@@ -388,48 +347,6 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 			}
 		}
 		return fChange;
-	}
-
-	/**
-	 * Creates the change for this proposal.
-	 * This method is only called once and only when no change has been passed in
- 	 * {@link #ChangeCorrectionProposal(String, Change, int, Image)}.
- 	 *
- 	 * Subclasses may override.
- 	 * 
-	 * @return the created change
-	 * @throws CoreException if the creation of the change failed
-	 */
-	protected Change createChange() throws CoreException {
-		return new NullChange();
-	}
-
-	/**
-	 * Sets the display name.
-	 *
-	 * @param name the name to set
-	 */
-	public void setDisplayName(String name) {
-		if (name == null) {
-			throw new IllegalArgumentException("Name must not be null"); //$NON-NLS-1$
-		}
-		fName= name;
-	}
-
-	@Override
-	public int getRelevance() {
-		return fRelevance;
-	}
-
-	/**
-	 * Sets the relevance.
-	 * 
-	 * @param relevance the relevance to set
-	 * 
-	 * @see #getRelevance()
-	 */
-	public void setRelevance(int relevance) {
-		fRelevance= relevance;
 	}
 
 	@Override
