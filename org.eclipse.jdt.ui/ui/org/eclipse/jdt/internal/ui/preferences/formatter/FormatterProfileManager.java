@@ -68,30 +68,21 @@ public class FormatterProfileManager extends ProfileManager {
 	 * @return Returns the settings for the default profile.
 	 */
 	public static Map<String, String> getEclipse21Settings() {
-		final Map<String, String> options= DefaultCodeFormatterConstants.getEclipse21Settings();
-
-		ProfileVersioner.setLatestCompliance(options);
-		return options;
+		return DefaultCodeFormatterConstants.getEclipse21Settings();
 	}
 
 	/**
 	 * @return Returns the settings for the new eclipse profile.
 	 */
 	public static Map<String, String> getEclipseSettings() {
-		final Map<String, String> options= DefaultCodeFormatterConstants.getEclipseDefaultSettings();
-
-		ProfileVersioner.setLatestCompliance(options);
-		return options;
+		return DefaultCodeFormatterConstants.getEclipseDefaultSettings();
 	}
 
 	/**
 	 * @return Returns the settings for the Java Conventions profile.
 	 */
 	public static Map<String, String> getJavaSettings() {
-		final Map<String, String> options= DefaultCodeFormatterConstants.getJavaConventionsSettings();
-
-		ProfileVersioner.setLatestCompliance(options);
-		return options;
+		return DefaultCodeFormatterConstants.getJavaConventionsSettings();
 	}
 
 	/**

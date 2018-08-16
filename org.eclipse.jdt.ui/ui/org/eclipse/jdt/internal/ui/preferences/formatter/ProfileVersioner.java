@@ -17,8 +17,6 @@ import java.util.Map;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
@@ -124,16 +122,7 @@ public class ProfileVersioner implements IProfileVersioner {
 		        newSettings.put(JavaCore.JAVA_FORMATTER, oldSettings.get(JavaCore.JAVA_FORMATTER));
 		    }
 		}
-		setLatestCompliance(newSettings);
 		return newSettings;
-	}
-
-	/**
-	 * Updates the map to use the latest the source compliance
-	 * @param map The map to update
-	 */
-	public static void setLatestCompliance(Map<String, String> map) {
-		JavaModelUtil.setComplianceOptions(map, JavaModelUtil.VERSION_LATEST);
 	}
 
 	private static void version1to2(final Map<String, String> oldSettings) {
