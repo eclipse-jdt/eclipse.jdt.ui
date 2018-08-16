@@ -11,6 +11,7 @@
             name="%Launch.label"
             delegateDescription="%JUnitLaunchDelegate.description"
             delegateName="%JUnitLaunchDelegate.name"
+            allowCommandLine="true"
             delegate="org.eclipse.jdt.junit.launcher.AdvancedJUnitLaunchConfigurationDelegate"
             modes="run, debug"
             id="org.eclipse.jdt.junit.launchconfig"
