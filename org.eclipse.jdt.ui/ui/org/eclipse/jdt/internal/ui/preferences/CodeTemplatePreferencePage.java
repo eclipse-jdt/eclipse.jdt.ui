@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IProject;
 
-import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
+import org.eclipse.text.templates.TemplatePersistenceData;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
