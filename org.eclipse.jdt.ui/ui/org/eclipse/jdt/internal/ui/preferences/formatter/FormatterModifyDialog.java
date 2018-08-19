@@ -744,6 +744,13 @@ public class FormatterModifyDialog extends ModifyDialog {
 		final CheckboxPreference alignFieldsPref= fTree.addCheckbox(parentSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_fields_in_columns,
 				DefaultCodeFormatterConstants.FORMATTER_ALIGN_TYPE_MEMBERS_ON_COLUMNS, CheckboxPreference.FALSE_TRUE);
 		
+		final CheckboxPreference useSpacesPref= fTree.addCheckbox(alignFieldsPref, FormatterMessages.FormatterModifyDialog_indentation_pref_align_with_spaces,
+				DefaultCodeFormatterConstants.FORMATTER_ALIGN_WITH_SPACES, CheckboxPreference.FALSE_TRUE);
+		Preference<?> tabCharPref= parentSection.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
+		Predicate<String> spacesChecker = v -> alignFieldsPref.getValue().equals(DefaultCodeFormatterConstants.TRUE) && !tabCharPref.getValue().equals(JavaCore.SPACE);
+		alignFieldsPref.addDependant(useSpacesPref, spacesChecker);
+		tabCharPref.addDependant(useSpacesPref, spacesChecker);
+
 		Button checkbox = new Button(parentSection.fInnerComposite, SWT.CHECK);
 		String label = FormatterMessages.FormatterModifyDialog_indentation_pref_blank_lines_separating_independent_groups;
 		checkbox.setText(label);
@@ -1097,7 +1104,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_else_on_same_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_ELSE_STATEMENT_ON_SAME_LINE)
 								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_else_if_on_one_line, DefaultCodeFormatterConstants.FORMATTER_COMPACT_ELSE_IF)
 								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_guardian_clause_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_GUARDIAN_CLAUSE_ON_ONE_LINE))
-						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_newLines_tree_simple_loops, "-simpleloops", modAll) //$NON-NLS-2$
+						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_newLines_tree_simple_loops, "-simpleloops", modAll) //$NON-NLS-1$
 								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_simple_for_body_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_FOR_BODY_ON_SAME_LINE)
 								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_simple_while_body_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_WHILE_BODY_ON_SAME_LINE)
 								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_simple_do_while_body_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_DO_WHILE_BODY_ON_SAME_LINE)))
@@ -1247,19 +1254,16 @@ public class FormatterModifyDialog extends ModifyDialog {
 					}
 				});
 
-		List<PreferenceTreeNode<?>> mainItems= section.getChildren();
-		Function<String, Preference<?>> prefFinder= key -> mainItems.stream().filter(n -> n instanceof Preference)
-				.map(n -> (Preference<?>) n).filter(n -> key.equals(n.getKey())).findAny().get();
-		Function<String, Section> sectionFinder= key -> mainItems.stream().filter(n -> n instanceof Section)
-				.map(n -> (Section) n).filter(n -> n.getKey().endsWith(key)).findAny().get();
-
-		Preference<?> javadocMaster= prefFinder.apply(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT);
-		Preference<?> blockMaster= prefFinder.apply(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT);
-		Preference<?> headerMaster= prefFinder.apply(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER);
+		Preference<?> javadocMaster= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT);
+		Preference<?> blockMaster= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT);
+		Preference<?> headerMaster= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER);
 		
 		Predicate<String> javadocChecker= v -> javadocMaster.getValue().equals(DefaultCodeFormatterConstants.TRUE) || headerMaster.getValue().equals(DefaultCodeFormatterConstants.TRUE);
 		Predicate<String> blockChecker= v -> blockMaster.getValue().equals(DefaultCodeFormatterConstants.TRUE) || headerMaster.getValue().equals(DefaultCodeFormatterConstants.TRUE);
 		
+		List<PreferenceTreeNode<?>> mainItems= section.getChildren();
+		Function<String, Section> sectionFinder= key -> mainItems.stream().filter(n -> n instanceof Section)
+				.map(n -> (Section) n).filter(n -> n.getKey().endsWith(key)).findAny().get();
 		Section javadocSection= sectionFinder.apply("-javadocs"); //$NON-NLS-1$
 		for (PreferenceTreeNode<?> pref : javadocSection.getChildren()) {
 			javadocMaster.addDependant(pref, javadocChecker);

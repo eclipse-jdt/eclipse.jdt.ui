@@ -168,6 +168,14 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 		public Control getToggle() {
 			return fToggle;
 		}
+
+		public Preference<?> findChildPreference(String key) {
+			for (PreferenceTreeNode<?> child : getChildren()) {
+				if (child instanceof Preference && key.equals(((Preference<?>) child).getKey()))
+					return (Preference<?>) child;
+			}
+			throw new IllegalArgumentException(key);
+		}
 	}
 
 	protected abstract static class ModifyAll<T extends Control> {
