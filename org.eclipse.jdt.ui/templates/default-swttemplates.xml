@@ -133,6 +133,15 @@ ${parent:var(org.eclipse.swt.widgets.Control)}.setLayoutData(${layoutData});
 ${imp:import(org.eclipse.swt.SWT)}${cursor}</template>
 
 
+<template 
+	name="GridDataFactory" 
+	description="%SWTTemplates.griddatafactory" 
+	id="org.eclipse.jdt.ui.text.codetemplates.swt.griddatafactory" 
+	context="swt-statements" enabled="true" autoinsert="false"
+	
+>GridDataFactory.fillDefaults().grab(true, false).applyTo(${parent:var(org.eclipse.swt.widgets.Control)});
+${imp:import(org.eclipse.jface.layout.GridDataFactory)}${cursor}</template>
+
 <!-- ************************************************** Basic Widgets ************************************************** -->
 
 
