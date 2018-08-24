@@ -489,8 +489,14 @@ public class JUnitLaunchConfigurationTab extends AbstractLaunchConfigurationTab 
 
 	private void updateTestLoaderFromConfig(ILaunchConfiguration config) {
 		ITestKind testKind= JUnitLaunchConfigurationConstants.getTestRunnerKind(config);
-		if (testKind.isNull())
-			testKind= TestKindRegistry.getDefault().getKind(TestKindRegistry.JUNIT3_TEST_KIND_ID);
+		if (testKind.isNull()) {
+			if (fContainerElement != null) {
+				testKind= TestKindRegistry.getContainerTestKind(fContainerElement);
+			}
+			if (testKind.isNull()) {
+				testKind= TestKindRegistry.getDefault().getKind(TestKindRegistry.JUNIT3_TEST_KIND_ID);
+			}
+		}
 		fTestLoaderViewer.setSelection(new StructuredSelection(testKind));
 	}
 
