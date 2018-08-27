@@ -114,7 +114,7 @@ FormatterPreferenceSectionComposite {
     swt-titlebar-color: #cccccc;
 }
 
-#BreadcrumbComposite,
+#BreadcrumbComposite > Composite,
 #BreadcrumbItemComposite,
 #BreadcrumbItemDetailComposite,
 #BreadcrumbItemDetailTextComposite,
