@@ -280,6 +280,7 @@ public interface IJavaHelpContextIds {
 	 * @since 3.7
 	 */
 	public static final String ACCESS_RULES_DIALOG_COMBINE_RULES= PREFIX + "access_rules_dialog_combine_rules_context"; //$NON-NLS-1$
+	public static final String MODULE_DIALOG= PREFIX + "module_dialog_context"; //$NON-NLS-1$
 
 	public static final String OUTPUT_LOCATION_DIALOG= PREFIX + "output_location_dialog_context"; //$NON-NLS-1$
 	public static final String VARIABLE_CREATION_DIALOG= PREFIX + "variable_creation_dialog_context"; //$NON-NLS-1$
