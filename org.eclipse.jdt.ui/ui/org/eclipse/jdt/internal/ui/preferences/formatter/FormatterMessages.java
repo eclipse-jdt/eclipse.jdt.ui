@@ -93,7 +93,9 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_comments_tree_comments;
 	public static String FormatterModifyDialog_comments_tree_javadocs;
 	public static String FormatterModifyDialog_indentation_info_blank_lines_to_preserve;
+	public static String FormatterModifyDialog_indentation_pref_align_assignment_statements_on_columns;
 	public static String FormatterModifyDialog_indentation_pref_align_fields_in_columns;
+	public static String FormatterModifyDialog_indentation_pref_align_variable_declarations_on_columns;
 	public static String FormatterModifyDialog_indentation_pref_align_with_spaces;
 	public static String FormatterModifyDialog_indentation_pref_blank_lines_separating_independent_groups;
 	public static String FormatterModifyDialog_indentation_pref_indent_break_statements;
@@ -113,6 +115,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_indentation_tab_policy_MIXED;
 	public static String FormatterModifyDialog_indentation_tab_policy_SPACE;
 	public static String FormatterModifyDialog_indentation_tab_policy_TAB;
+	public static String FormatterModifyDialog_indentation_tree_align_items_in_columns;
 	public static String FormatterModifyDialog_indentation_tree_indentation;
 	public static String FormatterModifyDialog_indentation_tree_indented_elements;
 	public static String FormatterModifyDialog_lineWrap_indentation_policy_label;

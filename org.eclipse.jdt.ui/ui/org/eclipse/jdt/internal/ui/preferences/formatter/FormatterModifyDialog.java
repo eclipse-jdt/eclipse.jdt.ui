@@ -581,8 +581,6 @@ public class FormatterModifyDialog extends ModifyDialog {
 		final Section globalSection= fTree.addSection(null, FormatterMessages.FormatterModifyDialog_indentation_tree_indentation, "section-indentation"); //$NON-NLS-1$
 		createGeneralIndentationPrefs(globalSection);
 		fTree.addGap(globalSection);
-		createAlignFieldsPrefs(globalSection);
-		fTree.addGap(globalSection);
 
 		fTree.builder(FormatterMessages.FormatterModifyDialog_indentation_tree_indented_elements, null, s -> CheckboxPreference.addModifyAll(s, fImages))
 				.pref(FormatterMessages.FormatterModifyDialog_indentation_pref_indent_declarations_within_class_body, DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_TYPE_HEADER)
@@ -602,6 +600,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 				.gap()
 				.pref(FormatterMessages.FormatterModifyDialog_indentation_pref_indent_empty_lines, DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES)
 				.build(globalSection, (parent, label, key) -> fTree.addCheckbox(parent, label, key, CheckboxPreference.FALSE_TRUE));
+
+		createAlignOnColumnPrefs(globalSection);
 	}
 
 	private void createGeneralIndentationPrefs(Section globalSection) {
@@ -684,7 +684,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 		});
 	}
 
-	private void createAlignFieldsPrefs(Section parentSection) {
+	private void createAlignOnColumnPrefs(Section parentSection) {
 		class CheckboxSpinnerPreference extends Preference<Button> {
 			
 			Spinner fSpinner;
@@ -744,26 +744,39 @@ public class FormatterModifyDialog extends ModifyDialog {
 			}
 		}
 
-		final CheckboxPreference alignFieldsPref= fTree.addCheckbox(parentSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_fields_in_columns,
+		final Section alignSection= fTree.addSection(parentSection, FormatterMessages.FormatterModifyDialog_indentation_tree_align_items_in_columns, "section-indentation-align-on-column"); //$NON-NLS-1$
+		final CheckboxPreference alignFieldsPref= fTree.addCheckbox(alignSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_fields_in_columns,
 				DefaultCodeFormatterConstants.FORMATTER_ALIGN_TYPE_MEMBERS_ON_COLUMNS, CheckboxPreference.FALSE_TRUE);
+		final CheckboxPreference alignVariablesPref= fTree.addCheckbox(alignSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_variable_declarations_on_columns,
+				DefaultCodeFormatterConstants.FORMATTER_ALIGN_VARIABLE_DECLARATIONS_ON_COLUMNS, CheckboxPreference.FALSE_TRUE);
+		final CheckboxPreference alignAssignmentsPref= fTree.addCheckbox(alignSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_assignment_statements_on_columns,
+				DefaultCodeFormatterConstants.FORMATTER_ALIGN_ASSIGNMENT_STATEMENTS_ON_COLUMNS, CheckboxPreference.FALSE_TRUE);
 		
-		final CheckboxPreference useSpacesPref= fTree.addCheckbox(alignFieldsPref, FormatterMessages.FormatterModifyDialog_indentation_pref_align_with_spaces,
+		fTree.addGap(alignSection);
+		final CheckboxPreference useSpacesPref= fTree.addCheckbox(alignSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_with_spaces,
 				DefaultCodeFormatterConstants.FORMATTER_ALIGN_WITH_SPACES, CheckboxPreference.FALSE_TRUE);
 		Preference<?> tabCharPref= parentSection.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
-		Predicate<String> spacesChecker = v -> alignFieldsPref.getValue().equals(DefaultCodeFormatterConstants.TRUE) && !tabCharPref.getValue().equals(JavaCore.SPACE);
+		Predicate<String> anyAlignChecker= v -> alignFieldsPref.getValue().equals(DefaultCodeFormatterConstants.TRUE)
+				|| alignVariablesPref.getValue().equals(DefaultCodeFormatterConstants.TRUE)
+				|| alignAssignmentsPref.getValue().equals(DefaultCodeFormatterConstants.TRUE);
+		Predicate<String> spacesChecker= anyAlignChecker.and(v -> !tabCharPref.getValue().equals(JavaCore.SPACE));
 		alignFieldsPref.addDependant(useSpacesPref, spacesChecker);
+		alignVariablesPref.addDependant(useSpacesPref, spacesChecker);
+		alignAssignmentsPref.addDependant(useSpacesPref, spacesChecker);
 		tabCharPref.addDependant(useSpacesPref, spacesChecker);
 
-		Button checkbox = new Button(parentSection.fInnerComposite, SWT.CHECK);
+		Button checkbox = new Button(alignSection.fInnerComposite, SWT.CHECK);
 		String label = FormatterMessages.FormatterModifyDialog_indentation_pref_blank_lines_separating_independent_groups;
 		checkbox.setText(label);
-		GridData gd= createGridData(GRID_COLUMNS - 2, GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_CENTER, SWT.DEFAULT, 1);
+		GridData gd= createGridData(GRID_COLUMNS - 2, GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_CENTER, SWT.DEFAULT, 0);
 		checkbox.setLayoutData(gd);
-		checkbox.setFont(parentSection.fInnerComposite.getFont());
-		Spinner spinner= NumberPreference.createSpinner(parentSection.fInnerComposite, 1, 99);
+		checkbox.setFont(alignSection.fInnerComposite.getFont());
+		Spinner spinner= NumberPreference.createSpinner(alignSection.fInnerComposite, 1, 99);
 		CheckboxSpinnerPreference groupingPref = new CheckboxSpinnerPreference(checkbox, spinner, label, DefaultCodeFormatterConstants.FORMATTER_ALIGN_FIELDS_GROUPING_BLANK_LINES);
-		fTree.addChild(parentSection, groupingPref);
-		alignFieldsPref.addDependant(groupingPref, valueAcceptor(DefaultCodeFormatterConstants.TRUE));
+		fTree.addChild(alignSection, groupingPref);
+		alignFieldsPref.addDependant(groupingPref, anyAlignChecker);
+		alignVariablesPref.addDependant(groupingPref, anyAlignChecker);
+		alignAssignmentsPref.addDependant(groupingPref, anyAlignChecker);
 
 		groupingPref.setValueValidator(value -> {
 			int blankLinesToPreserve= Integer.parseInt(fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE));

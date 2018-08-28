@@ -47,11 +47,7 @@ class INDENTATION {
 //--PREVIEW--START--section-indentation
 class Example {
 	int[] myArray = { 1, 2, 3, 4, 5, 6 };
-	int theInt = 1;
-
-	String someString = "Hello";
 	String stringWithTabs = "1	2	3	4";
-	double aDouble = 3.0;
 
 	void foo(int a, int b, int c, int d, int e, int f) {
 		switch (a) {
@@ -72,6 +68,31 @@ enum MyEnum {
 	int count() default 1;
 }
 //--PREVIEW--END--section-indentation
+
+//--PREVIEW--START--section-indentation-align-on-column
+class Example {
+	int[] myArray = { 1, 2, 3, 4, 5, 6 };
+	int theInt = 1;
+
+	String someString = "Hello";
+	String stringWithTabs = "1	2	3	4";
+	double aDouble = 3.0;
+
+	void foo() {
+		int i = 0;
+		String str = "123456";
+		Object object = null;
+
+		final Object unchanged = new Object();
+
+		while (i < 10) {
+			str = i + str;
+			object = Arrays.asList(str);
+			i += 2;
+		}
+	}
+}
+//--PREVIEW--END--section-indentation-align-on-column
 }
 
 class BRACES {
