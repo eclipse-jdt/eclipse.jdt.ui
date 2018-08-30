@@ -12,6 +12,7 @@ buildnotes*.htm
 buildnotes*.html
 old_build_notes.html
 oldnotes_swt.html
+ref-properties-buildpath-modularity.htm
 */bin/*
 */bin_ant/*
 */plugin-export/*
