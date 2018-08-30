@@ -31,10 +31,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestination;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
-
-import org.eclipse.jdt.ui.refactoring.RefactoringSaveHelper;
 
 
 public interface IReorgPolicy extends IReorgDestinationValidator {
@@ -63,7 +62,7 @@ public interface IReorgPolicy extends IReorgDestinationValidator {
 	/**
 	 * @return the save mode required for this reorg policy
 	 *
-	 * @see RefactoringSaveHelper
+	 * see RefactoringSaveHelper
 	 */
 	public int getSaveMode();
 

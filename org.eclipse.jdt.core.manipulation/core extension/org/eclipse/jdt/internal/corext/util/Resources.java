@@ -35,12 +35,14 @@ import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
+
+import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.CorextMessages;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class Resources {
 
@@ -156,7 +158,7 @@ public class Resources {
 			((MultiStatus)status).add(entry);
 			return status;
 		} else {
-			MultiStatus result= new MultiStatus(JavaPlugin.getPluginId(),
+			MultiStatus result= new MultiStatus(JavaManipulation.getPreferenceNodeId(),
 				IJavaStatusConstants.VALIDATE_EDIT_CHANGED_CONTENT,
 				CorextMessages.Resources_modifiedResources, null);
 			result.add(status);
@@ -240,7 +242,7 @@ public class Resources {
 		try {
 			resource.setResourceAttributes(resourceAttributes);
 		} catch (CoreException e) {
-			JavaPlugin.log(e);
+			JavaManipulationPlugin.log(e);
 		}
 	}
 }

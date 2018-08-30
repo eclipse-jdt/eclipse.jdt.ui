@@ -29,9 +29,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
 
 public class JavaRefactoringDescriptorUtil {
 	/* TODO: share implementation with
@@ -252,7 +251,7 @@ public class JavaRefactoringDescriptorUtil {
 		Assert.isNotNull(name);
 		Assert.isNotNull(id);
 		if (element != null)
-			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, new String[] { JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_FULLY_QUALIFIED), name, id}));
+			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, new String[] { JavaElementLabelsCore.getTextLabel(element, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), name, id}));
 		else
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_inputs_do_not_exist, new String[] { name, id}));
 	}
@@ -272,7 +271,7 @@ public class JavaRefactoringDescriptorUtil {
 		Assert.isNotNull(name);
 		Assert.isNotNull(id);
 		if (element != null)
-			return RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, new String[] { JavaElementLabels.getTextLabel(element, JavaElementLabels.ALL_FULLY_QUALIFIED), name, id}));
+			return RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, new String[] { JavaElementLabelsCore.getTextLabel(element, JavaElementLabelsCore.ALL_FULLY_QUALIFIED), name, id}));
 		else
 			return RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_inputs_do_not_exist, new String[] { name, id}));
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - refactor and expose some methods
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -28,7 +29,7 @@ public class TempAssignmentFinder extends ASTVisitor{
 	private ASTNode fFirstAssignment;
 	private IVariableBinding fTempBinding;
 
-	TempAssignmentFinder(VariableDeclaration tempDeclaration){
+	public TempAssignmentFinder(VariableDeclaration tempDeclaration){
 		fTempBinding= tempDeclaration.resolveBinding();
 	}
 
@@ -46,11 +47,11 @@ public class TempAssignmentFinder extends ASTVisitor{
 		return isNameReferenceToTemp(ref);
 	}
 
-	boolean hasAssignments(){
+	public boolean hasAssignments(){
 		return fFirstAssignment != null;
 	}
 
-	ASTNode getFirstAssignment(){
+	public ASTNode getFirstAssignment(){
 		return fFirstAssignment;
 	}
 

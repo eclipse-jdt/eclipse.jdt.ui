@@ -18,6 +18,9 @@ import org.eclipse.osgi.util.TextProcessor;
 
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
+
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -372,6 +375,12 @@ public final class JavaElementLabelsCore {
 	public static String getTextLabel(Object obj, long flags) {
 		if (obj instanceof IJavaElement) {
 			return getElementLabel((IJavaElement) obj, flags);
+
+		} else if (obj instanceof IResource) {
+			return BasicElementLabels.getResourceName((IResource) obj);
+
+		} else if (obj instanceof IStorage) {
+			return BasicElementLabels.getResourceName(((IStorage) obj).getName());
 
 		}
 		return ""; //$NON-NLS-1$

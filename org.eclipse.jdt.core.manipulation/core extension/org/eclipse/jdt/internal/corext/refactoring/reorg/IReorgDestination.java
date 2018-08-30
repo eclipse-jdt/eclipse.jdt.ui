@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
-import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
+import org.eclipse.jdt.internal.ui.JdtViewerDropAdapterConstants;
 
 /**
  * {@link ReorgDestinationFactory} can create concrete
@@ -21,9 +21,9 @@ import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
  */
 public interface IReorgDestination {
 
-    public static final int LOCATION_BEFORE = JdtViewerDropAdapter.LOCATION_BEFORE;
-    public static final int LOCATION_AFTER = JdtViewerDropAdapter.LOCATION_AFTER;
-    public static final int LOCATION_ON = JdtViewerDropAdapter.LOCATION_ON;
+    public static final int LOCATION_BEFORE = JdtViewerDropAdapterConstants.LOCATION_BEFORE;
+    public static final int LOCATION_AFTER = JdtViewerDropAdapterConstants.LOCATION_AFTER;
+    public static final int LOCATION_ON = JdtViewerDropAdapterConstants.LOCATION_ON;
 
 	public Object getDestination();
 

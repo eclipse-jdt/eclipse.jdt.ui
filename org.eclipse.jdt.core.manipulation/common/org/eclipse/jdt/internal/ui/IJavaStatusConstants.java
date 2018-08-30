@@ -13,10 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.javaeditor.saveparticipant.IPostSaveListener;
-
 /**
  * Defines status codes relevant to the Java UI plug-in. When a
  * Core exception is thrown, it contain a status object describing
@@ -58,7 +54,7 @@ public interface IJavaStatusConstants {
 	 * Status constant indicating that a problem occurred while notifying a post
 	 * save listener.
 	 *
-	 * @see IPostSaveListener
+	 * see IPostSaveListener
 	 * @since 3.3
 	 */
 	public static final int EDITOR_POST_SAVE_NOTIFICATION= 10006;
@@ -67,14 +63,14 @@ public interface IJavaStatusConstants {
 	 * Status constant indication that a problem occurred while calculating
 	 * the changed region during a save.
 	 *
-	 * @see CompilationUnitDocumentProvider
+	 * see CompilationUnitDocumentProvider
 	 * @since 3.4
 	 */
 	public static final int EDITOR_CHANGED_REGION_CALCULATION= 10007;
 
 	/**
 	 * Status constant indication that a problem occurred while opening an editor:
-	 * no editor input could be created. See {@link EditorUtility#openInEditor(Object, boolean)}.
+	 * no editor input could be created. See {EditorUtility#openInEditor(Object, boolean)}.
 	 * @since 3.4
 	 */
 	public static final int EDITOR_NO_EDITOR_INPUT= 10008;

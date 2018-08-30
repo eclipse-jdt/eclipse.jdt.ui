@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2011 IBM Corporation and others.
+ * Copyright (c) 2007, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - modified to use JdtViewerDropAdapterConstants
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dnd;
 
@@ -26,6 +27,8 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
+
+import org.eclipse.jdt.internal.ui.JdtViewerDropAdapterConstants;
 
 /**
  * This adapter class provides generic drag-and-drop support for a viewer.
@@ -51,7 +54,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * slightly before the target.
      * @see #getCurrentLocation()
      */
-    public static final int LOCATION_BEFORE = 1;
+    public static final int LOCATION_BEFORE = JdtViewerDropAdapterConstants.LOCATION_BEFORE;
 
     /**
      * Constant describing the position of the cursor relative
@@ -59,7 +62,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * slightly after the target.
      * @see #getCurrentLocation()
      */
-    public static final int LOCATION_AFTER = 2;
+    public static final int LOCATION_AFTER = JdtViewerDropAdapterConstants.LOCATION_AFTER;
 
     /**
      * Constant describing the position of the cursor relative
@@ -67,7 +70,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * directly on the target.
      * @see #getCurrentLocation()
      */
-    public static final int LOCATION_ON = 3;
+    public static final int LOCATION_ON = JdtViewerDropAdapterConstants.LOCATION_ON;
 
     /**
      * Constant describing the position of the cursor relative
@@ -75,7 +78,7 @@ public abstract class JdtViewerDropAdapter extends DropTargetAdapter {
      * over or near any valid target.
      * @see #getCurrentLocation()
      */
-    public static final int LOCATION_NONE = 4;
+    public static final int LOCATION_NONE = JdtViewerDropAdapterConstants.LOCATION_NONE;
 
     /**
      * The viewer to which this drop support has been added.

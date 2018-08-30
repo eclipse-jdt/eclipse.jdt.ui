@@ -59,8 +59,11 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
-import org.eclipse.jdt.internal.corext.Corext;
+import org.eclipse.jdt.internal.core.manipulation.JavaElementLabelsCore;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
@@ -71,11 +74,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
-
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  * This class defines a set of reusable static checks methods.
@@ -113,7 +111,7 @@ public class Checks {
 		else
 			return RefactoringStatus.createWarningStatus(
 				Messages.format(RefactoringCoreMessages.Checks_constructor_name,
-				new Object[] {JavaElementUtil.createMethodSignature(method), JavaElementLabels.getElementLabel(method.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED) } ));
+				new Object[] {JavaElementUtil.createMethodSignature(method), JavaElementLabelsCore.getElementLabel(method.getDeclaringType(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED) } ));
 	}
 
 	/**
@@ -287,16 +285,16 @@ public class Checks {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < methods.length; i++) {
 			if (JdtFlags.isNative(methods[i])){
-				String typeName= JavaElementLabels.getElementLabel(methods[i].getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED);
-				String methodName= JavaElementLabels.getElementLabel(methods[i], JavaElementLabels.ALL_DEFAULT);
+				String typeName= JavaElementLabelsCore.getElementLabel(methods[i].getDeclaringType(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED);
+				String methodName= JavaElementLabelsCore.getElementLabel(methods[i], JavaElementLabelsCore.ALL_DEFAULT);
 				String msg= Messages.format(RefactoringCoreMessages.Checks_method_native,
 								new String[]{typeName, methodName, "UnsatisfiedLinkError"});//$NON-NLS-1$
-				result.addEntry(RefactoringStatus.ERROR, msg, JavaStatusContext.create(methods[i]), Corext.getPluginId(), RefactoringStatusCodes.NATIVE_METHOD);
+				result.addEntry(RefactoringStatus.ERROR, msg, JavaStatusContext.create(methods[i]), JavaManipulation.getPreferenceNodeId(), RefactoringStatusCodes.NATIVE_METHOD);
 			}
 			if (methods[i].isMainMethod()) {
 				String msg= Messages.format(RefactoringCoreMessages.Checks_has_main,
-						JavaElementLabels.getElementLabel(methods[i].getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED));
-				result.addEntry(RefactoringStatus.WARNING, msg, JavaStatusContext.create(methods[i]), Corext.getPluginId(), RefactoringStatusCodes.MAIN_METHOD);
+						JavaElementLabelsCore.getElementLabel(methods[i].getDeclaringType(), JavaElementLabelsCore.ALL_FULLY_QUALIFIED));
+				result.addEntry(RefactoringStatus.WARNING, msg, JavaStatusContext.create(methods[i]), JavaManipulation.getPreferenceNodeId(), RefactoringStatusCodes.MAIN_METHOD);
 			}
 		}
 		return result;
@@ -763,7 +761,7 @@ public class Checks {
 	}
 
 	private static String getJavaElementName(IJavaElement element) {
-		return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
+		return JavaElementLabelsCore.getElementLabel(element, JavaElementLabelsCore.ALL_DEFAULT);
 	}
 
 	public static boolean isAvailable(IJavaElement javaElement) throws JavaModelException {
