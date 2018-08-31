@@ -62,6 +62,7 @@ public abstract class OpenEditorAction extends Action {
 		fClassName= className;
 		fTestRunner= testRunner;
 		fActivate= activate;
+		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/goto_input.png")); //$NON-NLS-1$
 	}
 
 	/*

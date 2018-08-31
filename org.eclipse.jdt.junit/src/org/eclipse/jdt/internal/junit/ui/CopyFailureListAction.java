@@ -22,6 +22,8 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.junit.model.TestElement;
@@ -40,7 +42,9 @@ public class CopyFailureListAction extends Action {
 		super(JUnitMessages.CopyFailureList_action_label);
 		fRunner= runner;
 		fClipboard= clipboard;
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPYFAILURELIST_ACTION);
+		IWorkbench workbench= PlatformUI.getWorkbench();
+		workbench.getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPYFAILURELIST_ACTION);
+		setImageDescriptor(workbench.getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
 	}
 
 	/*

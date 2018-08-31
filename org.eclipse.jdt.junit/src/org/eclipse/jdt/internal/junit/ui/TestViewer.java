@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2020 IBM Corporation and others.
+ * Copyright (c) 2000, 2022 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -173,6 +173,7 @@ public class TestViewer {
 		public ExpandAllAction() {
 			setText(JUnitMessages.ExpandAllAction_text);
 			setToolTipText(JUnitMessages.ExpandAllAction_tooltip);
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/expandall.png")); //$NON-NLS-1$
 		}
 
 		@Override
@@ -185,6 +186,7 @@ public class TestViewer {
 		public CollapseAllAction() {
 			setText(JUnitMessages.CollapseAllAction_text);
 			setToolTipText(JUnitMessages.CollapseAllAction_tooltip);
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/collapseall.png")); //$NON-NLS-1$
 		}
 
 		@Override

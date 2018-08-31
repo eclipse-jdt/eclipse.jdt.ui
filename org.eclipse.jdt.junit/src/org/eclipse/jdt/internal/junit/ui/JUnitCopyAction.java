@@ -29,6 +29,8 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.SelectionListenerAction;
 
@@ -47,7 +49,9 @@ public class JUnitCopyAction extends SelectionListenerAction {
 	public JUnitCopyAction(FailureTrace view, Clipboard clipboard) {
 		super(JUnitMessages.CopyTrace_action_label);
 		Assert.isNotNull(clipboard);
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPYTRACE_ACTION);
+		IWorkbench workbench= PlatformUI.getWorkbench();
+		workbench.getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPYTRACE_ACTION);
+		setImageDescriptor(workbench.getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
 		fView= view;
 		fClipboard= clipboard;
 	}

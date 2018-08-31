@@ -17,6 +17,8 @@ import org.eclipse.jface.action.Action;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.debug.core.ILaunchManager;
+
 /**
  * Requests to rerun a test.
  */
@@ -51,6 +53,11 @@ public class RerunAction extends Action {
 		fTestDisplayName= testDisplayName;
 		fUniqueId= uniqueId;
 		fLaunchMode= launchMode;
+		if (ILaunchManager.RUN_MODE == launchMode) {
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("etool16/run_exc.png")); //$NON-NLS-1$
+		} else if (ILaunchManager.DEBUG_MODE == launchMode) {
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("etool16/debug_exc.png")); //$NON-NLS-1$
+		}
 	}
 
 	@Override
