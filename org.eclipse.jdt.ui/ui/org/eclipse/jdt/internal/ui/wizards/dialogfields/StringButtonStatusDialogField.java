@@ -27,7 +27,7 @@ import org.eclipse.jface.resource.JFaceResources;
 
 /**
  * Dialog field containing a label, text control, status label and a button control.
- * The status label can be either a image or text label, and can be usd to give
+ * The status label can be either an image or text label, and can be used to give
  * additional information about the current element chosen.
  */
 public class StringButtonStatusDialogField extends StringButtonDialogField {
