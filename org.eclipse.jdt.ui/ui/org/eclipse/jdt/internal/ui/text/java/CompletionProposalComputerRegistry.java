@@ -519,4 +519,11 @@ public final class CompletionProposalComputerRegistry {
 		String message= status.getMessage();
 		MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message);
 	}
+
+	/**
+	 * @return whether any of the computers require the UI Thread. See {@link CompletionProposalComputerDescriptor#requiresUIThread()}.
+	 */
+	public boolean computingCompletionRequiresUIThread() {
+		return fDescriptors.stream().anyMatch(CompletionProposalComputerDescriptor::requiresUIThread);
+	}
 }

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.eclipse.jdt.ui">
+<schema targetNamespace="org.eclipse.jdt.ui" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appInfo>
          <meta.schema plugin="org.eclipse.jdt.ui" id="javaCompletionProposalSorters" name="Java Completion Proposal Sorters"/>
@@ -13,7 +13,7 @@
    <element name="extension">
       <annotation>
          <appInfo>
-            <meta.element labelAttribute="name"/>
+            <meta.element labelAttribute="name" />
          </appInfo>
       </annotation>
       <complexType>
@@ -85,6 +85,18 @@ and must have a public 0-argument constructor.
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.eclipse.jdt.ui.text.java.AbstractProposalSorter"/>
                </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="requiresUIThread" type="boolean" use="default" value="true">
+            <annotation>
+               <documentation>
+                  Whether the given extension requires to run in UI Thread. If extension doesn&apos;t require to run in UI Thread to work, this should be set to &quot;false&quot;. It&apos;s recommended for an extension to not require UI Thread and have this set to &quot;false&quot; in order to improve performances.
+
+If &quot;false&quot;, the sorter may run in a non UI Thread.
+If &quot;true&quot;, the sorter will run in UI Thread, freezing the UI while computing.
+
+@since 3.16
+               </documentation>
             </annotation>
          </attribute>
       </complexType>

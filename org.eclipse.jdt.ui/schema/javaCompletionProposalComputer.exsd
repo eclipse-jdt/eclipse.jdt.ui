@@ -109,6 +109,18 @@ and must have a public 0-argument constructor.
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="requiresUIThread" type="boolean" use="default" value="true">
+            <annotation>
+               <documentation>
+                  Whether the given extension requires to run in UI Thread. If extension doesn&apos;t require to run in UI Thread to work, this should be set to &quot;false&quot;. It&apos;s recommended for an extension to not require UI Thread and have this set to &quot;false&quot; in order to improve performance.
+
+If &quot;false&quot;, the completion proposal may run in a non-UI Thread, in parallel with other completion computers.
+If &quot;true&quot;, the completion proposal will run in UI Thread, freezing the UI while computing, and in sequence with other completion computers that also require UI Thread. 
+
+@since 3.16
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

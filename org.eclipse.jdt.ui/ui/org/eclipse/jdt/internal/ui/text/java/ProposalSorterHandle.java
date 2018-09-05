@@ -48,6 +48,8 @@ public final class ProposalSorterHandle {
 	private static final String NAME= "name"; //$NON-NLS-1$
 	/** The extension schema name of the class attribute. */
 	private static final String CLASS= "class"; //$NON-NLS-1$
+	/** The extension schema name of the requiresUIThread attribute. */
+	private static final String REQUIRES_UI_THREAD= "requiresUIThread"; //$NON-NLS-1$
 	/** The name of the performance event used to trace extensions. */
 	private static final String PERFORMANCE_EVENT= JavaPlugin.getPluginId() + "/perf/content_assist_sorters/extensions"; //$NON-NLS-1$
 	/**
@@ -64,6 +66,8 @@ public final class ProposalSorterHandle {
 	private final String fName;
 	/** The class name of the provided <code>AbstractProposalSorter</code>. */
 	private final String fClass;
+	/** whether the sorter requires to run in UI Thread. */
+	private final boolean fRequiresUIThread;
 	/** The configuration element of this extension. */
 	private final IConfigurationElement fElement;
 	/** The computer, if instantiated, <code>null</code> otherwise. */
@@ -81,6 +85,8 @@ public final class ProposalSorterHandle {
 
 		fElement= element;
 		fId= element.getAttribute(ID);
+		// Not Boolean.parse() to ensure fRequiresUIThread is true if attribute is not set/null
+		fRequiresUIThread = !Boolean.FALSE.toString().equals(element.getAttribute(REQUIRES_UI_THREAD));
 		checkNotNull(fId, ID);
 
 		String name= element.getAttribute(NAME);
@@ -126,6 +132,17 @@ public final class ProposalSorterHandle {
 	 */
 	public String getName() {
 		return fName;
+	}
+
+	/**
+	 * Returns whether the sorter requires to run in UI Thread.
+	 * If <code>false</code>, then the sorter execution is allowed to happen
+	 * from any thread.
+	 *
+	 * @return whether the sorter requires to run un UI Thread
+	 */
+	public boolean requiresUIThread() {
+		return this.fRequiresUIThread;
 	}
 
 	/**

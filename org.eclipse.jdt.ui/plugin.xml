@@ -325,7 +325,8 @@
 		id="JavaTypeCompletionProposalComputer">
 		<javaCompletionProposalComputer
 			class="org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposalComputer"
-			categoryId="org.eclipse.jdt.ui.javaTypeProposalCategory">
+			categoryId="org.eclipse.jdt.ui.javaTypeProposalCategory"
+			requiresUIThread="false">
 			<partition type="__dftl_partition_content_type"/>
 			<partition type="__java_string"/>
 		</javaCompletionProposalComputer>
@@ -336,7 +337,8 @@
 		<javaCompletionProposalComputer
 			class="org.eclipse.jdt.internal.ui.text.java.JavaNoTypeCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory"
-			needsSortingAfterFiltering="true">
+			needsSortingAfterFiltering="true"
+			requiresUIThread="false">
 			<partition type="__dftl_partition_content_type"/>
 			<partition type="__java_string"/>
 		</javaCompletionProposalComputer>
@@ -347,7 +349,8 @@
 		<javaCompletionProposalComputer
 			class="org.eclipse.jdt.internal.ui.text.java.JavaAllCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaAllProposalCategory"
-			needsSortingAfterFiltering="true">
+			needsSortingAfterFiltering="true"
+			requiresUIThread="false">
 			<partition type="__dftl_partition_content_type"/>
 			<partition type="__java_string"/>
 		</javaCompletionProposalComputer>
@@ -358,7 +361,8 @@
 		id="LegacyJavadocCompletionProposalComputer_no">
 		<javaCompletionProposalComputer
 			class="org.eclipse.jdt.internal.ui.text.javadoc.LegacyJavadocCompletionProposalComputer"
-			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
+			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory"
+			requiresUIThread="false">
 			<partition type="__java_javadoc"/>
 		</javaCompletionProposalComputer>
 	</extension>
@@ -366,6 +370,7 @@
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="JavadocCompletionProposalComputer_no">
 		<javaCompletionProposalComputer
+			requiresUIThread="false"
 			class="org.eclipse.jdt.internal.ui.text.javadoc.JavadocCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
 			<partition type="__java_javadoc"/>
@@ -375,6 +380,7 @@
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="JavadocHTMLCompletionProposalComputer_no">
 		<javaCompletionProposalComputer
+			requiresUIThread="false"
 			class="org.eclipse.jdt.internal.ui.text.javadoc.HTMLTagCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
 			<partition type="__java_javadoc"/>
@@ -384,6 +390,7 @@
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="LegacyJavadocCompletionProposalComputer_all">
 		<javaCompletionProposalComputer
+			requiresUIThread="false"
 			class="org.eclipse.jdt.internal.ui.text.javadoc.LegacyJavadocCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaAllProposalCategory">
 			<partition type="__java_javadoc"/>
@@ -393,6 +400,7 @@
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="JavadocCompletionProposalComputer_all">
 		<javaCompletionProposalComputer
+			requiresUIThread="false"
 			class="org.eclipse.jdt.internal.ui.text.javadoc.JavadocCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaAllProposalCategory">
 			<partition type="__java_javadoc"/>
@@ -402,6 +410,7 @@
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="JavadocHTMLCompletionProposalComputer_all">
 		<javaCompletionProposalComputer
+			requiresUIThread="false"
 			class="org.eclipse.jdt.internal.ui.text.javadoc.HTMLTagCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaAllProposalCategory">
 			<partition type="__java_javadoc"/>
@@ -412,6 +421,7 @@
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="TemplateProposalComputer">
 		<javaCompletionProposalComputer
+			requiresUIThread="false"
 			class="org.eclipse.jdt.internal.ui.text.java.TemplateCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.templateProposalCategory"
 			needsSortingAfterFiltering="true">
@@ -425,6 +435,7 @@
          id="swtBuilderCompletionProposalComputer">
       <javaCompletionProposalComputer
             class="org.eclipse.jdt.internal.ui.text.java.SWTTemplateCompletionProposalComputer"
+			requiresUIThread="false"
 			categoryId="org.eclipse.jdt.ui.swtProposalCategory"
 			needsSortingAfterFiltering="true">
 			<partition type="__dftl_partition_content_type"/>
@@ -436,7 +447,8 @@
          id="postfixCompletion">
       <javaCompletionProposalComputer
             class="org.eclipse.jdt.internal.ui.text.java.PostfixCompletionProposalComputer"
-            categoryId="org.eclipse.jdt.ui.javaPostfixProposalCategory">
+            categoryId="org.eclipse.jdt.ui.javaPostfixProposalCategory"
+            requiresUIThread="false">
             <partition type="__dftl_partition_content_type"/>
 			<partition type="__java_string"/>
       </javaCompletionProposalComputer>
@@ -445,6 +457,7 @@
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="HippieCompletionProposalComputer">
 		<javaCompletionProposalComputer
+			requiresUIThread="false"
 			class="org.eclipse.jdt.internal.ui.text.java.HippieProposalComputer"
 			categoryId="org.eclipse.jdt.ui.textProposalCategory">
 			<partition type="__java_singleline_comment"/>
@@ -476,11 +489,13 @@
 		<proposalSorter
 			id="org.eclipse.jdt.ui.RelevanceSorter"
 			name="%RelevanceSorter.name"
-			class="org.eclipse.jdt.internal.ui.text.java.RelevanceSorter"/>
+			class="org.eclipse.jdt.internal.ui.text.java.RelevanceSorter"
+			requiresUIThread="false"/>
 		<proposalSorter
 			id="org.eclipse.jdt.ui.AlphabeticSorter"
 			name="%AlphabeticSorter.name"
-			class="org.eclipse.jdt.internal.ui.text.java.AlphabeticSorter"/>
+			class="org.eclipse.jdt.internal.ui.text.java.AlphabeticSorter"
+			requiresUIThread="false"/>
 	</extension>
 
 	<!-- commands to surface java elements given handle id encoded parameter -->
@@ -7342,7 +7357,8 @@
            activate="true"
            categoryId="org.eclipse.jdt.ui.javaChainProposalCategory"
            class="org.eclipse.jdt.internal.ui.text.java.ChainCompletionProposalComputer"
-           needsSortingAfterFiltering="false">
+           needsSortingAfterFiltering="false"
+           requiresUIThread="false">
      </javaCompletionProposalComputer>
   </extension>
 </plugin>
