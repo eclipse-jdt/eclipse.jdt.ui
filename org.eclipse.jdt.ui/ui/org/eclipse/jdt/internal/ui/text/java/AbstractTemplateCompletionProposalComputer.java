@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2016 IBM Corporation and others.
+ * Copyright (c) 2007, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -18,8 +18,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.swt.graphics.Point;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
@@ -54,27 +58,36 @@ public abstract class AbstractTemplateCompletionProposalComputer implements IJav
 	 */
 	@Override
 	public List<ICompletionProposal> computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
-		if (!(context instanceof JavaContentAssistInvocationContext))
+		if (!(context instanceof JavaContentAssistInvocationContext)) {
 			return Collections.emptyList();
+		}
 
 		JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
 		ICompilationUnit unit= javaContext.getCompilationUnit();
-		if (unit == null)
+		if (unit == null) {
 			return Collections.emptyList();
+		}
 
 		fEngine= computeCompletionEngine(javaContext);
-		if (fEngine == null)
+		if (fEngine == null) {
 			return Collections.emptyList();
+		}
 
 		fEngine.reset();
-		fEngine.complete(javaContext.getViewer(), javaContext.getInvocationOffset(), unit);
+		ITextSelection viewerSelection= context.getTextSelection();
+		if (viewerSelection == null) {
+			viewerSelection = new TextSelection(context.getDocument(), context.getInvocationOffset(), 0);
+		}
+		Point selectionAsPoint = new Point(viewerSelection.getOffset(), viewerSelection.getLength());
+		fEngine.complete(javaContext.getViewer(), selectionAsPoint, javaContext.getInvocationOffset(), unit);
 
 		TemplateProposal[] templateProposals= fEngine.getResults();
 		List<ICompletionProposal> result= new ArrayList<>(Arrays.asList(templateProposals));
 
 		IJavaCompletionProposal[] keyWordResults= javaContext.getKeywordProposals();
-		if (keyWordResults.length == 0)
+		if (keyWordResults.length == 0) {
 			return result;
+		}
 
 		/* Update relevance of template proposals that match with a keyword
 		 * give those templates slightly more relevance than the keyword to

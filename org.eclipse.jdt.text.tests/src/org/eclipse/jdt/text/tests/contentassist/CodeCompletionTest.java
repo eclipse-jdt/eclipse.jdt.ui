@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,9 +19,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.NullTestUtils;
@@ -29,12 +32,14 @@ import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.test.OrderedTestSuite;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.templates.Template;
@@ -68,6 +73,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -77,6 +83,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.FillArgumentNamesCompletionProposalCollector;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
 import org.eclipse.jdt.internal.ui.text.java.JavaNoTypeCompletionProposalComputer;
 
@@ -144,7 +151,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			e1.printStackTrace();
 		}
 		System.out.println();
-		
+
 		IJavaProject project= cu.getJavaProject();
 		System.out.println(project);
 		for (IPackageFragmentRoot root : project.getAllPackageFragmentRoots()) {
@@ -200,18 +207,20 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 	public static void closeEditor(IEditorPart editor) {
 		IWorkbenchPartSite site;
 		IWorkbenchPage page;
-		if (editor != null && (site= editor.getSite()) != null && (page= site.getPage()) != null)
+		if (editor != null && (site= editor.getSite()) != null && (page= site.getPage()) != null) {
 			page.closeEditor(editor, false);
+		}
 	}
 
 	public static void closeAllEditors() {
 		IWorkbenchWindow[] windows= PlatformUI.getWorkbench().getWorkbenchWindows();
-		for (int i= 0; i < windows.length; i++) {
-			IWorkbenchPage[] pages= windows[i].getPages();
-			for (int j= 0; j < pages.length; j++) {
-				IEditorReference[] editorReferences= pages[j].getEditorReferences();
-				for (int k= 0; k < editorReferences.length; k++)
-					closeEditor(editorReferences[k].getEditor(false));
+		for (IWorkbenchWindow window : windows) {
+			IWorkbenchPage[] pages= window.getPages();
+			for (IWorkbenchPage page : pages) {
+				IEditorReference[] editorReferences= page.getEditorReferences();
+				for (IEditorReference editorReference : editorReferences) {
+					closeEditor(editorReference.getEditor(false));
+				}
 			}
 		}
 	}
@@ -526,7 +535,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 				"");
 		assertEquals(buf.toString(), doc.get());
 	}
-	
+
 	// same CU
 	// @NonNullByDefault on class
 	// -> don't insert redundant @NonNull
@@ -587,7 +596,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		NullTestUtils.prepareNullDeclarationAnnotations(sourceFolder);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		
+
 		String ifcContents=
 				"package test1;\n" +
 				"import annots.*;\n" +
@@ -648,7 +657,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		NullTestUtils.prepareNullDeclarationAnnotations(sourceFolder);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		
+
 		String ifcContents=
 				"package test1;\n" +
 				"import annots.*;\n" +
@@ -705,7 +714,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		NullTestUtils.prepareNullDeclarationAnnotations(sourceFolder);
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		
+
 		String ifcContents=
 				"package test1;\n" +
 				"import annots.*;\n" +
@@ -989,9 +998,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			IJavaCompletionProposal proposal= null;
 
-			for (int i= 0; i < proposals.length; i++) {
-				if (proposals[i].getDisplayString().startsWith("MyClass")) {
-					proposal= proposals[i];
+			for (IJavaCompletionProposal proposal2 : proposals) {
+				if (proposal2.getDisplayString().startsWith("MyClass")) {
+					proposal= proposal2;
 				}
 			}
 			assertNotNull("no proposal for MyClass()", proposal);
@@ -1053,9 +1062,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
 		IJavaCompletionProposal proposal= null;
-		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i].getDisplayString().startsWith("Natural")) {
-				proposal= proposals[i];
+		for (IJavaCompletionProposal proposal2 : proposals) {
+			if (proposal2.getDisplayString().startsWith("Natural")) {
+				proposal= proposal2;
 			}
 		}
 		assertNotNull("no proposal for enum Natural()", proposal);
@@ -1125,9 +1134,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			IJavaCompletionProposal proposal= null;
 
-			for (int i= 0; i < proposals.length; i++) {
-				if (proposals[i].getDisplayString().startsWith("getWriter")) {
-					proposal= proposals[i];
+			for (IJavaCompletionProposal proposal2 : proposals) {
+				if (proposal2.getDisplayString().startsWith("getWriter")) {
+					proposal= proposal2;
 				}
 			}
 			assertNotNull("no proposal for getWriter()", proposal);
@@ -1186,9 +1195,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 			IJavaCompletionProposal proposal= null;
 
-			for (int i= 0; i < proposals.length; i++) {
-				if (proposals[i].getDisplayString().startsWith("foo")) {
-					proposal= proposals[i];
+			for (IJavaCompletionProposal proposal2 : proposals) {
+				if (proposal2.getDisplayString().startsWith("foo")) {
+					proposal= proposal2;
 				}
 			}
 			assertNotNull("no proposal for foo()", proposal);
@@ -1392,9 +1401,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 		IJavaCompletionProposal proposal= null;
 
-		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i].getDisplayString().startsWith("foo")) {
-				proposal= proposals[i];
+		for (IJavaCompletionProposal proposal2 : proposals) {
+			if (proposal2.getDisplayString().startsWith("foo")) {
+				proposal= proposal2;
 			}
 		}
 		assertNotNull("no proposal for foomethod()", proposal);
@@ -1445,9 +1454,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		IJavaCompletionProposal toStringProposal= null;
 
-		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i].getDisplayString().startsWith("toString()")) {
-				toStringProposal= proposals[i];
+		for (IJavaCompletionProposal proposal : proposals) {
+			if (proposal.getDisplayString().startsWith("toString()")) {
+				toStringProposal= proposal;
 			}
 		}
 		assertNotNull("no proposal for toString()", toStringProposal);
@@ -1506,9 +1515,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		IJavaCompletionProposal closeProposal= null;
 
-		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i].getDisplayString().startsWith("close()")) {
-				closeProposal= proposals[i];
+		for (IJavaCompletionProposal proposal : proposals) {
+			if (proposal.getDisplayString().startsWith("close()")) {
+				closeProposal= proposal;
 			}
 		}
 		assertNotNull("no proposal for close()", closeProposal);
@@ -1568,9 +1577,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		IJavaCompletionProposal closeProposal= null;
 
-		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i].getDisplayString().startsWith("close()")) {
-				closeProposal= proposals[i];
+		for (IJavaCompletionProposal proposal : proposals) {
+			if (proposal.getDisplayString().startsWith("close()")) {
+				closeProposal= proposal;
 			}
 		}
 		assertNotNull("no proposal for close()", closeProposal);
@@ -1643,9 +1652,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		IJavaCompletionProposal closeProposal= null;
 
-		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i].getDisplayString().startsWith("foo()")) {
-				closeProposal= proposals[i];
+		for (IJavaCompletionProposal proposal : proposals) {
+			if (proposal.getDisplayString().startsWith("foo()")) {
+				closeProposal= proposal;
 			}
 		}
 		assertNotNull("no proposal for foo()", closeProposal);
@@ -1704,9 +1713,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		IJavaCompletionProposal toStringProposal= null;
 
-		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i].getDisplayString().startsWith("run()")) {
-				toStringProposal= proposals[i];
+		for (IJavaCompletionProposal proposal : proposals) {
+			if (proposal.getDisplayString().startsWith("run()")) {
+				toStringProposal= proposal;
 			}
 		}
 		assertNotNull("no proposal for toString()", toStringProposal);
@@ -1770,9 +1779,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		IJavaCompletionProposal closeProposal= null;
 
-		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i].getDisplayString().startsWith("foo(")) {
-				closeProposal= proposals[i];
+		for (IJavaCompletionProposal proposal : proposals) {
+			if (proposal.getDisplayString().startsWith("foo(")) {
+				closeProposal= proposal;
 			}
 		}
 		assertNotNull("no proposal for foo(Sub)", closeProposal);
@@ -1830,9 +1839,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		IJavaCompletionProposal toStringProposal= null;
 
-		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i].getDisplayString().startsWith("foo")) {
-				toStringProposal= proposals[i];
+		for (IJavaCompletionProposal proposal : proposals) {
+			if (proposal.getDisplayString().startsWith("foo")) {
+				toStringProposal= proposal;
 			}
 		}
 		assertNotNull("no proposal for foo(...)", toStringProposal);
@@ -1896,9 +1905,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		IJavaCompletionProposal toStringProposal= null;
 
-		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i].getDisplayString().startsWith("foo")) {
-				toStringProposal= proposals[i];
+		for (IJavaCompletionProposal proposal : proposals) {
+			if (proposal.getDisplayString().startsWith("foo")) {
+				toStringProposal= proposal;
 			}
 		}
 		assertNotNull("no proposal for foo(...)", toStringProposal);
@@ -1964,9 +1973,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 		IJavaCompletionProposal toStringProposal= null;
 
-		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i].getDisplayString().startsWith("foo")) {
-				toStringProposal= proposals[i];
+		for (IJavaCompletionProposal proposal : proposals) {
+			if (proposal.getDisplayString().startsWith("foo")) {
+				toStringProposal= proposal;
 			}
 		}
 		assertNotNull("no proposal for foo(...)", toStringProposal);
@@ -2001,7 +2010,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 	public void testOverrideCompletion10_bug377184() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=377184
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-	
+
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2013,32 +2022,32 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("    foo//here\n");
 		buf.append("}\n");
 		String contents= buf.toString();
-	
+
 		ICompilationUnit cu= pack1.createCompilationUnit("Impl.java", contents, false, null);
-	
+
 		String str= "//here";
-	
+
 		int offset= contents.indexOf(str);
-	
+
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
-	
+
 		codeComplete(cu, offset, collector);
-	
+
 		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
-	
+
 		IJavaCompletionProposal toStringProposal= null;
-	
-		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i].getDisplayString().startsWith("foo")) {
-				toStringProposal= proposals[i];
+
+		for (IJavaCompletionProposal proposal : proposals) {
+			if (proposal.getDisplayString().startsWith("foo")) {
+				toStringProposal= proposal;
 			}
 		}
 		assertNotNull("no proposal for foo(...)", toStringProposal);
-	
+
 		IDocument doc= new Document(contents);
 		toStringProposal.apply(doc);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("class Super<T> {\n");
@@ -2061,7 +2070,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 	public void testOverrideCompletionArrayOfTypeVariable() throws Exception {
 		//https://bugs.eclipse.org/bugs/show_bug.cgi?id=391265
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-	
+
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2073,32 +2082,32 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 		buf.append("    foo//here\n");
 		buf.append("}\n");
 		String contents= buf.toString();
-	
+
 		ICompilationUnit cu= pack1.createCompilationUnit("Impl.java", contents, false, null);
-	
+
 		String str= "//here";
-	
+
 		int offset= contents.indexOf(str);
-	
+
 		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
-	
+
 		codeComplete(cu, offset, collector);
-	
+
 		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
-	
+
 		IJavaCompletionProposal toStringProposal= null;
-	
-		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i].getDisplayString().startsWith("foo")) {
-				toStringProposal= proposals[i];
+
+		for (IJavaCompletionProposal proposal : proposals) {
+			if (proposal.getDisplayString().startsWith("foo")) {
+				toStringProposal= proposal;
 			}
 		}
 		assertNotNull("no proposal for foo(...)", toStringProposal);
-	
+
 		IDocument doc= new Document(contents);
 		toStringProposal.apply(doc);
-	
+
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("class Super {\n");
@@ -2150,9 +2159,9 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 			IJavaCompletionProposal proposal= null;
 
-			for (int i= 0; i < proposals.length; i++) {
-				if (proposals[i].getDisplayString().startsWith("setWriter")) {
-					proposal= proposals[i];
+			for (IJavaCompletionProposal proposal2 : proposals) {
+				if (proposal2.getDisplayString().startsWith("setWriter")) {
+					proposal= proposal2;
 				}
 			}
 			assertNotNull("no proposal for setWriter()", proposal);
@@ -2465,7 +2474,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			buf.append("\n");
 			buf.append("public enum DefaultLocation { PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND, TYPE_ARGUMENT, ARRAY_CONTENTS, TYPE_PARAMETER }\n");
 			pack0.createCompilationUnit("DefaultLocation.java", buf.toString(), false, null);
-		
+
 			buf= new StringBuilder();
 			buf.append("package annots;\n");
 			buf.append("\n");
@@ -2526,6 +2535,39 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 
 	private static void assertNumberOf(String name, int is, int expected) {
 		assertTrue("Wrong number of " + name + ", is: " + is + ", expected: " + expected, is == expected);
+	}
+
+	@org.junit.Test
+	public void testComputeCompletionInNonUIThread() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("Blah.java", "", true, new NullProgressMonitor());
+		JavaEditor part= (JavaEditor) JavaUI.openInEditor(cu);
+		ContentAssistant assistant= new ContentAssistant();
+		assistant.setDocumentPartitioning(IJavaPartitions.JAVA_PARTITIONING);
+		JavaCompletionProcessor javaProcessor= new JavaCompletionProcessor(part, assistant, getContentType());
+		AtomicReference<Throwable> exception = new AtomicReference<>();
+		List<IStatus> errors = new ArrayList<>();
+		JavaPlugin.getDefault().getLog().addLogListener((status, plugin) -> {
+			if (status.getSeverity() >= IStatus.WARNING) {
+				errors.add(status);
+			}
+		});
+		Thread thread = new Thread(() -> {
+			try {
+				javaProcessor.computeCompletionProposals(part.getViewer(), 0);
+				// a popup can be shown and block the thread in case of error
+			} catch (Exception e) {
+				exception.set(e);
+			}
+		});
+		thread.start();
+		thread.join();
+		if (exception.get() != null) {
+			exception.get().printStackTrace();
+		}
+		assertNull(exception.get());
+		assertEquals(Collections.emptyList(), errors);
 	}
 
 }

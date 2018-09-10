@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -19,14 +19,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.swt.graphics.Point;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
@@ -117,10 +116,10 @@ public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionP
 			ICompilationUnit cu= javaContext.getCompilationUnit();
 			int offset= javaContext.getInvocationOffset();
 			int length= javaContext.getSelectionLength();
-			Point selection= javaContext.getViewer().getSelectedRange();
-			if (selection.y > 0) {
-				offset= selection.x;
-				length= selection.y;
+			ITextSelection selection= javaContext.getTextSelection();
+			if (selection != null && selection.getLength() > 0) {
+				offset= selection.getOffset();
+				length= selection.getLength();
 			}
 
 			ArrayList<ICompletionProposal> result= new ArrayList<>();
