@@ -28,6 +28,7 @@ import org.osgi.framework.Bundle;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
@@ -666,7 +667,11 @@ public class JavaPluginImages {
 	 */
 	/* package */ static ImageRegistry getImageRegistry() {
 		if (fgImageRegistry == null) {
-			fgImageRegistry= new ImageRegistry();
+			Display display = Display.getCurrent();
+			if (display == null) {
+				display = Display.getDefault();
+			}
+			fgImageRegistry= new ImageRegistry(display);
 			for (Iterator<String> iter= fgAvoidSWTErrorMap.keySet().iterator(); iter.hasNext();) {
 				String key= iter.next();
 				fgImageRegistry.put(key, fgAvoidSWTErrorMap.get(key));

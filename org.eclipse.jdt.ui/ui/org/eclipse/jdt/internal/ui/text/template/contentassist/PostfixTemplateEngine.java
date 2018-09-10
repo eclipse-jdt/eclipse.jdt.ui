@@ -13,6 +13,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
+import org.eclipse.swt.graphics.Point;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateContextType;
+
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -22,16 +31,6 @@ import org.eclipse.jdt.internal.corext.template.java.JavaPostfixContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaPostfixContextType;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
-
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.templates.Template;
-import org.eclipse.jface.text.templates.TemplateContextType;
-
-import org.eclipse.swt.graphics.Point;
 
 /**
  * An extension to the {@linkplain TemplateEngine} to override the creation of the
@@ -58,13 +57,23 @@ public class PostfixTemplateEngine extends TemplateEngine {
 	}
 
 	@Override
+	@Deprecated
 	public void complete(ITextViewer viewer, int completionPosition, ICompilationUnit compilationUnit) {
+		if (!(getContextType() instanceof JavaPostfixContextType)) {
+			return;
+		}
+		complete(viewer, viewer.getSelectedRange(), completionPosition, compilationUnit);
+	}
+
+	@Override
+	public void complete(ITextViewer viewer, Point selectedRange, int completionPosition, ICompilationUnit compilationUnit) {
 		IDocument document= viewer.getDocument();
 
-		if (!(getContextType() instanceof JavaPostfixContextType))
+		if (!(getContextType() instanceof JavaPostfixContextType)) {
 			return;
+		}
 
-		Point selection= viewer.getSelectedRange();
+		Point selection= selectedRange;
 
 		String selectedText= null;
 		if (selection.y != 0) {
