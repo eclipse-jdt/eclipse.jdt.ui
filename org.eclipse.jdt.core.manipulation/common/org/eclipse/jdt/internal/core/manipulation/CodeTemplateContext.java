@@ -17,6 +17,8 @@ import java.util.Iterator;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
@@ -43,6 +45,14 @@ public class CodeTemplateContext extends TemplateContext {
 		fProject= project;
 	}
 
+	@Override
+	public <T> T getAdapter(Class<T> adapter) {
+		if(adapter == IProject.class) {
+			return adapter.cast(getJavaProject().getProject());
+		}
+		return super.getAdapter(adapter);
+	}
+	
 	public IJavaProject getJavaProject() {
 		return fProject;
 	}

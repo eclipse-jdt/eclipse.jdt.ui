@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.templates.DocumentTemplateContext;
@@ -134,5 +136,13 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 		ICompilationUnit compilationUnit= getCompilationUnit();
 		IJavaProject project= compilationUnit == null ? null : compilationUnit.getJavaProject();
 		return project;
+	}
+	
+	@Override
+	public <T> T getAdapter(Class<T> adapter) {
+		if(adapter == IProject.class) {
+			return adapter.cast(getJavaProject().getProject());
+		}
+		return super.getAdapter(adapter);
 	}
 }
