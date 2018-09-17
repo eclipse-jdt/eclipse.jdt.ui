@@ -77,6 +77,7 @@ import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -973,8 +974,25 @@ public final class ReorgPolicyFactory {
 
 		protected IPackageFragment getDestinationAsPackageFragment() {
 			IPackageFragment javaAsPackage= getJavaDestinationAsPackageFragment(getJavaElementDestination());
-			if (javaAsPackage != null)
-				return javaAsPackage;
+			boolean copyFilesToDefaultPackage= true;
+			if (javaAsPackage != null) {
+				IJavaProject jProject= javaAsPackage.getJavaProject();
+				if (jProject != null && JavaModelUtil.is9OrHigher(jProject) && javaAsPackage.isDefaultPackage()) {
+					try {
+						IModuleDescription desc= jProject.getModuleDescription();
+						if (desc!= null && desc.exists()) {
+							copyFilesToDefaultPackage= false;
+						}
+					} catch (JavaModelException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+				if (copyFilesToDefaultPackage) {
+					return javaAsPackage;
+				}
+			}	
 			return getResourceDestinationAsPackageFragment(getResourceDestination());
 		}
 

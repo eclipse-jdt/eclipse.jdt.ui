@@ -184,7 +184,9 @@ public class ReorgCorrectionsSubProcessor {
 
 		// correct package declaration
 		int relevance= cu.getPackageDeclarations().length == 0 ? IProposalRelevance.MISSING_PACKAGE_DECLARATION : IProposalRelevance.CORRECT_PACKAGE_DECLARATION; // bug 38357
-		proposals.add(new CorrectPackageDeclarationProposal(cu, problem, relevance));
+		if (CorrectPackageDeclarationProposal.isValidProposal(cu)) {		
+			proposals.add(new CorrectPackageDeclarationProposal(cu, problem, relevance));
+		}
 
 		// move to package
 		IPackageDeclaration[] packDecls= cu.getPackageDeclarations();

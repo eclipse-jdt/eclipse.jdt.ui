@@ -24,11 +24,14 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IModuleDescription;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -93,5 +96,30 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 			JavaPlugin.log(e);
 		}
 		return (Messages.format(CorrectionMessages.CorrectPackageDeclarationProposal_change_description, JavaElementLabels.getElementLabel(parentPack, JavaElementLabels.ALL_DEFAULT)));
+	}
+	
+	public static boolean isValidProposal(ICompilationUnit cu) {
+		boolean isValid= true;
+		IPackageFragment parentPack= (IPackageFragment) cu.getParent();
+		try {			
+			IPackageDeclaration[] decls= cu.getPackageDeclarations();
+			if (parentPack.isDefaultPackage() && decls.length > 0) {
+				IJavaProject jProject = parentPack.getJavaProject();
+				if (jProject != null && JavaModelUtil.is9OrHigher(jProject)) {
+					try {
+						IModuleDescription desc= jProject.getModuleDescription();
+						if (desc!= null && desc.exists()) {
+							isValid= false;
+						}
+					} catch (JavaModelException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		} catch(JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		return isValid;
 	}
 }
