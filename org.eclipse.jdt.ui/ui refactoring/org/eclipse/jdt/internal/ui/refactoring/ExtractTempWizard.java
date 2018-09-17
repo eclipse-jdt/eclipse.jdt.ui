@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -65,6 +65,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 
 		private static final String DECLARE_FINAL= "declareFinal";  //$NON-NLS-1$
 		private static final String REPLACE_ALL= "replaceOccurrences";  //$NON-NLS-1$
+		private static final String DECLARE_TYPE_VAR= "declarevariableTypeVar"; //$NON-NLS-1$
 
 		private final boolean fInitialValid;
 		private static final String DESCRIPTION = RefactoringMessages.ExtractTempInputPage_enter_name;
@@ -101,6 +102,7 @@ public class ExtractTempWizard extends RefactoringWizard {
 
 			addReplaceAllCheckbox(result, layouter);
 			addDeclareFinalCheckbox(result, layouter);
+			addDeclareTypeVarCheckbox(result, layouter);
 
 			validateTextField(text.getText());
 
@@ -113,9 +115,11 @@ public class ExtractTempWizard extends RefactoringWizard {
 			if (fSettings == null) {
 				fSettings= getDialogSettings().addNewSection(ExtractTempWizard.DIALOG_SETTING_SECTION);
 				fSettings.put(DECLARE_FINAL, false);
+				fSettings.put(DECLARE_TYPE_VAR, false);
 				fSettings.put(REPLACE_ALL, true);
 			}
 			getExtractTempRefactoring().setDeclareFinal(fSettings.getBoolean(DECLARE_FINAL));
+			getExtractTempRefactoring().setDeclareVarType(fSettings.getBoolean(DECLARE_TYPE_VAR));
 			getExtractTempRefactoring().setReplaceAllOccurrences(fSettings.getBoolean(REPLACE_ALL));
 		}
 
@@ -145,6 +149,22 @@ public class ExtractTempWizard extends RefactoringWizard {
 					getExtractTempRefactoring().setDeclareFinal(checkBox.getSelection());
 				}
 			});
+		}
+		
+		private void addDeclareTypeVarCheckbox(Composite result, RowLayouter layouter) {
+			if (getExtractTempRefactoring().isVarTypeAllowed()) {
+				String title= RefactoringMessages.ExtractTempInputPage_declare_type_var;
+				boolean defaultValue= getExtractTempRefactoring().declareVarType();
+				final Button checkBox= createCheckbox(result,  title, defaultValue, layouter);
+				getExtractTempRefactoring().setDeclareVarType(checkBox.getSelection());
+				checkBox.addSelectionListener(new SelectionAdapter(){
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						fSettings.put(DECLARE_TYPE_VAR, checkBox.getSelection());
+						getExtractTempRefactoring().setDeclareVarType(checkBox.getSelection());
+					}
+				});
+			}
 		}
 
 		/*
