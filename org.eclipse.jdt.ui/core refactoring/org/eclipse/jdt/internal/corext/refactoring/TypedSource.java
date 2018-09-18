@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -104,7 +104,8 @@ public class TypedSource {
 				|| 	type == IJavaElement.IMPORT_DECLARATION
 				|| 	type == IJavaElement.INITIALIZER
 				|| 	type == IJavaElement.METHOD
-				|| 	type == IJavaElement.PACKAGE_DECLARATION;
+				|| 	type == IJavaElement.PACKAGE_DECLARATION
+				|| 	type == IJavaElement.JAVA_MODULE;
 	}
 
 
