@@ -225,7 +225,7 @@ public class StubUtility {
 
 	/*
 	 * Don't use this method directly, use CodeGeneration.
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getCompilationUnitContent(ICompilationUnit, String, String, String, String)
+	 * @see CodeGeneration#getCompilationUnitContent(ICompilationUnit, String, String, String, String)
 	 */
 	public static String getCompilationUnitContent(ICompilationUnit cu, String fileComment, String typeComment, String typeContent, String lineDelimiter) throws CoreException {
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
@@ -255,7 +255,7 @@ public class StubUtility {
 
 	/*
 	 * Don't use this method directly, use CodeGeneration.
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getFileComment(ICompilationUnit, String)
+	 * @see CodeGeneration#getFileComment(ICompilationUnit, String)
 	 */
 	public static String getFileComment(ICompilationUnit cu, String lineDelimiter) throws CoreException {
 		Template template= getCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, cu.getJavaProject());
@@ -272,7 +272,7 @@ public class StubUtility {
 
 	/*
 	 * Don't use this method directly, use CodeGeneration.
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeComment(ICompilationUnit, String, String[], String)
+	 * @see CodeGeneration#getTypeComment(ICompilationUnit, String, String[], String)
 	 */
 	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String[] typeParameterNames, String lineDelim) throws CoreException {
 		Template template= getCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, cu.getJavaProject());
@@ -389,7 +389,7 @@ public class StubUtility {
 	 * @param lineDelim the line delimiter to use
 	 * @return return the type body template or <code>null</code>
 	 * @throws CoreException thrown if the template could not be evaluated
-	 * See org.eclipse.jdt.ui.CodeGeneration#getTypeBody(String, ICompilationUnit, String, String)
+	 * See CodeGeneration#getTypeBody(String, ICompilationUnit, String, String)
 	 */
 	public static String getTypeBody(String templateID, ICompilationUnit cu, String typeName, String lineDelim) throws CoreException {
 		if (!VALID_TYPE_BODY_TEMPLATES.contains(templateID)) {
@@ -409,7 +409,7 @@ public class StubUtility {
 
 	/*
 	 * Don't use this method directly, use CodeGeneration.
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, String, String[], String[], String, String[], IMethod, String)
+	 * @see CodeGeneration#getMethodComment(ICompilationUnit, String, String, String[], String[], String, String[], IMethod, String)
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, String[] typeParameterNames,
 			IMethod target, boolean delegate, String lineDelimiter) throws CoreException {
@@ -526,7 +526,7 @@ public class StubUtility {
 
 	/*
 	 * Don't use this method directly, use CodeGeneration.
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getSetterComment(ICompilationUnit, String, String, String, String, String, String, String)
+	 * @see CodeGeneration#getSetterComment(ICompilationUnit, String, String, String, String, String, String, String)
 	 */
 	public static String getSetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String paramName, String bareFieldName, String lineDelimiter)
 			throws CoreException {
@@ -550,7 +550,7 @@ public class StubUtility {
 
 	/*
 	 * Don't use this method directly, use CodeGeneration.
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getGetterComment(ICompilationUnit, String, String, String, String, String, String)
+	 * @see CodeGeneration#getGetterComment(ICompilationUnit, String, String, String, String, String, String)
 	 */
 	public static String getGetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String bareFieldName, String lineDelimiter) throws CoreException {
 		String templateName= CodeTemplateContextType.GETTERCOMMENT_ID;
@@ -609,7 +609,7 @@ public class StubUtility {
 	/*
 	 * Don't use this method directly, use CodeGeneration.
 	 * This method should work with all AST levels.
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, MethodDeclaration, boolean, String, String[], String)
+	 * @see CodeGeneration#getMethodComment(ICompilationUnit, String, MethodDeclaration, boolean, String, String[], String)
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, boolean isDeprecated, String targetName, String targetMethodDeclaringTypeName,
 			String[] targetMethodParameterTypeNames, boolean delegate, String lineDelimiter) throws CoreException {

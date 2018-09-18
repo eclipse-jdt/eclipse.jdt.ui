@@ -12,7 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
  *******************************************************************************/
-package org.eclipse.jdt.ui;
+package org.eclipse.jdt.core.manipulation;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -21,6 +21,9 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
+import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+
 /**
  * Class that offers access to the templates contained in the 'code templates' preference page.
  *
@@ -28,13 +31,11 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
  * This class is not intended to be subclassed or instantiated by clients.
  * </p>
  *
- * @since 2.1
+ * @since 1.11
  *
  * @noinstantiate This class is not intended to be instantiated by clients.
  * @noextend This class is not intended to be subclassed by clients.
- * @deprecated See {@link org.eclipse.jdt.core.manipulation.CodeGeneration}
  */
-@Deprecated
 public class CodeGeneration {
 
 
@@ -43,28 +44,33 @@ public class CodeGeneration {
 	 * for a new class type body.
 	 * @since 3.2
 	 */
-	public static final String CLASS_BODY_TEMPLATE_ID= org.eclipse.jdt.core.manipulation.CodeGeneration.CLASS_BODY_TEMPLATE_ID;
+	public static final String CLASS_BODY_TEMPLATE_ID= CodeTemplateContextType.CLASSBODY_ID;
 
 	/**
 	 * Constant ID for the type kind to be used in {@link #getTypeBody(String, ICompilationUnit, String, String)} to get the code template used
 	 * for a new interface type body.
 	 * @since 3.2
 	 */
-	public static final String INTERFACE_BODY_TEMPLATE_ID= org.eclipse.jdt.core.manipulation.CodeGeneration.INTERFACE_BODY_TEMPLATE_ID;
+	public static final String INTERFACE_BODY_TEMPLATE_ID= CodeTemplateContextType.INTERFACEBODY_ID;
 
 	/**
 	 * Constant ID for the type kind to be used in {@link #getTypeBody(String, ICompilationUnit, String, String)} to get the code template used
 	 * for a new enum type body.
 	 * @since 3.2
 	 */
-	public static final String ENUM_BODY_TEMPLATE_ID= org.eclipse.jdt.core.manipulation.CodeGeneration.ENUM_BODY_TEMPLATE_ID;
+	public static final String ENUM_BODY_TEMPLATE_ID= CodeTemplateContextType.ENUMBODY_ID;
 
 	/**
 	 * Constant ID for the type kind to be used in {@link #getTypeBody(String, ICompilationUnit, String, String)} to get the code template used
 	 * for a new annotation type body.
 	 * @since 3.2
 	 */
-	public static final String ANNOTATION_BODY_TEMPLATE_ID= org.eclipse.jdt.core.manipulation.CodeGeneration.ANNOTATION_BODY_TEMPLATE_ID;
+	public static final String ANNOTATION_BODY_TEMPLATE_ID= CodeTemplateContextType.ANNOTATIONBODY_ID;
+
+	private static final String[] EMPTY= new String[0];
+
+	private CodeGeneration() {
+	}
 
 	/**
 	 * Returns the content for a new compilation unit using the 'new Java file' code template.
@@ -77,7 +83,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
 	public static String getCompilationUnitContent(ICompilationUnit cu, String typeComment, String typeContent, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getCompilationUnitContent(cu, typeComment, typeContent, lineDelimiter);
+		return getCompilationUnitContent(cu, getFileComment(cu, lineDelimiter), typeComment, typeContent, lineDelimiter);
 	}
 
 	/**
@@ -94,7 +100,7 @@ public class CodeGeneration {
 	 * @since 3.1
 	 */
 	public static String getCompilationUnitContent(ICompilationUnit cu, String fileComment, String typeComment, String typeContent, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getCompilationUnitContent(cu, fileComment, typeComment, typeContent, lineDelimiter);
+		return StubUtility.getCompilationUnitContent(cu, fileComment, typeComment, typeContent, lineDelimiter);
 	}
 
 	/**
@@ -106,7 +112,7 @@ public class CodeGeneration {
 	 * @since 3.1
 	 */
 	public static String getFileComment(ICompilationUnit cu, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getFileComment(cu, lineDelimiter);
+		return StubUtility.getFileComment(cu, lineDelimiter);
 	}
 
 	/**
@@ -119,7 +125,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
 	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getTypeComment(cu, typeQualifiedName, lineDelimiter);
+		return StubUtility.getTypeComment(cu, typeQualifiedName, EMPTY, lineDelimiter);
 	}
 
 	/**
@@ -134,7 +140,7 @@ public class CodeGeneration {
 	 * @since 3.1
 	 */
 	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String[] typeParameterNames, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getTypeComment(cu, typeQualifiedName, typeParameterNames, lineDelimiter);
+		return StubUtility.getTypeComment(cu, typeQualifiedName, typeParameterNames, lineDelimiter);
 	}
 
 	/**
@@ -149,7 +155,7 @@ public class CodeGeneration {
 	 * @since 3.2
 	 */
 	public static String getTypeBody(String typeKind, ICompilationUnit cu, String typeName, String lineDelim) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getTypeBody(typeKind, cu, typeName, lineDelim);
+		return StubUtility.getTypeBody(typeKind, cu, typeName, lineDelim);
 	}
 
 	/**
@@ -163,7 +169,7 @@ public class CodeGeneration {
 	 * @since 3.0
 	 */
 	public static String getFieldComment(ICompilationUnit cu, String typeName, String fieldName, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getFieldComment(cu, typeName, fieldName, lineDelimiter);
+		return StubUtility.getFieldComment(cu, typeName, fieldName, lineDelimiter);
 	}
 
 	/**
@@ -183,7 +189,15 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, MethodDeclaration decl, IMethodBinding overridden, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getMethodComment(cu, declaringTypeName, decl, overridden, lineDelimiter);
+		if (overridden != null) {
+			overridden= overridden.getMethodDeclaration();
+			String declaringClassQualifiedName= overridden.getDeclaringClass().getQualifiedName();
+			String linkToMethodName= overridden.getName();
+			String[] parameterTypesQualifiedNames= StubUtility.getParameterTypeNamesForSeeTag(overridden);
+			return StubUtility.getMethodComment(cu, declaringTypeName, decl, overridden.isDeprecated(), linkToMethodName, declaringClassQualifiedName, parameterTypesQualifiedNames, false, lineDelimiter);
+		} else {
+			return StubUtility.getMethodComment(cu, declaringTypeName, decl, false, null, null, null, false, lineDelimiter);
+		}
 	}
 
 	/**
@@ -209,7 +223,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, IMethod overridden, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getMethodComment(cu, declaringTypeName, methodName, paramNames, excTypeSig, retTypeSig, overridden, lineDelimiter);
+		return StubUtility.getMethodComment(cu, declaringTypeName, methodName, paramNames, excTypeSig, retTypeSig, EMPTY, overridden, false, lineDelimiter);
 	}
 
 	/**
@@ -237,7 +251,7 @@ public class CodeGeneration {
 	 * @since 3.1
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, String[] typeParameterNames, IMethod overridden, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getMethodComment(cu, declaringTypeName, methodName, paramNames, excTypeSig, retTypeSig, typeParameterNames, overridden, lineDelimiter);
+		return StubUtility.getMethodComment(cu, declaringTypeName, methodName, paramNames, excTypeSig, retTypeSig, typeParameterNames, overridden, false, lineDelimiter);
 	}
 
 	/**
@@ -254,7 +268,12 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
 	public static String getMethodComment(IMethod method, IMethod overridden, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getMethodComment(method, overridden, lineDelimiter);
+		String retType= method.isConstructor() ? null : method.getReturnType();
+		String[] paramNames= method.getParameterNames();
+		String[] typeParameterNames= StubUtility.shouldGenerateMethodTypeParameterTags(method.getJavaProject()) ? StubUtility.getTypeParameterNames(method.getTypeParameters()) : new String[0];
+
+		return StubUtility.getMethodComment(method.getCompilationUnit(), method.getDeclaringType().getElementName(),
+			method.getElementName(), paramNames, method.getExceptionTypes(), retType, typeParameterNames, overridden, false, lineDelimiter);
 	}
 
 	/**
@@ -283,7 +302,7 @@ public class CodeGeneration {
 	 */
 
 	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, MethodDeclaration decl, boolean isDeprecated, String overriddenMethodName, String overriddenMethodDeclaringTypeName, String[] overriddenMethodParameterTypeNames, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getMethodComment(cu, declaringTypeName, decl, isDeprecated, overriddenMethodName, overriddenMethodDeclaringTypeName, overriddenMethodParameterTypeNames, lineDelimiter);
+		return StubUtility.getMethodComment(cu, declaringTypeName, decl, isDeprecated, overriddenMethodName, overriddenMethodDeclaringTypeName, overriddenMethodParameterTypeNames, false, lineDelimiter);
 	}
 
 	/**
@@ -303,7 +322,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
 	public static String getMethodBodyContent(ICompilationUnit cu, String declaringTypeName, String methodName, boolean isConstructor, String bodyStatement, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getMethodBodyContent(cu, declaringTypeName, methodName, isConstructor, bodyStatement, lineDelimiter);
+		return StubUtility.getMethodBodyContent(isConstructor, cu.getJavaProject(), declaringTypeName, methodName, bodyStatement, lineDelimiter);
 	}
 
 	/**
@@ -323,7 +342,7 @@ public class CodeGeneration {
 	 * @since 3.0
 	 */
 	public static String getGetterMethodBodyContent(ICompilationUnit cu, String declaringTypeName, String methodName, String fieldName, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getGetterMethodBodyContent(cu, declaringTypeName, methodName, fieldName, lineDelimiter);
+		return StubUtility.getGetterMethodBodyContent(cu.getJavaProject(), declaringTypeName, methodName, fieldName, lineDelimiter);
 	}
 
 	/**
@@ -344,7 +363,7 @@ public class CodeGeneration {
 	 * @since 3.0
 	 */
 	public static String getSetterMethodBodyContent(ICompilationUnit cu, String declaringTypeName, String methodName, String fieldName, String paramName, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getSetterMethodBodyContent(cu, declaringTypeName, methodName, fieldName, paramName, lineDelimiter);
+		return StubUtility.getSetterMethodBodyContent(cu.getJavaProject(), declaringTypeName, methodName, fieldName, paramName, lineDelimiter);
 	}
 
 	/**
@@ -366,7 +385,7 @@ public class CodeGeneration {
 	 * @since 3.0
 	 */
 	public static String getGetterComment(ICompilationUnit cu, String declaringTypeName, String methodName, String fieldName, String fieldType, String bareFieldName, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getGetterComment(cu, declaringTypeName, methodName, fieldName, fieldType, bareFieldName, lineDelimiter);
+		return StubUtility.getGetterComment(cu, declaringTypeName, methodName, fieldName, fieldType, bareFieldName, lineDelimiter);
 	}
 
 	/**
@@ -389,6 +408,7 @@ public class CodeGeneration {
 	 * @since 3.0
 	 */
 	public static String getSetterComment(ICompilationUnit cu, String declaringTypeName, String methodName, String fieldName, String fieldType, String paramName, String bareFieldName, String lineDelimiter) throws CoreException {
-		return org.eclipse.jdt.core.manipulation.CodeGeneration.getSetterComment(cu, declaringTypeName, methodName, fieldName, fieldType, paramName, bareFieldName, lineDelimiter);
+		return StubUtility.getSetterComment(cu, declaringTypeName, methodName, fieldName, fieldType, paramName, bareFieldName, lineDelimiter);
 	}
 }
+
