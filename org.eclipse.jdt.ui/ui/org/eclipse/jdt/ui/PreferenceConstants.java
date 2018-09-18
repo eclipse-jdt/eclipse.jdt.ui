@@ -31,6 +31,8 @@ import org.eclipse.jface.preference.JFacePreferences;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
@@ -148,7 +150,7 @@ public class PreferenceConstants {
 	 * will abbreviate 'javax.management.monitor' to '&lt;JMX&gt;.monitor'. A '#' at the beginning
 	 * of a line disables an entry.
 	 * </p>
-	 * 
+	 *
 	 * @since 3.7
 	 */
 	public static final String APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW= "org.eclipse.jdt.ui.pkgNameAbbreviationPatternForPackagesView"; //$NON-NLS-1$
@@ -158,7 +160,7 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 * 
+	 *
 	 * @see #APPEARANCE_PKG_NAME_ABBREVIATION_PATTERN_FOR_PKG_VIEW
 	 * @since 3.7
 	 */
@@ -319,7 +321,7 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 * 
+	 *
 	 * @since 3.0
 	 */
 	public static final String CODEGEN_IS_FOR_GETTERS= "org.eclipse.jdt.ui.gettersetter.use.is"; //$NON-NLS-1$
@@ -740,7 +742,7 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 * 
+	 *
 	 * @since 3.8
 	 */
 	public final static String EDITOR_HIGHLIGHT_BRACKET_AT_CARET_LOCATION= "highlightBracketAtCaretLocation"; //$NON-NLS-1$
@@ -751,7 +753,7 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 * 
+	 *
 	 * @since 3.8
 	 */
 	public final static String EDITOR_ENCLOSING_BRACKETS= "enclosingBrackets"; //$NON-NLS-1$
@@ -2989,6 +2991,17 @@ public class PreferenceConstants {
 	public final static String CODEASSIST_AUTOINSERT= "content_assist_autoinsert"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls if the Java code assist ignores or considers the
+	 * additional trigger chars for completion proposals.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 3.16
+	 * @see ContentAssistant#enableCompletionProposalTriggerChars(boolean)
+	 */
+	public static final String CODEASSIST_DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS= "content_assist_disable_completion_trigger_chars"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls if the Java code assist adds import
 	 * statements.
 	 * <p>
@@ -3339,9 +3352,9 @@ public class PreferenceConstants {
 	 *		<li>rank= enabled ? cycleState : cycleState - 65535)</li>
 	 * </ul></li>
 	 * </ul>
-	 * 
+	 *
 	 * </p>
-	 * 
+	 *
 	 * @since 3.2
 	 */
 	public static final String CODEASSIST_CATEGORY_ORDER= "content_assist_category_order"; //$NON-NLS-1$
@@ -3423,7 +3436,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>String</code>: semicolon separated list of fully qualified type names
 	 * appended with ".*" or "." + method name.
 	 * </p>
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	public static final String PREF_DEFAULT_EXPAND_WITH_CONSTRUCTORS_MEMBERS= "CallHierarchy.defaultExpandWithConstructorsMembers"; //$NON-NLS-1$
@@ -3434,7 +3447,7 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
-	 * 
+	 *
 	 * @since 3.6
 	 */
 	public static final String PREF_ANONYMOUS_EXPAND_WITH_CONSTRUCTORS= "CallHierarchy.anonymousExpandWithConstructors"; //$NON-NLS-1$
@@ -3935,6 +3948,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 0);
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
+		store.setDefault(PreferenceConstants.CODEASSIST_DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS, false);
 
 		// Set the value for the deprecated color constants
 		initializeDeprecatedColorConstants(store);
@@ -4240,7 +4254,7 @@ public class PreferenceConstants {
 
 	/**
 	 * Initializes deprecated color constants.
-	 * 
+	 *
 	 * @param store the preference store
 	 * @since 3.6
 	 */

@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
@@ -167,6 +167,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_highlightEnclosingBrackets;
 	public static String JavaEditorPreferencePage_highlightMatchingBracket;
 	public static String JavaEditorPreferencePage_insertSingleProposalsAutomatically;
+	public static String JavaEditorPreferencePage_disableCompletionProposalTriggerChars;
 	public static String JavaEditorPreferencePage_showOnlyProposalsVisibleInTheInvocationContext;
 	public static String JavaEditorPreferencePage_presentProposalsInAlphabeticalOrder;
 	public static String JavaEditorPreferencePage_coloring_element;
@@ -309,7 +310,7 @@ public final class PreferencesMessages extends NLS {
 	public static String AppearancePreferencePage_pkgNamePatternAbbreviateEnable_label;
 	public static String AppearancePreferencePage_pkgNamePatternAbbreviate_label;
 	public static String AppearancePreferencePage_showMembersInPackagesView;
-	public static String AppearancePreferencePage_decorateTestCodeContainerIcons;	
+	public static String AppearancePreferencePage_decorateTestCodeContainerIcons;
 	public static String AppearancePreferencePage_stackViewsVerticallyInTheJavaBrowsingPerspective;
 	public static String AppearancePreferencePage_note;
 	public static String AppearancePreferencePage_preferenceOnlyEffectiveForNewPerspectives;

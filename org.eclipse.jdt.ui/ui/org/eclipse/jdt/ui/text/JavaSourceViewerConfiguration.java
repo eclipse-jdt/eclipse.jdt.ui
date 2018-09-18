@@ -377,7 +377,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 	/**
 	 * Initializes the scanners.
-	 * 
+	 *
 	 * @param isModuleInfo <code>true</code> if used for module-info code
 	 *
 	 * @since 3.0

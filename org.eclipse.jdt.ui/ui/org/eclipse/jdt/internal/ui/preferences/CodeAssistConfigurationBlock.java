@@ -67,6 +67,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_CODEASSIST_AUTOACTIVATION= getJDTUIKey(PreferenceConstants.CODEASSIST_AUTOACTIVATION);
 	private static final Key PREF_CODEASSIST_AUTOACTIVATION_DELAY= getJDTUIKey(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY);
 	private static final Key PREF_CODEASSIST_AUTOINSERT= getJDTUIKey(PreferenceConstants.CODEASSIST_AUTOINSERT);
+	private static final Key PREF_CODEASSIST_DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS= getJDTUIKey(PreferenceConstants.CODEASSIST_DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS);
 	private static final Key PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA= getJDTUIKey(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA);
 	private static final Key PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC= getJDTUIKey(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC);
 	private static final Key PREF_CODEASSIST_SHOW_VISIBLE_PROPOSALS= getJDTUIKey(PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS);
@@ -100,7 +101,8 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_CODEASSIST_PREFIX_COMPLETION,
 				PREF_CODEASSIST_DEPRECATION_CHECK,
 				PREF_CODEASSIST_CAMEL_CASE_MATCH,
-				PREF_CODEASSIST_SUBSTRING_MATCH
+				PREF_CODEASSIST_SUBSTRING_MATCH,
+				PREF_CODEASSIST_DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS
 		};
 	}
 
@@ -168,6 +170,8 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.JavaEditorPreferencePage_completePrefixes;
 		addCheckBox(composite, label, PREF_CODEASSIST_PREFIX_COMPLETION, trueFalse, 0);
+
+		addCheckBox(composite, PreferencesMessages.JavaEditorPreferencePage_disableCompletionProposalTriggerChars, PREF_CODEASSIST_DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS, trueFalse, 0);
 
 		label= PreferencesMessages.JavaEditorPreferencePage_automaticallyAddImportInsteadOfQualifiedName;
 		Button master= addCheckBox(composite, label, PREF_CODEASSIST_ADDIMPORT, trueFalse, 0);
@@ -238,7 +242,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	 */
 	protected static void createSelectionDependency(final Button master, final Control slave) {
 		master.addSelectionListener(new SelectionAdapter() {
-			
+
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				deepSetEnabled(slave, master.getSelection());
@@ -278,10 +282,10 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.CodeAssistConfigurationBlock_matchCamelCase_label;
 		addCheckBox(composite, label, PREF_CODEASSIST_CAMEL_CASE_MATCH, enabledDisabled, 0);
-		
+
 		label= PreferencesMessages.CodeAssistConfigurationBlock_matchSubstring_label;
 		addCheckBox(composite, label, PREF_CODEASSIST_SUBSTRING_MATCH, enabledDisabled, 0);
-		
+
 		label= PreferencesMessages.JavaEditorPreferencePage_showOnlyProposalsVisibleInTheInvocationContext;
 		addCheckBox(composite, label, PREF_CODEASSIST_SHOW_VISIBLE_PROPOSALS, trueFalse, 0);
 
