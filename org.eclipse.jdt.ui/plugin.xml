@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
-<!-- ====================================================================== -->
-<!-- Copyright (c) 2000, 2018 IBM Corporation and others.                   -->
-<!-- All rights reserved. This program and the accompanying materials       -->
-<!-- are made available under the terms of the Eclipse Public License v1.0  -->
-<!-- which accompanies this distribution, and is available at               -->
-<!-- http://www.eclipse.org/legal/epl-v10.html                              -->
-<!--                                                                        -->
-<!-- Contributors:                                                          -->
-<!--     IBM Corporation - initial API and implementation                   -->
-<!--     Francis Upton IV, Oakland Software <francisu@ieee.org> - Add support for Go Into with the ProjectExplorer - https://bugs.eclipse.org/bugs/show_bug.cgi?id=262091 -->
-<!--     Troy Bishop <tjbishop@ca.ibm.com> - Add support for importing/exporting Java Code Style preferences - https://bugs.eclipse.org/bugs/show_bug.cgi?id=304395 -->
-<!--     Eugene Lucash <e.lucash@gmail.com> - [quick assist] Add key binding for Extract method Quick Assist - https://bugs.eclipse.org/424166 -->
-<!--     Frits Jalvingh <jal@etc.to> - Contribution for Bug 459831 - [launching] Support attaching external annotations to a JRE container -->
-<!-- ====================================================================== -->
+<!--
+     Copyright (c) 2000, 2006 IBM Corporation and others.
+
+     This program and the accompanying materials
+     are made available under the terms of the Eclipse Public License 2.0
+     which accompanies this distribution, and is available at
+     https://www.eclipse.org/legal/epl-2.0/
+
+     SPDX-License-Identifier: EPL-2.0
+
+     Contributors:
+         IBM Corporation - initial API and implementation
+         Francis Upton IV, Oakland Software <francisu@ieee.org> - Add support for Go Into with the ProjectExplorer - https://bugs.eclipse.org/bugs/show_bug.cgi?id=262091
+         Troy Bishop <tjbishop@ca.ibm.com> - Add support for importing/exporting Java Code Style preferences - https://bugs.eclipse.org/bugs/show_bug.cgi?id=304395
+         Eugene Lucash <e.lucash@gmail.com> - [quick assist] Add key binding for Extract method Quick Assist - https://bugs.eclipse.org/424166
+         Frits Jalvingh <jal@etc.to> - Contribution for Bug 459831 - [launching] Support attaching external annotations to a JRE container 
+ -->
 <plugin>
 
    <extension-point id="javaElementFilters" name="%elementFiltersName" schema="schema/javaElementFilters.exsd"/>
@@ -243,7 +246,7 @@
             id="org.eclipse.jdt.ui.text.correction.AdvancedQuickAssistProcessor">
       </quickAssistProcessor>
    </extension>
-   
+   <!-- While adding a new classpathFixProcessor, also update plugin.xml in its clients. See Bug 537470  -->  
    <extension
          point="org.eclipse.jdt.ui.classpathFixProcessors">
       <classpathFixProcessor

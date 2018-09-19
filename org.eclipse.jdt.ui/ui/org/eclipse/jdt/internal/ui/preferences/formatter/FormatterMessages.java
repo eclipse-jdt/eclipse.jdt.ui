@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2018 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -90,7 +93,10 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_comments_tree_comments;
 	public static String FormatterModifyDialog_comments_tree_javadocs;
 	public static String FormatterModifyDialog_indentation_info_blank_lines_to_preserve;
+	public static String FormatterModifyDialog_indentation_pref_align_assignment_statements_on_columns;
 	public static String FormatterModifyDialog_indentation_pref_align_fields_in_columns;
+	public static String FormatterModifyDialog_indentation_pref_align_variable_declarations_on_columns;
+	public static String FormatterModifyDialog_indentation_pref_align_with_spaces;
 	public static String FormatterModifyDialog_indentation_pref_blank_lines_separating_independent_groups;
 	public static String FormatterModifyDialog_indentation_pref_indent_break_statements;
 	public static String FormatterModifyDialog_indentation_pref_indent_declarations_within_annot_decl;
@@ -109,6 +115,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_indentation_tab_policy_MIXED;
 	public static String FormatterModifyDialog_indentation_tab_policy_SPACE;
 	public static String FormatterModifyDialog_indentation_tab_policy_TAB;
+	public static String FormatterModifyDialog_indentation_tree_align_items_in_columns;
 	public static String FormatterModifyDialog_indentation_tree_indentation;
 	public static String FormatterModifyDialog_indentation_tree_indented_elements;
 	public static String FormatterModifyDialog_lineWrap_indentation_policy_label;
@@ -119,6 +126,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_lineWrap_pref_binary_exprs;
 	public static String FormatterModifyDialog_lineWrap_pref_catch;
 	public static String FormatterModifyDialog_lineWrap_pref_compact_if_else;
+	public static String FormatterModifyDialog_lineWrap_pref_compact_loops;
 	public static String FormatterModifyDialog_lineWrap_pref_conditionals;
 	public static String FormatterModifyDialog_lineWrap_pref_constant_arguments;
 	public static String FormatterModifyDialog_lineWrap_pref_constants;
@@ -189,7 +197,10 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_newLines_pref_keep_else_if_on_one_line;
 	public static String FormatterModifyDialog_newLines_pref_keep_else_on_same_line;
 	public static String FormatterModifyDialog_newLines_pref_keep_guardian_clause_on_one_line;
+	public static String FormatterModifyDialog_newLines_pref_keep_simple_do_while_body_on_one_line;
+	public static String FormatterModifyDialog_newLines_pref_keep_simple_for_body_on_one_line;
 	public static String FormatterModifyDialog_newLines_pref_keep_simple_if_on_one_line;
+	public static String FormatterModifyDialog_newLines_pref_keep_simple_while_body_on_one_line;
 	public static String FormatterModifyDialog_newLines_pref_keep_then_on_same_line;
 	public static String FormatterModifyDialog_newLines_pref_local_variables;
 	public static String FormatterModifyDialog_newLines_pref_methods;
@@ -202,6 +213,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_newLines_tree_control_statements;
 	public static String FormatterModifyDialog_newLines_tree_if_else;
 	public static String FormatterModifyDialog_newLines_tree_new_lines;
+	public static String FormatterModifyDialog_newLines_tree_simple_loops;
 	public static String FormatterModifyDialog_offOn_description;
 	public static String FormatterModifyDialog_offOn_error_endsWithWhitespace;
 	public static String FormatterModifyDialog_offOn_error_startsWithWhitespace;

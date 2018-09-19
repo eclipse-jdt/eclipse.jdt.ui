@@ -1,12 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - Generation of equals and hashcode with java 7 Objects.equals and Objects.hashcode - https://bugs.eclipse.org/424214
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
@@ -64,7 +68,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 		return setUpTest(new TestSuite(THIS));
 	}
 
-	public void runOperation(IType type, IField[] fields, IJavaElement insertBefore, boolean createComments, boolean useInstanceof, boolean useBlocks, boolean force) throws CoreException {
+	public void runOperation(IType type, IField[] fields, IJavaElement insertBefore, boolean createComments, boolean useInstanceof, boolean useJ7HashEquals, boolean useBlocks, boolean force) throws CoreException {
 
 		RefactoringASTParser parser= new RefactoringASTParser(IASTSharedValues.SHARED_AST_LEVEL);
 		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
@@ -80,14 +84,18 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 		AbstractTypeDeclaration decl= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, unit);
 		ITypeBinding binding= decl.resolveBinding();
-		GenerateHashCodeEqualsOperation op= new GenerateHashCodeEqualsOperation(binding, fKeys, unit, insertBefore, fSettings, useInstanceof, force, true, true);
+		GenerateHashCodeEqualsOperation op= new GenerateHashCodeEqualsOperation(binding, fKeys, unit, insertBefore, fSettings, useInstanceof, useJ7HashEquals, force, true, true);
 		op.setUseBlocksForThen(useBlocks);
 		op.run(new NullProgressMonitor());
 		JavaModelUtil.reconcile(type.getCompilationUnit());
 	}
 
 	public void runOperation(IType type, IField[] fields, boolean useInstanceof, boolean force) throws CoreException {
-		runOperation(type, fields, null, true, useInstanceof, false, force);
+		runOperation(type, fields, null, true, useInstanceof, false, false, force);
+	}
+
+	public void runJ7Operation(IType type, IField[] fields, boolean useInstanceof) throws CoreException {
+		runOperation(type, fields, null, true, useInstanceof, true, false, false);
 	}
 
 	private IField[] getFields(IType type, String[] fieldNames) {
@@ -493,7 +501,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"someInt" });
-		runOperation(a.getType("A"), fields, a.getType("A").getMethod("bar", new String[0]), true, false, false, false);
+		runOperation(a.getType("A"), fields, a.getType("A").getMethod("bar", new String[0]), true, false, false, false, false);
 
 		String expected= "package p;\r\n" +
 				"\r\n" +
@@ -1056,6 +1064,775 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	}
 
 	/**
+	 * Test with J7+ Objects.hash and Objects.equals method calls
+	 * Using non-array instance variables and Enum
+	 * 
+	 * @throws Exception
+	 */
+	public void testHashCodeEqualsIn17() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"import java.util.List;\r\n" +
+				"import java.lang.annotation.ElementType;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"	ElementType anEnum;\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings", "anEnum" });
+		runJ7Operation(a.getType("A"), fields, false);
+
+		String expected= "package p;\r\n" +
+				"import java.util.List;\r\n" +
+				"import java.util.Objects;\r\n" +
+				"import java.lang.annotation.ElementType;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"	ElementType anEnum;\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#hashCode()\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		return Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings, anEnum);\r\n" +
+				"	}\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (obj == null)\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		A other = (A) obj;\r\n" +
+				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && anEnum == other.anEnum;\r\n"
+				+
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"";
+
+		compareSource(expected, a.getSource());
+	}
+	
+	/**
+	 * Test with J7+ Objects.hash and Objects.equals method calls
+	 * Using unique non-array instance variables
+	 * 
+	 * @throws Exception
+	 */
+	public void testHashCodeEqualsUniqueFieldIn17() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"public class A {\r\n" +
+				"	String aString;\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		IField[] fields= getFields(a.getType("A"), new String[] { "aString" });
+		runJ7Operation(a.getType("A"), fields, false);
+
+		String expected= "package p;\r\n" +
+				"\r\n" +
+				"import java.util.Objects;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	String aString;\r\n" +
+				"\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#hashCode()\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		return Objects.hash(aString);\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (obj == null)\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		A other = (A) obj;\r\n" +
+				"		return Objects.equals(aString, other.aString);\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"";
+
+		compareSource(expected, a.getSource());
+	}
+	
+	/**
+	 * Test with J7+ Objects.hash and Objects.equals method calls
+	 * Using non-array instance variables with 'instanceof' comparison
+	 * 
+	 * @throws Exception
+	 */
+	public void testHashCodeEqualsInstanceOfIn17() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"import java.util.List;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings" });
+		runJ7Operation(a.getType("A"), fields, true);
+
+		String expected= "package p;\r\n" +
+				"import java.util.List;\r\n" +
+				"import java.util.Objects;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#hashCode()\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		return Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
+				"	}\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (obj == null)\r\n" +
+				"			return false;\r\n" +
+				"		if (!(obj instanceof A))\r\n" +
+				"			return false;\r\n" +
+				"		A other = (A) obj;\r\n" +
+				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings);\r\n"
+				+
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"";
+
+		compareSource(expected, a.getSource());
+	}
+	
+	/**
+	 * Test with J7+ Objects.hash and Objects.equals method calls
+	 * Using 1-dim array amongst other instance variables
+	 * 
+	 * @throws Exception
+	 */
+	public void testHashCodeEqualsArrayIn17() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"import java.util.List;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"	int[] anArrayOfInts;\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings", "anArrayOfInts" });
+		runJ7Operation(a.getType("A"), fields, false);
+
+		String expected= "package p;\r\n" +
+				"import java.util.Arrays;\r\n" +
+				"import java.util.List;\r\n" +
+				"import java.util.Objects;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"	int[] anArrayOfInts;\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#hashCode()\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		final int prime = 31;\r\n" +
+				"		int result = 1;\r\n" +
+				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
+				"		result = prime * result + Arrays.hashCode(anArrayOfInts);\r\n" +
+				"		return result;\r\n" +
+				"	}\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (obj == null)\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		A other = (A) obj;\r\n" +
+				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.equals(anArrayOfInts, other.anArrayOfInts);\r\n"
+				+
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"";
+
+		compareSource(expected, a.getSource());
+	}
+
+	/**
+	 * Test with J7+ Objects.hash and Objects.equals method calls
+	 * Using 1-dim Cloneable array amongst other instance variables
+	 * @throws Exception
+	 */
+	public void testHashCodeEqualsCloneableArrayIn17() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"import java.util.List;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"	Cloneable[] anArrayOfCloneables;\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings", "anArrayOfCloneables" });
+		runJ7Operation(a.getType("A"), fields, false);
+
+		String expected= "package p;\r\n" +
+				"import java.util.Arrays;\r\n" +
+				"import java.util.List;\r\n" +
+				"import java.util.Objects;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"	Cloneable[] anArrayOfCloneables;\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#hashCode()\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		final int prime = 31;\r\n" +
+				"		int result = 1;\r\n" +
+				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
+				"		result = prime * result + Arrays.deepHashCode(anArrayOfCloneables);\r\n" +
+				"		return result;\r\n" +
+				"	}\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (obj == null)\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		A other = (A) obj;\r\n" +
+				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.deepEquals(anArrayOfCloneables, other.anArrayOfCloneables);\r\n"
+				+
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"";
+
+		compareSource(expected, a.getSource());
+	}
+	
+	/**
+	 * Test with J7+ Objects.hash and Objects.equals method calls
+	 * Using 1-dim Serializable array amongst other instance variables
+	 * @throws Exception
+	 */
+	public void testHashCodeEqualsSerializableArrayIn17() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"import java.util.List;\r\n" +
+				"import java.io.Serializable;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"	Serializable[] anArrayOfSerializables;\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings", "anArrayOfSerializables" });
+		runJ7Operation(a.getType("A"), fields, false);
+
+		String expected= "package p;\r\n" +
+				"import java.util.Arrays;\r\n" +
+				"import java.util.List;\r\n" +
+				"import java.util.Objects;\r\n" +
+				"import java.io.Serializable;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"	Serializable[] anArrayOfSerializables;\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#hashCode()\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		final int prime = 31;\r\n" +
+				"		int result = 1;\r\n" +
+				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
+				"		result = prime * result + Arrays.deepHashCode(anArrayOfSerializables);\r\n" +
+				"		return result;\r\n" +
+				"	}\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (obj == null)\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		A other = (A) obj;\r\n" +
+				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.deepEquals(anArrayOfSerializables, other.anArrayOfSerializables);\r\n"
+				+
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"";
+
+		compareSource(expected, a.getSource());
+	}
+	
+	/**
+	 * Test with J7+ Objects.hash and Objects.equals method calls
+	 * Using 1-dim Object array amongst other instance variables
+	 * @throws Exception
+	 */
+	public void testHashCodeEqualsObjectArrayIn17() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"import java.util.List;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"	Object[] anArrayOfObjects;\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings", "anArrayOfObjects" });
+		runJ7Operation(a.getType("A"), fields, false);
+
+		String expected= "package p;\r\n" +
+				"import java.util.Arrays;\r\n" +
+				"import java.util.List;\r\n" +
+				"import java.util.Objects;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"	Object[] anArrayOfObjects;\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#hashCode()\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		final int prime = 31;\r\n" +
+				"		int result = 1;\r\n" +
+				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
+				"		result = prime * result + Arrays.deepHashCode(anArrayOfObjects);\r\n" +
+				"		return result;\r\n" +
+				"	}\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (obj == null)\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		A other = (A) obj;\r\n" +
+				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.deepEquals(anArrayOfObjects, other.anArrayOfObjects);\r\n"
+				+
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"";
+
+		compareSource(expected, a.getSource());
+	}
+	
+	/**
+	 * Test with J7+ Objects.hash and Objects.equals method calls
+	 * Using 1-dim type variable arrays extending Serializable and Number
+	 * @throws Exception
+	 */
+	public void testHashCodeEqualsTypeVariableArrayIn17() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"import java.io.Serializable;\r\n" +
+				"public class A <S extends Serializable, N extends Number> {\r\n" +
+				"	S[] anArrayOfS;\r\n" +
+				"	N[] anArrayOfN;\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		IField[] fields= getFields(a.getType("A"), new String[] { "anArrayOfS", "anArrayOfN" });
+		runJ7Operation(a.getType("A"), fields, false);
+
+		String expected= "package p;\r\n" +
+				"import java.io.Serializable;\r\n" +
+				"import java.util.Arrays;\r\n" +
+				"public class A <S extends Serializable, N extends Number> {\r\n" +
+				"	S[] anArrayOfS;\r\n" +
+				"	N[] anArrayOfN;\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#hashCode()\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		final int prime = 31;\r\n" +
+				"		int result = 1;\r\n" +
+				"		result = prime * result + Arrays.deepHashCode(anArrayOfS);\r\n" +
+				"		result = prime * result + Arrays.hashCode(anArrayOfN);\r\n" +
+				"		return result;\r\n" +
+				"	}\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (obj == null)\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		A other = (A) obj;\r\n" +
+				"		return Arrays.deepEquals(anArrayOfS, other.anArrayOfS) && Arrays.equals(anArrayOfN, other.anArrayOfN);\r\n"
+				+
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"";
+
+		compareSource(expected, a.getSource());
+	}
+	
+	/**
+	 * Test with J7+ Objects.hash and Objects.equals method calls
+	 * Using multidimensional array amongst other instance variables
+	 * @throws Exception
+	 */
+	public void testHashCodeEqualsMultiArrayIn17() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"import java.util.List;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"	int[][] anArrayOfInts;\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings", "anArrayOfInts" });
+		runJ7Operation(a.getType("A"), fields, false);
+
+		String expected= "package p;\r\n" +
+				"import java.util.Arrays;\r\n" +
+				"import java.util.List;\r\n" +
+				"import java.util.Objects;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"	int[][] anArrayOfInts;\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#hashCode()\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		final int prime = 31;\r\n" +
+				"		int result = 1;\r\n" +
+				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
+				"		result = prime * result + Arrays.deepHashCode(anArrayOfInts);\r\n" +
+				"		return result;\r\n" +
+				"	}\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (obj == null)\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		A other = (A) obj;\r\n" +
+				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.deepEquals(anArrayOfInts, other.anArrayOfInts);\r\n"
+				+
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"";
+
+		compareSource(expected, a.getSource());
+	}
+	
+	/**
+	 * Test with J7+ Objects.hash and Objects.equals method calls
+	 * Using both multidimensional and 1-dimensional primitive arrays amongst other instance variables
+	 * 
+	 * @throws Exception
+	 */
+	public void testHashCodeEqualsVariousArraysIn17() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"import java.util.List;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"	int[] anArrayOfInts;\r\n" +
+				"	String[][] anArrayOfStrings;\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		IField[] fields= getFields(a.getType("A"), new String[] { "aBool", "aByte", "aChar", "anInt", "aDouble", "aFloat", "aLong", "aString", "aListOfStrings", "anArrayOfInts", "anArrayOfStrings" });
+		runJ7Operation(a.getType("A"), fields, false);
+
+		String expected= "package p;\r\n" +
+				"import java.util.Arrays;\r\n" +
+				"import java.util.List;\r\n" +
+				"import java.util.Objects;\r\n" +
+				"public class A {\r\n" +
+				"	boolean aBool;\r\n" +
+				"	byte aByte;\r\n" +
+				"	char aChar;\r\n" +
+				"	int anInt;\r\n" +
+				"	double aDouble;\r\n" +
+				"	float aFloat;\r\n" +
+				"	long aLong;\r\n" +
+				"	String aString;\r\n" +
+				"	List<String> aListOfStrings;\r\n" +
+				"	int[] anArrayOfInts;\r\n" +
+				"	String[][] anArrayOfStrings;\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#hashCode()\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		final int prime = 31;\r\n" +
+				"		int result = 1;\r\n" +
+				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
+				"		result = prime * result + Arrays.hashCode(anArrayOfInts);\r\n" +
+				"		result = prime * result + Arrays.deepHashCode(anArrayOfStrings);\r\n" +
+				"		return result;\r\n" +
+				"	}\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (obj == null)\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		A other = (A) obj;\r\n" +
+				"		return aBool == other.aBool && aByte == other.aByte && aChar == other.aChar && anInt == other.anInt && Double.doubleToLongBits(aDouble) == Double.doubleToLongBits(other.aDouble) && Float.floatToIntBits(aFloat) == Float.floatToIntBits(other.aFloat) && aLong == other.aLong && Objects.equals(aString, other.aString) && Objects.equals(aListOfStrings, other.aListOfStrings) && Arrays.equals(anArrayOfInts, other.anArrayOfInts) && Arrays.deepEquals(anArrayOfStrings, other.anArrayOfStrings);\r\n"
+				+
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"";
+
+		compareSource(expected, a.getSource());
+	}
+	
+	/**
+	 * Test with J7+ Objects.hash and Objects.equals method calls
+	 * Using ONLY multidimensional and 1-dimensional arrays as instance variables
+	 * 
+	 * @throws Exception
+	 */
+	public void testHashCodeEqualsOnlyArraysIn17() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"public class A {\r\n" +
+				"	int[] anArrayOfInts;\r\n" +
+				"	String[][] anArrayOfStrings;\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		IField[] fields= getFields(a.getType("A"), new String[] { "anArrayOfInts", "anArrayOfStrings" });
+		runJ7Operation(a.getType("A"), fields, false);
+
+		String expected= "package p;\r\n" +
+				"\r\n" +
+				"import java.util.Arrays;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	int[] anArrayOfInts;\r\n" +
+				"	String[][] anArrayOfStrings;\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#hashCode()\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		final int prime = 31;\r\n" +
+				"		int result = 1;\r\n" +
+				"		result = prime * result + Arrays.hashCode(anArrayOfInts);\r\n" +
+				"		result = prime * result + Arrays.deepHashCode(anArrayOfStrings);\r\n" +
+				"		return result;\r\n" +
+				"	}\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (obj == null)\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		A other = (A) obj;\r\n" +
+				"		return Arrays.equals(anArrayOfInts, other.anArrayOfInts) && Arrays.deepEquals(anArrayOfStrings, other.anArrayOfStrings);\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"";
+
+		compareSource(expected, a.getSource());
+	}
+
+	/**
 	 * Test member types
 	 *
 	 * @throws Exception
@@ -1139,7 +1916,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"}", true, null);
 
 		IField[] fields= getFields(a.getType("A"), new String[] {"aBool", "obj" });
-		runOperation(a.getType("A"), fields, null, true, false, true, false);
+		runOperation(a.getType("A"), fields, null, true, false, false, true, false);
 
 		String expected= "package p;\r\n" +
 				"\r\n" +
@@ -1346,7 +2123,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 				IJavaElement insertBefore= i < NUM_MEMBERS ? children[i] : null;
 
-				runOperation(type, new IField[] { foo }, insertBefore, false, false, false, false);
+				runOperation(type, new IField[] { foo }, insertBefore, false, false, false, false, false);
 
 				IJavaElement[] newChildren= type.getChildren();
 				assertEquals(NUM_MEMBERS + 2, newChildren.length);
@@ -1381,7 +2158,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"", true, null);
 	
 		IField[] fields= getFields(a.getType("Sub"), new String[] {"name" });
-		runOperation(a.getType("Sub"), fields, null, false, false, false, false);
+		runOperation(a.getType("Sub"), fields, null, false, false, false, false, false);
 	
 		String expected= "package p;\r\n" +
 				"\r\n" +

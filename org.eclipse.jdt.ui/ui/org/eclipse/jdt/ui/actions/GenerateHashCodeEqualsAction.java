@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2005, 2016 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -85,6 +88,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 	private class HashCodeEqualsGenerationSettings extends CodeGenerationSettings {
 		public boolean useInstanceOf= false;
 		public boolean useBlocks= false;
+		public boolean useJ7HashEquals= false;
 	}
 
 	private List<IVariableBinding> allFields;
@@ -209,6 +213,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		GenerateHashCodeEqualsDialog generateHashCodeEqualsDialog= (GenerateHashCodeEqualsDialog)dialog;
 		settings.useInstanceOf= generateHashCodeEqualsDialog.isUseInstanceOf();
 		settings.useBlocks= generateHashCodeEqualsDialog.isUseBlocks();
+		settings.useJ7HashEquals= generateHashCodeEqualsDialog.isUseJ7HashEquals();
 		return settings;
 	}
 
@@ -281,7 +286,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		final IVariableBinding[] selectedVariableBindings= Arrays.asList(selectedBindings).toArray(new IVariableBinding[0]);
 		HashCodeEqualsGenerationSettings hashCodeEqualsGenerationSettings= (HashCodeEqualsGenerationSettings)settings;
 		GenerateHashCodeEqualsOperation operation= new GenerateHashCodeEqualsOperation(fTypeBinding, selectedVariableBindings, fUnit, elementPosition, settings,
-				hashCodeEqualsGenerationSettings.useInstanceOf, regenerate, true, false);
+				hashCodeEqualsGenerationSettings.useInstanceOf, hashCodeEqualsGenerationSettings.useJ7HashEquals, regenerate, true, false);
 		operation.setUseBlocksForThen(hashCodeEqualsGenerationSettings.useBlocks);
 		return operation;
 	}

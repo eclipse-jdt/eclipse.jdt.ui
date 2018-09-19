@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2018 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -578,8 +581,6 @@ public class FormatterModifyDialog extends ModifyDialog {
 		final Section globalSection= fTree.addSection(null, FormatterMessages.FormatterModifyDialog_indentation_tree_indentation, "section-indentation"); //$NON-NLS-1$
 		createGeneralIndentationPrefs(globalSection);
 		fTree.addGap(globalSection);
-		createAlignFieldsPrefs(globalSection);
-		fTree.addGap(globalSection);
 
 		fTree.builder(FormatterMessages.FormatterModifyDialog_indentation_tree_indented_elements, null, s -> CheckboxPreference.addModifyAll(s, fImages))
 				.pref(FormatterMessages.FormatterModifyDialog_indentation_pref_indent_declarations_within_class_body, DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_TYPE_HEADER)
@@ -599,6 +600,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 				.gap()
 				.pref(FormatterMessages.FormatterModifyDialog_indentation_pref_indent_empty_lines, DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES)
 				.build(globalSection, (parent, label, key) -> fTree.addCheckbox(parent, label, key, CheckboxPreference.FALSE_TRUE));
+
+		createAlignOnColumnPrefs(globalSection);
 	}
 
 	private void createGeneralIndentationPrefs(Section globalSection) {
@@ -681,7 +684,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 		});
 	}
 
-	private void createAlignFieldsPrefs(Section parentSection) {
+	private void createAlignOnColumnPrefs(Section parentSection) {
 		class CheckboxSpinnerPreference extends Preference<Button> {
 			
 			Spinner fSpinner;
@@ -741,19 +744,39 @@ public class FormatterModifyDialog extends ModifyDialog {
 			}
 		}
 
-		final CheckboxPreference alignFieldsPref= fTree.addCheckbox(parentSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_fields_in_columns,
+		final Section alignSection= fTree.addSection(parentSection, FormatterMessages.FormatterModifyDialog_indentation_tree_align_items_in_columns, "section-indentation-align-on-column"); //$NON-NLS-1$
+		final CheckboxPreference alignFieldsPref= fTree.addCheckbox(alignSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_fields_in_columns,
 				DefaultCodeFormatterConstants.FORMATTER_ALIGN_TYPE_MEMBERS_ON_COLUMNS, CheckboxPreference.FALSE_TRUE);
+		final CheckboxPreference alignVariablesPref= fTree.addCheckbox(alignSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_variable_declarations_on_columns,
+				DefaultCodeFormatterConstants.FORMATTER_ALIGN_VARIABLE_DECLARATIONS_ON_COLUMNS, CheckboxPreference.FALSE_TRUE);
+		final CheckboxPreference alignAssignmentsPref= fTree.addCheckbox(alignSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_assignment_statements_on_columns,
+				DefaultCodeFormatterConstants.FORMATTER_ALIGN_ASSIGNMENT_STATEMENTS_ON_COLUMNS, CheckboxPreference.FALSE_TRUE);
 		
-		Button checkbox = new Button(parentSection.fInnerComposite, SWT.CHECK);
+		fTree.addGap(alignSection);
+		final CheckboxPreference useSpacesPref= fTree.addCheckbox(alignSection, FormatterMessages.FormatterModifyDialog_indentation_pref_align_with_spaces,
+				DefaultCodeFormatterConstants.FORMATTER_ALIGN_WITH_SPACES, CheckboxPreference.FALSE_TRUE);
+		Preference<?> tabCharPref= parentSection.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
+		Predicate<String> anyAlignChecker= v -> alignFieldsPref.getValue().equals(DefaultCodeFormatterConstants.TRUE)
+				|| alignVariablesPref.getValue().equals(DefaultCodeFormatterConstants.TRUE)
+				|| alignAssignmentsPref.getValue().equals(DefaultCodeFormatterConstants.TRUE);
+		Predicate<String> spacesChecker= anyAlignChecker.and(v -> !tabCharPref.getValue().equals(JavaCore.SPACE));
+		alignFieldsPref.addDependant(useSpacesPref, spacesChecker);
+		alignVariablesPref.addDependant(useSpacesPref, spacesChecker);
+		alignAssignmentsPref.addDependant(useSpacesPref, spacesChecker);
+		tabCharPref.addDependant(useSpacesPref, spacesChecker);
+
+		Button checkbox = new Button(alignSection.fInnerComposite, SWT.CHECK);
 		String label = FormatterMessages.FormatterModifyDialog_indentation_pref_blank_lines_separating_independent_groups;
 		checkbox.setText(label);
-		GridData gd= createGridData(GRID_COLUMNS - 2, GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_CENTER, SWT.DEFAULT, 1);
+		GridData gd= createGridData(GRID_COLUMNS - 2, GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_CENTER, SWT.DEFAULT, 0);
 		checkbox.setLayoutData(gd);
-		checkbox.setFont(parentSection.fInnerComposite.getFont());
-		Spinner spinner= NumberPreference.createSpinner(parentSection.fInnerComposite, 1, 99);
+		checkbox.setFont(alignSection.fInnerComposite.getFont());
+		Spinner spinner= NumberPreference.createSpinner(alignSection.fInnerComposite, 1, 99);
 		CheckboxSpinnerPreference groupingPref = new CheckboxSpinnerPreference(checkbox, spinner, label, DefaultCodeFormatterConstants.FORMATTER_ALIGN_FIELDS_GROUPING_BLANK_LINES);
-		fTree.addChild(parentSection, groupingPref);
-		alignFieldsPref.addDependant(groupingPref, valueAcceptor(DefaultCodeFormatterConstants.TRUE));
+		fTree.addChild(alignSection, groupingPref);
+		alignFieldsPref.addDependant(groupingPref, anyAlignChecker);
+		alignVariablesPref.addDependant(groupingPref, anyAlignChecker);
+		alignAssignmentsPref.addDependant(groupingPref, anyAlignChecker);
 
 		groupingPref.setValueValidator(value -> {
 			int blankLinesToPreserve= Integer.parseInt(fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE));
@@ -1096,7 +1119,11 @@ public class FormatterModifyDialog extends ModifyDialog {
 								})
 								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_else_on_same_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_ELSE_STATEMENT_ON_SAME_LINE)
 								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_else_if_on_one_line, DefaultCodeFormatterConstants.FORMATTER_COMPACT_ELSE_IF)
-								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_guardian_clause_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_GUARDIAN_CLAUSE_ON_ONE_LINE)))
+								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_guardian_clause_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_GUARDIAN_CLAUSE_ON_ONE_LINE))
+						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_newLines_tree_simple_loops, "-simpleloops", modAll) //$NON-NLS-1$
+								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_simple_for_body_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_FOR_BODY_ON_SAME_LINE)
+								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_simple_while_body_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_WHILE_BODY_ON_SAME_LINE)
+								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_simple_do_while_body_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_DO_WHILE_BODY_ON_SAME_LINE)))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_newLines_tree_after_annotations, "-annotations", modAll) //$NON-NLS-1$
 						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_packages, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PACKAGE)
 						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_types, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_TYPE)
@@ -1115,7 +1142,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_end_of_file, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AT_END_OF_FILE_IF_MISSING)
 				.build(null, (parent, label, key) -> {
 					String[] values= CheckboxPreference.DO_NOT_INSERT_INSERT;
-					if (parent.getKey().endsWith("-ifelse") || DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE.equals(key)) { //$NON-NLS-1$
+					if (parent.getKey().endsWith("-ifelse") || parent.getKey().endsWith("-simpleloops") //$NON-NLS-1$ //$NON-NLS-2$
+							|| DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE.equals(key)) {
 						values= CheckboxPreference.FALSE_TRUE;
 					}
 					return fTree.addCheckbox(parent, label, key, values);
@@ -1167,6 +1195,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_statements, null, modAll)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_for, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_FOR_LOOP_HEADER)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_compact_if_else, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_COMPACT_IF)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_compact_loops, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_COMPACT_LOOP)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_try, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_RESOURCES_IN_TRY)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_catch, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_UNION_TYPE_IN_MULTICATCH))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_parameterized_types, null, modAll)
@@ -1241,19 +1270,16 @@ public class FormatterModifyDialog extends ModifyDialog {
 					}
 				});
 
-		List<PreferenceTreeNode<?>> mainItems= section.getChildren();
-		Function<String, Preference<?>> prefFinder= key -> mainItems.stream().filter(n -> n instanceof Preference)
-				.map(n -> (Preference<?>) n).filter(n -> key.equals(n.getKey())).findAny().get();
-		Function<String, Section> sectionFinder= key -> mainItems.stream().filter(n -> n instanceof Section)
-				.map(n -> (Section) n).filter(n -> n.getKey().endsWith(key)).findAny().get();
-
-		Preference<?> javadocMaster= prefFinder.apply(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT);
-		Preference<?> blockMaster= prefFinder.apply(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT);
-		Preference<?> headerMaster= prefFinder.apply(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER);
+		Preference<?> javadocMaster= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_JAVADOC_COMMENT);
+		Preference<?> blockMaster= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_BLOCK_COMMENT);
+		Preference<?> headerMaster= section.findChildPreference(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER);
 		
 		Predicate<String> javadocChecker= v -> javadocMaster.getValue().equals(DefaultCodeFormatterConstants.TRUE) || headerMaster.getValue().equals(DefaultCodeFormatterConstants.TRUE);
 		Predicate<String> blockChecker= v -> blockMaster.getValue().equals(DefaultCodeFormatterConstants.TRUE) || headerMaster.getValue().equals(DefaultCodeFormatterConstants.TRUE);
 		
+		List<PreferenceTreeNode<?>> mainItems= section.getChildren();
+		Function<String, Section> sectionFinder= key -> mainItems.stream().filter(n -> n instanceof Section)
+				.map(n -> (Section) n).filter(n -> n.getKey().endsWith(key)).findAny().get();
 		Section javadocSection= sectionFinder.apply("-javadocs"); //$NON-NLS-1$
 		for (PreferenceTreeNode<?> pref : javadocSection.getChildren()) {
 			javadocMaster.addDependant(pref, javadocChecker);

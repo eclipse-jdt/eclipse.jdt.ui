@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2018 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -96,15 +99,34 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 	private static final String DEFAULT= "<default>"; //$NON-NLS-1$
 
 	@Override
-	public synchronized void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
+	public String showCommandLine(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
 		if (monitor == null) {
 			monitor = new NullProgressMonitor();
 		}
+		try {
+			VMRunnerConfiguration runConfig = getVMRunnerConfiguration(configuration, launch, mode, monitor);
+			if (runConfig == null) {
+				return ""; //$NON-NLS-1$
+			}
+			IVMRunner runner = getVMRunner(configuration, mode);
+			String cmdLine = runner.showCommandLine(runConfig, launch, monitor);
 
-		monitor.beginTask(MessageFormat.format("{0}...", configuration.getName()), 5); //$NON-NLS-1$
+			// check for cancellation
+			if (monitor.isCanceled()) {
+				return ""; //$NON-NLS-1$
+			}
+			return cmdLine;
+		} finally {
+			monitor.done();
+		}
+	}
+
+	private VMRunnerConfiguration getVMRunnerConfiguration(ILaunchConfiguration configuration, ILaunch launch, String mode, IProgressMonitor monitor) throws CoreException {
+		VMRunnerConfiguration runConfig = null;
+			monitor.beginTask(MessageFormat.format("{0}...", configuration.getName()), 5); //$NON-NLS-1$
 		// check for cancellation
 		if (monitor.isCanceled()) {
-			return;
+			return null;
 		}
 
 		try {
@@ -120,13 +142,13 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			} catch (CoreException e) {
 				if (e.getStatus().getSeverity() == IStatus.CANCEL) {
 					monitor.setCanceled(true);
-					return;
+					return null;
 				}
 				throw e;
 			}
 			// check for cancellation
 			if (monitor.isCanceled()) {
-				return;
+				return null;
 			}
 
 			fKeepAlive= mode.equals(ILaunchManager.DEBUG_MODE) && configuration.getAttribute(JUnitLaunchConfigurationConstants.ATTR_KEEPRUNNING, false);
@@ -147,7 +169,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			}
 
 			String mainTypeName= verifyMainTypeName(configuration);
-			IVMRunner runner= getVMRunner(configuration, mode);
+			
 
 			File workingDir = verifyWorkingDirectory(configuration);
 			String workingDirName = null;
@@ -191,7 +213,7 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			}
 
 			// Create VM config
-			VMRunnerConfiguration runConfig= new VMRunnerConfiguration(mainTypeName, classpath);
+			runConfig= new VMRunnerConfiguration(mainTypeName, classpath);
 			runConfig.setVMArguments(vmArguments.toArray(new String[vmArguments.size()]));
 			runConfig.setProgramArguments(programArguments.toArray(new String[programArguments.size()]));
 			runConfig.setEnvironment(envp);
@@ -213,12 +235,28 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 
 			// check for cancellation
 			if (monitor.isCanceled()) {
-				return;
+				return null;
 			}
-
+		}finally {
 			// done the verification phase
 			monitor.worked(1);
+		}
+		return runConfig;
+	}
 
+	@Override
+	public synchronized void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor) throws CoreException {
+		if (monitor == null) {
+			monitor = new NullProgressMonitor();
+		}
+
+		try {
+
+			VMRunnerConfiguration runConfig = getVMRunnerConfiguration(configuration, launch, mode, monitor);
+			if ( monitor.isCanceled() || runConfig == null) {
+				return;
+			}
+			IVMRunner runner= getVMRunner(configuration, mode);
 			monitor.subTask(JUnitMessages.JUnitLaunchConfigurationDelegate_create_source_locator_description);
 			// set the default source locator if required
 			setDefaultSourceLocator(launch, configuration);

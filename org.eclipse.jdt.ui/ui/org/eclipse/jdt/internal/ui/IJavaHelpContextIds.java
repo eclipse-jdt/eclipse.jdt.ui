@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2015 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -280,6 +283,7 @@ public interface IJavaHelpContextIds {
 	 * @since 3.7
 	 */
 	public static final String ACCESS_RULES_DIALOG_COMBINE_RULES= PREFIX + "access_rules_dialog_combine_rules_context"; //$NON-NLS-1$
+	public static final String MODULE_DIALOG= PREFIX + "module_dialog_context"; //$NON-NLS-1$
 
 	public static final String OUTPUT_LOCATION_DIALOG= PREFIX + "output_location_dialog_context"; //$NON-NLS-1$
 	public static final String VARIABLE_CREATION_DIALOG= PREFIX + "variable_creation_dialog_context"; //$NON-NLS-1$

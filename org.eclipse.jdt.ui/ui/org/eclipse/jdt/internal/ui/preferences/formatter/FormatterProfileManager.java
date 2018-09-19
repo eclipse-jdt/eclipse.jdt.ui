@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2018 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -68,30 +71,21 @@ public class FormatterProfileManager extends ProfileManager {
 	 * @return Returns the settings for the default profile.
 	 */
 	public static Map<String, String> getEclipse21Settings() {
-		final Map<String, String> options= DefaultCodeFormatterConstants.getEclipse21Settings();
-
-		ProfileVersioner.setLatestCompliance(options);
-		return options;
+		return DefaultCodeFormatterConstants.getEclipse21Settings();
 	}
 
 	/**
 	 * @return Returns the settings for the new eclipse profile.
 	 */
 	public static Map<String, String> getEclipseSettings() {
-		final Map<String, String> options= DefaultCodeFormatterConstants.getEclipseDefaultSettings();
-
-		ProfileVersioner.setLatestCompliance(options);
-		return options;
+		return DefaultCodeFormatterConstants.getEclipseDefaultSettings();
 	}
 
 	/**
 	 * @return Returns the settings for the Java Conventions profile.
 	 */
 	public static Map<String, String> getJavaSettings() {
-		final Map<String, String> options= DefaultCodeFormatterConstants.getJavaConventionsSettings();
-
-		ProfileVersioner.setLatestCompliance(options);
-		return options;
+		return DefaultCodeFormatterConstants.getJavaConventionsSettings();
 	}
 
 	/**

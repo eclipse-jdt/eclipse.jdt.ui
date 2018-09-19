@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2013 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -20,7 +23,7 @@ import org.eclipse.jdt.testplugin.TestOptionsSetup;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests2;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewDeltaTests;
-import org.eclipse.jdt.ui.tests.buildpath.BuildpathModifierActionTest;
+import org.eclipse.jdt.ui.tests.buildpath.BuildpathTestSuite;
 import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyContentProviderTest;
 import org.eclipse.jdt.ui.tests.core.CoreTests;
 import org.eclipse.jdt.ui.tests.jarexport.JarExportTests;
@@ -75,7 +78,7 @@ public class AutomatedSuite extends TestSuite {
 		addTest(SearchTest.suite());
 		addTest(JUnitJUnitTests.suite());
 
-		addTest(BuildpathModifierActionTest.suite());
+		addTest(BuildpathTestSuite.suite());
 
 		addTest(JarExportTests.suite());
 		addTest(PackageJavadocTests.suite());

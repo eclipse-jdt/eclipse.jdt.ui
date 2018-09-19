@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2018 Mateusz Matela and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     Mateusz Matela <mateusz.matela@gmail.com> - initial API and implementation
@@ -44,11 +47,7 @@ class INDENTATION {
 //--PREVIEW--START--section-indentation
 class Example {
 	int[] myArray = { 1, 2, 3, 4, 5, 6 };
-	int theInt = 1;
-
-	String someString = "Hello";
 	String stringWithTabs = "1	2	3	4";
-	double aDouble = 3.0;
 
 	void foo(int a, int b, int c, int d, int e, int f) {
 		switch (a) {
@@ -69,6 +68,31 @@ enum MyEnum {
 	int count() default 1;
 }
 //--PREVIEW--END--section-indentation
+
+//--PREVIEW--START--section-indentation-align-on-column
+class Example {
+	int[] myArray = { 1, 2, 3, 4, 5, 6 };
+	int theInt = 1;
+
+	String someString = "Hello";
+	String stringWithTabs = "1	2	3	4";
+	double aDouble = 3.0;
+
+	void foo() {
+		int i = 0;
+		String str = "123456";
+		Object object = null;
+
+		final Object unchanged = new Object();
+
+		while (i < 10) {
+			str = i + str;
+			object = Arrays.asList(str);
+			i += 2;
+		}
+	}
+}
+//--PREVIEW--END--section-indentation-align-on-column
 }
 
 class BRACES {
@@ -590,6 +614,15 @@ class Example {
 		if (true) return; else if (false) return; else return;
 	}
 }
+//--PREVIEW--START--section-newlines-controlstatements-simpleloops
+class WrapExample {
+	void bar2() {
+		while(!stop)doSomething();
+		for(String s : myStrings)System.out.println(s);
+		do doSomethingElse();while(!stop);
+	}
+}
+//--PREVIEW--END--section-newlines-controlstatements-simpleloops
 //--PREVIEW--END--section-newlines-controlstatements
 
 }
@@ -755,6 +788,10 @@ class Example {
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_compact_if
 class Example {int foo(int argument) {  if (argument==0) return 0;  if (argument==1) return 42; else return 43;}}
 //--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_compact_if
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_compact_loops
+class Example {int foo(int argument) {  while(!stop)doSomething();  for(String s : myStrings)System.out.println(s);  do doSomethingElse();while(!stop);}}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.alignment_for_compact_loops
 
 //--PREVIEW--START--org.eclipse.jdt.core.formatter.alignment_for_resources_in_try
 class Example {void foo() {try (FileReader reader1 = new FileReader("file1");   FileReader reader2 = new FileReader("file2")) {}}}

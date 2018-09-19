@@ -1,9 +1,12 @@
 /*******************************************************************************
  * Copyright (c) 2016, 2018 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -127,6 +130,12 @@ public class JUnit5TestListener implements TestExecutionListener {
 				}
 			}
 			return new FailedComparison(expectedStr, actualStr);
+		} else if (exception instanceof junit.framework.ComparisonFailure) {
+			junit.framework.ComparisonFailure comparisonFailure= (junit.framework.ComparisonFailure) exception;
+			return new FailedComparison(comparisonFailure.getExpected(), comparisonFailure.getActual());
+		} else if (exception instanceof org.junit.ComparisonFailure) {
+			org.junit.ComparisonFailure comparisonFailure= (org.junit.ComparisonFailure) exception;
+			return new FailedComparison(comparisonFailure.getExpected(), comparisonFailure.getActual());
 		}
 		return null;
 	}

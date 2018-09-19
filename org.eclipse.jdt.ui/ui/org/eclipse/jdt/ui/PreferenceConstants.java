@@ -1,13 +1,17 @@
 /*******************************************************************************
  * Copyright (c) 2000, 2018 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Guven Demir <guven.internet+eclipse@gmail.com> - [package explorer] Alternative package name shortening: abbreviation - https://bugs.eclipse.org/bugs/show_bug.cgi?id=299514
+ *     Red Hat Inc - modify to use CodeGenerationSettingsConstants
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
@@ -39,6 +43,7 @@ import org.eclipse.jdt.core.manipulation.CodeStyleConfiguration;
 import org.eclipse.jdt.core.manipulation.JavaManipulation;
 
 import org.eclipse.jdt.internal.core.manipulation.MembersOrderPreferenceCacheCommon;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettingsConstants;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstantsOptions;
 
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
@@ -302,7 +307,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @since 3.0
 	 */
-	public static final String CODEGEN_KEYWORD_THIS= "org.eclipse.jdt.ui.keywordthis"; //$NON-NLS-1$
+	public static final String CODEGEN_KEYWORD_THIS= CodeGenerationSettingsConstants.CODEGEN_KEYWORD_THIS;
 
 	/**
 	 * A named preference that controls whether automatically created getters which return a boolean
@@ -338,7 +343,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @since 2.1
 	 */
-	public static final String CODEGEN_ADD_COMMENTS= "org.eclipse.jdt.ui.javadoc"; //$NON-NLS-1$
+	public static final String CODEGEN_ADD_COMMENTS= CodeGenerationSettingsConstants.CODEGEN_ADD_COMMENTS;
 
 	/**
 	 * A named preference that controls if a comment stubs will be added
@@ -381,7 +386,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * @since 3.1
 	 */
-	public static final String CODEGEN_USE_OVERRIDE_ANNOTATION= "org.eclipse.jdt.ui.overrideannotation"; //$NON-NLS-1$
+	public static final String CODEGEN_USE_OVERRIDE_ANNOTATION= CodeGenerationSettingsConstants.CODEGEN_USE_OVERRIDE_ANNOTATION;
 
 	/**
 	 * A named preference that holds a list of semicolon separated fully qualified type names with wild card characters.
@@ -430,7 +435,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 */
-	public static final String ORGIMPORTS_IGNORELOWERCASE= "org.eclipse.jdt.ui.ignorelowercasenames"; //$NON-NLS-1$
+	public static final String ORGIMPORTS_IGNORELOWERCASE= CodeGenerationSettingsConstants.ORGIMPORTS_IGNORELOWERCASE;
 
 	/**
 	 * A named preference that specifies whether children of a compilation unit are shown in the package explorer.

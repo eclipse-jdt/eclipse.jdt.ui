@@ -1,13 +1,17 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
+ *
+ * This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License 2.0
  * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Rabea Gransberger <rgransberger@gmx.de> - [quick fix] Fix several visibility issues - https://bugs.eclipse.org/394692
+ *     Jens Reimann <jreimann@redhat.com> Bug 38201: [quick assist] Allow creating abstract method - https://bugs.eclipse.org/38201
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -2883,7 +2887,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot);
-		assertNumberOfProposals(proposals, 3);
+		assertNumberOfProposals(proposals, 4);
 		assertCorrectLabels(proposals);
 
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
@@ -2925,10 +2929,181 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		String expected3= buf.toString();
 
+		proposal= (CUCorrectionProposal) proposals.get(3);
+		String preview4= getPreviewContent(proposal);
 
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class E implements X<String, Integer> {\n");
+		buf.append("    public void meth(E e, String s) {\n");
+		buf.append("        int x= 0;\n");
+		buf.append("        e.foo(x);\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    protected abstract void foo(int x);\n");
+		buf.append("}\n");
+		String expected4= buf.toString();
+
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4 }, new String[] { expected1, expected2, expected3, expected4 });
 	}
 
+	public void testCreateAbstractMethodInAbstractParent() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class A {\n");
+		buf.append("    private class B {\n");
+		buf.append("      void test () {\n");
+		buf.append("        foo ();\n");
+		buf.append("      }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot);
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class A {\n");
+		buf.append("    private class B {\n");
+		buf.append("      void test () {\n");
+		buf.append("        foo ();\n");
+		buf.append("      }\n");
+		buf.append("\n");
+		buf.append("    private void foo() {\n");
+		buf.append("    }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class A {\n");
+		buf.append("    private class B {\n");
+		buf.append("      void test () {\n");
+		buf.append("        foo ();\n");
+		buf.append("      }\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class A {\n");
+		buf.append("    private class B {\n");
+		buf.append("      void test () {\n");
+		buf.append("        foo ();\n");
+		buf.append("      }\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    protected abstract void foo();\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		String[] previews= getAllPreviewContent(proposals);
+		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3 });
+
+		String[] displayStrings= getAllDisplayStrings(proposals);
+		assertEqualStringsIgnoreOrder(displayStrings, new String[] {
+				"Create method 'foo()'",
+				"Create method 'foo()' in type 'A'",
+				"Create abstract method 'foo()' in type 'A'"
+		});
+	}
+	
+	public void testCreateAbstractMethodInAbstractParentWithAbstractClass() throws Exception {
+
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class A {\n");
+		buf.append("    private abstract class B {\n");
+		buf.append("      void test () {\n");
+		buf.append("        foo ();\n");
+		buf.append("      }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu1, astRoot);
+		assertNumberOfProposals(proposals, 4);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class A {\n");
+		buf.append("    private abstract class B {\n");
+		buf.append("      void test () {\n");
+		buf.append("        foo ();\n");
+		buf.append("      }\n");
+		buf.append("\n");
+		buf.append("    private void foo() {\n");
+		buf.append("    }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class A {\n");
+		buf.append("    private abstract class B {\n");
+		buf.append("      void test () {\n");
+		buf.append("        foo ();\n");
+		buf.append("      }\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class A {\n");
+		buf.append("    private abstract class B {\n");
+		buf.append("      void test () {\n");
+		buf.append("        foo ();\n");
+		buf.append("      }\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    protected abstract void foo();\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class A {\n");
+		buf.append("    private abstract class B {\n");
+		buf.append("      void test () {\n");
+		buf.append("        foo ();\n");
+		buf.append("      }\n");
+		buf.append("\n");
+		buf.append("    protected abstract void foo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected4= buf.toString();
+
+		String[] previews= getAllPreviewContent(proposals);
+		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3, expected4 });
+
+		String[] displayStrings= getAllDisplayStrings(proposals);
+		assertEqualStringsIgnoreOrder(displayStrings, new String[] {
+				"Create method 'foo()'",
+				"Create method 'foo()' in type 'A'",
+				"Create abstract method 'foo()' in type 'A'",
+				"Create abstract method 'foo()'"
+		});
+	}
 
 	public void testSuperConstructorLessArguments() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
