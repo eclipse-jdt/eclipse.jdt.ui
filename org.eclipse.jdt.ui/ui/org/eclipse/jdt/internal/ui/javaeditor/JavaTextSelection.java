@@ -27,11 +27,10 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
-
-import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
@@ -119,7 +118,7 @@ public class JavaTextSelection extends TextSelection {
 			return fPartialAST;
 		fPartialASTRequested= true;
 		// long start= System.currentTimeMillis();
-		fPartialAST= SharedASTProvider.getAST(fElement, SharedASTProvider.WAIT_YES, null);
+		fPartialAST= SharedASTProviderCore.getAST(fElement, SharedASTProviderCore.WAIT_YES, null);
 		// System.out.println("Time requesting partial AST: " + (System.currentTimeMillis() - start));
 		return fPartialAST;
 	}

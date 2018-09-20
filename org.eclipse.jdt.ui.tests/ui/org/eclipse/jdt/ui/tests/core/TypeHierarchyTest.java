@@ -13,10 +13,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jface.text.IDocument;
@@ -30,13 +26,17 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeHierarchyChangedListener;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 
 public class TypeHierarchyTest extends TestCase {
@@ -140,7 +140,7 @@ public class TypeHierarchyTest extends TestCase {
 			assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
 
 			part.doSave(null);
-			SharedASTProvider.getAST(cu2, SharedASTProvider.WAIT_YES, null);
+			SharedASTProviderCore.getAST(cu2, SharedASTProviderCore.WAIT_YES, null);
 			hierarchy.refresh(null);
 
 			allTypes= hierarchy.getAllTypes();
@@ -210,7 +210,7 @@ public class TypeHierarchyTest extends TestCase {
 			assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
 
 			part.doSave(null);
-			SharedASTProvider.getAST(cu2, SharedASTProvider.WAIT_YES, null);
+			SharedASTProviderCore.getAST(cu2, SharedASTProviderCore.WAIT_YES, null);
 			hierarchy.refresh(null);
 
 			allTypes= hierarchy.getAllTypes();

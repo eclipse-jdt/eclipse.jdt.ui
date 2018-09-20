@@ -32,12 +32,11 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
-
-import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -155,7 +154,7 @@ public abstract class StructureSelectionAction extends Action {
 	}
 
 	private static CompilationUnit getAST(ITypeRoot sr) {
-		return SharedASTProvider.getAST(sr, SharedASTProvider.WAIT_YES, null);
+		return SharedASTProviderCore.getAST(sr, SharedASTProviderCore.WAIT_YES, null);
 	}
 
 	//-- helper methods for this class and subclasses

@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -68,7 +69,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -178,7 +178,7 @@ public class JavaElementImplementationHyperlink implements IHyperlink {
 			}
 			ITypeRoot editorInput= EditorUtility.getEditorInputJavaElement(editor, false);
 
-			CompilationUnit ast= SharedASTProvider.getAST(editorInput, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
+			CompilationUnit ast= SharedASTProviderCore.getAST(editorInput, SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);
 			if (ast == null) {
 				openQuickHierarchy(editor);
 				return;

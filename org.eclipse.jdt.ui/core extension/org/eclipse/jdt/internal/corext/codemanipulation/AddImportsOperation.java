@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jdt.core.manipulation.TypeKinds;
 import org.eclipse.jdt.core.manipulation.TypeNameMatchCollector;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -67,15 +68,13 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeNameMatch;
 
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JavaConventionsUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
@@ -170,7 +169,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		try {
 			monitor.beginTask(CodeGenerationMessages.AddImportsOperation_description, 4);
 
-			CompilationUnit astRoot= SharedASTProvider.getAST(fCompilationUnit, SharedASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 1));
+			CompilationUnit astRoot= SharedASTProviderCore.getAST(fCompilationUnit, SharedASTProviderCore.WAIT_YES, new SubProgressMonitor(monitor, 1));
 			if (astRoot == null)
 				throw new OperationCanceledException();
 

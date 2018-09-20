@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder.OccurrenceLocation;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
@@ -50,7 +51,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.CollectionsUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
@@ -214,7 +214,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 	 * @since 3.7
 	 */
 	public static OccurrenceLocation findBreakOrContinueTarget(ITypeRoot input, IRegion region) {
-		CompilationUnit astRoot= SharedASTProvider.getAST(input, SharedASTProvider.WAIT_NO, null);
+		CompilationUnit astRoot= SharedASTProviderCore.getAST(input, SharedASTProviderCore.WAIT_NO, null);
 		if (astRoot == null)
 			return null;
 
@@ -255,7 +255,7 @@ public class JavaElementHyperlinkDetector extends AbstractHyperlinkDetector {
 	 * @since 3.14
 	 */
 	public static OccurrenceLocation findSwitchCaseTarget(ITypeRoot input, IRegion region) {
-		CompilationUnit astRoot= SharedASTProvider.getAST(input, SharedASTProvider.WAIT_NO, null);
+		CompilationUnit astRoot= SharedASTProviderCore.getAST(input, SharedASTProviderCore.WAIT_NO, null);
 		if (astRoot == null) {
 			return null;
 		}

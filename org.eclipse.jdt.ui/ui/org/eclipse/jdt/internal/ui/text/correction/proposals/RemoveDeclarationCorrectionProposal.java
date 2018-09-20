@@ -46,18 +46,18 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionProposal {
 
@@ -158,7 +158,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			rewrite.remove(declaration, null);
 		} else if (binding.getKind() == IBinding.VARIABLE) {
 			// needs full AST
-			CompilationUnit completeRoot= SharedASTProvider.getAST(getCompilationUnit(), SharedASTProvider.WAIT_YES, null);
+			CompilationUnit completeRoot= SharedASTProviderCore.getAST(getCompilationUnit(), SharedASTProviderCore.WAIT_YES, null);
 
 			SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, fName.getStartPosition(), fName.getLength());
 

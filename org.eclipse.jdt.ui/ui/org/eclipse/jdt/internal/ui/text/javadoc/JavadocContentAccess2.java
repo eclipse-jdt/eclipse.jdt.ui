@@ -92,8 +92,10 @@ import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -104,10 +106,8 @@ import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.JavadocContentAccess;
-import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLinks;
 
 
@@ -1530,7 +1530,7 @@ public class JavadocContentAccess2 {
 		
 		ISourceRange nameRange= field.getNameRange();
 		if (SourceRange.isAvailable(nameRange)) {
-			CompilationUnit cuNode= SharedASTProvider.getAST(field.getTypeRoot(), SharedASTProvider.WAIT_ACTIVE_ONLY, null);
+			CompilationUnit cuNode= SharedASTProviderCore.getAST(field.getTypeRoot(), SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);
 			if (cuNode != null) {
 				ASTNode nameNode= NodeFinder.perform(cuNode, nameRange);
 				if (nameNode instanceof SimpleName) {

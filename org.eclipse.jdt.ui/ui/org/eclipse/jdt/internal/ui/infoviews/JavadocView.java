@@ -128,6 +128,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -140,7 +141,6 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.OpenAttachedJavadocAction;
@@ -1348,7 +1348,7 @@ public class JavadocView extends AbstractInfoView {
 		if (monitor != null && monitor.isCanceled())
 			return null;
 
-		CompilationUnit ast= SharedASTProvider.getAST(constantField.getTypeRoot(), SharedASTProvider.WAIT_NO, monitor);
+		CompilationUnit ast= SharedASTProviderCore.getAST(constantField.getTypeRoot(), SharedASTProviderCore.WAIT_NO, monitor);
 		if (ast != null) {
 			try {
 				if (constantField.isEnumConstant())
@@ -1399,7 +1399,7 @@ public class JavadocView extends AbstractInfoView {
 	 * @since 3.4
 	 */
 	private static Object getConstantValueFromActiveEditor(ITypeRoot activeType, IField field, ITextSelection selection, IProgressMonitor monitor) {
-		CompilationUnit unit= SharedASTProvider.getAST(activeType, SharedASTProvider.WAIT_ACTIVE_ONLY, monitor);
+		CompilationUnit unit= SharedASTProviderCore.getAST(activeType, SharedASTProviderCore.WAIT_ACTIVE_ONLY, monitor);
 		if (unit == null)
 			return null;
 

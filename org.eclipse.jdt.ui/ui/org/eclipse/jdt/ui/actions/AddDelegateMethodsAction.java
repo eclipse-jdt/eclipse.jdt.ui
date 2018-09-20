@@ -64,6 +64,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation;
@@ -78,7 +79,6 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -538,7 +538,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 	private void showUI(IType type, IField[] fields) {
 		try {
-			CompilationUnit astRoot= SharedASTProvider.getAST(type.getCompilationUnit(), SharedASTProvider.WAIT_YES, new NullProgressMonitor());
+			CompilationUnit astRoot= SharedASTProviderCore.getAST(type.getCompilationUnit(), SharedASTProviderCore.WAIT_YES, new NullProgressMonitor());
 
 			AddDelegateMethodsContentProvider provider= new AddDelegateMethodsContentProvider(astRoot, type, fields);
 			SourceActionDialog dialog= new AddDelegateMethodsDialog(getShell(), new AddDelegateMethodsLabelProvider(), provider, fEditor, type, false);

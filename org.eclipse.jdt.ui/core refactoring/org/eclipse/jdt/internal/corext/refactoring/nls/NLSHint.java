@@ -46,8 +46,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-
-import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 
 /**
@@ -165,7 +164,7 @@ public class NLSHint {
 						if (fCache_CU == null || !fCache_CU.equals(bundleCU) || fCache_AST == null) {
 							fCache_CU= bundleCU;
 							if (fCache_CU != null)
-								fCache_AST= SharedASTProvider.getAST(fCache_CU, SharedASTProvider.WAIT_YES, null);
+								fCache_AST= SharedASTProviderCore.getAST(fCache_CU, SharedASTProviderCore.WAIT_YES, null);
 							else
 								fCache_AST= null;
 						}

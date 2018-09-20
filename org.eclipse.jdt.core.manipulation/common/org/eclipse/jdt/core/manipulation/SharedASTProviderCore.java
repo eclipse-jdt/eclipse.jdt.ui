@@ -11,7 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui;
+package org.eclipse.jdt.core.manipulation;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.manipulation.CoreASTProvider;
  * <p>Clients can make the following assumptions about the AST:
  * <dl>
  *    <li>the AST has a {@link ITypeRoot} as source: {@link CompilationUnit#getTypeRoot()} is not null.</li>
- *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS11 API level 11} or higher</li>
+ *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS10 API level 10} or higher</li>
  *    <li>the AST has bindings resolved ({@link AST#hasResolvedBindings()})</li>
  *    <li>{@link AST#hasStatementsRecovery() statement} and {@link AST#hasBindingsRecovery() bindings}
  *           recovery are enabled
@@ -50,13 +50,11 @@ import org.eclipse.jdt.core.manipulation.CoreASTProvider;
  * This class is not intended to be subclassed or instantiated by clients.
  * </p>
  *
- * @since 3.4
+ * @since 1.11
  *
  * @noinstantiate This class is not intended to be instantiated by clients.
- * @deprecated Use {@link org.eclipse.jdt.core.manipulation.SharedASTProviderCore} instead.
  */
-@Deprecated
-public final class SharedASTProvider {
+public class SharedASTProviderCore {
 
 	/**
 	 * Wait flag class.
@@ -140,7 +138,7 @@ public final class SharedASTProvider {
 		return CoreASTProvider.getInstance().getAST(element, finalWaitFlag, progressMonitor);
 	}
 
-	private SharedASTProvider() {
+	protected SharedASTProviderCore() {
 		// Prevent instantiation.
 	}
 

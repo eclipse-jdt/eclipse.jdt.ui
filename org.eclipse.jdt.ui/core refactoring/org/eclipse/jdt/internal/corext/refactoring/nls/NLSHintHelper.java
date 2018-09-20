@@ -64,11 +64,10 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -203,13 +202,13 @@ public class NLSHintHelper {
 		if (!(je instanceof IType))
 			return null;
 		ITypeRoot typeRoot= ((IType) je).getTypeRoot();
-		CompilationUnit astRoot= SharedASTProvider.getAST(typeRoot, SharedASTProvider.WAIT_YES, null);
+		CompilationUnit astRoot= SharedASTProviderCore.getAST(typeRoot, SharedASTProviderCore.WAIT_YES, null);
 
 		return getResourceBundleName(astRoot);
 	}
 
 	public static String getResourceBundleName(ITypeRoot input) {
-		return getResourceBundleName(SharedASTProvider.getAST(input, SharedASTProvider.WAIT_YES, null));
+		return getResourceBundleName(SharedASTProviderCore.getAST(input, SharedASTProviderCore.WAIT_YES, null));
 	}
 
 	public static String getResourceBundleName(CompilationUnit astRoot) {

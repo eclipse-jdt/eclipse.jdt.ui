@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.manipulation.OrganizeImportsOperation;
-import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 
@@ -94,7 +94,7 @@ public class OrganizeImportsPerfTest extends JdtPerformanceTestCase {
 	private CompilationUnit[] createASTs(ICompilationUnit[] cus) {
 		CompilationUnit[] result= new CompilationUnit[cus.length];
 		for (int i= 0; i < cus.length; i++) {
-			result[i]= SharedASTProvider.getAST(cus[i], SharedASTProvider.WAIT_YES, new NullProgressMonitor());
+			result[i]= SharedASTProviderCore.getAST(cus[i], SharedASTProviderCore.WAIT_YES, new NullProgressMonitor());
 		}
 		return result;
 	}

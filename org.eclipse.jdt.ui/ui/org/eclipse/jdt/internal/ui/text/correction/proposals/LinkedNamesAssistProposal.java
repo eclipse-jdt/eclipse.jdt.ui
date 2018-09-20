@@ -47,11 +47,11 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
@@ -134,7 +134,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 			Point seletion= viewer.getSelectedRange();
 
 			// get full ast
-			CompilationUnit root= SharedASTProvider.getAST(fContext.getCompilationUnit(), SharedASTProvider.WAIT_YES, null);
+			CompilationUnit root= SharedASTProviderCore.getAST(fContext.getCompilationUnit(), SharedASTProviderCore.WAIT_YES, null);
 
 			ASTNode nameNode= NodeFinder.perform(root, fNode.getStartPosition(), fNode.getLength());
 			final int pos= fNode.getStartPosition();

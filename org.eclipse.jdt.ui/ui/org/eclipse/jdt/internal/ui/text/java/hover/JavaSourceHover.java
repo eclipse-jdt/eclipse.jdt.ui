@@ -54,14 +54,13 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -189,7 +188,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 
 			String delim= StubUtility.getLineDelimiterUsed(editorInput);
 
-			CompilationUnit ast= SharedASTProvider.getAST(editorInput, SharedASTProvider.WAIT_NO, null);
+			CompilationUnit ast= SharedASTProviderCore.getAST(editorInput, SharedASTProviderCore.WAIT_NO, null);
 			if (ast == null)
 				return null;
 			ASTNode bracketNode= NodeFinder.perform(ast, match.getOffset(),

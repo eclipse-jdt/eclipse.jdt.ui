@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -68,8 +69,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
-import org.eclipse.jdt.ui.SharedASTProvider;
 
 /**
  * A TargetProvider provides all targets that have to be adapted, i.e. all method invocations that should be inlined.
@@ -485,7 +484,7 @@ abstract class TargetProvider {
 
 		@Override
 		public BodyDeclaration[] getAffectedBodyDeclarations(ICompilationUnit unit, IProgressMonitor pm) {
-			ASTNode root= SharedASTProvider.getAST(unit, SharedASTProvider.WAIT_YES, pm);
+			ASTNode root= SharedASTProviderCore.getAST(unit, SharedASTProviderCore.WAIT_YES, pm);
 			InvocationFinder finder= new InvocationFinder(fMethodBinding);
 			root.accept(finder);
 			fCurrentBodies= finder.result;

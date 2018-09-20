@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
@@ -67,7 +68,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -2220,7 +2220,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			JavaCompletionProposalComputer computer= new JavaNoTypeCompletionProposalComputer();
 
 			// make sure we get an import rewrite context
-			SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, null);
+			SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_YES, null);
 
 			List<ICompletionProposal> proposals= computer.computeCompletionProposals(context, null);
 
@@ -2298,7 +2298,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			JavaCompletionProposalComputer computer= new JavaNoTypeCompletionProposalComputer();
 
 			// make sure we get an import rewrite context
-			SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, null);
+			SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_YES, null);
 
 			List<ICompletionProposal> proposals= computer.computeCompletionProposals(context, null);
 
@@ -2490,7 +2490,7 @@ public class CodeCompletionTest extends AbstractCompletionTest {
 			JavaCompletionProposalComputer computer= new JavaNoTypeCompletionProposalComputer();
 
 			// make sure we get an import rewrite context
-			SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, null);
+			SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_YES, null);
 
 			List<ICompletionProposal> proposals= computer.computeCompletionProposals(createContext(offset, cu), null);
 

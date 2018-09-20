@@ -53,16 +53,16 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 public class AccessorClassModifier {
 
@@ -77,7 +77,7 @@ public class AccessorClassModifier {
 
 		fCU= cu;
 
-		fRoot= SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, null);
+		fRoot= SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_YES, null);
 		fAst= fRoot.getAST();
 		fASTRewrite= ASTRewrite.create(fAst);
 

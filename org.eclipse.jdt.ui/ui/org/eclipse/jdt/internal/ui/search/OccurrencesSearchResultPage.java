@@ -50,12 +50,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder;
 import org.eclipse.jdt.internal.core.manipulation.search.OccurrencesFinder;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.SharedASTProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
@@ -94,7 +94,7 @@ public class OccurrencesSearchResultPage extends AbstractTextSearchViewPage {
 				ISelection selection= activeEditor.getSite().getSelectionProvider().getSelection();
 				ITypeRoot typeRoot= JavaUI.getEditorInputTypeRoot(activeEditor.getEditorInput());
 				if (typeRoot != null && selection instanceof ITextSelection) {
-					CompilationUnit astRoot= SharedASTProvider.getAST(typeRoot, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
+					CompilationUnit astRoot= SharedASTProviderCore.getAST(typeRoot, SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);
 					if (astRoot != null) {
 						preformEditorSelectionChanged((ITextSelection) selection, astRoot);
 					}

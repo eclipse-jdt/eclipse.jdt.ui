@@ -25,7 +25,6 @@ import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
-import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.ITextInputListener;
@@ -45,205 +44,13 @@ import org.eclipse.jdt.internal.ui.text.JavaPresentationReconciler;
  *
  * @since 3.0
  */
-public class SemanticHighlightingPresenter implements ITextPresentationListener, ITextInputListener, IDocumentListener {
-
-	/**
-	 * Semantic highlighting position updater.
-	 */
-	private class HighlightingPositionUpdater implements IPositionUpdater {
-
-		/** The position category. */
-		private final String fCategory;
-
-		/**
-		 * Creates a new updater for the given <code>category</code>.
-		 *
-		 * @param category the new category.
-		 */
-		public HighlightingPositionUpdater(String category) {
-			fCategory= category;
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.IPositionUpdater#update(org.eclipse.jface.text.DocumentEvent)
-		 */
-		@Override
-		public void update(DocumentEvent event) {
-
-			int eventOffset= event.getOffset();
-			int eventOldLength= event.getLength();
-			int eventEnd= eventOffset + eventOldLength;
-
-			try {
-				Position[] positions= event.getDocument().getPositions(fCategory);
-
-				for (int i= 0; i != positions.length; i++) {
-
-					HighlightedPosition position= (HighlightedPosition) positions[i];
-
-					// Also update deleted positions because they get deleted by the background thread and removed/invalidated only in the UI runnable
-//					if (position.isDeleted())
-//						continue;
-
-					int offset= position.getOffset();
-					int length= position.getLength();
-					int end= offset + length;
-
-					if (offset > eventEnd)
-						updateWithPrecedingEvent(position, event);
-					else if (end < eventOffset)
-						updateWithSucceedingEvent(position, event);
-					else if (offset <= eventOffset && end >= eventEnd)
-						updateWithIncludedEvent(position, event);
-					else if (offset <= eventOffset)
-						updateWithOverEndEvent(position, event);
-					else if (end >= eventEnd)
-						updateWithOverStartEvent(position, event);
-					else
-						updateWithIncludingEvent(position, event);
-				}
-			} catch (BadPositionCategoryException e) {
-				// ignore and return
-			}
-		}
-
-		/**
-		 * Update the given position with the given event. The event precedes the position.
-		 *
-		 * @param position The position
-		 * @param event The event
-		 */
-		private void updateWithPrecedingEvent(HighlightedPosition position, DocumentEvent event) {
-			String newText= event.getText();
-			int eventNewLength= newText != null ? newText.length() : 0;
-			int deltaLength= eventNewLength - event.getLength();
-
-			position.setOffset(position.getOffset() + deltaLength);
-		}
-
-		/**
-		 * Update the given position with the given event. The event succeeds the position.
-		 *
-		 * @param position The position
-		 * @param event The event
-		 */
-		private void updateWithSucceedingEvent(HighlightedPosition position, DocumentEvent event) {
-		}
-
-		/**
-		 * Update the given position with the given event. The event is included by the position.
-		 *
-		 * @param position The position
-		 * @param event The event
-		 */
-		private void updateWithIncludedEvent(HighlightedPosition position, DocumentEvent event) {
-			int eventOffset= event.getOffset();
-			String newText= event.getText();
-			if (newText == null)
-				newText= ""; //$NON-NLS-1$
-			int eventNewLength= newText.length();
-
-			int deltaLength= eventNewLength - event.getLength();
-
-			int offset= position.getOffset();
-			int length= position.getLength();
-			int end= offset + length;
-
-			int includedLength= 0;
-			while (includedLength < eventNewLength && Character.isJavaIdentifierPart(newText.charAt(includedLength)))
-				includedLength++;
-			if (includedLength == eventNewLength)
-				position.setLength(length + deltaLength);
-			else {
-				int newLeftLength= eventOffset - offset + includedLength;
-
-				int excludedLength= eventNewLength;
-				while (excludedLength > 0 && Character.isJavaIdentifierPart(newText.charAt(excludedLength - 1)))
-					excludedLength--;
-				int newRightOffset= eventOffset + excludedLength;
-				int newRightLength= end + deltaLength - newRightOffset;
-
-				if (newRightLength == 0) {
-					position.setLength(newLeftLength);
-				} else {
-					if (newLeftLength == 0) {
-						position.update(newRightOffset, newRightLength);
-					} else {
-						position.setLength(newLeftLength);
-						addPositionFromUI(newRightOffset, newRightLength, position.getHighlighting());
-					}
-				}
-			}
-		}
-
-		/**
-		 * Update the given position with the given event. The event overlaps with the end of the position.
-		 *
-		 * @param position The position
-		 * @param event The event
-		 */
-		private void updateWithOverEndEvent(HighlightedPosition position, DocumentEvent event) {
-			String newText= event.getText();
-			if (newText == null)
-				newText= ""; //$NON-NLS-1$
-			int eventNewLength= newText.length();
-
-			int includedLength= 0;
-			while (includedLength < eventNewLength && Character.isJavaIdentifierPart(newText.charAt(includedLength)))
-				includedLength++;
-			position.setLength(event.getOffset() - position.getOffset() + includedLength);
-		}
-
-		/**
-		 * Update the given position with the given event. The event overlaps with the start of the position.
-		 *
-		 * @param position The position
-		 * @param event The event
-		 */
-		private void updateWithOverStartEvent(HighlightedPosition position, DocumentEvent event) {
-			int eventOffset= event.getOffset();
-			int eventEnd= eventOffset + event.getLength();
-
-			String newText= event.getText();
-			if (newText == null)
-				newText= ""; //$NON-NLS-1$
-			int eventNewLength= newText.length();
-
-			int excludedLength= eventNewLength;
-			while (excludedLength > 0 && Character.isJavaIdentifierPart(newText.charAt(excludedLength - 1)))
-				excludedLength--;
-			int deleted= eventEnd - position.getOffset();
-			int inserted= eventNewLength - excludedLength;
-			position.update(eventOffset + excludedLength, position.getLength() - deleted + inserted);
-		}
-
-		/**
-		 * Update the given position with the given event. The event includes the position.
-		 *
-		 * @param position The position
-		 * @param event The event
-		 */
-		private void updateWithIncludingEvent(HighlightedPosition position, DocumentEvent event) {
-			position.delete();
-			position.update(event.getOffset(), 0);
-		}
-	}
-
-	/** Position updater */
-	private IPositionUpdater fPositionUpdater= new HighlightingPositionUpdater(getPositionCategory());
+public class SemanticHighlightingPresenter extends SemanticHighlightingPresenterCore
+	implements ITextPresentationListener, ITextInputListener, IDocumentListener {
 
 	/** The source viewer this semantic highlighting reconciler is installed on */
 	private JavaSourceViewer fSourceViewer;
 	/** The background presentation reconciler */
 	private JavaPresentationReconciler fPresentationReconciler;
-
-	/** UI's current highlighted positions - can contain <code>null</code> elements */
-	private List<Position> fPositions= new ArrayList<>();
-	/** UI position lock */
-	private Object fPositionLock= new Object();
-
-	/** <code>true</code> iff the current reconcile is canceled. */
-	private boolean fIsCanceled= false;
 
 	/**
 	 * Creates and returns a new highlighted position with the given offset, length and highlighting.
@@ -261,19 +68,14 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 		return new HighlightedPosition(offset, length, highlighting, fPositionUpdater);
 	}
 
-	/**
-	 * Adds all current positions to the given list.
-	 * <p>
-	 * NOTE: Called from background thread.
-	 * </p>
-	 *
-	 * @param list The list
+	/*
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightingPresenterCore#addPositionForEvent()
 	 */
-	public void addAllPositions(List<Position> list) {
-		synchronized (fPositionLock) {
-			list.addAll(fPositions);
-		}
+	@Override
+	protected void addPositionForEvent(DocumentEvent event, String category, int offset, int length, Object highlighting) {
+		addPositionFromUI(offset, length, (Highlighting)highlighting);
 	}
+
 
 	/**
 	 * Create a text presentation in the background.
@@ -465,33 +267,6 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 //	}
 
 	/**
-	 * Returns <code>true</code> iff the positions contain the position.
-	 * @param positions the positions, must be ordered by offset but may overlap
-	 * @param position the position
-	 * @return <code>true</code> iff the positions contain the position
-	 */
-	private boolean contain(List<? extends Position> positions, Position position) {
-		return indexOf(positions, position) != -1;
-	}
-
-	/**
-	 * Returns index of the position in the positions, <code>-1</code> if not found.
-	 * @param positions the positions, must be ordered by offset but may overlap
-	 * @param position the position
-	 * @return the index
-	 */
-	private int indexOf(List<? extends Position> positions, Position position) {
-		int index= computeIndexAtOffset(positions, position.getOffset());
-		int size= positions.size();
-		while (index < size) {
-			if (positions.get(index) == position)
-				return index;
-			index++;
-		}
-		return -1;
-	}
-
-	/**
 	 * Insert the given position in <code>fPositions</code>, s.t. the offsets remain in linear order.
 	 *
 	 * @param position The position for insertion
@@ -515,27 +290,6 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 			int k= (i + j) >> 1;
 			Position position= positions.get(k);
 			if (position.getOffset() > offset)
-				j= k;
-			else
-				i= k;
-		}
-		return j;
-	}
-
-	/**
-	 * Returns the index of the first position with an offset equal or greater than the given offset.
-	 *
-	 * @param positions the positions, must be ordered by offset and must not overlap
-	 * @param offset the offset
-	 * @return the index of the last position with an offset equal or greater than the given offset
-	 */
-	private int computeIndexAtOffset(List<? extends Position> positions, int offset) {
-		int i= -1;
-		int j= positions.size();
-		while (j - i > 1) {
-			int k= (i + j) >> 1;
-			Position position= positions.get(k);
-			if (position.getOffset() >= offset)
 				j= k;
 			else
 				i= k;
@@ -608,6 +362,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * NOTE: Also called from background thread.
 	 * </p>
 	 */
+	@Override
 	public boolean isCanceled() {
 		IDocument document= fSourceViewer != null ? fSourceViewer.getDocument() : null;
 		if (document == null)
@@ -623,6 +378,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 *
 	 * @param isCanceled <code>true</code> iff the current reconcile is canceled
 	 */
+	@Override
 	public void setCanceled(boolean isCanceled) {
 		IDocument document= fSourceViewer != null ? fSourceViewer.getDocument() : null;
 		if (document == null) {
@@ -779,7 +535,8 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	/**
 	 * @return The semantic reconciler position's category.
 	 */
-	private String getPositionCategory() {
+	@Override
+	protected String getPositionCategory() {
 		return toString();
 	}
 }

@@ -18,10 +18,9 @@ import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder;
-
-import org.eclipse.jdt.ui.SharedASTProvider;
 
 
 public final class FindOccurrencesEngine {
@@ -52,7 +51,7 @@ public final class FindOccurrencesEngine {
 			return SearchMessages.FindOccurrencesEngine_noSource_text;
 		}
 
-		final CompilationUnit root= SharedASTProvider.getAST(input, SharedASTProvider.WAIT_YES, null);
+		final CompilationUnit root= SharedASTProviderCore.getAST(input, SharedASTProviderCore.WAIT_YES, null);
 		if (root == null) {
 			return SearchMessages.FindOccurrencesEngine_cannotParse_text;
 		}

@@ -31,12 +31,12 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.SharedASTProvider;
 
 
 
@@ -65,7 +65,7 @@ public class NLSKeyHyperlinkDetector extends AbstractHyperlinkDetector {
 		if (javaElement == null)
 			return null;
 
-		CompilationUnit ast= SharedASTProvider.getAST(javaElement, SharedASTProvider.WAIT_NO, null);
+		CompilationUnit ast= SharedASTProviderCore.getAST(javaElement, SharedASTProviderCore.WAIT_NO, null);
 		if (ast == null)
 			return null;
 

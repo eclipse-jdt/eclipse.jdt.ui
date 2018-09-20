@@ -105,6 +105,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -117,7 +118,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.actions.OpenAttachedJavadocAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -1014,7 +1014,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 		if (editorInputElement == null)
 			return null;
 
-		CompilationUnit unit= SharedASTProvider.getAST(editorInputElement, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
+		CompilationUnit unit= SharedASTProviderCore.getAST(editorInputElement, SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);
 		if (unit == null)
 			return null;
 		

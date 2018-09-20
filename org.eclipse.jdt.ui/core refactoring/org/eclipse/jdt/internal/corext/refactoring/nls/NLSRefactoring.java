@@ -42,16 +42,14 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.ui.SharedASTProvider;
-
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 
 public class NLSRefactoring extends Refactoring {
@@ -88,7 +86,7 @@ public class NLSRefactoring extends Refactoring {
 		Assert.isNotNull(cu);
 		fCu= cu;
 
-		CompilationUnit astRoot= SharedASTProvider.getAST(fCu, SharedASTProvider.WAIT_YES, null);
+		CompilationUnit astRoot= SharedASTProviderCore.getAST(fCu, SharedASTProviderCore.WAIT_YES, null);
 		NLSHint nlsHint= new NLSHint(fCu, astRoot);
 
 		fSubstitutions= nlsHint.getSubstitutions();

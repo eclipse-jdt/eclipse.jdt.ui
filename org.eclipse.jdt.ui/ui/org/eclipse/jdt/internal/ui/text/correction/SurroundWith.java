@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -60,7 +61,6 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.SurroundWithAnalyzer;
 
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
 public abstract class SurroundWith {
@@ -173,7 +173,7 @@ public abstract class SurroundWith {
 
 	public static boolean isApplicable(IInvocationContext context) throws CoreException {
 		ICompilationUnit unit= context.getCompilationUnit();
-		CompilationUnit ast= SharedASTProvider.getAST(unit, SharedASTProvider.WAIT_NO, null);
+		CompilationUnit ast= SharedASTProviderCore.getAST(unit, SharedASTProviderCore.WAIT_NO, null);
 		if (ast == null)
 			return true;
 

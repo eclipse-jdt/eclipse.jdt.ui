@@ -32,10 +32,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import junit.framework.Test;
@@ -218,7 +218,7 @@ public class CleanUpAnnotationTest extends CleanUpTestCase {
 		options.put(JavaCore.COMPILER_PB_UNUSED_PRIVATE_MEMBER, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 
-		CompilationUnit ast= SharedASTProvider.getAST(cu1, SharedASTProvider.WAIT_YES, null);
+		CompilationUnit ast= SharedASTProviderCore.getAST(cu1, SharedASTProviderCore.WAIT_YES, null);
 		assertTrue(ast.getProblems().length > 0);
 
 		enable(CleanUpConstants.SORT_MEMBERS);

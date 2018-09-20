@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.RequiresDirective;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -46,7 +47,6 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.correction.ChangeCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -81,7 +81,7 @@ public class AddModuleRequiresCorrectionProposal extends ChangeCorrectionProposa
 		if (fModuleName == null || fModuleCu == null) {
 			return null;
 		}
-		CompilationUnit astRoot= SharedASTProvider.getAST(fModuleCu, SharedASTProvider.WAIT_YES, null);
+		CompilationUnit astRoot= SharedASTProviderCore.getAST(fModuleCu, SharedASTProviderCore.WAIT_YES, null);
 		ModuleDeclaration moduleDecl= astRoot.getModule();
 		if (moduleDecl == null) {
 			return null;

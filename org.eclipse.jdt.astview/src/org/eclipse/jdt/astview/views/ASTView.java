@@ -122,9 +122,8 @@ import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.NodeFinder;
-
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.SharedASTProvider;
 
 
 public class ASTView extends ViewPart implements IShowInSource, IShowInTargetList {
@@ -633,7 +632,7 @@ public class ASTView extends ViewPart implements IShowInSource, IShowInTargetLis
 		} else if (input instanceof ICompilationUnit && (getCurrentInputKind() == ASTInputKindAction.USE_CACHE)) {
 			ICompilationUnit cu= (ICompilationUnit) input;
 			startTime= System.currentTimeMillis();
-			root= SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_NO, null);
+			root= SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_NO, null);
 			endTime= System.currentTimeMillis();
 			
 		} else {

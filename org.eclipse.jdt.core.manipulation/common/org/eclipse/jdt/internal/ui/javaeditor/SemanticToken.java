@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc - make hidden methods public now that class is refactored
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.javaeditor;
@@ -84,7 +85,7 @@ public final class SemanticToken {
 	 *
 	 * @param node the AST simple name
 	 */
-	void update(SimpleName node) {
+	public void update(SimpleName node) {
 		clear();
 		fNode= node;
 	}
@@ -97,7 +98,7 @@ public final class SemanticToken {
 	 *
 	 * @param literal the AST literal
 	 */
-	void update(Expression literal) {
+	public void update(Expression literal) {
 		clear();
 		fLiteral= literal;
 	}
@@ -108,7 +109,7 @@ public final class SemanticToken {
 	 * NOTE: Allowed to be used by {@link SemanticHighlightingReconciler} only.
 	 * </p>
 	 */
-	void clear() {
+	public void clear() {
 		fNode= null;
 		fLiteral= null;
 		fBinding= null;

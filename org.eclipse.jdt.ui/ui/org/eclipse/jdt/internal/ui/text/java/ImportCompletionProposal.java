@@ -32,13 +32,13 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -183,7 +183,7 @@ public class ImportCompletionProposal extends AbstractJavaCompletionProposal {
 	}
 
 	private CompilationUnit getASTRoot(ICompilationUnit compilationUnit) {
-		return SharedASTProvider.getAST(compilationUnit, SharedASTProvider.WAIT_NO, null);
+		return SharedASTProviderCore.getAST(compilationUnit, SharedASTProviderCore.WAIT_NO, null);
 	}
 
 	/**

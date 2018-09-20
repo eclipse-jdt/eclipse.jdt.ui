@@ -21,7 +21,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.core.ITypeRoot;
 
-import org.eclipse.jdt.ui.SharedASTProvider;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
@@ -56,6 +56,6 @@ public class ActivateJavaEditorTest extends ActivateEditorTest {
 	@Override
 	protected void waitUntilReady(AbstractTextEditor editor) {
 		ITypeRoot cu= EditorUtility.getEditorInputJavaElement(editor, false);
-		SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_ACTIVE_ONLY, null);
+		SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_ACTIVE_ONLY, null);
 	}
 }

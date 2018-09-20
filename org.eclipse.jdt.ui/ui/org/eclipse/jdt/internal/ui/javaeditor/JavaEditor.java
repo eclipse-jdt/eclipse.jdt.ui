@@ -189,6 +189,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 import org.eclipse.jdt.core.util.IModifierConstants;
 
 import org.eclipse.jdt.internal.core.manipulation.search.IOccurrencesFinder;
@@ -199,7 +200,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
@@ -1219,7 +1219,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				if (inputJavaElement != null) {
 					IProgressMonitor monitor = getProgressMonitor();
 					try {
-						updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO, monitor));
+						updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProviderCore.getAST(inputJavaElement, SharedASTProviderCore.WAIT_NO, monitor));
 					} finally {
 						monitor.done();
 					}
@@ -2426,7 +2426,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		IProgressMonitor monitor = getProgressMonitor();
 		CompilationUnit ast;
 		try {
-			ast= SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO /* DO NOT USE WAIT_ACTIVE_ONLY */ , monitor);
+			ast= SharedASTProviderCore.getAST(inputJavaElement, SharedASTProviderCore.WAIT_NO /* DO NOT USE WAIT_ACTIVE_ONLY */ , monitor);
 		} finally {
 			monitor.done();
 		}
@@ -3402,7 +3402,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (inputJavaElement != null) {
 				IProgressMonitor monitor = getProgressMonitor();
 				try {
-					updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProvider.getAST(inputJavaElement, SharedASTProvider.WAIT_NO, monitor));
+					updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, SharedASTProviderCore.getAST(inputJavaElement, SharedASTProviderCore.WAIT_NO, monitor));
 				} finally {
 					monitor.done();
 				}
@@ -3528,7 +3528,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			IProgressMonitor monitor = getProgressMonitor();
 			try {
 				SubMonitor subMonitor= SubMonitor.convert(monitor, 2);
-				CompilationUnit ast= SharedASTProvider.getAST(inputElement, SharedASTProvider.WAIT_ACTIVE_ONLY,
+				CompilationUnit ast= SharedASTProviderCore.getAST(inputElement, SharedASTProviderCore.WAIT_ACTIVE_ONLY,
 						subMonitor.newChild(1, SubMonitor.SUPPRESS_NONE));
 				fOverrideIndicatorManager.reconciled(ast, true, subMonitor.newChild(1, SubMonitor.SUPPRESS_NONE));
 			} finally {
