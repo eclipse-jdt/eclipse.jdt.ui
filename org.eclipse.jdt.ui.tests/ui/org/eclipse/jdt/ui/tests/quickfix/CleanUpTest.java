@@ -9171,11 +9171,24 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("  }\n");
 		buf.append("}\n");
 		String expected3 = buf.toString();
-
 		ICompilationUnit cu3= pack1.createCompilationUnit("AnonymousNestedInInterface.java", buf.toString(), false, null);
 
+		// public modifier must not be removed from enum methods 
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public interface A {\n");
+		buf.append("  public static enum B {\n");
+		buf.append("    public static void method () { }\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		ICompilationUnit cu4= pack1.createCompilationUnit("NestedEnum.java", buf.toString(), false, null);
+		// https://docs.oracle.com/javase/specs/jls/se8/html/jls-8.html#jls-8.9
+		// nested enum type is implicitly static
+		// Bug#538459 'public' modified must not be removed from static method in nested enum
+		String expected4 = buf.toString().replace("static enum", "enum");
+		
 		enable(CleanUpConstants.REMOVE_REDUNDANT_MODIFIERS);
-		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3 }, new String[] { expected1, expected2, expected3 });
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1, cu2, cu3, cu4 }, new String[] { expected1, expected2, expected3, expected4 });
 
 	}
 	

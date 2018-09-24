@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -139,7 +140,7 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 				TypeDeclaration typeDecl= ASTNodes.getParent(node, TypeDeclaration.class);
 				if (typeDecl != null && typeDecl.isInterface()) {
 					rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.ABSTRACT));
-					if (!AnonymousClassDeclaration.class.isInstance(node.getParent())) {
+					if (!AnonymousClassDeclaration.class.isInstance(node.getParent()) && !EnumDeclaration.class.isInstance(node.getParent())) {
 						rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.PUBLIC));
 					}
 				} else if (typeDecl != null && Modifier.isFinal(typeDecl.getModifiers()) && Modifier.isFinal(node.getModifiers())) {
@@ -152,6 +153,15 @@ public class RedundantModifiersCleanUp extends AbstractMultiFix {
 			public boolean visit(TypeDeclaration node) {
 				TypeDeclaration typeDecl= ASTNodes.getParent(node, TypeDeclaration.class);
 				if (typeDecl != null && node.isInterface() && Modifier.isStatic(node.getModifiers())) {
+					rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.STATIC));
+				}
+				return true;
+			}
+			
+			@Override
+			public boolean visit(EnumDeclaration node) {
+				TypeDeclaration typeDecl= ASTNodes.getParent(node, TypeDeclaration.class);
+				if (typeDecl != null && Modifier.isStatic(node.getModifiers())) {
 					rewriteOperations.add(new RemoveModifiersOperation(node, Modifier.STATIC));
 				}
 				return true;
