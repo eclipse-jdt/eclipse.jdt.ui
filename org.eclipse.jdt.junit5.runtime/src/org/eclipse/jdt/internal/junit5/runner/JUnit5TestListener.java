@@ -110,7 +110,9 @@ public class JUnit5TestListener implements TestExecutionListener {
 				return null;
 			}
 			return new FailedComparison(expected.getStringRepresentation(), actual.getStringRepresentation());
-		} else if (exception instanceof MultipleFailuresError) {
+		}
+
+		if (exception instanceof MultipleFailuresError) {
 			String expectedStr= ""; //$NON-NLS-1$
 			String actualStr= ""; //$NON-NLS-1$
 			String delimiter= "\n\n"; //$NON-NLS-1$
@@ -130,13 +132,21 @@ public class JUnit5TestListener implements TestExecutionListener {
 				}
 			}
 			return new FailedComparison(expectedStr, actualStr);
-		} else if (exception instanceof junit.framework.ComparisonFailure) {
-			junit.framework.ComparisonFailure comparisonFailure= (junit.framework.ComparisonFailure) exception;
-			return new FailedComparison(comparisonFailure.getExpected(), comparisonFailure.getActual());
-		} else if (exception instanceof org.junit.ComparisonFailure) {
-			org.junit.ComparisonFailure comparisonFailure= (org.junit.ComparisonFailure) exception;
-			return new FailedComparison(comparisonFailure.getExpected(), comparisonFailure.getActual());
 		}
+
+		// Avoid reference to ComparisonFailure initially to avoid NoClassDefFoundError for ComparisonFailure when junit.jar is not on the build path 
+		String classname= exception.getClass().getName();
+		if (classname.equals("junit.framework.ComparisonFailure") || classname.equals("org.junit.ComparisonFailure")) { //$NON-NLS-1$ //$NON-NLS-2$
+			if (exception instanceof junit.framework.ComparisonFailure) {
+				junit.framework.ComparisonFailure comparisonFailure= (junit.framework.ComparisonFailure) exception;
+				return new FailedComparison(comparisonFailure.getExpected(), comparisonFailure.getActual());
+			}
+			if (exception instanceof org.junit.ComparisonFailure) {
+				org.junit.ComparisonFailure comparisonFailure= (org.junit.ComparisonFailure) exception;
+				return new FailedComparison(comparisonFailure.getExpected(), comparisonFailure.getActual());
+			}
+		}
+
 		return null;
 	}
 
