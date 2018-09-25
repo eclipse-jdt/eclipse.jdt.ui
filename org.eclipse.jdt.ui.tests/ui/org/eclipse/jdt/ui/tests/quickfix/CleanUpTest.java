@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Alex Blewitt - https://bugs.eclipse.org/bugs/show_bug.cgi?id=168954
  *     Chris West (Faux) <eclipse@goeswhere.com> - [clean up] "Use modifier 'final' where possible" can introduce compile errors - https://bugs.eclipse.org/bugs/show_bug.cgi?id=272532
+ *     Red Hat Inc. - redundant semicolons test
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
@@ -9181,6 +9182,9 @@ public class CleanUpTest extends CleanUpTestCase {
 	public void testRemoveRedundantSemicolons () throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
+		
+		// Ensure various extra semi-colons are removed and required ones are left intact.
+		// This includes a lambda expression.
 		buf.append("package test; ;\n");
 		buf.append("enum cars { sedan, coupe };\n");
 		buf.append("public class Foo {\n");
@@ -9190,6 +9194,9 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("  int c= 10; /* and this ; too */\n");
 		buf.append("  public int foo () {\n");
 		buf.append("    ;\n");
+		buf.append("    Runnable r = () -> {\n");
+		buf.append("      System.out.println(\"running\");\n");
+		buf.append("    };;\n");
 		buf.append("    for (;;)\n");
 		buf.append("      ;;\n");
 		buf.append("      ;\n");
@@ -9198,6 +9205,7 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("};\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("Foo.java", buf.toString(), false, null);
 
+		// Ensure semi-colon after lambda expression remains intact.
 		buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("enum cars { sedan, coupe }\n");
@@ -9208,6 +9216,9 @@ public class CleanUpTest extends CleanUpTestCase {
 		buf.append("  int c= 10; /* and this ; too */\n");
 		buf.append("  public int foo () {\n");
 		buf.append("    \n");
+		buf.append("    Runnable r = () -> {\n");
+		buf.append("      System.out.println(\"running\");\n");
+		buf.append("    };\n");
 		buf.append("    for (;;)\n");
 		buf.append("      ;\n");
 		buf.append("      \n");

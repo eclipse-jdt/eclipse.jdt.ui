@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -178,7 +179,9 @@ public class RedundantSemicolonsCleanUp extends AbstractMultiFix implements ICle
 			
 			@Override
 			public boolean visit(Block node) {
-				searchNode(node, contents, label, textedits);
+				if (!(node.getParent() instanceof LambdaExpression)) {
+					searchNode(node, contents, label, textedits);
+				}
 				return true;
 			}
 		});
