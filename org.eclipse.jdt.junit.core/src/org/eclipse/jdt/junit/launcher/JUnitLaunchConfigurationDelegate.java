@@ -220,17 +220,17 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 			runConfig.setWorkingDirectory(workingDirName);
 			runConfig.setVMSpecificAttributesMap(vmAttributesMap);
 
-			if (JavaRuntime.isModularProject(javaProject)) {
-				// modulepath
+			if (!JavaRuntime.isModularConfiguration(configuration)) {
+				// Bootpath
+				runConfig.setBootClassPath(getBootpath(configuration));
+			} else {
+				// module path
 				runConfig.setModulepath(modulepath);
 				if (!configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_MODULE_CLI_OPTIONS, true)) {
 					runConfig.setOverrideDependencies(configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_MODULE_CLI_OPTIONS, "")); //$NON-NLS-1$
 				} else {
 					runConfig.setOverrideDependencies(getModuleCLIOptions(configuration));
 				}
-			} else {
-				// Bootpath
-				runConfig.setBootClassPath(getBootpath(configuration));
 			}
 
 			// check for cancellation
