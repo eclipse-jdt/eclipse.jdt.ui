@@ -297,9 +297,8 @@ public final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_add_inferred_lambda_parameter_types;
 	public static String QuickAssistProcessor_replace_var_with_inferred_lambda_parameter_types;
 	public static String QuickAssistProcessor_add_var_lambda_parameter_types;
-	public static String QuickAssistProcessor_replace_inferred_with_var_lambda_parameter_types;
-	public static String QuickAssistProcessor_remove_inferred_lambda_parameter_types;
-	public static String QuickAssistProcessor_remove_var_lambda_parameter_types;
+	public static String QuickAssistProcessor_replace_lambda_parameter_types_with_var;
+	public static String QuickAssistProcessor_remove_lambda_parameter_types;
 	public static String QuickAssistProcessor_addfinallyblock_description;
 	public static String QuickAssistProcessor_addelseblock_description;
 	public static String QuickAssistProcessor_addParenthesesInLambda;

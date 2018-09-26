@@ -1537,7 +1537,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		String label= null;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		if (isvarTypeSingleVariableDeclaration) {
-			label= CorrectionMessages.QuickAssistProcessor_replace_inferred_with_var_lambda_parameter_types;
+			label= CorrectionMessages.QuickAssistProcessor_replace_lambda_parameter_types_with_var;
 			ASTRewriteRemoveImportsCorrectionProposal newProposal= new ASTRewriteRemoveImportsCorrectionProposal(label, context.getCompilationUnit(), rewrite,
 					IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
 			newProposal.setImportRemover(remover);
@@ -1622,14 +1622,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ASTRewriteCorrectionProposal proposal;
 		String label= null;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		label= CorrectionMessages.QuickAssistProcessor_remove_lambda_parameter_types;
 		if (removeImports) {
-			label= CorrectionMessages.QuickAssistProcessor_remove_inferred_lambda_parameter_types;
 			ASTRewriteRemoveImportsCorrectionProposal newProposal= new ASTRewriteRemoveImportsCorrectionProposal(label, context.getCompilationUnit(), rewrite,
 					IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
 			newProposal.setImportRemover(remover);
 			proposal= newProposal;
 		} else {
-			label= CorrectionMessages.QuickAssistProcessor_remove_var_lambda_parameter_types;
 			proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
 		}
 		proposal.setImportRewrite(importRewrite);
