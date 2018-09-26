@@ -1,3 +1,4 @@
 # To force a version qualifier update, add the bug here
 Bug 509973 - Comparator errors in I20170105-0320
+Bug 539509 - Comparator errors in jdt.ui bundles in I20180926-0830
 Adopt change of IASTSharedValues.SHARED_AST_LEVEL to 10
