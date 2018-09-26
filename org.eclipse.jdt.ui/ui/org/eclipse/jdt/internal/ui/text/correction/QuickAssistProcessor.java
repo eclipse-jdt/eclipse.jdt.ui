@@ -164,6 +164,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -186,6 +187,7 @@ import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteRemoveImportsCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.GenerateForLoopAssistProposal;
@@ -259,6 +261,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getChangeLambdaBodyToBlockProposal(context, coveringNode, null)
 				|| getChangeLambdaBodyToExpressionProposal(context, coveringNode, null)
 				|| getAddInferredLambdaParameterTypes(context, coveringNode, null)
+				|| getAddVarLambdaParameterTypes(context, coveringNode, null)
+				|| getRemoveVarOrInferredLambdaParameterTypes(context, coveringNode, null)
 				|| getConvertMethodReferenceToLambdaProposal(context, coveringNode, null)
 				|| getConvertLambdaToMethodReferenceProposal(context, coveringNode, null)
 				|| getFixParenthesesInLambdaExpression(context, coveringNode, null)
@@ -314,6 +318,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getChangeLambdaBodyToBlockProposal(context, coveringNode, resultingCollections);
 				getChangeLambdaBodyToExpressionProposal(context, coveringNode, resultingCollections);
 				getAddInferredLambdaParameterTypes(context, coveringNode, resultingCollections);
+				getAddVarLambdaParameterTypes(context, coveringNode, resultingCollections);
+				getRemoveVarOrInferredLambdaParameterTypes(context, coveringNode, resultingCollections);
 				getConvertMethodReferenceToLambdaProposal(context, coveringNode, resultingCollections);
 				getConvertLambdaToMethodReferenceProposal(context, coveringNode, resultingCollections);
 				getFixParenthesesInLambdaExpression(context, coveringNode, resultingCollections);
@@ -1370,11 +1376,35 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	public static boolean getAddInferredLambdaParameterTypes(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
 		LambdaExpression lambda;
+		boolean isvarTypeSingleVariableDeclaration= false;
 		if (covering instanceof LambdaExpression) {
 			lambda= (LambdaExpression) covering;
 		} else if (covering.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY &&
 				((VariableDeclarationFragment) covering.getParent()).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
 			lambda= (LambdaExpression) covering.getParent().getParent();
+		} else if (covering.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY &&
+				((SingleVariableDeclaration) covering.getParent()).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
+			CompilationUnit astRoot= context.getASTRoot();
+			IJavaElement root= astRoot.getJavaElement();
+			ASTNode parent= covering.getParent();
+			if (parent == null || root == null) {
+				return false;
+			}
+			IJavaProject javaProject= root.getJavaProject();
+			if (javaProject == null) {
+				return false;
+			}
+			if (!JavaModelUtil.is11OrHigher(javaProject)) {
+				return false;
+			} else {
+				SingleVariableDeclaration svDecl= (SingleVariableDeclaration) parent;
+				if (svDecl.getType() != null && svDecl.getType().isVar()) {
+					lambda= (LambdaExpression) covering.getParent().getParent();
+					isvarTypeSingleVariableDeclaration= true;
+				} else {
+					return false;
+				}
+			}
 		} else {
 			return false;
 		}
@@ -1384,7 +1414,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (noOfLambdaParams == 0)
 			return false;
 
-		if (lambdaParameters.get(0) instanceof SingleVariableDeclaration)
+		if (lambdaParameters.get(0) instanceof SingleVariableDeclaration && !isvarTypeSingleVariableDeclaration)
 			return false;
 
 		IMethodBinding methodBinding= lambda.resolveMethodBinding();
@@ -1412,8 +1442,196 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		// add proposal
 		String label= CorrectionMessages.QuickAssistProcessor_add_inferred_lambda_parameter_types;
+		if (isvarTypeSingleVariableDeclaration) {
+			label= CorrectionMessages.QuickAssistProcessor_replace_var_with_inferred_lambda_parameter_types;
+		}
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
+		proposal.setImportRewrite(importRewrite);
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	public static boolean getAddVarLambdaParameterTypes(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+		CompilationUnit astRoot= context.getASTRoot();
+		IJavaElement root= astRoot.getJavaElement();
+		ASTNode parent= covering.getParent();
+		if (parent == null || root == null) {
+			return false;
+		}
+		IJavaProject javaProject= root.getJavaProject();
+		if (javaProject == null) {
+			return false;
+		}
+		if (!JavaModelUtil.is11OrHigher(javaProject)) {
+			return false;
+		}
+
+		LambdaExpression lambda;
+		boolean isvarTypeSingleVariableDeclaration= false;
+		if (covering instanceof LambdaExpression) {
+			lambda= (LambdaExpression) covering;
+		} else if (covering.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY &&
+				((VariableDeclarationFragment) parent).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
+			lambda= (LambdaExpression) covering.getParent().getParent();
+		} else {
+			if (covering.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY &&
+					((SingleVariableDeclaration) parent).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
+				SingleVariableDeclaration svDecl= (SingleVariableDeclaration) parent;
+				if (svDecl.getType() != null && !svDecl.getType().isVar()) {
+					lambda= (LambdaExpression) covering.getParent().getParent();
+					isvarTypeSingleVariableDeclaration= true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+
+		List<VariableDeclaration> lambdaParameters= lambda.parameters();
+		int noOfLambdaParams= lambdaParameters.size();
+		if (noOfLambdaParams == 0)
+			return false;
+
+		if (lambdaParameters.get(0) instanceof SingleVariableDeclaration && !isvarTypeSingleVariableDeclaration)
+			return false;
+
+		IMethodBinding methodBinding= lambda.resolveMethodBinding();
+		if (methodBinding == null)
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		String VAR_TYPE= "var"; //$NON-NLS-1$
+		AST ast= lambda.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+
+		ImportRemover remover= new ImportRemover(context.getCompilationUnit().getJavaProject(), context.getASTRoot());
+
+		ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
+
+		rewrite.set(lambda, LambdaExpression.PARENTHESES_PROPERTY, Boolean.valueOf(true), null);
+		for (int i= 0; i < noOfLambdaParams; i++) {
+			VariableDeclaration param= lambdaParameters.get(i);
+			Type oldType= null;
+			if (param instanceof SingleVariableDeclaration) {
+				SingleVariableDeclaration curParent= (SingleVariableDeclaration) param;
+				oldType= curParent.getType();
+				if (oldType != null) {
+					rewrite.replace(oldType, ast.newSimpleType(ast.newName(VAR_TYPE)), null);
+					remover.registerRemovedNode(oldType);
+				}
+			}
+			if (oldType == null) {
+				SingleVariableDeclaration newParam= ast.newSingleVariableDeclaration();
+				newParam.setName(ast.newSimpleName(param.getName().getIdentifier()));
+				newParam.setType(ast.newSimpleType(ast.newName(VAR_TYPE)));
+				rewrite.replace(param, newParam, null);
+			}
+		}
+
+		// add proposal
+		ASTRewriteCorrectionProposal proposal;
+		String label= null;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		if (isvarTypeSingleVariableDeclaration) {
+			label= CorrectionMessages.QuickAssistProcessor_replace_inferred_with_var_lambda_parameter_types;
+			ASTRewriteRemoveImportsCorrectionProposal newProposal= new ASTRewriteRemoveImportsCorrectionProposal(label, context.getCompilationUnit(), rewrite,
+					IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
+			newProposal.setImportRemover(remover);
+			proposal= newProposal;
+
+		} else {
+			label= CorrectionMessages.QuickAssistProcessor_add_var_lambda_parameter_types;
+			proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
+		}
+		proposal.setImportRewrite(importRewrite);
+		resultingCollections.add(proposal);
+		return true;
+	}
+
+	public static boolean getRemoveVarOrInferredLambdaParameterTypes(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
+		CompilationUnit astRoot= context.getASTRoot();
+		IJavaElement root= astRoot.getJavaElement();
+		ASTNode parent= covering.getParent();
+		if (parent == null || root == null) {
+			return false;
+		}
+		IJavaProject javaProject= root.getJavaProject();
+		if (javaProject == null) {
+			return false;
+		}
+		boolean checkForVarTypes= false;
+		if (JavaModelUtil.is11OrHigher(javaProject)) {
+			checkForVarTypes= true;
+		}
+
+		LambdaExpression lambda;
+		if (covering instanceof LambdaExpression) {
+			lambda= (LambdaExpression) covering;
+		} else if (covering.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY &&
+				((SingleVariableDeclaration) parent).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
+			lambda= (LambdaExpression) covering.getParent().getParent();
+		} else {
+			return false;
+		}
+
+		List<VariableDeclaration> lambdaParameters= lambda.parameters();
+		int noOfLambdaParams= lambdaParameters.size();
+		if (noOfLambdaParams == 0)
+			return false;
+
+		if (!(lambdaParameters.get(0) instanceof SingleVariableDeclaration))
+			return false;
+
+		IMethodBinding methodBinding= lambda.resolveMethodBinding();
+		if (methodBinding == null)
+			return false;
+
+		if (resultingCollections == null)
+			return true;
+
+		AST ast= lambda.getAST();
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+
+		ImportRemover remover= new ImportRemover(context.getCompilationUnit().getJavaProject(), context.getASTRoot());
+
+		ImportRewrite importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
+
+		rewrite.set(lambda, LambdaExpression.PARENTHESES_PROPERTY, Boolean.valueOf(true), null);
+		boolean removeImports= false;
+		for (int i= 0; i < noOfLambdaParams; i++) {
+			VariableDeclaration param= lambdaParameters.get(i);
+			Type oldType= null;
+			if (param instanceof SingleVariableDeclaration) {
+				SingleVariableDeclaration curParent= (SingleVariableDeclaration) param;
+				oldType= curParent.getType();
+				if (oldType != null && (!checkForVarTypes || (checkForVarTypes && !oldType.isVar()))) {
+					remover.registerRemovedNode(oldType);
+					removeImports= true;
+				}
+				VariableDeclarationFragment newParam= ast.newVariableDeclarationFragment();
+				newParam.setName(ast.newSimpleName(param.getName().getIdentifier()));
+				rewrite.replace(param, newParam, null);
+			}
+		}
+
+		// add proposal
+		ASTRewriteCorrectionProposal proposal;
+		String label= null;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		if (removeImports) {
+			label= CorrectionMessages.QuickAssistProcessor_remove_inferred_lambda_parameter_types;
+			ASTRewriteRemoveImportsCorrectionProposal newProposal= new ASTRewriteRemoveImportsCorrectionProposal(label, context.getCompilationUnit(), rewrite,
+					IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
+			newProposal.setImportRemover(remover);
+			proposal= newProposal;
+		} else {
+			label= CorrectionMessages.QuickAssistProcessor_remove_var_lambda_parameter_types;
+			proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
+		}
 		proposal.setImportRewrite(importRewrite);
 		resultingCollections.add(proposal);
 		return true;

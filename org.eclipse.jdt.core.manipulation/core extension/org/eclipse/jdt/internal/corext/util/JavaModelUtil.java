@@ -77,7 +77,7 @@ public final class JavaModelUtil {
 	 */
 	public static final String VERSION_LATEST;
 	static {
-		VERSION_LATEST= JavaCore.VERSION_10; // make sure it is not inlined
+		VERSION_LATEST= JavaCore.VERSION_11; // make sure it is not inlined
 	}
 
 	public static final int VALIDATE_EDIT_CHANGED_CONTENT= 10003;
@@ -816,6 +816,10 @@ public final class JavaModelUtil {
 		return !isVersionLessThan(compliance, JavaCore.VERSION_10);
 	}
 
+	public static boolean is11OrHigher(String compliance) {
+		return !isVersionLessThan(compliance, JavaCore.VERSION_11);
+	}
+
 	/**
 	 * Checks if the given project or workspace has source compliance 1.5 or greater.
 	 *
@@ -868,6 +872,16 @@ public final class JavaModelUtil {
 		return is10OrHigher(getSourceCompliance(project));
 	}
 
+	/**
+	 * Checks if the given project or workspace has source compliance 11 or greater.
+	 * 
+	 * @param project the project to test or <code>null</code> to test the workspace settings
+	 * @return <code>true</code> if the given project or workspace has source compliance 11 or greater.
+	 */
+	public static boolean is11OrHigher(IJavaProject project) {
+		return is11OrHigher(getSourceCompliance(project));
+	}
+
 	private static String getSourceCompliance(IJavaProject project) {
 		return project != null ? project.getOption(JavaCore.COMPILER_SOURCE, true) : JavaCore.getOption(JavaCore.COMPILER_SOURCE);
 	}
@@ -901,6 +915,8 @@ public final class JavaModelUtil {
 		String version= vMInstall.getJavaVersion();
 		if (version == null) {
 			return defaultCompliance;
+		} else if (version.startsWith(JavaCore.VERSION_11)) {
+			return JavaCore.VERSION_11;
 		} else if (version.startsWith(JavaCore.VERSION_10)) {
 			return JavaCore.VERSION_10;
 		} else if (version.startsWith(JavaCore.VERSION_9)) {
@@ -935,7 +951,9 @@ public final class JavaModelUtil {
 		
 		// fallback:
 		String desc= executionEnvironment.getId();
-		if (desc.indexOf(JavaCore.VERSION_10) != -1) {
+		if (desc.indexOf(JavaCore.VERSION_11) != -1) {
+			return JavaCore.VERSION_11;
+		} else if (desc.indexOf(JavaCore.VERSION_10) != -1) {
 			return JavaCore.VERSION_10;
 		} else if (desc.indexOf(JavaCore.VERSION_9) != -1) {
 			return JavaCore.VERSION_9;

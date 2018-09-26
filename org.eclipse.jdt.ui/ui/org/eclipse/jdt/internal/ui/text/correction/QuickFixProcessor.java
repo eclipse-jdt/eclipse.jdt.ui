@@ -70,6 +70,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.PublicClassMustMatchFileName:
 			case IProblem.PackageIsNotExpectedPackage:
 			case IProblem.UndefinedType:
+			case IProblem.VarIsNotAllowedHere:
 			case IProblem.TypeMismatch:
 			case IProblem.ReturnTypeMismatch:
 			case IProblem.UnhandledException:
@@ -387,6 +388,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.UndefinedType:
 			case IProblem.JavadocUndefinedType:
+			case IProblem.VarIsNotAllowedHere:
 				UnresolvedElementsSubProcessor.getTypeProposals(context, problem, proposals);
 				break;
 			case IProblem.TypeMismatch:

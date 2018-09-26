@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
@@ -824,6 +824,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_version18;
 	public static String ComplianceConfigurationBlock_version9;
 	public static String ComplianceConfigurationBlock_version10;
+	public static String ComplianceConfigurationBlock_version_11;
 	public static String ComplianceConfigurationBlock_versionCLDC11;
 	public static String ComplianceConfigurationBlock_src_greater_compliance;
 	public static String ComplianceConfigurationBlock_classfile_greater_compliance;
