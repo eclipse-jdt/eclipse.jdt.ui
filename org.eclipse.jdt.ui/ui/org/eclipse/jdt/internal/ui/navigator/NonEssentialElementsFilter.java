@@ -79,9 +79,18 @@ public abstract class NonEssentialElementsFilter extends ViewerFilter {
 		Object[] children= getRawChildren(viewer, element);
 		ViewerFilter[] filters= viewer.getFilters();
 		for (int i= 0; i < filters.length; i++) {
-			children= filters[i].filter(viewer, element, children);
-			if (children.length == 0)
+			boolean hasSelectedChildren= false;
+			// next lines are identical to ViewerFilter.filter(Viewer, Object, Object[]), but exit early when first child is found
+			int size = children.length;
+			for (int j = 0; j < size; ++j) {
+				if (filters[i].select(viewer, element, children[j])) {
+					hasSelectedChildren = true;
+					break;
+				}
+			}
+			if (!hasSelectedChildren) {
 				return false;
+			}
 		}
 		return true;
 	}
