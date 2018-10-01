@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -160,7 +161,7 @@ public class AddUnimplementedMethodsOperation extends CompilationUnitRewriteOper
 		if (binding == null)
 			return new IMethodBinding[0];
 
-		IMethodBinding[] unimplementedMethods= StubUtility2.getUnimplementedMethods(binding, implementAbstractsOfInput);
+		IMethodBinding[] unimplementedMethods= StubUtility2Core.getUnimplementedMethods(binding, implementAbstractsOfInput);
 		Arrays.sort(unimplementedMethods, new MethodsSourcePositionComparator(binding));
 		return unimplementedMethods;
 	}

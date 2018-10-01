@@ -139,7 +139,7 @@ import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -1248,7 +1248,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				typeMethodReference.setName((SimpleName) rewrite.createCopyTarget(methodInvocation.getName()));
 				importRewrite= StubUtility.createImportRewrite(context.getASTRoot(), true);
 				ITypeBinding invocationTypeBinding= ASTNodes.getInvocationType(methodInvocation, methodBinding, invocationQualifier);
-				invocationTypeBinding=StubUtility2.replaceWildcardsAndCaptures(invocationTypeBinding);
+				invocationTypeBinding=StubUtility2Core.replaceWildcardsAndCaptures(invocationTypeBinding);
 				ImportRewriteContext importRewriteContext=new ContextSensitiveImportRewriteContext(lambda, importRewrite);
 				typeMethodReference.setType(importRewrite.addImport(invocationTypeBinding, ast, importRewriteContext, TypeLocation.OTHER));
 				typeMethodReference.typeArguments().addAll(getCopiedTypeArguments(rewrite, methodInvocation.typeArguments()));
@@ -1436,7 +1436,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			VariableDeclaration param= lambdaParameters.get(i);
 			SingleVariableDeclaration newParam= ast.newSingleVariableDeclaration();
 			newParam.setName(ast.newSimpleName(param.getName().getIdentifier()));
-			ITypeBinding type= StubUtility2.replaceWildcardsAndCaptures(parameterTypes[i]);
+			ITypeBinding type= StubUtility2Core.replaceWildcardsAndCaptures(parameterTypes[i]);
 			newParam.setType(importRewrite.addImport(type, ast, importRewriteContext, TypeLocation.PARAMETER));
 			rewrite.replace(param, newParam, null);
 		}

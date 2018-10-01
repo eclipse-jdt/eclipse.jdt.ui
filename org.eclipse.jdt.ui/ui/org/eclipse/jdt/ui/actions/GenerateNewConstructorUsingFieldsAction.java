@@ -51,7 +51,7 @@ import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddCustomConstructorOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -372,7 +372,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		if (typeBinding.isEnum()) {
 			bindings= new IMethodBinding[] {getObjectConstructor(astRoot.getAST())};
 		} else {
-			bindings= StubUtility2.getVisibleConstructors(typeBinding, false, true);
+			bindings= StubUtility2Core.getVisibleConstructors(typeBinding, false, true);
 			if (bindings.length == 0) {
 				MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_nothing_found);
 				notifyResult(false);

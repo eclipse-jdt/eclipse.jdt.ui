@@ -17,10 +17,6 @@ import static org.junit.Assert.assertArrayEquals;
 
 import java.util.Hashtable;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
@@ -50,20 +46,23 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
+import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class AddUnimplementedMethodsTest extends TestCase {
 
@@ -426,7 +425,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
 		
-		IMethodBinding[] overridableMethods= StubUtility2.getOverridableMethods(unit.getAST(), binding, false);
+		IMethodBinding[] overridableMethods= StubUtility2Core.getOverridableMethods(unit.getAST(), binding, false);
 		
 		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(unit, binding, overridableMethods, -1, true, true, true);
 		op.run(new NullProgressMonitor());
@@ -453,7 +452,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
 
-		IMethodBinding[] overridableMethods= implementAllOverridable ? StubUtility2.getOverridableMethods(unit.getAST(), binding, false) : null;
+		IMethodBinding[] overridableMethods= implementAllOverridable ? StubUtility2Core.getOverridableMethods(unit.getAST(), binding, false) : null;
 
 		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(unit, binding, overridableMethods, insertionPos, true, true, true);
 		op.run(new NullProgressMonitor());

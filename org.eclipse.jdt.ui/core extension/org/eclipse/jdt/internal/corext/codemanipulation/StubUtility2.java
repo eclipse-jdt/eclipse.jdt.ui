@@ -16,9 +16,7 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -26,13 +24,9 @@ import java.util.Map;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -49,19 +43,16 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
@@ -70,11 +61,9 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.manipulation.CodeGeneration;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation.DelegateEntry;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -225,84 +214,6 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	public static MethodDeclaration createDelegationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context, IMethodBinding delegate, IVariableBinding delegatingField, CodeGenerationSettings settings) throws CoreException {
-		Assert.isNotNull(delegate);
-		Assert.isNotNull(delegatingField);
-		Assert.isNotNull(settings);
-
-		AST ast= rewrite.getAST();
-
-		MethodDeclaration decl= ast.newMethodDeclaration();
-		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, delegate.getModifiers() & ~Modifier.SYNCHRONIZED & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
-
-		decl.setName(ast.newSimpleName(delegate.getName()));
-		decl.setConstructor(false);
-
-		createTypeParameters(imports, context, ast, delegate, decl);
-
-		decl.setReturnType2(imports.addImport(delegate.getReturnType(), ast, context, TypeLocation.RETURN_TYPE));
-
-		List<SingleVariableDeclaration> params= createParameters(unit.getJavaProject(), imports, context, ast, delegate, null, decl);
-
-		createThrownExceptions(decl, delegate, imports, context, ast);
-
-		Block body= ast.newBlock();
-		decl.setBody(body);
-
-		String delimiter= StubUtility.getLineDelimiterUsed(unit);
-
-		Statement statement= null;
-		MethodInvocation invocation= ast.newMethodInvocation();
-		invocation.setName(ast.newSimpleName(delegate.getName()));
-		List<Expression> arguments= invocation.arguments();
-		for (int i= 0; i < params.size(); i++)
-			arguments.add(ast.newSimpleName(params.get(i).getName().getIdentifier()));
-		if (settings.useKeywordThis) {
-			FieldAccess access= ast.newFieldAccess();
-			access.setExpression(ast.newThisExpression());
-			access.setName(ast.newSimpleName(delegatingField.getName()));
-			invocation.setExpression(access);
-		} else
-			invocation.setExpression(ast.newSimpleName(delegatingField.getName()));
-		if (delegate.getReturnType().isPrimitive() && delegate.getReturnType().getName().equals("void")) {//$NON-NLS-1$
-			statement= ast.newExpressionStatement(invocation);
-		} else {
-			ReturnStatement returnStatement= ast.newReturnStatement();
-			returnStatement.setExpression(invocation);
-			statement= returnStatement;
-		}
-		body.statements().add(statement);
-
-		ITypeBinding declaringType= delegatingField.getDeclaringClass();
-		if (declaringType == null) { // can be null for
-			return decl;
-		}
-
-		String qualifiedName= declaringType.getQualifiedName();
-		IPackageBinding packageBinding= declaringType.getPackage();
-		if (packageBinding != null) {
-			if (packageBinding.getName().length() > 0 && qualifiedName.startsWith(packageBinding.getName()))
-				qualifiedName= qualifiedName.substring(packageBinding.getName().length());
-		}
-
-		if (settings.createComments) {
-			/*
-			 * TODO: have API for delegate method comments This is an inlined
-			 * version of
-			 * {@link CodeGeneration#getMethodComment(ICompilationUnit, String, MethodDeclaration, IMethodBinding, String)}
-			 */
-			delegate= delegate.getMethodDeclaration();
-			String declaringClassQualifiedName= delegate.getDeclaringClass().getQualifiedName();
-			String linkToMethodName= delegate.getName();
-			String[] parameterTypesQualifiedNames= StubUtility.getParameterTypeNamesForSeeTag(delegate);
-			String string= StubUtility.getMethodComment(unit, qualifiedName, decl, delegate.isDeprecated(), linkToMethodName, declaringClassQualifiedName, parameterTypesQualifiedNames, true, delimiter);
-			if (string != null) {
-				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
-				decl.setJavadoc(javadoc);
-			}
-		}
-		return decl;
-	}
 
 	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context,
 			IMethodBinding binding, ITypeBinding targetType, CodeGenerationSettings settings, boolean inInterface, ASTNode astNode) throws CoreException {
@@ -329,7 +240,7 @@ public final class StubUtility2 {
 		decl.setConstructor(false);
 		
 		ITypeBinding bindingReturnType= binding.getReturnType();
-		bindingReturnType = StubUtility2.replaceWildcardsAndCaptures(bindingReturnType);
+		bindingReturnType = StubUtility2Core.replaceWildcardsAndCaptures(bindingReturnType);
 		
 		if (JavaModelUtil.is50OrHigher(javaProject)) {
 			createTypeParameters(imports, context, ast, binding, decl);
@@ -452,7 +363,7 @@ public final class StubUtility2 {
 		for (int i= 0; i < params.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			ITypeBinding type= params[i];
-			type=replaceWildcardsAndCaptures(type);
+			type=StubUtility2Core.replaceWildcardsAndCaptures(type);
 			if (!is50OrHigher) {
 				type= type.getErasure();
 				var.setType(imports.addImport(type, ast, context, TypeLocation.PARAMETER));
@@ -531,147 +442,6 @@ public final class StubUtility2 {
 		return decl.thrownExceptions();
 	}
 
-	private static IMethodBinding findMethodBinding(IMethodBinding method, List<IMethodBinding> allMethods) {
-		for (int i= 0; i < allMethods.size(); i++) {
-			IMethodBinding curr= allMethods.get(i);
-			if (Bindings.isSubsignature(method, curr)) {
-				return curr;
-			}
-		}
-		return null;
-	}
-
-	private static IMethodBinding findOverridingMethod(IMethodBinding method, List<IMethodBinding> allMethods) {
-		for (int i= 0; i < allMethods.size(); i++) {
-			IMethodBinding curr= allMethods.get(i);
-			if (Bindings.areOverriddenMethods(curr, method) || Bindings.isSubsignature(curr, method))
-				return curr;
-		}
-		return null;
-	}
-
-	private static void findUnimplementedInterfaceMethods(ITypeBinding typeBinding, HashSet<ITypeBinding> visited,
-			ArrayList<IMethodBinding> allMethods, IPackageBinding currPack, ArrayList<IMethodBinding> toImplement) {
-		
-		if (visited.add(typeBinding)) {
-			IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
-			
-			nextMethod: for (int i= 0; i < typeMethods.length; i++) {
-				IMethodBinding curr= typeMethods[i];
-				for (Iterator<IMethodBinding> allIter= allMethods.iterator(); allIter.hasNext();) {
-					IMethodBinding oneMethod= allIter.next();
-					if (Bindings.isSubsignature(oneMethod, curr)) {
-						// We've already seen a method that is a subsignature of curr.
-						if (!Bindings.isSubsignature(curr, oneMethod)) {
-							// oneMethod is a true subsignature of curr; let's go with oneMethod
-							continue nextMethod;
-						}
-						// Subsignatures are equivalent.
-						// Check visibility and return types ('getErasure()' tries to achieve effect of "rename type variables")
-						if (Bindings.isVisibleInHierarchy(oneMethod, currPack)
-								&& oneMethod.getReturnType().getErasure().isSubTypeCompatible(curr.getReturnType().getErasure())) {
-							// oneMethod is visible and curr doesn't have a stricter return type; let's go with oneMethod
-							continue nextMethod;
-						}
-						// curr is stricter than oneMethod, so let's remove oneMethod
-						allIter.remove();
-						toImplement.remove(oneMethod);
-					} else if (Bindings.isSubsignature(curr, oneMethod)) {
-						// curr is a true subsignature of oneMethod. Let's remove oneMethod.
-						allIter.remove();
-						toImplement.remove(oneMethod);
-					}
-				}
-				int modifiers= curr.getModifiers();
-				if (!Modifier.isStatic(modifiers)) {
-					allMethods.add(curr);
-					if (Modifier.isAbstract(modifiers)) {
-						toImplement.add(curr);
-					}
-				}
-			}
-			ITypeBinding[] superInterfaces= typeBinding.getInterfaces();
-			for (int i= 0; i < superInterfaces.length; i++)
-				findUnimplementedInterfaceMethods(superInterfaces[i], visited, allMethods, currPack, toImplement);
-		}
-	}
-
-	public static DelegateEntry[] getDelegatableMethods(ITypeBinding binding) {
-		final List<DelegateEntry> tuples= new ArrayList<>();
-		final List<IMethodBinding> declared= new ArrayList<>();
-		IMethodBinding[] typeMethods= binding.getDeclaredMethods();
-		for (int index= 0; index < typeMethods.length; index++)
-			declared.add(typeMethods[index]);
-		IVariableBinding[] typeFields= binding.getDeclaredFields();
-		for (int index= 0; index < typeFields.length; index++) {
-			IVariableBinding fieldBinding= typeFields[index];
-			if (fieldBinding.isField() && !fieldBinding.isEnumConstant() && !fieldBinding.isSynthetic())
-				getDelegatableMethods(new ArrayList<>(declared), fieldBinding, fieldBinding.getType(), binding, tuples);
-		}
-		// list of tuple<IVariableBinding, IMethodBinding>
-		return tuples.toArray(new DelegateEntry[tuples.size()]);
-	}
-
-	private static void getDelegatableMethods(List<IMethodBinding> methods, IVariableBinding fieldBinding, ITypeBinding typeBinding, ITypeBinding binding, List<DelegateEntry> result) {
-		boolean match= false;
-		if (typeBinding.isTypeVariable()) {
-			ITypeBinding[] typeBounds= typeBinding.getTypeBounds();
-			if (typeBounds.length > 0) {
-				for (int i= 0; i < typeBounds.length; i++) {
-					getDelegatableMethods(methods, fieldBinding, typeBounds[i], binding, result);
-				}
-			} else {
-				ITypeBinding objectBinding= Bindings.findTypeInHierarchy(binding, "java.lang.Object"); //$NON-NLS-1$
-				if (objectBinding != null) {
-					getDelegatableMethods(methods, fieldBinding, objectBinding, binding, result);
-				}
-			}
-		} else {
-			IMethodBinding[] candidates= getDelegateCandidates(typeBinding, binding);
-			for (int index= 0; index < candidates.length; index++) {
-				match= false;
-				final IMethodBinding methodBinding= candidates[index];
-				for (int offset= 0; offset < methods.size() && !match; offset++) {
-					if (Bindings.areOverriddenMethods(methods.get(offset), methodBinding))
-						match= true;
-				}
-				if (!match) {
-					result.add(new DelegateEntry(methodBinding, fieldBinding));
-					methods.add(methodBinding);
-				}
-			}
-			final ITypeBinding superclass= typeBinding.getSuperclass();
-			if (superclass != null)
-				getDelegatableMethods(methods, fieldBinding, superclass, binding, result);
-			ITypeBinding[] superInterfaces= typeBinding.getInterfaces();
-			for (int offset= 0; offset < superInterfaces.length; offset++)
-				getDelegatableMethods(methods, fieldBinding, superInterfaces[offset], binding, result);
-		}
-	}
-
-	private static IMethodBinding[] getDelegateCandidates(ITypeBinding binding, ITypeBinding hierarchy) {
-		List<IMethodBinding> allMethods= new ArrayList<>();
-		boolean isInterface= binding.isInterface();
-		IMethodBinding[] typeMethods= binding.getDeclaredMethods();
-		for (int index= 0; index < typeMethods.length; index++) {
-			final int modifiers= typeMethods[index].getModifiers();
-			if (!typeMethods[index].isConstructor() && !Modifier.isStatic(modifiers) && (isInterface || Modifier.isPublic(modifiers))) {
-				IMethodBinding result= Bindings.findOverriddenMethodInHierarchy(hierarchy, typeMethods[index]);
-				if (result != null && Flags.isFinal(result.getModifiers()))
-					continue;
-				ITypeBinding[] parameterBindings= typeMethods[index].getParameterTypes();
-				boolean upper= false;
-				for (int offset= 0; offset < parameterBindings.length; offset++) {
-					if (parameterBindings[offset].isWildcardType() && parameterBindings[offset].isUpperbound())
-						upper= true;
-				}
-				if (!upper)
-					allMethods.add(typeMethods[index]);
-			}
-		}
-		return allMethods.toArray(new IMethodBinding[allMethods.size()]);
-	}
-
 	private static List<IExtendedModifier> getImplementationModifiers(AST ast, IMethodBinding method, boolean inInterface, ImportRewrite importRewrite, ImportRewriteContext context, EnumSet<TypeLocation> nullnessDefault) throws JavaModelException {
 		IJavaProject javaProject= importRewrite.getCompilationUnit().getJavaProject();
 		int modifiers= method.getModifiers();
@@ -737,190 +507,12 @@ public final class StubUtility2 {
 		
 		return result;
 	}
-
-	public static IMethodBinding[] getOverridableMethods(AST ast, ITypeBinding typeBinding, boolean isSubType) {
-		List<IMethodBinding> allMethods= new ArrayList<>();
-		IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
-		for (int index= 0; index < typeMethods.length; index++) {
-			final int modifiers= typeMethods[index].getModifiers();
-			if (!typeMethods[index].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers))
-				allMethods.add(typeMethods[index]);
-		}
-		ITypeBinding clazz= typeBinding.getSuperclass();
-		while (clazz != null) {
-			IMethodBinding[] methods= clazz.getDeclaredMethods();
-			for (int offset= 0; offset < methods.length; offset++) {
-				final int modifiers= methods[offset].getModifiers();
-				if (!methods[offset].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
-					if (findOverridingMethod(methods[offset], allMethods) == null)
-						allMethods.add(methods[offset]);
-				}
-			}
-			clazz= clazz.getSuperclass();
-		}
-		clazz= typeBinding;
-		while (clazz != null) {
-			ITypeBinding[] superInterfaces= clazz.getInterfaces();
-			for (int index= 0; index < superInterfaces.length; index++) {
-				getOverridableMethods(ast, superInterfaces[index], allMethods);
-			}
-			clazz= clazz.getSuperclass();
-		}
-		if (typeBinding.isInterface())
-			getOverridableMethods(ast, ast.resolveWellKnownType("java.lang.Object"), allMethods); //$NON-NLS-1$
-		if (!isSubType)
-			allMethods.removeAll(Arrays.asList(typeMethods));
-		for (int index= allMethods.size() - 1; index >= 0; index--) {
-			IMethodBinding method= allMethods.get(index);
-			if (Modifier.isFinal(method.getModifiers()))
-				allMethods.remove(index);
-		}
-		return allMethods.toArray(new IMethodBinding[allMethods.size()]);
-	}
-
-	private static void getOverridableMethods(AST ast, ITypeBinding superBinding, List<IMethodBinding> allMethods) {
-		IMethodBinding[] methods= superBinding.getDeclaredMethods();
-		for (int offset= 0; offset < methods.length; offset++) {
-			final int modifiers= methods[offset].getModifiers();
-			if (!methods[offset].isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
-				if (findOverridingMethod(methods[offset], allMethods) == null)
-					allMethods.add(methods[offset]);
-			}
-		}
-		ITypeBinding[] superInterfaces= superBinding.getInterfaces();
-		for (int index= 0; index < superInterfaces.length; index++) {
-			getOverridableMethods(ast, superInterfaces[index], allMethods);
-		}
-	}
-
+	
 	private static String suggestParameterName(ICompilationUnit unit, IVariableBinding binding, String[] excluded) {
 		String name= StubUtility.getBaseName(binding, unit.getJavaProject());
 		return StubUtility.suggestArgumentName(unit.getJavaProject(), name, excluded);
 	}
 
-	public static IMethodBinding[] getUnimplementedMethods(ITypeBinding typeBinding) {
-		return getUnimplementedMethods(typeBinding, false);
-	}
-
-	public static IMethodBinding[] getUnimplementedMethods(ITypeBinding typeBinding, boolean implementAbstractsOfInput) {
-		ArrayList<IMethodBinding> allMethods= new ArrayList<>();
-		ArrayList<IMethodBinding> toImplement= new ArrayList<>();
-
-		IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
-		for (int i= 0; i < typeMethods.length; i++) {
-			IMethodBinding curr= typeMethods[i];
-			int modifiers= curr.getModifiers();
-			if (!curr.isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
-				allMethods.add(curr);
-			}
-		}
-
-		ITypeBinding superClass= typeBinding.getSuperclass();
-		while (superClass != null) {
-			typeMethods= superClass.getDeclaredMethods();
-			for (int i= 0; i < typeMethods.length; i++) {
-				IMethodBinding curr= typeMethods[i];
-				int modifiers= curr.getModifiers();
-				if (!curr.isConstructor() && !Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
-					if (findMethodBinding(curr, allMethods) == null) {
-						allMethods.add(curr);
-					}
-				}
-			}
-			superClass= superClass.getSuperclass();
-		}
-
-		for (int i= 0; i < allMethods.size(); i++) {
-			IMethodBinding curr= allMethods.get(i);
-			int modifiers= curr.getModifiers();
-			if ((Modifier.isAbstract(modifiers) || curr.getDeclaringClass().isInterface()) && (implementAbstractsOfInput || typeBinding != curr.getDeclaringClass())) {
-				// implement all abstract methods
-				toImplement.add(curr);
-			}
-		}
-
-		HashSet<ITypeBinding> visited= new HashSet<>();
-		ITypeBinding curr= typeBinding;
-		while (curr != null) {
-			ITypeBinding[] superInterfaces= curr.getInterfaces();
-			for (int i= 0; i < superInterfaces.length; i++) {
-				findUnimplementedInterfaceMethods(superInterfaces[i], visited, allMethods, typeBinding.getPackage(), toImplement);
-			}
-			curr= curr.getSuperclass();
-		}
-
-		return toImplement.toArray(new IMethodBinding[toImplement.size()]);
-	}
-
-	public static IMethodBinding[] getVisibleConstructors(ITypeBinding binding, boolean accountExisting, boolean proposeDefault) {
-		List<IMethodBinding> constructorMethods= new ArrayList<>();
-		List<IMethodBinding> existingConstructors= null;
-		ITypeBinding superType= binding.getSuperclass();
-		if (superType == null)
-			return new IMethodBinding[0];
-		if (accountExisting) {
-			IMethodBinding[] methods= binding.getDeclaredMethods();
-			existingConstructors= new ArrayList<>(methods.length);
-			for (int index= 0; index < methods.length; index++) {
-				IMethodBinding method= methods[index];
-				if (method.isConstructor() && !method.isDefaultConstructor())
-					existingConstructors.add(method);
-			}
-		}
-		if (existingConstructors != null)
-			constructorMethods.addAll(existingConstructors);
-		IMethodBinding[] methods= binding.getDeclaredMethods();
-		IMethodBinding[] superMethods= superType.getDeclaredMethods();
-		for (int index= 0; index < superMethods.length; index++) {
-			IMethodBinding method= superMethods[index];
-			if (method.isConstructor()) {
-				if (Bindings.isVisibleInHierarchy(method, binding.getPackage()) && (!accountExisting || !Bindings.containsSignatureEquivalentConstructor(methods, method)))
-					constructorMethods.add(method);
-			}
-		}
-		if (existingConstructors != null)
-			constructorMethods.removeAll(existingConstructors);
-		if (constructorMethods.isEmpty()) {
-			superType= binding;
-			while (superType.getSuperclass() != null)
-				superType= superType.getSuperclass();
-			IMethodBinding method= Bindings.findMethodInType(superType, "Object", new ITypeBinding[0]); //$NON-NLS-1$
-			if (method != null) {
-				if ((proposeDefault || !accountExisting || existingConstructors == null || existingConstructors.isEmpty()) && (!accountExisting || !Bindings.containsSignatureEquivalentConstructor(methods, method)))
-					constructorMethods.add(method);
-			}
-		}
-		return constructorMethods.toArray(new IMethodBinding[constructorMethods.size()]);
-	}
-
-
-	/**
-	 * Evaluates the insertion position of a new node.
-	 *
-	 * @param listRewrite The list rewriter to which the new node will be added
-	 * @param sibling The Java element before which the new element should be added.
-	 * @return the AST node of the list to insert before or null to insert as last.
-	 * @throws JavaModelException thrown if accessing the Java element failed
-	 */
-
-	public static ASTNode getNodeToInsertBefore(ListRewrite listRewrite, IJavaElement sibling) throws JavaModelException {
-		if (sibling instanceof IMember) {
-			ISourceRange sourceRange= ((IMember) sibling).getSourceRange();
-			if (sourceRange == null) {
-				return null;
-			}
-			int insertPos= sourceRange.getOffset();
-
-			List<? extends ASTNode> members= listRewrite.getOriginalList();
-			for (int i= 0; i < members.size(); i++) {
-				ASTNode curr= members.get(i);
-				if (curr.getStartPosition() >= insertPos) {
-					return curr;
-				}
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * Creates a new stub utility.
@@ -929,11 +521,4 @@ public final class StubUtility2 {
 		// Not for instantiation
 	}
 
-	public static ITypeBinding replaceWildcardsAndCaptures(ITypeBinding type) {
-		while (type.isWildcardType() || type.isCapture() || (type.isArray() && type.getElementType().isCapture())) {
-			ITypeBinding bound= type.getBound();
-			type= (bound != null) ? bound : type.getErasure();
-		}
-		return type;
-	}
 }

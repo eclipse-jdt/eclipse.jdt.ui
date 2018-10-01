@@ -175,7 +175,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 			}
 
 			if (listRewriter != null) {
-				ASTNode insertion= StubUtility2.getNodeToInsertBefore(listRewriter, fInsert);
+				ASTNode insertion= StubUtility2Core.getNodeToInsertBefore(listRewriter, fInsert);
 
 				ContextSensitiveImportRewriteContext context= new ContextSensitiveImportRewriteContext(fASTRoot, typeDecl.getStartPosition(), importRewrite);
 
@@ -184,7 +184,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 				for (int i= 0; i < fDelegatesToCreate.length; i++) {
 					IMethodBinding delegateMethod= fDelegatesToCreate[i].delegateMethod;
 					IVariableBinding field= fDelegatesToCreate[i].field;
-					MethodDeclaration newMethod= StubUtility2.createDelegationStub(cu, astRewrite, importRewrite, context, delegateMethod, field, fSettings);
+					MethodDeclaration newMethod= StubUtility2Core.createDelegationStub(cu, astRewrite, importRewrite, context, delegateMethod, field, fSettings);
 					if (newMethod != null) {
 						fCreated.add(delegateMethod);
 						if (insertion != null && insertion.getParent() == typeDecl)

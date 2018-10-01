@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
@@ -184,7 +185,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			if (dummyTypeBinding == null)
 				return null;
 
-			IMethodBinding[] bindings= StubUtility2.getOverridableMethods(astRoot.getAST(), dummyTypeBinding, true);
+			IMethodBinding[] bindings= StubUtility2Core.getOverridableMethods(astRoot.getAST(), dummyTypeBinding, true);
 			
 			if (fSuperType.isInterface()) {
 				ITypeBinding[] dummySuperInterfaces= dummyTypeBinding.getInterfaces();

@@ -95,6 +95,7 @@ import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatur
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -656,7 +657,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	}
 	
 	private IMethodBinding[] getUnimplementedMethods(ITypeBinding binding) {
-		IMethodBinding[] unimplementedMethods= StubUtility2.getUnimplementedMethods(binding, true);
+		IMethodBinding[] unimplementedMethods= StubUtility2Core.getUnimplementedMethods(binding, true);
 		Arrays.sort(unimplementedMethods, new MethodsSourcePositionComparator(binding));
 		return unimplementedMethods;
 	}
