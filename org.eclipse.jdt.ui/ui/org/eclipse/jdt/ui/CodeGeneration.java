@@ -66,6 +66,9 @@ public class CodeGeneration {
 	 */
 	public static final String ANNOTATION_BODY_TEMPLATE_ID= org.eclipse.jdt.core.manipulation.CodeGeneration.ANNOTATION_BODY_TEMPLATE_ID;
 
+	private CodeGeneration() {
+	}
+
 	/**
 	 * Returns the content for a new compilation unit using the 'new Java file' code template.
 	 * @param cu The compilation unit to create the source for. The compilation unit does not need to exist.
