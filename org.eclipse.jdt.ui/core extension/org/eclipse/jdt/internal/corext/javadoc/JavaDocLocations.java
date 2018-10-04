@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -314,6 +314,10 @@ public class JavaDocLocations {
 				return null;
 		}
 
+		return getURL(urlBuffer, pathBuffer, fragmentBuffer);
+	}
+
+	private static URL getURL(StringBuffer urlBuffer, StringBuffer pathBuffer, StringBuffer fragmentBuffer) {
 		try {
 			String fragment= fragmentBuffer.length() == 0 ? null : fragmentBuffer.toString();
 			try {
@@ -331,6 +335,7 @@ public class JavaDocLocations {
 	}
 
 	private static void appendPackageSummaryPath(IPackageFragment pack, StringBuffer buf) {
+		appendModulePath(pack, buf);
 		String packPath= pack.getElementName().replace('.', '/');
 		buf.append(packPath);
 		buf.append("/package-summary.html"); //$NON-NLS-1$
@@ -339,7 +344,7 @@ public class JavaDocLocations {
 	private static void appendModuleSummaryPath(IModuleDescription module, StringBuffer buf) {
 		String moduleName= module.getElementName();
 		buf.append(moduleName);
-		buf.append("-summary.html"); //$NON-NLS-1$
+		buf.append("/module-summary.html"); //$NON-NLS-1$
 	}
 
 	private static void appendIndexPath(StringBuffer buf) {
@@ -348,6 +353,7 @@ public class JavaDocLocations {
 
 	private static void appendTypePath(IType type, StringBuffer buf) {
 		IPackageFragment pack= type.getPackageFragment();
+		appendModulePath(pack, buf);
 		String packPath= pack.getElementName().replace('.', '/');
 		String typePath= type.getTypeQualifiedName('.');
 		if (packPath.length() > 0) {
@@ -356,6 +362,44 @@ public class JavaDocLocations {
 		}
 		buf.append(typePath);
 		buf.append(".html"); //$NON-NLS-1$
+	}
+
+	private static void appendModulePath(IPackageFragment pack, StringBuffer buf) {
+		IModuleDescription moduleDescription= getModuleDescription(pack);
+		if (moduleDescription != null) {
+			String moduleName= moduleDescription.getElementName();
+			if (moduleName != null && moduleName.length() > 0) {
+				buf.append(moduleName);
+				buf.append('/');
+			}
+		}
+	}
+
+	private static IModuleDescription getModuleDescription(IPackageFragment pack) {
+		if (pack == null) {
+			return null;
+		}
+		IModuleDescription moduleDescription= null;
+		/*
+		 * The Javadoc tool for Java SE 11 uses module name in the created URL.
+		 * We can't know what format is required, so we just guess by the project's compiler compliance.
+		 */
+		IJavaProject javaProject= pack.getJavaProject();
+		if (javaProject != null && JavaModelUtil.is11OrHigher(javaProject)) {
+			if (pack.isReadOnly()) {
+				IPackageFragmentRoot root= (IPackageFragmentRoot) pack.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+				if (root != null) {
+					moduleDescription= root.getModuleDescription();
+				}
+			} else {
+				try {
+					moduleDescription= javaProject.getModuleDescription();
+				} catch (JavaModelException e) {
+					// do nothing
+				}
+			}
+		}
+		return moduleDescription;
 	}
 
 	private static void appendFieldReference(IField field, StringBuffer buf) {
