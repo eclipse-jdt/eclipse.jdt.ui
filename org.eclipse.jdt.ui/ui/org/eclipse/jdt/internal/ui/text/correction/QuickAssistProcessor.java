@@ -1375,37 +1375,20 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	public static boolean getAddInferredLambdaParameterTypes(IInvocationContext context, ASTNode covering, Collection<ICommandAccess> resultingCollections) {
-		LambdaExpression lambda;
-		boolean isvarTypeSingleVariableDeclaration= false;
+		LambdaExpression lambda= null;
+		boolean isLambdaParamVarType= false;
+		ASTNode parent= covering.getParent();
 		if (covering instanceof LambdaExpression) {
 			lambda= (LambdaExpression) covering;
 		} else if (covering.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY &&
 				((VariableDeclarationFragment) covering.getParent()).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
 			lambda= (LambdaExpression) covering.getParent().getParent();
 		} else if (covering.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY &&
-				((SingleVariableDeclaration) covering.getParent()).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
-			CompilationUnit astRoot= context.getASTRoot();
-			IJavaElement root= astRoot.getJavaElement();
-			ASTNode parent= covering.getParent();
-			if (parent == null || root == null) {
-				return false;
-			}
-			IJavaProject javaProject= root.getJavaProject();
-			if (javaProject == null) {
-				return false;
-			}
-			if (!JavaModelUtil.is11OrHigher(javaProject)) {
-				return false;
-			} else {
-				SingleVariableDeclaration svDecl= (SingleVariableDeclaration) parent;
-				if (svDecl.getType() != null && svDecl.getType().isVar()) {
-					lambda= (LambdaExpression) covering.getParent().getParent();
-					isvarTypeSingleVariableDeclaration= true;
-				} else {
-					return false;
-				}
-			}
-		} else {
+				((SingleVariableDeclaration) parent).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
+			lambda= (LambdaExpression) covering.getParent().getParent();
+		}
+
+		if (lambda == null) {
 			return false;
 		}
 
@@ -1414,8 +1397,22 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (noOfLambdaParams == 0)
 			return false;
 
-		if (lambdaParameters.get(0) instanceof SingleVariableDeclaration && !isvarTypeSingleVariableDeclaration)
-			return false;
+		VariableDeclaration firstLambdaParam= lambdaParameters.get(0);
+		if (firstLambdaParam instanceof SingleVariableDeclaration) {
+			CompilationUnit astRoot= context.getASTRoot();
+			IJavaElement root= astRoot.getJavaElement();
+			if (root != null) {
+				IJavaProject javaProject= root.getJavaProject();
+				if (javaProject != null && JavaModelUtil.is11OrHigher(javaProject)) {
+					if (((SingleVariableDeclaration) firstLambdaParam).getType().isVar()) {
+						isLambdaParamVarType= true;
+					}
+				}
+			}
+			if (!isLambdaParamVarType) {
+				return false;
+			}
+		}
 
 		IMethodBinding methodBinding= lambda.resolveMethodBinding();
 		if (methodBinding == null)
@@ -1442,7 +1439,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		// add proposal
 		String label= CorrectionMessages.QuickAssistProcessor_add_inferred_lambda_parameter_types;
-		if (isvarTypeSingleVariableDeclaration) {
+		if (isLambdaParamVarType) {
 			label= CorrectionMessages.QuickAssistProcessor_replace_var_with_inferred_lambda_parameter_types;
 		}
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -1467,26 +1464,20 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		LambdaExpression lambda;
-		boolean isvarTypeSingleVariableDeclaration= false;
+		LambdaExpression lambda= null;
+		boolean isLambdaParamExplicitType= false;
 		if (covering instanceof LambdaExpression) {
 			lambda= (LambdaExpression) covering;
 		} else if (covering.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY &&
 				((VariableDeclarationFragment) parent).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
 			lambda= (LambdaExpression) covering.getParent().getParent();
-		} else {
-			if (covering.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY &&
-					((SingleVariableDeclaration) parent).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
-				SingleVariableDeclaration svDecl= (SingleVariableDeclaration) parent;
-				if (svDecl.getType() != null && !svDecl.getType().isVar()) {
-					lambda= (LambdaExpression) covering.getParent().getParent();
-					isvarTypeSingleVariableDeclaration= true;
-				} else {
-					return false;
-				}
-			} else {
-				return false;
-			}
+		} else if (covering.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY &&
+				((SingleVariableDeclaration) parent).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
+			lambda= (LambdaExpression) covering.getParent().getParent();
+		}
+
+		if (lambda == null) {
+			return false;
 		}
 
 		List<VariableDeclaration> lambdaParameters= lambda.parameters();
@@ -1494,8 +1485,16 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (noOfLambdaParams == 0)
 			return false;
 
-		if (lambdaParameters.get(0) instanceof SingleVariableDeclaration && !isvarTypeSingleVariableDeclaration)
-			return false;
+
+		VariableDeclaration firstLambdaParam= lambdaParameters.get(0);
+		if (firstLambdaParam instanceof SingleVariableDeclaration) {
+			if (!((SingleVariableDeclaration) firstLambdaParam).getType().isVar()) {
+				isLambdaParamExplicitType= true;
+			} else {
+				return false;
+			}
+		}
+
 
 		IMethodBinding methodBinding= lambda.resolveMethodBinding();
 		if (methodBinding == null)
@@ -1536,7 +1535,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ASTRewriteCorrectionProposal proposal;
 		String label= null;
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		if (isvarTypeSingleVariableDeclaration) {
+		if (isLambdaParamExplicitType) {
 			label= CorrectionMessages.QuickAssistProcessor_replace_lambda_parameter_types_with_var;
 			ASTRewriteRemoveImportsCorrectionProposal newProposal= new ASTRewriteRemoveImportsCorrectionProposal(label, context.getCompilationUnit(), rewrite,
 					IProposalRelevance.ADD_INFERRED_LAMBDA_PARAMETER_TYPES, image);
