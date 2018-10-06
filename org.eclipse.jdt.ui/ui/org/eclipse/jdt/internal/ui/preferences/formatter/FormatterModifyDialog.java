@@ -471,10 +471,17 @@ public class FormatterModifyDialog extends ModifyDialog {
 	@Override
 	protected Composite createPreviewPane(Composite parent) {
 		Composite previewPane= super.createPreviewPane(parent);
-		((GridLayout) previewPane.getLayout()).makeColumnsEqualWidth= true;
 
-		fPreviewRawButton= new Button(previewPane, SWT.TOGGLE | SWT.WRAP);
-		fPreviewRawButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		Composite controlPane= new Composite(previewPane, SWT.NONE);
+		controlPane.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		createGridLayout(controlPane, 2, false);
+		Composite buttonsPane= new Composite(controlPane, SWT.NONE);
+		buttonsPane.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, true, false));
+		createGridLayout(buttonsPane, 3, false);
+		((GridLayout) buttonsPane.getLayout()).makeColumnsEqualWidth= true;
+
+		fPreviewRawButton= new Button(buttonsPane, SWT.TOGGLE | SWT.WRAP);
+		fPreviewRawButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		fPreviewRawButton.setText(FormatterMessages.FormatterModifyDialog_preview_show_raw_source_toggle);
 		fPreviewRawButton.setFont(previewPane.getFont());
 		fPreviewRawButton.addSelectionListener(new SelectionAdapter() {
@@ -484,8 +491,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 			}
 		});
 
-		Button customPreviewButton= new Button(previewPane, SWT.TOGGLE | SWT.WRAP);
-		customPreviewButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		Button customPreviewButton= new Button(buttonsPane, SWT.TOGGLE | SWT.WRAP);
+		customPreviewButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		customPreviewButton.setText(FormatterMessages.FormatterModifyDialog_preview_custom_contents_toggle);
 		customPreviewButton.setFont(previewPane.getFont());
 		customPreviewButton.setSelection(fDialogSettings.getBoolean(CUSTOM_PREVIEW_TOGGLE_PREFERENCE_KEY));
@@ -501,8 +508,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 				fDialogSettings.put(CUSTOM_PREVIEW_CONTENT_PREFERENCE_KEY, ((StyledText) e.getSource()).getText());
 		});
 
-		final Button showInvisibleButton= new Button(previewPane, SWT.TOGGLE | SWT.WRAP);
-		showInvisibleButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
+		final Button showInvisibleButton= new Button(buttonsPane, SWT.TOGGLE | SWT.WRAP);
+		showInvisibleButton.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		showInvisibleButton.setText(FormatterMessages.FormatterModifyDialog_preview_show_whitespace_toggle);
 		showInvisibleButton.setFont(previewPane.getFont());
 		showInvisibleButton.addSelectionListener(new SelectionAdapter() {
@@ -516,8 +523,9 @@ public class FormatterModifyDialog extends ModifyDialog {
 		fPreview.showInvisibleCharacters(showInvisible);
 		showInvisibleButton.setSelection(showInvisible);
 
-		Composite lineWidthPane= new Composite(previewPane, SWT.NONE);
-		lineWidthPane.setLayoutData(new GridData(SWT.TRAIL, SWT.FILL, true, false, 1, 1));
+		Composite lineWidthPane= new Composite(controlPane, SWT.NONE);
+		GridData lineWidthPaneLayoutData= new GridData(SWT.END, SWT.CENTER, true, false);
+		lineWidthPane.setLayoutData(lineWidthPaneLayoutData);
 		RowLayout layout= new RowLayout();
 		layout.center= true;
 		layout.justify= true;
@@ -529,6 +537,8 @@ public class FormatterModifyDialog extends ModifyDialog {
 		Spinner lineWidthSpinner= NumberPreference.createSpinner(lineWidthPane, 0, 9999);
 		lineWidthSpinner.setFont(previewPane.getFont());
 		lineWidthSpinner.setLayoutData(null);
+		lineWidthPaneLayoutData.minimumWidth= lineWidthSpinner.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+
 		int previewLineSplit;
 		try {
 			previewLineSplit= fDialogSettings.getInt(PREVIEW_LINE_WIDTH_PREFERENCE_KEY);

@@ -1518,13 +1518,13 @@ public abstract class ModifyDialog extends StatusDialog implements IModification
 
 	protected Composite createPreviewPane(Composite parent) {
 		final Composite previewPane= new Composite(parent, SWT.NONE);
-		createGridLayout(previewPane, GRID_COLUMNS, true);
+		createGridLayout(previewPane, 1, true);
 		previewPane.setFont(parent.getFont());
 
-		createLabel(GRID_COLUMNS, previewPane, FormatterMessages.ModifyDialogTabPage_preview_label_text, 0);
+		createLabel(1, previewPane, FormatterMessages.ModifyDialogTabPage_preview_label_text, 0);
 
 		fPreview= new JavaPreview(fWorkingValues, previewPane);
-		fPreview.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, GRID_COLUMNS, 1));
+		fPreview.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		return previewPane;
 	}
