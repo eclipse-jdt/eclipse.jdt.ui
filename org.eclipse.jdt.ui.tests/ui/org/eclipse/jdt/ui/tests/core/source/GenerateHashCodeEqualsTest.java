@@ -11,14 +11,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Generation of equals and hashcode with java 7 Objects.equals and Objects.hashcode - https://bugs.eclipse.org/424214
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - Different behaviour when generating hashCode and equals - https://bugs.eclipse.org/539589
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.junit.Assert;
 
@@ -40,13 +38,15 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.GenerateHashCodeEqualsOperation;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Tests generation of delegate methods
@@ -1309,8 +1309,8 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	public int hashCode() {\r\n" +
 				"		final int prime = 31;\r\n" +
 				"		int result = 1;\r\n" +
-				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
 				"		result = prime * result + Arrays.hashCode(anArrayOfInts);\r\n" +
+				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
 				"		return result;\r\n" +
 				"	}\r\n" +
 				"	/* (non-Javadoc)\r\n" +
@@ -1384,8 +1384,8 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	public int hashCode() {\r\n" +
 				"		final int prime = 31;\r\n" +
 				"		int result = 1;\r\n" +
-				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
 				"		result = prime * result + Arrays.deepHashCode(anArrayOfCloneables);\r\n" +
+				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
 				"		return result;\r\n" +
 				"	}\r\n" +
 				"	/* (non-Javadoc)\r\n" +
@@ -1461,8 +1461,8 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	public int hashCode() {\r\n" +
 				"		final int prime = 31;\r\n" +
 				"		int result = 1;\r\n" +
-				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
 				"		result = prime * result + Arrays.deepHashCode(anArrayOfSerializables);\r\n" +
+				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
 				"		return result;\r\n" +
 				"	}\r\n" +
 				"	/* (non-Javadoc)\r\n" +
@@ -1536,8 +1536,8 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	public int hashCode() {\r\n" +
 				"		final int prime = 31;\r\n" +
 				"		int result = 1;\r\n" +
-				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
 				"		result = prime * result + Arrays.deepHashCode(anArrayOfObjects);\r\n" +
+				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
 				"		return result;\r\n" +
 				"	}\r\n" +
 				"	/* (non-Javadoc)\r\n" +
@@ -1669,8 +1669,8 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	public int hashCode() {\r\n" +
 				"		final int prime = 31;\r\n" +
 				"		int result = 1;\r\n" +
-				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
 				"		result = prime * result + Arrays.deepHashCode(anArrayOfInts);\r\n" +
+				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
 				"		return result;\r\n" +
 				"	}\r\n" +
 				"	/* (non-Javadoc)\r\n" +
@@ -1747,9 +1747,9 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	public int hashCode() {\r\n" +
 				"		final int prime = 31;\r\n" +
 				"		int result = 1;\r\n" +
-				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
 				"		result = prime * result + Arrays.hashCode(anArrayOfInts);\r\n" +
 				"		result = prime * result + Arrays.deepHashCode(anArrayOfStrings);\r\n" +
+				"		result = prime * result + Objects.hash(aBool, aByte, aChar, anInt, aDouble, aFloat, aLong, aString, aListOfStrings);\r\n" +
 				"		return result;\r\n" +
 				"	}\r\n" +
 				"	/* (non-Javadoc)\r\n" +
@@ -1831,7 +1831,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 		compareSource(expected, a.getSource());
 	}
-
+	
 	/**
 	 * Test member types
 	 *
@@ -1887,6 +1887,73 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			if (x != other.x)\r\n" +
 				"				return false;\r\n" +
 				"			return true;\r\n" +
+				"		}\r\n" +
+				"\r\n" +
+				"		private A getOuterType() {\r\n" +
+				"			return A.this;\r\n" +
+				"		}\r\n" +
+				"	}\r\n" +
+				"}\r\n" +
+				"";
+
+		compareSource(expected, a.getSource());
+	}
+
+	/**
+	 * Test member types with J7+ Objects.hash and Objects.equals method calls
+	 *
+	 * @throws Exception
+	 */
+	public void testMemberTypeIn17() throws Exception {
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	public class Inner {\r\n" +
+				"		int x;\r\n" +
+				"	}\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		IType type= a.getType("A").getType("Inner");
+		IField[] fields= getFields(type, new String[] { "x" });
+		runJ7Operation(type, fields, false);
+
+		String expected= "package p;\r\n" +
+				"\r\n" +
+				"import java.util.Objects;\r\n" +
+				"\r\n" +
+				"public class A {\r\n" +
+				"	public class Inner {\r\n" +
+				"		int x;\r\n" +
+				"\r\n" +
+				"		/* (non-Javadoc)\r\n" +
+				"		 * @see java.lang.Object#hashCode()\r\n" +
+				"		 */\r\n" +
+				"		@Override\r\n" +
+				"		public int hashCode() {\r\n" +
+				"			final int prime = 31;\r\n" +
+				"			int result = 1;\r\n" +
+				"			result = prime * result + getOuterType().hashCode();\r\n" +
+				"			result = prime * result + Objects.hash(x);\r\n" +
+				"			return result;\r\n" +
+				"		}\r\n" +
+				"\r\n" +
+				"		/* (non-Javadoc)\r\n" +
+				"		 * @see java.lang.Object#equals(java.lang.Object)\r\n" +
+				"		 */\r\n" +
+				"		@Override\r\n" +
+				"		public boolean equals(Object obj) {\r\n" +
+				"			if (this == obj)\r\n" +
+				"				return true;\r\n" +
+				"			if (obj == null)\r\n" +
+				"				return false;\r\n" +
+				"			if (getClass() != obj.getClass())\r\n" +
+				"				return false;\r\n" +
+				"			Inner other = (Inner) obj;\r\n" +
+				"			if (!getOuterType().equals(other.getOuterType()))\r\n" +
+				"				return false;\r\n" +
+				"			return x == other.x;\r\n" +
 				"		}\r\n" +
 				"\r\n" +
 				"		private A getOuterType() {\r\n" +
@@ -2081,6 +2148,77 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 		} finally {
 			javaProject.setOptions(oldOptions);
 		}
+	}
+
+	/**
+	 * Test with J7+ Objects.hash and Objects.equals method calls Using sub-type
+	 * 
+	 * @throws Exception
+	 */
+	public void testSubTypeIn17() throws Exception {
+		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
+				"\r\n" +
+				"public class B {\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		return 1;\r\n" +
+				"	}\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		return obj instanceof B;\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"public class A extends B {\r\n" +
+				"\r\n" +
+				"	String aString;\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		IField[] fields= getFields(a.getType("A"), new String[] { "aString" });
+		runJ7Operation(a.getType("A"), fields, false);
+
+		String expected= "package p;\r\n" +
+				"\r\n" +
+				"import java.util.Objects;\r\n" +
+				"\r\n" +
+				"public class A extends B {\r\n" +
+				"\r\n" +
+				"	String aString;\r\n" +
+				"\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#hashCode()\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		final int prime = 31;\r\n" +
+				"		int result = super.hashCode();\r\n" +
+				"		result = prime * result + Objects.hash(aString);\r\n" +
+				"		return result;\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (!super.equals(obj))\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		A other = (A) obj;\r\n" +
+				"		return Objects.equals(aString, other.aString);\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"";
+
+		compareSource(expected, a.getSource());
 	}
 
 	public void testInsertAt() throws Exception {

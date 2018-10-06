@@ -11,10 +11,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Generation of equals and hashcode with java 7 Objects.equals and Objects.hashcode - https://bugs.eclipse.org/424214
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - Different behaviour when generating hashCode and equals - https://bugs.eclipse.org/539589
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -420,67 +422,52 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		Block body= fAst.newBlock();
 		hashCodeMethod.setBody(body);
 	
-		// PRIME NUMBER
-		VariableDeclarationFragment frag= fAst.newVariableDeclarationFragment();
-		frag.setName(fAst.newSimpleName(VARIABLE_NAME_PRIME));
-		frag.setInitializer(fAst.newNumberLiteral(PRIME_NUMBER));
+		boolean needsNoSuperCall= needsNoSuperCall(fType, METHODNAME_HASH_CODE, new ITypeBinding[0]);
+		boolean memberType= isMemberType();
+		ReturnStatement endReturn= fAst.newReturnStatement();
+		if (fUseJ7HashEquals && needsNoSuperCall && !memberType && containsNoArrays()) {
+			// return Objects.hash(...);
+			endReturn.setExpression(createStandaloneJ7HashCall());
+		} else {
+			// final int prime = 31;
+			VariableDeclarationFragment frag= fAst.newVariableDeclarationFragment();
+			frag.setName(fAst.newSimpleName(VARIABLE_NAME_PRIME));
+			frag.setInitializer(fAst.newNumberLiteral(PRIME_NUMBER));
 
-		VariableDeclarationStatement primeNumberDeclaration= fAst.newVariableDeclarationStatement(frag);
-		primeNumberDeclaration.modifiers().add(fAst.newModifier(ModifierKeyword.FINAL_KEYWORD));
-		primeNumberDeclaration.setType(fAst.newPrimitiveType(PrimitiveType.INT));
-		if (!fUseJ7HashEquals)
+			VariableDeclarationStatement primeNumberDeclaration= fAst.newVariableDeclarationStatement(frag);
+			primeNumberDeclaration.modifiers().add(fAst.newModifier(ModifierKeyword.FINAL_KEYWORD));
+			primeNumberDeclaration.setType(fAst.newPrimitiveType(PrimitiveType.INT));
 			body.statements().add(primeNumberDeclaration);
 
-		VariableDeclarationFragment fragment= fAst.newVariableDeclarationFragment();
-		fragment.setName(fAst.newSimpleName(VARIABLE_NAME_RESULT));
+			VariableDeclarationFragment fragment= fAst.newVariableDeclarationFragment();
+			fragment.setName(fAst.newSimpleName(VARIABLE_NAME_RESULT));
 
-		VariableDeclarationStatement resultDeclaration= fAst.newVariableDeclarationStatement(fragment);
-		resultDeclaration.setType(fAst.newPrimitiveType(PrimitiveType.INT));
-		if (!fUseJ7HashEquals)
+			VariableDeclarationStatement resultDeclaration= fAst.newVariableDeclarationStatement(fragment);
+			resultDeclaration.setType(fAst.newPrimitiveType(PrimitiveType.INT));
 			body.statements().add(resultDeclaration);
 
-		if (needsNoSuperCall(fType, METHODNAME_HASH_CODE, new ITypeBinding[0])) {
-			fragment.setInitializer(fAst.newNumberLiteral(INITIAL_HASHCODE_VALUE));
-		} else {
-			SuperMethodInvocation invoc= fAst.newSuperMethodInvocation();
-			invoc.setName(fAst.newSimpleName(METHODNAME_HASH_CODE));
-			fragment.setInitializer(invoc);
-		}
+			if (needsNoSuperCall) {
+				// int result = 1;
+				fragment.setInitializer(fAst.newNumberLiteral(INITIAL_HASHCODE_VALUE));
+			} else {
+				// int result = super.hashCode();
+				SuperMethodInvocation invoc= fAst.newSuperMethodInvocation();
+				invoc.setName(fAst.newSimpleName(METHODNAME_HASH_CODE));
+				fragment.setInitializer(invoc);
+			}
 
-		if (isMemberType()) {
-			body.statements().add(createAddOuterHashCode());
-		}
+			if (memberType) {
+				// result = prime * result + getOuterType().hashCode();
+				body.statements().add(createAddOuterHashCode());
+			}
 
-		ReturnStatement endReturn= fAst.newReturnStatement();
-		if (fUseJ7HashEquals) {
 			MethodInvocation j7Invoc= fAst.newMethodInvocation();
-			List<Statement> arrayStatements= new ArrayList<>();
-
 			for (int i= 0; i < fFields.length; i++) {
 				if (fFields[i].getType().isArray())
-					arrayStatements.add(createAddArrayHashCode(fFields[i]));
-				else
+					body.statements().add(createAddArrayHashCode(fFields[i]));
+				else if (fUseJ7HashEquals)
 					j7Invoc.arguments().add(fAst.newSimpleName(fFields[i].getName()));
-			}
-
-			if (!j7Invoc.arguments().isEmpty()) {
-				j7Invoc.setExpression(getQualifiedName(JAVA_UTIL_OBJECTS));
-				j7Invoc.setName(fAst.newSimpleName(METHODNAME_HASH));
-			}
-
-			if (arrayStatements.isEmpty()) {
-				endReturn.setExpression(j7Invoc);
-			} else {
-				body.statements().add(primeNumberDeclaration);
-				body.statements().add(resultDeclaration);
-				if (!j7Invoc.arguments().isEmpty())
-					body.statements().add(prepareAssignment(j7Invoc));
-				body.statements().addAll(arrayStatements);
-				endReturn.setExpression(fAst.newSimpleName(VARIABLE_NAME_RESULT));
-			}
-		} else {
-			for (int i= 0; i < fFields.length; i++) {
-				if (fFields[i].getType().isPrimitive()) {
+				else if (fFields[i].getType().isPrimitive()) {
 					Statement[] sts= createAddSimpleHashCode(fFields[i].getType(), new IHashCodeAccessProvider() {
 
 						@Override
@@ -492,10 +479,13 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 					for (int j= 0; j < sts.length; j++) {
 						body.statements().add(sts[j]);
 					}
-				} else if (fFields[i].getType().isArray())
-					body.statements().add(createAddArrayHashCode(fFields[i]));
-				else
+				} else
 					body.statements().add(createAddQualifiedHashCode(fFields[i]));
+			}
+			if (!j7Invoc.arguments().isEmpty()) {
+				j7Invoc.setExpression(getQualifiedName(JAVA_UTIL_OBJECTS));
+				j7Invoc.setName(fAst.newSimpleName(METHODNAME_HASH));
+				body.statements().add(prepareAssignment(j7Invoc));
 			}
 			endReturn.setExpression(fAst.newSimpleName(VARIABLE_NAME_RESULT));
 		}
@@ -516,6 +506,20 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		}
 
 		return hashCodeMethod;
+	}
+
+	private boolean containsNoArrays() {
+		return Arrays.stream(fFields).map(IVariableBinding::getType).noneMatch(ITypeBinding::isArray);
+	}
+
+	private MethodInvocation createStandaloneJ7HashCall() {
+		MethodInvocation j7Invoc= fAst.newMethodInvocation();
+		for (int i= 0; i < fFields.length; i++) {
+			j7Invoc.arguments().add(fAst.newSimpleName(fFields[i].getName()));
+		}
+		j7Invoc.setExpression(getQualifiedName(JAVA_UTIL_OBJECTS));
+		j7Invoc.setName(fAst.newSimpleName(METHODNAME_HASH));
+		return j7Invoc;
 	}
 
 	private Statement createAddOuterHashCode() {
@@ -912,13 +916,13 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		body.statements().add(otherDeclaration);
 
+		if (isMemberType()) { // test outer type
+			body.statements().add(createOuterComparison());
+		}
+
 		if (fUseJ7HashEquals) {
 			body.statements().add(createJ7EqualsStatement());
 		} else {
-			if (isMemberType()) { // test outer type
-				body.statements().add(createOuterComparison());
-			}
-
 			for (int i= 0; i < fFields.length; i++) {
 				IVariableBinding field= fFields[i];
 				ITypeBinding type= field.getType();
