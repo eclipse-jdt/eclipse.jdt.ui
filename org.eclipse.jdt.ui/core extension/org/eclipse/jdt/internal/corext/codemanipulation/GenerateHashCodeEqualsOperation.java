@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Generation of equals and hashcode with java 7 Objects.equals and Objects.hashcode - https://bugs.eclipse.org/424214
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Different behaviour when generating hashCode and equals - https://bugs.eclipse.org/539589
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - Confusing name when generating hashCode and equals with outer type - https://bugs.eclipse.org/539872
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
@@ -154,7 +155,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 	private static final String METHODNAME_DEEP_HASH_CODE= "deepHashCode"; //$NON-NLS-1$
 
-	private static final String METHODNAME_OUTER_TYPE= "getOuterType"; //$NON-NLS-1$
+	private static final String METHODNAME_GET_ENCLOSING_INSTANCE= "getEnclosingInstance"; //$NON-NLS-1$
 
 	private static final String PRIME_NUMBER= "31"; //$NON-NLS-1$
 
@@ -356,8 +357,8 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 				}
 
 				if (isMemberType()) {
-					if (findMethodToReplace(list, METHODNAME_OUTER_TYPE, new ITypeBinding[0]) == null) {
-						final MethodDeclaration helperDecl= createGetOuterHelper();
+					if (findMethodToReplace(list, METHODNAME_GET_ENCLOSING_INSTANCE, new ITypeBinding[0]) == null) {
+						final MethodDeclaration helperDecl= createGetEnclosingInstanceHelper();
 						rewriter.insertLast(helperDecl, null);
 					}
 				}
@@ -457,8 +458,8 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			}
 
 			if (memberType) {
-				// result = prime * result + getOuterType().hashCode();
-				body.statements().add(createAddOuterHashCode());
+				// result = prime * result + getEnclosingInstance().hashCode();
+				body.statements().add(createAddEnclosingInstanceHashCode());
 			}
 
 			MethodInvocation j7Invoc= fAst.newMethodInvocation();
@@ -522,12 +523,12 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		return j7Invoc;
 	}
 
-	private Statement createAddOuterHashCode() {
-		MethodInvocation outer= fAst.newMethodInvocation();
-		outer.setName(fAst.newSimpleName(METHODNAME_OUTER_TYPE));
+	private Statement createAddEnclosingInstanceHashCode() {
+		MethodInvocation enclosing= fAst.newMethodInvocation();
+		enclosing.setName(fAst.newSimpleName(METHODNAME_GET_ENCLOSING_INSTANCE));
 		MethodInvocation hashAccess= fAst.newMethodInvocation();
 		hashAccess.setName(fAst.newSimpleName(METHODNAME_HASH_CODE));
-		hashAccess.setExpression(outer);
+		hashAccess.setExpression(enclosing);
 		return prepareAssignment(hashAccess);
 	}
 
@@ -626,20 +627,20 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		return prepareAssignment(invoc);
 	}
 
-	private MethodDeclaration createGetOuterHelper() {
-		String outerTypeName= fType.getDeclaringClass().getTypeDeclaration().getName();
+	private MethodDeclaration createGetEnclosingInstanceHelper() {
+		String enclosingTypeName= fType.getDeclaringClass().getTypeDeclaration().getName();
 
 		MethodDeclaration helperMethod= fAst.newMethodDeclaration();
 		helperMethod.modifiers().addAll(ASTNodeFactory.newModifiers(fAst, Modifier.PRIVATE));
-		helperMethod.setName(fAst.newSimpleName(METHODNAME_OUTER_TYPE));
+		helperMethod.setName(fAst.newSimpleName(METHODNAME_GET_ENCLOSING_INSTANCE));
 		helperMethod.setConstructor(false);
-		helperMethod.setReturnType2(fAst.newSimpleType(fAst.newSimpleName(outerTypeName)));
+		helperMethod.setReturnType2(fAst.newSimpleType(fAst.newSimpleName(enclosingTypeName)));
 
 		Block body= fAst.newBlock();
 		helperMethod.setBody(body);
 
 		ThisExpression thisExpression= fAst.newThisExpression();
-		thisExpression.setQualifier(fAst.newSimpleName(outerTypeName));
+		thisExpression.setQualifier(fAst.newSimpleName(enclosingTypeName));
 
 		ReturnStatement endReturn= fAst.newReturnStatement();
 		endReturn.setExpression(thisExpression);
@@ -916,8 +917,8 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		body.statements().add(otherDeclaration);
 
-		if (isMemberType()) { // test outer type
-			body.statements().add(createOuterComparison());
+		if (isMemberType()) {
+			body.statements().add(createEnclosingInstanceComparison());
 		}
 
 		if (fUseJ7HashEquals) {
@@ -1029,21 +1030,21 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		}
 	}
 
-	private Statement createOuterComparison() {
-		MethodInvocation outer1= fAst.newMethodInvocation();
-		outer1.setName(fAst.newSimpleName(METHODNAME_OUTER_TYPE));
+	private Statement createEnclosingInstanceComparison() {
+		MethodInvocation enclosing1= fAst.newMethodInvocation();
+		enclosing1.setName(fAst.newSimpleName(METHODNAME_GET_ENCLOSING_INSTANCE));
 
-		MethodInvocation outer2= fAst.newMethodInvocation();
-		outer2.setName(fAst.newSimpleName(METHODNAME_OUTER_TYPE));
-		outer2.setExpression(fAst.newSimpleName(VARIABLE_NAME_EQUALS_CASTED));
+		MethodInvocation enclosing2= fAst.newMethodInvocation();
+		enclosing2.setName(fAst.newSimpleName(METHODNAME_GET_ENCLOSING_INSTANCE));
+		enclosing2.setExpression(fAst.newSimpleName(VARIABLE_NAME_EQUALS_CASTED));
 
-		MethodInvocation outerEql= fAst.newMethodInvocation();
-		outerEql.setName(fAst.newSimpleName(METHODNAME_EQUALS));
-		outerEql.setExpression(outer1);
-		outerEql.arguments().add(outer2);
+		MethodInvocation enclosingEql= fAst.newMethodInvocation();
+		enclosingEql.setName(fAst.newSimpleName(METHODNAME_EQUALS));
+		enclosingEql.setExpression(enclosing1);
+		enclosingEql.arguments().add(enclosing2);
 
 		PrefixExpression not= fAst.newPrefixExpression();
-		not.setOperand(outerEql);
+		not.setOperand(enclosingEql);
 		not.setOperator(PrefixExpression.Operator.NOT);
 
 		IfStatement notEqNull= fAst.newIfStatement();

@@ -12,6 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Generation of equals and hashcode with java 7 Objects.equals and Objects.hashcode - https://bugs.eclipse.org/424214
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Different behaviour when generating hashCode and equals - https://bugs.eclipse.org/539589
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - Confusing name when generating hashCode and equals with outer type - https://bugs.eclipse.org/539872
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
@@ -1837,7 +1838,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
-	public void testMemberType() throws Exception {
+	public void testEnclosingInstance() throws Exception {
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
@@ -1865,7 +1866,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"		public int hashCode() {\r\n" +
 				"			final int prime = 31;\r\n" +
 				"			int result = 1;\r\n" +
-				"			result = prime * result + getOuterType().hashCode();\r\n" +
+				"			result = prime * result + getEnclosingInstance().hashCode();\r\n" +
 				"			result = prime * result + x;\r\n" +
 				"			return result;\r\n" +
 				"		}\r\n" +
@@ -1882,14 +1883,14 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			if (!(obj instanceof Inner))\r\n" +
 				"				return false;\r\n" +
 				"			Inner other = (Inner) obj;\r\n" +
-				"			if (!getOuterType().equals(other.getOuterType()))\r\n" +
+				"			if (!getEnclosingInstance().equals(other.getEnclosingInstance()))\r\n" +
 				"				return false;\r\n" +
 				"			if (x != other.x)\r\n" +
 				"				return false;\r\n" +
 				"			return true;\r\n" +
 				"		}\r\n" +
 				"\r\n" +
-				"		private A getOuterType() {\r\n" +
+				"		private A getEnclosingInstance() {\r\n" +
 				"			return A.this;\r\n" +
 				"		}\r\n" +
 				"	}\r\n" +
@@ -1904,7 +1905,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 	 *
 	 * @throws Exception
 	 */
-	public void testMemberTypeIn17() throws Exception {
+	public void testEnclosingInstanceIn17() throws Exception {
 
 		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
 				"\r\n" +
@@ -1934,7 +1935,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"		public int hashCode() {\r\n" +
 				"			final int prime = 31;\r\n" +
 				"			int result = 1;\r\n" +
-				"			result = prime * result + getOuterType().hashCode();\r\n" +
+				"			result = prime * result + getEnclosingInstance().hashCode();\r\n" +
 				"			result = prime * result + Objects.hash(x);\r\n" +
 				"			return result;\r\n" +
 				"		}\r\n" +
@@ -1951,12 +1952,12 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"			if (getClass() != obj.getClass())\r\n" +
 				"				return false;\r\n" +
 				"			Inner other = (Inner) obj;\r\n" +
-				"			if (!getOuterType().equals(other.getOuterType()))\r\n" +
+				"			if (!getEnclosingInstance().equals(other.getEnclosingInstance()))\r\n" +
 				"				return false;\r\n" +
 				"			return x == other.x;\r\n" +
 				"		}\r\n" +
 				"\r\n" +
-				"		private A getOuterType() {\r\n" +
+				"		private A getEnclosingInstance() {\r\n" +
 				"			return A.this;\r\n" +
 				"		}\r\n" +
 				"	}\r\n" +
