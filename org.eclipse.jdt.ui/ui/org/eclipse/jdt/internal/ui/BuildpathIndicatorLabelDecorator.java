@@ -43,19 +43,19 @@ public class BuildpathIndicatorLabelDecorator extends AbstractJavaElementLabelDe
 			IResource resource= (IResource) element;
 			IProject project= resource.getProject();
 			if (project != null) {
-				IJavaProject javaProject= JavaCore.create(project);
-				if (javaProject != null) {
-					if (javaProject.isOnClasspath(resource)) {
-						IJavaElement javaElement= JavaCore.create(resource, javaProject);
-						try {
+				try {
+					IJavaProject javaProject= JavaCore.create(project);
+					if (javaProject != null) {
+						if (javaProject.isOnClasspath(resource)) {
+							IJavaElement javaElement= JavaCore.create(resource, javaProject);
 							if (javaElement instanceof IPackageFragmentRoot
 									&& ((IPackageFragmentRoot)javaElement).getKind() != IPackageFragmentRoot.K_SOURCE) {
 								return JavaPluginImages.DESC_OVR_LIBRARY;
 							}
-						} catch (JavaModelException e) {
-							return null;
 						}
 					}
+				} catch (JavaModelException | IllegalStateException e) {
+					return null;
 				}
 			}
 		}
