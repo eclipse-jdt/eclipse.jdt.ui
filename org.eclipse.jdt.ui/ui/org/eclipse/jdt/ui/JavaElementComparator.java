@@ -352,8 +352,18 @@ public class JavaElementComparator extends ViewerComparator {
 				((IPackageFragment)e2).getParent().getResource() instanceof IProject)) {
 			// when PFRs should be sorted by name, they do not need classpath comparison
 			if (fSortPFRByName && cat1 == PACKAGEFRAGMENTROOTS && cat2 == PACKAGEFRAGMENTROOTS) {
-				// categories might be PACKAGEFRAGMENTROOTS, but not necessarily compared objects are PFR instances
-				return (e1 instanceof IPackageFragmentRoot && e2 instanceof IPackageFragmentRoot) ? false : true;
+				boolean areBinPFRs = false;
+				try {
+					// categories might be PACKAGEFRAGMENTROOTS, but not necessarily compared objects are PFR instances
+					if ((e1 instanceof IPackageFragmentRoot) && (e2 instanceof IPackageFragmentRoot)) {
+						// continue sorting source roots by classpath order
+						areBinPFRs = ((IPackageFragmentRoot)e1).getKind() == IPackageFragmentRoot.K_BINARY
+								&& ((IPackageFragmentRoot)e2).getKind() == IPackageFragmentRoot.K_BINARY;
+					}
+				} catch (JavaModelException e) {
+					// areJarPFRs remains false
+				}
+				return !areBinPFRs;
 			}
 			IJavaProject p1= getJavaProject(e1);
 			return p1 != null && p1.equals(getJavaProject(e2));
