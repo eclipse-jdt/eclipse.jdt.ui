@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2015 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -61,6 +61,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_PB_INCOMPLETE_BUILDPATH= getJDTCoreKey(JavaCore.CORE_INCOMPLETE_CLASSPATH);
 	private static final Key PREF_PB_CIRCULAR_BUILDPATH= getJDTCoreKey(JavaCore.CORE_CIRCULAR_CLASSPATH);
 	private static final Key PREF_PB_INCOMPATIBLE_JDK_LEVEL= getJDTCoreKey(JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL);
+	private static final Key PREF_PB_MAIN_ONLY_PROJECT_HAS_TEST_ONLY_DEPENDENCY= getJDTCoreKey(JavaCore.CORE_MAIN_ONLY_PROJECT_HAS_TEST_ONLY_DEPENDENCY);
 	private static final Key PREF_PB_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE= getJDTCoreKey(JavaCore.CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE);
 	private static final Key PREF_PB_DUPLICATE_RESOURCE= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE);
 	private static final Key PREF_RECREATE_MODIFIED_CLASS_FILES= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_RECREATE_MODIFIED_CLASS_FILES_IN_OUTPUT_FOLDER);
@@ -96,7 +97,8 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_PB_MAX_PER_UNIT, PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_INCOMPLETE_BUILDPATH, PREF_PB_CIRCULAR_BUILDPATH,
 				PREF_BUILD_CLEAN_OUTPUT_FOLDER, PREF_PB_DUPLICATE_RESOURCE,
 				PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_PB_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, PREF_ENABLE_EXCLUSION_PATTERNS, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS, 
-				PREF_RECREATE_MODIFIED_CLASS_FILES,	PREF_PB_STRICTLY_COMPATIBLE_JRE_NOT_AVAILABLE, PREF_PB_COMPILER_COMPLIANCE_DOES_NOT_MATCH_JRE
+				PREF_RECREATE_MODIFIED_CLASS_FILES,	PREF_PB_STRICTLY_COMPATIBLE_JRE_NOT_AVAILABLE, PREF_PB_COMPILER_COMPLIANCE_DOES_NOT_MATCH_JRE, 
+				PREF_PB_MAIN_ONLY_PROJECT_HAS_TEST_ONLY_DEPENDENCY
 			};
 		return keys;
 	}
@@ -139,6 +141,13 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		String[] errorWarningLabels= new String[] {
 			PreferencesMessages.JavaBuildConfigurationBlock_error,
 			PreferencesMessages.JavaBuildConfigurationBlock_warning
+		};
+
+		String[] errorIgnore= new String[] { ERROR, IGNORE };
+
+		String[] errorIgnoreLabels= new String[] {
+			PreferencesMessages.JavaBuildConfigurationBlock_error,
+			PreferencesMessages.JavaBuildConfigurationBlock_ignore
 		};
 
 		String[] errorWarningInfoIgnore= new String[] { ERROR, WARNING, INFO, IGNORE };
@@ -208,6 +217,9 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_compiler_compliance_does_not_match_jre_label;
 		addComboBox(othersComposite, label, PREF_PB_COMPILER_COMPLIANCE_DOES_NOT_MATCH_JRE, errorWarningInfoIgnore, errorWarningInfoIgnoreLabels, 0);
+
+		label= PreferencesMessages.JavaBuildConfigurationBlock_pb_main_only_project_has_test_only_dependency_label;
+		addComboBox(othersComposite, label, PREF_PB_MAIN_ONLY_PROJECT_HAS_TEST_ONLY_DEPENDENCY, errorIgnore, errorIgnoreLabels, 0);
 
 		label= PreferencesMessages.JavaBuildConfigurationBlock_section_output_folder;
 		excomposite= createStyleSection(composite, label, nColumns);

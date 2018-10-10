@@ -377,6 +377,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaBuildConfigurationBlock_pb_output_overlapping_with_source_label;
 	public static String JavaBuildConfigurationBlock_pb_strictly_compatible_jre_not_available_label;
 	public static String JavaBuildConfigurationBlock_pb_compiler_compliance_does_not_match_jre_label;
+	public static String JavaBuildConfigurationBlock_pb_main_only_project_has_test_only_dependency_label;
 	public static String JavaBuildConfigurationBlock_empty_input;
 	public static String JavaBuildConfigurationBlock_invalid_input;
 	public static String JavaBuildConfigurationBlock_filter_invalidsegment_error;
