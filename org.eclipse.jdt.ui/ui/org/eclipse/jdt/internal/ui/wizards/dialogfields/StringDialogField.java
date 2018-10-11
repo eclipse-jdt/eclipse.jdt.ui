@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - add setting to specify focus selection - Bug 539919
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 
@@ -35,12 +36,13 @@ public class StringDialogField extends DialogField {
 	private Text fTextControl;
 	private ModifyListener fModifyListener;
     private IContentAssistProcessor fContentAssistProcessor;
+    private boolean selectAllByDefault= true;
 
 	public StringDialogField() {
 		super();
 		fText= ""; //$NON-NLS-1$
 	}
-
+	
 	public void setContentAssistProcessor(IContentAssistProcessor processor) {
 	    fContentAssistProcessor= processor;
 	    if (fContentAssistProcessor != null && isOkToUse(fTextControl)) {
@@ -87,6 +89,11 @@ public class StringDialogField extends DialogField {
 
 	// ------- focus methods
 
+	public boolean setFocus(boolean selectAllByDefault) {
+		this.selectAllByDefault= selectAllByDefault;
+		return setFocus();
+	}
+	
 	/*
 	 * @see DialogField#setFocus
 	 */
@@ -94,11 +101,17 @@ public class StringDialogField extends DialogField {
 	public boolean setFocus() {
 		if (isOkToUse(fTextControl)) {
 			fTextControl.setFocus();
-			fTextControl.setSelection(0, fTextControl.getText().length());
+			if (selectAllByDefault) {
+				fTextControl.setSelection(0, fTextControl.getText().length());
+			} else {
+				// Leave selection at end of text control contents
+				// Bug 539919 - https://bugs.eclipse.org/bugs/show_bug.cgi?id=539919
+				fTextControl.setSelection(fTextControl.getText().length());
+			}
 		}
 		return true;
 	}
-
+	
 	// ------- ui creation
 
 	/**

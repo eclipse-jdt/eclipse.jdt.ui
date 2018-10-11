@@ -134,7 +134,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 		PackageFieldAdapter adapter= new PackageFieldAdapter();
 
-		fPackageDialogField= new StringDialogField();
+		fPackageDialogField= new StringDialogField(); 
 		fPackageDialogField.setDialogFieldListener(adapter);
 		fPackageDialogField.setLabelText(NewWizardMessages.NewPackageWizardPage_package_label);
 
@@ -244,7 +244,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	 * Sets the focus to the package name input field.
 	 */
 	protected void setFocus() {
-		fPackageDialogField.setFocus();
+		fPackageDialogField.setFocus(false); // choose to not select all by default - Bug 539919
 	}
 
 
