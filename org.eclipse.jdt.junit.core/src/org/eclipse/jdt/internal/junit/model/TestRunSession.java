@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -484,7 +484,7 @@ public class TestRunSession implements ITestRunSession {
 	}
 
 	private TestElement addTreeEntry(String treeEntry) {
-		// format: testId","testName","isSuite","testcount","isDynamicTest","parentId","displayName","parameterTypes
+		// format: testId","testName","isSuite","testcount","isDynamicTest","parentId","displayName","parameterTypes","uniqueId
 		int index0= treeEntry.indexOf(',');
 		String id= treeEntry.substring(0, index0);
 
