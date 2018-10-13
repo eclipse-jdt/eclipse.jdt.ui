@@ -28,6 +28,7 @@ public class BuildpathTestSuite {
 		suite.addTest(BuildpathModifierActionEnablementTest.suite());
 		suite.addTest(BuildpathModifierActionTest.suite());
 		suite.addTest(CPUserLibraryTest.suite());
+		suite.addTest(BuildpathProblemQuickFixTest.suite());
 		//$JUnit-END$
 		return suite;
 	}

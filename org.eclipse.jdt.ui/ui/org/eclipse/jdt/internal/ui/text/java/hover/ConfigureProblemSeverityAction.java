@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 IBM Corporation and others.
+ * Copyright (c) 2016, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -29,14 +29,14 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
+import org.eclipse.jdt.internal.ui.preferences.JavaBuildConfigurationBlock;
+import org.eclipse.jdt.internal.ui.preferences.JavaBuildPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavadocProblemsConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock;
@@ -50,6 +50,9 @@ import org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage;
  * @since 3.4
  */
 public class ConfigureProblemSeverityAction extends Action {
+	public enum PreferencePage {
+		BUILDING, ERRORS_WARNINGS, JAVADOC
+	}
 
 	private static final String CONFIGURE_PROBLEM_SEVERITY_DIALOG_ID= "configure_problem_severity_dialog_id"; //$NON-NLS-1$
 
@@ -57,15 +60,18 @@ public class ConfigureProblemSeverityAction extends Action {
 
 	private final String fOptionId;
 
-	private final boolean fIsJavadocOption;
+	private final PreferencePage fPreferencePage;
 
 	private final IInformationControl fInfoControl;
 
-	public ConfigureProblemSeverityAction(IJavaProject project, String optionId, boolean isJavadocOption, IInformationControl infoControl) {
+	private String fOptionQualifier;
+
+	public ConfigureProblemSeverityAction(IJavaProject project, String optionId, String optionQualifier, PreferencePage preferencePage, IInformationControl infoControl) {
 		super();
 		fProject= project;
 		fOptionId= optionId;
-		fIsJavadocOption= isJavadocOption;
+		fOptionQualifier= optionQualifier;
+		fPreferencePage= preferencePage;
 		fInfoControl= infoControl;
 		setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_PROBLEM_SEVERITIES);
 		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_PROBLEM_SEVERITIES);
@@ -107,24 +113,39 @@ public class ConfigureProblemSeverityAction extends Action {
 
 		Map<String, Object> data= new HashMap<>();
 		String pageId;
-		if (fIsJavadocOption) {
-			if (showPropertyPage) {
-				pageId= JavadocProblemsPreferencePage.PROP_ID;
-				data.put(JavadocProblemsPreferencePage.DATA_USE_PROJECT_SPECIFIC_OPTIONS, Boolean.TRUE);
-			} else {
-				pageId= JavadocProblemsPreferencePage.PREF_ID;
-			}
-			data.put(JavadocProblemsPreferencePage.DATA_SELECT_OPTION_KEY, fOptionId);
-			data.put(JavadocProblemsPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
-		} else {
-			if (showPropertyPage) {
-				pageId= ProblemSeveritiesPreferencePage.PROP_ID;
-				data.put(ProblemSeveritiesPreferencePage.USE_PROJECT_SPECIFIC_OPTIONS, Boolean.TRUE);
-			} else {
-				pageId= ProblemSeveritiesPreferencePage.PREF_ID;
-			}
-			data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_KEY, fOptionId);
-			data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_QUALIFIER, JavaCore.PLUGIN_ID);
+		switch (fPreferencePage) {
+			case JAVADOC:
+				if (showPropertyPage) {
+					pageId= JavadocProblemsPreferencePage.PROP_ID;
+					data.put(JavadocProblemsPreferencePage.DATA_USE_PROJECT_SPECIFIC_OPTIONS, Boolean.TRUE);
+				} else {
+					pageId= JavadocProblemsPreferencePage.PREF_ID;
+				}
+				data.put(JavadocProblemsPreferencePage.DATA_SELECT_OPTION_KEY, fOptionId);
+				data.put(JavadocProblemsPreferencePage.DATA_SELECT_OPTION_QUALIFIER, fOptionQualifier);
+				break;
+			case ERRORS_WARNINGS:
+				if (showPropertyPage) {
+					pageId= ProblemSeveritiesPreferencePage.PROP_ID;
+					data.put(ProblemSeveritiesPreferencePage.USE_PROJECT_SPECIFIC_OPTIONS, Boolean.TRUE);
+				} else {
+					pageId= ProblemSeveritiesPreferencePage.PREF_ID;
+				}
+				data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_KEY, fOptionId);
+				data.put(ProblemSeveritiesPreferencePage.DATA_SELECT_OPTION_QUALIFIER, fOptionQualifier);
+				break;
+			case BUILDING:
+				if (showPropertyPage) {
+					pageId= JavaBuildPreferencePage.PROP_ID;
+					data.put(JavaBuildPreferencePage.USE_PROJECT_SPECIFIC_OPTIONS, Boolean.TRUE);
+				} else {
+					pageId= JavaBuildPreferencePage.PREF_ID;
+				}
+				data.put(JavaBuildPreferencePage.DATA_SELECT_OPTION_KEY, fOptionId);
+				data.put(JavaBuildPreferencePage.DATA_SELECT_OPTION_QUALIFIER, fOptionQualifier);
+				break;
+			default:
+				return; // cannot happen
 		}
 
 		if (fInfoControl != null) {
@@ -139,7 +160,20 @@ public class ConfigureProblemSeverityAction extends Action {
 	}
 
 	private boolean hasProjectSpecificOptions() {
-		Key[] keys= fIsJavadocOption ? JavadocProblemsConfigurationBlock.getKeys() : ProblemSeveritiesConfigurationBlock.getKeys();
+		Key[] keys;
+		switch(fPreferencePage) {
+			case BUILDING:
+				keys= JavaBuildConfigurationBlock.getKeys();
+				break;
+			case JAVADOC:
+				keys= JavadocProblemsConfigurationBlock.getKeys();
+				break;
+			case ERRORS_WARNINGS:
+				keys= ProblemSeveritiesConfigurationBlock.getKeys();
+				break;
+			default: 
+				return false; // cannot happen
+		}
 		return OptionsConfigurationBlock.hasProjectSpecificOptions(fProject.getProject(), keys, null);
 	}
 }

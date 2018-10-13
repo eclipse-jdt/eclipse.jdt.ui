@@ -92,7 +92,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		fResourceFilterStatus= new StatusInfo();
 	}
 
-	private static Key[] getKeys() {
+	public static Key[] getKeys() {
 		Key[] keys= new Key[] {
 				PREF_PB_MAX_PER_UNIT, PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_INCOMPLETE_BUILDPATH, PREF_PB_CIRCULAR_BUILDPATH,
 				PREF_BUILD_CLEAN_OUTPUT_FOLDER, PREF_PB_DUPLICATE_RESOURCE,

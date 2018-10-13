@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,6 +12,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
+
+import java.util.Map;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -33,6 +35,14 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 
 	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.JavaBuildPreferencePage"; //$NON-NLS-1$
 	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.JavaBuildPreferencePage"; //$NON-NLS-1$
+
+	public static final String DATA_SELECT_OPTION_KEY= "select_option_key"; //$NON-NLS-1$
+	public static final String DATA_SELECT_OPTION_QUALIFIER= "select_option_qualifier"; //$NON-NLS-1$
+
+	/**
+	 * Key for a Boolean value defining if 'use project specific settings' should be enabled or not.
+	 */
+	public static final String USE_PROJECT_SPECIFIC_OPTIONS= "use_project_specific_key"; //$NON-NLS-1$
 
 	private JavaBuildConfigurationBlock fConfigurationBlock;
 
@@ -128,6 +138,26 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 		}
 	}
 
+	@Override
+	public void applyData(Object data) {
+		super.applyData(data);
+		if (data instanceof Map && fConfigurationBlock != null) {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map= (Map<String, Object>) data;
+			if (isProjectPreferencePage()) {
+				Boolean useProjectOptions= (Boolean) map.get(USE_PROJECT_SPECIFIC_OPTIONS);
+				if (useProjectOptions != null) {
+					enableProjectSpecificSettings(useProjectOptions.booleanValue());
+				}
+			}
+
+			Object key= map.get(DATA_SELECT_OPTION_KEY);
+			Object qualifier= map.get(DATA_SELECT_OPTION_QUALIFIER);
+			if (key instanceof String && qualifier instanceof String) {
+				fConfigurationBlock.selectOption((String) key, (String) qualifier);
+			}
+		}
+	}
 	@Override
 	public void setElement(IAdaptable element) {
 		super.setElement(element);

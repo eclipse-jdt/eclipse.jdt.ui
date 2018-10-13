@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,6 +33,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolution2;
 import org.eclipse.ui.IMarkerResolutionGenerator2;
+import org.eclipse.ui.IMarkerResolutionRelevance;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
@@ -43,7 +44,6 @@ import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
@@ -53,12 +53,14 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
 import org.eclipse.jdt.internal.ui.preferences.UserLibraryPreferencePage;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.java.hover.ConfigureProblemSeverityAction;
+import org.eclipse.jdt.internal.ui.text.java.hover.ConfigureProblemSeverityAction.PreferencePage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 
-public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGenerator2 {
+public class BuildpathProblemMarkerResolutionGenerator implements IMarkerResolutionGenerator2 {
 
 	private final static IMarkerResolution[] NO_RESOLUTION = new IMarkerResolution[0];
 
@@ -69,9 +71,14 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 				|| id == IJavaModelStatusConstants.CP_VARIABLE_PATH_UNBOUND
 				|| id == IJavaModelStatusConstants.INVALID_CP_CONTAINER_ENTRY
 				|| id == IJavaModelStatusConstants.DEPRECATED_VARIABLE
+				|| id == IJavaModelStatusConstants.MAIN_ONLY_PROJECT_DEPENDS_ON_TEST_ONLY_PROJECT
 				|| id == IJavaModelStatusConstants.INVALID_CLASSPATH) {
 			return true;
 		}
+		if(JavaCore.getOptionForConfigurableBuildPathProblemSeverity(id) != null) {
+			return true;
+		}
+
 		return false;
 	}
 
@@ -119,6 +126,13 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 					changeToExistingLibrary(shell, path, true, project);
 				}
 			});
+		}
+		
+		String optionId= JavaCore.getOptionForConfigurableBuildPathProblemSeverity(id);
+
+
+		if (optionId != null) {
+			resolutions.add(new ConfigureSeverityResolution(project, optionId));
 		}
 
 		if (project != null) {
@@ -231,6 +245,44 @@ public class UserLibraryMarkerResolutionGenerator implements IMarkerResolutionGe
 			return fImage;
 		}
 	}
+	
+	private static class ConfigureSeverityResolution implements IMarkerResolution2, IMarkerResolutionRelevance {
+		private final IJavaProject fProject;
+		private String fOptionId;
+
+		public ConfigureSeverityResolution(IJavaProject project, String optionId) {
+			fProject= project;
+			fOptionId= optionId;
+		}
+
+		@Override
+		public String getDescription() {
+			return null;
+		}
+
+		@Override
+		public Image getImage() {
+			return JavaPluginImages.get(JavaPluginImages.IMG_CONFIGURE_PROBLEM_SEVERITIES);
+		}
+
+		@Override
+		public String getLabel() {
+			return CorrectionMessages.ConfigureProblemSeveritySubProcessor_name;
+		}
+
+		@Override
+		public int getRelevanceForResolution() {
+			return -1;
+		}
+
+		@Override
+		public void run(IMarker marker) {
+			ConfigureProblemSeverityAction problemSeverityAction= new ConfigureProblemSeverityAction(fProject, fOptionId, JavaCore.PLUGIN_ID,
+					PreferencePage.BUILDING, null);
+			problemSeverityAction.run();
+		}
+	}
+
 
 	private static class OpenBuildPathMarkerResolution implements IMarkerResolution2 {
 		private final IJavaProject fProject;
