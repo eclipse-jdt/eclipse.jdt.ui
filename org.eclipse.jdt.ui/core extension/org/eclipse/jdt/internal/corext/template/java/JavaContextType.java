@@ -22,6 +22,7 @@ package org.eclipse.jdt.internal.corext.template.java;
  * <li>templates for all Java code locations</li>
  * <li>templates for member locations</li>
  * <li>templates for statement locations</li>
+ * <li>templates for module-info.java files</li>
  * </dl>
  */
 public class JavaContextType extends AbstractJavaContextType {
@@ -41,9 +42,17 @@ public class JavaContextType extends AbstractJavaContextType {
 	 */
 	public static final String ID_STATEMENTS= "java-statements"; //$NON-NLS-1$
 
+	/**
+	 * The context type id for templates working on module-info.java files
+	 */
+	public static final String ID_MODULE= "module"; //$NON-NLS-1$
 
 	@Override
 	protected void initializeContext(JavaContext context) {
+		// Separate 'module' context type from 'java' context type
+		if (getId().equals(ID_MODULE)) {
+			return;
+		}
 		if (!getId().equals(JavaContextType.ID_ALL)) { // a specific context must also allow the templates that work everywhere
 			context.addCompatibleContextType(JavaContextType.ID_ALL);
 		}

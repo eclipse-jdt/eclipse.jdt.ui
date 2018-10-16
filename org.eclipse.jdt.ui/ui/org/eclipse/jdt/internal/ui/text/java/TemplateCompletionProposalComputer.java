@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.CompletionContext;
 
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
@@ -42,6 +43,7 @@ public class TemplateCompletionProposalComputer extends AbstractTemplateCompleti
 	private final TemplateEngine fJavaTemplateEngine;
 	private final TemplateEngine fJavaStatementsTemplateEngine;
 	private final TemplateEngine fJavaMembersTemplateEngine;
+	private final TemplateEngine fJavaModuleTemplateEngine;
 
 	private final TemplateEngine fJavadocTemplateEngine;
 
@@ -51,6 +53,7 @@ public class TemplateCompletionProposalComputer extends AbstractTemplateCompleti
 		fJavaMembersTemplateEngine= createTemplateEngine(templateContextRegistry, JavaContextType.ID_MEMBERS);
 		fJavaStatementsTemplateEngine= createTemplateEngine(templateContextRegistry, JavaContextType.ID_STATEMENTS);
 		fJavadocTemplateEngine= createTemplateEngine(templateContextRegistry, JavaDocContextType.ID);
+		fJavaModuleTemplateEngine= createTemplateEngine(templateContextRegistry, JavaContextType.ID_MODULE);
 	}
 
 	private static TemplateEngine createTemplateEngine(ContextTypeRegistry templateContextRegistry, String contextTypeId) {
@@ -76,7 +79,11 @@ public class TemplateCompletionProposalComputer extends AbstractTemplateCompleti
 						return fJavaStatementsTemplateEngine;
 					}
 				}
-				return fJavaTemplateEngine;
+				if (JavaModelUtil.MODULE_INFO_JAVA.equals(context.getCompilationUnit().getElementName())) {
+					return fJavaModuleTemplateEngine;
+				} else {
+					return fJavaTemplateEngine;
+				}
 			}
 		} catch (BadLocationException x) {
 			return null;

@@ -5512,6 +5512,12 @@
             registryId="org.eclipse.jdt.ui.CompilationUnitEditor">
       </contextType>
       <contextType
+            name="%templates.java.module.contextType.name"
+            class="org.eclipse.jdt.internal.corext.template.java.JavaContextType"
+            id="module"
+            registryId="org.eclipse.jdt.ui.CompilationUnitEditor">
+      </contextType>
+      <contextType
             name="%templates.java.statements.contextType.name"
             class="org.eclipse.jdt.internal.corext.template.java.JavaContextType"
             id="java-statements"
