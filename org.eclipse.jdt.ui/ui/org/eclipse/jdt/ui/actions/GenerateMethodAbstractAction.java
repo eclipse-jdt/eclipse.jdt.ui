@@ -9,9 +9,10 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *     IBM Corporation - initial API and implementation 
+ *     IBM Corporation - initial API and implementation
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
  *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] toString() generator: Fields in declaration order - https://bugs.eclipse.org/bugs/show_bug.cgi?id=279924
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - Check whether enclosing instance implements hashCode and equals - https://bugs.eclipse.org/539900
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
@@ -55,10 +56,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NodeFinder;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -75,16 +79,14 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
-import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
- * An abstract class containing elements common for <code>GenerateHashCodeEqualsAction</code> and 
+ * An abstract class containing elements common for <code>GenerateHashCodeEqualsAction</code> and
  * <code>GenerateToStringAction</code>
  * 
  * since 3.5
@@ -271,6 +273,10 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 				status.merge(checkSuperClass(superclass));
 			}
 			
+			if (fTypeBinding.isMember() && !Modifier.isStatic(fTypeBinding.getModifiers())) {
+				status.merge(checkEnclosingClass(fTypeBinding.getDeclaringClass()));
+			}
+
 			for (int i= 0; i < selected.length; i++) {
 				status.merge(checkMember(selected[i]));
 			}
@@ -355,6 +361,13 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 	 * @return RefactoringStatus containing information about eventual problems
 	 */
 	abstract RefactoringStatus checkSuperClass(ITypeBinding superclass);
+	
+	/**
+	 * Checks whether the enclosing class fulfills requirements expected by method generator
+	 * @param enclosingClass enclosing class type binding to be checked
+	 * @return RefactoringStatus containing information about eventual problems
+	 */
+	abstract RefactoringStatus checkEnclosingClass(ITypeBinding enclosingClass);
 
 	/**
 	 * Creates the action's main dialog.
@@ -384,7 +397,7 @@ abstract class GenerateMethodAbstractAction extends SelectionDispatchAction {
 	/**
 	 * 
 	 * @param typeBinding Type to be checked
-	 * @return true if given type already contains the method to be generated 
+	 * @return true if given type already contains the method to be generated
 	 */
 	abstract boolean isMethodAlreadyImplemented(ITypeBinding typeBinding);
 

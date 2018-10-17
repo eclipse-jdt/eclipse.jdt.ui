@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - Check whether enclosing instance implements hashCode and equals - https://bugs.eclipse.org/539900
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
@@ -35,6 +36,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.GenerateHashCodeEqualsOperation;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
@@ -48,7 +50,6 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.dialogs.GenerateHashCodeEqualsDialog;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
@@ -173,12 +174,11 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		return info;
 	}
 
-	private RefactoringStatus checkHashCodeEqualsExists(ITypeBinding someType, boolean superClass) {
+	private RefactoringStatus checkHashCodeEqualsExists(ITypeBinding someType, boolean checkFinalMethods, String concreteTypeWarning) {
 
 		RefactoringStatus status= new RefactoringStatus();
 		HashCodeEqualsInfo info= getTypeInfo(someType, true);
 
-		String concreteTypeWarning= superClass ? ActionMessages.GenerateMethodAbstractAction_super_class : ActionMessages.GenerateHashCodeEqualsAction_field_type;
 		String concreteMethWarning= (someType.isInterface() || Modifier.isAbstract(someType.getModifiers()))
 				? ActionMessages.GenerateHashCodeEqualsAction_interface_does_not_declare_hashCode_equals_error
 				: ActionMessages.GenerateHashCodeEqualsAction_type_does_not_implement_hashCode_equals_error;
@@ -196,7 +196,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 					Messages.format(concreteTypeWarning, BindingLabelProvider.getBindingLabel(someType, JavaElementLabels.ALL_FULLY_QUALIFIED)), concreteHCEWarning }),
 					createRefactoringStatusContext(someType.getJavaElement()));
 
-		if (superClass && (info.foundFinalEquals || info.foundFinalHashCode)) {
+		if (checkFinalMethods && (info.foundFinalEquals || info.foundFinalHashCode)) {
 			status.addError(Messages.format(ActionMessages.GenerateMethodAbstractAction_final_method_in_superclass_error, new String[] {
 					Messages.format(concreteTypeWarning, BasicElementLabels.getJavaElementName(someType.getQualifiedName())), ActionMessages.GenerateHashCodeEqualsAction_hashcode_or_equals }),
 					createRefactoringStatusContext(someType.getJavaElement()));
@@ -256,7 +256,12 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 
 	@Override
 	RefactoringStatus checkSuperClass(ITypeBinding superclass) {
-		return checkHashCodeEqualsExists(superclass, true);
+		return checkHashCodeEqualsExists(superclass, true, ActionMessages.GenerateMethodAbstractAction_super_class);
+	}
+
+	@Override
+	RefactoringStatus checkEnclosingClass(ITypeBinding enclosingClass) {
+		return checkHashCodeEqualsExists(enclosingClass, false, ActionMessages.GenerateMethodAbstractAction_enclosing_class);
 	}
 
 	@Override
@@ -272,7 +277,7 @@ public final class GenerateHashCodeEqualsAction extends GenerateMethodAbstractAc
 		if (fieldsType.isArray())
 			fieldsType= fieldsType.getElementType();
 		if (!fieldsType.isPrimitive() && !fieldsType.isEnum() && !alreadyCheckedMemberTypes.contains(fieldsType) && !fieldsType.equals(fTypeBinding)) {
-			status.merge(checkHashCodeEqualsExists(fieldsType, false));
+			status.merge(checkHashCodeEqualsExists(fieldsType, false, ActionMessages.GenerateHashCodeEqualsAction_field_type));
 			alreadyCheckedMemberTypes.add(fieldsType);
 		}
 		if (Modifier.isTransient(variableBinding.getModifiers()))
