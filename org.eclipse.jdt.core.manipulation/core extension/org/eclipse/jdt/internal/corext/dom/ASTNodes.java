@@ -117,6 +117,7 @@ import org.eclipse.jdt.internal.core.manipulation.JavaManipulationPlugin;
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
 import org.eclipse.jdt.internal.core.manipulation.util.Strings;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * JDT-UI-internal helper methods that deal with {@link ASTNode}s:
@@ -1505,5 +1506,71 @@ public class ASTNodes {
 			}
 		}
 		return hasSemicolon;
+	}
+
+	/**
+	 * Checks if the given <code>node</code> is a {@link VariableDeclarationStatement}
+	 * or a {@link SimpleName} whose type is 'var'.
+	 *
+	 * @param node the AST node
+	 * @param astRoot the AST node of the compilation unit
+	 * @return <code>true</code> if the given {@link ASTNode} represents a
+	 * {@link SimpleName} or {@link VariableDeclarationStatement} that has a 'var' type
+	 * and <code>false</code> otherwise.
+	 */
+	public static boolean isVarType(ASTNode node, CompilationUnit astRoot) {
+		IJavaElement root= astRoot.getJavaElement();
+		if (root == null) {
+			return false;
+		}
+		IJavaProject javaProject= root.getJavaProject();
+		if (javaProject == null) {
+			return false;
+		}
+		if (!JavaModelUtil.is10OrHigher(javaProject)) {
+			return false;
+		}
+
+		Type type= null;
+		if (node instanceof SimpleName) {
+			IBinding binding= null;
+			SimpleName name= (SimpleName) node;
+			binding= name.resolveBinding();
+			if (!(binding instanceof IVariableBinding)) {
+				return false;
+			}
+
+			IVariableBinding varBinding= (IVariableBinding) binding;
+			if (varBinding.isField() || varBinding.isParameter()) {
+				return false;
+			}
+
+			ASTNode varDeclaration= astRoot.findDeclaringNode(varBinding);
+			if (varDeclaration == null) {
+				return false;
+			}
+
+			ITypeBinding typeBinding= varBinding.getType();
+			if (typeBinding == null || typeBinding.isAnonymous() || typeBinding.isIntersectionType() || typeBinding.isWildcardType()) {
+				return false;
+			}
+
+			if (varDeclaration instanceof SingleVariableDeclaration) {
+				type= ((SingleVariableDeclaration) varDeclaration).getType();
+			} else if (varDeclaration instanceof VariableDeclarationFragment) {
+				ASTNode parent= varDeclaration.getParent();
+				if (parent instanceof VariableDeclarationStatement) {
+					type= ((VariableDeclarationStatement) parent).getType();
+				} else if (parent instanceof VariableDeclarationExpression) {
+					type= ((VariableDeclarationExpression) parent).getType();
+				}
+			}
+		} else if (node instanceof VariableDeclarationStatement) {
+			type= ((VariableDeclarationStatement)node).getType();
+		} else {
+			return false;
+		}
+
+		return type == null ? false : type.isVar();
 	}
 }

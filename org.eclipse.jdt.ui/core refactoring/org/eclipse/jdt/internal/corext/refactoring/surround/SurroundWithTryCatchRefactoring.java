@@ -318,6 +318,16 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 					VariableDeclarationFragment fragment= iter.next();
 					fragment.setInitializer(null);
 				}
+
+				// "var" type cannot have null initializer, so change to inferred type
+				if (ASTNodes.isVarType(statement, fRootNode)) {
+					ITypeBinding binding= statement.getType().resolveBinding();
+					if (binding != null) {
+						Type varType= fImportRewrite.addImport(binding, getAST(), context, TypeLocation.LOCAL_VARIABLE);
+						copy.setType(varType);
+					}
+				}
+
 				CompilationUnit root= (CompilationUnit)statement.getRoot();
 				int extendedStart= root.getExtendedStartPosition(statement);
 				// we have a leading comment and the comment is covered by the selection

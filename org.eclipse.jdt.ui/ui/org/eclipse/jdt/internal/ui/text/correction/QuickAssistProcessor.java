@@ -3872,21 +3872,15 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static boolean getConvertVarTypeToResolvedTypeProposal(IInvocationContext context, ASTNode node, Collection<ICommandAccess> proposals) {
 		CompilationUnit astRoot= context.getASTRoot();
-		IJavaElement root= astRoot.getJavaElement();
-		if (root == null) {
-			return false;
-		}
-		IJavaProject javaProject= root.getJavaProject();
-		if (javaProject == null) {
-			return false;
-		}
-		if (!JavaModelUtil.is10OrHigher(javaProject)) {
+		boolean isValid= ASTNodes.isVarType(node, astRoot);
+		if (!isValid) {
 			return false;
 		}
 
 		if (!(node instanceof SimpleName)) {
 			return false;
 		}
+
 		SimpleName name= (SimpleName) node;
 		IBinding binding= name.resolveBinding();
 		if (!(binding instanceof IVariableBinding)) {
@@ -3897,28 +3891,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 
-		ASTNode varDeclaration= astRoot.findDeclaringNode(varBinding);
-		if (varDeclaration == null) {
-			return false;
-		}
-
 		ITypeBinding typeBinding= varBinding.getType();
 		if (typeBinding == null || typeBinding.isAnonymous() || typeBinding.isIntersectionType() || typeBinding.isWildcardType()) {
-			return false;
-		}
-
-		Type type= null;
-		if (varDeclaration instanceof SingleVariableDeclaration) {
-			type= ((SingleVariableDeclaration) varDeclaration).getType();
-		} else if (varDeclaration instanceof VariableDeclarationFragment) {
-			ASTNode parent= varDeclaration.getParent();
-			if (parent instanceof VariableDeclarationStatement) {
-				type= ((VariableDeclarationStatement) parent).getType();
-			} else if (parent instanceof VariableDeclarationExpression) {
-				type= ((VariableDeclarationExpression) parent).getType();
-			}
-		}
-		if (type == null || !type.isVar()) {
 			return false;
 		}
 

@@ -19,12 +19,14 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -106,6 +108,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.UnionType;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
@@ -137,6 +140,7 @@ import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.SurroundWithAnalyzer;
@@ -220,9 +224,30 @@ public class LocalCorrectionsSubProcessor {
 		if (refactoring == null)
 			return;
 
+		List<String> affectedLocals= new ArrayList<>();
+		SimpleName vName= null;
+		ITypeBinding vType= null;
+		if (selectedNode.getAST().apiLevel() >= AST.JLS10 && (selectedNode instanceof VariableDeclarationStatement)) {
+			for (Object o : ((VariableDeclarationStatement)selectedNode).fragments()) {
+				VariableDeclarationFragment v= ((VariableDeclarationFragment)o);
+				vName= v.getName();
+				vType= ((VariableDeclarationStatement)selectedNode).getType().resolveBinding();
+			}
+
+			// If no references to 'var' type exist, entire statement will be placed in try block
+			SurroundWithTryCatchAnalyzer analyzer= new SurroundWithTryCatchAnalyzer(cu, Selection.createFromStartLength(offset, length));
+			astRoot.accept(analyzer);
+			affectedLocals= Arrays.asList(analyzer.getAffectedLocals()).stream().map(f -> f.getName().getIdentifier()).collect(Collectors.toList());
+		}
+
 		refactoring.setLeaveDirty(true);
 		if (refactoring.checkActivationBasics(astRoot).isOK()) {
-			String label= CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_trycatch_description;
+			String label;
+			if ((vType != null) && (vName != null) && ASTNodes.isVarType(selectedNode, astRoot) && affectedLocals.contains(vName.getIdentifier())) {
+				label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_trycatch_var_description, new Object[] { vName.getIdentifier(), vType.getName() });
+			} else {
+				label= CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_trycatch_description;
+			}
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, refactoring, IProposalRelevance.SURROUND_WITH_TRY_CATCH, image);
 			proposal.setLinkedProposalModel(refactoring.getLinkedProposalModel());
@@ -236,7 +261,12 @@ public class LocalCorrectionsSubProcessor {
 
 			refactoring.setLeaveDirty(true);
 			if (refactoring.checkActivationBasics(astRoot).isOK()) {
-				String label= CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_trymulticatch_description;
+				String label;
+				if ((vType != null) && (vName != null) && ASTNodes.isVarType(selectedNode, astRoot) && affectedLocals.contains(vName.getIdentifier())) {
+					label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_trymulticatch_var_description, new Object[] { vName.getIdentifier(), vType.getName() });
+				} else {
+					label= CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_trymulticatch_description;
+				}
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 				RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposal(label, cu, refactoring, IProposalRelevance.SURROUND_WITH_TRY_MULTICATCH, image);
 				proposal.setLinkedProposalModel(refactoring.getLinkedProposalModel());
