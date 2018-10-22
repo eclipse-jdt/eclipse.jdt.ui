@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.osgi.framework.Bundle;
+import org.osgi.framework.Constants;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -709,10 +710,16 @@ public class JUnitLaunchConfigurationDelegate extends AbstractJavaLaunchConfigur
 		private String localURL(JUnitRuntimeClasspathEntry jar) throws IOException, MalformedURLException, URISyntaxException {
 			Bundle bundle= JUnitCorePlugin.getDefault().getBundle(jar.getPluginId());
 			URL url;
-			if (jar.getPluginRelativePath() == null)
-				url= bundle.getEntry("/"); //$NON-NLS-1$
-			else
+			if (jar.getPluginRelativePath() == null) {
+				String bundleClassPath= bundle.getHeaders().get(Constants.BUNDLE_CLASSPATH);
+				url= bundleClassPath != null ? bundle.getEntry(bundleClassPath) : null;
+				if (url == null) {
+					url= bundle.getEntry("/"); //$NON-NLS-1$
+				}
+			} else {
 				url= bundle.getEntry(jar.getPluginRelativePath());
+			}
+
 			if (url == null)
 				throw new IOException();
 			return URIUtil.toFile(URIUtil.toURI(FileLocator.toFileURL(url))).getAbsolutePath(); // See bug 503050
