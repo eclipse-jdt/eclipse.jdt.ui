@@ -297,6 +297,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UndefinedModule:
 			case IProblem.PackageDoesNotExistOrIsEmpty:
 			case IProblem.NotAccessibleType:
+			case IProblem.AbstractServiceImplementation:
+			case IProblem.ProviderMethodOrConstructorRequiredForServiceImpl:
+			case IProblem.ServiceImplDefaultConstructorNotPublic:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -832,6 +835,11 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.PackageDoesNotExistOrIsEmpty:
 				ModuleCorrectionsSubProcessor.getPackageDoesNotExistProposals(context, problem, proposals);
+				break;
+			case IProblem.AbstractServiceImplementation:
+			case IProblem.ProviderMethodOrConstructorRequiredForServiceImpl:
+			case IProblem.ServiceImplDefaultConstructorNotPublic:
+				LocalCorrectionsSubProcessor.addServiceProviderProposal(context, problem, proposals);
 				break;
 			default:
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,9 +16,11 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
@@ -50,6 +52,9 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.Proposal;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -63,6 +68,7 @@ import org.eclipse.jdt.internal.ui.text.correction.GetterSetterCorrectionSubProc
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.ReorgCorrectionsSubProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RenameRefactoringProposal;
@@ -637,5 +643,21 @@ public class QuickFixTest extends TestCase {
 		}
 	}
 
+	protected void assertLinkedChoices(ICompletionProposal proposal, String linkedGroup, String[] expectedChoices) {
+		assertTrue("Not a LinkedCorrectionProposal", proposal instanceof LinkedCorrectionProposal);
+		LinkedCorrectionProposal linkedProposal = (LinkedCorrectionProposal)proposal;
 
+		LinkedProposalModel linkedProposalModel = linkedProposal.getLinkedProposalModel();
+		LinkedProposalPositionGroup positionGroup = linkedProposalModel.getPositionGroup(linkedGroup, false);
+		Proposal[] choices = positionGroup.getProposals();
+		assertEquals("Not same number of choices", expectedChoices.length, choices.length);
+		Arrays.sort(expectedChoices);
+		List<String> sortedChoices= Arrays.stream(choices)
+									.map(Proposal::getDisplayString)
+									.sorted()
+									.collect(Collectors.toList());
+		for (int i=0; i<expectedChoices.length; i++) {
+			assertEquals("Unexpected choice", expectedChoices[i], sortedChoices.get(i));
+		}
+	}
 }
