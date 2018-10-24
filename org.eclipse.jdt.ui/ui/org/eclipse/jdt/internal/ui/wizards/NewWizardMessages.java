@@ -218,6 +218,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewJavaProjectWizardPageOne_dialog_title;
 	public static String NewJavaProjectWizardPageOne_directory_message;
 	public static String NewJavaProjectWizardPageOne_JREGroup_link_description;
+	public static String NewJavaProjectWizardPageOne_JREGroup_unspecified_compliance;
 	public static String NewJavaProjectWizardPageOne_JREGroup_default_compliance;
 	public static String NewJavaProjectWizardPageOne_JREGroup_specific_compliance;
 	public static String NewJavaProjectWizardPageOne_JREGroup_specific_EE;

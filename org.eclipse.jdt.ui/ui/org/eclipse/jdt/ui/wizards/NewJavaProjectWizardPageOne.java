@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Karsten Thoms - Bug#451777
  *******************************************************************************/
 package org.eclipse.jdt.ui.wizards;
 
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.equinox.bidi.StructuredTextTypeHandlerFactory;
 
@@ -36,6 +38,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -381,7 +384,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 	}
 
-	private final class JREGroup implements Observer, SelectionListener, IDialogFieldListener {
+	private final class JREGroup extends Observable implements Observer, SelectionListener, IDialogFieldListener {
 
 		private final String LAST_SELECTED_EE_SETTINGS_KEY= JavaUI.ID_PLUGIN + ".last.selected.execution.enviroment"; //$NON-NLS-1$
 		private final String LAST_SELECTED_JRE_SETTINGS_KEY= JavaUI.ID_PLUGIN + ".last.selected.project.jre"; //$NON-NLS-1$
@@ -401,43 +404,80 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		private String[] fJRECompliance;
 		private IExecutionEnvironment[] fInstalledEEs;
 		private String[] fEECompliance;
+		private String fDefaultJVMLabel;
 
 		public JREGroup() {
 			fUseDefaultJRE= new SelectionButtonDialogField(SWT.RADIO);
-			fUseDefaultJRE.setLabelText(getDefaultJVMLabel());
+			fUseDefaultJRE.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_JREGroup_unspecified_compliance);
 
 			fUseProjectJRE= new SelectionButtonDialogField(SWT.RADIO);
 			fUseProjectJRE.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_JREGroup_specific_compliance);
 
 			fJRECombo= new ComboDialogField(SWT.READ_ONLY);
-			fillInstalledJREs(fJRECombo);
 			fJRECombo.setDialogFieldListener(this);
 
 			fUseEEJRE= new SelectionButtonDialogField(SWT.RADIO);
 			fUseEEJRE.setLabelText(NewWizardMessages.NewJavaProjectWizardPageOne_JREGroup_specific_EE);
 
 			fEECombo= new ComboDialogField(SWT.READ_ONLY);
-			fillExecutionEnvironments(fEECombo);
 			fEECombo.setDialogFieldListener(this);
-
-			switch (getLastSelectedJREKind()) {
-				case DEFAULT_JRE:
-					fUseDefaultJRE.setSelection(true);
-					break;
-				case PROJECT_JRE:
-					fUseProjectJRE.setSelection(true);
-					break;
-				case EE_JRE:
-					fUseEEJRE.setSelection(true);
-					break;
-			}
-
-			fJRECombo.setEnabled(fUseProjectJRE.isSelected());
-			fEECombo.setEnabled(fUseEEJRE.isSelected());
 
 			fUseDefaultJRE.setDialogFieldListener(this);
 			fUseProjectJRE.setDialogFieldListener(this);
 			fUseEEJRE.setDialogFieldListener(this);
+
+			CompletableFuture.supplyAsync(this::getLastSelectedJREKind)
+				.thenAcceptAsync(kind -> {
+					switch (kind.intValue()) {
+						case DEFAULT_JRE:
+							fUseDefaultJRE.setSelection(true);
+							break;
+						case PROJECT_JRE:
+							fUseProjectJRE.setSelection(true);
+							break;
+						case EE_JRE:
+							fUseEEJRE.setSelection(true);
+							break;
+						default:
+							break;
+					}
+				}, Display.getDefault()::asyncExec);
+				
+			CompletableFuture.runAsync(this::initializeJvmFields)
+				.thenAcceptAsync((VOID) -> {
+					if (fGroup.isDisposed()) {
+						return;
+					}
+					fUseDefaultJRE.setLabelText(fDefaultJVMLabel);
+					fillInstalledJREs(fJRECombo);
+					fillExecutionEnvironments(fEECombo);
+					updateEnableState();
+					fGroup.requestLayout();
+					setChanged();
+					notifyObservers();
+				}, Display.getDefault()::asyncExec);
+		}
+		
+		
+		private void initializeJvmFields () {
+			fDefaultJVMLabel= getDefaultJVMLabel();
+			
+			fInstalledJVMs= getWorkspaceJREs();
+			Arrays.sort(fInstalledJVMs, new Comparator<IVMInstall>() {
+				@Override
+				public int compare(IVMInstall i0, IVMInstall i1) {
+					if (i1 instanceof IVMInstall2 && i0 instanceof IVMInstall2) {
+						String cc0= JavaModelUtil.getCompilerCompliance((IVMInstall2) i0, JavaCore.VERSION_1_4);
+						String cc1= JavaModelUtil.getCompilerCompliance((IVMInstall2) i1, JavaCore.VERSION_1_4);
+						int result= JavaCore.compareJavaVersions(cc1, cc0);
+						if (result != 0)
+							return result;
+					}
+					return Policy.getComparator().compare(i0.getName(), i1.getName());
+				}
+			});
+
+			fInstalledEEs= JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments();
 		}
 
 		public Control createControl(Composite composite) {
@@ -468,6 +508,9 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 
 		private void fillInstalledJREs(ComboDialogField comboField) {
+			if (fGroup.isDisposed()) {
+				return;
+			}
 			String selectedItem= getLastSelectedJRE();
 			int selectionIndex= -1;
 			if (fUseProjectJRE.isSelected()) {
@@ -477,22 +520,6 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				}
 			}
 
-			fInstalledJVMs= getWorkspaceJREs();
-			Arrays.sort(fInstalledJVMs, new Comparator<IVMInstall>() {
-
-				@Override
-				public int compare(IVMInstall i0, IVMInstall i1) {
-					if (i1 instanceof IVMInstall2 && i0 instanceof IVMInstall2) {
-						String cc0= JavaModelUtil.getCompilerCompliance((IVMInstall2) i0, JavaCore.VERSION_1_4);
-						String cc1= JavaModelUtil.getCompilerCompliance((IVMInstall2) i1, JavaCore.VERSION_1_4);
-						int result= JavaCore.compareJavaVersions(cc1, cc0);
-						if (result != 0)
-							return result;
-					}
-					return Policy.getComparator().compare(i0.getName(), i1.getName());
-				}
-
-			});
 			selectionIndex= -1;//find new index
 			String[] jreLabels= new String[fInstalledJVMs.length];
 			fJRECompliance= new String[fInstalledJVMs.length];
@@ -525,7 +552,6 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				}
 			}
 
-			fInstalledEEs= JavaRuntime.getExecutionEnvironmentsManager().getExecutionEnvironments();
 			selectionIndex= -1;//find new index
 			String[] eeLabels= new String[fInstalledEEs.length];
 			fEECompliance= new String[fInstalledEEs.length];
@@ -600,12 +626,15 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		}
 
 		private void updateEnableState() {
-			final boolean detect= fDetectGroup.mustDetect();
+			if (fGroup.isDisposed()) {
+				return;
+			}
+			final boolean detect= fDetectGroup != null ? fDetectGroup.mustDetect() : false;
 			fUseDefaultJRE.setEnabled(!detect);
 			fUseProjectJRE.setEnabled(!detect);
 			fUseEEJRE.setEnabled(!detect);
-			fJRECombo.setEnabled(!detect && fUseProjectJRE.isSelected());
-			fEECombo.setEnabled(!detect && fUseEEJRE.isSelected());
+			fJRECombo.setEnabled(!detect && fUseProjectJRE.isSelected() && fJRECombo.getItems().length > 0);
+			fEECombo.setEnabled(!detect && fUseEEJRE.isSelected() && fEECombo.getItems().length > 0);
 			if (fPreferenceLink != null) {
 				fPreferenceLink.setEnabled(!detect);
 			}
@@ -640,6 +669,9 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 
 		@Override
 		public void dialogFieldChanged(DialogField field) {
+			if (fGroup.isDisposed()) {
+				return;
+			}
 			updateEnableState();
 			fDetectGroup.handlePossibleJVMChange();
 			if (field == fJRECombo) {
@@ -1009,7 +1041,16 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				setPageComplete(false);
 				return;
 			}
-
+			
+			if (fJREGroup.fUseEEJRE.isSelected() && fJREGroup.fEECombo.getItems().length == 0) {
+				setPageComplete(false);
+				return;
+			}
+			if (fJREGroup.fUseProjectJRE.isSelected() && fJREGroup.fJRECombo.getItems().length == 0) {
+				setPageComplete(false);
+				return;
+			}
+			
 			setPageComplete(true);
 
 			setErrorMessage(null);
@@ -1066,6 +1107,7 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		fValidator= new Validator();
 		fNameGroup.addObserver(fValidator);
 		fLocationGroup.addObserver(fValidator);
+		fJREGroup.addObserver(fValidator);
 
 		// initialize defaults
 		setProjectName(""); //$NON-NLS-1$
