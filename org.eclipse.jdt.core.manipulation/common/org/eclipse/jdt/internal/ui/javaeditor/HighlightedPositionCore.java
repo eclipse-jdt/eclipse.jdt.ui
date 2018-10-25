@@ -18,6 +18,8 @@ import org.eclipse.jface.text.Position;
 
 /**
  * Highlighted Positions.
+ * 
+ * @since 1.11
  */
 public class HighlightedPositionCore extends Position {
 

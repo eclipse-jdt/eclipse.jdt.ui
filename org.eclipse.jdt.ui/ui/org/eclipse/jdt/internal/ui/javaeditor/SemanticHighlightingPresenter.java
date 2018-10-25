@@ -536,7 +536,7 @@ public class SemanticHighlightingPresenter extends SemanticHighlightingPresenter
 	 * @return The semantic reconciler position's category.
 	 */
 	@Override
-	protected String getPositionCategory() {
+	public String getPositionCategory() {
 		return toString();
 	}
 }
