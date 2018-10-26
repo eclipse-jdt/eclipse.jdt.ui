@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.manipulation.CoreASTProvider;
 
 
 /**
- * The {@link SharedASTProvider} provides access to the {@link CompilationUnit AST root} used by
+ * The {@link SharedASTProviderCore} provides access to the {@link CompilationUnit AST root} used by
  * the current active Java editor.
  *
  * <p>For performance reasons, not more than one AST should be kept in memory at a time. Therefore, clients must
