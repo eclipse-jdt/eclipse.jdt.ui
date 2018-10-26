@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.manipulation.CoreASTProvider;
  * <p>Clients can make the following assumptions about the AST:
  * <dl>
  *    <li>the AST has a {@link ITypeRoot} as source: {@link CompilationUnit#getTypeRoot()} is not null.</li>
- *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS10 API level 10} or higher</li>
+ *    <li>the {@link AST#apiLevel() AST API level} is {@link AST#JLS11 API level 11} or higher</li>
  *    <li>the AST has bindings resolved ({@link AST#hasResolvedBindings()})</li>
  *    <li>{@link AST#hasStatementsRecovery() statement} and {@link AST#hasBindingsRecovery() bindings}
  *           recovery are enabled
