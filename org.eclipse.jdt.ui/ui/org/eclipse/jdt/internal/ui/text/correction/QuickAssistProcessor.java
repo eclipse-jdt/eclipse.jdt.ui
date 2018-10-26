@@ -39,6 +39,8 @@ import org.eclipse.jface.text.link.LinkedPositionGroup;
 
 import org.eclipse.ui.IEditorPart;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 
 import org.eclipse.jdt.core.Flags;
@@ -271,6 +273,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getMissingCaseStatementProposals(context, coveringNode, null)
 				|| getConvertStringConcatenationProposals(context, null)
 				|| getInferDiamondArgumentsProposal(context, coveringNode, null, null)
+				|| getJUnitTestCaseProposal(context, coveringNode, null)
 				|| getAddStaticImportProposals(context, coveringNode, null);
 		}
 		return false;
@@ -292,6 +295,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			getAssignAllParamsToFieldsProposals(context, coveringNode, resultingCollections);
 			getInferDiamondArgumentsProposal(context, coveringNode, locations, resultingCollections);
 			getGenerateForLoopProposals(context, coveringNode, locations, resultingCollections);
+			getJUnitTestCaseProposal(context, coveringNode, resultingCollections);
 
 			if (noErrorsAtLocation) {
 				boolean problemsAtLocation= locations.length != 0;
@@ -4210,6 +4214,25 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 
 			node= node.getParent();
+		}
+		return false;
+	}
+
+	private boolean getJUnitTestCaseProposal(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> resultingCollections) {
+		if (coveringNode instanceof SimpleName && coveringNode.getParent() instanceof AbstractTypeDeclaration) {
+			SimpleName name= (SimpleName) coveringNode;
+			String idName= name.getIdentifier() + JavaModelUtil.DEFAULT_CU_SUFFIX;
+			String unitName= context.getCompilationUnit().getElementName();
+			if (unitName.equals(idName)) {
+				if (resultingCollections != null) {
+					Image image= JavaPluginImages.DESC_OBJS_TEST_CASE.createImage();
+					String label= Messages.format(CorrectionMessages.QuickAssistProcessor_create_new_junit_test_case, unitName);
+					Change change= new NullChange(CorrectionMessages.QuickAssistProcessor_create_new_junit_test_case_desc);
+					NewJUnitTestCaseProposal proposal= new NewJUnitTestCaseProposal(label, change, IProposalRelevance.CREATE_JUNIT_TEST_CASE, image, context.getASTRoot());
+					resultingCollections.add(proposal);
+				}
+				return true;
+			}
 		}
 		return false;
 	}

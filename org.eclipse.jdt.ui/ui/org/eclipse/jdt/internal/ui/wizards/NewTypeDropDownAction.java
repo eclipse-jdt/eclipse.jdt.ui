@@ -70,17 +70,23 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 		private final static String ATT_CLASS = "class";//$NON-NLS-1$
 		private final static String ATT_ICON = "icon";//$NON-NLS-1$
 		private static final String TAG_DESCRIPTION = "description";	//$NON-NLS-1$
+		private static final String TAG_ID = "id";	//$NON-NLS-1$
 
 		private IConfigurationElement fConfigurationElement;
 
 		public OpenTypeWizardAction(IConfigurationElement element) {
 			fConfigurationElement= element;
+			setId(getIdFromConfig(fConfigurationElement));
 			setText(element.getAttribute(ATT_NAME));
 
 			String description= getDescriptionFromConfig(fConfigurationElement);
 			setDescription(description);
 			setToolTipText(description);
 			setImageDescriptor(getIconFromConfig(fConfigurationElement));
+		}
+
+		private String getIdFromConfig(IConfigurationElement config) {
+			return config.getAttribute(TAG_ID);
 		}
 
 		private String getDescriptionFromConfig(IConfigurationElement config) {
