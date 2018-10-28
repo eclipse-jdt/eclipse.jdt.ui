@@ -316,6 +316,10 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				label.setFont(JFaceResources.getHeaderFont());
 			}
 
+			if (fNoSourceTextWidget != null && !fNoSourceTextWidget.isDisposed()) {
+				fNoSourceTextWidget.setFont(JFaceResources.getTextFont());
+			}
+
 			fComposite.layout(true);
 			fComposite.redraw();
 		}
@@ -345,6 +349,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			styledText.setBackground(fBackgroundColor);
 			styledText.setForeground(fForegroundColor);
 			styledText.setEditable(false);
+			styledText.setFont(JFaceResources.getTextFont());
 			return styledText;
 		}
 
