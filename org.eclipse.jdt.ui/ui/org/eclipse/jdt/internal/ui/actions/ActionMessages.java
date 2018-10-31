@@ -439,6 +439,8 @@ public final class ActionMessages extends NLS {
 	public static String CollapsAllAction_tooltip;
 	public static String CollapsAllAction_description;
 
+	public static String CreateModuleInfoAction_convert_message_compliance;
+	public static String CreateModuleInfoAction_convert_title;
 	public static String CreateModuleInfoAction_error_message_compliance;
 	public static String CreateModuleInfoAction_error_message_no_source_folder;
 	public static String CreateModuleInfoAction_error_title;

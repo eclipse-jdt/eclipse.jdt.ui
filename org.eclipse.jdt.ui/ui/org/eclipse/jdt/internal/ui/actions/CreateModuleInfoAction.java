@@ -15,7 +15,11 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -24,6 +28,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -43,11 +49,17 @@ import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ClasspathVMUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewModuleInfoWizard;
 
 public class CreateModuleInfoAction implements IObjectActionDelegate {
@@ -116,8 +128,25 @@ public class CreateModuleInfoAction implements IObjectActionDelegate {
 
 			try {
 				if (!JavaModelUtil.is9OrHigher(javaProject)) {
-					MessageDialog.openError(getDisplay().getActiveShell(), ActionMessages.CreateModuleInfoAction_error_title, ActionMessages.CreateModuleInfoAction_error_message_compliance);
-					return;
+					IVMInstall install= ClasspathVMUtil.findRequiredOrGreaterVMInstall(JavaCore.VERSION_9, true, true);
+					if (install == null) {
+						MessageDialog.openError(getDisplay().getActiveShell(), ActionMessages.CreateModuleInfoAction_error_title, ActionMessages.CreateModuleInfoAction_error_message_compliance);
+					} else {
+						String compliance= ClasspathVMUtil.getVMInstallCompliance(install, false);
+						if (compliance != null) {
+							boolean val= MessageDialog.openQuestion(getDisplay().getActiveShell(), ActionMessages.CreateModuleInfoAction_convert_title,
+									Messages.format(ActionMessages.CreateModuleInfoAction_convert_message_compliance, compliance));
+							if (!val) {
+								return;
+							} else {
+								updateJRE(javaProject, compliance);
+								updateComplianceSettings(javaProject, compliance);
+							}
+						}
+						else {
+							MessageDialog.openError(getDisplay().getActiveShell(), ActionMessages.CreateModuleInfoAction_error_title, ActionMessages.CreateModuleInfoAction_error_message_compliance);
+						}
+					}
 				}
 
 				IPackageFragmentRoot[] packageFragmentRoots= javaProject.getPackageFragmentRoots();
@@ -165,5 +194,25 @@ public class CreateModuleInfoAction implements IObjectActionDelegate {
 		if (display == null)
 			display= Display.getDefault();
 		return display;
+	}
+
+	private boolean updateJRE(IJavaProject project, String compliance) throws CoreException, JavaModelException {
+		IExecutionEnvironment bestEE= ClasspathVMUtil.findBestMatchingEE(compliance);
+		if (bestEE != null) {
+			IPath newPath= JavaRuntime.newJREContainerPath(bestEE);
+			boolean classpathUpdated= ClasspathVMUtil.updateClasspath(newPath, project, new NullProgressMonitor());
+			return !classpathUpdated;
+		}
+		return true;
+	}
+
+	private void updateComplianceSettings(IJavaProject project, String compliance) {
+		HashMap<String, String> defaultOptions= new HashMap<>();
+		JavaCore.setComplianceOptions(compliance, defaultOptions);
+		Iterator<Map.Entry<String, String>> it= defaultOptions.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<String, String> pair= it.next();
+			project.setOption(pair.getKey(), pair.getValue());
+		}
 	}
 }
