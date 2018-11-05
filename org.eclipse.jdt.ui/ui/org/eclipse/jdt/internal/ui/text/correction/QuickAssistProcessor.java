@@ -4225,7 +4225,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			String unitName= context.getCompilationUnit().getElementName();
 			if (unitName.equals(idName)) {
 				if (resultingCollections != null) {
-					Image image= JavaPluginImages.DESC_OBJS_TEST_CASE.createImage();
+					Image image= JavaPlugin.getImageDescriptorRegistry().get(JavaPluginImages.DESC_OBJS_TEST_CASE);
 					String label= Messages.format(CorrectionMessages.QuickAssistProcessor_create_new_junit_test_case, unitName);
 					Change change= new NullChange(CorrectionMessages.QuickAssistProcessor_create_new_junit_test_case_desc);
 					NewJUnitTestCaseProposal proposal= new NewJUnitTestCaseProposal(label, change, IProposalRelevance.CREATE_JUNIT_TEST_CASE, image, context.getASTRoot());
