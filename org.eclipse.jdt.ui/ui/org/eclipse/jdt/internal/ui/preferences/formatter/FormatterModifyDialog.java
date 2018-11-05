@@ -66,6 +66,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree;
 import org.eclipse.jdt.internal.ui.preferences.FilteredPreferenceTree.PreferenceTreeNode;
 import org.eclipse.jdt.internal.ui.preferences.PreferenceHighlight;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog.ProfilePreferenceTree.SectionBuilder;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ModifyDialog.ProfilePreferenceTree.SimpleTreeBuilder;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -1107,14 +1108,14 @@ public class FormatterModifyDialog extends ModifyDialog {
 	private void createNewLinesTree() {
 		Consumer<Section> modAll= s -> CheckboxPreference.addModifyAll(s, fImages);
 		fTree.builder(FormatterMessages.FormatterModifyDialog_newLines_tree_new_lines, "section-newlines") //$NON-NLS-1$
-				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_newLines_tree_between_empty_braces, "-declarations", modAll) //$NON-NLS-1$
-						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_empty_block, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK)
-						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_empty_class_body, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_TYPE_DECLARATION)
-						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_empty_anonymous_class_body, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANONYMOUS_TYPE_DECLARATION)
-						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_empty_method_body, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_METHOD_BODY)
-						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_empty_enum_declaration, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_DECLARATION)
-						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_empty_enum_constant, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_CONSTANT)
-						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_empty_annotation_decl, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANNOTATION_DECLARATION))
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_empty_statement, DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE)
+				.gap()
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_after_opening_brace_of_array_initializer,
+						DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER)
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_before_closing_brace_of_array_initializer,
+						DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER)
+				.gap()
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_end_of_file, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AT_END_OF_FILE_IF_MISSING)
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_newLines_tree_control_statements, "-controlstatements", modAll) //$NON-NLS-1$
 						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_before_else_statements, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_ELSE_IN_IF_STATEMENT)
 						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_before_catch_statements, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_CATCH_IN_TRY_STATEMENT)
@@ -1128,8 +1129,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 									pref.addDependant(child, valueAcceptor(DefaultCodeFormatterConstants.FALSE));
 								})
 								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_else_on_same_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_ELSE_STATEMENT_ON_SAME_LINE)
-								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_else_if_on_one_line, DefaultCodeFormatterConstants.FORMATTER_COMPACT_ELSE_IF)
-								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_guardian_clause_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_GUARDIAN_CLAUSE_ON_ONE_LINE))
+								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_else_if_on_one_line, DefaultCodeFormatterConstants.FORMATTER_COMPACT_ELSE_IF))
 						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_newLines_tree_simple_loops, "-simpleloops", modAll) //$NON-NLS-1$
 								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_simple_for_body_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_FOR_BODY_ON_SAME_LINE)
 								.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_simple_while_body_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_WHILE_BODY_ON_SAME_LINE)
@@ -1143,13 +1143,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_local_variables, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE)
 						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_paramters, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PARAMETER)
 						.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_type_annotations, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_TYPE_ANNOTATION))
-				.gap()
-				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_empty_statement, DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE)
-				.gap()
-				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_after_opening_brace_of_array_initializer, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER)
-				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_before_closing_brace_of_array_initializer, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER)
-				.gap()
-				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_end_of_file, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AT_END_OF_FILE_IF_MISSING)
+				.node(createKeepOnOneLineSection())
 				.build(null, (parent, label, key) -> {
 					String[] values= CheckboxPreference.DO_NOT_INSERT_INSERT;
 					if (parent.getKey().endsWith("-ifelse") || parent.getKey().endsWith("-simpleloops") //$NON-NLS-1$ //$NON-NLS-2$
@@ -1158,6 +1152,60 @@ public class FormatterModifyDialog extends ModifyDialog {
 					}
 					return fTree.addCheckbox(parent, label, key, values);
 				});
+	}
+
+	private SimpleTreeBuilder<?> createKeepOnOneLineSection() {
+		String[] oneLineOptions= {
+				DefaultCodeFormatterConstants.ONE_LINE_NEVER,
+				DefaultCodeFormatterConstants.ONE_LINE_IF_EMPTY,
+				DefaultCodeFormatterConstants.ONE_LINE_IF_SINGLE_ITEM,
+				DefaultCodeFormatterConstants.ONE_LINE_ALWAYS,
+				DefaultCodeFormatterConstants.ONE_LINE_PRESERVE,
+		};
+		String[] oneLineLabels= {
+				FormatterMessages.FormatterModifyDialog_newLines_val_one_line_never,
+				FormatterMessages.FormatterModifyDialog_newLines_val_one_line_if_empty,
+				FormatterMessages.FormatterModifyDialog_newLines_val_one_line_if_single_item,
+				FormatterMessages.FormatterModifyDialog_newLines_val_one_line_always,
+				FormatterMessages.FormatterModifyDialog_newLines_val_one_line_preserve,
+		};
+		PreferenceBuilder prefBuilder= (parent, label, key) -> {
+			String[] values= oneLineOptions;
+			String[] items= oneLineLabels;
+			if (DefaultCodeFormatterConstants.FORMATTER_KEEP_CODE_BLOCK_ON_ONE_LINE.equals(key)) {
+				values= Arrays.copyOf(values, 2);
+				items= Arrays.copyOf(items, 2);
+			}
+			return fTree.addComboPref(parent, label, key, values, items);
+		};
+		SectionBuilder sectionBuilder= fTree
+				.builder(FormatterMessages.FormatterModifyDialog_newLines_tree_keep_braced_code_on_one_line, "-keepononeline", s -> ComboPreference.addModifyAll(s, fImages)) //$NON-NLS-1$
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_loop_body_block_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_LOOP_BODY_BLOCK_ON_ONE_LINE)
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_if_then_body_block_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_IF_THEN_BODY_BLOCK_ON_ONE_LINE, pref -> {
+					CheckboxPreference guardianPref= fTree.addCheckbox(pref, FormatterMessages.FormatterModifyDialog_newLines_pref_keep_guardian_clause_on_one_line,
+							DefaultCodeFormatterConstants.FORMATTER_KEEP_GUARDIAN_CLAUSE_ON_ONE_LINE, CheckboxPreference.FALSE_TRUE);
+					pref.addDependant(guardianPref, valueAcceptor(oneLineOptions[0], oneLineOptions[1], oneLineOptions[4]));
+				})
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_lambda_body_block_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_LAMBDA_BODY_BLOCK_ON_ONE_LINE)
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_code_block_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_CODE_BLOCK_ON_ONE_LINE)
+				.gap()
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_method_body_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_METHOD_BODY_ON_ONE_LINE, pref -> {
+					CheckboxPreference getterSetterPref= fTree.addCheckbox(pref, FormatterMessages.FormatterModifyDialog_newLines_pref_keep_simple_getter_setter_on_one_line,
+							DefaultCodeFormatterConstants.FORMATTER_KEEP_SIMPLE_GETTER_SETTER_ON_ONE_LINE, CheckboxPreference.FALSE_TRUE);
+					pref.addDependant(getterSetterPref, valueAcceptor(oneLineOptions[0], oneLineOptions[1], oneLineOptions[4]));
+				})
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_type_declaration_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_TYPE_DECLARATION_ON_ONE_LINE)
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_anonymous_type_declaration_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_ANONYMOUS_TYPE_DECLARATION_ON_ONE_LINE)
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_enum_declaration_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_ENUM_DECLARATION_ON_ONE_LINE)
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_enum_constant_declaration_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_ENUM_CONSTANT_DECLARATION_ON_ONE_LINE)
+				.pref(FormatterMessages.FormatterModifyDialog_newLines_pref_keep_annotation_declaration_on_one_line, DefaultCodeFormatterConstants.FORMATTER_KEEP_ANNOTATION_DECLARATION_ON_ONE_LINE);
+
+		return fTree.new SimpleTreeBuilder<PreferenceTreeNode<?>>(null, null, null) {
+			@Override
+			protected PreferenceTreeNode<?> build(Section parent, PreferenceBuilder ignored) {
+				return sectionBuilder.build(parent, prefBuilder);
+			}
+		};
 	}
 
 	private void createLineWrapTree() {

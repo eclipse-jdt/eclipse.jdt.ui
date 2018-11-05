@@ -44,7 +44,9 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static final int VERSION_13= 13; // https://bugs.eclipse.org/514019
 	private static final int VERSION_14= 14; // https://bugs.eclipse.org/128653, https://bugs.eclipse.org/531826
 
-	private static final int CURRENT_VERSION= VERSION_14;
+	private static final int VERSION_15= 15; // https://bugs.eclipse.org/205973
+
+	private static final int CURRENT_VERSION= VERSION_15;
 
 	@Override
 	public int getFirstVersion() {
@@ -109,6 +111,9 @@ public class ProfileVersioner implements IProfileVersioner {
 		case VERSION_13 :
 			version13to14(oldSettings);
 			//$FALL-THROUGH$
+			case VERSION_14:
+				version14to15(oldSettings);
+				//$FALL-THROUGH$
 		default:
 		    for (final Iterator<String> iter= oldSettings.keySet().iterator(); iter.hasNext(); ) {
 		        final String key= iter.next();
@@ -580,8 +585,8 @@ public class ProfileVersioner implements IProfileVersioner {
 
 	private static void version9to10(Map<String, String> oldSettings) {
 		checkAndReplace(oldSettings,
-				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_TYPE_DECLARATION,
-				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANNOTATION_DECLARATION);
+				FORMATTER_INSERT_NEW_LINE_IN_EMPTY_TYPE_DECLARATION,
+				FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANNOTATION_DECLARATION);
 		checkAndReplace(oldSettings,
 				DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_TYPE_HEADER,
 				DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_ANNOTATION_DECLARATION_HEADER);
@@ -630,6 +635,26 @@ public class ProfileVersioner implements IProfileVersioner {
 			oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION, DefaultCodeFormatterConstants.FALSE);
 
 		oldSettings.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_ALIGN_TAGS_DESCREIPTIONS_GROUPED, DefaultCodeFormatterConstants.FALSE);
+	}
+
+	private static void version14to15(Map<String, String> oldSettings) {
+		String[][] transitions= {
+				{ DefaultCodeFormatterConstants.FORMATTER_KEEP_ANNOTATION_DECLARATION_ON_ONE_LINE, FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANNOTATION_DECLARATION },
+				{ DefaultCodeFormatterConstants.FORMATTER_KEEP_ANONYMOUS_TYPE_DECLARATION_ON_ONE_LINE, FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANONYMOUS_TYPE_DECLARATION },
+				{ DefaultCodeFormatterConstants.FORMATTER_KEEP_IF_THEN_BODY_BLOCK_ON_ONE_LINE, FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK },
+				{ DefaultCodeFormatterConstants.FORMATTER_KEEP_LOOP_BODY_BLOCK_ON_ONE_LINE, FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK },
+				{ DefaultCodeFormatterConstants.FORMATTER_KEEP_LAMBDA_BODY_BLOCK_ON_ONE_LINE, FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK },
+				{ DefaultCodeFormatterConstants.FORMATTER_KEEP_CODE_BLOCK_ON_ONE_LINE, FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK },
+				{ DefaultCodeFormatterConstants.FORMATTER_KEEP_ENUM_CONSTANT_DECLARATION_ON_ONE_LINE, FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_CONSTANT },
+				{ DefaultCodeFormatterConstants.FORMATTER_KEEP_ENUM_DECLARATION_ON_ONE_LINE, FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_DECLARATION },
+				{ DefaultCodeFormatterConstants.FORMATTER_KEEP_METHOD_BODY_ON_ONE_LINE, FORMATTER_INSERT_NEW_LINE_IN_EMPTY_METHOD_BODY },
+				{ DefaultCodeFormatterConstants.FORMATTER_KEEP_TYPE_DECLARATION_ON_ONE_LINE, FORMATTER_INSERT_NEW_LINE_IN_EMPTY_TYPE_DECLARATION },
+		};
+		for (String[] transition : transitions) {
+			String value= oldSettings.get(transition[1]);
+			if (JavaCore.DO_NOT_INSERT.equals(value))
+				oldSettings.put(transition[0], DefaultCodeFormatterConstants.ONE_LINE_IF_EMPTY);
+		}
 	}
 
 	/* old format constant values */
@@ -772,4 +797,55 @@ public class ProfileVersioner implements IProfileVersioner {
 	@Deprecated
 	private static final String FORMATTER_COMMENT_FORMATHTML= PreferenceConstants.FORMATTER_COMMENT_FORMATHTML;
 
+	/**
+	 * @deprecated As of 3.16 replaced by
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_KEEP_ANNOTATION_DECLARATION_ON_ONE_LINE}
+	 */
+	@Deprecated
+	private static final String FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANNOTATION_DECLARATION= DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANNOTATION_DECLARATION;
+
+	/**
+	 * @deprecated As of 3.16 replaced by
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_KEEP_ANONYMOUS_TYPE_DECLARATION_ON_ONE_LINE}
+	 */
+	@Deprecated
+	private static final String FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANONYMOUS_TYPE_DECLARATION= DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANONYMOUS_TYPE_DECLARATION;
+
+	/**
+	 * @deprecated As of 3.16 replaced by
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_KEEP_IF_THEN_BODY_BLOCK_ON_ONE_LINE},
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_KEEP_LOOP_BODY_BLOCK_ON_ONE_LINE},
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_KEEP_LAMBDA_BODY_BLOCK_ON_ONE_LINE},
+	 *             and {@link DefaultCodeFormatterConstants#FORMATTER_KEEP_CODE_BLOCK_ON_ONE_LINE}
+	 */
+	@Deprecated
+	private static final String FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK= DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK;
+
+	/**
+	 * @deprecated As of 3.16 replaced by
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_KEEP_ENUM_CONSTANT_DECLARATION_ON_ONE_LINE}
+	 */
+	@Deprecated
+	private static final String FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_CONSTANT= DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_CONSTANT;
+
+	/**
+	 * @deprecated As of 3.16 replaced by
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_KEEP_ENUM_DECLARATION_ON_ONE_LINE}
+	 */
+	@Deprecated
+	private static final String FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_DECLARATION= DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_DECLARATION;
+
+	/**
+	 * @deprecated As of 3.16 replaced by
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_KEEP_METHOD_BODY_ON_ONE_LINE}
+	 */
+	@Deprecated
+	private static final String FORMATTER_INSERT_NEW_LINE_IN_EMPTY_METHOD_BODY= DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_METHOD_BODY;
+
+	/**
+	 * @deprecated As of 3.16 replaced by
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_KEEP_TYPE_DECLARATION_ON_ONE_LINE}
+	 */
+	@Deprecated
+	private static final String FORMATTER_INSERT_NEW_LINE_IN_EMPTY_TYPE_DECLARATION= DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_TYPE_DECLARATION;
  }
