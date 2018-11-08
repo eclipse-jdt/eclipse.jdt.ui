@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -63,7 +64,8 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 		if (isMovedMember(binding))
 			return super.visit(node);
 
-		if (isSourceAccess(binding))
+		boolean isVarType= node.getAST().apiLevel() >= AST.JLS10 && node.isVar();
+		if (isSourceAccess(binding) && ! isVarType)
 			rewrite(node, fSource);
 		return super.visit(node);
 	}
