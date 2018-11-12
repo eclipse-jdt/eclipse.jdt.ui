@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.ui.workingsets;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.Viewer;
@@ -101,8 +102,10 @@ public class WorkingSetFilter extends JavaViewerFilter {
 			if (fJavaElement != null && element.fJavaElement != null) {
 				IJavaElement other= element.fJavaElement;
 				if (fJavaElement.getElementType() == IJavaElement.JAVA_PROJECT) {
-					if (!((IJavaProject) fJavaElement).getProject().isAccessible()) {
-						return false;
+					IProject project= ((IJavaProject) fJavaElement).getProject();
+					if (!project.isAccessible()) {
+						IProject otherProject= ((IJavaProject) other).getProject();
+						return project.equals(otherProject);
 					}
 					IPackageFragmentRoot pkgRoot= (IPackageFragmentRoot) other.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					if (pkgRoot != null && pkgRoot.isExternal()) {
