@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -48,7 +48,7 @@ public class ContentAssistPreference {
 	private final static String PARAMETERS_BACKGROUND=  PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND;
 	/** Preference key for content assist auto insert */
 	private final static String AUTOINSERT= PreferenceConstants.CODEASSIST_AUTOINSERT;
-	/** Preference key to disable content assist proposal trigger chars */
+	/** Preference key to disable content assist insertion trigger chars */
 	private final static String DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS = PreferenceConstants.CODEASSIST_DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS;
 
 	/** Preference key for java content assist auto activation triggers */

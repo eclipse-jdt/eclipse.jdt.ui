@@ -2991,11 +2991,12 @@ public class PreferenceConstants {
 	public final static String CODEASSIST_AUTOINSERT= "content_assist_autoinsert"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls if the Java code assist ignores or considers the
-	 * additional trigger chars for completion proposals.
+	 * A named preference that controls if the Java code assist ignores the insertion trigger
+	 * characters for completion proposals.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * 
 	 * @since 3.16
 	 * @see ContentAssistant#enableCompletionProposalTriggerChars(boolean)
 	 */
