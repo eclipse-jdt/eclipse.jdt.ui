@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.correction.ModuleCorrectionsSubProcessor;
 
 public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 
@@ -107,20 +108,13 @@ public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 			IModuleDescription projectModule= null;
 			if (enclosingPackage.isReadOnly()) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) enclosingPackage.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-				if (root != null) {
-					projectModule= root.getModuleDescription();
-				}
+				projectModule= ModuleCorrectionsSubProcessor.getModuleDescription(root);
 			} else {
 				IJavaProject project= enclosingPackage.getJavaProject();
-				if (project != null && JavaModelUtil.is9OrHigher(project)) {
-					try {
-						projectModule= project.getModuleDescription();
-					} catch (JavaModelException e) {
-						//DO NOTHING
-					}
-				}
+				projectModule= ModuleCorrectionsSubProcessor.getModuleDescription(project);
 			}
-			if (projectModule != null && projectModule.exists() && !projectModule.equals(currentModuleDescription) && !JAVA_BASE.equals(projectModule.getElementName())) {
+			if (projectModule != null && ((projectModule.exists() && !projectModule.equals(currentModuleDescription))
+					|| projectModule.isAutoModule()) && !JAVA_BASE.equals(projectModule.getElementName())) {
 				String moduleName= projectModule.getElementName();
 				String[] args= { moduleName };
 				final String changeName= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_add_requires_module_info, args);
