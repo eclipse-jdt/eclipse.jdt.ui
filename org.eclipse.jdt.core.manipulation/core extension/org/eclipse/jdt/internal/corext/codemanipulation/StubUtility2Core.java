@@ -20,6 +20,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
@@ -31,11 +32,13 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -55,10 +58,13 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -71,7 +77,10 @@ import org.eclipse.jdt.core.manipulation.CodeGeneration;
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation.DelegateEntry;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
@@ -241,8 +250,139 @@ public final class StubUtility2Core {
 		}
 		return decl;
 	}
+	
+	public static MethodDeclaration createImplementationStubCore(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context,
+			IMethodBinding binding, ITypeBinding targetType, CodeGenerationSettings settings, boolean inInterface,
+			ASTNode astNode, boolean snippetStringSupport) throws CoreException {
+		return createImplementationStubCore(unit, rewrite, imports, context, binding, null, targetType, settings,
+				inInterface, astNode, snippetStringSupport);
+	}
 
-	private static void createTypeParameters(ImportRewrite imports, ImportRewriteContext context, AST ast, IMethodBinding binding, MethodDeclaration decl) {
+	public static MethodDeclaration createImplementationStubCore(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ImportRewriteContext context,
+			IMethodBinding binding, String[] parameterNames, ITypeBinding targetType, CodeGenerationSettings settings, boolean inInterface, ASTNode astNode, boolean snippetStringSupport) throws CoreException {
+		Assert.isNotNull(imports);
+		Assert.isNotNull(rewrite);
+		
+		AST ast= rewrite.getAST();
+		String type= Bindings.getTypeQualifiedName(targetType);
+
+		IJavaProject javaProject= unit.getJavaProject();
+		EnumSet<TypeLocation> nullnessDefault= null;
+		if (astNode != null && JavaCore.ENABLED.equals(javaProject.getOption(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, true))) {
+			nullnessDefault= RedundantNullnessTypeAnnotationsFilter.determineNonNullByDefaultLocations(astNode, RedundantNullnessTypeAnnotationsFilter.determineNonNullByDefaultNames(javaProject));
+		}
+
+		MethodDeclaration decl= ast.newMethodDeclaration();
+		decl.modifiers().addAll(StubUtility2Core.getImplementationModifiers(ast, binding, inInterface, imports, context, nullnessDefault));
+
+		decl.setName(ast.newSimpleName(binding.getName()));
+		decl.setConstructor(false);
+
+		ITypeBinding bindingReturnType= binding.getReturnType();
+		bindingReturnType= StubUtility2Core.replaceWildcardsAndCaptures(bindingReturnType);
+
+		if (JavaModelUtil.is50OrHigher(javaProject)) {
+			StubUtility2Core.createTypeParameters(imports, context, ast, binding, decl);
+
+		} else {
+			bindingReturnType= bindingReturnType.getErasure();
+		}
+
+		decl.setReturnType2(imports.addImport(bindingReturnType, ast, context, TypeLocation.RETURN_TYPE));
+
+		List<SingleVariableDeclaration> parameters= StubUtility2Core.createParameters(javaProject, imports, context, ast, binding, parameterNames, decl, nullnessDefault);
+
+		StubUtility2Core.createThrownExceptions(decl, binding, imports, context, ast);
+
+		String delimiter= unit.findRecommendedLineSeparator();
+		int modifiers= binding.getModifiers();
+		ITypeBinding declaringType= binding.getDeclaringClass();
+		ITypeBinding typeObject= ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+		if (!inInterface || (declaringType != typeObject && JavaModelUtil.is18OrHigher(javaProject))) {
+			// generate a method body
+
+			Map<String, String> options= javaProject.getOptions(true);
+
+			Block body= ast.newBlock();
+			decl.setBody(body);
+
+			String bodyStatement= ""; //$NON-NLS-1$
+			if (Modifier.isAbstract(modifiers)) {
+				Expression expression= ASTNodeFactory.newDefaultExpression(ast, decl.getReturnType2(), decl.getExtraDimensions());
+				if (expression != null) {
+					ReturnStatement returnStatement= ast.newReturnStatement();
+					returnStatement.setExpression(expression);
+					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter, options);
+				}
+			} else {
+				SuperMethodInvocation invocation= ast.newSuperMethodInvocation();
+				if (declaringType.isInterface()) {
+					ITypeBinding supertype= Bindings.findImmediateSuperTypeInHierarchy(targetType, declaringType.getTypeDeclaration().getQualifiedName());
+					if (supertype == null) { // should not happen, but better use the type we have rather than failing
+						supertype= declaringType;
+					}
+					if (supertype.isInterface()) {
+						String qualifier= imports.addImport(supertype.getTypeDeclaration(), context);
+						Name name= ASTNodeFactory.newName(ast, qualifier);
+						invocation.setQualifier(name);
+					}
+				}
+				invocation.setName(ast.newSimpleName(binding.getName()));
+
+				for (SingleVariableDeclaration varDecl : parameters) {
+					invocation.arguments().add(ast.newSimpleName(varDecl.getName().getIdentifier()));
+				}
+				Expression expression= invocation;
+				Type returnType= decl.getReturnType2();
+				if (returnType instanceof PrimitiveType && ((PrimitiveType) returnType).getPrimitiveTypeCode().equals(PrimitiveType.VOID)) {
+					bodyStatement= ASTNodes.asFormattedString(ast.newExpressionStatement(expression), 0, delimiter, options);
+				} else {
+					ReturnStatement returnStatement= ast.newReturnStatement();
+					returnStatement.setExpression(expression);
+					bodyStatement= ASTNodes.asFormattedString(returnStatement, 0, delimiter, options);
+				}
+			}
+
+			if (bodyStatement != null) {
+				StringBuilder placeHolder= new StringBuilder();
+				if (snippetStringSupport) {
+					placeHolder.append("${0"); //$NON-NLS-1$
+					if (!bodyStatement.isEmpty()) {
+						placeHolder.append(":"); //$NON-NLS-1$
+					}
+					final String ESCAPE_DOLLAR= "\\\\\\$"; //$NON-NLS-1$
+					final String DOLLAR= "\\$"; //$NON-NLS-1$
+
+					bodyStatement = bodyStatement.replaceAll(DOLLAR, ESCAPE_DOLLAR);
+				}
+				placeHolder.append(bodyStatement);
+				if (snippetStringSupport) {
+					placeHolder.append("}"); //$NON-NLS-1$
+				}
+				ReturnStatement todoNode= (ReturnStatement) rewrite.createStringPlaceholder(placeHolder.toString(), ASTNode.RETURN_STATEMENT);
+				body.statements().add(todoNode);
+			}
+		}
+		
+		if (settings != null && settings.createComments) {
+			String string= CodeGeneration.getMethodComment(unit, type, decl, binding, delimiter);
+			if (string != null) {
+				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
+				decl.setJavadoc(javadoc);
+			}
+		}
+
+		// According to JLS8 9.2, an interface doesn't implicitly declare non-public members of Object,
+		// and JLS8 9.6.4.4 doesn't allow @Override for these methods (clone and finalize).
+		boolean skipOverride= inInterface && declaringType == typeObject && !Modifier.isPublic(modifiers);
+
+		if (!skipOverride) {
+			StubUtility2Core.addOverrideAnnotation(settings, javaProject, rewrite, imports, decl, binding.getDeclaringClass().isInterface(), null);
+		}
+		return decl;
+	}
+
+	public static void createTypeParameters(ImportRewrite imports, ImportRewriteContext context, AST ast, IMethodBinding binding, MethodDeclaration decl) {
 		ITypeBinding[] typeParams= binding.getTypeParameters();
 		List<TypeParameter> typeParameters= decl.typeParameters();
 		for (int i= 0; i < typeParams.length; i++) {
@@ -260,10 +400,10 @@ public final class StubUtility2Core {
 		}
 	}
 
-	private static List<SingleVariableDeclaration> createParameters(IJavaProject project, ImportRewrite imports, ImportRewriteContext context, AST ast, IMethodBinding binding, String[] paramNames, MethodDeclaration decl) {
+	public static List<SingleVariableDeclaration> createParameters(IJavaProject project, ImportRewrite imports, ImportRewriteContext context, AST ast, IMethodBinding binding, String[] paramNames, MethodDeclaration decl) {
 		return createParameters(project, imports, context, ast, binding, paramNames, decl, null);
 	}
-	private static List<SingleVariableDeclaration> createParameters(IJavaProject project, ImportRewrite imports, ImportRewriteContext context, AST ast,
+	public static List<SingleVariableDeclaration> createParameters(IJavaProject project, ImportRewrite imports, ImportRewriteContext context, AST ast,
 			IMethodBinding binding, String[] paramNames, MethodDeclaration decl, EnumSet<TypeLocation> nullnessDefault) {
 		boolean is50OrHigher= JavaModelUtil.is50OrHigher(project);
 		List<SingleVariableDeclaration> parameters= decl.parameters();
@@ -326,7 +466,7 @@ public final class StubUtility2Core {
 		return parameters;
 	}
 
-	private static void createThrownExceptions(MethodDeclaration decl, IMethodBinding method, ImportRewrite imports, ImportRewriteContext context, AST ast) {
+	public static void createThrownExceptions(MethodDeclaration decl, IMethodBinding method, ImportRewrite imports, ImportRewriteContext context, AST ast) {
 		ITypeBinding[] excTypes= method.getExceptionTypes();
 		if (ast.apiLevel() >= AST.JLS8) {
 			List<Type> thrownExceptions= decl.thrownExceptionTypes();
@@ -416,6 +556,72 @@ public final class StubUtility2Core {
 			for (int i= 0; i < superInterfaces.length; i++)
 				findUnimplementedInterfaceMethods(superInterfaces[i], visited, allMethods, currPack, toImplement);
 		}
+	}
+
+	public static List<IExtendedModifier> getImplementationModifiers(AST ast, IMethodBinding method, boolean inInterface, ImportRewrite importRewrite, ImportRewriteContext context, EnumSet<TypeLocation> nullnessDefault) throws JavaModelException {
+		IJavaProject javaProject= importRewrite.getCompilationUnit().getJavaProject();
+		int modifiers= method.getModifiers();
+		if (inInterface) {
+			modifiers= modifiers & ~Modifier.PROTECTED & ~Modifier.PUBLIC;
+			if (Modifier.isAbstract(modifiers) && JavaModelUtil.is18OrHigher(javaProject)) {
+				modifiers= modifiers | Modifier.DEFAULT;
+			}
+		} else {
+			modifiers= modifiers & ~Modifier.DEFAULT;
+		}
+		modifiers= modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE & ~Modifier.PRIVATE;
+		IAnnotationBinding[] annotations= method.getAnnotations();
+		
+		if (modifiers != Modifier.NONE && annotations.length > 0) {
+			// need an AST of the source method to preserve order of modifiers
+			IMethod iMethod= (IMethod) method.getJavaElement();
+			if (iMethod != null && JavaElementUtil.isSourceAvailable(iMethod)) {
+				ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+				parser.setSource(iMethod.getTypeRoot());
+				parser.setIgnoreMethodBodies(true);
+				CompilationUnit otherCU= (CompilationUnit) parser.createAST(null);
+				ASTNode otherMethod= NodeFinder.perform(otherCU, iMethod.getSourceRange());
+				if (otherMethod instanceof MethodDeclaration) {
+					MethodDeclaration otherMD= (MethodDeclaration) otherMethod;
+					ArrayList<IExtendedModifier> result= new ArrayList<>();
+					List<IExtendedModifier> otherModifiers= otherMD.modifiers();
+					for (IExtendedModifier otherModifier : otherModifiers) {
+						if (otherModifier instanceof Modifier) {
+							int otherFlag= ((Modifier) otherModifier).getKeyword().toFlagValue();
+							if ((otherFlag & modifiers) != 0) {
+								modifiers= ~otherFlag & modifiers;
+								result.addAll(ast.newModifiers(otherFlag));
+							}
+						} else {
+							Annotation otherAnnotation= (Annotation) otherModifier;
+							String n= otherAnnotation.getTypeName().getFullyQualifiedName();
+							for (IAnnotationBinding annotation : annotations) {
+								ITypeBinding otherAnnotationType= annotation.getAnnotationType();
+								String qn= otherAnnotationType.getQualifiedName();
+								if (qn.endsWith(n) && (qn.length() == n.length() || qn.charAt(qn.length() - n.length() - 1) == '.')) {
+									if (StubUtility2Core.isCopyOnInheritAnnotation(otherAnnotationType, javaProject, nullnessDefault, TypeLocation.RETURN_TYPE))
+										result.add(importRewrite.addAnnotation(annotation, ast, context));
+									break;
+								}
+							}
+						}
+					}
+					result.addAll(ASTNodeFactory.newModifiers(ast, modifiers));
+					return result;
+				}
+			}
+		}
+		
+		ArrayList<IExtendedModifier> result= new ArrayList<>();
+		
+		for (IAnnotationBinding annotation : annotations) {
+			if (StubUtility2Core.isCopyOnInheritAnnotation(annotation.getAnnotationType(), javaProject, nullnessDefault, TypeLocation.RETURN_TYPE))
+				result.add(importRewrite.addAnnotation(annotation, ast, context));
+		}
+		
+		result.addAll(ASTNodeFactory.newModifiers(ast, modifiers));
+		
+		return result;
 	}
 
 	public static DelegateEntry[] getDelegatableMethods(ITypeBinding binding) {
