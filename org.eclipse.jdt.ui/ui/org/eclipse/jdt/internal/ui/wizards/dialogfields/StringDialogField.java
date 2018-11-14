@@ -36,7 +36,6 @@ public class StringDialogField extends DialogField {
 	private Text fTextControl;
 	private ModifyListener fModifyListener;
     private IContentAssistProcessor fContentAssistProcessor;
-    private boolean selectAllByDefault= true;
 
 	public StringDialogField() {
 		super();
@@ -89,27 +88,33 @@ public class StringDialogField extends DialogField {
 
 	// ------- focus methods
 
-	public boolean setFocus(boolean selectAllByDefault) {
-		this.selectAllByDefault= selectAllByDefault;
-		return setFocus();
-	}
-	
-	/*
-	 * @see DialogField#setFocus
+	/**
+	 * Tries to set the focus to the string dialog field.
+	 * 
+	 * @param selectText <code>true</code> if the text should be selected in the string dialog
+	 *            field. Otherwise, the text is left unselected and the caret is placed at the end
+	 *            of the text
+	 * @return <code>true</code> if the dialog field can take focus
+	 * @see StringDialogField#setFocus()
 	 */
-	@Override
-	public boolean setFocus() {
+	public boolean setFocus(boolean selectText) {
 		if (isOkToUse(fTextControl)) {
 			fTextControl.setFocus();
-			if (selectAllByDefault) {
+			if (selectText) {
 				fTextControl.setSelection(0, fTextControl.getText().length());
 			} else {
-				// Leave selection at end of text control contents
-				// Bug 539919 - https://bugs.eclipse.org/bugs/show_bug.cgi?id=539919
 				fTextControl.setSelection(fTextControl.getText().length());
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * @see StringDialogField#setFocus(boolean)
+	 */
+	@Override
+	public boolean setFocus() {
+		return setFocus(true);
 	}
 	
 	// ------- ui creation

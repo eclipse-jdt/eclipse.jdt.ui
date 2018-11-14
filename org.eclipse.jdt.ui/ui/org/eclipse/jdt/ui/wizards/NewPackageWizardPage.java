@@ -244,7 +244,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	 * Sets the focus to the package name input field.
 	 */
 	protected void setFocus() {
-		fPackageDialogField.setFocus(false); // choose to not select all by default - Bug 539919
+		fPackageDialogField.setFocus(false);
 	}
 
 
