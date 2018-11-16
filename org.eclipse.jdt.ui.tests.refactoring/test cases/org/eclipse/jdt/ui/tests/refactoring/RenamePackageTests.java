@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -441,7 +441,7 @@ public class RenamePackageTests extends RefactoringTest {
 
 	/**
 	 * Custom project and source folder structure.
-	 * 
+	 *
 	 * @param roots source folders
 	 * @param packageNames package names per root
 	 * @param newPackageName the new package name for packageNames[0][0]
@@ -502,7 +502,7 @@ public class RenamePackageTests extends RefactoringTest {
 	/**
 	 * 2 Projects with a root each: Project RenamePack2 (root: srcTest) requires project RenamePack1
 	 * (root: srcPrg).
-	 * 
+	 *
 	 * @param packageNames package names per root
 	 * @param newPackageName the new package name for packageNames[0][0]
 	 * @param cuNames cu names per package
@@ -789,7 +789,7 @@ public class RenamePackageTests extends RefactoringTest {
 		fRenameSubpackages= true;
 
 		PackageRename rename= new PackageRename(
-				new String[]{"a", "a.b", "a.b.c", "a.b.c.d", "p"},
+				new String[]{"a", "a.b", "a.b.c", "a.b.c.d", "p", "q"},
 				new String[][]{{},{"B"},{"C"},{"D"}},
 				"a.b",
 				true
@@ -837,7 +837,7 @@ public class RenamePackageTests extends RefactoringTest {
 		fRenameSubpackages= true;
 
 		PackageRename rename= new PackageRename(
-				new String[]{"a.b", "a.b.b", "a", "p"},
+				new String[]{"a.b", "a.b.b", "a", "p", "q"},
 				new String[][]{{"B"},{"BB"},{}},
 				"a",
 				true
@@ -877,7 +877,7 @@ public class RenamePackageTests extends RefactoringTest {
 		fRenameSubpackages= true;
 
 		PackageRename rename= new PackageRename(
-				new String[]{"a.b", "a.b.c", "a.c", "p"},
+				new String[]{"a.b", "a.b.c", "a.c", "p", "q"},
 				new String[][]{{"B"},{"BC"},{}},
 				"a",
 				true
@@ -911,7 +911,7 @@ public class RenamePackageTests extends RefactoringTest {
 		});
 
 		performUndo();
-		rename.fPackageNames= new String[] {"a.b", "a.b.c", "a", "p"};// empty package is not recreated, but that's OK
+		rename.fPackageNames= new String[] {"a.b", "a.b.c", "a", "p", "q"};// empty package is not recreated, but that's OK
 		rename.checkOriginalState();
 	}
 
@@ -919,7 +919,7 @@ public class RenamePackageTests extends RefactoringTest {
 		fRenameSubpackages= true;
 
 		PackageRename rename= new PackageRename(
-				new String[]{"a.b", "a.b.c", "a.c", "a", "p"},
+				new String[]{"a.b", "a.b.c", "a.c", "a", "p", "q"},
 				new String[][]{{"B"},{"BC"},{"AC"}},
 				"a",
 				true
@@ -1112,10 +1112,10 @@ public class RenamePackageTests extends RefactoringTest {
 	public void test2() throws Exception{
 		fIsPreDeltaTest= true;
 		RenamePackageProcessor processor= helper2(new String[]{"r", "fred"}, new String[][]{{"A"}, {"A"}}, "p1");
-		
+
 		// test that participants are correctly informed after '< Back': https://bugs.eclipse.org/bugs/show_bug.cgi?id=280068
 		performUndo();
-		
+
 		ParticipantTesting.reset();
 		String secondName= "pipapo";
 		processor.setNewElementName(secondName);
@@ -1123,7 +1123,7 @@ public class RenamePackageTests extends RefactoringTest {
 				processor.getPackage(),
 				processor.getPackage().getResource()
 		});
-		
+
 		RenameRefactoring refactoring= (RenameRefactoring)processor.getRefactoring();
 		refactoring.checkFinalConditions(new NullProgressMonitor());
 		refactoring.createChange(new NullProgressMonitor());

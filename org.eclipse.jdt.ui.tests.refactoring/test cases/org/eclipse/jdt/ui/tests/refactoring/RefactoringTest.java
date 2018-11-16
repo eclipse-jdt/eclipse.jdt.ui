@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -7,7 +7,7 @@
  * https://www.eclipse.org/legal/epl-2.0/
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -82,6 +82,7 @@ public abstract class RefactoringTest extends TestCase {
 
 	protected IPackageFragmentRoot fRoot;
 	protected IPackageFragment fPackageP;
+	protected IPackageFragment fPackageQ;
 
 	public boolean fIsVerbose= false;
 	public boolean fIsPreDeltaTest= false;
@@ -103,6 +104,7 @@ public abstract class RefactoringTest extends TestCase {
 	protected void setUp() throws Exception {
 		fRoot= RefactoringTestSetup.getDefaultSourceFolder();
 		fPackageP= RefactoringTestSetup.getPackageP();
+		fPackageQ= RefactoringTestSetup.getPackageQ();
 		fIsPreDeltaTest= false;
 
 		if (fIsVerbose){
@@ -123,7 +125,7 @@ public abstract class RefactoringTest extends TestCase {
 	/**
 	 * Removes contents of {@link #getPackageP()}, of {@link #getRoot()} (except for p) and of the
 	 * Java project (except for src and the JRE library).
-	 * 
+	 *
 	 * @throws Exception in case of errors
 	 */
 	@Override
@@ -137,11 +139,17 @@ public abstract class RefactoringTest extends TestCase {
 			tryDeletingAllNonJavaChildResources(getPackageP());
 		}
 
+		final boolean qExists= getPackageQ().exists();
+		if (qExists) {
+			tryDeletingAllJavaChildren(getPackageQ());
+			tryDeletingAllNonJavaChildResources(getPackageQ());
+		}
+
 		if (getRoot().exists()){
 			IJavaElement[] packages= getRoot().getChildren();
 			for (int i= 0; i < packages.length; i++){
 				IPackageFragment pack= (IPackageFragment)packages[i];
-				if (!pack.equals(getPackageP()) && pack.exists() && !pack.isReadOnly())
+				if (!pack.equals(getPackageP()) && !pack.equals(getPackageQ()) && pack.exists() && !pack.isReadOnly())
 					if (pack.isDefaultPackage())
 						JavaProjectHelper.deletePackage(pack); // also delete packages with subpackages
 					else
@@ -150,7 +158,10 @@ public abstract class RefactoringTest extends TestCase {
 			// Restore package 'p'
 			if (!pExists)
 				getRoot().createPackageFragment("p", true, null);
-			
+			// Restore package 'q'
+			if (!qExists)
+				getRoot().createPackageFragment("q", true, null);
+
 			tryDeletingAllNonJavaChildResources(getRoot());
 		}
 
@@ -217,7 +228,7 @@ public abstract class RefactoringTest extends TestCase {
 			}
 		}
 	}
-	
+
 	private static void tryDeletingAllJavaChildren(IPackageFragment pack) throws CoreException {
 		IJavaElement[] kids= pack.getChildren();
 		for (int i= 0; i < kids.length; i++){
@@ -234,6 +245,10 @@ public abstract class RefactoringTest extends TestCase {
 
 	protected IPackageFragment getPackageP() {
 		return fPackageP;
+	}
+
+	protected IPackageFragment getPackageQ() {
+		return fPackageQ;
 	}
 
 	protected final RefactoringStatus performRefactoring(RefactoringDescriptor descriptor) throws Exception {

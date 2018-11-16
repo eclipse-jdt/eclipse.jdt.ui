@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,6 +22,7 @@ public class AllChangeTests {
 	public static Test suite() {
 		TestSuite suite= new TestSuite(clazz.getName());
 		suite.addTest(new TestSuite(RenameResourceChangeTests.class));
+		suite.addTest(new TestSuite(MoveRenameResourceChangeTests.class));
 		suite.addTest(new TestSuite(RenameSourceFolderChangeTests.class));
 		suite.addTest(new TestSuite(CopyPackageChangeTest.class));
 		suite.addTest(new TestSuite(CopyPackageChangeTest.class));

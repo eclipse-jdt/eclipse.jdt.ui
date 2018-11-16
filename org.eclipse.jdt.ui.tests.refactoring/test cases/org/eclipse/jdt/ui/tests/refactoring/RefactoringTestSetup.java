@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -39,6 +39,7 @@ public class RefactoringTestSetup extends AbstractRefactoringTestSetup {
 	public static final String CONTAINER= "src";
 	private static IPackageFragmentRoot fgRoot;
 	private static IPackageFragment fgPackageP;
+	private static IPackageFragment fgPackageQ;
 	private static IJavaProject fgJavaTestProject;
 	private static IPackageFragmentRoot fgJRELibrary;
 
@@ -66,6 +67,12 @@ public class RefactoringTestSetup extends AbstractRefactoringTestSetup {
 		throw new Exception(RefactoringTestSetup.class.getName() + " not initialized");
 	}
 
+	public static IPackageFragment getPackageQ()throws Exception {
+		if (fgPackageQ != null)
+			return fgPackageQ;
+		throw new Exception(RefactoringTestSetup.class.getName() + " not initialized");
+	}
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -76,6 +83,7 @@ public class RefactoringTestSetup extends AbstractRefactoringTestSetup {
 		fgJRELibrary= addRTJar(fgJavaTestProject);
 		fgRoot= JavaProjectHelper.addSourceContainer(fgJavaTestProject, CONTAINER);
 		fgPackageP= fgRoot.createPackageFragment("p", true, null);
+		fgPackageQ= fgRoot.createPackageFragment("q", true, null);
 	}
 
 	protected IPackageFragmentRoot addRTJar(IJavaProject project) throws CoreException {
