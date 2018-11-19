@@ -318,16 +318,6 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	/**
-	 * @param decl method declaration
-	 * @return thrown exception names
-	 * @deprecated to avoid deprecation warnings
-	 */
-	@Deprecated
-	private static List<Name> getThrownExceptions(MethodDeclaration decl) {
-		return decl.thrownExceptions();
-	}
-
 	private static String suggestParameterName(ICompilationUnit unit, IVariableBinding binding, String[] excluded) {
 		String name= StubUtility.getBaseName(binding, unit.getJavaProject());
 		return StubUtility.suggestArgumentName(unit.getJavaProject(), name, excluded);
