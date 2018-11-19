@@ -842,6 +842,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ProviderMethodOrConstructorRequiredForServiceImpl:
 			case IProblem.ServiceImplDefaultConstructorNotPublic:
 				LocalCorrectionsSubProcessor.addServiceProviderProposal(context, problem, proposals);
+				LocalCorrectionsSubProcessor.addServiceProviderConstructorProposals(context, problem, proposals);
 				break;
 			case IProblem.PreviewFeatureDisabled:
 				PreviewFeaturesSubProcessor.getEnablePreviewFeaturesProposal(context, proposals);

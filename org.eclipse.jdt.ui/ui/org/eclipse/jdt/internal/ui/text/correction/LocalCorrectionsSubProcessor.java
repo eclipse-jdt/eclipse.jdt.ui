@@ -51,10 +51,12 @@ import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
@@ -131,6 +133,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.BodyDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
+import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
@@ -142,6 +145,7 @@ import org.eclipse.jdt.internal.corext.fix.TypeParametersFix;
 import org.eclipse.jdt.internal.corext.fix.UnimplementedCodeFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 import org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
@@ -151,6 +155,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.actions.GenerateHashCodeEqualsAction;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.InferTypeArgumentsAction;
@@ -178,11 +183,14 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatu
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.ChangeDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.InsertDescription;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal.RemoveDescription;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ConstructorFromSuperclassProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.MissingAnnotationAttributesProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ModifierChangeCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewProviderMethodDeclaration;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewVariableCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.RefactoringCorrectionProposal;
@@ -2147,6 +2155,70 @@ public class LocalCorrectionsSubProcessor {
 					Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_add_provider_method_description, type.getElementName()),
 					targetCU, context.getASTRoot(), targetBinding,
 					IProposalRelevance.CREATE_METHOD, image, type));
+		}
+	}
+
+	public static void addServiceProviderConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
+		ASTNode node= problem.getCoveredNode(context.getASTRoot());
+		if (! (node instanceof Name) && ! (node.getParent() instanceof ProvidesDirective)) {
+			return;
+		}
+
+		Name name= (Name) node;
+		ITypeBinding targetBinding= name.resolveTypeBinding();
+
+		if (targetBinding != null &&
+				!(targetBinding.isInterface() || Modifier.isAbstract(targetBinding.getModifiers()))) {
+			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(context.getCompilationUnit(), context.getASTRoot(), targetBinding);
+			IJavaProject proj= targetCU.getJavaProject();
+
+			// Get the AST Root (CompilationUnit) for target class
+			ASTParser parser= ASTParser.newParser(IASTSharedValues.SHARED_AST_LEVEL);
+			parser.setKind(ASTParser.K_COMPILATION_UNIT);
+			parser.setSource(targetCU);
+			parser.setProject(proj);
+			parser.setUnitName(targetCU.getPath().toString());
+			parser.setResolveBindings(true);
+			ASTNode targetRoot= parser.createAST(null);
+
+			if (!(targetRoot instanceof CompilationUnit)) {
+				return;
+			}
+
+			IType targetType= proj.findType(targetBinding.getQualifiedName());
+
+			// Locate the no-arg constructor binding for the type
+			List<IMethodBinding> result= Arrays.asList(targetBinding.getDeclaredMethods()).stream()
+					.filter(m -> m.isConstructor() && m.getParameterTypes().length == 0)
+					.collect(Collectors.toList());
+
+			// no-arg constructor exists, need to change visibility
+			if (!result.isEmpty()) {
+				IMethodBinding targetMethodBinding= result.get(0);
+				IMethod targetMethod= null;
+				for (IMethod m : targetType.getMethods()) {
+					if (m.isConstructor() && m.getParameters().length == 0) {
+						targetMethod= m;
+						break;
+					}
+				}
+
+				String label= CorrectionMessages.LocalCorrectionsSubProcessor_changeconstructor_public_description;
+				int include=Modifier.PUBLIC;
+				int exclude=Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
+
+				// Locate the constructor declaration node in the target AST Node
+				MethodDeclaration targetMethodDecl= ASTNodeSearchUtil.getMethodDeclarationNode(targetMethod, (CompilationUnit) targetRoot);
+				proposals.add(new ModifierChangeCorrectionProposal(label, targetCU, targetMethodBinding, targetMethodDecl.getName(),
+						include, exclude, IProposalRelevance.CHANGE_VISIBILITY_TO_NON_PRIVATE,
+						JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)));
+			} else {
+				// no-arg constructor does not exist, need to create it
+				String[] args= new String[] { org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getMethodSignature(org.eclipse.jdt.internal.ui.text.correction.ASTResolving.getTypeSignature(targetBinding), new ITypeBinding[0], false) };
+				String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createconstructor_description, args);
+				Image image= JavaElementImageProvider.getDecoratedImage(JavaPluginImages.DESC_MISC_PUBLIC, JavaElementImageDescriptor.CONSTRUCTOR, JavaElementImageProvider.SMALL_SIZE);
+				proposals.add(new NewMethodCorrectionProposal(label, targetCU, targetRoot, new ArrayList<> (), targetBinding, IProposalRelevance.CREATE_CONSTRUCTOR, image));
+			}
 		}
 	}
 }
