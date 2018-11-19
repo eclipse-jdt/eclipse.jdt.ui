@@ -59,8 +59,16 @@ public class ClasspathVMUtil {
 						continue; // the other one is the least matching
 					}
 				}
-				bestMatchingCompliance= vmInstallCompliance;
-				bestMatchingVMInstall= installs[k];
+				if (getHighestVersion) {
+					if (JavaModelUtil.isVersionLessThan(bestMatchingCompliance, vmInstallCompliance)) {
+						bestMatchingCompliance= vmInstallCompliance;
+						bestMatchingVMInstall= installs[k];
+					}
+				}
+				else {
+					bestMatchingCompliance= vmInstallCompliance;
+					bestMatchingVMInstall= installs[k];
+				}
 			}
 		}
 		if (getHighestVersion) {
