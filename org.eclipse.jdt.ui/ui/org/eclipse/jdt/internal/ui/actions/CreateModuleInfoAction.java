@@ -131,6 +131,7 @@ public class CreateModuleInfoAction implements IObjectActionDelegate {
 					IVMInstall install= ClasspathVMUtil.findRequiredOrGreaterVMInstall(JavaCore.VERSION_9, true, true);
 					if (install == null) {
 						MessageDialog.openError(getDisplay().getActiveShell(), ActionMessages.CreateModuleInfoAction_error_title, ActionMessages.CreateModuleInfoAction_error_message_compliance);
+						return;
 					} else {
 						String compliance= ClasspathVMUtil.getVMInstallCompliance(install, false);
 						if (compliance != null) {
@@ -145,6 +146,7 @@ public class CreateModuleInfoAction implements IObjectActionDelegate {
 						}
 						else {
 							MessageDialog.openError(getDisplay().getActiveShell(), ActionMessages.CreateModuleInfoAction_error_title, ActionMessages.CreateModuleInfoAction_error_message_compliance);
+							return;
 						}
 					}
 				}
