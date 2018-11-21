@@ -4206,11 +4206,11 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_CODEMINING_ENABLED, false);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_CODEMINING_AT_LEAST_ONE,
 				true);
-		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES, false);
+		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_CLASSES, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_FIELDS, false);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_METHODS, true);
-		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS, false);
+		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS, true);
 	}
 
 	/**
