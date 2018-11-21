@@ -44,7 +44,7 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 
 	/**
 	 * Install this reconciler on the given editor.
-	 * 
+	 *
 	 * @param editor the editor
 	 * @param sourceViewer the source viewer
 	 */
@@ -54,8 +54,8 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 
 		if (fEditor instanceof CompilationUnitEditor) {
 			((CompilationUnitEditor) fEditor).addReconcileListener(this);
-			updateCodeMinings();
 		}
+		updateCodeMinings();
 	}
 
 	/**
