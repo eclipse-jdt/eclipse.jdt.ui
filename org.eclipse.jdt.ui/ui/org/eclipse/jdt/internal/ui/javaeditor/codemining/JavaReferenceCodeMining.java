@@ -10,8 +10,12 @@
  */
 package org.eclipse.jdt.internal.ui.javaeditor.codemining;
 
+import java.text.MessageFormat;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
+
+import org.eclipse.swt.events.MouseEvent;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -46,26 +50,34 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  */
 public class JavaReferenceCodeMining extends AbstractJavaElementLineHeaderCodeMining {
 
+	private final JavaEditor editor;
+
 	private final boolean showReferencesAtLeastOne;
+
+	private Consumer<MouseEvent> action;
 
 	public JavaReferenceCodeMining(IJavaElement element, JavaEditor editor, IDocument document,
 			ICodeMiningProvider provider, boolean showReferencesAtLeastOne)
 			throws JavaModelException, BadLocationException {
-		super(element, document, provider, e -> new FindReferencesAction(editor).run(element));
+		super(element, document, provider, null);
+		this.editor= editor;
 		this.showReferencesAtLeastOne= showReferencesAtLeastOne;
 	}
 
+	@SuppressWarnings("boxing")
 	@Override
 	protected CompletableFuture<Void> doResolve(ITextViewer viewer, IProgressMonitor monitor) {
 		return CompletableFuture.runAsync(() -> {
 			try {
 				monitor.isCanceled();
-				long refCount= countReferences(getElement(), monitor);
+				IJavaElement element = super.getElement();
+				long refCount= countReferences(element, monitor);
 				monitor.isCanceled();
+				action= refCount > 0 ? e -> new FindReferencesAction(editor).run(element) : null;
 				if (refCount == 0 && showReferencesAtLeastOne) {
 					super.setLabel(""); //$NON-NLS-1$
 				} else {
-					super.setLabel(refCount + " " + (refCount > 1 ? "references" : "reference")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					super.setLabel(MessageFormat.format(JavaCodeMiningMessages.JavaReferenceCodeMining_label, refCount));
 				}
 			} catch (JavaModelException e) {
 				// Should never occur
@@ -73,6 +85,11 @@ public class JavaReferenceCodeMining extends AbstractJavaElementLineHeaderCodeMi
 				// Should never occur
 			}
 		});
+	}
+
+	@Override
+	public Consumer<MouseEvent> getAction() {
+		return action;
 	}
 
 	/**

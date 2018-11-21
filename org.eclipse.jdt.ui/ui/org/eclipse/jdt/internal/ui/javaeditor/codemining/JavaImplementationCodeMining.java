@@ -10,6 +10,7 @@
  */
 package org.eclipse.jdt.internal.ui.javaeditor.codemining;
 
+import java.text.MessageFormat;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -39,6 +40,7 @@ public class JavaImplementationCodeMining extends AbstractJavaElementLineHeaderC
 		this.showImplementationsAtLeastOne= showImplementationsAtLeastOne;
 	}
 
+	@SuppressWarnings("boxing")
 	@Override
 	protected CompletableFuture<Void> doResolve(ITextViewer viewer, IProgressMonitor monitor) {
 		return CompletableFuture.runAsync(() -> {
@@ -47,7 +49,7 @@ public class JavaImplementationCodeMining extends AbstractJavaElementLineHeaderC
 				if (implCount == 0 && showImplementationsAtLeastOne) {
 					super.setLabel(""); //$NON-NLS-1$
 				} else {
-					super.setLabel(implCount + " " + (implCount > 1 ? "implementations" : "implementation")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					super.setLabel(MessageFormat.format(JavaCodeMiningMessages.JavaImplementationCodeMining_label, implCount));
 				}
 			} catch (JavaModelException e) {
 				// Should never occur
