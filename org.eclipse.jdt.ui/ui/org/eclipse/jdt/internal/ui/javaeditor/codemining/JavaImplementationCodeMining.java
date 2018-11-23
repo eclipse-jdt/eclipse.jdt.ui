@@ -12,9 +12,14 @@ package org.eclipse.jdt.internal.ui.javaeditor.codemining;
 
 import java.text.MessageFormat;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import org.eclipse.swt.events.MouseEvent;
+
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -25,6 +30,10 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.actions.OpenTypeHierarchyAction;
+
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+
 /**
  * Java implementation code mining.
  *
@@ -32,11 +41,16 @@ import org.eclipse.jdt.core.JavaModelException;
  */
 public class JavaImplementationCodeMining extends AbstractJavaElementLineHeaderCodeMining {
 
-	private final boolean showImplementationsAtLeastOne;
+	private final JavaEditor editor;
 
-	public JavaImplementationCodeMining(IType element, IDocument document, ICodeMiningProvider provider,
+	private final boolean showImplementationsAtLeastOne;
+	
+	private Consumer<MouseEvent> action;
+
+	public JavaImplementationCodeMining(IType element, JavaEditor editor, IDocument document, ICodeMiningProvider provider,
 			boolean showImplementationsAtLeastOne) throws JavaModelException, BadLocationException {
 		super(element, document, provider, null);
+		this.editor= editor;
 		this.showImplementationsAtLeastOne= showImplementationsAtLeastOne;
 	}
 
@@ -45,7 +59,9 @@ public class JavaImplementationCodeMining extends AbstractJavaElementLineHeaderC
 	protected CompletableFuture<Void> doResolve(ITextViewer viewer, IProgressMonitor monitor) {
 		return CompletableFuture.runAsync(() -> {
 			try {
-				long implCount= countImplementations((IType) getElement(), monitor);
+				IJavaElement element= super.getElement();
+				long implCount= countImplementations((IType) element, monitor);
+				action= implCount > 0 ? e -> new OpenTypeHierarchyAction(editor).run(new StructuredSelection(element)) : null;
 				if (implCount == 0 && showImplementationsAtLeastOne) {
 					super.setLabel(""); //$NON-NLS-1$
 				} else {
@@ -55,6 +71,11 @@ public class JavaImplementationCodeMining extends AbstractJavaElementLineHeaderC
 				// Should never occur
 			}
 		});
+	}
+
+	@Override
+	public Consumer<MouseEvent> getAction() {
+		return action;
 	}
 
 	/**

@@ -132,7 +132,7 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 					IType type= (IType) element;
 					if (type.isInterface() || Flags.isAbstract(type.getFlags())) {
 						try {
-							minings.add(new JavaImplementationCodeMining(type, viewer.getDocument(), this,
+							minings.add(new JavaImplementationCodeMining(type, (JavaEditor) textEditor, viewer.getDocument(), this,
 									showAtLeastOne));
 						} catch (BadLocationException e) {
 							// Should never occur
