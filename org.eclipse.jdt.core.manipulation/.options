@@ -13,4 +13,4 @@
 ###############################################################################
 
 # Prints debug information
-org.eclipse.jdt.core.manipulation/debug=true
+org.eclipse.jdt.core.manipulation/debug=false
