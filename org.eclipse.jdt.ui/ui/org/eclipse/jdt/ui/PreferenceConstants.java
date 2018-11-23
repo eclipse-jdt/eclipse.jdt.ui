@@ -4208,7 +4208,7 @@ public class PreferenceConstants {
 				true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_CLASSES, true);
-		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_FIELDS, false);
+		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_FIELDS, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_METHODS, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS, true);
 	}
