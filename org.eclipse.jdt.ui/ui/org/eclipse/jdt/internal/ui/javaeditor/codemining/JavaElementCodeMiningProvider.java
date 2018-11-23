@@ -52,7 +52,7 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 
 	private final boolean showReferences;
 
-	private final boolean showReferencesOnClasses;
+	private final boolean showReferencesOnTypes;
 
 	private final boolean showReferencesOnFields;
 
@@ -63,7 +63,7 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 	public JavaElementCodeMiningProvider() {
 		showAtLeastOne= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_CODEMINING_AT_LEAST_ONE);
 		showReferences= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES);
-		showReferencesOnClasses= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_CLASSES);
+		showReferencesOnTypes= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_TYPES);
 		showReferencesOnFields= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_FIELDS);
 		showReferencesOnMethods= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_METHODS);
 		showImplementations= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS);
@@ -116,7 +116,7 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 			}
 			if (showReferences) {
 				try {
-					if ((showReferencesOnClasses && (element.getElementType() == IJavaElement.TYPE)) // Show references on classes
+					if ((showReferencesOnTypes && (element.getElementType() == IJavaElement.TYPE)) // Show references on types
 							|| (showReferencesOnMethods && (element.getElementType() == IJavaElement.METHOD)) // Show references on methods
 							|| (showReferencesOnFields && (element.getElementType() == IJavaElement.FIELD)) // Show references on fields
 					) {

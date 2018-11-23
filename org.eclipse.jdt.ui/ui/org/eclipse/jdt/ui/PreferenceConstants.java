@@ -3825,14 +3825,14 @@ public class PreferenceConstants {
 	public static final String EDITOR_JAVA_CODEMINING_SHOW_REFERENCES = "java.codemining.references"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that stores the value for "Show references" on classes.
+	 * A named preference that stores the value for "Show references" on types.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 *
 	 * @since 3.16
 	 */
-	public static final String EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_CLASSES= "java.codemining.references.onClasses"; //$NON-NLS-1$
+	public static final String EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_TYPES= "java.codemining.references.onTypes"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that stores the value for "Show references" on fields.
@@ -4207,7 +4207,7 @@ public class PreferenceConstants {
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_CODEMINING_AT_LEAST_ONE,
 				true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES, true);
-		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_CLASSES, true);
+		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_TYPES, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_FIELDS, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_METHODS, true);
 		store.setDefault(EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS, true);

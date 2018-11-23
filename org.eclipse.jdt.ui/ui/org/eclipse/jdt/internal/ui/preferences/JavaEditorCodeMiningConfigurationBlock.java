@@ -54,8 +54,8 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 	private static final Key PREF_SHOW_REFERENCES= getJDTUIKey(
 			PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES);
 
-	private static final Key PREF_SHOW_REFERENCES_ON_CLASSES= getJDTUIKey(
-			PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_CLASSES);
+	private static final Key PREF_SHOW_REFERENCES_ON_TYPES= getJDTUIKey(
+			PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_TYPES);
 
 	private static final Key PREF_SHOW_REFERENCES_ON_FIELDS= getJDTUIKey(
 			PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_FIELDS);
@@ -82,7 +82,7 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 	}
 
 	public static Key[] getAllKeys() {
-		return new Key[] { PREF_CODEMINING_ENABLED, PREF_SHOW_CODEMINING_AT_LEAST_ONE, PREF_SHOW_REFERENCES, PREF_SHOW_REFERENCES_ON_CLASSES, PREF_SHOW_REFERENCES_ON_FIELDS,
+		return new Key[] { PREF_CODEMINING_ENABLED, PREF_SHOW_CODEMINING_AT_LEAST_ONE, PREF_SHOW_REFERENCES, PREF_SHOW_REFERENCES_ON_TYPES, PREF_SHOW_REFERENCES_ON_FIELDS,
 				PREF_SHOW_REFERENCES_ON_METHODS,
 				PREF_SHOW_IMPLEMENTATIONS };
 	}
@@ -164,10 +164,10 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 		PreferenceTreeNode<Button> showReferences= fFilteredPrefTree.addCheckBox(inner,
 				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showReferences_label, PREF_SHOW_REFERENCES,
 				TRUE_FALSE, defaultIndent, section);
-		// - Show references (On classes)
+		// - Show references (On types)
 		fFilteredPrefTree.addCheckBox(inner,
-				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showReferences_onClasses_label,
-				PREF_SHOW_REFERENCES_ON_CLASSES, TRUE_FALSE, extraIndent, showReferences);
+				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showReferences_onTypes_label,
+				PREF_SHOW_REFERENCES_ON_TYPES, TRUE_FALSE, extraIndent, showReferences);
 		// - Show references (On fields)
 		fFilteredPrefTree.addCheckBox(inner,
 				PreferencesMessages.JavaEditorCodeMiningConfigurationBlock_showReferences_onFields_label,
@@ -188,7 +188,7 @@ public class JavaEditorCodeMiningConfigurationBlock extends OptionsConfiguration
 		if (enabledCodeMining) {
 			// Show references checkboxes
 			boolean showReferences= getCheckBox(PREF_SHOW_REFERENCES).getSelection();
-			getCheckBox(PREF_SHOW_REFERENCES_ON_CLASSES).setEnabled(showReferences);
+			getCheckBox(PREF_SHOW_REFERENCES_ON_TYPES).setEnabled(showReferences);
 			getCheckBox(PREF_SHOW_REFERENCES_ON_FIELDS).setEnabled(showReferences);
 			getCheckBox(PREF_SHOW_REFERENCES_ON_METHODS).setEnabled(showReferences);
 			// Show implementations checkboxes
