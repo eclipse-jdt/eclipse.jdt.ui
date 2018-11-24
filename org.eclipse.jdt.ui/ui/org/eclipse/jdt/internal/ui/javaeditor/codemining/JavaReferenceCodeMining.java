@@ -20,16 +20,12 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.codemining.ICodeMiningProvider;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -42,6 +38,7 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.ui.actions.FindReferencesAction;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 
 /**
  * Java reference code mining.
@@ -110,14 +107,17 @@ public class JavaReferenceCodeMining extends AbstractJavaElementLineHeaderCodeMi
 		SearchPattern pattern= SearchPattern.createPattern(element, IJavaSearchConstants.REFERENCES);
 		SearchEngine engine= new SearchEngine();
 		engine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() },
-				createSearchScope(), new SearchRequestor() {
+				createSearchScope(element), new SearchRequestor() {
 
 					@Override
 					public void acceptSearchMatch(SearchMatch match) throws CoreException {
 						Object o= match.getElement();
-						if (o instanceof IJavaElement
-								&& ((IJavaElement) o).getAncestor(IJavaElement.COMPILATION_UNIT) != null) {
-							count.incrementAndGet();
+						if (o instanceof IJavaElement) {
+							IJavaElement e= (IJavaElement)o;
+							if (e.getAncestor(IJavaElement.COMPILATION_UNIT) != null
+									|| e.getAncestor(IJavaElement.CLASS_FILE) != null) {
+								count.incrementAndGet();
+							}
 						}
 					}
 				}, monitor);
@@ -128,11 +128,15 @@ public class JavaReferenceCodeMining extends AbstractJavaElementLineHeaderCodeMi
 	/**
 	 * Create Java workspace scope.
 	 * 
+	 * @param element IJavaElement to search references for
+	 * 
 	 * @return the Java workspace scope.
 	 * @throws JavaModelException when java error.
 	 */
-	private static IJavaSearchScope createSearchScope() throws JavaModelException {
-		IJavaProject[] projects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
-		return SearchEngine.createJavaSearchScope(projects, IJavaSearchScope.SOURCES);
+	private static IJavaSearchScope createSearchScope(IJavaElement element) throws JavaModelException {
+		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
+		boolean isInsideJRE = factory.isInsideJRE(element);
+		IJavaSearchScope scope= factory.createWorkspaceScope(isInsideJRE);
+		return scope;
 	}
 }
