@@ -15,8 +15,10 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.core.resources.IProject;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
@@ -41,6 +43,7 @@ public class JavaEditorCodeMiningPreferencePage extends PropertyAndPreferencePag
 		fConfigurationBlock= new JavaEditorCodeMiningConfigurationBlock(getNewStatusChangedListener(), container);
 
 		super.createControl(parent);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, IJavaHelpContextIds.CODE_MINING_PREFERENCE_PAGE);
 	}
 
 	@Override
