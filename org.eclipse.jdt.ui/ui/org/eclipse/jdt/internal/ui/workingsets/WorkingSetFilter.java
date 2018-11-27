@@ -104,8 +104,14 @@ public class WorkingSetFilter extends JavaViewerFilter {
 				if (fJavaElement.getElementType() == IJavaElement.JAVA_PROJECT) {
 					IProject project= ((IJavaProject) fJavaElement).getProject();
 					if (!project.isAccessible()) {
-						IProject otherProject= ((IJavaProject) other).getProject();
-						return project.equals(otherProject);
+						// If our project is closed, return true only if the "other" is the same project
+						// to keep closed projects in the working sets 
+						if (other instanceof IJavaProject) {
+							IProject otherProject= ((IJavaProject) other).getProject();
+							return project.equals(otherProject);
+						} else {
+							return false;
+						}
 					}
 					IPackageFragmentRoot pkgRoot= (IPackageFragmentRoot) other.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					if (pkgRoot != null && pkgRoot.isExternal()) {
