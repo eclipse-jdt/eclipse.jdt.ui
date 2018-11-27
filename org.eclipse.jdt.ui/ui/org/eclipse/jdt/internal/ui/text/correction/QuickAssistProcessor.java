@@ -4191,6 +4191,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					IProposalRelevance.ADD_STATIC_IMPORT, image);
 			proposalReplaceAllOccurrences.setImportRewrite(importRewriteReplaceAllOccurences);
 			proposals.add(proposalReplaceAllOccurrences);
+		} catch (IllegalArgumentException e) {
+			// Wrong use of ASTRewrite or ImportRewrite API, see bug 541586
+			JavaPlugin.log(e);
+			return false;
 		} catch (JavaModelException e) {
 			return false;
 		}
