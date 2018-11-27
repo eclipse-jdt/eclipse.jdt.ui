@@ -4062,7 +4062,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (name.getParent() instanceof MethodInvocation) {
 			MethodInvocation mi= (MethodInvocation) name.getParent();
 
-			if (mi.getExpression() != null && mi.getExpression().equals(name)) {
+			Expression expression= mi.getExpression();
+			if (expression == null || expression.equals(name)) {
 				return false;
 			}
 
