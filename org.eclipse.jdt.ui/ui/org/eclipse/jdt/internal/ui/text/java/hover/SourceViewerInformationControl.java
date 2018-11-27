@@ -52,6 +52,7 @@ import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
 import org.eclipse.jface.text.IInformationControlExtension3;
 import org.eclipse.jface.text.IInformationControlExtension5;
+import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 
@@ -371,7 +372,8 @@ public class SourceViewerInformationControl
 				fViewerConfiguration= fKindToViewerConfiguration.get(SimpleJavaSourceViewerConfiguration.STANDARD);
 			}
 			if (fViewerConfiguration != null && !fViewerConfiguration.equals(oldViewerConfiguration)) {
-				fViewer.configure(fViewerConfiguration);
+				IPresentationReconciler pReconciler= fViewerConfiguration.getPresentationReconciler(fViewer);
+				pReconciler.install(fViewer);
 			}
 		}
 	}

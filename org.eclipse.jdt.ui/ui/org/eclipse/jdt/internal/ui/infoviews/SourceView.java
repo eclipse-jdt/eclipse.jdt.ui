@@ -47,6 +47,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextViewer;
+import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IActionBars;
@@ -489,7 +490,8 @@ public class SourceView extends AbstractInfoView {
 				fViewerConfiguration= fKindToViewerConfiguration.get(SimpleJavaSourceViewerConfiguration.STANDARD);
 			}
 			if (fViewerConfiguration != null && !fViewerConfiguration.equals(oldViewerConfiguration)) {
-				fViewer.configure(fViewerConfiguration);
+				IPresentationReconciler pReconciler= fViewerConfiguration.getPresentationReconciler(fViewer);
+				pReconciler.install(fViewer);
 			}
 		}
 	}
