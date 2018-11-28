@@ -4139,18 +4139,22 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			name.getRoot().accept(new ASTVisitor() {
 				@Override
 				public boolean visit(MethodInvocation methodInvocation) {
-					if (methodInvocation.getExpression() == null) {
+					Expression methodInvocationExpression= methodInvocation.getExpression();
+					if (methodInvocationExpression == null) {
 						return super.visit(methodInvocation);
 					}
-
-					if (miFinal != null &&
-							miFinal.getExpression().toString().equals(methodInvocation.getExpression().toString()) && miFinal.getName().toString().equals(methodInvocation.getName().toString())) {
-						methodInvocation.typeArguments().forEach(type -> astRewriteReplaceAllOccurrences.remove((Type) type, null));
-						astRewriteReplaceAllOccurrences.remove(methodInvocation.getExpression(), null);
-						allReferencesToDeclaringClass[0]++;
-					} else if (declaringClass.getName().equals(methodInvocation.getExpression().toString())) {
-						allReferencesToDeclaringClass[0]++;
-						referencesFromOtherOccurences[0]++;
+					if (methodInvocationExpression instanceof Name) {
+						String fullyQualifiedName= ((Name) methodInvocationExpression).getFullyQualifiedName();
+						if (miFinal != null &&
+								miFinal.getExpression() instanceof Name && ((Name) miFinal.getExpression()).getFullyQualifiedName().equals(fullyQualifiedName)
+								&& miFinal.getName().getIdentifier().equals(methodInvocation.getName().getIdentifier())) {
+							methodInvocation.typeArguments().forEach(type -> astRewriteReplaceAllOccurrences.remove((Type) type, null));
+							astRewriteReplaceAllOccurrences.remove(methodInvocationExpression, null);
+							allReferencesToDeclaringClass[0]++;
+						} else if (declaringClass.getName().equals(fullyQualifiedName)) {
+							allReferencesToDeclaringClass[0]++;
+							referencesFromOtherOccurences[0]++;
+						}
 					}
 					return super.visit(methodInvocation);
 				}
