@@ -4143,6 +4143,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					if (methodInvocationExpression == null) {
 						return super.visit(methodInvocation);
 					}
+
 					if (methodInvocationExpression instanceof Name) {
 						String fullyQualifiedName= ((Name) methodInvocationExpression).getFullyQualifiedName();
 						if (miFinal != null &&
@@ -4155,7 +4156,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 							allReferencesToDeclaringClass[0]++;
 							referencesFromOtherOccurences[0]++;
 						}
+					} else if (methodInvocationExpression instanceof ClassInstanceCreation) {
+						ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) methodInvocationExpression;
+						if (classInstanceCreation.getType() instanceof SimpleType) {
+							String typeName= ((SimpleType) classInstanceCreation.getType()).getName().getFullyQualifiedName();
+							if (typeName.equals(declaringClass.getName())) {
+								allReferencesToDeclaringClass[0]++;
+								referencesFromOtherOccurences[0]++;
+							}
+						}
 					}
+
 					return super.visit(methodInvocation);
 				}
 			});
