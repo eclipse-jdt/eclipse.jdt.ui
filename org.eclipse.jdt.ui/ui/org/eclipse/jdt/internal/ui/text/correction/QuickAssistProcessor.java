@@ -87,6 +87,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LabeledStatement;
@@ -4076,7 +4077,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		} else if (name.getParent() instanceof QualifiedName) {
 			QualifiedName qn= (QualifiedName) name.getParent();
 
-			if (name.equals(qn.getQualifier())) {
+			if (name.equals(qn.getQualifier()) || qn.getParent() instanceof ImportDeclaration) {
 				return false;
 			}
 
