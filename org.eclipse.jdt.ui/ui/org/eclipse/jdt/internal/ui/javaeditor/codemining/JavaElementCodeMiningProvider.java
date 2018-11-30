@@ -24,7 +24,6 @@ import org.eclipse.jface.text.codemining.ICodeMining;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
@@ -130,7 +129,7 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 			if (showImplementations) {
 				if (element instanceof IType) {
 					IType type= (IType) element;
-					if (type.isInterface() || Flags.isAbstract(type.getFlags())) {
+					if (type.isInterface() || type.isClass()) {
 						try {
 							minings.add(new JavaImplementationCodeMining(type, (JavaEditor) textEditor, viewer.getDocument(), this,
 									showAtLeastOne));
