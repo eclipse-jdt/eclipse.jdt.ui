@@ -20,6 +20,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.NullTestUtils;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.core.runtime.Path;
@@ -5241,5 +5242,83 @@ public class AssistQuickFixTest18 extends QuickFixTest {
 		buf.append("    };\n");
 		buf.append("}\n");
 		assertProposalPreviewEquals(buf.toString(), "Convert to anonymous class creation", proposals);		
+	}
+	
+	public void testNoRedundantNonNullInConvertArrayForLoop() throws Exception {
+		NullTestUtils.prepareNullTypeAnnotations(fSourceFolder);
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import annots.*;\n");
+			buf.append("public class A {\n");
+			buf.append("    public void foo(@NonNull String[] array) {\n");
+			buf.append("		for (int i = 0; i < array.length; i++){\n");
+			buf.append("			System.out.println(array[i]);\n");
+			buf.append("		}\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+	        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("for"), 0);
+			ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+			
+			assertCorrectLabels(proposals);
+			assertNumberOfProposals(proposals, 3);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import annots.*;\n");
+			buf.append("public class A {\n");
+			buf.append("    public void foo(@NonNull String[] array) {\n");
+			buf.append("		for (String element : array) {\n");
+			buf.append("			System.out.println(element);\n");
+			buf.append("		}\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertProposalPreviewEquals(buf.toString(), "Convert to enhanced 'for' loop", proposals);
+		} finally {
+			NullTestUtils.disableAnnotationBasedNullAnalysis(fSourceFolder);
+		}
+	}
+	public void testNoRedundantNonNullInConvertIterableForLoop() throws Exception {
+		NullTestUtils.prepareNullTypeAnnotations(fSourceFolder);
+		try {
+			IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import java.util.Iterator;\n");
+			buf.append("import annots.*;\n");
+			buf.append("@NonNullByDefault\n");
+			buf.append("public class A {\n");
+			buf.append("    public void foo(Iterable<String> x) {\n");
+			buf.append("		for (Iterator<String> iterator = x.iterator(); iterator.hasNext();){\n");
+			buf.append("			System.out.println(iterator.next());\n");
+			buf.append("		}\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+	        AssistContext context= getCorrectionContext(cu, buf.toString().indexOf("for"), 0);
+			ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+			
+			assertCorrectLabels(proposals);
+			assertNumberOfProposals(proposals, 3);
+
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("import annots.*;\n");
+			buf.append("@NonNullByDefault\n");
+			buf.append("public class A {\n");
+			buf.append("    public void foo(Iterable<String> x) {\n");
+			buf.append("		for (String string : x) {\n");
+			buf.append("			System.out.println(string);\n");
+			buf.append("		}\n");
+			buf.append("    }\n");
+			buf.append("}\n");
+			assertProposalPreviewEquals(buf.toString(), "Convert to enhanced 'for' loop", proposals);
+		} finally {
+			NullTestUtils.disableAnnotationBasedNullAnalysis(fSourceFolder);
+		}
 	}
 }

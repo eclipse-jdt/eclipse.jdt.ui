@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -677,7 +678,8 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 		result.setName(name);
 
 		ITypeBinding arrayTypeBinding= arrayAccess.resolveTypeBinding();
-		Type type= importType(arrayTypeBinding.getElementType(), statement, importRewrite, compilationUnit);
+		Type type= importType(arrayTypeBinding.getElementType(), statement, importRewrite, compilationUnit,
+				arrayTypeBinding.getDimensions() == 1 ? TypeLocation.LOCAL_VARIABLE : TypeLocation.ARRAY_CONTENTS);
 		if (arrayTypeBinding.getDimensions() != 1) {
 			type= ast.newArrayType(type, arrayTypeBinding.getDimensions() - 1);
 		}
