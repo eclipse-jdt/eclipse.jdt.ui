@@ -59,18 +59,24 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 
 	private final boolean showImplementations;
 
+	private final boolean editorEnabled;
+
 	public JavaElementCodeMiningProvider() {
-		showAtLeastOne= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_CODEMINING_AT_LEAST_ONE);
-		showReferences= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES);
-		showReferencesOnTypes= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_TYPES);
-		showReferencesOnFields= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_FIELDS);
-		showReferencesOnMethods= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_METHODS);
-		showImplementations= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS);
+		editorEnabled= JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_CODEMINING_ENABLED);
+		showAtLeastOne= editorEnabled && JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_CODEMINING_AT_LEAST_ONE);
+		showReferences= editorEnabled && JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES);
+		showReferencesOnTypes= editorEnabled && JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_TYPES);
+		showReferencesOnFields= editorEnabled && JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_FIELDS);
+		showReferencesOnMethods= editorEnabled && JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_REFERENCES_ON_METHODS);
+		showImplementations= editorEnabled && JavaPreferencesPropertyTester.isEnabled(PreferenceConstants.EDITOR_JAVA_CODEMINING_SHOW_IMPLEMENTATIONS);
 	}
 
 	@Override
 	public CompletableFuture<List<? extends ICodeMining>> provideCodeMinings(ITextViewer viewer,
 			IProgressMonitor monitor) {
+		if (!editorEnabled) {
+			return CompletableFuture.completedFuture(Collections.emptyList());
+		}
 		return CompletableFuture.supplyAsync(() -> {
 			monitor.isCanceled();
 			ITextEditor textEditor= super.getAdapter(ITextEditor.class);
@@ -93,7 +99,7 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 
 	/**
 	 * Collect java code minings.
-	 * 
+	 *
 	 * @param unit the compilation unit
 	 * @param textEditor the Java editor
 	 * @param elements the java elements to track
@@ -104,6 +110,17 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 	 */
 	private void collectMinings(ITypeRoot unit, ITextEditor textEditor, IJavaElement[] elements,
 			List<ICodeMining> minings, ITextViewer viewer, IProgressMonitor monitor) throws JavaModelException {
+
+		// Only Java editor is supported, see bug 541811
+		if(!(textEditor instanceof JavaEditor)) {
+			return;
+		}
+
+		// Don't worth to loop if none of mining types are requested
+		if (!(showReferences || showImplementations)) {
+			return;
+		}
+
 		for (IJavaElement element : elements) {
 			if (monitor.isCanceled()) {
 				return;

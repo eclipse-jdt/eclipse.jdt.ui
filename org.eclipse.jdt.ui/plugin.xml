@@ -7171,10 +7171,14 @@
           label="%JavaElementCodeMiningProvider.label">
         <enabledWhen>
           <and>
+            <with variable="editor">
+               <instanceof value="org.eclipse.jdt.internal.ui.javaeditor.JavaEditor" />
+            </with>
+            <test property="org.eclipse.jdt.ui.hasPreference" value="editor_codemining_enabled" forcePluginActivation="true"/>
             <with variable="editorInput">
                <or>
 	              <adapt type="org.eclipse.core.resources.IFile">
-                     <test property="org.eclipse.core.resources.contentTypeId" value="org.eclipse.jdt.core.javaSource" />                     
+                     <test property="org.eclipse.core.resources.contentTypeId" value="org.eclipse.jdt.core.javaSource" />
 	              </adapt>
 	              <adapt type="org.eclipse.jdt.core.IClassFile">
 					<instanceof value="org.eclipse.jdt.core.IClassFile" />
