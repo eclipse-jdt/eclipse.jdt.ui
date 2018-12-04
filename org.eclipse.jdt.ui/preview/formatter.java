@@ -594,10 +594,10 @@ bar
  {
 @SuppressWarnings("unused") final @Positive int k;
 }
-  void foo() {    ;;    do {} while (false);    for (;;) {}  }
+  void foo() {    ;;   }
   void empty(@SuppressWarnings("unused") final int i) { }}
-enum MyEnum {    @Deprecated UNDEFINED(0) { }}enum EmptyEnum { }@interface EmptyAnnotation { 
-}//--PREVIEW--END--section-newlines
+enum MyEnum {    @Deprecated UNDEFINED(0) { }}
+//--PREVIEW--END--section-newlines
 
 //--PREVIEW--START--section-newlines-controlstatements
 class Example {
@@ -606,7 +606,6 @@ class Example {
 		try { } catch (Exception e) { } finally { }
 	}
 	void foo2() {
-		if (true) { return; }
 		if (true) { return; } else if (false) { return; } else { return; }
 	}
 	void foo(int state) {
@@ -624,6 +623,112 @@ class WrapExample {
 }
 //--PREVIEW--END--section-newlines-controlstatements-simpleloops
 //--PREVIEW--END--section-newlines-controlstatements
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_loop_body_block_on_one_line
+class Example{
+	public void example() {
+		for (int i = 0; i < 10; i++) {
+		}
+		int a = 10;
+		while (a-- > 0) { System.out.println(a); }
+		do { a += 2;
+		System.out.println(a); } while(a < 50);
+	}
+}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_loop_body_block_on_one_line
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_if_then_body_block_on_one_line
+class Example {
+	public String example(int a) {
+		if (a < 0) { 
+			throw new IllegalArgumentException(); }
+		if (a == 0) { return null; }
+		if (false) {}
+		if (a % 3 == 0) {
+			System.out.println("fizz"); }
+		if (a % 5 == 0) { System.out.println("buzz"); return ""; }
+		return Integer.toString(a);
+	}
+}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_if_then_body_block_on_one_line
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_lambda_body_block_on_one_line
+class Example {
+	Runnable emptyLambda = () -> {};
+	Runnable emptyLambda2 = () -> {
+	};
+	Runnable tinyLambda = () -> { doSomething(); };
+	Runnable smallLambda = () -> { doFirstThing(); doSecondThing(); };
+}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_lambda_body_block_on_one_line
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_code_block_on_one_line
+class Example {
+	static {
+	}
+	
+	void foo() {
+		if (true) {} else {}
+		synchronized(this) {}
+		try {} finally {}
+		
+		labeled:{}
+	}
+}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_code_block_on_one_line
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_method_body_on_one_line
+public class Example {
+	private int something;
+	public int getSomething() { return something; }
+	public void setSomehing(int something) { this.something = something; }
+	public void doNoting() {}
+	public void doOneThing() { System.out.println();
+	}
+	public void doMoreThings() { something = 4; doOneThing(); doOneThing(); }
+}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_method_body_on_one_line
+
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_type_declaration_on_one_line
+public class EmptyClass{}
+public class TinyClass{ 
+	int a; }
+public class SmallClass{ int a; String b; }
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_type_declaration_on_one_line
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_anonymous_type_declaration_on_one_line
+public class AnonymousClasses {
+	EmptyClass emptyAnonymous = new EmptyClass() {
+	};
+	TinyClass tinyAnonymous = new TinyClass() { String b; };
+	Object o = new SmallClass() { int a; int getA() { return a; } };
+}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_anonymous_type_declaration_on_one_line
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_enum_declaration_on_one_line
+public enum EmptyEnum {}
+public enum TinyEnum{ A;
+}
+public enum SmallEnum{ VALUE(0); SmallEnum(int val) {}; }
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_enum_declaration_on_one_line
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_enum_constant_declaration_on_one_line
+public enum EnumConstants {
+	EMPTY {
+	},
+	TINY { int getVal() { return 2; }},
+	SMALL { int val = 3; int getVal() { return 3; }};
+	int getVal() { return 1; }
+}
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_enum_constant_declaration_on_one_line
+
+//--PREVIEW--START--org.eclipse.jdt.core.formatter.keep_annotation_declaration_on_one_line
+public @interface EmptyInterface {}
+public @interface TinyInterface { 
+	void run(); }
+public @interface SmallInteface { int toA(); String toB(); }
+//--PREVIEW--END--org.eclipse.jdt.core.formatter.keep_annotation_declaration_on_one_line
 
 }
 

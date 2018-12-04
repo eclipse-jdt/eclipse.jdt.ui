@@ -944,7 +944,7 @@ public final class JavaModelUtil {
 		} else if (version.startsWith(JavaCore.VERSION_1_1)) {
 			return JavaCore.VERSION_1_3;
 		}
-		return defaultCompliance;
+		return JavaCore.isSupportedJavaVersion(version) ? defaultCompliance : JavaModelUtil.VERSION_LATEST;
 	}
 
 	public static String getExecutionEnvironmentCompliance(IExecutionEnvironment executionEnvironment) {

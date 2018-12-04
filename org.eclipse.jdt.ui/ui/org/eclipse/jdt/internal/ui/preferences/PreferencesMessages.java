@@ -11,7 +11,7 @@
  * only. The code is not compatible with any specification of the JCP.
  *
  * SPDX-License-Identifier: EPL-2.0
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
@@ -24,6 +24,7 @@
  *     				Warning option for bug 410218 - https://bugs.eclipse.org/461999
  *     Gábor Kövesdán - Contribution for Bug 350000 - [content assist] Include non-prefix matches in auto-complete suggestions
  *     Jesper S Møller - Contributions for bug 529432 - Allow JDT UI to target Java 10
+ *     Angelo Zerr <angelo.zerr@gmail.com> - [CodeMining] Provide Java References/Implementation CodeMinings - Bug 529127
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
@@ -171,6 +172,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_highlightEnclosingBrackets;
 	public static String JavaEditorPreferencePage_highlightMatchingBracket;
 	public static String JavaEditorPreferencePage_insertSingleProposalsAutomatically;
+	public static String JavaEditorPreferencePage_disableCompletionProposalTriggerChars;
 	public static String JavaEditorPreferencePage_showOnlyProposalsVisibleInTheInvocationContext;
 	public static String JavaEditorPreferencePage_presentProposalsInAlphabeticalOrder;
 	public static String JavaEditorPreferencePage_coloring_element;
@@ -313,7 +315,7 @@ public final class PreferencesMessages extends NLS {
 	public static String AppearancePreferencePage_pkgNamePatternAbbreviateEnable_label;
 	public static String AppearancePreferencePage_pkgNamePatternAbbreviate_label;
 	public static String AppearancePreferencePage_showMembersInPackagesView;
-	public static String AppearancePreferencePage_decorateTestCodeContainerIcons;	
+	public static String AppearancePreferencePage_decorateTestCodeContainerIcons;
 	public static String AppearancePreferencePage_stackViewsVerticallyInTheJavaBrowsingPerspective;
 	public static String AppearancePreferencePage_note;
 	public static String AppearancePreferencePage_preferenceOnlyEffectiveForNewPerspectives;
@@ -884,4 +886,14 @@ public final class PreferencesMessages extends NLS {
 	public static String FilteredPreferencesTree_expandAll_tooltip;
 	public static String FilterTextControl_Clear;
 	public static String FilterTextControl_ClearFilterField;
+
+	public static String JavaEditorCodeMiningConfigurationBlock_common_description;
+	public static String JavaEditorCodeMiningConfigurationBlock_enableCodeMining_label;
+	public static String JavaEditorCodeMiningConfigurationBlock_showCodeMining_atLeastOne_label;
+	public static String JavaEditorCodeMiningConfigurationBlock_section_general;
+	public static String JavaEditorCodeMiningConfigurationBlock_showReferences_label;
+	public static String JavaEditorCodeMiningConfigurationBlock_showReferences_onTypes_label;
+	public static String JavaEditorCodeMiningConfigurationBlock_showReferences_onFields_label;
+	public static String JavaEditorCodeMiningConfigurationBlock_showReferences_onMethods_label;
+	public static String JavaEditorCodeMiningConfigurationBlock_showImplementations_label;
 }

@@ -51,7 +51,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
@@ -302,7 +302,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		IMethodBinding[] overridable= null;
 		if (binding != null) {
 			final IPackageBinding pack= binding.getPackage();
-			final IMethodBinding[] methods= StubUtility2.getOverridableMethods(fUnit.getAST(), binding, false);
+			final IMethodBinding[] methods= StubUtility2Core.getOverridableMethods(fUnit.getAST(), binding, false);
 			List<IMethodBinding> list= new ArrayList<>(methods.length);
 			for (int index= 0; index < methods.length; index++) {
 				final IMethodBinding cur= methods[index];

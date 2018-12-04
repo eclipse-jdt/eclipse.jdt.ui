@@ -84,11 +84,13 @@ import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractSuperclassDescriptor;
 import org.eclipse.jdt.core.refactoring.descriptors.JavaRefactoringDescriptor;
 
+import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.IASTSharedValues;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JDTRefactoringDescriptorComment;
@@ -111,8 +113,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.preferences.formatter.FormatterProfileManager;
-
-import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 
 /**
  * Refactoring processor for the extract supertype refactoring.
@@ -437,7 +437,7 @@ public final class ExtractSupertypeProcessor extends PullUpRefactoringProcessor 
 		if (superType != null) {
 			final ITypeBinding binding= targetDeclaration.resolveBinding();
 			if (binding != null && binding.isClass()) {
-				final IMethodBinding[] bindings= StubUtility2.getVisibleConstructors(binding, true, true);
+				final IMethodBinding[] bindings= StubUtility2Core.getVisibleConstructors(binding, true, true);
 				int deprecationCount= 0;
 				for (int i= 0; i < bindings.length; i++) {
 					if (bindings[i].isDeprecated())

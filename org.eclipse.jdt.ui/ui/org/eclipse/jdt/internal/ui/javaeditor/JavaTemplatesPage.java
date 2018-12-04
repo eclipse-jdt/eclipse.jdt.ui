@@ -44,6 +44,7 @@ import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.ui.texteditor.templates.AbstractTemplatesPage;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
@@ -51,6 +52,7 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.corext.template.java.SWTContextType;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
@@ -344,6 +346,10 @@ public class JavaTemplatesPage extends AbstractTemplatesPage {
 			String[] ids= new String[] { JavaContextType.ID_ALL, JavaContextType.ID_MEMBERS, JavaContextType.ID_STATEMENTS, SWTContextType.ID_ALL, SWTContextType.ID_STATEMENTS, SWTContextType.ID_MEMBERS};
 			if (partition.equals(IJavaPartitions.JAVA_DOC))
 				ids= new String[] { JavaDocContextType.ID };
+			IJavaElement elem= EditorUtility.getEditorInputJavaElement(fJavaEditor, true);
+			if (elem != null && JavaModelUtil.MODULE_INFO_JAVA.equals(elem.getElementName())) {
+				ids= new String[] { JavaContextType.ID_MODULE };
+			}
 			return ids;
 		} catch (BadLocationException e) {
 			return new String[0];

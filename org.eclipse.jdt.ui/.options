@@ -1,5 +1,5 @@
 # Prints debug information
-org.eclipse.jdt.ui/debug=true
+org.eclipse.jdt.ui/debug=false
 
 # Prints debug information related to the AST provider
 org.eclipse.jdt.ui/debug/ASTProvider=false

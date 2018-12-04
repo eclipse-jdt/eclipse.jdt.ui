@@ -466,7 +466,7 @@ public class SemanticHighlightingPresenterCore {
 	/**
 	 * @return The semantic reconciler position's category.
 	 */
-	protected String getPositionCategory() {
+	public String getPositionCategory() {
 		return toString();
 	}
 }

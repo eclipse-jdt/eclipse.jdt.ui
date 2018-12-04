@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - add setting to specify focus selection - Bug 539919
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 
@@ -40,7 +41,7 @@ public class StringDialogField extends DialogField {
 		super();
 		fText= ""; //$NON-NLS-1$
 	}
-
+	
 	public void setContentAssistProcessor(IContentAssistProcessor processor) {
 	    fContentAssistProcessor= processor;
 	    if (fContentAssistProcessor != null && isOkToUse(fTextControl)) {
@@ -87,18 +88,35 @@ public class StringDialogField extends DialogField {
 
 	// ------- focus methods
 
-	/*
-	 * @see DialogField#setFocus
+	/**
+	 * Tries to set the focus to the string dialog field.
+	 * 
+	 * @param selectText <code>true</code> if the text should be selected in the string dialog
+	 *            field. Otherwise, the text is left unselected and the caret is placed at the end
+	 *            of the text
+	 * @return <code>true</code> if the dialog field can take focus
+	 * @see StringDialogField#setFocus()
 	 */
-	@Override
-	public boolean setFocus() {
+	public boolean setFocus(boolean selectText) {
 		if (isOkToUse(fTextControl)) {
 			fTextControl.setFocus();
-			fTextControl.setSelection(0, fTextControl.getText().length());
+			if (selectText) {
+				fTextControl.setSelection(0, fTextControl.getText().length());
+			} else {
+				fTextControl.setSelection(fTextControl.getText().length());
+			}
 		}
 		return true;
 	}
 
+	/**
+	 * @see StringDialogField#setFocus(boolean)
+	 */
+	@Override
+	public boolean setFocus() {
+		return setFocus(true);
+	}
+	
 	// ------- ui creation
 
 	/**

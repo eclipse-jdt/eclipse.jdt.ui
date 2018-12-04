@@ -17,10 +17,6 @@ package org.eclipse.jdt.ui.tests.refactoring.nls;
 import java.io.File;
 import java.util.Properties;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
@@ -51,12 +47,16 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.manipulation.SharedASTProviderCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
 
-import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 
 /**
@@ -92,7 +92,7 @@ public class NLSHintHelperTest extends TestCase {
 		IPackageFragment pkg= fLibrary.getPackageFragment("pkg");
 		IClassFile classFile= pkg.getClassFile("Client.class");
 		IRegion region= new Region(648, 4);
-		CompilationUnit ast= SharedASTProvider.getAST(classFile, SharedASTProvider.WAIT_YES, null);
+		CompilationUnit ast= SharedASTProviderCore.getAST(classFile, SharedASTProviderCore.WAIT_YES, null);
 		AccessorClassReference accessor= NLSHintHelper.getAccessorClassReference(ast, region);
 		assertNotNull(accessor);
 		Properties properties= NLSHintHelper.getProperties(fJProject, accessor);
@@ -420,7 +420,7 @@ public class NLSHintHelperTest extends TestCase {
         ICompilationUnit  cu= pack.createCompilationUnit(className + ".java", source, false, null);
 
         // Get type binding
-        CompilationUnit ast= SharedASTProvider.getAST(cu, SharedASTProvider.WAIT_YES, null);
+        CompilationUnit ast= SharedASTProviderCore.getAST(cu, SharedASTProviderCore.WAIT_YES, null);
         ASTNode node= NodeFinder.perform(ast, cu.getType(className).getSourceRange());
         ITypeBinding typeBinding= ((TypeDeclaration)node).resolveBinding();
 

@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
@@ -2848,14 +2849,27 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 
 	private static Expression getNextSiblingExpression(Expression expression) {
 		InfixExpression parentInfixExpression= (InfixExpression) expression.getParent();
+		List<Expression> extendedOperands= parentInfixExpression.extendedOperands();
 		Expression sibiling;
 		if (expression.equals(parentInfixExpression.getLeftOperand())) {
 			sibiling= parentInfixExpression.getRightOperand();
 		} else if (expression.equals(parentInfixExpression.getRightOperand())) {
-			if (parentInfixExpression.getParent() instanceof InfixExpression)
+			if (parentInfixExpression.getParent() instanceof InfixExpression) {
 				sibiling= getNextSiblingExpression(parentInfixExpression);
-			else
+			} else if (extendedOperands.size() > 0) {
+				sibiling= extendedOperands.get(0);
+			} else {
 				sibiling= null;
+			}
+		} else if (extendedOperands.contains(expression)) {
+			sibiling= null;
+			ListIterator<Expression> it= extendedOperands.listIterator();
+			while (it.hasNext()) {
+				if (expression.equals(it.next()) && it.hasNext()) {
+					sibiling= it.next();
+					break;
+				}
+			}
 		} else {
 			sibiling= null;
 		}

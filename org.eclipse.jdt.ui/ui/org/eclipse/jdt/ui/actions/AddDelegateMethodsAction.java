@@ -70,7 +70,7 @@ import org.eclipse.jdt.internal.core.manipulation.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation.DelegateEntry;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -171,7 +171,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 			final ITypeBinding binding= ASTNodes.getTypeBinding(astRoot, type);
 			if (binding != null) {
-				fDelegateEntries= StubUtility2.getDelegatableMethods(binding);
+				fDelegateEntries= StubUtility2Core.getDelegatableMethods(binding);
 
 				List<IVariableBinding> expanded= new ArrayList<>();
 				for (int index= 0; index < fields.length; index++) {

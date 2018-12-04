@@ -1169,16 +1169,13 @@ public class UnresolvedElementsSubProcessor {
 			for (IPackageFragment enclosingPackage : matchingPackageFragments) {
 				if (enclosingPackage.isReadOnly()) { // This is to handle the case where the enclosingPackage belongs to a jar file
 					IPackageFragmentRoot root= (IPackageFragmentRoot) enclosingPackage.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-					if (root != null) {
-						projectModule= root.getModuleDescription();
-					}
+					projectModule= ModuleCorrectionsSubProcessor.getModuleDescription(root);
 				} else {
 					IJavaProject project= enclosingPackage.getJavaProject();
-					if (project != null && JavaModelUtil.is9OrHigher(project)) {
-						projectModule= project.getModuleDescription();
-					}
+					projectModule= ModuleCorrectionsSubProcessor.getModuleDescription(project);
 				}
-				if (projectModule != null && projectModule.exists() && !projectModule.equals(currentModuleDescription)) {
+				if (projectModule != null && ((projectModule.exists() && !projectModule.equals(currentModuleDescription))
+						|| projectModule.isAutoModule())) {
 					String moduleName= projectModule.getElementName();
 					if (!modules.contains(moduleName)) {
 						String[] args= { moduleName };

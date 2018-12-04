@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NameQualifiedType;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.provisional.JavaModelAccess;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -368,6 +369,32 @@ public class ModuleCorrectionsSubProcessor {
 		return null;
 	}
 	
-	
+	public static IModuleDescription getModuleDescription(IJavaElement element) {
+		IModuleDescription projectModule= null;
+		try {
+			switch (element.getElementType()) {
+				case IJavaElement.JAVA_PROJECT:
+					IJavaProject project= (IJavaProject) element;
+					if (JavaModelUtil.is9OrHigher(project)) {
+						projectModule= project.getModuleDescription();
+					}
+					break;
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+					IPackageFragmentRoot root= (IPackageFragmentRoot) element;
+					projectModule= root.getModuleDescription();
+					break;
+				default:
+					//do nothing
+			}
+			if (projectModule == null) {
+				projectModule= JavaModelAccess.getAutomaticModuleDescription(element);
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		} catch (IllegalArgumentException e) {
+			JavaPlugin.log(e);
+		}
+		return projectModule;
+	}
 
 }

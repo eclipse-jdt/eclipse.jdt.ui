@@ -41,7 +41,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationMessages;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2Core;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -125,7 +125,7 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 		if (replace != null) {
 			rewriter.replace(replace, method, null);
 		} else {
-			ASTNode insertion= StubUtility2.getNodeToInsertBefore(rewriter, fInsert);
+			ASTNode insertion= StubUtility2Core.getNodeToInsertBefore(rewriter, fInsert);
 			if (insertion != null)
 				rewriter.insertBefore(method, insertion, null);
 			else

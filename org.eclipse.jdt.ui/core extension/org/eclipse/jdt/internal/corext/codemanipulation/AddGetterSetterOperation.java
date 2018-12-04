@@ -185,7 +185,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 				removeExistingAccessor(existing, rewrite);
 			} else
 				sibling= fInsert;
-			ASTNode insertion= StubUtility2.getNodeToInsertBefore(rewrite, sibling);
+			ASTNode insertion= StubUtility2Core.getNodeToInsertBefore(rewrite, sibling);
 			addNewAccessor(type, field, GetterSetterUtil.getGetterStub(field, name, fSettings.createComments, fVisibility | (field.getFlags() & Flags.AccStatic)), rewrite, insertion);
 		}
 	}
@@ -210,7 +210,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 				removeExistingAccessor(existing, rewrite);
 			} else
 				sibling= fInsert;
-			ASTNode insertion= StubUtility2.getNodeToInsertBefore(rewrite, sibling);
+			ASTNode insertion= StubUtility2Core.getNodeToInsertBefore(rewrite, sibling);
 			addNewAccessor(type, field, GetterSetterUtil.getSetterStub(field, name, fSettings.createComments, fVisibility | (field.getFlags() & Flags.AccStatic)), rewrite, insertion);
 			if (Flags.isFinal(field.getFlags())) {
 				FieldDeclaration fieldDecl= ASTNodes.getParent(NodeFinder.perform(fASTRoot, field.getNameRange()), FieldDeclaration.class);

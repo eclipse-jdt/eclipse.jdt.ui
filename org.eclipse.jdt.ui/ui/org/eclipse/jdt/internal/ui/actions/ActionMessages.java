@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2017 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - Check whether enclosing instance implements hashCode and equals - https://bugs.eclipse.org/539900
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
@@ -173,6 +174,7 @@ public final class ActionMessages extends NLS {
 	public static String GenerateMethodAbstractAction_final_method_in_superclass_error;
 	public static String GenerateMethodAbstractAction_already_has_this_method_error;
 	public static String GenerateMethodAbstractAction_super_class;
+	public static String GenerateMethodAbstractAction_enclosing_class;
 	public static String GenerateHashCodeEqualsAction_field_type;
 	public static String GenerateHashCodeEqualsAction_equals;
 	public static String GenerateHashCodeEqualsAction_hashCode;
@@ -281,7 +283,7 @@ public final class ActionMessages extends NLS {
 	
 	/**
 	 * DO NOT REMOVE, used in a product, see https://bugs.eclipse.org/296836 .
-	 * @deprecated As of 3.6, replaced by {@link #OrganizeImportsAction_summary_added_singular} and {@link #OrganizeImportsAction_summary_added_plural} 
+	 * @deprecated As of 3.6, replaced by {@link #OrganizeImportsAction_summary_added_singular} and {@link #OrganizeImportsAction_summary_added_plural}
 	 */
 	@Deprecated
 	public static String OrganizeImportsAction_summary_added;
@@ -439,6 +441,8 @@ public final class ActionMessages extends NLS {
 	public static String CollapsAllAction_tooltip;
 	public static String CollapsAllAction_description;
 
+	public static String CreateModuleInfoAction_convert_message_compliance;
+	public static String CreateModuleInfoAction_convert_title;
 	public static String CreateModuleInfoAction_error_message_compliance;
 	public static String CreateModuleInfoAction_error_message_no_source_folder;
 	public static String CreateModuleInfoAction_error_title;

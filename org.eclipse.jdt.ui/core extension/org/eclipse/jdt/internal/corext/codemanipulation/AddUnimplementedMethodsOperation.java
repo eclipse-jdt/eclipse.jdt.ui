@@ -199,7 +199,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 
 			IMethodBinding[] methodsToImplement= fMethodsToImplement;
 			if (methodsToImplement == null) {
-				methodsToImplement= StubUtility2.getUnimplementedMethods(currTypeBinding);
+				methodsToImplement= StubUtility2Core.getUnimplementedMethods(currTypeBinding);
 			}
 
 			Arrays.sort(methodsToImplement, new MethodsSourcePositionComparator(fType));

@@ -222,7 +222,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 
 			IMethodBinding[] toImplement= fConstructorsToImplement;
 			if (toImplement == null) {
-				toImplement= StubUtility2.getVisibleConstructors(currTypeBinding, true, true);
+				toImplement= StubUtility2Core.getVisibleConstructors(currTypeBinding, true, true);
 			}
 
 			int deprecationCount= 0;

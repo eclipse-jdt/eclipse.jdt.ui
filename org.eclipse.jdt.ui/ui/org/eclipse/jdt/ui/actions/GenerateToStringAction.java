@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2016 Mateusz Matela and others.
+ * Copyright (c) 2008, 2018 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
  *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] toString() generator: Fields in declaration order - https://bugs.eclipse.org/bugs/show_bug.cgi?id=279924
+  *    Pierre-Yves B. <pyvesdev@gmail.com> - Check whether enclosing instance implements hashCode and equals - https://bugs.eclipse.org/539900
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
@@ -40,6 +41,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.GenerateToStringOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration.ToStringGenerationSettings;
@@ -52,7 +54,6 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.dialogs.GenerateToStringDialog;
 import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 
 /**
  * Adds method implementations for <code>{@link java.lang.Object#toString()}</code> The action opens a
@@ -141,7 +142,7 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 
 	@Override
 	RefactoringStatus checkMember(Object object) {
-		// no conditions need to be checked 
+		// no conditions need to be checked
 		return new RefactoringStatus();
 	}
 
@@ -159,6 +160,12 @@ public class GenerateToStringAction extends GenerateMethodAbstractAction {
 					ActionMessages.GenerateToStringAction_tostring }), createRefactoringStatusContext(superclass.getJavaElement()));
 		}
 		return status;
+	}
+
+	@Override
+	RefactoringStatus checkEnclosingClass(ITypeBinding enclosingClass) {
+		// no conditions need to be checked
+		return new RefactoringStatus();
 	}
 
 	@Override

@@ -38,9 +38,8 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.core.manipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -180,7 +179,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 				ImportRewriteContext context= new ContextSensitiveImportRewriteContext(typeDecl, importRewrite);
 				MethodDeclaration stub= StubUtility2.createConstructorStub(cu, astRewrite, importRewrite, context, fParentType, fOmitSuper ? null : fConstructorBinding, fFieldBindings, fVisibility, fSettings);
 				if (stub != null) {
-					ASTNode insertion= StubUtility2.getNodeToInsertBefore(listRewriter, fInsert);
+					ASTNode insertion= StubUtility2Core.getNodeToInsertBefore(listRewriter, fInsert);
 					if (insertion != null && insertion.getParent() == typeDecl) {
 						listRewriter.insertBefore(stub, insertion, null);
 					} else {

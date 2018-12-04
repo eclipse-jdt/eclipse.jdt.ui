@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -48,6 +48,8 @@ public class ContentAssistPreference {
 	private final static String PARAMETERS_BACKGROUND=  PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND;
 	/** Preference key for content assist auto insert */
 	private final static String AUTOINSERT= PreferenceConstants.CODEASSIST_AUTOINSERT;
+	/** Preference key to disable content assist insertion trigger chars */
+	private final static String DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS = PreferenceConstants.CODEASSIST_DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS;
 
 	/** Preference key for java content assist auto activation triggers */
 	private final static String AUTOACTIVATION_TRIGGERS_JAVA= PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA;
@@ -158,6 +160,8 @@ public class ContentAssistPreference {
 		enabled= store.getBoolean(USE_COLORED_LABELS);
 		assistant.enableColoredLabels(enabled);
 
+		boolean completionProposaltriggerCharsDisabled = store.getBoolean(DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS);
+		assistant.enableCompletionProposalTriggerChars(!completionProposaltriggerCharsDisabled);
 
 		configureJavaProcessor(assistant, store);
 		configureJavaDocProcessor(assistant, store);
@@ -232,6 +236,9 @@ public class ContentAssistPreference {
 		} else if (USE_COLORED_LABELS.equals(p)) {
 			boolean enabled= store.getBoolean(USE_COLORED_LABELS);
 			assistant.enableColoredLabels(enabled);
+		} else if (DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS.equals(p)) {
+			boolean disabled = store.getBoolean(DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS);
+			assistant.enableCompletionProposalTriggerChars(!disabled);
 		}
 
 		changeJavaProcessor(assistant, store, p);

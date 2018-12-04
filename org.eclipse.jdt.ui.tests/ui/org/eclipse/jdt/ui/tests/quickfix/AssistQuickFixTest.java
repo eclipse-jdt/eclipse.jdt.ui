@@ -27,6 +27,8 @@ import java.util.Map;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
+import org.eclipse.core.internal.expressions.Messages;
+
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -50,6 +52,7 @@ import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.correction.NewJUnitTestCaseProposal;
 import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AssignToVariableAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedNamesAssistProposal;
@@ -3303,7 +3306,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] { ex1, ex2, ex3, ex4 });
 	}
 	
-	private static final Class<?>[] FILTER_EQ= { LinkedNamesAssistProposal.class, RenameRefactoringProposal.class, AssignToVariableAssistProposal.class };
+	private static final Class<?>[] FILTER_EQ= { LinkedNamesAssistProposal.class, RenameRefactoringProposal.class, AssignToVariableAssistProposal.class, NewJUnitTestCaseProposal.class };
 
 	public void testInvertEquals1() throws Exception {
         IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -6382,7 +6385,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		AssistContext context= getCorrectionContext(cu, offset, 1);
 		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
 
-		assertNumberOfProposals(proposals, 0);
+		assertNumberOfProposals(proposals, 1);
 		assertProposalDoesNotExist(proposals, CHANGE_MODIFIER_TO_FINAL);
 	}
 
@@ -10586,6 +10589,89 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 0);
 		assertProposalDoesNotExist(proposals, "Convert to static import");
 		assertProposalDoesNotExist(proposals, "Convert to static import (replace all occurrences)");
+	}
+
+	public void testDoesntRemoveImportWithReferenceFromClassInstanceCreation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class T {\n");
+		buf.append("    public static void foo() { };\n");
+		buf.append("    public void bar() { };\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("T.java", buf.toString(), false, null);
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("\n");
+		buf.append("import test1.T;\n");
+		buf.append("public class S {\n");
+		buf.append("    public S() {\n");
+		buf.append("        T.foo();\n");
+		buf.append("        T.foo();\n");
+		buf.append("        new T().foo();\n");
+		buf.append("        new T().bar();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("S.java", buf.toString(), false, null);
+
+		String selection= "foo";
+		int offset= buf.toString().indexOf(selection);
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		ArrayList<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		StringBuffer expectation= new StringBuffer();
+		expectation.append("package test2;\n");
+		expectation.append("\n");
+		expectation.append("import static test1.T.foo;\n");
+		expectation.append("\n");
+		expectation.append("import test1.T;\n");
+		expectation.append("public class S {\n");
+		expectation.append("    public S() {\n");
+		expectation.append("        foo();\n");
+		expectation.append("        T.foo();\n");
+		expectation.append("        new T().foo();\n");
+		expectation.append("        new T().bar();\n");
+		expectation.append("    }\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import", proposals);
+
+		expectation= new StringBuffer();
+		expectation.append("package test2;\n");
+		expectation.append("\n");
+		expectation.append("import static test1.T.foo;\n");
+		expectation.append("\n");
+		expectation.append("import test1.T;\n");
+		expectation.append("public class S {\n");
+		expectation.append("    public S() {\n");
+		expectation.append("        foo();\n");
+		expectation.append("        foo();\n");
+		expectation.append("        new T().foo();\n");
+		expectation.append("        new T().bar();\n");
+		expectation.append("    }\n");
+		expectation.append("}\n");
+		assertProposalPreviewEquals(expectation.toString(), "Convert to static import (replace all occurrences)", proposals);
+	}
+
+	public void testCreateJUnitTestCase() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		String string= "E";
+		int offset= buf.toString().indexOf(string);
+		AssistContext context= getCorrectionContext(cu, offset, string.length());
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertProposalExists(proposals, Messages.format(CorrectionMessages.QuickAssistProcessor_create_new_junit_test_case, "E.java"));
 	}
 
 }

@@ -16,7 +16,6 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.source.ISourceViewer;
-import org.eclipse.jface.text.source.ISourceViewerExtension5;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -45,8 +44,8 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 
 	/**
 	 * Install this reconciler on the given editor.
-	 * 
-	 * @param editor       the editor
+	 *
+	 * @param editor the editor
 	 * @param sourceViewer the source viewer
 	 */
 	public void install(JavaEditor editor, ISourceViewer sourceViewer) {
@@ -55,8 +54,8 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 
 		if (fEditor instanceof CompilationUnitEditor) {
 			((CompilationUnitEditor) fEditor).addReconcileListener(this);
-			updateCodeMinings();
 		}
+		updateCodeMinings();
 	}
 
 	/**
@@ -73,9 +72,9 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 	/**
 	 * Update Java code mining in the Java editor.
 	 */
-	private void updateCodeMinings() {
-		if (fSourceViewer instanceof ISourceViewerExtension5) {
-			((ISourceViewerExtension5) fSourceViewer).updateCodeMinings();
+	void updateCodeMinings() {
+		if (fSourceViewer instanceof JavaSourceViewer) {
+			((JavaSourceViewer) fSourceViewer).doUpdateCodeMinings();
 		}
 	}
 

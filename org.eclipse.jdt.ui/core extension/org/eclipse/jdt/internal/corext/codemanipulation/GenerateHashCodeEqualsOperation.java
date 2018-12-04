@@ -327,7 +327,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 				ICompilationUnit cu= (ICompilationUnit) fUnit.getJavaElement();
 
-				ASTNode insertion= StubUtility2.getNodeToInsertBefore(rewriter, fInsert);
+				ASTNode insertion= StubUtility2Core.getNodeToInsertBefore(rewriter, fInsert);
 
 				// equals(..)
 				ITypeBinding[] objectAsParam= { declaration.getAST().resolveWellKnownType(JAVA_LANG_OBJECT) };

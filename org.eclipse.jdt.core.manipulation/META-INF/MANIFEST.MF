@@ -46,6 +46,7 @@ Export-Package: org.eclipse.jdt.core.manipulation,
  org.eclipse.jdt.internal.ui.javaeditor;x-friends:="org.eclipse.jdt.debug.ui,org.eclipse.jdt.junit,org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.preferences;x-friends:="org.eclipse.jdt.ui",
  org.eclipse.jdt.internal.ui.text;x-friends:="org.eclipse.jdt.ui",
- org.eclipse.jdt.internal.ui.text.correction;x-friends:="org.eclipse.jdt.ui"
+ org.eclipse.jdt.internal.ui.text.correction;x-friends:="org.eclipse.jdt.ui",
+ org.eclipse.jdt.internal.ui.text.correction.proposals;x-friends:="org.eclipse.jdt.ui"
 Import-Package: com.ibm.icu.text
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

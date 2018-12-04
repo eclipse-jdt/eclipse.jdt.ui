@@ -551,4 +551,48 @@ public class AdvancedQuickAssistTest17 extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 	}
 	
+	public void testConvertIfToSwitch() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static boolean isOdd(String number) {\n");
+		buf.append("        if (number.equals(\"one\") || number.equals(\"three\") || number.equals(\"five\") || number.equals(\"nine\")) {\n");
+		buf.append("            return true;\n");
+		buf.append("        } else {\n");
+		buf.append("            return false;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List<IJavaCompletionProposal> proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 6);
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public static boolean isOdd(String number) {\n");
+		buf.append("        switch (number) {\n");
+		buf.append("            case \"one\" :\n");
+		buf.append("            case \"three\" :\n");
+		buf.append("            case \"five\" :\n");
+		buf.append("            case \"nine\" :\n");
+		buf.append("                return true;\n");
+		buf.append("            default :\n");
+		buf.append("                return false;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] { expected1 });
+	}
+
 }
