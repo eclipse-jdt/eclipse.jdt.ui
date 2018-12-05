@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -13,6 +13,7 @@
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Generation of equals and hashcode with java 7 Objects.equals and Objects.hashcode - https://bugs.eclipse.org/424214
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Different behaviour when generating hashCode and equals - https://bugs.eclipse.org/539589
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Confusing name when generating hashCode and equals with outer type - https://bugs.eclipse.org/539872
+ *     Pierre-Yves B. <pyvesdev@gmail.com> - Allow hashCode and equals generation when no fields but a super/enclosing class that implements them - https://bugs.eclipse.org/539901
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core.source;
 
@@ -2216,6 +2217,64 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"		return Objects.equals(aString, other.aString);\r\n" +
 				"	}\r\n" +
 				"\r\n" +
+				"}\r\n" +
+				"";
+
+		compareSource(expected, a.getSource());
+	}
+
+	/**
+	 * Test implementation based only on super class
+	 * 
+	 * @throws Exception
+	 */
+	public void testSubTypeNoFields() throws Exception {
+		fPackageP.createCompilationUnit("B.java", "package p;\r\n" +
+				"\r\n" +
+				"public class B {\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		return 1;\r\n" +
+				"	}\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		return obj instanceof B;\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		ICompilationUnit a= fPackageP.createCompilationUnit("A.java", "package p;\r\n" +
+				"\r\n" +
+				"public class A extends B {\r\n" +
+				"}\r\n" +
+				"", true, null);
+
+		runOperation(a.getType("A"), new IField[0], false, false);
+
+		String expected= "package p;\r\n" +
+				"\r\n" +
+				"public class A extends B {\r\n" +
+				"\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#hashCode()\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public int hashCode() {\r\n" +
+				"		return super.hashCode();\r\n" +
+				"	}\r\n" +
+				"\r\n" +
+				"	/* (non-Javadoc)\r\n" +
+				"	 * @see java.lang.Object#equals(java.lang.Object)\r\n" +
+				"	 */\r\n" +
+				"	@Override\r\n" +
+				"	public boolean equals(Object obj) {\r\n" +
+				"		if (this == obj)\r\n" +
+				"			return true;\r\n" +
+				"		if (!super.equals(obj))\r\n" +
+				"			return false;\r\n" +
+				"		if (getClass() != obj.getClass())\r\n" +
+				"			return false;\r\n" +
+				"		return true;\r\n" +
+				"	}\r\n" +
 				"}\r\n" +
 				"";
 
