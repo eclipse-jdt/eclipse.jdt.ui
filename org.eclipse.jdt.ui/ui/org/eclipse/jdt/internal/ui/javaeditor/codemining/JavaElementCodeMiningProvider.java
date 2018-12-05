@@ -31,6 +31,7 @@ import org.eclipse.jface.text.source.ISourceViewerExtension5;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -163,15 +164,22 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 				}
 			}
 			if (showImplementations) {
+				// support methods, classes, and interfaces
+				boolean addMining= false;
 				if (element instanceof IType) {
 					IType type= (IType) element;
 					if (type.isInterface() || type.isClass()) {
-						try {
-							minings.add(new JavaImplementationCodeMining(type, (JavaEditor) textEditor, viewer.getDocument(), this,
-									showAtLeastOne));
-						} catch (BadLocationException e) {
-							// Should never occur
-						}
+						addMining= true;
+					}
+				} else if (element instanceof IMethod) {
+					addMining= true;
+				}
+				if (addMining) {
+					try {
+						minings.add(new JavaImplementationCodeMining(element, (JavaEditor) textEditor, viewer.getDocument(), this,
+								showAtLeastOne));
+					} catch (BadLocationException e) {
+						// Should never occur
 					}
 				}
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -10,6 +10,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Red Hat Inc. - add support for restricting to sub-types
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
@@ -51,6 +52,8 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
  */
 public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 
+	private boolean onlySubtypes;
+
 	/**
 	 * Creates a new <code>FindDeclarationsInHierarchyAction</code>. The action
 	 * requires that the selection provided by the site's selection provider is of type
@@ -70,6 +73,19 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 	 */
 	public FindDeclarationsInHierarchyAction(JavaEditor editor) {
 		super(editor);
+	}
+
+	/**
+	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the Java editor
+	 * @param onlySubtypes true if only sub-types should be considered in search
+	 *
+	 * @noreference This constructor is not intended to be referenced by clients.
+	 * @since 3.18
+	 */
+	public FindDeclarationsInHierarchyAction(JavaEditor editor, boolean onlySubtypes) {
+		super(editor);
+		this.onlySubtypes= onlySubtypes;
 	}
 
 	@Override
@@ -93,7 +109,9 @@ public class FindDeclarationsInHierarchyAction extends FindDeclarationsAction {
 		if (type == null) {
 			return super.createQuery(element);
 		}
-		IJavaSearchScope scope= SearchEngine.createHierarchyScope(type);
+		IJavaSearchScope scope= onlySubtypes
+				? SearchEngine.createStrictHierarchyScope(null, type, true, false, null)
+				: SearchEngine.createHierarchyScope(type);
 		String description= factory.getHierarchyScopeDescription(type);
 		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
 	}
