@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010, 2018 Mateusz Matela and others.
+ * Copyright (c) 2010, 2019 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -11,6 +11,7 @@
  * Contributors:
  *     Mateusz Matela <mateusz.matela@gmail.com> - [code manipulation] [dcr] toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=26070
  *     Mateusz Matela <mateusz.matela@gmail.com> - [toString] finish toString() builder wizard - https://bugs.eclipse.org/bugs/show_bug.cgi?id=267710
+ *     Red Hat Inc. - moved to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation.tostringgeneration;
 
@@ -237,7 +238,7 @@ public class GenerateToStringOperation implements IWorkspaceRunnable {
 	 * @return a ready to use <code>GenerateToStringOperation</code> object
 	 */
 	public static GenerateToStringOperation createOperation(ITypeBinding typeBinding, Object[] selectedBindings, CompilationUnit unit, IJavaElement elementPosition,
-			ToStringGenerationSettings settings) {
+			ToStringGenerationSettingsCore settings) {
 		AbstractToStringGenerator generator= createToStringGenerator(settings.toStringStyle);
 		ToStringTemplateParser parser= createTemplateParser(settings.toStringStyle);
 		parser.parseTemplate(settings.stringFormatTemplate);
