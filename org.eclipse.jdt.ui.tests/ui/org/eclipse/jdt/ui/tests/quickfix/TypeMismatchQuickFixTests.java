@@ -1050,6 +1050,47 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
+	public void testTypeMismatchInAssignment4() throws Exception {
+		// test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=540927
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import java.util.Map.Entry;\n");
+		buf.append("import java.util.Set;\n");
+		buf.append("public class E {\n");
+		buf.append("    static void foo(Map<Integer, ? extends Number> path) {\n");
+		buf.append("        Set<Entry<Integer, ? extends Number>> s = path.entrySet();\n");
+		buf.append("        System.out.println(s);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import java.util.Map.Entry;\n");
+		buf.append("import java.util.Set;\n");
+		buf.append("public class E {\n");
+		buf.append("    static void foo(Map<Integer, ? extends Number> path) {\n");
+		buf.append("        Set<?> s = path.entrySet();\n");
+		buf.append("        System.out.println(s);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertEqualString(preview1, expected1);
+	}
+
 	public void testTypeMismatchInExpression() throws Exception {
 
 		IPackageFragment pack0= fSourceFolder.createPackageFragment("test0", false, null);

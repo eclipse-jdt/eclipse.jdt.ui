@@ -52,6 +52,8 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.TypeLocation;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.DimensionRewrite;
@@ -65,9 +67,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
-
-import org.eclipse.jdt.internal.core.manipulation.dom.ASTResolving;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
@@ -116,7 +115,13 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 		if (isNewTypeVar) {
 			typeName= VAR_TYPE;
 		} else {
-			typeName= BindingLabelProvider.getBindingLabel(fNewType, JavaElementLabels.ALL_DEFAULT);
+			// Bug 540927 - if type contains nested capture, we need to get the name
+			// that the type will eventually be resolved to
+			if (containsNestedCapture(fNewType, false)) {
+				typeName= getNewTypeString();
+			} else {
+				typeName= BindingLabelProvider.getBindingLabel(fNewType, JavaElementLabels.ALL_DEFAULT);
+			}
 		}
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding varBinding= (IVariableBinding) binding;
@@ -136,6 +141,50 @@ public class TypeChangeCorrectionProposal extends LinkedCorrectionProposal {
 			fTypeLocation= TypeLocation.RETURN_TYPE;
 			setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_method_name, args));
 		}
+	}
+	
+	private boolean containsNestedCapture(ITypeBinding binding, boolean isNested) {
+		if (binding == null || binding.isPrimitive() || binding.isTypeVariable()) {
+			return false;
+		}
+		if (binding.isCapture()) {
+			if (isNested) {
+				return true;
+			}
+			return containsNestedCapture(binding.getWildcard(), true);
+		}
+		if (binding.isWildcardType()) {
+			return containsNestedCapture(binding.getBound(), true);
+		}
+		if (binding.isArray()) {
+			return containsNestedCapture(binding.getElementType(), true);
+		}
+		ITypeBinding[] typeArguments= binding.getTypeArguments();
+		for (int i= 0; i < typeArguments.length; i++) {
+			if (containsNestedCapture(typeArguments[i], true)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private String getNewTypeString() {
+		ASTNode boundNode= fAstRoot.findDeclaringNode(fBinding);
+		ASTNode declNode= null;
+		CompilationUnit newRoot= fAstRoot;
+		if (boundNode != null) {
+			declNode= boundNode; // is same CU
+		} else {
+			newRoot= ASTResolving.createQuickFixAST(getCompilationUnit(), null);
+			declNode= newRoot.findDeclaringNode(fBinding.getKey());
+		}
+		if (declNode != null) {
+			ImportRewrite imports= createImportRewrite(newRoot);
+			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(newRoot, declNode.getStartPosition(), imports);
+
+			return imports.addImport(fNewType, context);
+		}
+		return BindingLabelProvider.getBindingLabel(fNewType, JavaElementLabels.ALL_DEFAULT);
 	}
 
 	@Override
