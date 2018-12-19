@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -420,6 +421,9 @@ public class ConvertForLoopOperation extends ConvertLoopOperation {
 			body.accept(new GenericVisitor() {
 				@Override
 				protected boolean visitNode(ASTNode node) {
+					if (node instanceof ContinueStatement) {
+						return false;
+					}
 					if (node instanceof Name) {
 						Name name= (Name)node;
 						IBinding nameBinding= name.resolveBinding();
