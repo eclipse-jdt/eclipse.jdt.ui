@@ -1417,10 +1417,12 @@ public class FormatterModifyDialog extends ModifyDialog {
 				alignPref.addLabel(FormatterMessages.FormatterModifyDialog_comments_pref_javadoc_align, true, fTree.getIndent(parent));
 				fTree.addChild(parent, alignPref);
 
-				fTree.addCheckbox(alignPref, FormatterMessages.FormatterModifyDialog_comments_pref_indent_description_after_param,
-						DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION, CheckboxPreference.FALSE_TRUE);
 				fTree.addCheckbox(alignPref, FormatterMessages.FormatterModifyDialog_comments_pref_new_line_after_param_tags,
 						DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER, CheckboxPreference.DO_NOT_INSERT_INSERT);
+				fTree.addCheckbox(alignPref, FormatterMessages.FormatterModifyDialog_comments_pref_indent_description_after_param,
+						DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION, CheckboxPreference.FALSE_TRUE);
+				fTree.addCheckbox(alignPref, FormatterMessages.FormatterModifyDialog_comments_pref_indent_other_tag_descriptions,
+						DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_TAG_DESCRIPTION, CheckboxPreference.FALSE_TRUE);
 				return alignPref;
 			}
 		};
