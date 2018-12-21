@@ -16,9 +16,11 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.ISourceViewerExtension5;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.ui.javaeditor.codemining.JavaElementCodeMiningProvider;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 
 /**
@@ -30,11 +32,12 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 	private JavaEditor fEditor;
 
 	/** The source viewer this Java code mining reconciler is installed on */
-	private ISourceViewer fSourceViewer;
+	private ISourceViewerExtension5 fSourceViewer;
 
 	@Override
 	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
-		updateCodeMinings();
+		JavaElementCodeMiningProvider.markReconciledViewer(fSourceViewer);
+		fSourceViewer.updateCodeMinings();
 	}
 
 	@Override
@@ -50,32 +53,29 @@ public class JavaCodeMiningReconciler implements IJavaReconcilingListener {
 	 */
 	public void install(JavaEditor editor, ISourceViewer sourceViewer) {
 		fEditor= editor;
-		fSourceViewer= sourceViewer;
+		if (sourceViewer instanceof ISourceViewerExtension5) {
+			fSourceViewer= (ISourceViewerExtension5)sourceViewer;
+		} else {
+			uninstall();
+			return;
+		}
 
 		if (fEditor instanceof CompilationUnitEditor) {
 			((CompilationUnitEditor) fEditor).addReconcileListener(this);
 		}
-		updateCodeMinings();
+		fSourceViewer.updateCodeMinings();
 	}
 
 	/**
 	 * Uninstall this reconciler from the editor.
 	 */
 	public void uninstall() {
+		JavaElementCodeMiningProvider.discardViewer(fSourceViewer);
 		if (fEditor instanceof CompilationUnitEditor) {
 			((CompilationUnitEditor) fEditor).removeReconcileListener(this);
 		}
 		fEditor= null;
 		fSourceViewer= null;
-	}
-
-	/**
-	 * Update Java code mining in the Java editor.
-	 */
-	void updateCodeMinings() {
-		if (fSourceViewer instanceof JavaSourceViewer) {
-			((JavaSourceViewer) fSourceViewer).doUpdateCodeMinings();
-		}
 	}
 
 }

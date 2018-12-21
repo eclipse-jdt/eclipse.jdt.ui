@@ -12,7 +12,9 @@ package org.eclipse.jdt.internal.ui.javaeditor.codemining;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -21,6 +23,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.codemining.AbstractCodeMiningProvider;
 import org.eclipse.jface.text.codemining.ICodeMining;
+import org.eclipse.jface.text.source.ISourceViewerExtension5;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -46,6 +49,12 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesPropertyTester;
  * @since 3.16
  */
 public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
+
+	/**
+	 * Stores the set of viewers for which source is reconciled and requests
+	 * for references can be performed.
+	 */
+	private static final Set<ISourceViewerExtension5> reconciledViewers = new HashSet<>();
 
 	private final boolean showAtLeastOne;
 
@@ -76,6 +85,13 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 			IProgressMonitor monitor) {
 		if (!editorEnabled) {
 			return CompletableFuture.completedFuture(Collections.emptyList());
+		}
+		if (viewer instanceof ISourceViewerExtension5) {
+			ISourceViewerExtension5 codeMiningViewer = (ISourceViewerExtension5)viewer;
+			if (!reconciledViewers.contains(codeMiningViewer)) {
+				// the provider isn't able to return code minings for non-reconciled viewerss
+				return CompletableFuture.completedFuture(Collections.emptyList());
+			}
 		}
 		return CompletableFuture.supplyAsync(() -> {
 			monitor.isCanceled();
@@ -157,5 +173,25 @@ public class JavaElementCodeMiningProvider extends AbstractCodeMiningProvider {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Marks the content of the viewer is reconciled with AST. This is
+	 * required for the code minings to be computed.
+	 * If code minings are requested on a viewer which wasn't marked as
+	 * reconciled via this method, the provider skips the queries and
+	 * returns an empty list.
+	 * @param viewer a viewer with reconciled input.
+	 */
+	public static void markReconciledViewer(ISourceViewerExtension5 viewer) {
+		reconciledViewers.add(viewer);
+	}
+
+	/**
+	 * Removes a viewer from the list of viewers the provider will process.
+	 * @param viewer the viewer to stop providing minings for.
+	 */
+	public static void discardViewer(ISourceViewerExtension5 viewer) {
+		reconciledViewers.remove(viewer);
 	}
 }

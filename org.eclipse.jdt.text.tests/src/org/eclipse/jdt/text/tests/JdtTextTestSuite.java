@@ -71,6 +71,7 @@ public class JdtTextTestSuite {
 		suite.addTest(IndentActionTest.suite());
 		suite.addTest(TemplatesTestSuite.suite());
 		suite.addTest(JavaElementPrefixPatternMatcherTest.suite());
+		suite.addTest(CodeMiningTest.suite());
 		//$JUnit-END$
 
 		return suite;

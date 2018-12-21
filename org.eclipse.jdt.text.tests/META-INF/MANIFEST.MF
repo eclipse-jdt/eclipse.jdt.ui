@@ -3,7 +3,7 @@ Automatic-Module-Name: org.eclipse.jdt.text.tests
 Bundle-ManifestVersion: 2
 Bundle-Name: %Plugin.name
 Bundle-SymbolicName: org.eclipse.jdt.text.tests;singleton:=true
-Bundle-Version: 3.13.300.qualifier
+Bundle-Version: 3.13.400.qualifier
 Bundle-Activator: org.eclipse.jdt.text.tests.JdtTextTestPlugin
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: %Plugin.providerName
@@ -35,6 +35,7 @@ Require-Bundle:
  org.eclipse.jdt.ui.tests,
  org.eclipse.test.performance,
  com.ibm.icu,
- org.eclipse.jdt.core.manipulation
+ org.eclipse.jdt.core.manipulation,
+ org.eclipse.core.expressions
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BundleShape: dir
