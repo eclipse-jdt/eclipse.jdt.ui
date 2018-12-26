@@ -74,6 +74,7 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_comments_pref_format_html;
 	public static String FormatterModifyDialog_comments_pref_format_line_comments_on_first_column;
 	public static String FormatterModifyDialog_comments_pref_indent_description_after_param;
+	public static String FormatterModifyDialog_comments_pref_indent_other_tag_descriptions;
 	public static String FormatterModifyDialog_comments_pref_javadoc_align;
 	public static String FormatterModifyDialog_comments_pref_javadoc_align_none;
 	public static String FormatterModifyDialog_comments_pref_javadoc_align_names_and_descriptions;

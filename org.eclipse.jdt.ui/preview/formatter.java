@@ -975,7 +975,7 @@ int foo3();
  * between 0 and 100.
  * @param second The second parameter.
  * @throws Exception when the foo operation cannot be performed for one reason or another.
- * @return The result of the foo operation, usually within 0 and 1000.
+ * @return The result of the foo operation, usually an even number within 0 and 1000.
  */ int foo(int first, int second) throws Exception;
 }
 class Test {

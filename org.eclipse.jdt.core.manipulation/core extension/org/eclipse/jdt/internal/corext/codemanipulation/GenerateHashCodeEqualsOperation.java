@@ -13,6 +13,7 @@
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Generation of equals and hashcode with java 7 Objects.equals and Objects.hashcode - https://bugs.eclipse.org/424214
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Different behaviour when generating hashCode and equals - https://bugs.eclipse.org/539589
  *     Pierre-Yves B. <pyvesdev@gmail.com> - Confusing name when generating hashCode and equals with outer type - https://bugs.eclipse.org/539872
+ *     Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 

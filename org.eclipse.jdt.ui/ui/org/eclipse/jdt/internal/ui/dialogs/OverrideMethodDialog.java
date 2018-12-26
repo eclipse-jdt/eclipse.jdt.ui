@@ -18,14 +18,18 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.core.runtime.IStatus;
 
@@ -33,9 +37,12 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
@@ -63,6 +70,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.util.PatternMatcher;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
@@ -422,8 +430,55 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		return treeViewer;
 	}
 
+	@Override
+	protected Text createFilterComposite(Composite inner) {
+		Label filterTextLabel = new Label(inner, SWT.NONE);
+		filterTextLabel.setText(JavaUIMessages.OverrideMethodDialog_filter_description);
+		Text filterText= new Text(inner, SWT.SEARCH | SWT.BORDER);
+		filterText.setMessage(JavaUIMessages.OverrideMethodDialog_searchtext_message);
+		return filterText;
+	}
+
 	public boolean hasMethodsToOverride() {
 		return getContentProvider().getElements(null).length > 0;
+	}
+	
+	@Override
+	protected void addMethodSearchFilter(Text filterText, CheckboxTreeViewer treeViewer) {
+		
+		filterText.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				final String searchText = filterText.getText();
+				
+				PatternMatcher matcher = new PatternMatcher(searchText);
+				ViewerFilter vf = null;
+				if(!searchText.trim().isEmpty()) {
+					vf = new ViewerFilter() {
+						
+						@Override
+						public boolean select(Viewer viewer, Object parentElement, Object element) {
+							IBaseLabelProvider lblProvider= getTreeViewer().getLabelProvider();
+							if(element instanceof ITypeBinding) {
+								return true;
+							}
+							
+							String filterableName = null;
+							if(lblProvider instanceof LabelProvider) {
+								filterableName = ((LabelProvider)lblProvider).getText(element);
+								return matcher.matches(filterableName);
+							}
+							
+							return false;
+						}
+					};
+					treeViewer.setFilters(vf);
+					treeViewer.expandAll();
+				} else {
+					treeViewer.resetFilters();
+				}
+			}
+		});
 	}
 
 }

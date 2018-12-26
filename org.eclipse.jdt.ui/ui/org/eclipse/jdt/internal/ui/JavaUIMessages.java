@@ -113,6 +113,8 @@ public final class JavaUIMessages extends NLS {
 	public static String OverrideMethodDialog_selectioninfo_more;
 	public static String OverrideMethodDialog_link_tooltip;
 	public static String OverrideMethodDialog_link_message;
+	public static String OverrideMethodDialog_searchtext_message;
+	public static String OverrideMethodDialog_filter_description;
 
 	public static String GenerateHashCodeEqualsDialog_dialog_title;
 	public static String GenerateHashCodeEqualsDialog_selectioninfo_more;

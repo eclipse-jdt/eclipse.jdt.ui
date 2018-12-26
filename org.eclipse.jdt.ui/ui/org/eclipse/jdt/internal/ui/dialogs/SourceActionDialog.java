@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -382,7 +383,13 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		innerLayout.marginWidth= 0;
 		inner.setLayout(innerLayout);
 		inner.setFont(parent.getFont());
-
+		Text filterText = createFilterComposite(inner);
+		if(filterText != null) {
+			gd = new GridData();
+			gd.widthHint = convertWidthInCharsToPixels(fWidth);
+			gd.horizontalSpan = 2 ;
+			filterText.setLayoutData(gd);
+		}
 		CheckboxTreeViewer treeViewer= createTreeViewer(inner);
 		gd= new GridData(GridData.FILL_BOTH);
 		gd.widthHint = convertWidthInCharsToPixels(fWidth);
@@ -409,11 +416,19 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		gd= new GridData(GridData.FILL_BOTH);
 		composite.setLayoutData(gd);
 
+		if(filterText != null) {
+			addMethodSearchFilter(filterText, treeViewer);
+			filterText.forceFocus();
+		}
 		applyDialogFont(composite);
 
 		return composite;
 	}
 
+	protected Text createFilterComposite(@SuppressWarnings("unused") Composite inner) {
+		return null; // No filter as default
+	}
+		
 	/**
 	 * Clients override to provide link control
 	 *
@@ -702,6 +717,11 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	@Override
 	protected IDialogSettings getDialogBoundsSettings() {
 		return JavaPlugin.getDefault().getDialogSettingsSection("DialogBounds_" + getClass().getSimpleName()); //$NON-NLS-1$
+	}
+	
+	@SuppressWarnings("unused")
+	protected void addMethodSearchFilter(Text filterText, CheckboxTreeViewer treeViewer) {
+		//Default is do nothing
 	}
 
 }

@@ -62,6 +62,7 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -72,7 +73,6 @@ import org.eclipse.jdt.launching.environments.IExecutionEnvironment;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.core.manipulation.util.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
@@ -167,12 +167,14 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	 * @see #IDX_COMPLIANCE
 	 * @see #IDX_INLINE_JSR_BYTECODE
 	 * @see #IDX_METHOD_PARAMETERS_ATTR
+	 * @see #IDX_RELEASE
 	 */
 	private String[] fRememberedUserCompliance;
 	
 	/**
-	 * Stored compliance settings that were active when the page was first shown. May be <code>null</code>.
-	 * Elements are identified by <code>IDX_*</code> constants.
+	 * Stored compliance settings that were active when the page was first shown. May be
+	 * <code>null</code>. Elements are identified by <code>IDX_*</code> constants.
+	 * 
 	 * @see #IDX_ASSERT_AS_IDENTIFIER
 	 * @see #IDX_ENUM_AS_IDENTIFIER
 	 * @see #IDX_SOURCE_COMPATIBILITY
@@ -180,6 +182,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	 * @see #IDX_COMPLIANCE
 	 * @see #IDX_INLINE_JSR_BYTECODE
 	 * @see #IDX_METHOD_PARAMETERS_ATTR
+	 * @see #IDX_RELEASE
 	 */
 	private String[] fOriginalStoredCompliance;
 
@@ -659,6 +662,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			updateComplianceEnableState();
 			validateComplianceStatus();
 			updateInlineJSREnableState();
+			updateAssertEnumAsIdentifierEnableState();
 			updateStoreMethodParamNamesEnableState();
 		}
 	}
