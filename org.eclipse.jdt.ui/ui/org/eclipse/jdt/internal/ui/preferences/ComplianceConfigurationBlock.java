@@ -651,6 +651,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			updateComplianceEnableState();
 			validateComplianceStatus();
 			updateInlineJSREnableState();
+			updateAssertEnumAsIdentifierEnableState();
 			updateStoreMethodParamNamesEnableState();
 		}
 	}
