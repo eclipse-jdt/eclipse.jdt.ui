@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2016 IBM Corporation and others.
+ * Copyright (c) 2005, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -66,6 +66,7 @@ import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.contentassist.BoldStylerProvider;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
@@ -90,10 +91,16 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.SourceRange;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.search.SearchPattern;
 
@@ -188,9 +195,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			fDocument= document;
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager, org.eclipse.swt.events.VerifyEvent, int, int)
-		 */
 		@Override
 		public ExitFlags doExit(LinkedModeModel environment, VerifyEvent event, int offset, int length) {
 
@@ -282,9 +286,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		fInvocationContext= context;
 	}
 
-	/*
-	 * @see ICompletionProposalExtension#getTriggerCharacters()
-	 */
 	@Override
 	public char[] getTriggerCharacters() {
 		return fTriggerCharacters;
@@ -334,18 +335,12 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		return fCursorPosition;
 	}
 
-	/*
-	 * @see ICompletionProposal#apply
-	 */
 	@Override
 	public final void apply(IDocument document) {
 		// not used any longer
 		apply(document, (char) 0, getReplacementOffset() + getReplacementLength());
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#apply(org.eclipse.jface.text.IDocument, char, int)
-	 */
 	@Override
 	public void apply(IDocument document, char trigger, int offset) {
 
@@ -483,9 +478,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 			document.replace(offset, length, string);
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension1#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
-	 */
 	@Override
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 
@@ -552,9 +544,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		fIsInJavadoc= isInJavadoc;
 	}
 
-	/*
-	 * @see ICompletionProposal#getSelection
-	 */
 	@Override
 	public Point getSelection(IDocument document) {
 		if (!fIsValidated)
@@ -562,9 +551,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		return new Point(getReplacementOffset() + getCursorPosition(), 0);
 	}
 
-	/*
-	 * @see ICompletionProposal#getContextInformation()
-	 */
 	@Override
 	public IContextInformation getContextInformation() {
 		return fContextInformation;
@@ -578,9 +564,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		fContextInformation= contextInformation;
 	}
 
-	/*
-	 * @see ICompletionProposal#getDisplayString()
-	 */
 	@Override
 	public String getDisplayString() {
 		if (fDisplayString != null)
@@ -588,56 +571,97 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		return ""; //$NON-NLS-1$
 	}
 
-	/*
-	 * @see ICompletionProposal#getAdditionalProposalInfo()
-	 */
 	@Override
 	public String getAdditionalProposalInfo() {
 		Object info= getAdditionalProposalInfo(new NullProgressMonitor());
 		return info == null ? null : info.toString();
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension5#getAdditionalProposalInfo(org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-		if (getProposalInfo() != null) {
-			String info= getProposalInfo().getInfo(monitor);
-			if (info != null && info.length() > 0) {
+		ProposalInfo proposalInfo= getProposalInfo();
+		if (proposalInfo != null) {
+			try {
 				StringBuilder buffer= new StringBuilder();
+				IJavaElement element= proposalInfo.getJavaElement();
 
-				ColorRegistry registry = JFaceResources.getColorRegistry();
-				RGB fgRGB = registry.getRGB("org.eclipse.jdt.ui.Javadoc.foregroundColor"); //$NON-NLS-1$ 
-				RGB bgRGB= registry.getRGB("org.eclipse.jdt.ui.Javadoc.backgroundColor"); //$NON-NLS-1$ 
-				HTMLPrinter.insertPageProlog(buffer, 0, fgRGB, bgRGB, getCSSStyles());
-				
-				buffer.append(info);
+				if (element != null) {
+					String base= null;
+					String info= proposalInfo.getInfo(monitor);
+					if (info != null && info.length() > 0) {
+						buffer.append(info);
+						base= JavadocContentAccess2.extractBaseURL(info);
+					}
+					if (base == null && element instanceof IMember) {
+						base= JavaDocLocations.getBaseURL(element, ((IMember) element).isBinary());
+					}
 
-				IJavaElement element= null;
-				try {
-					element= getProposalInfo().getJavaElement();
-					if (element instanceof IMember) {
-						String base= JavadocContentAccess2.extractBaseURL(info);
-						if (base == null) {
-							base= JavaDocLocations.getBaseURL(element, ((IMember) element).isBinary());
-						}
+					addConstantOrDefaultValue(buffer, element);
+
+					if (buffer.length() > 0) {
+						ColorRegistry registry= JFaceResources.getColorRegistry();
+						RGB fgRGB= registry.getRGB("org.eclipse.jdt.ui.Javadoc.foregroundColor"); //$NON-NLS-1$ 
+						RGB bgRGB= registry.getRGB("org.eclipse.jdt.ui.Javadoc.backgroundColor"); //$NON-NLS-1$ 
+						HTMLPrinter.insertPageProlog(buffer, 0, fgRGB, bgRGB, getCSSStyles());
 						if (base != null) {
 							int endHeadIdx= buffer.indexOf("</head>"); //$NON-NLS-1$
 							buffer.insert(endHeadIdx, "\n<base href='" + base + "'>\n"); //$NON-NLS-1$ //$NON-NLS-2$
 						}
+						HTMLPrinter.addPageEpilog(buffer);
+						return new JavadocBrowserInformationControlInput(null, element, buffer.toString(), 0);
 					}
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
 				}
 
-				HTMLPrinter.addPageEpilog(buffer);
-				info= buffer.toString();
-
-				return new JavadocBrowserInformationControlInput(null, element, info, 0);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
 			}
 		}
 		return null;
+	}
+
+	private void addConstantOrDefaultValue(StringBuilder buffer, IJavaElement element) throws JavaModelException {
+		ITypeRoot typeRoot= null;
+		Region nameRegion= null;
+		if (element instanceof IMember) {
+			// typeRoot and nameRegion - used to retrieve the constant/default value of the element.
+			// Useful only when the element is declared in the active CU as JavadocHover#getHoveredASTNode
+			// uses SharedASTProvider.WAIT_ACTIVE_ONLY. Otherwise, bindings are created.
+			typeRoot= ((IMember) element).getTypeRoot();
+			ISourceRange nameRange= ((ISourceReference) element).getNameRange();
+			if (SourceRange.isAvailable(nameRange)) {
+				nameRegion= new Region(nameRange.getOffset(), nameRange.getLength());
+			}
+		}
+		if (element.getElementType() == IJavaElement.FIELD) {
+			String constantValue= JavadocHover.getConstantValue((IField) element, typeRoot, nameRegion);
+			if (constantValue != null) {
+				constantValue= HTMLPrinter.convertToHTMLContentWithWhitespace(constantValue);
+
+				buffer.append(JavadocContentAccess2.BlOCK_TAG_TITLE_START);
+				buffer.append(JavaTextMessages.AbstractJavaCompletionProposal_value);
+				buffer.append(JavadocContentAccess2.BlOCK_TAG_TITLE_END);
+				buffer.append(JavadocContentAccess2.BlOCK_TAG_ENTRY_START);
+				buffer.append(constantValue);
+				buffer.append(JavadocContentAccess2.BlOCK_TAG_ENTRY_END);
+			}
+		} else if (element.getElementType() == IJavaElement.METHOD) {
+			String defaultValue;
+			try {
+				defaultValue= JavadocHover.getAnnotationMemberDefaultValue((IMethod) element, typeRoot, nameRegion);
+			} catch (JavaModelException e) {
+				defaultValue= null;
+			}
+			if (defaultValue != null) {
+				defaultValue= HTMLPrinter.convertToHTMLContentWithWhitespace(defaultValue);
+
+				buffer.append(JavadocContentAccess2.BlOCK_TAG_TITLE_START);
+				buffer.append(JavaTextMessages.AbstractJavaCompletionProposal_default);
+				buffer.append(JavadocContentAccess2.BlOCK_TAG_TITLE_END);
+				buffer.append(JavadocContentAccess2.BlOCK_TAG_ENTRY_START);
+				buffer.append(defaultValue);
+				buffer.append(JavadocContentAccess2.BlOCK_TAG_ENTRY_END);
+			}
+		}
 	}
 
 	/**
@@ -683,9 +707,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		return css;
 	}
 
-	/*
-	 * @see ICompletionProposalExtension#getContextInformationPosition()
-	 */
 	@Override
 	public int getContextInformationPosition() {
 		if (getContextInformation() == null)
@@ -710,9 +731,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		fReplacementOffset= replacementOffset;
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getCompletionOffset()
-	 */
 	@Override
 	public int getPrefixCompletionStart(IDocument document, int completionOffset) {
 		return getReplacementOffset();
@@ -752,9 +770,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		fReplacementString= replacementString;
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementText()
-	 */
 	@Override
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
 		if (!isCamelCaseMatching())
@@ -764,9 +779,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		return getCamelCaseCompound(prefix, getReplacementString());
 	}
 
-	/*
-	 * @see ICompletionProposal#getImage()
-	 */
 	@Override
 	public Image getImage() {
 		return fImage;
@@ -780,17 +792,11 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		fImage= image;
 	}
 
-	/*
-	 * @see ICompletionProposalExtension#isValidFor(IDocument, int)
-	 */
 	@Override
 	public boolean isValidFor(IDocument document, int offset) {
 		return validate(document, offset, null);
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
-	 */
 	@Override
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 
@@ -1102,9 +1108,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		return new StyleRange(modelCaret, length, foreground, background);
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(ITextViewer, boolean)
-	 */
 	@Override
 	public void selected(final ITextViewer viewer, boolean smartToggle) {
 		repairPresentation(viewer);
@@ -1135,9 +1138,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		}
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(ITextViewer)
-	 */
 	@Override
 	public void unselected(ITextViewer viewer) {
 		if (fTextPresentationListener != null) {
@@ -1148,9 +1148,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		fRememberedStyleRange= null;
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getInformationControlCreator()
-	 */
 	@Override
 	public IInformationControlCreator getInformationControlCreator() {
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
@@ -1236,7 +1233,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension6#getStyledDisplayString()
 	 * @since 3.4
 	 */
 	@Override
@@ -1285,9 +1281,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		return pattern;
 	}
 
-	/*
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		return getDisplayString();

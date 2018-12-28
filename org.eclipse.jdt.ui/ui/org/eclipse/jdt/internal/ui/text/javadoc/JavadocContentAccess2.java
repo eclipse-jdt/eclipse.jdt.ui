@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2017 IBM Corporation and others.
+ * Copyright (c) 2008, 2018 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -128,8 +128,11 @@ public class JavadocContentAccess2 {
 	private static final String BLOCK_TAG_START= "<dl>"; //$NON-NLS-1$
 	private static final String BLOCK_TAG_END= "</dl>"; //$NON-NLS-1$
 
-	private static final String BlOCK_TAG_ENTRY_START= "<dd>"; //$NON-NLS-1$
-	private static final String BlOCK_TAG_ENTRY_END= "</dd>"; //$NON-NLS-1$
+	public static final String BlOCK_TAG_TITLE_START= "<dt>"; //$NON-NLS-1$
+	public static final String BlOCK_TAG_TITLE_END= "</dt>"; //$NON-NLS-1$
+
+	public static final String BlOCK_TAG_ENTRY_START= "<dd>"; //$NON-NLS-1$
+	public static final String BlOCK_TAG_ENTRY_END= "</dd>"; //$NON-NLS-1$
 
 	private static final String PARAM_NAME_START= "<b>"; //$NON-NLS-1$
 	private static final String PARAM_NAME_END= "</b> "; //$NON-NLS-1$
@@ -1747,9 +1750,9 @@ public class JavadocContentAccess2 {
 	}
 
 	private void handleBlockTagTitle(String title) {
-		fBuf.append("<dt>"); //$NON-NLS-1$
+		fBuf.append(BlOCK_TAG_TITLE_START);
 		fBuf.append(title);
-		fBuf.append("</dt>"); //$NON-NLS-1$
+		fBuf.append(BlOCK_TAG_TITLE_END);
 	}
 
 	private void handleSeeTag(TagElement tag) {
