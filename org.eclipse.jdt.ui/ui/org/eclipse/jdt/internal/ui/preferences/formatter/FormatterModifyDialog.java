@@ -1245,11 +1245,18 @@ public class FormatterModifyDialog extends ModifyDialog {
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_explicit_constructor_invocations, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_EXPLICIT_CONSTRUCTOR_CALL)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_object_allocation_arguments, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ALLOCATION_EXPRESSION)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_qualified_object_allocation_arguments, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_QUALIFIED_ALLOCATION_EXPRESSION))
+				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_binary_expressions, "-binary-expressions", modAll) //$NON-NLS-1$
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_multiplicative_operators, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_MULTIPLICATIVE_OPERATOR)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_additive_operators, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ADDITIVE_OPERATOR)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_string_concatenation, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_STRING_CONCATENATION)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_shift_operators, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SHIFT_OPERATOR)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_relational_operators, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_RELATIONAL_OPERATOR)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_bitwise_operators, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_BITWISE_OPERATOR)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_logical_operators, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_LOGICAL_OPERATOR))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_expressions, null, modAll)
-						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_binary_exprs, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_BINARY_EXPRESSION)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_conditionals, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_CONDITIONAL_EXPRESSION)
-						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_array_init, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_ARRAY_INITIALIZER)
-						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_assignments, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ASSIGNMENT))
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_assignments, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ASSIGNMENT)
+						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_array_init, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_ARRAY_INITIALIZER))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_lineWrap_tree_statements, null, modAll)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_for, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_FOR_LOOP_HEADER)
 						.pref(FormatterMessages.FormatterModifyDialog_lineWrap_pref_compact_if_else, DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_COMPACT_IF)
@@ -1268,8 +1275,26 @@ public class FormatterModifyDialog extends ModifyDialog {
 						case DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_CONDITIONAL_EXPRESSION:
 							wrapBeforeKey= DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_CONDITIONAL_OPERATOR;
 							break;
-						case DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_BINARY_EXPRESSION:
-							wrapBeforeKey= DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_BINARY_OPERATOR;
+						case DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_MULTIPLICATIVE_OPERATOR:
+							wrapBeforeKey= DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_MULTIPLICATIVE_OPERATOR;
+							break;
+						case DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ADDITIVE_OPERATOR:
+							wrapBeforeKey= DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_ADDITIVE_OPERATOR;
+							break;
+						case DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_STRING_CONCATENATION:
+							wrapBeforeKey= DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_STRING_CONCATENATION;
+							break;
+						case DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SHIFT_OPERATOR:
+							wrapBeforeKey= DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_SHIFT_OPERATOR;
+							break;
+						case DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_RELATIONAL_OPERATOR:
+							wrapBeforeKey= DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_RELATIONAL_OPERATOR;
+							break;
+						case DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_BITWISE_OPERATOR:
+							wrapBeforeKey= DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_BITWISE_OPERATOR;
+							break;
+						case DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_LOGICAL_OPERATOR:
+							wrapBeforeKey= DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_LOGICAL_OPERATOR;
 							break;
 						case DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_UNION_TYPE_IN_MULTICATCH:
 							wrapBeforeKey= DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_OR_OPERATOR_MULTICATCH;

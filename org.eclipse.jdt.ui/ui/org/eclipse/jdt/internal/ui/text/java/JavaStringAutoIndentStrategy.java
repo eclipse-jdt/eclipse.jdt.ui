@@ -228,7 +228,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 
 	private boolean isWrappingBeforeBinaryOperator() {
 		return DefaultCodeFormatterConstants.TRUE.equals(getCoreFormatterOption(
-				DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_BINARY_OPERATOR));
+				DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_STRING_CONCATENATION));
 	}
 
 	private int getContinuationIndentationSize() {
@@ -244,7 +244,7 @@ public class JavaStringAutoIndentStrategy extends DefaultIndentLineAutoEditStrat
 	
 	private int getBinaryOperatorAlignmentStyle() {
 		String binaryAlignmentValue= getCoreFormatterOption(
-				DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_BINARY_EXPRESSION);
+				DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_STRING_CONCATENATION);
 		return DefaultCodeFormatterConstants.getIndentStyle(binaryAlignmentValue);
 	}
 
