@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012, 2018 IBM Corporation and others.
+ * Copyright (c) 2012, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -143,6 +143,8 @@ public interface IProposalRelevance {
 	public static final int CHANGE_TO_RETURN= 5;
 	public static final int INCOMPATIBLE_FOREACH_TYPE= 5;
 	public static final int CHANGE_RETURN_TYPE_TO_VOID= 5;
+	public static final int CHANGE_TYPE_TO_VAR= 5;
+	public static final int CHANGE_TYPE_FROM_VAR= 5;
 	public static final int CHANGE_TO_CONSTRUCTOR= 5;
 	public static final int FIX_SUPPRESS_TOKEN= 5;
 	public static final int REMOVE_ANNOTATION= 5;
