@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2007, 2018 IBM Corporation and others.
+ * Copyright (c) 2007, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 public class CompilationUnitRewriteOperationsFix extends CompilationUnitRewriteOperationsFixCore implements ILinkedFix {
-	
+
 	public abstract static class CompilationUnitRewriteOperation extends CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation {
 
 		public abstract void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException;
@@ -39,6 +39,11 @@ public class CompilationUnitRewriteOperationsFix extends CompilationUnitRewriteO
 	}
 
 	public CompilationUnitRewriteOperationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] operations) {
+		super(name, compilationUnit, operations);
+		fLinkedProposalModel= new LinkedProposalModel();
+	}
+
+	public CompilationUnitRewriteOperationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperation[] operations) {
 		super(name, compilationUnit, operations);
 		fLinkedProposalModel= new LinkedProposalModel();
 	}
