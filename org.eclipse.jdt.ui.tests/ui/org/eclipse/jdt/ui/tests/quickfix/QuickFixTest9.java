@@ -62,7 +62,7 @@ public class QuickFixTest9 extends QuickFixTest {
 	protected void setUp() throws CoreException {
 		fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");
 		JavaProjectHelper.set9CompilerOptions(fJProject2);
-		JavaProjectHelper.addRequiredProject(fJProject2, Java9ProjectTestSetup.getProject());
+		JavaProjectHelper.addRequiredModularProject(fJProject2, Java9ProjectTestSetup.getProject());
 		IPackageFragmentRoot java9Src= JavaProjectHelper.addSourceContainer(fJProject2, "src");
 		IPackageFragment def= java9Src.createPackageFragment("", false, null);
 		IPackageFragment pkgFrag= java9Src.createPackageFragment("java.defaultProject", false, null);
@@ -78,8 +78,8 @@ public class QuickFixTest9 extends QuickFixTest {
 
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		JavaProjectHelper.set9CompilerOptions(fJProject1);
-		JavaProjectHelper.addRequiredProject(fJProject1, fJProject2);
-		JavaProjectHelper.addRequiredProject(fJProject1, Java9ProjectTestSetup.getProject());
+		JavaProjectHelper.addRequiredModularProject(fJProject1, fJProject2);
+		JavaProjectHelper.addRequiredModularProject(fJProject1, Java9ProjectTestSetup.getProject());
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}

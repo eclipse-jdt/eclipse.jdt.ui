@@ -889,6 +889,18 @@ public class JavaProjectHelper {
 		addToClasspath(jproject, cpe);
 	}
 
+	/**
+	 * Adds a required project entry to the module path.
+	 * @param jproject Parent project
+	 * @param required Project to add to the build path with attribute "module" set to "true"
+	 * @throws JavaModelException Creation failed
+	 */
+	public static void addRequiredModularProject(IJavaProject jproject, IJavaProject required) throws JavaModelException {
+		IClasspathAttribute[] attrs= new IClasspathAttribute[] { JavaCore.newClasspathAttribute(IClasspathAttribute.MODULE, "true") };
+		IClasspathEntry cpe= JavaCore.newProjectEntry(required.getProject().getFullPath(), null, true, attrs, false);
+		addToClasspath(jproject, cpe);
+	}
+
 	public static void removeFromClasspath(IJavaProject jproject, IPath path) throws JavaModelException {
 		IClasspathEntry[] oldEntries= jproject.getRawClasspath();
 		int nEntries= oldEntries.length;
