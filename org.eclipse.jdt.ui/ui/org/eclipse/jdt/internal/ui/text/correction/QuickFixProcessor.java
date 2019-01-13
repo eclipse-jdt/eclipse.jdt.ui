@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -33,6 +33,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Name;
 
 import org.eclipse.jdt.internal.corext.fix.NullAnnotationsRewriteOperations.ChangeKind;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -294,6 +296,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MissingNonNullByDefaultAnnotationOnPackage:
 			case IProblem.UndefinedModule:
 			case IProblem.PackageDoesNotExistOrIsEmpty:
+			case IProblem.NotAccessibleType:
 				return true;
 			default:
 				return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(cu.getJavaProject(), problemId)
@@ -820,7 +823,12 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.NotAccessibleType:
 				// Handle the case in an import statement, if a requires needs to be added.
-				ReorgCorrectionsSubProcessor.importNotFoundProposals(context, problem, proposals);
+				if (!ReorgCorrectionsSubProcessor.importNotFoundProposals(context, problem, proposals)) {
+					ASTNode node= context.getCoveredNode();
+					if (node instanceof Name) {
+						UnresolvedElementsSubProcessor.addRequiresModuleProposals(context.getCompilationUnit(), (Name) node, IProposalRelevance.IMPORT_NOT_FOUND_ADD_REQUIRES_MODULE, proposals, true);
+					}
+				}
 				break;
 			case IProblem.PackageDoesNotExistOrIsEmpty:
 				ModuleCorrectionsSubProcessor.getPackageDoesNotExistProposals(context, problem, proposals);

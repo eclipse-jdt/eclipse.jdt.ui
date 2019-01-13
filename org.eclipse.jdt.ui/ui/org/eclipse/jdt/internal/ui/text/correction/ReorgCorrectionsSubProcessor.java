@@ -298,17 +298,17 @@ public class ReorgCorrectionsSubProcessor {
 		proposals.add(new ClasspathFixCorrectionProposal(context.getCompilationUnit(), problem.getOffset(), problem.getLength(), missingType));
 	}
 
-
-	public static void importNotFoundProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
+	/* answers false if the problem location is not an import declaration, and hence no proposal have been added. */
+	public static boolean importNotFoundProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		if (selectedNode == null) {
-			return;
+			return false;
 		}
 		ImportDeclaration importDeclaration= (ImportDeclaration) ASTNodes.getParent(selectedNode, ASTNode.IMPORT_DECLARATION);
 		if (importDeclaration == null) {
-			return;
+			return false;
 		}
 		if (!importDeclaration.isOnDemand()) {
 			Name name= importDeclaration.getName();
@@ -327,6 +327,7 @@ public class ReorgCorrectionsSubProcessor {
 			name= JavaModelUtil.concatenateName(name, "*"); //$NON-NLS-1$
 		}
 		addProjectSetupFixProposal(context, problem, name, proposals);
+		return true;
 	}
 
 	private static final class OpenBuildPathCorrectionProposal extends ChangeCorrectionProposal {
