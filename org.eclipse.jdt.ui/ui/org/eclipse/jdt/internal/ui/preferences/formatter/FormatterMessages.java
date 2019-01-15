@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -263,7 +263,13 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_whiteSpace_pref_after_arrow_operator;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_assignment_operator;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_at;
-	public static String FormatterModifyDialog_whiteSpace_pref_after_binary_operators;
+	public static String FormatterModifyDialog_whiteSpace_pref_after_multiplicative_operator;
+	public static String FormatterModifyDialog_whiteSpace_pref_after_additive_operator;
+	public static String FormatterModifyDialog_whiteSpace_pref_after_string_concatenation;
+	public static String FormatterModifyDialog_whiteSpace_pref_after_shift_operator;
+	public static String FormatterModifyDialog_whiteSpace_pref_after_relational_operator;
+	public static String FormatterModifyDialog_whiteSpace_pref_after_bitwise_operator;
+	public static String FormatterModifyDialog_whiteSpace_pref_after_logical_operator;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_closing_angle_bracket;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_closing_brace;
 	public static String FormatterModifyDialog_whiteSpace_pref_after_closing_paren;
@@ -296,7 +302,13 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_whiteSpace_pref_before_arrow_operator;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_assignment_operator;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_at;
-	public static String FormatterModifyDialog_whiteSpace_pref_before_binary_operators;
+	public static String FormatterModifyDialog_whiteSpace_pref_before_multiplicative_operator;
+	public static String FormatterModifyDialog_whiteSpace_pref_before_additive_operator;
+	public static String FormatterModifyDialog_whiteSpace_pref_before_string_concatenation;
+	public static String FormatterModifyDialog_whiteSpace_pref_before_shift_operator;
+	public static String FormatterModifyDialog_whiteSpace_pref_before_relational_operator;
+	public static String FormatterModifyDialog_whiteSpace_pref_before_bitwise_operator;
+	public static String FormatterModifyDialog_whiteSpace_pref_before_logical_operator;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_closing_angle_bracket;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_closing_brace;
 	public static String FormatterModifyDialog_whiteSpace_pref_before_closing_bracket;
@@ -366,7 +378,8 @@ final class FormatterMessages extends NLS {
 	public static String FormatterModifyDialog_whiteSpace_tree_lambda;
 	public static String FormatterModifyDialog_whiteSpace_tree_localvars;
 	public static String FormatterModifyDialog_whiteSpace_tree_methods;
-	public static String FormatterModifyDialog_whiteSpace_tree_operators;
+	public static String FormatterModifyDialog_whiteSpace_tree_unary_operators;
+	public static String FormatterModifyDialog_whiteSpace_tree_binary_operators;
 	public static String FormatterModifyDialog_whiteSpace_tree_param_type_ref;
 	public static String FormatterModifyDialog_whiteSpace_tree_parameterized_types;
 	public static String FormatterModifyDialog_whiteSpace_tree_parenexpr;

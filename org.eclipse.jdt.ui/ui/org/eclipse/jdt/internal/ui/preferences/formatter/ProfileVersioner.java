@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -44,7 +44,7 @@ public class ProfileVersioner implements IProfileVersioner {
 	private static final int VERSION_13= 13; // https://bugs.eclipse.org/514019
 	private static final int VERSION_14= 14; // https://bugs.eclipse.org/128653, https://bugs.eclipse.org/531826
 	private static final int VERSION_15= 15; // https://bugs.eclipse.org/205973
-	private static final int VERSION_16= 16; // https://bugs.eclipse.org/543080
+	private static final int VERSION_16= 16; // https://bugs.eclipse.org/543080, https://bugs.eclipse.org/543475
 
 	private static final int CURRENT_VERSION= VERSION_16;
 
@@ -675,6 +675,24 @@ public class ProfileVersioner implements IProfileVersioner {
 				DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_BITWISE_OPERATOR,
 				DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_LOGICAL_OPERATOR,
 		});
+		checkAndReplace(oldSettings, FORMATTER_INSERT_SPACE_BEFORE_BINARY_OPERATOR, new String[] {
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_MULTIPLICATIVE_OPERATOR,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ADDITIVE_OPERATOR,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_STRING_CONCATENATION,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SHIFT_OPERATOR,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_RELATIONAL_OPERATOR,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BITWISE_OPERATOR,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_LOGICAL_OPERATOR,
+		});
+		checkAndReplace(oldSettings, FORMATTER_INSERT_SPACE_AFTER_BINARY_OPERATOR, new String[] {
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_MULTIPLICATIVE_OPERATOR,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ADDITIVE_OPERATOR,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_STRING_CONCATENATION,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_SHIFT_OPERATOR,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_RELATIONAL_OPERATOR,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_BITWISE_OPERATOR,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_LOGICAL_OPERATOR,
+		});
 	}
 
 	/* old format constant values */
@@ -891,4 +909,31 @@ public class ProfileVersioner implements IProfileVersioner {
 	 */
 	@Deprecated
 	private static final String FORMATTER_WRAP_BEFORE_BINARY_OPERATOR= DefaultCodeFormatterConstants.FORMATTER_WRAP_BEFORE_BINARY_OPERATOR;
+
+	/**
+	 * @deprecated As of 3.17 replaced by
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_BEFORE_MULTIPLICATIVE_OPERATOR},
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_BEFORE_ADDITIVE_OPERATOR},
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_BEFORE_STRING_CONCATENATION},
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_BEFORE_SHIFT_OPERATOR},
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_BEFORE_RELATIONAL_OPERATOR},
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_BEFORE_BITWISE_OPERATOR}, and
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_BEFORE_LOGICAL_OPERATOR}
+	 */
+	@Deprecated
+	private static final String FORMATTER_INSERT_SPACE_BEFORE_BINARY_OPERATOR= DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BINARY_OPERATOR;
+
+	/**
+	 * @deprecated As of 3.17 replaced by
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_AFTER_MULTIPLICATIVE_OPERATOR},
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_AFTER_ADDITIVE_OPERATOR},
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_AFTER_STRING_CONCATENATION},
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_AFTER_SHIFT_OPERATOR},
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_AFTER_RELATIONAL_OPERATOR},
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_AFTER_BITWISE_OPERATOR}, and
+	 *             {@link DefaultCodeFormatterConstants#FORMATTER_INSERT_SPACE_AFTER_LOGICAL_OPERATOR}
+	 */
+	@Deprecated
+	private static final String FORMATTER_INSERT_SPACE_AFTER_BINARY_OPERATOR= DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_BINARY_OPERATOR;
+
  }

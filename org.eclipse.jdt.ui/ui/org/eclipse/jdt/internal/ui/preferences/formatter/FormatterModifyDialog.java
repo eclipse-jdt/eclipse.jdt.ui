@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -1008,18 +1008,36 @@ public class FormatterModifyDialog extends ModifyDialog {
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_comma_in_alloc, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_ALLOCATION_EXPRESSION)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_comma_in_qalloc, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_comma_in_qalloc, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_EXPLICIT_CONSTRUCTOR_CALL_ARGUMENTS))
+						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_unary_operators, "-unaryoperators", modAll) //$NON-NLS-1$
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_postfix_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_POSTFIX_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_postfix_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_POSTFIX_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_prefix_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_PREFIX_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_prefix_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_PREFIX_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_unary_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_UNARY_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_unary_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_UNARY_OPERATOR))
+						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_binary_operators, "-binaryoperators", modAll) //$NON-NLS-1$
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_multiplicative_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_MULTIPLICATIVE_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_multiplicative_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_MULTIPLICATIVE_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_additive_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ADDITIVE_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_additive_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ADDITIVE_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_string_concatenation, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_STRING_CONCATENATION)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_string_concatenation, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_STRING_CONCATENATION)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_shift_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SHIFT_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_shift_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_SHIFT_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_relational_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_RELATIONAL_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_relational_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_RELATIONAL_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_bitwise_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BITWISE_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_bitwise_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_BITWISE_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_logical_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_LOGICAL_OPERATOR)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_logical_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_LOGICAL_OPERATOR))
+						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_conditionals, "-conditionals", modAll) //$NON-NLS-1$
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_question, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_QUESTION_IN_CONDITIONAL)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_question, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_QUESTION_IN_CONDITIONAL)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_colon, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CONDITIONAL)
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_colon, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_CONDITIONAL))
 						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_assignments, "-assignments", modAll) //$NON-NLS-1$
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_assignment_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_ASSIGNMENT_OPERATOR)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_assignment_operator, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_ASSIGNMENT_OPERATOR))
-						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_operators, "-operators", modAll) //$NON-NLS-1$
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_binary_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_BINARY_OPERATOR)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_binary_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_BINARY_OPERATOR)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_unary_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_UNARY_OPERATOR)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_unary_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_UNARY_OPERATOR)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_prefix_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_PREFIX_OPERATOR)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_prefix_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_PREFIX_OPERATOR)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_postfix_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_POSTFIX_OPERATOR)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_postfix_operators, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_POSTFIX_OPERATOR))
 						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_parenexpr, "-parenexpr", modAll) //$NON-NLS-1$
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_opening_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_PARENTHESIZED_EXPRESSION)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_opening_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_PARENTHESIZED_EXPRESSION)
@@ -1027,12 +1045,7 @@ public class FormatterModifyDialog extends ModifyDialog {
 						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_typecasts, "-typecasts", modAll) //$NON-NLS-1$
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_opening_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_CAST)
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_closing_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_CAST)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_closing_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_PAREN_IN_CAST))
-						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_conditionals, "-conditionals", modAll) //$NON-NLS-1$
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_question, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_QUESTION_IN_CONDITIONAL)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_question, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_QUESTION_IN_CONDITIONAL)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_colon, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_CONDITIONAL)
-								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_colon, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_CONDITIONAL)))
+								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_after_closing_paren, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_PAREN_IN_CAST)))
 				.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_arrays, "-arrays", modAll) //$NON-NLS-1$
 						.node(fTree.builder(FormatterMessages.FormatterModifyDialog_whiteSpace_tree_arraydecls, "-declarations", modAll) //$NON-NLS-1$
 								.pref(FormatterMessages.FormatterModifyDialog_whiteSpace_pref_before_opening_bracket, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_BRACKET_IN_ARRAY_TYPE_REFERENCE)

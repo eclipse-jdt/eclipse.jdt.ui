@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Mateusz Matela and others.
+ * Copyright (c) 2018, 2019 Mateusz Matela and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -474,14 +474,18 @@ class MyClass extends OtherClass {
 //--PREVIEW--END--section-whitespace-expressions-calls
 
 //--PREVIEW--START--section-whitespace-expressions-assignments
-//--PREVIEW--START--section-whitespace-expressions-operators
+//--PREVIEW--START--section-whitespace-expressions-unaryoperators
+//--PREVIEW--START--section-whitespace-expressions-binaryoperators
 List list = new ArrayList();
 int a = -4 + -9;
-b = a++ / --number;
-c += 4;
-boolean value = true && false;
+int b = a++ / --number;
+b = (a++) / (--number) + (-9);
+String d = "a = " + a;
+if (a == b && a > c)
+	c += (a >> 5) & 0xFF;
 //--PREVIEW--END--section-whitespace-expressions-assignments
-//--PREVIEW--END--section-whitespace-expressions-operators
+//--PREVIEW--END--section-whitespace-expressions-unaryoperators
+//--PREVIEW--END--section-whitespace-expressions-binaryoperators
 
 //--PREVIEW--START--section-whitespace-expressions-parenexpr
 result = (a * (b + c + d) * (e + f));
