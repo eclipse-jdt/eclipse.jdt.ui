@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2018 IBM Corporation and others.
+ * Copyright (c) 2008, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -16,6 +16,7 @@ package org.eclipse.jdt.ui.cleanup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.manipulation.CleanUpContextCore;
 
 
 /**
@@ -23,10 +24,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
  * 
  * @since 3.5
  */
-public class CleanUpContext {
-	
-	// Use internal class to supply logic
-	private final org.eclipse.jdt.internal.corext.fix.CleanUpContext fContext;
+public class CleanUpContext extends CleanUpContextCore {
 
 	/**
 	 * Creates a new clean up context.
@@ -38,31 +36,17 @@ public class CleanUpContext {
 	 *            <code>true</code>.
 	 */
 	public CleanUpContext(ICompilationUnit unit, CompilationUnit ast) {
-		fContext= new org.eclipse.jdt.internal.corext.fix.CleanUpContext(unit, ast);
+		super(unit, ast);
 	}
 
-	/**
-	 * The compilation unit to clean up.
-	 * 
-	 * @return the compilation unit to clean up
-	 */
+	@Override
 	public ICompilationUnit getCompilationUnit() {
-		return fContext.getCompilationUnit();
+		return super.getCompilationUnit();
 	}
 
-	/**
-	 * An AST built from the compilation unit to fix.
-	 * <p>
-	 * Can be <code>null</code> if {@link CleanUpRequirements#requiresAST()} returns
-	 * <code>false</code>. The AST is guaranteed to contain changes made by previous clean ups only
-	 * if {@link CleanUpRequirements#requiresFreshAST()} returns <code>true</code>.
-	 * </p>
-	 * <p>Clients should check the AST API level and do nothing if they are given an AST
-	 * they can't handle (see {@link org.eclipse.jdt.core.dom.AST#apiLevel()}).
-	 * 
-	 * @return an AST or <code>null</code> if none required
-	 */
+	@Override
 	public CompilationUnit getAST() {
-		return fContext.getAST();
+		return super.getAST();
 	}
+
 }

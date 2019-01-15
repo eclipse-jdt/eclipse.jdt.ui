@@ -16,6 +16,8 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
+
 /**
  * A <code>ICleanUpFix</code> which can be used in a
  * correction proposal environment. A proposal

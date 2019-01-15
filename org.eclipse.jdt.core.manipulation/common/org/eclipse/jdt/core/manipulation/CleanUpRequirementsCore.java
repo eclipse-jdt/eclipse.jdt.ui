@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2018 IBM Corporation and others.
+ * Copyright (c) 2008, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -12,7 +12,7 @@
  *     IBM Corporation - initial API and implementation
  *     Red Hat Inc. - refactored to jdt.core.manipulation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.fix;
+package org.eclipse.jdt.core.manipulation;
 
 import java.util.Map;
 
@@ -23,29 +23,29 @@ import org.eclipse.jdt.core.JavaCore;
 
 /**
  * Specifies the requirements of a clean up.
- * 
- * @since 3.5
+ *
+ * @since 1.12
  */
-public final class CleanUpRequirements {
+final public class CleanUpRequirementsCore {
 
-	private final boolean fRequiresAST;
+	protected final boolean fRequiresAST;
 
-	private final Map<String, String> fCompilerOptions;
+	protected final Map<String, String> fCompilerOptions;
 
-	private final boolean fRequiresFreshAST;
+	protected final boolean fRequiresFreshAST;
 
-	private final boolean fRequiresChangedRegions;
+	protected final boolean fRequiresChangedRegions;
 
 
 	/**
 	 * Create a new instance
-	 * 
+	 *
 	 * @param requiresAST <code>true</code> if an AST is required
 	 * @param requiresFreshAST <code>true</code> if a fresh AST is required
 	 * @param requiresChangedRegions <code>true</code> if changed regions are required
 	 * @param compilerOptions map of compiler options or <code>null</code> if no requirements
 	 */
-	public CleanUpRequirements(boolean requiresAST, boolean requiresFreshAST, boolean requiresChangedRegions, Map<String, String> compilerOptions) {
+	public CleanUpRequirementsCore(boolean requiresAST, boolean requiresFreshAST, boolean requiresChangedRegions, Map<String, String> compilerOptions) {
 		Assert.isLegal(!requiresFreshAST || requiresAST, "Must not request fresh AST if no AST is required"); //$NON-NLS-1$
 		Assert.isLegal(compilerOptions == null || requiresAST, "Must not provide options if no AST is required"); //$NON-NLS-1$
 		fRequiresAST= requiresAST;
@@ -64,8 +64,8 @@ public final class CleanUpRequirements {
 	 * <strong>Note:</strong> This should return <code>false</code> whenever possible because
 	 * creating an AST is expensive.
 	 * </p>
-	 * 
-	 * @return <code>true</code> if the {@linkplain CleanUpContext context} must provide an AST
+	 *
+	 * @return <code>true</code> if the CleanUpContext context must provide an AST
 	 */
 	public boolean requiresAST() {
 		return fRequiresAST;
@@ -74,7 +74,7 @@ public final class CleanUpRequirements {
 	/**
 	 * Tells whether a fresh AST, containing all the changes from previous clean ups, will be
 	 * needed.
-	 * 
+	 *
 	 * @return <code>true</code> if the caller needs an up to date AST
 	 */
 	public boolean requiresFreshAST() {
@@ -83,7 +83,7 @@ public final class CleanUpRequirements {
 
 	/**
 	 * Required compiler options.
-	 * 
+	 *
 	 * @return the compiler options map or <code>null</code> if none
 	 * @see JavaCore
 	 */
@@ -102,8 +102,8 @@ public final class CleanUpRequirements {
 	 * <strong>Note:</strong>: This should return <code>false</code> whenever possible because
 	 * calculating the changed regions is expensive.
 	 * </p>
-	 * 
-	 * @return <code>true</code> if the {@linkplain CleanUpContext context} must provide changed
+	 *
+	 * @return <code>true</code> if the CleanUpContext context must provide changed
 	 *         regions
 	 */
 	public boolean requiresChangedRegions() {

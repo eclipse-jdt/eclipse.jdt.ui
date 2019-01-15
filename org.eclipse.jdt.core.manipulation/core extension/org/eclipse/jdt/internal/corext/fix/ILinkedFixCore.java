@@ -14,6 +14,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
+import org.eclipse.jdt.core.manipulation.ICleanUpFixCore;
+
 /**
  * A fix which when executed can set up a linked mode model
  * and put an editor into linked mode.
