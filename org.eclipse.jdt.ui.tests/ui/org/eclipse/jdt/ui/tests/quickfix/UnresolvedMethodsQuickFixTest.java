@@ -4139,6 +4139,64 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	public void testMissingParameterWithVarArgs() throws Exception { // test for Bug 521070
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class ArrayTest {\n");
+		buf.append("        public void test(String a, String...b){\n");
+		buf.append("                a.concat(c);\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("ArrayTest.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class ArrayTest {\n");
+		buf.append("        public void test(String a, String c, String...b){\n");
+		buf.append("                a.concat(c);\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	public void testMissingParameterWithoutVarArgs() throws Exception { // test for Bug 521070
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class ArrayTest {\n");
+		buf.append("        public void test(String a, String b){\n");
+		buf.append("                a.concat(c);\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("ArrayTest.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList<IJavaCompletionProposal> proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class ArrayTest {\n");
+		buf.append("        public void test(String a, String b, String c){\n");
+		buf.append("                a.concat(c);\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 
 
 	public void testParameterMismatchSwap2() throws Exception {

@@ -143,7 +143,24 @@ public class NewVariableCorrectionProposal extends LinkedCorrectionProposal {
 			newDecl.setName(ast.newSimpleName(node.getIdentifier()));
 
 			ListRewrite listRewriter= rewrite.getListRewrite(decl, MethodDeclaration.PARAMETERS_PROPERTY);
-			listRewriter.insertLast(newDecl, null);
+			// Before inserting, check if last parameter is vararg in which case, we must
+			// insert new param second last, otherwise insert it last.
+			List<ASTNode> declNodes= listRewriter.getOriginalList();
+			int insertIndex= -1;
+			if (declNodes.size() > 0) {
+				ASTNode lastNode= declNodes.get(declNodes.size() - 1);
+				if (lastNode instanceof SingleVariableDeclaration) {
+					SingleVariableDeclaration var= (SingleVariableDeclaration)lastNode;
+					if (var.isVarargs()) {
+						insertIndex= declNodes.size() - 1;
+					}
+				}
+			}
+			if (insertIndex == -1) {
+				listRewriter.insertLast(newDecl, null);
+			} else {
+				listRewriter.insertAt(newDecl, insertIndex, null);
+			}
 
 			addLinkedPosition(rewrite.track(node), true, KEY_NAME);
 
