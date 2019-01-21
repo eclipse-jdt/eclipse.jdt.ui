@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CastExpression;
@@ -2085,8 +2086,11 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 		// find linked nodes
-		final MethodDeclaration method= ASTResolving.findParentMethodDeclaration(covering);
-		SimpleName[] linkedNodes= LinkedNodeFinder.findByBinding(method, variableBinding);
+		final BodyDeclaration bodyDecl= ASTResolving.findParentBodyDeclaration(covering);
+		if (bodyDecl == null) {
+			return false;
+		}
+		SimpleName[] linkedNodes= LinkedNodeFinder.findByBinding(bodyDecl, variableBinding);
 		//
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
 		// create proposal
