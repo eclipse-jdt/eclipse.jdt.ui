@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2018 IBM Corporation and others.
+ * Copyright (c) 2000, 2019 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -535,6 +535,8 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_codegen_method_parameters_attr;
 	public static String ComplianceConfigurationBlock_compiler_compliance_label;
 	public static String ComplianceConfigurationBlock_default_settings_label;
+	public static String ComplianceConfigurationBlock_enable_preview_label;
+	public static String ComplianceConfigurationBlock_enable_preview_severity_label;
 	public static String ComplianceConfigurationBlock_source_compatibility_label;
 	public static String ComplianceConfigurationBlock_codegen_targetplatform_label;
 	public static String ComplianceConfigurationBlock_pb_assert_as_identifier_label;
