@@ -3874,6 +3874,61 @@ public class PreferenceConstants {
 	 */
 	public static final String EDITOR_JAVA_CODEMINING_SHOW_PARAMETER_NAMES = "java.codemining.parameterNames"; //$NON-NLS-1$
 
+	/**
+	 * A named preference that stores the maximum number of chain completions
+	 * to be proposed at one time.
+	 * <p>
+	 * Value is of type <code>Integer</code>
+	 * </p>
+	 *
+	 * @since 3.18
+	 */
+	public static final String PREF_MAX_CHAINS = "recommenders.chain.max_chains"; //$NON-NLS-1$
+
+    /**
+     * A named preference that stores the minimum number of chain sequences
+     * for a given completion.
+     * <p>
+     * Value is of type <code>Integer</code>
+     * </p>
+     *
+	 * @since 3.18
+	 */
+
+    public static final String PREF_MIN_CHAIN_LENGTH = "recommenders.chain.min_chain_length"; //$NON-NLS-1$
+    /**
+     * A named preference that stores the maximum number of chain sequences
+     * for a given completion.
+     * <p>
+     * Value is of type <code>Integer</code>
+     * </p>
+     *
+     * @since 3.18
+     */
+    public static final String PREF_MAX_CHAIN_LENGTH = "recommenders.chain.max_chain_length"; //$NON-NLS-1$
+
+    /**
+     * A named preference that stores the amount of time (in seconds) to
+     * allow for chain completion processing. The chain completion processor
+     * timeout value.
+     * <p>
+     * Value is of type <code>Integer</code>
+     * </p>
+     *
+	 * @since 3.18
+	 */
+    public static final String PREF_TIMEOUT = "recommenders.chain.timeout"; //$NON-NLS-1$
+
+    /**
+	 * A named preference that stores a '|' separated list of types to exclude
+	 * from chain completion processing.
+	 * <p>
+	 * Value is of type <code>String</code>
+	 * </p>
+	 *
+	 * @since 3.18
+	 */
+    public static final String PREF_IGNORED_TYPES = "recommenders.chain.ignore_types"; //$NON-NLS-1$
 
 	/**
 	 * Initializes the given preference store with the default values.
@@ -4032,6 +4087,11 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 0);
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOINSERT, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_DISABLE_COMPLETION_PROPOSAL_TRIGGER_CHARS, false);
+		store.setDefault(PreferenceConstants.PREF_MIN_CHAIN_LENGTH, 2);
+		store.setDefault(PreferenceConstants.PREF_MAX_CHAIN_LENGTH, 4);
+		store.setDefault(PreferenceConstants.PREF_MAX_CHAINS, 20);
+		store.setDefault(PreferenceConstants.PREF_TIMEOUT, 3);
+		store.setDefault(PreferenceConstants.PREF_IGNORED_TYPES, "java.lang.Object"); //$NON-NLS-1$
 
 		// Set the value for the deprecated color constants
 		initializeDeprecatedColorConstants(store);
@@ -4045,7 +4105,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, false);
 		store.setDefault(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, false);
-		store.setDefault(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES, "org.eclipse.jdt.ui.textProposalCategory\0org.eclipse.jdt.ui.javaTypeProposalCategory\0org.eclipse.jdt.ui.javaNoTypeProposalCategory\0"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES, "org.eclipse.jdt.ui.textProposalCategory\0org.eclipse.jdt.ui.javaTypeProposalCategory\0org.eclipse.jdt.ui.javaNoTypeProposalCategory\0org.eclipse.jdt.ui.javaChainProposalCategory\0"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_CATEGORY_ORDER, "org.eclipse.jdt.ui.spellingProposalCategory:65545\0org.eclipse.jdt.ui.javaTypeProposalCategory:65540\0org.eclipse.jdt.ui.javaNoTypeProposalCategory:65539\0org.eclipse.jdt.ui.textProposalCategory:65541\0org.eclipse.jdt.ui.javaAllProposalCategory:65542\0org.eclipse.jdt.ui.templateProposalCategory:2\0org.eclipse.jdt.ui.swtProposalCategory:3\0"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_LRU_HISTORY, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_SORTER, "org.eclipse.jdt.ui.RelevanceSorter"); //$NON-NLS-1$

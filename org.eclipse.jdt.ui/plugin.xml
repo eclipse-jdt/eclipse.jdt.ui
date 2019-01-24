@@ -7217,4 +7217,20 @@
         </enabledWhen>
       </codeMiningProvider>
    </extension>
+  <extension
+        id="javaChainProposalCategory"
+        name="%ChainProposalCategory"
+        point="org.eclipse.jdt.ui.javaCompletionProposalComputer">
+        <proposalCategory icon="icons/full/eview16/package.png"/>
+  </extension>
+  <extension
+        point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+        id="org.eclipse.jdt.ui.javaCompletionProposalComputer.chain">
+     <javaCompletionProposalComputer
+           activate="true"
+           categoryId="org.eclipse.jdt.ui.javaChainProposalCategory"
+           class="org.eclipse.jdt.internal.ui.text.java.ChainCompletionProposalComputer"
+           needsSortingAfterFiltering="false">
+     </javaCompletionProposalComputer>
+  </extension>
 </plugin>
