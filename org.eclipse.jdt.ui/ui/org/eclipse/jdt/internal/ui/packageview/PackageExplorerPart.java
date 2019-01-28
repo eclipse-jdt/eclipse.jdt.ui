@@ -87,6 +87,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.actions.ActionContext;
+import org.eclipse.ui.internal.views.helpers.EmptyWorkspaceHelper;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
@@ -191,6 +192,8 @@ public class PackageExplorerPart extends ViewPart
 	private Menu fContextMenu;
 
 	private IMemento fMemento;
+
+	private EmptyWorkspaceHelper fEmptyWorkspaceHelper;
 
 	/**
 	 * Helper to open and activate editors.
@@ -487,8 +490,13 @@ public class PackageExplorerPart extends ViewPart
 		final PerformanceStats stats= PerformanceStats.getStats(PERF_CREATE_PART_CONTROL, this);
 		stats.startRun();
 
-		fViewer= createViewer(parent);
+		fEmptyWorkspaceHelper = new EmptyWorkspaceHelper();
+		Composite displayArea= fEmptyWorkspaceHelper.getComposite(parent);
+
+		fViewer= createViewer(displayArea);
 		fViewer.setUseHashlookup(true);
+
+		fEmptyWorkspaceHelper.setNonEmptyControl(fViewer.getControl());
 
 		initDragAndDrop();
 
