@@ -14,11 +14,9 @@
 package org.eclipse.jdt.internal.ui;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.concurrent.Executors;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -26,8 +24,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.packageadmin.PackageAdmin;
 import org.osgi.service.prefs.BackingStoreException;
-import org.osgi.util.promise.Promise;
-import org.osgi.util.promise.PromiseFactory;
 
 import org.eclipse.osgi.service.debug.DebugOptions;
 import org.eclipse.osgi.service.debug.DebugOptionsListener;
@@ -148,13 +144,21 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * @since 3.0
 	 */
 	private static final String TEMPLATES_KEY= "org.eclipse.jdt.ui.text.custom_templates"; //$NON-NLS-1$
-
+	/**
+	 * The key to store customized code templates.
+	 * @since 3.0
+	 */
+	private static final String CODE_TEMPLATES_KEY= "org.eclipse.jdt.ui.text.custom_code_templates"; //$NON-NLS-1$
 	/**
 	 * The key to store whether the legacy templates have been migrated
 	 * @since 3.0
 	 */
 	private static final String TEMPLATES_MIGRATION_KEY= "org.eclipse.jdt.ui.text.templates_migrated"; //$NON-NLS-1$
-
+	/**
+	 * The key to store whether the legacy code templates have been migrated
+	 * @since 3.0
+	 */
+	private static final String CODE_TEMPLATES_MIGRATION_KEY= "org.eclipse.jdt.ui.text.code_templates_migrated"; //$NON-NLS-1$
 
 	public static boolean DEBUG_AST_PROVIDER;
 
@@ -205,8 +209,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 	private WorkingCopyManager fWorkingCopyManager;
 
-	private TemplateStoreInitializer fJavaPluginInitializer;
-
 	/**
 	 * @deprecated to avoid deprecation warning
 	 */
@@ -219,7 +221,6 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	private ImageDescriptorRegistry fImageDescriptorRegistry;
 
 	private MembersOrderPreferenceCache fMembersOrderPreferenceCache;
-	private Promise<MembersOrderPreferenceCache> fMembersOrderPreferenceCachePromise;
 
 	private JavaEditorTextHoverDescriptor[] fJavaEditorTextHoverDescriptors;
 
@@ -304,11 +305,11 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	}
 
 	public static Shell getActiveWorkbenchShell() {
-		IWorkbenchWindow window= getActiveWorkbenchWindow();
-		if (window != null) {
-			return window.getShell();
-		}
-		return null;
+		 IWorkbenchWindow window= getActiveWorkbenchWindow();
+		 if (window != null) {
+		 	return window.getShell();
+		 }
+		 return null;
 	}
 
 	public static String getPluginId() {
@@ -369,7 +370,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 	public JavaPlugin() {
 		super();
-		fgJavaPlugin= this;
+		fgJavaPlugin = this;
 	}
 
 	/* (non - Javadoc)
@@ -400,10 +401,11 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 		// by the MembersOrderPreferenceCache common logic
 		JavaManipulation.setPreferenceNodeId(getPluginId());
 
+		IPreferenceStore store= getPreferenceStore();
 
-		PromiseFactory promiseFactory= new PromiseFactory(Executors.newSingleThreadExecutor());
-		fMembersOrderPreferenceCachePromise= promiseFactory.submit(this::createMemberOrderPreferenceCache);
 		// must add here to guarantee that it is the first in the listener list
+		fMembersOrderPreferenceCache= new MembersOrderPreferenceCache();
+		fMembersOrderPreferenceCache.install(store);
 
 		FormatterProfileStore.checkCurrentOptionsVersion();
 
@@ -429,7 +431,9 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 			new InitializeAfterLoadJob().schedule(); // last call in start, see bug 191193
 		}
-		getTemplateStoreInitializer();
+
+		JavaManipulation.setCodeTemplateStore(getCodeTemplateStore());
+		JavaManipulation.setCodeTemplateContextRegistry(getCodeTemplateContextRegistry());
 	}
 
 	private void createOrUpdateWorkingSet(String name, String oldname, String label, final String id) {
@@ -446,7 +450,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 					workingSet.setLabel(label);
 			} else {
 				logErrorMessage("found existing workingset with name=\"" + name + "\" but id=\"" + workingSet.getId() + "\""); //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
-			}
+			}			
 		}
 		IWorkingSet oldWorkingSet= workingSetManager.getWorkingSet(oldname);
 		if (oldWorkingSet != null && id.equals(oldWorkingSet.getId())) {
@@ -566,21 +570,8 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	}
 
 	/**
-	 * Creates an additional async initializer that loads the template store. Because the initialization
-	 * can be 'long running', it is not recommended to be executed in the bundle activator.
-	 *
-	 * @return the initializer instance
-	 */
-	private synchronized TemplateStoreInitializer getTemplateStoreInitializer() {
-		if (fJavaPluginInitializer == null) {
-			fJavaPluginInitializer= new TemplateStoreInitializer();
-			fJavaPluginInitializer.activate();
-		}
-		return fJavaPluginInitializer;
-	}
-
-	/**
 	 * Private deprecated method to avoid deprecation warnings
+	 * 
 	 * @return the deprecated buffer factory
 	 * @deprecated to avoid deprecation warnings
 	 */
@@ -638,7 +629,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 	/**
 	 * Returns the Java Core plug-in preferences.
-	 *
+	 * 
 	 * @return the Java Core plug-in preferences
 	 * @since 3.7
 	 */
@@ -660,28 +651,10 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	}
 
 	public synchronized MembersOrderPreferenceCache getMemberOrderPreferenceCache() {
-		if (fMembersOrderPreferenceCache == null) {
-			try {
-				fMembersOrderPreferenceCache= fMembersOrderPreferenceCachePromise.getValue();
-			} catch (InvocationTargetException | InterruptedException e) {
-				if(e instanceof InterruptedException){
-					Thread.currentThread().interrupt();
-				}
-				log(e);
-				fMembersOrderPreferenceCache= createMemberOrderPreferenceCache();
-			}
-		}
 		// initialized on startup
 		return fMembersOrderPreferenceCache;
 	}
 
-
-	private MembersOrderPreferenceCache createMemberOrderPreferenceCache() {
-		IPreferenceStore store= getPreferenceStore();
-		MembersOrderPreferenceCache cache= new MembersOrderPreferenceCache();
-		cache.install(store);
-		return cache;
-	}
 
 	public synchronized TypeFilter getTypeFilter() {
 		if (fTypeFilter == null)
@@ -845,7 +818,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 	/**
 	 * Private deprecated method to avoid deprecation warnings
-	 *
+	 * 
 	 * @return the deprecated template store
 	 * @deprecated to avoid deprecation warnings
 	 */
@@ -880,17 +853,27 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 */
 	public TemplateStore getCodeTemplateStore() {
 		if (fCodeTemplateStore == null) {
-			TemplateStoreInitializer initializer= getTemplateStoreInitializer();
-			Promise<TemplateStore> p= initializer.getCodeTemplateStore();
+			IPreferenceStore store= getPreferenceStore();
+			boolean alreadyMigrated= store.getBoolean(CODE_TEMPLATES_MIGRATION_KEY);
+			if (alreadyMigrated)
+				fCodeTemplateStore= new ContributionTemplateStore(getCodeTemplateContextRegistry(), store, CODE_TEMPLATES_KEY);
+			else {
+				fCodeTemplateStore= new CompatibilityTemplateStore(getCodeTemplateContextRegistry(), store, CODE_TEMPLATES_KEY, getOldCodeTemplateStoreInstance());
+				store.setValue(CODE_TEMPLATES_MIGRATION_KEY, true);
+			}
+
 			try {
-				fCodeTemplateStore= p.getValue();
-			} catch (InvocationTargetException | InterruptedException e) {
-				if(e instanceof InterruptedException){
-					Thread.currentThread().interrupt();
-				}
-				fCodeTemplateStore= initializer.loadCodeTemplateStore();
+				fCodeTemplateStore.load();
+			} catch (IOException e) {
 				log(e);
 			}
+
+			fCodeTemplateStore.startListeningForPreferenceChanges();
+
+			// compatibility / bug fixing code for duplicated templates
+			// TODO remove for 3.0
+			CompatibilityTemplateStore.pruneDuplicates(fCodeTemplateStore, true);
+
 		}
 
 		return fCodeTemplateStore;
@@ -898,12 +881,12 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 	/**
 	 * Private deprecated method to avoid deprecation warnings
-	 *
+	 * 
 	 * @return the deprecated code template store
 	 * @deprecated to avoid deprecation warnings
 	 */
 	@Deprecated
-	org.eclipse.jdt.internal.corext.template.java.CodeTemplates getOldCodeTemplateStoreInstance() {
+	private org.eclipse.jdt.internal.corext.template.java.CodeTemplates getOldCodeTemplateStoreInstance() {
 		return org.eclipse.jdt.internal.corext.template.java.CodeTemplates.getInstance();
 	}
 
@@ -930,7 +913,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 
 	/**
 	 * Flushes the instance scope of this plug-in.
-	 *
+	 * 
 	 * @since 3.7
 	 */
 	public static void flushInstanceScope() {
@@ -944,7 +927,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	/**
 	 * Returns the registry of the extensions to the
 	 * <code>org.eclipse.jdt.ui.javaFoldingStructureProvider</code> extension point.
-	 *
+	 * 
 	 * @return the registry of contributed <code>IJavaFoldingStructureProvider</code>
 	 * @since 3.0
 	 */
@@ -1039,7 +1022,7 @@ public class JavaPlugin extends AbstractUIPlugin implements DebugOptionsListener
 	 * Returns the content assist additional info focus affordance string.
 	 *
 	 * @return the affordance string which is <code>null</code> if the
-	 *						preference is disabled
+	 *			preference is disabled
 	 *
 	 * @see EditorsUI#getTooltipAffordanceString()
 	 * @since 3.4
